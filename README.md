@@ -1,2 +1,2 @@
-# lisa
-LISA, a library for static analysis
+# LiSA
+LiSA, a library for static analysis
