@@ -1,0 +1,70 @@
+buildscript {
+  	repositories {
+  		jcenter()
+    	mavenCentral()
+  	}
+  	dependencies {
+    	classpath 'org.ajoberstar.grgit:grgit-core:4.0.2'
+    	classpath 'org.ajoberstar.grgit:grgit-gradle:4.0.2'
+  	}
+}
+
+plugins {
+    id 'java-library'
+    id 'com.github.roroche.plantuml' version '1.0.2'
+    id 'eclipse'
+    id 'org.ajoberstar.grgit' version '4.0.2'
+}
+
+group = 'it.unive'
+version = '0.1'
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    api 'org.apache.commons:commons-lang3:3.9'
+    api 'org.apache.commons:commons-text:1.9'
+	api 'org.apache.logging.log4j:log4j-api:2.13.0'
+	api 'org.apache.logging.log4j:log4j-core:2.13.0'
+
+    testImplementation 'junit:junit:4.12'
+}
+
+plugins.withType(JavaPlugin) {
+	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir)
+	jar.doFirst {
+	    manifest {
+	    	 attributes(
+	            'Implementation-Title': rootProject.name,
+	            'Implementation-Version': project.version,
+	            'Implementation-Vendor': 'Ca\' Foscari University of Venice',
+	            'Created-By': "Gradle ${gradle.gradleVersion}",
+	            'Build-Revision': repo.head().abbreviatedId,
+	            'Build-Tag': repo.describe(tags: true, always: true),
+				'Build-Branch': repo.branch.current().getName(),
+				'Build-Clean': repo.status().isClean(),
+	            'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+	            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+	            'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+	        )
+	    }
+    }
+}
+
+classDiagram { 
+    packageName = "it.unive.lisa"
+    outputFile = new File("${projectDir}/diagrams/class_diagram.plantuml")
+}
+
+buildClassDiagram {
+	doFirst {
+        mkdir new File("${projectDir}/diagrams/")
+	}
+}
+
+build {
+	dependsOn 'buildClassDiagram', 'javadoc'
+}
