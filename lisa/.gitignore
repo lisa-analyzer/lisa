@@ -39,3 +39,6 @@ local.properties
 
 # Locally stored "Eclipse launch configurations"
 *.launch
+
+# UML diagrams
+diagrams/

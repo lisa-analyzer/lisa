@@ -34,7 +34,7 @@ dependencies {
 }
 
 plugins.withType(JavaPlugin) {
-	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir)
+	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
 	jar.doFirst {
 	    manifest {
 	    	 attributes(
