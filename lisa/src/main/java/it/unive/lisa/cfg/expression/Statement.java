@@ -113,8 +113,8 @@ public abstract class Statement implements Comparable<Statement> {
 
 	/**
 	 * Compares two statements in terms of order of appearance in the program,
-	 * comparing source files first, followed by lines and columns at last. <br/>
-	 * <br/>
+	 * comparing source files first, followed by lines and columns at last. <br>
+	 * <br>
 	 * {@inheritDoc}
 	 */
 	@Override
