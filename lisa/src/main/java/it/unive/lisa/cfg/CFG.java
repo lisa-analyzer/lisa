@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.text.StringEscapeUtils;
 
-import it.unive.lisa.cfg.expression.Statement;
+import it.unive.lisa.cfg.statement.Statement;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s

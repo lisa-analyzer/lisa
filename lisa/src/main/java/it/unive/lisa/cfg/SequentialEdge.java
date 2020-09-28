@@ -1,6 +1,6 @@
 package it.unive.lisa.cfg;
 
-import it.unive.lisa.cfg.expression.Statement;
+import it.unive.lisa.cfg.statement.Statement;
 
 /**
  * A sequential edge connecting two statement. The abstract analysis state
