@@ -1,6 +1,10 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.cfg.CFG;
 
 /**
  * A statement of the program to analyze.
@@ -8,6 +12,11 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Statement implements Comparable<Statement> {
+
+	/**
+	 * The cfg containing this statement.
+	 */
+	private final CFG cfg;
 
 	/**
 	 * The source file where this statement happens. If it is unknown, this field
@@ -28,15 +37,9 @@ public abstract class Statement implements Comparable<Statement> {
 	private final int col;
 
 	/**
-	 * Builds a statement happening at an unknown location.
-	 */
-	protected Statement() {
-		this(null, -1, -1);
-	}
-
-	/**
 	 * Builds a statement happening at the given source location.
 	 * 
+	 * @param cfg        the cfg that this statement belongs to
 	 * @param sourceFile the source file where this statement happens. If unknown,
 	 *                   use {@code null}
 	 * @param line       the line number where this statement happens in the source
@@ -44,10 +47,21 @@ public abstract class Statement implements Comparable<Statement> {
 	 * @param col        the column where this statement happens in the source file.
 	 *                   If unknown, use {@code -1}
 	 */
-	protected Statement(String sourceFile, int line, int col) {
+	protected Statement(CFG cfg, String sourceFile, int line, int col) {
+		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
+		this.cfg = cfg;
 		this.sourceFile = sourceFile;
 		this.line = line;
 		this.col = col;
+	}
+
+	/**
+	 * Yields the CFG that this statement belongs to.
+	 * 
+	 * @return the containing CFG
+	 */
+	public final CFG getCFG() {
+		return cfg;
 	}
 
 	/**
@@ -56,7 +70,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * 
 	 * @return the source file, or {@code null}
 	 */
-	public String getSourceFile() {
+	public final String getSourceFile() {
 		return sourceFile;
 	}
 
@@ -66,7 +80,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * 
 	 * @return the line number, or {@code -1}
 	 */
-	public int getLine() {
+	public final int getLine() {
 		return line;
 	}
 
@@ -76,7 +90,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * 
 	 * @return the column, or {@code -1}
 	 */
-	public int getCol() {
+	public final int getCol() {
 		return col;
 	}
 
@@ -118,7 +132,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public int compareTo(Statement o) {
+	public final int compareTo(Statement o) {
 		int cmp;
 
 		if ((cmp = StringUtils.compare(sourceFile, o.sourceFile)) != 0)

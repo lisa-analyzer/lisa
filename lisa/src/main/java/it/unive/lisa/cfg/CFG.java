@@ -40,18 +40,18 @@ public class CFG {
 	private Statement first;
 
 	/**
-	 * The name of this control flow graph.
+	 * The descriptor of this control flow graph.
 	 */
-	private final String name;
+	private final CFGDescriptor descriptor;
 
 	/**
 	 * Builds the control flow graph.
 	 * 
-	 * @param name the name of this cfg
+	 * @param descriptor the descriptor of this cfg
 	 */
-	public CFG(String name) {
+	public CFG(CFGDescriptor descriptor) {
 		this.adjacencyMatrix = new HashMap<>();
-		this.name = name;
+		this.descriptor = descriptor;
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class CFG {
 	protected CFG(CFG other) {
 		adjacencyMatrix = new HashMap<>(other.adjacencyMatrix);
 		first = other.first;
-		name = other.name;
+		descriptor = other.descriptor;
 	}
 
 	/**
@@ -70,8 +70,8 @@ public class CFG {
 	 * 
 	 * @return the name
 	 */
-	public final String getName() {
-		return name;
+	public final CFGDescriptor getDescriptor() {
+		return descriptor;
 	}
 
 	/**
@@ -190,17 +190,7 @@ public class CFG {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-
-		for (Statement v : adjacencyMatrix.keySet()) {
-			builder.append(v + ": [");
-			for (Edge w : adjacencyMatrix.get(v))
-				builder.append(w.getDestination() + ", ");
-
-			builder.append("]\n");
-		}
-
-		return builder.toString();
+		return descriptor.toString();
 	}
 
 	/**
