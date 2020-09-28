@@ -41,6 +41,18 @@ public class CFGDescriptor {
 	private final String[] argNames;
 
 	/**
+	 * Builds the descriptor for a method that is defined at an unknown location
+	 * (i.e. no source file/line/column is available).
+	 * 
+	 * @param name     the name of the CFG associated with this descriptor
+	 * @param argNames the names of the arguments of the CFG associated with this
+	 *                 descriptor
+	 */
+	public CFGDescriptor(String name, String... argNames) {
+		this(null, -1, -1, name, argNames);
+	}
+
+	/**
 	 * Builds the descriptor.
 	 * 
 	 * @param sourceFile the source file where the CFG associated with this
