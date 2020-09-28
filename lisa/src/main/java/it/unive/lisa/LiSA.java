@@ -5,11 +5,15 @@ import java.util.Collections;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.Warning;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
+import it.unive.lisa.logging.TimerLogger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -20,6 +24,8 @@ import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSA {
+	
+	private static final Logger log = LogManager.getLogger(LiSA.class); 
 
 	/**
 	 * The collection of CFG instances that are to be analyzed
@@ -91,14 +97,27 @@ public class LiSA {
 	 * Runs LiSA, executing all the checks that have been added.
 	 */
 	public void run() {
-		CheckTool tool = new CheckTool();
-
-		SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
-
-		warnings.addAll(tool.getWarnings());
+		printConfig();
+		TimerLogger.execAction(log, "Analysis time", () -> runAux());
+		printStats();
+	}
+	
+	private void printConfig() {
+		log.info("LiSA setup:");
+		log.info("  " + inputs.size() + " CFGs to analyze");
+		log.info("  " + syntacticChecks.size() + " syntactic checks to execute");
 	}
 
-	
+	private void printStats() {
+		log.info("LiSA statistics:");
+		log.info("  " + warnings.size() + " warnings generated");
+	}
+
+	private void runAux() {
+		CheckTool tool = new CheckTool();
+		SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
+		warnings.addAll(tool.getWarnings());
+	}
 
 	/**
 	 * Yields an unmodifiable view of the warnings that have been generated during

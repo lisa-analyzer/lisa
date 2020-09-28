@@ -2,6 +2,9 @@ package it.unive.lisa.checks.syntactic;
 
 import java.util.Collection;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Assignment;
 import it.unive.lisa.cfg.statement.Call;
@@ -10,6 +13,7 @@ import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
 import it.unive.lisa.checks.CheckTool;
+import it.unive.lisa.logging.IterationLogger;
 
 /**
  * Utility class that handles the execution of {@link SyntacticCheck}s.
@@ -17,6 +21,8 @@ import it.unive.lisa.checks.CheckTool;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class SyntacticChecksExecutor {
+	
+	private static final Logger log = LogManager.getLogger(SyntacticChecksExecutor.class); 
 
 	/**
 	 * Executes all the given checks on the given inputs cfgs.
@@ -27,7 +33,7 @@ public class SyntacticChecksExecutor {
 	 */
 	public static void executeAll(CheckTool tool, Collection<CFG> inputs, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
-		for (CFG cfg : inputs)
+		for (CFG cfg : IterationLogger.iterate(log, inputs, "Analyzing CFGs...", "CFGs"))
 			process(tool, cfg, checks);
 		checks.forEach(c -> c.afterExecution(tool));
 	}
