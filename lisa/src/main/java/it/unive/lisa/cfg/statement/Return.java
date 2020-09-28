@@ -7,7 +7,7 @@ import it.unive.lisa.cfg.CFG;
 /**
  * Returns an expression to the caller CFG.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Return extends Statement {
 

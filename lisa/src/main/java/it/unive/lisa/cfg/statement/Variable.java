@@ -7,7 +7,7 @@ import it.unive.lisa.cfg.CFG;
 /**
  * A reference to a variable of the current CFG, identified by its name.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Variable extends Expression {
 

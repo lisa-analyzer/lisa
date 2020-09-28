@@ -8,7 +8,7 @@ import it.unive.lisa.cfg.CFG;
  * A statement assigning the result of an expression to an assignable
  * expression.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Assignment extends Expression {
 

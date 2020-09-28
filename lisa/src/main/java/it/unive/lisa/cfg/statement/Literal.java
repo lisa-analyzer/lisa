@@ -7,7 +7,7 @@ import it.unive.lisa.cfg.CFG;
 /**
  * A literal, representing a constant value.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Literal extends Expression {
 

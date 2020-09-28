@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * A descriptor of a CFG, containing the debug informations (source file, line,
  * column) as well as metadata
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class CFGDescriptor {
 

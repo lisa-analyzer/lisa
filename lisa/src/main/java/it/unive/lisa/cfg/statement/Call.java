@@ -10,7 +10,7 @@ import it.unive.lisa.cfg.CFG;
  * the analysis), or if it represents the invocation of one of the native
  * constructs of the language.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Call extends Expression {
 

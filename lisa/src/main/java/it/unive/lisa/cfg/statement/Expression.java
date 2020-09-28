@@ -5,7 +5,7 @@ import it.unive.lisa.cfg.CFG;
 /**
  * An expression that is part of a statement of the program.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Expression extends Statement {
 

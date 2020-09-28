@@ -9,7 +9,7 @@ import it.unive.lisa.cfg.CFG;
 /**
  * A call to one of the CFG under analysis.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class CFGCall extends Call {
 

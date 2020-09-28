@@ -8,7 +8,7 @@ import it.unive.lisa.cfg.CFG;
  * A statement that raises an error, stopping the execution of the current CFG
  * and propagating the error to among the call chain.
  * 
- * @author @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Throw extends Statement {
 
