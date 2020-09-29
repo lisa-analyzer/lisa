@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -138,6 +139,46 @@ public class CFGDescriptor {
 	 */
 	public String[] getArgNames() {
 		return argNames;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(argNames);
+		result = prime * result + col;
+		result = prime * result + line;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CFGDescriptor other = (CFGDescriptor) obj;
+		if (!Arrays.equals(argNames, other.argNames))
+			return false;
+		if (col != other.col)
+			return false;
+		if (line != other.line)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (sourceFile == null) {
+			if (other.sourceFile != null)
+				return false;
+		} else if (!sourceFile.equals(other.sourceFile))
+			return false;
+		return true;
 	}
 
 	@Override

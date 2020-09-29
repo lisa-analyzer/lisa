@@ -36,9 +36,9 @@ public interface SyntacticCheck {
 	void visitCFGDescriptor(CheckTool tool, CFGDescriptor descriptor);
 
 	/**
-	 * Callback invoked when inspecting a statement. It is guaranteed that the
-	 * statement is not an instance of {@link Expression}, for which
-	 * {@link #visitExpression(CheckTool, Expression)} will be invoked instead.
+	 * Callback invoked when inspecting a statement. This method might also be
+	 * invoked with {@link Expression} instances if they are the root of a
+	 * statement.
 	 * 
 	 * @param tool      the auxiliary tool that this check can use during the
 	 *                  execution
@@ -47,7 +47,10 @@ public interface SyntacticCheck {
 	void visitStatement(CheckTool tool, Statement statement);
 
 	/**
-	 * Callback invoked when inspecting the an expression.
+	 * Callback invoked when inspecting an expression. This method will be invoked
+	 * on all expressions that are <b>not</b> the root of a statement (e.g.,
+	 * expressions that lie on line by themselves will be visited with
+	 * {@link #visitStatement(CheckTool, Statement)}).
 	 * 
 	 * @param tool       the auxiliary tool that this check can use during the
 	 *                   execution

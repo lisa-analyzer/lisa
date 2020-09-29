@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
+import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.Statement;
 
 /**
@@ -30,15 +31,25 @@ public class CheckTool {
 	}
 
 	/**
+	 * Reports a new warning that is meant to be a generic warning on the program.
+	 * For warnings related to one of the components of the program (e.g., a CFG, a
+	 * statement, ...) rely on the other methods provided by this class.
+	 * 
+	 * @param message the message of the warning
+	 */
+	public void warn(String message) {
+		warnings.add(new Warning(message));
+	}
+
+	/**
 	 * Reports a new warning with the given message on the declaration of the given
 	 * cfg.
 	 * 
 	 * @param cfg     the cfg to warn on
 	 * @param message the message of the warning
 	 */
-	public void warn(CFG cfg, String message) {
-		warnings.add(new Warning(cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(),
-				cfg.getDescriptor().getCol(), message));
+	public void warnOn(CFG cfg, String message) {
+		warnings.add(new CFGWarning(cfg, message));
 	}
 
 	/**
@@ -48,19 +59,28 @@ public class CheckTool {
 	 * @param descriptor the descriptor cfg to warn on
 	 * @param message    the message of the warning
 	 */
-	public void warn(CFGDescriptor descriptor, String message) {
-		warnings.add(new Warning(descriptor.getSourceFile(), descriptor.getLine(), descriptor.getCol(), message));
+	public void warnOn(CFGDescriptor descriptor, String message) {
+		warnings.add(new CFGDesccriptorWarning(descriptor, message));
 	}
 
 	/**
-	 * Reports a new warning with the given message on the declaration of the given
-	 * statement.
+	 * Reports a new warning with the given message on the given statement.
 	 * 
 	 * @param statement the statement to warn on
 	 * @param message   the message of the warning
 	 */
-	public void warn(Statement statement, String message) {
-		warnings.add(new Warning(statement.getSourceFile(), statement.getLine(), statement.getCol(), message));
+	public void warnOn(Statement statement, String message) {
+		warnings.add(new StatementWarning(statement, message));
+	}
+
+	/**
+	 * Reports a new warning with the given message on the given expression.
+	 * 
+	 * @param expression the expression to warn on
+	 * @param message    the message of the warning
+	 */
+	public void warnOn(Expression expression, String message) {
+		warnings.add(new ExpressionWarning(expression, message));
 	}
 
 	/**

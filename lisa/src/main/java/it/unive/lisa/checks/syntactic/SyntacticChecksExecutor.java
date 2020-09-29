@@ -41,21 +41,18 @@ public class SyntacticChecksExecutor {
 	private static void process(CheckTool tool, CFG cfg, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.visitCFGDescriptor(tool, cfg.getDescriptor()));
 
-		for (Statement st : cfg.getNodes())
-			if (!(st instanceof Expression)) {
-				checks.forEach(c -> c.visitStatement(tool, st));
-				if (st instanceof Return)
-					checks.forEach(c -> c.visitExpression(tool, ((Return) st).getExpression()));
-				else if (st instanceof Throw)
-					checks.forEach(c -> c.visitExpression(tool, ((Return) st).getExpression()));
-			} else {
-				checks.forEach(c -> c.visitExpression(tool, (Expression) st));
-				if (st instanceof Assignment) {
-					checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getTarget()));
-					checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getExpression()));
-				} else if (st instanceof Call)
-					for (Expression param : ((Call) st).getParameters())
-						checks.forEach(c -> c.visitExpression(tool, param));
-			}
+		for (Statement st : cfg.getNodes()) {
+			checks.forEach(c -> c.visitStatement(tool, st));
+			if (st instanceof Return)
+				checks.forEach(c -> c.visitExpression(tool, ((Return) st).getExpression()));
+			else if (st instanceof Throw)
+				checks.forEach(c -> c.visitExpression(tool, ((Throw) st).getExpression()));
+			else if (st instanceof Assignment) {
+				checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getTarget()));
+				checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getExpression()));
+			} else if (st instanceof Call)
+				for (Expression param : ((Call) st).getParameters())
+					checks.forEach(c -> c.visitExpression(tool, param));
+		}
 	}
 }
