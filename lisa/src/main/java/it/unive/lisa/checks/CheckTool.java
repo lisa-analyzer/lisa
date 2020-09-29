@@ -8,6 +8,11 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.checks.warnings.CFGDesccriptorWarning;
+import it.unive.lisa.checks.warnings.CFGWarning;
+import it.unive.lisa.checks.warnings.ExpressionWarning;
+import it.unive.lisa.checks.warnings.StatementWarning;
+import it.unive.lisa.checks.warnings.Warning;
 
 /**
  * An auxiliary tool that can be used by checks during their execution. It

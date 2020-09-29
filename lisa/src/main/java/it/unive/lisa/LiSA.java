@@ -10,9 +10,9 @@ import org.apache.logging.log4j.Logger;
 
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.checks.CheckTool;
-import it.unive.lisa.checks.Warning;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
+import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.TimerLogger;
 
 /**

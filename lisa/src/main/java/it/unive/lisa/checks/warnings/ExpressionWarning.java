@@ -1,4 +1,4 @@
-package it.unive.lisa.checks;
+package it.unive.lisa.checks.warnings;
 
 import it.unive.lisa.cfg.statement.Expression;
 

@@ -1,4 +1,4 @@
-package it.unive.lisa.checks;
+package it.unive.lisa.checks.warnings;
 
 import org.apache.commons.lang3.StringUtils;
 
