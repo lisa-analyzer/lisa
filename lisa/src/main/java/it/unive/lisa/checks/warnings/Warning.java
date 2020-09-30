@@ -82,6 +82,6 @@ public class Warning implements Comparable<Warning> {
 
 	@Override
 	public String toString() {
-		return message;
+		return getTaggedMessage();
 	}
 }

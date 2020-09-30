@@ -132,6 +132,15 @@ public class CFGDescriptor {
 	}
 
 	/**
+	 * Yields the full signature of this cfg.
+	 * 
+	 * @return the signature
+	 */
+	public String getFullSignature() {
+		return name + "(" + StringUtils.join(argNames, ", ") + ")";
+	}
+
+	/**
 	 * Yields the array containing the names of the arguments of the CFG associated
 	 * with this descriptor.
 	 * 
@@ -183,7 +192,6 @@ public class CFGDescriptor {
 
 	@Override
 	public String toString() {
-		return name + "(" + StringUtils.join(argNames, ", ") + ") [at '" + String.valueOf(sourceFile) + "':" + line
-				+ ":" + col + "]";
+		return getFullSignature() + " [at '" + String.valueOf(sourceFile) + "':" + line + ":" + col + "]";
 	}
 }

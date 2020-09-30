@@ -7,7 +7,7 @@ import it.unive.lisa.cfg.statement.Expression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ExpressionWarning extends WarningWithLocation {
+public final class ExpressionWarning extends CFGWarning {
 
 	/**
 	 * The expression where this warning was reported on
@@ -21,7 +21,7 @@ public final class ExpressionWarning extends WarningWithLocation {
 	 * @param message   the message of this warning
 	 */
 	public ExpressionWarning(Expression expression, String message) {
-		super(expression.getSourceFile(), expression.getLine(), expression.getCol(), message);
+		super(expression.getCFG(), message);
 		this.expression = expression;
 	}
 
@@ -76,10 +76,5 @@ public final class ExpressionWarning extends WarningWithLocation {
 	@Override
 	public String getTag() {
 		return "EXPRESSION";
-	}
-	
-	@Override
-	public String toString() {
-		return getLocationWithBrackets() + " on '" + expression.getCFG().getDescriptor() + "': " + getTaggedMessage();
 	}
 }

@@ -7,7 +7,7 @@ import it.unive.lisa.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class StatementWarning extends WarningWithLocation {
+public final class StatementWarning extends CFGWarning {
 
 	/**
 	 * The statement where this warning was reported on
@@ -21,7 +21,7 @@ public final class StatementWarning extends WarningWithLocation {
 	 * @param message   the message of this warning
 	 */
 	public StatementWarning(Statement statement, String message) {
-		super(statement.getSourceFile(), statement.getLine(), statement.getCol(), message);
+		super(statement.getCFG(), message);
 		this.statement = statement;
 	}
 
@@ -76,10 +76,5 @@ public final class StatementWarning extends WarningWithLocation {
 	@Override
 	public String getTag() {
 		return "STATEMENT";
-	}
-	
-	@Override
-	public String toString() {
-		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor() + "': " + getTaggedMessage();
 	}
 }

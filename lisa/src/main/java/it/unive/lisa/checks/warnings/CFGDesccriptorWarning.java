@@ -83,6 +83,6 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 	
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + descriptor + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + descriptor.getFullSignature() + "': " + getTaggedMessage();
 	}
 }

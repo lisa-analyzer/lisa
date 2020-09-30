@@ -9,7 +9,7 @@ import it.unive.lisa.cfg.CFG;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class CFGWarning extends WarningWithLocation {
+public class CFGWarning extends WarningWithLocation {
 
 	/**
 	 * The cfg where this warning was reported on
@@ -83,6 +83,6 @@ public final class CFGWarning extends WarningWithLocation {
 	
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + cfg.getDescriptor() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignature() + "': " + getTaggedMessage();
 	}
 }
