@@ -133,7 +133,7 @@ public class CFG {
 	 * @throws UnsupportedOperationException if the source or the destination of the
 	 *                                       given edge is not part of this cfg
 	 */
-	protected void addEdge(Edge edge) {
+	public void addEdge(Edge edge) {
 		if (!adjacencyMatrix.containsKey(edge.getSource()))
 			throw new UnsupportedOperationException("The source node is not in the graph");
 
