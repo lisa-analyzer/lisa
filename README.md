@@ -11,7 +11,7 @@ Building an analyzer upon LiSA boils down to writing a parser for the language t
 the control flow graph representation of LiSA. Then, simple checks iterating over the results provided by the semantic analyses of LiSA can be easily defined to translate 
 semantic information into warnings that can be of value for the final user. 
 
-LiSA is developed and maintained by the [Software Security and Verification (SSV)](https://ssv.dais.unive.it/) group @ Università Ca' Foscari in Venice, Italy. 
+LiSA is developed and maintained by the [Software and System Verification (SSV)](https://ssv.dais.unive.it/) group @ Università Ca' Foscari in Venice, Italy. 
 
 ## Release plan ##
 
