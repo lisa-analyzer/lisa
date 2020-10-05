@@ -34,11 +34,11 @@ public class SyntacticChecksExecutor {
 	public static void executeAll(CheckTool tool, Collection<CFG> inputs, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
 		for (CFG cfg : IterationLogger.iterate(log, inputs, "Analyzing CFGs...", "CFGs"))
-			process(tool, cfg, checks);
+			processCFG(tool, cfg, checks);
 		checks.forEach(c -> c.afterExecution(tool));
 	}
 
-	private static void process(CheckTool tool, CFG cfg, Collection<SyntacticCheck> checks) {
+	private static void processCFG(CheckTool tool, CFG cfg, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.visitCFGDescriptor(tool, cfg.getDescriptor()));
 
 		for (Statement st : cfg.getNodes()) {
@@ -47,12 +47,20 @@ public class SyntacticChecksExecutor {
 				checks.forEach(c -> c.visitExpression(tool, ((Return) st).getExpression()));
 			else if (st instanceof Throw)
 				checks.forEach(c -> c.visitExpression(tool, ((Throw) st).getExpression()));
-			else if (st instanceof Assignment) {
-				checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getTarget()));
-				checks.forEach(c -> c.visitExpression(tool, ((Assignment) st).getExpression()));
-			} else if (st instanceof Call)
-				for (Expression param : ((Call) st).getParameters())
-					checks.forEach(c -> c.visitExpression(tool, param));
+			else if (st instanceof Expression)
+				processExpression(tool, checks, (Expression) st, false);
 		}
+	}
+
+	private static void processExpression(CheckTool tool, Collection<SyntacticCheck> checks, Expression expression, boolean visitSelf) {
+		if (visitSelf)
+			checks.forEach(c -> c.visitExpression(tool, expression));
+		
+		if (expression instanceof Assignment) {
+			processExpression(tool, checks, ((Assignment) expression).getTarget(), true);
+			processExpression(tool, checks, ((Assignment) expression).getExpression(), true);
+		} else if (expression instanceof Call)
+			for (Expression param : ((Call) expression).getParameters())
+				processExpression(tool, checks, param, true);
 	}
 }

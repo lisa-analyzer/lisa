@@ -140,7 +140,7 @@ public class CFG {
 		if (!adjacencyMatrix.containsKey(edge.getDestination()))
 			throw new UnsupportedOperationException("The destination node is not in the graph");
 
-		adjacencyMatrix.get(first).add(edge);
+		adjacencyMatrix.get(edge.getSource()).add(edge);
 	}
 
 	/**
