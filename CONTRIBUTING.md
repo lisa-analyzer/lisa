@@ -34,7 +34,8 @@ Contributions to LiSA are always welcome! Thank you for taking time to make LiSA
 + Submit a _Pull Request_!
   + Check that the _Files Changed_ tab matches what you want to deliver.
   + Keep in mind that more file changed means more review time required.
-+ Link the PR to the original issue.
++ Link the PR in the original issue.
++ Add the PR with the `work in progress` label if you do not want reviewers to work on it yet.
 
 ## Useful links ##
 
