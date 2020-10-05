@@ -29,7 +29,7 @@ public class EmptyParametersTest {
 		CFG cfg = new CFG(new CFGDescriptor("f1", new String[0]));
 
 		Assignment xAsg = new Assignment(cfg, new Variable(cfg, "x"), new Literal(cfg, 1));
-		cfg.addNode(xAsg, true);
+		cfg.addNode(xAsg);
 
 		Assignment yAsg = new Assignment(cfg, new Variable(cfg, "y"), new Literal(cfg, 2));
 		cfg.addNode(yAsg);
@@ -54,7 +54,7 @@ public class EmptyParametersTest {
 		cfg = new CFG(new CFGDescriptor("f2", new String[0]));
 
 		xAsg = new Assignment(cfg, new Variable(cfg, "a"), new Literal(cfg, 1));
-		cfg.addNode(xAsg, true);
+		cfg.addNode(xAsg);
 
 		yAsg = new Assignment(cfg, new Variable(cfg, "y"), new Literal(cfg, 2));
 		cfg.addNode(yAsg);
