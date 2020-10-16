@@ -65,14 +65,12 @@ public class Variable extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
 			return true;
-		if (!super.equals(obj))
+		if (getClass() != st.getClass())
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Variable other = (Variable) obj;
+		Variable other = (Variable) st;
 		if (name == null) {
 			if (other.name != null)
 				return false;

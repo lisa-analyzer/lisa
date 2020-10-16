@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 import it.unive.lisa.cfg.CFG;
@@ -46,5 +47,47 @@ public abstract class Call extends Expression {
 	 */
 	public final Expression[] getParameters() {
 		return parameters;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Arrays.hashCode(parameters);
+		return result;
+	}
+
+	@Override
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
+			return true;
+		if (getClass() != st.getClass())
+			return false;
+		Call other = (Call) st;
+		if (!areEquals(parameters, other.parameters))
+			return false;
+		return true;
+	}
+
+	private static boolean areEquals(Expression[] params, Expression[] otherParams) {
+		if (params == otherParams)
+			return true;
+		
+		if (params == null || otherParams == null)
+			return false;
+
+		int length = params.length;
+		if (otherParams.length != length)
+			return false;
+
+		for (int i = 0; i < length; i++)
+			if (!isEqualTo(params[i], otherParams[i]))
+				return false;
+
+		return true;
+	}
+
+	private static boolean isEqualTo(Expression a, Expression b) {
+		return (a == b) || (a != null && a.isEqualTo(b));
 	}
 }

@@ -65,18 +65,16 @@ public class Return extends Statement {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
 			return true;
-		if (!super.equals(obj))
+		if (getClass() != st.getClass())
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Return other = (Return) obj;
+		Return other = (Return) st;
 		if (expression == null) {
 			if (other.expression != null)
 				return false;
-		} else if (!expression.equals(other.expression))
+		} else if (!expression.isEqualTo(other.expression))
 			return false;
 		return true;
 	}
