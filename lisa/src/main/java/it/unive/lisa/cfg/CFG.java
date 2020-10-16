@@ -35,9 +35,10 @@ public class CFG {
 	private final Map<Statement, Collection<Edge>> adjacencyMatrix;
 
 	/**
-	 * The first statement of this control flow graph.
+	 * The statements of this control flow graph that are entrypoints, that is, that
+	 * can be executed from other cfgs.
 	 */
-	private Statement first;
+	private Collection<Statement> entrypoints;
 
 	/**
 	 * The descriptor of this control flow graph.
@@ -52,6 +53,7 @@ public class CFG {
 	public CFG(CFGDescriptor descriptor) {
 		this.adjacencyMatrix = new HashMap<>();
 		this.descriptor = descriptor;
+		this.entrypoints = new ArrayList<>();
 	}
 
 	/**
@@ -60,9 +62,9 @@ public class CFG {
 	 * @param other the original cfg
 	 */
 	protected CFG(CFG other) {
-		adjacencyMatrix = new HashMap<>(other.adjacencyMatrix);
-		first = other.first;
-		descriptor = other.descriptor;
+		this.adjacencyMatrix = new HashMap<>(other.adjacencyMatrix);
+		this.entrypoints = new ArrayList<>(other.entrypoints);
+		this.descriptor = other.descriptor;
 	}
 
 	/**
@@ -75,12 +77,14 @@ public class CFG {
 	}
 
 	/**
-	 * Yields the root of this control flow graph.
+	 * Yields the statements of this control flow graph that are entrypoints, that
+	 * is, that can be executed from other cfgs. This usually contains the first
+	 * statement of this cfg, but might also contain other ones.
 	 * 
-	 * @return the root
+	 * @return the entrypoints of this cfg.
 	 */
-	public final Statement getFirstStatement() {
-		return first;
+	public final Collection<Statement> getEntrypoints() {
+		return entrypoints;
 	}
 
 	/**
@@ -113,17 +117,20 @@ public class CFG {
 	}
 
 	/**
-	 * Adds the given node to the set of nodes, optionally setting that as first
-	 * instruction for this cfg.
+	 * Adds the given node to the set of nodes, optionally marking this as
+	 * entrypoint (that is, reachable executable from other cfgs). The first
+	 * statement of a cfg should always be marked as entrypoint. Besides, statements
+	 * that might be reached through jumps from external cfgs should be marked as
+	 * entrypoints as well.
 	 * 
-	 * @param node the node to add
-	 * @param root if {@code true} causes the given node to be set as first
-	 *             instruction
+	 * @param node       the node to add
+	 * @param entrypoint if {@code true} causes the given node to be considered as
+	 *                   an entrypoint.
 	 */
-	public final void addNode(Statement node, boolean root) {
+	public final void addNode(Statement node, boolean entrypoint) {
 		adjacencyMatrix.put(node, new LinkedList<>());
-		if (root)
-			this.first = node;
+		if (entrypoint)
+			this.entrypoints.add(node);
 	}
 
 	/**
