@@ -286,14 +286,53 @@ public class CFG {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
+		result = prime * result + ((entrypoints == null) ? 0 : entrypoints.hashCode());
 		return result;
 	}
 
+	/**
+	 * CFG instances use reference equality for equality checks, under the
+	 * assumption that every cfg is unique. For checking if two cfgs are effectively
+	 * equal (that is, they are different object with the same structure) use
+	 * {@link #isEqualTo(CFG)}. <br>
+	 * <br>
+	 * 
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean equals(Object obj) {
-		// equality relies on identity
-		if (this == obj)
+		return this == obj;
+	}
+
+	/**
+	 * Checks if this cfg is effectively equal to the given one, that is, if they
+	 * have the same structure while potentially being different instances.
+	 * 
+	 * @param cfg the other cfg
+	 * @return {@code true} if this cfg and the given one are effectively equals
+	 */
+	public boolean isEqualTo(CFG cfg) {
+		if (this == cfg)
 			return true;
+		if (cfg == null)
+			return false;
+		if (getClass() != cfg.getClass())
+			return false;
+		if (descriptor == null) {
+			if (cfg.descriptor != null)
+				return false;
+		} else if (!descriptor.equals(cfg.descriptor))
+			return false;
+		if (entrypoints == null) {
+			if (cfg.entrypoints != null)
+				return false;
+		} else if (!entrypoints.equals(cfg.entrypoints))
+			return false;
+		if (adjacencyMatrix == null) {
+			if (cfg.adjacencyMatrix != null)
+				return false;
+		} else if (!adjacencyMatrix.equals(cfg.adjacencyMatrix))
+			return false;
 		return true;
 	}
 
