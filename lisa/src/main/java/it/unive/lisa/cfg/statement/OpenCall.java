@@ -78,7 +78,7 @@ public class OpenCall extends Call {
 				return false;
 		} else if (!targetName.equals(other.targetName))
 			return false;
-		return true;
+		return super.isEqualTo(other);
 	}
 
 	@Override

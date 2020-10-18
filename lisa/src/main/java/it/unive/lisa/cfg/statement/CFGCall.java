@@ -78,7 +78,7 @@ public class CFGCall extends Call {
 				return false;
 		} else if (!target.equals(other.target))
 			return false;
-		return true;
+		return super.isEqualTo(other);
 	}
 
 	@Override

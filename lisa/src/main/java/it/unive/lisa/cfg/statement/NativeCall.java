@@ -79,7 +79,7 @@ public abstract class NativeCall extends Call {
 				return false;
 		} else if (!constructName.equals(other.constructName))
 			return false;
-		return true;
+		return super.isEqualTo(other);
 	}
 
 	@Override
