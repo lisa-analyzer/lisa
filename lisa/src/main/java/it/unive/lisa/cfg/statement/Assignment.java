@@ -87,23 +87,21 @@ public class Assignment extends Expression {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
 			return true;
-		if (!super.equals(obj))
+		if (getClass() != st.getClass())
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Assignment other = (Assignment) obj;
+		Assignment other = (Assignment) st;
 		if (expression == null) {
 			if (other.expression != null)
 				return false;
-		} else if (!expression.equals(other.expression))
+		} else if (!expression.isEqualTo(other.expression))
 			return false;
 		if (target == null) {
 			if (other.target != null)
 				return false;
-		} else if (!target.equals(other.target))
+		} else if (!target.isEqualTo(other.target))
 			return false;
 		return true;
 	}

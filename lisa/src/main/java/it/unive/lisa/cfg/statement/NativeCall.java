@@ -12,7 +12,7 @@ import it.unive.lisa.cfg.CFG;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NativeCall extends Call {
+public abstract class NativeCall extends Call {
 
 	/**
 	 * The target of this call
@@ -25,9 +25,10 @@ public class NativeCall extends Call {
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param constructName the name of the construct invoked by this native call
+	 * @param parameters    the parameters of this call
 	 */
-	public NativeCall(CFG cfg, String constructName) {
-		this(cfg, null, -1, -1, constructName);
+	protected NativeCall(CFG cfg, String constructName, Expression... parameters) {
+		this(cfg, null, -1, -1, constructName, parameters);
 	}
 
 	/**
@@ -41,9 +42,10 @@ public class NativeCall extends Call {
 	 * @param col           the column where this expression happens in the source
 	 *                      file. If unknown, use {@code -1}
 	 * @param constructName the name of the construct invoked by this native call
+	 * @param parameters    the parameters of this call
 	 */
-	public NativeCall(CFG cfg, String sourceFile, int line, int col, String constructName) {
-		super(cfg, sourceFile, line, col);
+	protected NativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Expression... parameters) {
+		super(cfg, sourceFile, line, col, parameters);
 		Objects.requireNonNull(constructName, "The name of the native construct of a native call cannot be null");
 		this.constructName = constructName;
 	}
@@ -53,12 +55,35 @@ public class NativeCall extends Call {
 	 * 
 	 * @return the target CFG
 	 */
-	public String getConstructName() {
+	public final String getConstructName() {
 		return constructName;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((constructName == null) ? 0 : constructName.hashCode());
+		return result;
 	}
 
 	@Override
-	public String toString() {
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
+			return true;
+		if (getClass() != st.getClass())
+			return false;
+		NativeCall other = (NativeCall) st;
+		if (constructName == null) {
+			if (other.constructName != null)
+				return false;
+		} else if (!constructName.equals(other.constructName))
+			return false;
+		return super.isEqualTo(other);
+	}
+
+	@Override
+	public final String toString() {
 		return constructName + "(" + StringUtils.join(getParameters(), ", ") + ")";
 	}
 }

@@ -104,23 +104,44 @@ public abstract class Statement implements Comparable<Statement> {
 		return result;
 	}
 
+	/**
+	 * All statements use reference equality for equality checks, to allow different
+	 * statement with the same content but placed in different part of the cfg to
+	 * being not equal if there are no debug information available. For checking if
+	 * two statements are effectively equal (that is, they are different object with
+	 * the same structure) use {@link #isEqualTo(Statement)}. <br>
+	 * <br>
+	 * 
+	 * {@inheritDoc}
+	 */
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
+	public final boolean equals(Object obj) {
+		return this == obj;
+	}
+
+	/**
+	 * Checks if this statement is effectively equal to the given one, that is, if
+	 * they have the same structure while potentially being different instances.
+	 * 
+	 * @param st the other statement
+	 * @return {@code true} if this statement and the given one are effectively
+	 *         equals
+	 */
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
 			return true;
-		if (obj == null)
+		if (st == null)
 			return false;
-		if (getClass() != obj.getClass())
+		if (getClass() != st.getClass())
 			return false;
-		Statement other = (Statement) obj;
-		if (col != other.col)
+		if (col != st.col)
 			return false;
-		if (line != other.line)
+		if (line != st.line)
 			return false;
 		if (sourceFile == null) {
-			if (other.sourceFile != null)
+			if (st.sourceFile != null)
 				return false;
-		} else if (!sourceFile.equals(other.sourceFile))
+		} else if (!sourceFile.equals(st.sourceFile))
 			return false;
 		return true;
 	}

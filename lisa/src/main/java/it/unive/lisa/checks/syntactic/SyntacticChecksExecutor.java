@@ -41,26 +41,30 @@ public class SyntacticChecksExecutor {
 	private static void processCFG(CheckTool tool, CFG cfg, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.visitCFGDescriptor(tool, cfg.getDescriptor()));
 
-		for (Statement st : cfg.getNodes()) {
-			checks.forEach(c -> c.visitStatement(tool, st));
-			if (st instanceof Return)
-				checks.forEach(c -> c.visitExpression(tool, ((Return) st).getExpression()));
-			else if (st instanceof Throw)
-				checks.forEach(c -> c.visitExpression(tool, ((Throw) st).getExpression()));
-			else if (st instanceof Expression)
-				processExpression(tool, checks, (Expression) st, false);
-		}
+		for (Statement st : cfg.getNodes()) 
+			if (st instanceof Expression)
+				processExpression(tool, checks, (Expression) st);
+			else 
+				processStatement(tool, checks, st);
 	}
 
-	private static void processExpression(CheckTool tool, Collection<SyntacticCheck> checks, Expression expression, boolean visitSelf) {
-		if (visitSelf)
-			checks.forEach(c -> c.visitExpression(tool, expression));
+	private static void processStatement(CheckTool tool, Collection<SyntacticCheck> checks, Statement st) {
+		checks.forEach(c -> c.visitStatement(tool, st));
+		
+		if (st instanceof Return)
+			processExpression(tool, checks, ((Return) st).getExpression());
+		else if (st instanceof Throw)
+			processExpression(tool, checks, ((Throw) st).getExpression());
+	}
+
+	private static void processExpression(CheckTool tool, Collection<SyntacticCheck> checks, Expression expression) {
+		checks.forEach(c -> c.visitExpression(tool, expression));
 		
 		if (expression instanceof Assignment) {
-			processExpression(tool, checks, ((Assignment) expression).getTarget(), true);
-			processExpression(tool, checks, ((Assignment) expression).getExpression(), true);
+			processExpression(tool, checks, ((Assignment) expression).getTarget());
+			processExpression(tool, checks, ((Assignment) expression).getExpression());
 		} else if (expression instanceof Call)
 			for (Expression param : ((Call) expression).getParameters())
-				processExpression(tool, checks, param, true);
+				processExpression(tool, checks, param);
 	}
 }

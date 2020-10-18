@@ -1,8 +1,8 @@
 package it.unive.lisa;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -52,7 +52,7 @@ public class LiSA {
 		// since the warnings collection will be filled AFTER the execution of every
 		// concurrent bit has completed its execution, it is fine to use a non
 		// thread-safe one
-		this.warnings = new TreeSet<>();
+		this.warnings = new ArrayList<>();
 	}
 
 	/**

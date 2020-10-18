@@ -24,9 +24,10 @@ public class OpenCall extends Call {
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param targetName the name of the target of this open call
+	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(CFG cfg, String targetName) {
-		this(cfg, null, -1, -1, targetName);
+	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
+		this(cfg, null, -1, -1, targetName, parameters);
 	}
 
 	/**
@@ -40,9 +41,10 @@ public class OpenCall extends Call {
 	 * @param col        the column where this expression happens in the source
 	 *                   file. If unknown, use {@code -1}
 	 * @param targetName the name of the target of this open call
+	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName) {
-		super(cfg, sourceFile, line, col);
+	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Expression... parameters) {
+		super(cfg, sourceFile, line, col, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of an open call cannot be null");
 		this.targetName = targetName;
 	}
@@ -54,6 +56,29 @@ public class OpenCall extends Call {
 	 */
 	public String getTargetName() {
 		return targetName;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean isEqualTo(Statement st) {
+		if (this == st)
+			return true;
+		if (getClass() != st.getClass())
+			return false;
+		OpenCall other = (OpenCall) st;
+		if (targetName == null) {
+			if (other.targetName != null)
+				return false;
+		} else if (!targetName.equals(other.targetName))
+			return false;
+		return super.isEqualTo(other);
 	}
 
 	@Override
