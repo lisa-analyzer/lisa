@@ -4,16 +4,21 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
 
+import it.unive.lisa.cfg.edge.Edge;
+import it.unive.lisa.cfg.edge.FalseEdge;
+import it.unive.lisa.cfg.edge.SequentialEdge;
+import it.unive.lisa.cfg.edge.TrueEdge;
+import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -24,15 +29,10 @@ import it.unive.lisa.cfg.statement.Statement;
 public class CFG {
 
 	/**
-	 * Singleton for the empty collection
-	 */
-	private static final Collection<Edge> EMPTY_LIST = new ArrayList<>();
-
-	/**
 	 * The adjacency matrix of this graph, mapping statements to the collection of
 	 * edges attached to it.
 	 */
-	private final Map<Statement, Collection<Edge>> adjacencyMatrix;
+	private final AdjacencyMatrix adjacencyMatrix;
 
 	/**
 	 * The statements of this control flow graph that are entrypoints, that is, that
@@ -51,9 +51,9 @@ public class CFG {
 	 * @param descriptor the descriptor of this cfg
 	 */
 	public CFG(CFGDescriptor descriptor) {
-		this.adjacencyMatrix = new HashMap<>();
+		this.adjacencyMatrix = new AdjacencyMatrix();
 		this.descriptor = descriptor;
-		this.entrypoints = new ArrayList<>();
+		this.entrypoints = new HashSet<>();
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class CFG {
 	 * @param other the original cfg
 	 */
 	protected CFG(CFG other) {
-		this.adjacencyMatrix = new HashMap<>(other.adjacencyMatrix);
+		this.adjacencyMatrix = new AdjacencyMatrix(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 		this.descriptor = other.descriptor;
 	}
@@ -93,7 +93,7 @@ public class CFG {
 	 * @return the collection of nodes
 	 */
 	public final Collection<Statement> getNodes() {
-		return adjacencyMatrix.keySet();
+		return adjacencyMatrix.getNodes();
 	}
 
 	/**
@@ -102,7 +102,7 @@ public class CFG {
 	 * @return the collection of edges
 	 */
 	public final Collection<Edge> getEdges() {
-		return adjacencyMatrix.values().stream().flatMap(c -> c.stream()).collect(Collectors.toList());
+		return adjacencyMatrix.getEdges();
 	}
 
 	/**
@@ -128,7 +128,7 @@ public class CFG {
 	 *                   an entrypoint.
 	 */
 	public final void addNode(Statement node, boolean entrypoint) {
-		adjacencyMatrix.put(node, new LinkedList<>());
+		adjacencyMatrix.addNode(node);
 		if (entrypoint)
 			this.entrypoints.add(node);
 	}
@@ -138,16 +138,10 @@ public class CFG {
 	 * 
 	 * @param edge the edge to add
 	 * @throws UnsupportedOperationException if the source or the destination of the
-	 *                                       given edge is not part of this cfg
+	 *                                       given edge are not part of this cfg
 	 */
 	public void addEdge(Edge edge) {
-		if (!adjacencyMatrix.containsKey(edge.getSource()))
-			throw new UnsupportedOperationException("The source node is not in the graph");
-
-		if (!adjacencyMatrix.containsKey(edge.getDestination()))
-			throw new UnsupportedOperationException("The destination node is not in the graph");
-
-		adjacencyMatrix.get(edge.getSource()).add(edge);
+		adjacencyMatrix.addEdge(edge);
 	}
 
 	/**
@@ -169,30 +163,43 @@ public class CFG {
 	}
 
 	/**
+	 * Yields the edge connecting the two given statements, if any. Yields
+	 * {@code null} if such edge does not exist, or if one of the two statements is
+	 * not inside this cfg.
+	 * 
+	 * @param source      the source statement
+	 * @param destination the destination statement
+	 * @return the edge connecting {@code source} to {@code destination}, or
+	 *         {@code null}
+	 */
+	public final Edge getEdgeConnecting(Statement source, Statement destination) {
+		return adjacencyMatrix.getEdgeConnecting(source, destination);
+	}
+
+	/**
 	 * Yields the collection of the nodes that are followers of the given one, that
 	 * is, all nodes such that there exist an edge in this control flow graph going
-	 * from the given node to such node.
+	 * from the given node to such node. Yields {@code null} if the node is not in
+	 * this cfg.
 	 * 
 	 * @param node the node
 	 * @return the collection of followers
 	 */
 	public final Collection<Statement> followersOf(Statement node) {
-		return adjacencyMatrix.getOrDefault(node, EMPTY_LIST).stream().map(e -> e.getDestination())
-				.collect(Collectors.toList());
+		return adjacencyMatrix.followersOf(node);
 	}
 
 	/**
 	 * Yields the collection of the nodes that are predecessors of the given vertex,
 	 * that is, all nodes such that there exist an edge in this control flow graph
-	 * going from such node to the given one.
+	 * going from such node to the given one. Yields {@code null} if the node is not
+	 * in this cfg.
 	 * 
 	 * @param node the node
 	 * @return the collection of predecessors
 	 */
 	public final Collection<Statement> predecessorsOf(Statement node) {
-		return adjacencyMatrix.values().stream().flatMap(c -> c.stream())
-				.filter(edge -> edge.getDestination().equals(node)).map(edge -> edge.getSource()).distinct()
-				.collect(Collectors.toList());
+		return adjacencyMatrix.predecessorsOf(node);
 	}
 
 	/**
@@ -226,7 +233,7 @@ public class CFG {
 		Map<Statement, Integer> codes = new IdentityHashMap<>();
 		int code = 0;
 
-		for (Map.Entry<Statement, Collection<Edge>> entry : adjacencyMatrix.entrySet()) {
+		for (Map.Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> entry : adjacencyMatrix) {
 			Statement current = entry.getKey();
 
 			if (!codes.containsKey(current))
@@ -241,7 +248,7 @@ public class CFG {
 			writer.write(provideVertexShapeIfNeeded(current));
 			writer.write("label = <" + dotEscape(current.toString()) + extraLabel + ">];\n");
 
-			for (Edge edge : entry.getValue()) {
+			for (Edge edge : entry.getValue().getRight()) {
 				Statement follower = edge.getDestination();
 				if (!codes.containsKey(follower))
 					codes.put(follower, code++);
@@ -326,12 +333,36 @@ public class CFG {
 		if (entrypoints == null) {
 			if (cfg.entrypoints != null)
 				return false;
-		} else if (!entrypoints.equals(cfg.entrypoints))
+		} else if (entrypoints.size() != cfg.entrypoints.size())
 			return false;
+		else {
+			// statements use reference equality, thus entrypoint.equals(cfg.entrypoints)
+			// won't
+			// achieve content comparison. Need to do this manually.
+
+			// the following keeps track of the unmatched statements in cfg.entrypoints
+			Collection<Statement> copy = new HashSet<>(cfg.entrypoints);
+			boolean found;
+			for (Statement s : entrypoints) {
+				found = false;
+				for (Statement ss : cfg.entrypoints)
+					if (copy.contains(ss) && s.isEqualTo(ss)) {
+						copy.remove(ss);
+						found = true;
+						break;
+					}
+				if (!found)
+					return false;
+			}
+
+			if (!copy.isEmpty())
+				// we also have to match all of the entrypoints in cfg.entrypoints
+				return false;
+		}
 		if (adjacencyMatrix == null) {
 			if (cfg.adjacencyMatrix != null)
 				return false;
-		} else if (!adjacencyMatrix.equals(cfg.adjacencyMatrix))
+		} else if (!adjacencyMatrix.isEqualTo(cfg.adjacencyMatrix))
 			return false;
 		return true;
 	}
@@ -339,5 +370,22 @@ public class CFG {
 	@Override
 	public String toString() {
 		return descriptor.toString();
+	}
+
+	/**
+	 * Simplifies this cfg, removing all {@link NoOp}s and rewriting the edge set
+	 * accordingly. This method will throw an {@link UnsupportedOperationException}
+	 * if one of the {@link NoOp}s has an outgoing edge that is not a
+	 * {@link SequentialEdge}, since such statement is expected to always be
+	 * sequential.
+	 * 
+	 * @throws UnsupportedOperationException if there exists at least one
+	 *                                       {@link NoOp} with an outgoing
+	 *                                       non-sequential edge, or if one of the
+	 *                                       ingoing edges to the {@link NoOp} is
+	 *                                       not currently supported.
+	 */
+	public void simplify() {
+		adjacencyMatrix.simplify();
 	}
 }

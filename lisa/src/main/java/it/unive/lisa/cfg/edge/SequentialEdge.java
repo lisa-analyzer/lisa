@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg;
+package it.unive.lisa.cfg.edge;
 
 import it.unive.lisa.cfg.statement.Statement;
 
@@ -18,5 +18,10 @@ public class SequentialEdge extends Edge {
 	 */
 	public SequentialEdge(Statement source, Statement destination) {
 		super(source, destination);
+	}
+	
+	@Override
+	public String toString() {
+		return "[ " + getSource() + " ] ---> [ " + getDestination() + " ]";
 	}
 }
