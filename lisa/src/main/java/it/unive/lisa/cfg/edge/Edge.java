@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg;
+package it.unive.lisa.cfg.edge;
 
 import it.unive.lisa.cfg.statement.Statement;
 
@@ -54,6 +54,7 @@ public abstract class Edge {
 		int result = 1;
 		result = prime * result + ((destination == null) ? 0 : destination.hashCode());
 		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + getClass().getName().hashCode();
 		return result;
 	}
 
@@ -79,8 +80,36 @@ public abstract class Edge {
 		return true;
 	}
 
-	@Override
-	public String toString() {
-		return "[ " + source + " ] -> [ " + destination + " ]";
+	/**
+	 * Checks if this edge is effectively equal to the given one, that is, if they
+	 * have the same structure while potentially being different instances. This
+	 * translates into comparing source and destination statements with
+	 * {@link Statement#isEqualTo(Statement)} instead of using
+	 * {@link Statement#equals(Object)}
+	 * 
+	 * @param other the other edge
+	 * @return {@code true} if this edge and the given one are effectively equals
+	 */
+	public boolean isEqualTo(Edge other) {
+		if (this == other)
+			return true;
+		if (other == null)
+			return false;
+		if (getClass() != other.getClass())
+			return false;
+		if (destination == null) {
+			if (other.destination != null)
+				return false;
+		} else if (!destination.isEqualTo(other.destination))
+			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.isEqualTo(other.source))
+			return false;
+		return true;
 	}
+
+	@Override
+	public abstract String toString();
 }

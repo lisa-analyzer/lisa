@@ -1,4 +1,4 @@
-package it.unive.lisa.test;
+package it.unive.lisa.test.checks.syntactic;
 
 import static org.junit.Assert.assertEquals;
 
