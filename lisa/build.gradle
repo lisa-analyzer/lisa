@@ -17,7 +17,7 @@ plugins {
 }
 
 group = 'it.unive'
-version = '0.1'
+version = '0.1a1'
 
 repositories {
     jcenter()
