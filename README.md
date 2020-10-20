@@ -1,7 +1,9 @@
 # LiSA 
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-![buildbadge](https://github.com/UniVE-SSV/lisa/workflows/Gradle%20Build/badge.svg) 
+![GitHub](https://img.shields.io/github/license/UniVE-SSV/lisa?color=brightgreen)
+![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/UniVE-SSV/lisa/Gradle%20Build/master)
+![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/UniVE-SSV/lisa?include_prereleases&sort=semver&color=brightgreen)
+![GitHub last commit](https://img.shields.io/github/last-commit/UniVE-SSV/lisa)
 
 LiSA (Library for Static Analysis) aims to ease the creation and implementation of static analyzers based on the Abstract Interpretation theory.
 LiSA provides an analysis engine that works on a generic and extensible control flow graph representation of the program to analyze. Abstract interpreters in LiSA are built 
