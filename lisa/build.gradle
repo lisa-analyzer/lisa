@@ -11,8 +11,8 @@ buildscript {
 
 plugins {
     id 'java-library'
-    id 'com.github.roroche.plantuml' version '1.0.2'
     id 'eclipse'
+    id 'com.github.roroche.plantuml' version '1.0.2'
     id 'org.ajoberstar.grgit' version '4.0.2'
 }
 
@@ -34,24 +34,34 @@ dependencies {
 }
 
 plugins.withType(JavaPlugin) {
-	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
-	jar.doFirst {
-	    manifest {
-	    	 attributes(
-	            'Implementation-Title': rootProject.name,
-	            'Implementation-Version': project.version,
-	            'Implementation-Vendor': 'Ca\' Foscari University of Venice',
-	            'Created-By': "Gradle ${gradle.gradleVersion}",
-	            'Build-Revision': repo.head().abbreviatedId,
-	            'Build-Tag': repo.describe(tags: true, always: true),
-				'Build-Branch': repo.branch.current().getName(),
-				'Build-Clean': repo.status().isClean(),
-	            'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-	            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-	            'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
-	        )
-	    }
-    }
+	def repo = null
+	try {
+		repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
+	} catch (Exception e) {
+		// this means we are building from outside of LiSA, probably from an outer model
+		// we can skip the manifest attributes injection here
+		println("Skipping manifest attriubtes injection because we are not directly building LiSA")
+	}
+	
+	if (repo != null) {
+		jar.doFirst {
+			manifest {
+				 attributes(
+					'Implementation-Title': rootProject.name,
+					'Implementation-Version': project.version,
+					'Implementation-Vendor': 'Ca\' Foscari University of Venice',
+					'Created-By': "Gradle ${gradle.gradleVersion}",
+					'Build-Revision': repo.head().abbreviatedId,
+					'Build-Tag': repo.describe(tags: true, always: true),
+					'Build-Branch': repo.branch.current().getName(),
+					'Build-Clean': repo.status().isClean(),
+					'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+					'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+					'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
+				)
+			}
+		}
+	}
 }
 
 classDiagram { 
@@ -63,8 +73,4 @@ buildClassDiagram {
 	doFirst {
         mkdir new File("${projectDir}/diagrams/")
 	}
-}
-
-build {
-	dependsOn 'buildClassDiagram', 'javadoc'
 }
