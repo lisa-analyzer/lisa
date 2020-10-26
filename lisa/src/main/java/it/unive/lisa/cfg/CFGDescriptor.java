@@ -5,6 +5,10 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.cfg.type.Untyped;
+
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,
  * column) as well as metadata
@@ -39,18 +43,23 @@ public class CFGDescriptor {
 	/**
 	 * The names of the arguments of the CFG associated with this descriptor.
 	 */
-	private final String[] argNames;
+	private final Variable[] argNames;
 
 	/**
+	 * The return type of the CFG associated with this descriptor.
+	 */
+	private final Type returnType;
+	
+	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
-	 * (i.e. no source file/line/column is available).
+	 * (i.e. no source file/line/column is available) and with untyped return type.
 	 * 
 	 * @param name     the name of the CFG associated with this descriptor
 	 * @param argNames the names of the arguments of the CFG associated with this
 	 *                 descriptor
 	 */
-	public CFGDescriptor(String name, String... argNames) {
-		this(null, -1, -1, name, argNames);
+	public CFGDescriptor(String name, Variable... argNames) {
+		this(null, -1, -1, name, Untyped.INSTANCE, argNames);
 	}
 
 	/**
@@ -64,12 +73,14 @@ public class CFGDescriptor {
 	 * @param col        the column where the CFG associated with this descriptor is
 	 *                   defined in the source file. If unknown, use {@code -1}
 	 * @param name       the name of the CFG associated with this descriptor
+	 * @param returnType the return type of the CFG associated with this descriptor
 	 * @param argNames   the names of the arguments of the CFG associated with this
-	 *                   descriptor
+	 *                   descriptor                
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, String name, String... argNames) {
+	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Variable... argNames) {
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(argNames, "The array of argument names of a CFG cannot be null");
+		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
 		for (int i = 0; i < argNames.length; i++)
 			Objects.requireNonNull(argNames[i], "The " + i + "-th argument name of a CFG cannot be null");
 		this.sourceFile = sourceFile;
@@ -77,6 +88,7 @@ public class CFGDescriptor {
 		this.col = col;
 		this.name = name;
 		this.argNames = argNames;
+		this.returnType = returnType;
 	}
 
 	/**
@@ -146,8 +158,17 @@ public class CFGDescriptor {
 	 * 
 	 * @return the arguments names
 	 */
-	public String[] getArgNames() {
+	public Variable[] getArgNames() {
 		return argNames;
+	}
+	
+	/**
+	 * Yields the return type of the CFG associated with this descriptor.
+	 * 
+	 * @return the return type
+	 */
+	public Type getReturnType() {
+		return returnType;
 	}
 
 	@Override
@@ -186,6 +207,8 @@ public class CFGDescriptor {
 			if (other.sourceFile != null)
 				return false;
 		} else if (!sourceFile.equals(other.sourceFile))
+			return false;
+		if (!getReturnType().equals(other.getReturnType()))
 			return false;
 		return true;
 	}
