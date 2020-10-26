@@ -55,7 +55,7 @@ public interface Type {
 	/**
 	 * Returns this as Boolean type.
 	 * 
-	 * @return this as Boolean type if it is boolean; null otherwise.
+	 * @return this as Boolean type if it is Boolean; null otherwise.
 	 */
 	public default BooleanType asBoolean() {
 		return isBoolean() ? (BooleanType) this : null;

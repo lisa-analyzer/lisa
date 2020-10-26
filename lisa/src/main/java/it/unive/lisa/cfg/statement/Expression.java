@@ -1,5 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
@@ -14,11 +16,11 @@ public abstract class Expression extends Statement {
 	/**
 	 * The static type of this expression
 	 */
-	private final Type type;
+	protected final Type type;
 	
 	/**
 	 * Builds an untyped expression happening at the given source location,
-	 * that is its type is Untyped.
+	 * that is its type is {@code Untyped.INSTANCE}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param sourceFile the source file where this expression happens. If unknown,
@@ -31,7 +33,7 @@ public abstract class Expression extends Statement {
 	protected Expression(CFG cfg, String sourceFile, int line, int col) {
 		this(cfg, sourceFile, line, col, Untyped.INSTANCE);
 	}
-	
+		
 	/**
 	 * Builds a typed expression happening at the given source location.
 	 * 
@@ -46,6 +48,7 @@ public abstract class Expression extends Statement {
 	 */
 	protected Expression(CFG cfg, String sourceFile, int line, int col, Type type) {
 		super(cfg, sourceFile, line, col);
+		Objects.requireNonNull(type, "The expression type of a CFG cannot be null");
 		this.type = type;
 	}
 	

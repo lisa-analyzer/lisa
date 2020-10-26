@@ -29,6 +29,19 @@ public class Variable extends Expression {
 	public Variable(CFG cfg, String name) {
 		this(cfg, null, -1, -1, name, Untyped.INSTANCE);
 	}
+	
+	/**
+	 * Builds a typed variable reference, identified by its name and its type. The location where
+	 * this variable reference happens is unknown (i.e. no source file/line/column is
+	 * available).
+	 * 
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param name       the name of this variable
+	 * @param type		 the type of this variable
+	 */
+	public Variable(CFG cfg, String name, Type type) {
+		this(cfg, null, -1, -1, name, type);
+	}
 
 	/**
 	 * Builds the variable reference, identified by its name, happening at the given
@@ -64,6 +77,7 @@ public class Variable extends Expression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
 	}
 

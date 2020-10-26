@@ -180,6 +180,7 @@ public class CFGDescriptor {
 		result = prime * result + line;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
+		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
 		return result;
 	}
 
