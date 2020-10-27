@@ -160,7 +160,7 @@ public class CFGDescriptor {
 	 * @return the signature
 	 */
 	public String getFullSignature() {
-		return name + "(" + StringUtils.join(args, ", ") + ")";
+		return returnType + " " + name + "(" + StringUtils.join(args, ", ") + ")";
 	}
 
 	/**
