@@ -1,7 +1,8 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * Numeric type interface.
+ * Numeric type interface. Any concrete numerical type or numerical sub-interface 
+ * should implement/extend this interface.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */

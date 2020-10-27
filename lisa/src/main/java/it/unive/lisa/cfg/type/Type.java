@@ -1,7 +1,9 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * Type interface.
+ * Type interface. Any instance of a concrete type, instance of Type, 
+ * should be unique and implemented following the singleton design pattern
+ * (see for instance {@link Untyped} class).
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */

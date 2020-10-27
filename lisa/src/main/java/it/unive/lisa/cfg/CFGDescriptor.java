@@ -41,9 +41,9 @@ public class CFGDescriptor {
 	private final String name;
 
 	/**
-	 * The names of the arguments of the CFG associated with this descriptor.
+	 * The arguments of the CFG associated with this descriptor.
 	 */
-	private final Variable[] argNames;
+	private final Variable[] args;
 
 	/**
 	 * The return type of the CFG associated with this descriptor.
@@ -52,14 +52,26 @@ public class CFGDescriptor {
 	
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
-	 * (i.e. no source file/line/column is available) and with untyped return type.
+	 * (i.e. no source file/line/column is available) and with untyped return type,
+	 * that is its type is {@link Untyped#INSTANCE}.
 	 * 
 	 * @param name     the name of the CFG associated with this descriptor
-	 * @param argNames the names of the arguments of the CFG associated with this
-	 *                 descriptor
+	 * @param args 	   the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(String name, Variable... argNames) {
-		this(null, -1, -1, name, Untyped.INSTANCE, argNames);
+	public CFGDescriptor(String name, Variable... args) {
+		this(null, -1, -1, name, Untyped.INSTANCE, args);
+	}
+	
+	/**
+	 * Builds the descriptor for a method that is defined at an unknown location
+	 * (i.e. no source file/line/column is available).
+	 * 
+	 * @param name		 the name of the CFG associated with this descriptor
+	 * @param returnType the return type of the CFG associated with this descriptor
+	 * @param args 	   	 the arguments of the CFG associated with this descriptor
+	 */
+	public CFGDescriptor(String name, Type returnType, Variable... args) {
+		this(null, -1, -1, name, returnType, args);
 	}
 
 	/**
@@ -74,20 +86,19 @@ public class CFGDescriptor {
 	 *                   defined in the source file. If unknown, use {@code -1}
 	 * @param name       the name of the CFG associated with this descriptor
 	 * @param returnType the return type of the CFG associated with this descriptor
-	 * @param argNames   the names of the arguments of the CFG associated with this
-	 *                   descriptor                
+	 * @param args   	 the arguments of the CFG associated with this descriptor                
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Variable... argNames) {
+	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Variable... args) {
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
-		Objects.requireNonNull(argNames, "The array of argument names of a CFG cannot be null");
+		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
-		for (int i = 0; i < argNames.length; i++)
-			Objects.requireNonNull(argNames[i], "The " + i + "-th argument name of a CFG cannot be null");
+		for (int i = 0; i < args.length; i++)
+			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
 		this.sourceFile = sourceFile;
 		this.line = line;
 		this.col = col;
 		this.name = name;
-		this.argNames = argNames;
+		this.args = args;
 		this.returnType = returnType;
 	}
 
@@ -149,7 +160,7 @@ public class CFGDescriptor {
 	 * @return the signature
 	 */
 	public String getFullSignature() {
-		return name + "(" + StringUtils.join(argNames, ", ") + ")";
+		return name + "(" + StringUtils.join(args, ", ") + ")";
 	}
 
 	/**
@@ -158,8 +169,8 @@ public class CFGDescriptor {
 	 * 
 	 * @return the arguments names
 	 */
-	public Variable[] getArgNames() {
-		return argNames;
+	public Variable[] getArgs() {
+		return args;
 	}
 	
 	/**
@@ -175,7 +186,7 @@ public class CFGDescriptor {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + Arrays.hashCode(argNames);
+		result = prime * result + Arrays.hashCode(args);
 		result = prime * result + col;
 		result = prime * result + line;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -193,7 +204,7 @@ public class CFGDescriptor {
 		if (getClass() != obj.getClass())
 			return false;
 		CFGDescriptor other = (CFGDescriptor) obj;
-		if (!Arrays.equals(argNames, other.argNames))
+		if (!Arrays.equals(args, other.args))
 			return false;
 		if (col != other.col)
 			return false;

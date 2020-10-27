@@ -21,13 +21,25 @@ public class Literal extends Expression {
 	/**
 	 * Builds the literal, consisting of a constant value. The location where this
 	 * literal happens is unknown (i.e. no source file/line/column is available).
-	 * The type of this literal is unknown (i.e. its type is {@code Untyped.INSTANCE}).
+	 * The type of this literal is unknown (i.e. its type is {@link Untyped#INSTANCE}).
 	 * 
 	 * @param cfg   the cfg that this expression belongs to
 	 * @param value the value of this literal
 	 */
 	public Literal(CFG cfg, Object value) {
 		this(cfg, null, -1, -1, value, Untyped.INSTANCE);
+	}
+	
+	/**
+	 * Builds the literal, consisting of a constant value. The location where this
+	 * literal happens is unknown (i.e. no source file/line/column is available).
+	 * 
+	 * @param cfg   the cfg that this expression belongs to
+	 * @param value the value of this literal
+	 * @param type	the type of this literal
+	 */
+	public Literal(CFG cfg, Object value, Type type) {
+		this(cfg, null, -1, -1, value, type);
 	}
 
 	/**
@@ -62,7 +74,7 @@ public class Literal extends Expression {
 	 * @param col        the column where this expression happens in the source
 	 *                   file. If unknown, use {@code -1}
 	 * @param value      the value of this literal
-	 * @param type		 the type of this literal
+	 * @param staticType the type of this literal
 	 */
 	public Literal(CFG cfg, String sourceFile, int line, int col, Object value) {
 		super(cfg, sourceFile, line, col, Untyped.INSTANCE);

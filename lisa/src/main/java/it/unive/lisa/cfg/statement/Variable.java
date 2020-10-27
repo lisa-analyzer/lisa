@@ -21,7 +21,7 @@ public class Variable extends Expression {
 	/**
 	 * Builds the untyped variable reference, identified by its name. The location where
 	 * this variable reference happens is unknown (i.e. no source file/line/column is
-	 * available).
+	 * available) and its type is {@link Untyped#INSTANCE}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param name       the name of this variable
@@ -31,9 +31,9 @@ public class Variable extends Expression {
 	}
 	
 	/**
-	 * Builds a typed variable reference, identified by its name and its type. The location where
-	 * this variable reference happens is unknown (i.e. no source file/line/column is
-	 * available).
+	 * Builds a typed variable reference, identified by its name and its type. 
+	 * The location where this variable reference happens is unknown 
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param name       the name of this variable
@@ -77,7 +77,7 @@ public class Variable extends Expression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -93,7 +93,7 @@ public class Variable extends Expression {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (!getType().equals(other.getType()))
+		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return true;
 	}
