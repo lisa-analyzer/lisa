@@ -24,4 +24,14 @@ public class Untyped implements Type {
 	public String toString() {
 		return "untyped";
 	}
+	
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof Untyped;
+	}
+	
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(this);
+	}
 }

@@ -134,30 +134,39 @@ public class Parameter {
 		int result = 1;
 		result = prime * result + col;
 		result = prime * result + line;
-		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
-
-	/**
-	 * Checks if this parameter is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances, 
-	 * namely they have same name and same type.
-	 * 
-	 * @param other	 		the other parameter.
-	 * @return {@code true} if this parameter and the given one are effectively equals; 
-	 * 						{@code false} otherwise
-	 */
-	public boolean isEqualTo(Parameter other) {
-		if (this == other)
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Parameter other = (Parameter) obj;
+		if (col != other.col)
+			return false;
+		if (line != other.line)
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (!getStaticType().equals(other.getStaticType()))
+		if (sourceFile == null) {
+			if (other.sourceFile != null)
+				return false;
+		} else if (!sourceFile.equals(other.sourceFile))
+			return false;
+		if (staticType == null) {
+			if (other.staticType != null)
+				return false;
+		} else if (!staticType.equals(other.staticType))
 			return false;
 		return true;
 	}

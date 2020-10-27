@@ -22,4 +22,14 @@ public class NullType implements Type {
 	public String toString() {
 		return "null";
 	}
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof NullType;
+	}
+	
+	@Override
+	public int hashCode() {
+		return System.identityHashCode(this);
+	}
 }
