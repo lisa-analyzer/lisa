@@ -19,4 +19,9 @@ public class Untyped implements Type {
 	public static final Untyped INSTANCE = new Untyped();
 	
 	private Untyped() {}
+
+	@Override
+	public String toString() {
+		return "untyped";
+	}
 }
