@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.Parameter;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
@@ -43,13 +43,13 @@ public class CFGDescriptor {
 	/**
 	 * The arguments of the CFG associated with this descriptor.
 	 */
-	private final Variable[] args;
+	private final Parameter[] args;
 
 	/**
 	 * The return type of the CFG associated with this descriptor.
 	 */
 	private final Type returnType;
-	
+
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
 	 * (i.e. no source file/line/column is available) and with untyped return type,
@@ -58,10 +58,10 @@ public class CFGDescriptor {
 	 * @param name     the name of the CFG associated with this descriptor
 	 * @param args 	   the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(String name, Variable... args) {
+	public CFGDescriptor(String name, Parameter... args) {
 		this(null, -1, -1, name, Untyped.INSTANCE, args);
 	}
-	
+
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
 	 * (i.e. no source file/line/column is available).
@@ -70,7 +70,7 @@ public class CFGDescriptor {
 	 * @param returnType the return type of the CFG associated with this descriptor
 	 * @param args 	   	 the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(String name, Type returnType, Variable... args) {
+	public CFGDescriptor(String name, Type returnType, Parameter... args) {
 		this(null, -1, -1, name, returnType, args);
 	}
 
@@ -88,7 +88,7 @@ public class CFGDescriptor {
 	 * @param returnType the return type of the CFG associated with this descriptor
 	 * @param args   	 the arguments of the CFG associated with this descriptor                
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Variable... args) {
+	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Parameter... args) {
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
@@ -157,22 +157,22 @@ public class CFGDescriptor {
 	/**
 	 * Yields the full signature of this cfg.
 	 * 
-	 * @return the signature
+	 * @return the full signature 
 	 */
 	public String getFullSignature() {
-		return returnType + " " + name + "(" + StringUtils.join(args, ", ") + ")";
+		return returnType + " " + name + "(" + StringUtils.join(args, ", ")+ ")";
 	}
 
 	/**
-	 * Yields the array containing the names of the arguments of the CFG associated
+	 * Yields the array containing the arguments of the CFG associated
 	 * with this descriptor.
 	 * 
-	 * @return the arguments names
+	 * @return the arguments
 	 */
-	public Variable[] getArgs() {
+	public Parameter[] getArgs() {
 		return args;
 	}
-	
+
 	/**
 	 * Yields the return type of the CFG associated with this descriptor.
 	 * 

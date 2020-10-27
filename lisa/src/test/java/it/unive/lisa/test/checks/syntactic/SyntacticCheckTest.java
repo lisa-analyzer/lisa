@@ -13,6 +13,7 @@ import it.unive.lisa.cfg.statement.Assignment;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.Literal;
 import it.unive.lisa.cfg.statement.OpenCall;
+import it.unive.lisa.cfg.statement.Parameter;
 import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
@@ -53,7 +54,7 @@ public class SyntacticCheckTest {
 		LiSA lisa = new LiSA();
 		lisa.addSyntacticCheck(new VariableI());
 
-		CFG cfg = new CFG(new CFGDescriptor("foo", new Variable[0]));
+		CFG cfg = new CFG(new CFGDescriptor("foo", new Parameter[0]));
 		cfgFiller.accept(cfg);
 		lisa.addCFG(cfg);
 		lisa.run();
