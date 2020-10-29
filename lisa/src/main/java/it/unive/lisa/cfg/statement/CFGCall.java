@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import it.unive.lisa.cfg.CFG;
 
 /**
- * A call to one of the CFG under analysis.
+ * A call to one of the CFG under analysis. 
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -27,11 +27,12 @@ public class CFGCall extends Call {
 	 * @param parameters the parameters of this call
 	 */
 	public CFGCall(CFG cfg, CFG target, Expression... parameters) {
-		this(cfg, null, -1, -1, target, parameters);
+		this(cfg, null, -1, -1, target, parameters);		
 	}
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program.
+	 * Builds the CFG call, happening at the given location in the program. 
+	 * The static type of this CFGCall is the one return type of the descriptor of {@code target}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param sourceFile the source file where this expression happens. If unknown,
@@ -44,7 +45,7 @@ public class CFGCall extends Call {
 	 * @param parameters the parameters of this call
 	 */
 	public CFGCall(CFG cfg, String sourceFile, int line, int col, CFG target, Expression... parameters) {
-		super(cfg, sourceFile, line, col, parameters);
+		super(cfg, sourceFile, line, col, target.getDescriptor().getReturnType(), parameters);
 		Objects.requireNonNull(target, "The target of a CFG call cannot be null");
 		this.target = target;
 	}

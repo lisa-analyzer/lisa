@@ -5,6 +5,8 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.cfg.type.Untyped;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -18,6 +20,19 @@ public class OpenCall extends Call {
 	 */
 	private final String targetName;
 
+	
+	/**
+	 * Builds the untyped open call. The location where this call happens is unknown (i.e.
+	 * no source file/line/column is available). The static type of this call is {@link Untyped}.
+	 * 
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param targetName the name of the target of this open call
+	 * @param parameters the parameters of this call
+	 */
+	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
+		this(cfg, null, -1, -1, targetName, Untyped.INSTANCE, parameters);
+	}
+	
 	/**
 	 * Builds the open call. The location where this call happens is unknown (i.e.
 	 * no source file/line/column is available).
@@ -25,9 +40,10 @@ public class OpenCall extends Call {
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
-		this(cfg, null, -1, -1, targetName, parameters);
+	public OpenCall(CFG cfg, String targetName, Type staticType, Expression... parameters) {
+		this(cfg, null, -1, -1, targetName, staticType, parameters);
 	}
 
 	/**
@@ -42,9 +58,10 @@ public class OpenCall extends Call {
 	 *                   file. If unknown, use {@code -1}
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Expression... parameters) {
-		super(cfg, sourceFile, line, col, parameters);
+	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Type staticType, Expression... parameters) {
+		super(cfg, sourceFile, line, col, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of an open call cannot be null");
 		this.targetName = targetName;
 	}
@@ -63,6 +80,7 @@ public class OpenCall extends Call {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
+		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -78,11 +96,13 @@ public class OpenCall extends Call {
 				return false;
 		} else if (!targetName.equals(other.targetName))
 			return false;
+		if (!getStaticType().equals(other.getStaticType()))
+			return false;
 		return super.isEqualTo(other);
 	}
 
 	@Override
 	public String toString() {
-		return targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return getStaticType() + " " + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
 	}
 }

@@ -75,6 +75,32 @@ public class CFGDescriptor {
 	}
 
 	/**
+	 * Builds the descriptor with {@link Untyped} return type.
+	 * 
+	 * @param sourceFile the source file where the CFG associated with this
+	 *                   descriptor is defined. If unknown, use {@code null}
+	 * @param line       the line number where the CFG associated with this
+	 *                   descriptor is defined in the source file. If unknown, use
+	 *                   {@code -1}
+	 * @param col        the column where the CFG associated with this descriptor is
+	 *                   defined in the source file. If unknown, use {@code -1}
+	 * @param name       the name of the CFG associated with this descriptor
+	 * @param args   	 the arguments of the CFG associated with this descriptor                
+	 */
+	public CFGDescriptor(String sourceFile, int line, int col, String name, Parameter... args) {
+		Objects.requireNonNull(name, "The name of a CFG cannot be null");
+		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
+		for (int i = 0; i < args.length; i++)
+			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
+		this.sourceFile = sourceFile;
+		this.line = line;
+		this.col = col;
+		this.name = name;
+		this.args = args;
+		this.returnType = Untyped.INSTANCE;
+	}
+	
+	/**
 	 * Builds the descriptor.
 	 * 
 	 * @param sourceFile the source file where the CFG associated with this
