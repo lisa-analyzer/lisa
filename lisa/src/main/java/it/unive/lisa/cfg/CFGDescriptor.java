@@ -88,16 +88,7 @@ public class CFGDescriptor {
 	 * @param args   	 the arguments of the CFG associated with this descriptor                
 	 */
 	public CFGDescriptor(String sourceFile, int line, int col, String name, Parameter... args) {
-		Objects.requireNonNull(name, "The name of a CFG cannot be null");
-		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
-		for (int i = 0; i < args.length; i++)
-			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
-		this.sourceFile = sourceFile;
-		this.line = line;
-		this.col = col;
-		this.name = name;
-		this.args = args;
-		this.returnType = Untyped.INSTANCE;
+		this(sourceFile, line, col, name, Untyped.INSTANCE, args);
 	}
 	
 	/**

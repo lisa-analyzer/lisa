@@ -61,9 +61,7 @@ public abstract class NativeCall extends Call {
 	 * @param parameters    the parameters of this call
 	 */
 	protected NativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Expression... parameters) {
-		super(cfg, sourceFile, line, col, Untyped.INSTANCE, parameters);
-		Objects.requireNonNull(constructName, "The name of the native construct of a native call cannot be null");
-		this.constructName = constructName;
+		this(cfg, sourceFile, line, col, constructName, Untyped.INSTANCE, parameters);
 	}
 	
 	/**
