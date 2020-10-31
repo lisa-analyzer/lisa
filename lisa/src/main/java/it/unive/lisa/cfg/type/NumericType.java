@@ -9,38 +9,44 @@ package it.unive.lisa.cfg.type;
 public interface NumericType extends Type {
 
 	/**
-	 * Returns true if this numeric type follows a 8-bits format representation.
+	 * Returns {@code true} if this numeric type follows a 8-bits format representation.
 	 * 
-	 * @return true if this numeric type follows a 8-bits format representation; false otherwise 
+	 * @return {@code true} if this numeric type follows a 8-bits format representation; {@code false} otherwise 
 	 */
 	public boolean is8Bits();
 	
 	/**
-	 * Returns true if this numeric type follows a 32-bits format representation.
+	 * Returns {@code true} if this numeric type follows a 16-bits format representation.
 	 * 
-	 * @return true if this numeric type follows a 32-bits format representation; false otherwise
+	 * @return {@code true} if this numeric type follows a 16-bits format representation; {@code false} otherwise
 	 */
+	public boolean is16Bits();
 	
+	/**
+	 * Returns {@code true} if this numeric type follows a 32-bits format representation.
+	 * 
+	 * @return {@code true} if this numeric type follows a 32-bits format representation; {@code false} otherwise
+	 */
 	public boolean is32Bits();
 	
 	/**
-	 * Returns whether this numeric type follows a 64-bits format representation.
+	 * Returns {@code true} if this numeric type follows a 64-bits format representation.
 	 * 
-	 * @return true if this numeric type follows a 64-bits format representation; false otherwise 
+	 * @return {@code true} if this numeric type follows a 64-bits format representation; {@code false} otherwise 
 	 */
-	public boolean is64its();
+	public boolean is64Bits();
 	
 	/**
-	 * Returns true if this numeric type is unsigned.
+	 * Returns {@code true} if this numeric type is unsigned.
 	 *  
-	 * @return true if this numeric type is unsigned; false otherwise
+	 * @return {@code true} if this numeric type is unsigned; {@code false} otherwise
 	 */
 	public boolean isUnsigned();
 	
 	/**
-	 * Returns true if this numeric type is signed. 
+	 * Returns {@code true} if this numeric type is signed. 
 	 *  
-	 * @return true if this numeric type is signed; false otherwise
+	 * @return {@code true} if this numeric type is signed; {@code false} otherwise
 	 */
 	public default boolean isSigned() {
 		return !isUnsigned();

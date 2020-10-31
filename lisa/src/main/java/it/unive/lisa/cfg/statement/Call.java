@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.type.Type;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -31,9 +32,10 @@ public abstract class Call extends Expression {
 	 * @param col        the column where this expression happens in the source
 	 *                   file. If unknown, use {@code -1}
 	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	protected Call(CFG cfg, String sourceFile, int line, int col, Expression... parameters) {
-		super(cfg, sourceFile, line, col);
+	protected Call(CFG cfg, String sourceFile, int line, int col, Type staticType, Expression... parameters) {
+		super(cfg, sourceFile, line, col, staticType);
 		Objects.requireNonNull(parameters, "The array of parameters of a call cannot be null");
 		for (int i = 0; i < parameters.length; i++)
 			Objects.requireNonNull(parameters[i], "The " + i + "-th parameter of a call cannot be null");
@@ -54,6 +56,7 @@ public abstract class Call extends Expression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Arrays.hashCode(parameters);
+		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -65,6 +68,8 @@ public abstract class Call extends Expression {
 			return false;
 		Call other = (Call) st;
 		if (!areEquals(parameters, other.parameters))
+			return false;
+		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return true;
 	}
