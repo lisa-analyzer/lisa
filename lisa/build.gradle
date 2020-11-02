@@ -88,15 +88,15 @@ task copyJavadocToPages {
 		def f = new File('../docs/_data/sitemap.yml')
 		f.withWriterAppend { out ->
 			out.println "      - page: ${project.version}"
-			out.println "        url: /javadoc/${project.version}/"
+			out.println "        url: javadoc/${project.version}/"
 		}
 		
 		f = new File('../docs/javadoc/index.md')
 		f.withWriterAppend { out ->
 		
-		out.println "\n### 0.1a1\n"
+		out.println "\n### ${project.version}\n"
 
-		out.println "[Release](https://github.com/UniVE-SSV/lisa/releases/tag/v${project.version}) - [Javadoc](/javadoc/${project.version}/)"
+		out.println "[Release](https://github.com/UniVE-SSV/lisa/releases/tag/v${project.version}) - [Javadoc](${project.version}/)"
 		}
 	}
 }
