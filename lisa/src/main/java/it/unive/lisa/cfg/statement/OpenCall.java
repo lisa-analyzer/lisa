@@ -4,9 +4,15 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.Skip;
+import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -104,5 +110,14 @@ public class OpenCall extends Call {
 	@Override
 	public String toString() {
 		return getStaticType() + " " + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+	}
+	
+	@Override
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params) {
+		// TODO we should distinguish between skip (void methods) and top (non-void methods)
+		// TODO is computedState.getState().top() correct? variables should not change, only heap locations
+		// but that might be too conservative to assume
+		return new AnalysisState<>(computedState.getState().top(), new Skip());
 	}
 }

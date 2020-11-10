@@ -2,7 +2,12 @@ package it.unive.lisa.cfg.statement;
 
 import java.util.Objects;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.symbolic.Skip;
 
 /**
  * Returns an expression to the caller CFG.
@@ -82,5 +87,13 @@ public class Return extends Statement {
 	@Override
 	public final String toString() {
 		return "return " + expression;
+	}
+	
+	@Override
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		AnalysisState<H, V> result = expression.semantics(entryState, callGraph);
+		// TODO should we directly return result here to have also the computed expression
+		return new AnalysisState<>(result.getState(), new Skip()); 
 	}
 }

@@ -2,7 +2,13 @@ package it.unive.lisa.cfg.statement;
 
 import java.util.Objects;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.symbolic.Identifier;
+import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * A statement assigning the result of an expression to an assignable
@@ -76,7 +82,7 @@ public class Assignment extends Expression {
 	public final Expression getExpression() {
 		return expression;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -109,5 +115,31 @@ public class Assignment extends Expression {
 	@Override
 	public final String toString() {
 		return target + " = " + expression;
+	}
+
+	/**
+	 * Semantics of an assignment ({@code left = right}) is evaluated as follows:
+	 * <ol>
+	 * <li>the semantic of the {@code right} is evaluated using the given
+	 * {@code entryState}, returning a new analysis state
+	 * {@code as_r = <state_r, expr_r>}</li>
+	 * <li>the semantic of the {@code left} is evaluated using {@code as_r},
+	 * returning a new analysis state {@code as_l = <state_l, expr_l>}</li>
+	 * <li>the final post-state is evaluated through
+	 * {@link AnalysisState#assign(Identifier, SymbolicExpression)}, using
+	 * {@code expr_l} as {@code id} and {@code expr_r} as {@code value}</li>
+	 * </ol>
+	 * This means that all side effects from {@code right} are evaluated before the
+	 * ones from {@code left}.<br>
+	 * <br>
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		AnalysisState<H, V> right = expression.semantics(entryState, callGraph);
+		AnalysisState<H, V> left = target.semantics(right, callGraph);
+
+		return left.assign((Identifier) left.getLastComputedExpression(), right.getLastComputedExpression());
 	}
 }

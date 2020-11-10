@@ -1,6 +1,11 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.symbolic.Skip;
 
 /**
  * A statement that does nothing. Can be used for instrumenting branching
@@ -56,5 +61,11 @@ public class NoOp extends Statement {
 	@Override
 	public final String toString() {
 		return "no-op";
+	}
+	
+	@Override
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		return new AnalysisState<>(entryState.getState(), new Skip()); 
 	}
 }

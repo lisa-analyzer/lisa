@@ -2,9 +2,14 @@ package it.unive.lisa.cfg.statement;
 
 import java.util.Objects;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -101,5 +106,12 @@ public class Variable extends Expression {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	@Override
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		// TODO we should have a if (isreferencetype) then new heapidentifier else new valueidentifier
+		return new AnalysisState<>(entryState.getState(), new ValueIdentifier(getName()));
 	}
 }

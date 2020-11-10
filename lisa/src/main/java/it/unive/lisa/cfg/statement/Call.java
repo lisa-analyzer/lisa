@@ -3,8 +3,13 @@ package it.unive.lisa.cfg.statement;
 import java.util.Arrays;
 import java.util.Objects;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -77,7 +82,7 @@ public abstract class Call extends Expression {
 	private static boolean areEquals(Expression[] params, Expression[] otherParams) {
 		if (params == otherParams)
 			return true;
-		
+
 		if (params == null || otherParams == null)
 			return false;
 
@@ -95,4 +100,43 @@ public abstract class Call extends Expression {
 	private static boolean isEqualTo(Expression a, Expression b) {
 		return (a == b) || (a != null && a.isEqualTo(b));
 	}
+
+	/**
+	 * Semantics of a call statement is evaluated by computing the semantics of its
+	 * parameters, from left to right, using the analysis state from each
+	 * parameter's computation as entry state for the next one. Then, the semantics
+	 * of the call itself is evaluated. <br>
+	 * <br>
+	 * {@inheritDoc}
+	 */
+	@Override
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		SymbolicExpression[] computed = new SymbolicExpression[parameters.length];
+
+		AnalysisState<H, V> current = entryState;
+		for (int i = 0; i < computed.length; i++) {
+			current = parameters[i].semantics(current, callGraph);
+			computed[i] = current.getLastComputedExpression();
+		}
+
+		return callSemantics(current, callGraph, computed);
+	}
+
+	/**
+	 * Computes the semantics of the call, after the semantics of all parameters
+	 * have been computed.
+	 * 
+	 * @param <H>           the type of the heap analysis
+	 * @param <V>           the type of the value analysis
+	 * @param computedState the entry state that has been computed by chaining the
+	 *                      parameters' semantics evaluation
+	 * @param callGraph     the call graph of the program to analyze
+	 * @param params        the symbolic expressions representing the computed
+	 *                      values of the parameters of this call
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *         execution of this call
+	 */
+	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params);
 }

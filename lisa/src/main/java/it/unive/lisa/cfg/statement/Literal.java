@@ -2,9 +2,14 @@ package it.unive.lisa.cfg.statement;
 
 import java.util.Objects;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.value.Constant;
 
 /**
  * A literal, representing a constant value.
@@ -116,5 +121,11 @@ public class Literal extends Expression {
 	@Override
 	public String toString() {
 		return value.toString();
+	}
+	
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		return new AnalysisState<>(entryState.getState(), new Constant(getValue())); 
 	}
 }

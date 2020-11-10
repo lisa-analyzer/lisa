@@ -4,6 +4,10 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 
 /**
@@ -167,4 +171,20 @@ public abstract class Statement implements Comparable<Statement> {
 
 	@Override
 	public abstract String toString();
+
+	/**
+	 * Computes the semantics of the statement, expressing how semantic information
+	 * is transformed by the execution of this statement.
+	 * 
+	 * @param <H>        the type of the heap analysis
+	 * @param <V>        the type of the value analysis
+	 * @param entryState the entry state that represents the abstract values of each
+	 *                   program variable and memory location when the execution
+	 *                   reaches this statement
+	 * @param callGraph  the call graph of the program to analyze
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *         execution of this statement
+	 */
+	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph);
 }

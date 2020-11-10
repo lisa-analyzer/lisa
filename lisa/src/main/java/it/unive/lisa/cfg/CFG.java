@@ -4,21 +4,36 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;
 import it.unive.lisa.cfg.edge.TrueEdge;
+import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.workset.FIFOWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -27,6 +42,15 @@ import it.unive.lisa.util.collections.ExternalSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class CFG {
+
+	private static final Logger log = LogManager.getLogger(CFG.class);
+
+	/**
+	 * The default number of fixpoint iteration on a given statement after which
+	 * calls ti {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}.
+	 */
+	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
 
 	/**
 	 * The adjacency matrix of this graph, mapping statements to the collection of
@@ -387,5 +411,532 @@ public class CFG {
 	 */
 	public void simplify() {
 		adjacencyMatrix.simplify();
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements returned by {@link #getEntrypoints()},
+	 * using {@code entryState} as entry state for all of them. {@code cg} will be
+	 * invoked to get the approximation of all invoked cfgs, while a fresh instance
+	 * of {@link FIFOWorkingSet} is used as working set for the statements to
+	 * process.
+	 * 
+	 * @param <H>        the type of {@link HeapDomain} contained into the computed
+	 *                   abstract state
+	 * @param <V>        the type of {@link ValueDomain} contained into the computed
+	 *                   abstract state
+	 * @param entryState the entry states to apply to each {@link Statement}
+	 *                   returned by {@link #getEntrypoints()}
+	 * @param cg         the callgraph that can be queried when a call towards an
+	 *                   other cfg is encountered
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			AnalysisState<H, V> entryState, CallGraph cg) {
+		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements returned by {@link #getEntrypoints()}, using {@code entryState} as
+	 * entry state for all of them. {@code cg} will be invoked to get the
+	 * approximation of all invoked cfgs, while a fresh instance of
+	 * {@link FIFOWorkingSet} is used as working set for the statements to process.
+	 * 
+	 * @param <H>        the type of {@link HeapDomain} contained into the computed
+	 *                   abstract state
+	 * @param <V>        the type of {@link ValueDomain} contained into the computed
+	 *                   abstract state
+	 * @param entryState the entry states to apply to each {@link Statement}
+	 *                   returned by {@link #getEntrypoints()}
+	 * @param cg         the callgraph that can be queried when a call towards an
+	 *                   other cfg is encountered
+	 * @param widenAfter the number of times after which the
+	 *                   {@link Lattice#lub(Lattice)} invocation gets replaced by
+	 *                   the {@link Lattice#widening(Lattice)} call. Use {@code 0}
+	 *                   to <b>always</b> use {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			AnalysisState<H, V> entryState, CallGraph cg, int widenAfter) {
+		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), widenAfter);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements returned by {@link #getEntrypoints()},
+	 * using {@code entryState} as entry state for all of them. {@code cg} will be
+	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
+	 * used as working set for the statements to process.
+	 * 
+	 * @param <H>        the type of {@link HeapDomain} contained into the computed
+	 *                   abstract state
+	 * @param <V>        the type of {@link ValueDomain} contained into the computed
+	 *                   abstract state
+	 * @param entryState the entry states to apply to each {@link Statement}
+	 *                   returned by {@link #getEntrypoints()}
+	 * @param cg         the callgraph that can be queried when a call towards an
+	 *                   other cfg is encountered
+	 * @param ws         the {@link WorkingSet} instance to use for this computation
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws) {
+		return fixpoint(entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements returned by {@link #getEntrypoints()}, using {@code entryState} as
+	 * entry state for all of them. {@code cg} will be invoked to get the
+	 * approximation of all invoked cfgs, while {@code ws} is used as working set
+	 * for the statements to process.
+	 * 
+	 * @param <H>        the type of {@link HeapDomain} contained into the computed
+	 *                   abstract state
+	 * @param <V>        the type of {@link ValueDomain} contained into the computed
+	 *                   abstract state
+	 * @param entryState the entry states to apply to each {@link Statement}
+	 *                   returned by {@link #getEntrypoints()}
+	 * @param cg         the callgraph that can be queried when a call towards an
+	 *                   other cfg is encountered
+	 * @param ws         the {@link WorkingSet} instance to use for this computation
+	 * @param widenAfter the number of times after which the
+	 *                   {@link Lattice#lub(Lattice)} invocation gets replaced by
+	 *                   the {@link Lattice#widening(Lattice)} call. Use {@code 0}
+	 *                   to <b>always</b> use {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter) {
+		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
+		entrypoints.forEach(e -> start.put(e, entryState));
+		return fixpoint(start, cg, ws, widenAfter);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements in {@code entrypoints}, using
+	 * {@code entryState} as entry state for all of them. {@code cg} will be invoked
+	 * to get the approximation of all invoked cfgs, while a fresh instance of
+	 * {@link FIFOWorkingSet} is used as working set for the statements to process.
+	 * 
+	 * @param <H>         the type of {@link HeapDomain} contained into the computed
+	 *                    abstract state
+	 * @param <V>         the type of {@link ValueDomain} contained into the
+	 *                    computed abstract state
+	 * @param entrypoints the collection of {@link Statement}s that to use as a
+	 *                    starting point of the computation (that must be nodes of
+	 *                    this cfg)
+	 * @param entryState  the entry states to apply to each {@link Statement} in
+	 *                    {@code entrypoints}
+	 * @param cg          the callgraph that can be queried when a call towards an
+	 *                    other cfg is encountered
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg) {
+		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements in {@code entrypoints}, using {@code entryState} as entry state
+	 * for all of them. {@code cg} will be invoked to get the approximation of all
+	 * invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is used as
+	 * working set for the statements to process.
+	 * 
+	 * @param <H>         the type of {@link HeapDomain} contained into the computed
+	 *                    abstract state
+	 * @param <V>         the type of {@link ValueDomain} contained into the
+	 *                    computed abstract state
+	 * @param entrypoints the collection of {@link Statement}s that to use as a
+	 *                    starting point of the computation (that must be nodes of
+	 *                    this cfg)
+	 * @param entryState  the entry states to apply to each {@link Statement} in
+	 *                    {@code entrypoints}
+	 * @param cg          the callgraph that can be queried when a call towards an
+	 *                    other cfg is encountered
+	 * @param widenAfter  the number of times after which the
+	 *                    {@link Lattice#lub(Lattice)} invocation gets replaced by
+	 *                    the {@link Lattice#widening(Lattice)} call. Use {@code 0}
+	 *                    to <b>always</b> use {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, int widenAfter) {
+		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements in {@code entrypoints}, using
+	 * {@code entryState} as entry state for all of them. {@code cg} will be invoked
+	 * to get the approximation of all invoked cfgs, while {@code ws} is used as
+	 * working set for the statements to process.
+	 * 
+	 * @param <H>         the type of {@link HeapDomain} contained into the computed
+	 *                    abstract state
+	 * @param <V>         the type of {@link ValueDomain} contained into the
+	 *                    computed abstract state
+	 * @param entrypoints the collection of {@link Statement}s that to use as a
+	 *                    starting point of the computation (that must be nodes of
+	 *                    this cfg)
+	 * @param entryState  the entry states to apply to each {@link Statement} in
+	 *                    {@code entrypoints}
+	 * @param cg          the callgraph that can be queried when a call towards an
+	 *                    other cfg is encountered
+	 * @param ws          the {@link WorkingSet} instance to use for this
+	 *                    computation
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws) {
+		return fixpoint(entrypoints, entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements in {@code entrypoints}, using {@code entryState} as entry state
+	 * for all of them. {@code cg} will be invoked to get the approximation of all
+	 * invoked cfgs, while {@code ws} is used as working set for the statements to
+	 * process.
+	 * 
+	 * @param <H>         the type of {@link HeapDomain} contained into the computed
+	 *                    abstract state
+	 * @param <V>         the type of {@link ValueDomain} contained into the
+	 *                    computed abstract state
+	 * @param entrypoints the collection of {@link Statement}s that to use as a
+	 *                    starting point of the computation (that must be nodes of
+	 *                    this cfg)
+	 * @param entryState  the entry states to apply to each {@link Statement} in
+	 *                    {@code entrypoints}
+	 * @param cg          the callgraph that can be queried when a call towards an
+	 *                    other cfg is encountered
+	 * @param ws          the {@link WorkingSet} instance to use for this
+	 *                    computation
+	 * @param widenAfter  the number of times after which the
+	 *                    {@link Lattice#lub(Lattice)} invocation gets replaced by
+	 *                    the {@link Lattice#widening(Lattice)} call. Use {@code 0}
+	 *                    to <b>always</b> use {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
+			int widenAfter) {
+		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
+		entrypoints.forEach(e -> start.put(e, entryState));
+		return fixpoint(start, cg, ws, widenAfter);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements in {@code startingPoints}, using as its
+	 * entry state their respective value. {@code cg} will be invoked to get the
+	 * approximation of all invoked cfgs, while a fresh instance of
+	 * {@link FIFOWorkingSet} is used as working set for the statements to process.
+	 * 
+	 * @param <H>            the type of {@link HeapDomain} contained into the
+	 *                       computed abstract state
+	 * @param <V>            the type of {@link ValueDomain} contained into the
+	 *                       computed abstract state
+	 * @param startingPoints a map between {@link Statement}s that to use as a
+	 *                       starting point of the computation (that must be nodes
+	 *                       of this cfg) and the entry states to apply on it
+	 * @param cg             the callgraph that can be queried when a call towards
+	 *                       an other cfg is encountered
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg) {
+		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements in {@code startingPoints}, using as its entry state their
+	 * respective value. {@code cg} will be invoked to get the approximation of all
+	 * invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is used as
+	 * working set for the statements to process.
+	 * 
+	 * @param <H>            the type of {@link HeapDomain} contained into the
+	 *                       computed abstract state
+	 * @param <V>            the type of {@link ValueDomain} contained into the
+	 *                       computed abstract state
+	 * @param startingPoints a map between {@link Expression}s that to use as a
+	 *                       starting point of the computation (that must be nodes
+	 *                       of this cfg) and the entry states to apply on it
+	 * @param cg             the callgraph that can be queried when a call towards
+	 *                       an other cfg is encountered
+	 * @param widenAfter     the number of times after which the
+	 *                       {@link Lattice#lub(Lattice)} invocation gets replaced
+	 *                       by the {@link Lattice#widening(Lattice)} call. Use
+	 *                       {@code 0} to <b>always</b> use
+	 *                       {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Expression} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of an statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, int widenAfter) {
+		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@link #DEFAULT_WIDENING_THRESHOLD}
+	 * {@code * predecessors_number} times, where {@code predecessors_number} is the
+	 * number of expressions that are predecessors of the one being processed. After
+	 * overcoming that threshold, {@link Lattice#widening(Lattice)} is used. The
+	 * computation starts at the statements in {@code startingPoints}, using as its
+	 * entry state their respective value. {@code cg} will be invoked to get the
+	 * approximation of all invoked cfgs, while {@code ws} is used as working set
+	 * for the statements to process.
+	 * 
+	 * @param <H>            the type of {@link HeapDomain} contained into the
+	 *                       computed abstract state
+	 * @param <V>            the type of {@link ValueDomain} contained into the
+	 *                       computed abstract state
+	 * @param startingPoints a map between {@link Expression}s that to use as a
+	 *                       starting point of the computation (that must be nodes
+	 *                       of this cfg) and the entry states to apply on it
+	 * @param cg             the callgraph that can be queried when a call towards
+	 *                       an other cfg is encountered
+	 * @param ws             the {@link WorkingSet} instance to use for this
+	 *                       computation
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Expression} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of an statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws) {
+		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD);
+	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements in {@code startingPoints}, using as its entry state their
+	 * respective value. {@code cg} will be invoked to get the approximation of all
+	 * invoked cfgs, while {@code ws} is used as working set for the statements to
+	 * process.
+	 * 
+	 * @param <H>            the type of {@link HeapDomain} contained into the
+	 *                       computed abstract state
+	 * @param <V>            the type of {@link ValueDomain} contained into the
+	 *                       computed abstract state
+	 * @param startingPoints a map between {@link Statement}s that to use as a
+	 *                       starting point of the computation (that must be nodes
+	 *                       of this cfg) and the entry states to apply on it
+	 * @param cg             the callgraph that can be queried when a call towards
+	 *                       an other cfg is encountered
+	 * @param ws             the {@link WorkingSet} instance to use for this
+	 *                       computation
+	 * @param widenAfter     the number of times after which the
+	 *                       {@link Lattice#lub(Lattice)} invocation gets replaced
+	 *                       by the {@link Lattice#widening(Lattice)} call. Use
+	 *                       {@code 0} to <b>always</b> use
+	 *                       {@link Lattice#lub(Lattice)}.
+	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to this
+	 *         control flow graph, and that stores for each {@link Statement} the
+	 *         result of the fixpoint computation
+	 * @throws FixpointException if an error occurs during the semantic computation
+	 *                           of a statement, or if some unknown/invalid
+	 *                           statement ends up in the working set
+	 */
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
+			int widenAfter) {
+		int size = adjacencyMatrix.getNodes().size();
+		Map<Statement, AtomicInteger> lubs = new HashMap<>(size);
+		Map<Statement, AnalysisState<H, V>> result = new HashMap<>(size);
+		startingPoints.keySet().forEach(ws::push);
+
+		AnalysisState<H, V> previousApprox = null, newApprox;
+		while (!ws.isEmpty()) {
+			Statement current = ws.pop();
+
+			if (current == null)
+				throw new FixpointException("Unknown instruction encountered during fixpoint execution");
+			if (!adjacencyMatrix.getNodes().contains(current))
+				throw new FixpointException(current
+						+ " is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
+
+			AnalysisState<H, V> entrystate = startingPoints.get(current);
+			List<AnalysisState<H, V>> states = predecessorsOf(current).stream()
+					.map(pred -> adjacencyMatrix.getEdgeConnecting(pred, current))
+					.map(edge -> edge.traverse(result.get(edge.getSource()))).collect(Collectors.toList());
+			for (AnalysisState<H, V> s : states)
+				if (entrystate == null)
+					entrystate = s;
+				else
+					entrystate = entrystate.lub(s);
+
+			if (entrystate == null)
+				throw new FixpointException(current + " does not have an entry state");
+
+			previousApprox = result.get(current);
+
+			try {
+				newApprox = current.semantics(entrystate, cg);
+			} catch (Exception e) {
+				log.error("Exception while evaluating semantics of '" + current + "' in " + descriptor + ": " + e);
+				throw new FixpointException("Exception during fixpoint computation", e);
+			}
+
+			if (previousApprox != null)
+				if (widenAfter == 0)
+					newApprox = newApprox.lub(previousApprox);
+				else {
+					// we multiply by the number of predecessors since if we have more than one
+					// the threshold will be reached faster
+					int lub = lubs
+							.computeIfAbsent(current, e -> new AtomicInteger(widenAfter * predecessorsOf(e).size()))
+							.getAndDecrement();
+					if (lub > 0)
+						newApprox = newApprox.lub(previousApprox);
+					else
+						newApprox = newApprox.widening(previousApprox);
+				}
+
+			if (!newApprox.equals(previousApprox)) {
+				// TODO how do we save intermediate results for each expression?
+				result.put(current, newApprox);
+				for (Statement instr : followersOf(current))
+					ws.push(instr);
+			}
+		}
+
+		return new CFGWithAnalysisResults<>(this, result);
 	}
 }

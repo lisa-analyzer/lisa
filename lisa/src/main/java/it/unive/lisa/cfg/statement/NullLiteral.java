@@ -1,7 +1,12 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.NullType;
+import it.unive.lisa.symbolic.value.NullConstant;
 
 /**
  * A literal representing the {@code null} constant.
@@ -42,5 +47,11 @@ public class NullLiteral extends Literal {
 	@Override
 	public String toString() {
 		return "null";
+	}
+	
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph) {
+		return new AnalysisState<>(entryState.getState(), NullConstant.INSTANCE); 
 	}
 }
