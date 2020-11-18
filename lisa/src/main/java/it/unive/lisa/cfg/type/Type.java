@@ -1,74 +1,155 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * Type interface. Any instance of a concrete type, instance of Type, 
- * should be unique and implemented following the singleton design pattern
- * (see for instance {@link Untyped} class).
+ * Type interface. Any instance of a concrete type, instance of Type, should be
+ * unique and implemented following the singleton design pattern (see for
+ * instance {@link Untyped} class).
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public interface Type {
-	
+
 	/**
-	 * Checks if this is a numeric type.
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link NumericType}.
 	 * 
-	 * @return true if this is a numeric type; false otherwise.
+	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isNumeric() {
+	public default boolean isNumericType() {
 		return this instanceof NumericType;
 	}
 
 	/**
-	 * Checks if this is a boolean type
+	 * Returns this type casted as a {@link NumericType}, only if
+	 * {@link #isNumericType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
-	 * @return true if this is a Boolean type; false otherwise.
+	 * @return this type casted as {@link NumericType}, or {@code null}
 	 */
-	public default boolean isBoolean() {
+	public default NumericType asNumericType() {
+		return isNumericType() ? (NumericType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link BooleanType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isBooleanType() {
 		return this instanceof BooleanType;
 	}
-	
+
 	/**
-	 * Checks if this is a string type
+	 * Returns this type casted as a {@link BooleanType}, only if
+	 * {@link #isBooleanType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
-	 * @return true if this is a string type; false otherwise.
+	 * @return this type casted as {@link BooleanType}, or {@code null}
 	 */
-	public default boolean isString() {
+	public default BooleanType asBooleanType() {
+		return isBooleanType() ? (BooleanType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link StringType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isStringType() {
 		return this instanceof StringType;
 	}
-	
+
 	/**
-	 * Returns true if this is untyped.
+	 * Returns this type casted as a {@link StringType}, only if
+	 * {@link #isStringType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
-	 * @return true if this is a untyped; false otherwise.
+	 * @return this type casted as {@link StringType}, or {@code null}
+	 */
+	public default StringType asStringType() {
+		return isStringType() ? (StringType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link Untyped}.
+	 * 
+	 * @return {@code true} if that condition holds
 	 */
 	public default boolean isUntyped() {
 		return this instanceof Untyped;
 	}
-	
+
 	/**
-	 * Returns this as numeric type.
+	 * Returns this type casted as an {@link Untyped}, only if {@link #isUntyped()}
+	 * yields {@code true}. Otherwise, this method returns {@code null}.
 	 * 
-	 * @return this as numeric type if it is numeric; null otherwise.
+	 * @return this type casted as {@link Untyped}, or {@code null}
 	 */
-	public default NumericType asNumeric() {
-		return isNumeric() ? (NumericType) this : null;
+	public default Untyped asUntyped() {
+		return isUntyped() ? (Untyped) this : null;
 	}
-	
+
 	/**
-	 * Returns this as Boolean type.
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link VoidType}.
 	 * 
-	 * @return this as Boolean type if it is Boolean; null otherwise.
+	 * @return {@code true} if that condition holds
 	 */
-	public default BooleanType asBoolean() {
-		return isBoolean() ? (BooleanType) this : null;
+	public default boolean isVoidType() {
+		return this instanceof VoidType;
 	}
-	
+
 	/**
-	 * Returns this as string type.
+	 * Returns this type casted as a {@link VoidType}, only if {@link #isVoidType()}
+	 * yields {@code true}. Otherwise, this method returns {@code null}.
 	 * 
-	 * @return this as string type if it is string; null otherwise.
+	 * @return this type casted as {@link VoidType}, or {@code null}
 	 */
-	public default StringType asString() {
-		return isString() ? (StringType) this : null;
+	public default VoidType asVoidType() {
+		return isVoidType() ? (VoidType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link PointerType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isPointerType() {
+		return this instanceof PointerType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link PointerType}, only if
+	 * {@link #isPointerType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
+	 * 
+	 * @return this type casted as {@link PointerType}, or {@code null}
+	 */
+	public default PointerType asPointerType() {
+		return isPointerType() ? (PointerType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link NullType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isNullType() {
+		return this instanceof NullType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link NullType}, only if {@link #isNullType()}
+	 * yields {@code true}. Otherwise, this method returns {@code null}.
+	 * 
+	 * @return this type casted as {@link NullType}, or {@code null}
+	 */
+	public default NullType asNullType() {
+		return isNullType() ? (NullType) this : null;
 	}
 }

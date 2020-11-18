@@ -98,7 +98,6 @@ public abstract class NativeCall extends Call {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((constructName == null) ? 0 : constructName.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -108,13 +107,13 @@ public abstract class NativeCall extends Call {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		NativeCall other = (NativeCall) st;
 		if (constructName == null) {
 			if (other.constructName != null)
 				return false;
 		} else if (!constructName.equals(other.constructName))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return super.isEqualTo(other);
 	}

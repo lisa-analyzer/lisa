@@ -8,8 +8,9 @@ import it.unive.lisa.cfg.statement.Statement;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
- * as edges. It also maps each expression to the result of a fixpoint
- * computation, in the form of an {@link AnalysisState} instance.
+ * as edges. It also maps each statement (and its inner expressions) to the
+ * result of a fixpoint computation, in the form of an {@link AnalysisState}
+ * instance.
  * 
  * @param <H> the type of {@link HeapDomain} contained into the computed
  *            abstract state
@@ -23,7 +24,7 @@ public class CFGWithAnalysisResults<H extends HeapDomain<H>, V extends ValueDoma
 	/**
 	 * The map storing the analysis results
 	 */
-	private final Map<Statement, AnalysisState<H, V>> results; // TODO should this be an abstract state?
+	private final Map<Statement, AnalysisState<H, V>> results;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes and

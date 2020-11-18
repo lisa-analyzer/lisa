@@ -2,6 +2,7 @@ package it.unive.lisa.cfg.edge;
 
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
 
@@ -30,8 +31,7 @@ public class TrueEdge extends Edge {
 
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
-			AnalysisState<H, V> sourceState) {
-		// TODO this will not contain x > 5, but just an abstract value of true/false
+			AnalysisState<H, V> sourceState) throws SemanticException {
 		return sourceState.assume(sourceState.getLastComputedExpression()); 
 	}
 }

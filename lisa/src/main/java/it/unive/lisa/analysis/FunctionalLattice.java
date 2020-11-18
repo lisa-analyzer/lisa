@@ -1,10 +1,12 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.Map.Entry;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -15,7 +17,7 @@ import java.util.function.BiFunction;
  * @param <V> the concrete {@link Lattice} type of the values of this function
  */
 public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K, V extends Lattice<V>>
-		extends BaseLattice<F> {
+		extends BaseLattice<F> implements Iterable<Map.Entry<K, V>> {
 
 	/**
 	 * The function implemented by this lattice
@@ -71,28 +73,36 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
-	public final F lubAux(F other) {
+	public final F lubAux(F other) throws SemanticException {
 		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
-	public final F wideningAux(F succ) {
+	public final F wideningAux(F succ) throws SemanticException {
 		return functionalLift(succ, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
-	private final F functionalLift(F other, BiFunction<V, V, V> lift) {
+	private interface FunctionalLift<V extends Lattice<V>> {
+		V lift(V first, V second) throws SemanticException;
+	}
+
+	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
 
 		Set<K> keys = new HashSet<>(function.keySet());
 		keys.addAll(other.function.keySet());
 		for (K key : keys)
-			result.function.put(key, lift.apply(getState(key), other.getState(key)));
+			try {
+				result.function.put(key, lift.lift(getState(key), other.getState(key)));
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
+			}
 
 		return result;
 	}
 
 	@Override
-	public final boolean lessOrEqualAux(F other) {
+	public final boolean lessOrEqualAux(F other) throws SemanticException {
 		for (K key : function.keySet())
 			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
 				return false;
@@ -105,7 +115,9 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((function == null) ? 0 : function.hashCode());
-		result = prime * result + ((lattice == null) ? 0 : lattice.hashCode());
+		// we use the name of the lattice's class since we do not care about the single
+		// instance, but more about the type itself
+		result = prime * result + ((lattice == null) ? 0 : lattice.getClass().getName().hashCode());
 		return result;
 	}
 
@@ -126,7 +138,9 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		if (lattice == null) {
 			if (other.lattice != null)
 				return false;
-		} else if (!lattice.equals(other.lattice))
+		} else if (lattice.getClass() != other.lattice.getClass())
+			// we use the lattice's class since we do not care about the single
+			// instance, but more about the type itself
 			return false;
 		return true;
 	}
@@ -140,5 +154,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return "#TOP#";
 
 		return function.toString();
+	}
+
+	@Override
+	public Iterator<Entry<K, V>> iterator() {
+		if (function == null)
+			return Collections.emptyIterator();
+		return function.entrySet().iterator();
 	}
 }

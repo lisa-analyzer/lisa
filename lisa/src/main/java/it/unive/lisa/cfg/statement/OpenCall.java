@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
@@ -13,13 +14,15 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.Skip;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
  * A call to a CFG that is not under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall extends Call {
+public class OpenCall extends Call implements MetaVariableCreator {
 
 	/**
 	 * The name of the target of this call
@@ -86,7 +89,6 @@ public class OpenCall extends Call {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -96,13 +98,13 @@ public class OpenCall extends Call {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		OpenCall other = (OpenCall) st;
 		if (targetName == null) {
 			if (other.targetName != null)
 				return false;
 		} else if (!targetName.equals(other.targetName))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return super.isEqualTo(other);
 	}
@@ -113,11 +115,19 @@ public class OpenCall extends Call {
 	}
 	
 	@Override
+	public final Identifier getMetaVariable() {
+		return new ValueIdentifier("open_call_ret_value@" + offset);
+	}
+	
+	@Override
 	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params) {
-		// TODO we should distinguish between skip (void methods) and top (non-void methods)
-		// TODO is computedState.getState().top() correct? variables should not change, only heap locations
-		// but that might be too conservative to assume
-		return new AnalysisState<>(computedState.getState().top(), new Skip());
+		// TODO too coarse
+		AbstractState<H, V> poststate = computedState.getState().top();
+
+		if (getStaticType().isVoidType()) 
+			return new AnalysisState<>(poststate, new Skip());
+		else 
+			return new AnalysisState<>(poststate, getMetaVariable());
 	}
 }

@@ -5,10 +5,13 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
@@ -67,6 +70,11 @@ public class Variable extends Expression {
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		return this.offset = offset;
+	}
 
 	/**
 	 * Yields the name of this variable.
@@ -82,7 +90,6 @@ public class Variable extends Expression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -92,13 +99,13 @@ public class Variable extends Expression {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		Variable other = (Variable) st;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return true;
 	}
@@ -107,11 +114,16 @@ public class Variable extends Expression {
 	public String toString() {
 		return name;
 	}
-
+	
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		// TODO we should have a if (isreferencetype) then new heapidentifier else new valueidentifier
-		return new AnalysisState<>(entryState.getState(), new ValueIdentifier(getName()));
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		if (getStaticType().isPointerType())
+			// the smallStepSemantics will take care of converting that reference to a variable identifier
+			// setting also the identifier as computed expression
+			return entryState.smallStepSemantics(new HeapReference(getName()));
+		else 
+			return entryState.smallStepSemantics(new ValueIdentifier(getName()));
 	}
 }

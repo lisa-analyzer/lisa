@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -21,8 +22,10 @@ import org.apache.logging.log4j.Logger;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.CallGraph;
+import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
@@ -30,6 +33,7 @@ import it.unive.lisa.cfg.edge.SequentialEdge;
 import it.unive.lisa.cfg.edge.TrueEdge;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NoOp;
+import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
@@ -109,6 +113,18 @@ public class CFG {
 	 */
 	public final Collection<Statement> getEntrypoints() {
 		return entrypoints;
+	}
+
+	/**
+	 * Yields the statements of this control flow graph that are normal exitpoints,
+	 * that is, that normally ends the execution of this cfg, returning the control
+	 * to the caller.
+	 * 
+	 * @return the exitpoints of this cfg.
+	 */
+	public final Collection<Return> getNormalExitpoints() {
+		return adjacencyMatrix.getNodes().stream().filter(st -> st instanceof Return).map(st -> (Return) st)
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -879,64 +895,154 @@ public class CFG {
 			int widenAfter) {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<Statement, AtomicInteger> lubs = new HashMap<>(size);
-		Map<Statement, AnalysisState<H, V>> result = new HashMap<>(size);
+		Map<Statement, Pair<AnalysisState<H, V>, ExpressionStates<H, V>>> result = new HashMap<>(size);
 		startingPoints.keySet().forEach(ws::push);
 
-		AnalysisState<H, V> previousApprox = null, newApprox;
-		while (!ws.isEmpty()) {
-			Statement current = ws.pop();
+		AnalysisState<H, V> oldApprox = null, newApprox;
+		ExpressionStates<H, V> oldExprs = null, newExprs;
+		try {
+			while (!ws.isEmpty()) {
+				Statement current = ws.pop();
 
-			if (current == null)
-				throw new FixpointException("Unknown instruction encountered during fixpoint execution");
-			if (!adjacencyMatrix.getNodes().contains(current))
-				throw new FixpointException(current
-						+ " is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
+				if (current == null)
+					throw new FixpointException("Unknown instruction encountered during fixpoint execution");
+				if (!adjacencyMatrix.getNodes().contains(current))
+					throw new FixpointException(current
+							+ " is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
 
-			AnalysisState<H, V> entrystate = startingPoints.get(current);
-			List<AnalysisState<H, V>> states = predecessorsOf(current).stream()
-					.map(pred -> adjacencyMatrix.getEdgeConnecting(pred, current))
-					.map(edge -> edge.traverse(result.get(edge.getSource()))).collect(Collectors.toList());
-			for (AnalysisState<H, V> s : states)
-				if (entrystate == null)
-					entrystate = s;
-				else
-					entrystate = entrystate.lub(s);
-
-			if (entrystate == null)
-				throw new FixpointException(current + " does not have an entry state");
-
-			previousApprox = result.get(current);
-
-			try {
-				newApprox = current.semantics(entrystate, cg);
-			} catch (Exception e) {
-				log.error("Exception while evaluating semantics of '" + current + "' in " + descriptor + ": " + e);
-				throw new FixpointException("Exception during fixpoint computation", e);
-			}
-
-			if (previousApprox != null)
-				if (widenAfter == 0)
-					newApprox = newApprox.lub(previousApprox);
-				else {
-					// we multiply by the number of predecessors since if we have more than one
-					// the threshold will be reached faster
-					int lub = lubs
-							.computeIfAbsent(current, e -> new AtomicInteger(widenAfter * predecessorsOf(e).size()))
-							.getAndDecrement();
-					if (lub > 0)
-						newApprox = newApprox.lub(previousApprox);
-					else
-						newApprox = newApprox.widening(previousApprox);
+				AnalysisState<H, V> entrystate;
+				try {
+					entrystate = getEntryState(current, startingPoints, result);
+				} catch (SemanticException e) {
+					throw new FixpointException(
+							"Exception while computing the entry state for '" + current + "' in " + descriptor, e);
 				}
 
-			if (!newApprox.equals(previousApprox)) {
-				// TODO how do we save intermediate results for each expression?
-				result.put(current, newApprox);
-				for (Statement instr : followersOf(current))
-					ws.push(instr);
+				if (entrystate == null)
+					throw new FixpointException(current + " does not have an entry state");
+				oldApprox = result.get(current).getLeft();
+				oldExprs = result.get(current).getRight();
+
+				try {
+					newApprox = current.semantics(entrystate, cg, newExprs = new ExpressionStates<>(entrystate));
+				} catch (SemanticException e) {
+					log.error("Evaluation of the semantics of '" + current + "' in " + descriptor
+							+ " led to an exception: " + e);
+					throw new FixpointException("Semantic exception during fixpoint computation", e);
+				}
+
+				if (oldApprox != null && oldExprs != null)
+					try {
+						if (widenAfter == 0) {
+							newApprox = newApprox.lub(oldApprox);
+							newExprs = newExprs.lub(oldExprs);
+						} else {
+							// we multiply by the number of predecessors since if we have more than one
+							// the threshold will be reached faster
+							int lub = lubs
+									.computeIfAbsent(current,
+											e -> new AtomicInteger(widenAfter * predecessorsOf(e).size()))
+									.getAndDecrement();
+							if (lub > 0) {
+								newApprox = newApprox.lub(oldApprox);
+								newExprs = newExprs.lub(oldExprs);
+							} else {
+								newApprox = newApprox.widening(oldApprox);
+								newExprs = newExprs.widening(oldExprs);
+							}
+						}
+					} catch (SemanticException e) {
+						throw new FixpointException(
+								"Exception while updating the analysis results of '" + current + "' in " + descriptor,
+								e);
+					}
+
+				if (!newApprox.lessOrEqual(oldApprox) || !newExprs.lessOrEqual(oldExprs)) {
+					result.put(current, Pair.of(newApprox, newExprs));
+					for (Statement instr : followersOf(current))
+						ws.push(instr);
+				}
 			}
+
+			HashMap<Statement, AnalysisState<H, V>> finalResults = new HashMap<>(result.size());
+			for (Entry<Statement, Pair<AnalysisState<H, V>, ExpressionStates<H, V>>> e : result.entrySet()) {
+				finalResults.put(e.getKey(), e.getValue().getLeft());
+				for (Entry<Expression, AnalysisState<H, V>> ee : e.getValue().getRight())
+					finalResults.put(ee.getKey(), ee.getValue());
+			}
+
+			return new CFGWithAnalysisResults<>(this, finalResults);
+		} catch (Exception e) {
+			log.fatal("Unexpected exception during fixpoint computation of " + descriptor + ": " + e);
+			throw new FixpointException("Unexpected exception during fixpoint computation", e);
+		}
+	}
+
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getEntryState(Statement current,
+			Map<Statement, AnalysisState<H, V>> startingPoints,
+			Map<Statement, Pair<AnalysisState<H, V>, ExpressionStates<H, V>>> result) throws SemanticException {
+		AnalysisState<H, V> entrystate = startingPoints.get(current);
+		Collection<Statement> preds = predecessorsOf(current);
+		List<AnalysisState<H, V>> states = new ArrayList<>(preds.size());
+
+		for (Statement pred : preds) {
+			Edge edge = adjacencyMatrix.getEdgeConnecting(pred, current);
+			states.add(edge.traverse(result.get(edge.getSource()).getLeft()));
 		}
 
-		return new CFGWithAnalysisResults<>(this, result);
+		for (AnalysisState<H, V> s : states)
+			if (entrystate == null)
+				entrystate = s;
+			else
+				entrystate = entrystate.lub(s);
+
+		return entrystate;
+	}
+
+	/**
+	 * A functional lattice that stores {@link AnalysisState}s computed on
+	 * intermediate expressions inside root statements. Storing states in such an
+	 * object enables easy fixpoint computation thanks to the function lub and
+	 * widening operations
+	 * 
+	 * @param <H> the type of heap analysis embedded in the analysis state
+	 * @param <V> the type of value analysis embedded in the analysis state
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class ExpressionStates<H extends HeapDomain<H>, V extends ValueDomain<V>>
+			extends FunctionalLattice<ExpressionStates<H, V>, Expression, AnalysisState<H, V>> {
+
+		private ExpressionStates(AnalysisState<H, V> lattice) {
+			super(lattice);
+		}
+
+		/**
+		 * Stores the given analysis state for the given expression. This is a "forced"
+		 * update, without performing any lattice operation if a mapping for the given
+		 * expression already exists.
+		 * 
+		 * @param expression the expression whose state needs to be set
+		 * @param state      the state to set
+		 * @return the previous state mapped to {@code expression}, or {@code null}
+		 */
+		public AnalysisState<H, V> put(Expression expression, AnalysisState<H, V> state) {
+			return function.put(expression, state);
+		}
+
+		@Override
+		public ExpressionStates<H, V> top() {
+			throw new IllegalStateException("top() should never be called on an instance of " + getClass().getName());
+		}
+
+		@Override
+		public ExpressionStates<H, V> bottom() {
+			return new ExpressionStates<>(lattice.bottom());
+		}
+
+		@Override
+		public boolean isBottom() {
+			return function == null || function.isEmpty();
+		}
 	}
 }

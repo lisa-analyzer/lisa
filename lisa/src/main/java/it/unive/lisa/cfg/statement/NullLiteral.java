@@ -3,8 +3,10 @@ package it.unive.lisa.cfg.statement;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.NullType;
 import it.unive.lisa.symbolic.value.NullConstant;
 
@@ -19,8 +21,8 @@ public class NullLiteral extends Literal {
 
 	/**
 	 * Builds the null literal. The location where this literal happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * The type of a null literal is {@link NullType}.
+	 * (i.e. no source file/line/column is available). The type of a null literal is
+	 * {@link NullType}.
 	 * 
 	 * @param cfg the cfg that this expression belongs to
 	 */
@@ -29,8 +31,8 @@ public class NullLiteral extends Literal {
 	}
 
 	/**
-	 * Builds the null literal, happening at the given location in the program.
-	 * The type of a null literal is {@link NullType}.
+	 * Builds the null literal, happening at the given location in the program. The
+	 * type of a null literal is {@link NullType}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param sourceFile the source file where this expression happens. If unknown,
@@ -48,10 +50,11 @@ public class NullLiteral extends Literal {
 	public String toString() {
 		return "null";
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		return new AnalysisState<>(entryState.getState(), NullConstant.INSTANCE); 
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		return new AnalysisState<>(entryState.getState(), NullConstant.INSTANCE);
 	}
 }

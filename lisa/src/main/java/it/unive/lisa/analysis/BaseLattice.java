@@ -14,7 +14,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final L lub(L other) {
+	public final L lub(L other) throws SemanticException {
 		if (other == null || other == bottom() || this == top() || this == other || equals(other))
 			return (L) this;
 
@@ -37,12 +37,13 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @param other the other lattice element
 	 * @return the least upper bound
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract L lubAux(L other);
+	protected abstract L lubAux(L other) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final L widening(L other) {
+	public final L widening(L other) throws SemanticException {
 		if (other == null || other == bottom() || this == top() || this == other || equals(other))
 			return (L) this;
 
@@ -65,11 +66,12 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @param other the other lattice element
 	 * @return the least upper bound
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract L wideningAux(L other);
+	protected abstract L wideningAux(L other) throws SemanticException;
 
 	@Override
-	public final boolean lessOrEqual(L other) {
+	public final boolean lessOrEqual(L other) throws SemanticException {
 		if (other == null)
 			return false;
 
@@ -95,6 +97,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @param other the other lattice element
 	 * @return {@code true} if and only if that condition holds
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract boolean lessOrEqualAux(L other);
+	protected abstract boolean lessOrEqualAux(L other) throws SemanticException;
 }

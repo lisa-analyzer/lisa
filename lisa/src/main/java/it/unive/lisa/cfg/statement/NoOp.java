@@ -3,8 +3,10 @@ package it.unive.lisa.cfg.statement;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.symbolic.Skip;
 
 /**
@@ -26,8 +28,7 @@ public class NoOp extends Statement {
 	}
 
 	/**
-	 * Builds the no-op, happening at the given
-	 * location in the program.
+	 * Builds the no-op, happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param sourceFile the source file where this statement happens. If unknown,
@@ -39,6 +40,11 @@ public class NoOp extends Statement {
 	 */
 	public NoOp(CFG cfg, String sourceFile, int line, int col) {
 		super(cfg, sourceFile, line, col);
+	}
+	
+	@Override
+	public int setOffset(int offset) {
+		return this.offset = offset;
 	}
 
 	@Override
@@ -62,10 +68,11 @@ public class NoOp extends Statement {
 	public final String toString() {
 		return "no-op";
 	}
-	
+
 	@Override
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		return new AnalysisState<>(entryState.getState(), new Skip()); 
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		return new AnalysisState<>(entryState.getState(), new Skip());
 	}
 }

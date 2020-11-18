@@ -7,8 +7,10 @@ import org.apache.commons.lang3.StringUtils;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 
 /**
  * A statement of the program to analyze.
@@ -41,6 +43,11 @@ public abstract class Statement implements Comparable<Statement> {
 	private final int col;
 
 	/**
+	 * The offset of the statement within the cfg
+	 */
+	protected int offset;
+
+	/**
 	 * Builds a statement happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
@@ -57,6 +64,7 @@ public abstract class Statement implements Comparable<Statement> {
 		this.sourceFile = sourceFile;
 		this.line = line;
 		this.col = col;
+		this.offset = -1;
 	}
 
 	/**
@@ -97,6 +105,25 @@ public abstract class Statement implements Comparable<Statement> {
 	public final int getCol() {
 		return col;
 	}
+
+	/**
+	 * Yields the offset of this statement relative to its containing cfg.
+	 * 
+	 * @return the offset
+	 */
+	public final int getOffset() {
+		return offset;
+	}
+
+	/**
+	 * Sets the offset of this statement to the given value, and then proceeds by
+	 * setting the one of its nested expressions to subsequent values. The last
+	 * offset used is returned.
+	 * 
+	 * @param offset the offset to set
+	 * @return the last offset used while setting the offsets of nested expressions
+	 */
+	public abstract int setOffset(int offset);
 
 	@Override
 	public int hashCode() {
@@ -176,15 +203,19 @@ public abstract class Statement implements Comparable<Statement> {
 	 * Computes the semantics of the statement, expressing how semantic information
 	 * is transformed by the execution of this statement.
 	 * 
-	 * @param <H>        the type of the heap analysis
-	 * @param <V>        the type of the value analysis
-	 * @param entryState the entry state that represents the abstract values of each
-	 *                   program variable and memory location when the execution
-	 *                   reaches this statement
-	 * @param callGraph  the call graph of the program to analyze
+	 * @param <H>         the type of the heap analysis
+	 * @param <V>         the type of the value analysis
+	 * @param entryState  the entry state that represents the abstract values of
+	 *                    each program variable and memory location when the
+	 *                    execution reaches this statement
+	 * @param callGraph   the call graph of the program to analyze
+	 * @param expressions the cache where analysis states of intermediate
+	 *                    expressions must be stored
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *         execution of this statement
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph);
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException;
 }

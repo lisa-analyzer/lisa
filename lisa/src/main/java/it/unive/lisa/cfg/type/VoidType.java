@@ -1,32 +1,32 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * The Null type, that is the type of {#link NullLiteral}.
+ * The void type.
  * 
  * It implements the singleton design pattern, that is the instances of this
  * type are unique. The unique instance of this type can be retrieved by
- * {@link NullType#INSTANCE}.
+ * {@link VoidType#INSTANCE}.
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NullType implements Type {
+public class VoidType implements Type {
 
 	/**
-	 * Unique instance of {@link NullType}.
+	 * Unique instance of {@link VoidType}.
 	 */
-	public static final NullType INSTANCE = new NullType();
+	public static final VoidType INSTANCE = new VoidType();
 
-	private NullType() {
+	private VoidType() {
 	}
 
 	@Override
 	public String toString() {
-		return "null";
+		return "void";
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof NullType;
+		return other instanceof VoidType;
 	}
 
 	@Override

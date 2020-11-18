@@ -1,11 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.symbolic.Identifier;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.heap.HeapIdentifier;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -64,67 +61,62 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	@Override
-	public AbstractState<H, V> assign(Identifier id, SymbolicExpression value) {
-		H heap = heapState;
-		V val = valueState;
+	public AbstractState<H, V> assign(Identifier id, SymbolicExpression expression) throws SemanticException {
+		H heap = heapState.assign(id, expression);
+		ValueExpression expr = heap.getRewrittenExpression();
 
-		if (id instanceof ValueIdentifier)
-			val = val.assign((ValueIdentifier) id, (ValueExpression) value);
-		else
-			// TODO we should take care of replacements
-			heap = heap.assign((HeapIdentifier) id, (HeapExpression) value);
+		V value = valueState;
+		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
+			value = value.applySubstitution(heap.getSubstitution());
 
-		return new AbstractState<>(heap, val);
+		value = value.assign(id, expr);
+		return new AbstractState<>(heap, value);
 	}
 
 	@Override
-	public AbstractState<H, V> smallStepSemantics(SymbolicExpression expression) {
-		H heap = heapState;
-		V val = valueState;
+	public AbstractState<H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
+		H heap = heapState.smallStepSemantics(expression);
+		ValueExpression expr = heap.getRewrittenExpression();
 
-		if (expression instanceof ValueExpression)
-			val = val.smallStepSemantics((ValueExpression) expression);
-		else
-			// TODO we should take care of replacements
-			heap = heap.smallStepSemantics((HeapExpression) expression);
+		V value = valueState;
+		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
+			value = value.applySubstitution(heap.getSubstitution());
 
-		return new AbstractState<>(heap, val);
+		value = value.smallStepSemantics(expr);
+		return new AbstractState<>(heap, value);
 	}
 
 	@Override
-	public AbstractState<H, V> assume(SymbolicExpression expression) {
-		H heap = heapState;
-		V val = valueState;
+	public AbstractState<H, V> assume(SymbolicExpression expression) throws SemanticException {
+		H heap = heapState.assume(expression);
+		ValueExpression expr = heap.getRewrittenExpression();
 
-		if (expression instanceof ValueExpression)
-			val = val.assume((ValueExpression) expression);
-		else
-			// TODO we should take care of replacements
-			heap = heap.assume((HeapExpression) expression);
+		V value = valueState;
+		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
+			value = value.applySubstitution(heap.getSubstitution());
 
-		return new AbstractState<>(heap, val);
+		value = value.assume(expr);
+		return new AbstractState<>(heap, value);
 	}
 
 	@Override
-	public Satisfiability satisfy(SymbolicExpression expression) {
-		if (expression instanceof ValueExpression)
-			return valueState.satisfy((ValueExpression) expression);
-		else
-			return heapState.satisfy((HeapExpression) expression);
+	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
+		return heapState.satisfies(expression)
+				.glb(valueState.satisfies(heapState.smallStepSemantics(expression).getRewrittenExpression()));
 	}
 
 	@Override
-	public AbstractState<H, V> lub(AbstractState<H, V> other) {
+	public AbstractState<H, V> lub(AbstractState<H, V> other) throws SemanticException {
 		return new AbstractState<>(heapState.lub(other.heapState), valueState.lub(other.valueState));
 	}
 
 	@Override
-	public AbstractState<H, V> widening(AbstractState<H, V> other) {
+	public AbstractState<H, V> widening(AbstractState<H, V> other) throws SemanticException {
 		return new AbstractState<>(heapState.widening(other.heapState), valueState.widening(other.valueState));
 	}
 
 	@Override
-	public boolean lessOrEqual(AbstractState<H, V> other) {
+	public boolean lessOrEqual(AbstractState<H, V> other) throws SemanticException {
 		return heapState.lessOrEqual(other.heapState) && valueState.lessOrEqual(other.valueState);
 	}
 
@@ -146,5 +138,10 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	@Override
 	public boolean isBottom() {
 		return heapState.isBottom() && valueState.isBottom();
+	}
+
+	@Override
+	public AbstractState<H, V> forgetIdentifier(Identifier id) throws SemanticException {
+		return new AbstractState<>(heapState.forgetIdentifier(id), valueState.forgetIdentifier(id));
 	}
 }

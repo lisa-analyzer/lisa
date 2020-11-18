@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import java.util.List;
 
 import it.unive.lisa.analysis.HeapDomain.Replacement;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
@@ -17,7 +18,7 @@ import it.unive.lisa.symbolic.value.ValueIdentifier;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface ValueDomain<D extends ValueDomain<D>>
-		extends SemanticDomain<D, ValueExpression, ValueIdentifier>, Lattice<D> {
+		extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of the
@@ -26,6 +27,23 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 * <b>must be applied in order</b>.
 	 * 
 	 * @param substitution the substitution to apply
+	 * @return the value domain instance modified by the substitution
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	void applySubstitution(List<Replacement> substitution);
+	public default D applySubstitution(List<Replacement> substitution) throws SemanticException {
+		@SuppressWarnings("unchecked")
+		D result = (D) this;
+		for (Replacement r : substitution) {
+			D lub = bottom();
+			for (Identifier source : r.getSources()) {
+				D partial = result;
+				for (Identifier target : r.getTargets())
+					partial = partial.assign(target, source);
+				lub = lub.lub(partial);
+			}
+			result = lub.forgetIdentifiers(r.getIdsToForget());
+		}
+
+		return result;
+	}
 }

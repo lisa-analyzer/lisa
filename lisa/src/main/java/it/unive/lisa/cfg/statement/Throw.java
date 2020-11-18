@@ -5,8 +5,10 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.symbolic.Skip;
 
 /**
@@ -24,8 +26,7 @@ public class Throw extends Statement {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error. The location where
-	 * this throw happens is unknown (i.e. no source file/line/column is
-	 * available).
+	 * this throw happens is unknown (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param expression the expression to raise as error
@@ -61,6 +62,12 @@ public class Throw extends Statement {
 	public final Expression getExpression() {
 		return expression;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		this.offset = offset;
+		return expression.setOffset(offset + 1);
+	}
 
 	@Override
 	public int hashCode() {
@@ -89,11 +96,16 @@ public class Throw extends Statement {
 	public final String toString() {
 		return "throw " + expression;
 	}
-	
+
 	@Override
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph);
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
+		expressions.put(expression, result);
+		if (!expression.getMetaVariables().isEmpty())
+			// TODO is this correct?
+			result = result.forgetIdentifiers(expression.getMetaVariables());
 		return new AnalysisState<>(result.getState(), new Skip());
 	}
 }

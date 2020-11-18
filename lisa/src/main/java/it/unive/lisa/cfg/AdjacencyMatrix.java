@@ -37,20 +37,26 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	/**
 	 * The factory where edges are stored.
 	 */
-	private ExternalSetCache<Edge> edgeFactory;
+	private final ExternalSetCache<Edge> edgeFactory;
 
 	/**
 	 * The matrix. The left set in the mapped value is the set of ingoing edges,
 	 * while the right one is the set of outgoing edges.
 	 */
-	private Map<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> matrix;
+	private final Map<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> matrix;
 
+	/**
+	 * The next available offset to be assigned to the next statement
+	 */
+	private int nextOffset;
+	
 	/**
 	 * Builds a new matrix.
 	 */
 	public AdjacencyMatrix() {
 		edgeFactory = new ExternalSetCache<>();
 		matrix = new ConcurrentHashMap<>();
+		nextOffset = 0;
 	}
 
 	/**
@@ -64,6 +70,7 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 		matrix = new ConcurrentHashMap<>();
 		for (Map.Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> entry : other.matrix.entrySet())
 			matrix.put(entry.getKey(), Pair.of(entry.getValue().getLeft().copy(), entry.getValue().getRight().copy()));
+		nextOffset = other.nextOffset;
 	}
 
 	/**
@@ -73,6 +80,7 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	 */
 	public void addNode(Statement node) {
 		matrix.put(node, Pair.of(edgeFactory.mkEmptySet(), edgeFactory.mkEmptySet()));
+		nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
 	/**

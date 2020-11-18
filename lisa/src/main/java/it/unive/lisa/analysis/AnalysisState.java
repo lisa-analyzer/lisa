@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.symbolic.Identifier;
 import it.unive.lisa.symbolic.Skip;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -65,43 +65,49 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	@Override
-	public AnalysisState<H, V> assign(Identifier id, SymbolicExpression value) {
-		return new AnalysisState<>(getState().assign(id, value), (SymbolicExpression) id);
+	public AnalysisState<H, V> assign(Identifier id, SymbolicExpression value) throws SemanticException {
+		return new AnalysisState<>(getState().assign(id, value), id);
 	}
 
 	@Override
-	public AnalysisState<H, V> smallStepSemantics(SymbolicExpression expression) {
-		// TODO should we return an expression that contains the value?
-		// answer: yes, but how to do this
-		return new AnalysisState<>(state.smallStepSemantics(expression), new Skip());
+	public AnalysisState<H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
+		AbstractState<H, V> s = state.smallStepSemantics(expression);
+		return new AnalysisState<>(s, s.getHeapState().getRewrittenExpression());
 	}
 
 	@Override
-	public AnalysisState<H, V> assume(SymbolicExpression expression) {
-		return new AnalysisState<>(state.assume(expression), new Skip());
+	public AnalysisState<H, V> assume(SymbolicExpression expression) throws SemanticException {
+		return new AnalysisState<>(state.assume(expression), lastComputedExpression);
 	}
 
 	@Override
-	public Satisfiability satisfy(SymbolicExpression expression) {
-		return state.satisfy(expression);
+	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
+		return state.satisfies(expression);
 	}
 
 	@Override
-	public AnalysisState<H, V> lub(AnalysisState<H, V> other) {
-		// TODO should we perform some check on the expression too?
+	public AnalysisState<H, V> lub(AnalysisState<H, V> other) throws SemanticException {
+		checkExpression(other);
 		return new AnalysisState<>(state.lub(other.state), lastComputedExpression);
 	}
 
 	@Override
-	public AnalysisState<H, V> widening(AnalysisState<H, V> other) {
-		// TODO should we perform some check on the expression too?
+	public AnalysisState<H, V> widening(AnalysisState<H, V> other) throws SemanticException {
+		checkExpression(other);
 		return new AnalysisState<>(state.widening(other.state), lastComputedExpression);
 	}
 
 	@Override
-	public boolean lessOrEqual(AnalysisState<H, V> other) {
-		// TODO should we perform some check on the expression too?
+	public boolean lessOrEqual(AnalysisState<H, V> other) throws SemanticException {
+		checkExpression(other);
 		return state.lessOrEqual(other.state);
+	}
+
+	private void checkExpression(AnalysisState<H, V> other) throws SemanticException {
+		// TODO we want to eventually support this
+		if (!lastComputedExpression.equals(other.lastComputedExpression))
+			throw new SemanticException(
+					"Semantic operations on instances with different expressions is not yet supported");
 	}
 
 	@Override
@@ -113,14 +119,19 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	public AnalysisState<H, V> bottom() {
 		return new AnalysisState<>(state.bottom(), new Skip());
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return state.isTop() && lastComputedExpression instanceof Skip;
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return state.isBottom() && lastComputedExpression instanceof Skip;
+	}
+
+	@Override
+	public AnalysisState<H, V> forgetIdentifier(Identifier id) throws SemanticException {
+		return new AnalysisState<>(state.forgetIdentifier(id), lastComputedExpression);
 	}
 }

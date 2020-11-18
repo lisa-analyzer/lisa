@@ -17,8 +17,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @param other the other lattice element
 	 * @return the least upper bound
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L lub(L other);
+	L lub(L other) throws SemanticException;
 
 	/**
 	 * Performs the widening operation between this lattice element and the given
@@ -26,8 +27,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @param other the other lattice element
 	 * @return the least upper bound
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L widening(L other);
+	L widening(L other) throws SemanticException;
 
 	/**
 	 * Yields {@code true} if and only if this lattice element is in relation with
@@ -36,8 +38,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @param other the other lattice element
 	 * @return {@code true} if and only if that condition holds
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	boolean lessOrEqual(L other);
+	boolean lessOrEqual(L other) throws SemanticException;
 
 	/**
 	 * Yields the top element of this lattice. The returned element should be unique

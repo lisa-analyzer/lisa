@@ -5,8 +5,10 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.value.Constant;
@@ -24,9 +26,10 @@ public class Literal extends Expression {
 	private final Object value;
 
 	/**
-	 * Builds an untyped literal, consisting of a constant value. The location where this
-	 * literal happens is unknown (i.e. no source file/line/column is available).
-	 * The type of this literal is unknown (i.e. its type is {@link Untyped#INSTANCE}).
+	 * Builds an untyped literal, consisting of a constant value. The location where
+	 * this literal happens is unknown (i.e. no source file/line/column is
+	 * available). The type of this literal is unknown (i.e. its type is
+	 * {@link Untyped#INSTANCE}).
 	 * 
 	 * @param cfg   the cfg that this expression belongs to
 	 * @param value the value of this literal
@@ -34,13 +37,14 @@ public class Literal extends Expression {
 	public Literal(CFG cfg, Object value) {
 		this(cfg, null, -1, -1, value, Untyped.INSTANCE);
 	}
-	
+
 	/**
-	 * Builds a typed literal, consisting of a constant value. The location where this
-	 * literal happens is unknown (i.e. no source file/line/column is available).
+	 * Builds a typed literal, consisting of a constant value. The location where
+	 * this literal happens is unknown (i.e. no source file/line/column is
+	 * available).
 	 * 
-	 * @param cfg   	 the cfg that this literal belongs to
-	 * @param value 	 the value of this literal
+	 * @param cfg        the cfg that this literal belongs to
+	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */
 	public Literal(CFG cfg, Object value, Type staticType) {
@@ -48,9 +52,9 @@ public class Literal extends Expression {
 	}
 
 	/**
-	 * Builds the untyped literal, consisting of a constant value, happening at the given
-	 * location in the program.
-	 * The type of this literal is unknown (i.e. its type is {@link Untyped#INSTANCE}).
+	 * Builds the untyped literal, consisting of a constant value, happening at the
+	 * given location in the program. The type of this literal is unknown (i.e. its
+	 * type is {@link Untyped#INSTANCE}).
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param sourceFile the source file where this expression happens. If unknown,
@@ -64,10 +68,10 @@ public class Literal extends Expression {
 	public Literal(CFG cfg, String sourceFile, int line, int col, Object value) {
 		this(cfg, sourceFile, line, col, value, Untyped.INSTANCE);
 	}
-	
+
 	/**
-	 * Builds a typed literal, consisting of a constant value, happening at the given
-	 * location in the program.
+	 * Builds a typed literal, consisting of a constant value, happening at the
+	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param sourceFile the source file where this expression happens. If unknown,
@@ -93,13 +97,17 @@ public class Literal extends Expression {
 	public Object getValue() {
 		return value;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		return this.offset = offset;
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
-		result = prime * result + ((getStaticType() == null) ? 0 : getStaticType().hashCode());
 		return result;
 	}
 
@@ -108,6 +116,8 @@ public class Literal extends Expression {
 		if (this == st)
 			return true;
 		if (getClass() != st.getClass())
+			return false;
+		if (!super.isEqualTo(st))
 			return false;
 		Literal other = (Literal) st;
 		if (value == null) {
@@ -122,10 +132,11 @@ public class Literal extends Expression {
 	public String toString() {
 		return value.toString();
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		return new AnalysisState<>(entryState.getState(), new Constant(getValue())); 
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		return new AnalysisState<>(entryState.getState(), new Constant(getValue()));
 	}
 }

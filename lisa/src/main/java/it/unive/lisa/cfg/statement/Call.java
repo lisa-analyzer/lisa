@@ -6,8 +6,10 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
@@ -55,13 +57,21 @@ public abstract class Call extends Expression {
 	public final Expression[] getParameters() {
 		return parameters;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		this.offset = offset;
+		int off = offset;
+		for (Expression param : parameters)
+			off = param.setOffset(off + 1);
+		return off;
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + Arrays.hashCode(parameters);
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -71,10 +81,10 @@ public abstract class Call extends Expression {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		Call other = (Call) st;
 		if (!areEquals(parameters, other.parameters))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return true;
 	}
@@ -111,21 +121,28 @@ public abstract class Call extends Expression {
 	 */
 	@Override
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
 		SymbolicExpression[] computed = new SymbolicExpression[parameters.length];
 
 		AnalysisState<H, V> current = entryState;
 		for (int i = 0; i < computed.length; i++) {
-			current = parameters[i].semantics(current, callGraph);
+			current = parameters[i].semantics(current, callGraph, expressions);
+			expressions.put(parameters[i], current);
 			computed[i] = current.getLastComputedExpression();
 		}
 
-		return callSemantics(current, callGraph, computed);
+		AnalysisState<H, V> result = callSemantics(current, callGraph, computed);
+		for (Expression param : parameters)
+			if (!param.getMetaVariables().isEmpty())
+				result = result.forgetIdentifiers(param.getMetaVariables());
+		return result;
 	}
 
 	/**
 	 * Computes the semantics of the call, after the semantics of all parameters
-	 * have been computed.
+	 * have been computed. Meta variables from the parameters will be forgotten
+	 * after this call returns.
 	 * 
 	 * @param <H>           the type of the heap analysis
 	 * @param <V>           the type of the value analysis
@@ -136,7 +153,9 @@ public abstract class Call extends Expression {
 	 *                      values of the parameters of this call
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *         execution of this call
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params);
+			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+			throws SemanticException;
 }

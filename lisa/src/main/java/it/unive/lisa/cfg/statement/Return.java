@@ -5,16 +5,19 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.symbolic.Skip;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
  * Returns an expression to the caller CFG.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return extends Statement {
+public class Return extends Statement implements MetaVariableCreator {
 
 	/**
 	 * The expression being returned
@@ -60,6 +63,12 @@ public class Return extends Statement {
 	public final Expression getExpression() {
 		return expression;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		this.offset = offset;
+		return expression.setOffset(offset + 1);
+	}
 
 	@Override
 	public int hashCode() {
@@ -88,12 +97,21 @@ public class Return extends Statement {
 	public final String toString() {
 		return "return " + expression;
 	}
-	
+
+	@Override
+	public final Identifier getMetaVariable() {
+		return new ValueIdentifier("ret_value@" + getCFG().getDescriptor().getName());
+	}
+
 	@Override
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph);
-		// TODO should we directly return result here to have also the computed expression
-		return new AnalysisState<>(result.getState(), new Skip()); 
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
+		expressions.put(expression, result);
+		result = result.assign(getMetaVariable(), result.getLastComputedExpression());
+		if (!expression.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(expression.getMetaVariables());
+		return result;
 	}
 }

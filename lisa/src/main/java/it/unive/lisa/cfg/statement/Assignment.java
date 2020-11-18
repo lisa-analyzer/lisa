@@ -5,10 +5,12 @@ import java.util.Objects;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.symbolic.Identifier;
+import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A statement assigning the result of an expression to an assignable
@@ -82,6 +84,12 @@ public class Assignment extends Expression {
 	public final Expression getExpression() {
 		return expression;
 	}
+	
+	@Override
+	public int setOffset(int offset) {
+		this.offset = offset;
+		return expression.setOffset(target.setOffset(offset + 1) + 1);
+	}
 
 	@Override
 	public int hashCode() {
@@ -97,6 +105,8 @@ public class Assignment extends Expression {
 		if (this == st)
 			return true;
 		if (getClass() != st.getClass())
+			return false;
+		if (!super.isEqualTo(st))
 			return false;
 		Assignment other = (Assignment) st;
 		if (expression == null) {
@@ -136,10 +146,17 @@ public class Assignment extends Expression {
 	 */
 	@Override
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph) {
-		AnalysisState<H, V> right = expression.semantics(entryState, callGraph);
-		AnalysisState<H, V> left = target.semantics(right, callGraph);
-
-		return left.assign((Identifier) left.getLastComputedExpression(), right.getLastComputedExpression());
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			throws SemanticException {
+		AnalysisState<H, V> right = expression.semantics(entryState, callGraph, expressions);
+		AnalysisState<H, V> left = target.semantics(right, callGraph, expressions);
+		expressions.put(expression, right);
+		expressions.put(target, left);
+		AnalysisState<H, V> result = left.assign((Identifier) left.getLastComputedExpression(), right.getLastComputedExpression());
+		if (!expression.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(expression.getMetaVariables());
+		if (!target.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(target.getMetaVariables());
+		return result;
 	}
 }
