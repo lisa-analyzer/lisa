@@ -112,6 +112,11 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		AnalysisState<H, V> returned = callGraph.getAbstractResultOf(this, computedState, params);
 		// the lub will include the metavariable inside the state
 		AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState().lub(returned.getState()), new Skip());
+		
+		if (target.getDescriptor().getReturnType().isVoidType())
+			// no need to add the meta variable since nothing has been pushed on the stack
+			return tmp;
+		
 		Identifier meta = getMetaVariable();
 		getMetaVariables().add(meta);
 		return tmp.assign(meta, returned.getLastComputedExpression());
