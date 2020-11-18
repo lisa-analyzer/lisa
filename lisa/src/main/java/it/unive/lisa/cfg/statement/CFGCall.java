@@ -118,6 +118,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 			return tmp;
 		
 		Identifier meta = getMetaVariable();
+		getMetaVariables().add((Identifier) returned.getLastComputedExpression());
 		getMetaVariables().add(meta);
 		return tmp.assign(meta, returned.getLastComputedExpression());
 	}
