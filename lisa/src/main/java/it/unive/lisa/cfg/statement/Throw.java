@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
-import it.unive.lisa.symbolic.Skip;
+import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG

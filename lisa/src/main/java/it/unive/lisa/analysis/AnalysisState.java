@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.symbolic.Skip;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
