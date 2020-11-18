@@ -4,10 +4,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;

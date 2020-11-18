@@ -21,12 +21,12 @@ import org.apache.logging.log4j.Logger;
 
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.CallGraph;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;

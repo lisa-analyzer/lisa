@@ -1,7 +1,12 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.callgraph;
 
 import java.util.Collection;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
