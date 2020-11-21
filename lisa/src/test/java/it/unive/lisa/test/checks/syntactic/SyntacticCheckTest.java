@@ -1,11 +1,13 @@
 package it.unive.lisa.test.checks.syntactic;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.util.function.Consumer;
 
 import org.junit.Test;
 
+import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
@@ -57,7 +59,12 @@ public class SyntacticCheckTest {
 		CFG cfg = new CFG(new CFGDescriptor("foo", new Parameter[0]));
 		cfgFiller.accept(cfg);
 		lisa.addCFG(cfg);
-		lisa.run();
+		try {
+			lisa.run();
+		} catch (AnalysisException e) {
+			System.err.println(e);
+			fail("Analysis terminated with errors");
+		}
 
 		assertEquals("Incorrect number of warnings", expectedWarnings, lisa.getWarnings().size());
 	}

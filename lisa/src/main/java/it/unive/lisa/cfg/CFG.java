@@ -460,7 +460,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg) {
+			AnalysisState<H, V> entryState, CallGraph cg) throws FixpointException {
 		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -498,7 +498,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, int widenAfter) {
+			AnalysisState<H, V> entryState, CallGraph cg, int widenAfter) throws FixpointException {
 		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
@@ -533,7 +533,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws) {
+			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws) throws FixpointException {
 		return fixpoint(entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -572,7 +572,8 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter) {
+			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter)
+			throws FixpointException {
 		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(start, cg, ws, widenAfter);
@@ -611,7 +612,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg) {
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg) throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -652,7 +653,8 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, int widenAfter) {
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, int widenAfter)
+			throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
@@ -691,7 +693,8 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws) {
+			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws)
+			throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -735,7 +738,7 @@ public class CFG {
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
 			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
-			int widenAfter) {
+			int widenAfter) throws FixpointException {
 		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(start, cg, ws, widenAfter);
@@ -772,7 +775,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg) {
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg) throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -812,7 +815,7 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, int widenAfter) {
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, int widenAfter) throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
@@ -849,7 +852,8 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws) {
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws)
+			throws FixpointException {
 		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
@@ -891,8 +895,8 @@ public class CFG {
 	 *                           statement ends up in the working set
 	 */
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
-			int widenAfter) {
+			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws, int widenAfter)
+			throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<Statement, AtomicInteger> lubs = new HashMap<>(size);
 		Map<Statement, Pair<AnalysisState<H, V>, ExpressionStates<H, V>>> result = new HashMap<>(size);

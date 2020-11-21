@@ -5,7 +5,7 @@ package it.unive.lisa.cfg;
  * 
  * @author Luca Negrini
  */
-public class FixpointException extends RuntimeException {
+public class FixpointException extends Exception {
 
 	private static final long serialVersionUID = 8975446457619020051L;
 

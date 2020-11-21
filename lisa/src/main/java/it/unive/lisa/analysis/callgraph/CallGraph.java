@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -41,8 +42,11 @@ public interface CallGraph {
 	 * @param <V>        the type of {@link ValueDomain} to compute
 	 * @param entryState the entry state for the {@link CFG}s that are the
 	 *                   entrypoints of the computation
+	 * @throws FixpointException if something goes wrong while evaluating the
+	 *                           fixpoint
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState);
+	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState)
+			throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
