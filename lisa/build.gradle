@@ -12,6 +12,7 @@ buildscript {
 plugins {
     id 'java-library'
     id 'eclipse'
+    id 'antlr'
     id 'com.github.roroche.plantuml' version '1.0.2'
     id 'org.ajoberstar.grgit' version '4.0.2'
 }
@@ -29,6 +30,8 @@ dependencies {
     api 'org.apache.commons:commons-text:1.9'
 	api 'org.apache.logging.log4j:log4j-api:2.13.0'
 	api 'org.apache.logging.log4j:log4j-core:2.13.0'
+
+	antlr 'org.antlr:antlr4:4.8-1'
 
     testImplementation 'junit:junit:4.12'
 }
@@ -62,6 +65,20 @@ plugins.withType(JavaPlugin) {
 			}
 		}
 	}
+}
+
+generateTestGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-no-listener"]
+    
+    doLast {
+    	copy {
+      		from 'build/generated-src/antlr/test/'
+      		include '*.*'
+      		into 'build/generated-src/antlr/test/it/unive/lisa/test/antlr'
+    	}
+   		project.delete fileTree('build/generated-src/antlr/test').include('*.*')
+  	}
 }
 
 classDiagram { 
