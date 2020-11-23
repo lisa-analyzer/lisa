@@ -114,14 +114,30 @@ public class LiSA {
 		syntacticChecks.add(check);
 	}
 
+	/**
+	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
+	 * overwritten.
+	 * 
+	 * @param callGraph the callgraph to use
+	 */
 	public void setCallGraph(CallGraph callGraph) {
 		this.callGraph = callGraph;
 	}
 
+	/**
+	 * Adds a new {@link HeapDomain} to execute during the analysis.
+	 * 
+	 * @param domain the domain to execute
+	 */
 	public void addHeapDomain(HeapDomain<?> domain) {
 		this.heapDomains.add(domain);
 	}
 
+	/**
+	 * Adds a new {@link ValueDomain} to execute during the analysis.
+	 * 
+	 * @param domain the domain to execute
+	 */
 	public void addValueDomain(ValueDomain<?> domain) {
 		this.valueDomains.add(domain);
 	}
@@ -143,23 +159,25 @@ public class LiSA {
 	 */
 	public void run() throws AnalysisException {
 		printConfig();
-		
+
 		try {
 			TimerLogger.execAction(log, "Analysis time", this::runAux);
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
-		
+
 		printStats();
 	}
 
 	private void printConfig() {
 		log.info("LiSA setup:");
 		log.info("  " + inputs.size() + " CFGs to analyze");
-		log.info("  " + syntacticChecks.size() + " syntactic checks to execute" + (syntacticChecks.isEmpty() ? "" : ":"));
+		log.info("  " + syntacticChecks.size() + " syntactic checks to execute"
+				+ (syntacticChecks.isEmpty() ? "" : ":"));
 		for (SyntacticCheck check : syntacticChecks)
 			log.info("      " + check.getClass().getSimpleName());
-		log.info("  call graph implementation: " + (callGraph == null ? IntraproceduralCallGraph.class : callGraph.getClass()).getSimpleName());
+		log.info("  call graph implementation: "
+				+ (callGraph == null ? "none provided" : callGraph.getClass().getSimpleName()));
 		log.info("  " + heapDomains.size() + " heap domains to execute" + (heapDomains.isEmpty() ? "" : ":"));
 		for (HeapDomain<?> domain : heapDomains)
 			log.info("      " + domain.getClass().getSimpleName());
@@ -173,21 +191,24 @@ public class LiSA {
 		log.info("  " + warnings.size() + " warnings generated");
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private void runAux() throws AnalysisExecutionException {
 		CheckTool tool = new CheckTool();
 
 		if (!syntacticChecks.isEmpty())
 			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
 		else
-			log.info("Skipping syntactic checks execution since none have been provided");
+			log.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (callGraph == null) {
-			log.info("No call graph set for this analysis, defaulting to a non-interprocedural implementation");
+			log.warn("No call graph set for this analysis, defaulting to a non-interprocedural implementation");
 			callGraph = new IntraproceduralCallGraph();
 		}
+		
+		inputs.forEach(callGraph::addCFG);
 
 		if (heapDomains.isEmpty()) {
-			log.info("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
+			log.warn("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
 			heapDomains.add(new MonolithicHeap());
 		} else if (heapDomains.size() > 1) {
 			log.fatal("Analyses with a combination of heap domains are not supported yet");
@@ -195,18 +216,19 @@ public class LiSA {
 		}
 
 		if (valueDomains.isEmpty())
-			log.fatal("Skipping analysis execution since no value domains have been provided");
+			log.warn("Skipping analysis execution since no value domains have been provided");
 		else if (valueDomains.size() > 1) {
 			log.fatal("Analyses with a combination of value domains are not supported yet");
 			throw new AnalysisExecutionException("Analyses with a combination of value domains are not supported yet");
 		} else {
-			HeapDomain<?> heap = heapDomains.iterator().next();
-			ValueDomain<?> value = valueDomains.iterator().next();
+			HeapDomain heap = heapDomains.iterator().next();
+			ValueDomain value = valueDomains.iterator().next();
 			if (value instanceof NonRelationalDomain)
 				value = new Environment<>((NonRelationalDomain) value);
 
 			try {
-				callGraph.fixpoint(new AnalysisState<>(new AbstractState<>(heap.top(), value.top()), new Skip()));
+				callGraph.fixpoint(new AnalysisState(
+						new AbstractState((HeapDomain) heap.top(), (ValueDomain) value.top()), new Skip()));
 			} catch (FixpointException e) {
 				log.fatal("Exception during fixpoint computation", e);
 				throw new AnalysisExecutionException("Exception during fixpoint computation", e);

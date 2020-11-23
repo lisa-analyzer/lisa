@@ -1,5 +1,7 @@
 package it.unive.lisa.cfg.edge;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -30,6 +32,8 @@ public abstract class Edge {
 	 * @param destination the destination statement
 	 */
 	protected Edge(Statement source, Statement destination) {
+		Objects.requireNonNull(source, "The source of an edge cannot be null");
+		Objects.requireNonNull(destination, "The destination of an edge cannot be null");
 		this.source = source;
 		this.destination = destination;
 	}

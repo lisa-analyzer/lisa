@@ -111,7 +111,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public String toString() {
-		return getStaticType() + " " + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return "[open call]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
 	}
 	
 	@Override

@@ -77,13 +77,13 @@ public abstract class Expression extends Statement {
 	 * expression. These should be removed as soon as the values computed by those
 	 * gets out of scope (e.g., popped from the stack). The returned collection will
 	 * be filled while evaluating this expression
-	 * {@link #semantics(it.unive.lisa.analysis.AnalysisState, it.unive.lisa.analysis.CallGraph, it.unive.lisa.cfg.CFG.ExpressionStates)},
+	 * {@link #semantics(it.unive.lisa.analysis.AnalysisState, it.unive.lisa.analysis.callgraph.CallGraph, it.unive.lisa.cfg.CFG.ExpressionStates)},
 	 * thus invoking this method before computing the semantics will yield an empty
 	 * collection.
 	 * 
 	 * @return the meta variables
 	 */
-	protected Collection<Identifier> getMetaVariables() {
+	public Collection<Identifier> getMetaVariables() {
 		return metaVariables;
 	}
 

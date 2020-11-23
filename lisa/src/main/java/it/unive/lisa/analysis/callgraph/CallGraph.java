@@ -10,25 +10,43 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.statement.CFGCall;
+import it.unive.lisa.cfg.statement.Call;
+import it.unive.lisa.cfg.statement.OpenCall;
+import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic
- * targets of {@link CFGCall}s.
+ * targets of {@link UnresolvedCall}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface CallGraph {
 
 	/**
-	 * Yields a collection containing all possible runtime targets of a
-	 * {@link CFGCall}.
+	 * Adds a new cfg to this call graph.
+	 * 
+	 * @param cfg the cfg to add
+	 */
+	void addCFG(CFG cfg);
+
+	/**
+	 * Yields a {@link Call} implementation that corresponds to the resolution of
+	 * the given {@link UnresolvedCall}. This method will return:
+	 * <ul>
+	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
+	 * {@link UnresolvedCall#getQualifiedName()} is found. The returned
+	 * {@link CFGCall} will be linked to all the possible runtime targets matching
+	 * {@link UnresolvedCall#getQualifiedName()};</li>
+	 * <li>an {@link OpenCall}, if no {@link CFG} matching
+	 * {@link UnresolvedCall#getQualifiedName()} is found.</li>
+	 * </ul>
 	 * 
 	 * @param call the call to resolve
 	 * @return a collection of all the possible runtime targets
 	 */
-	Collection<CFG> resolve(CFGCall call);
+	Call resolve(UnresolvedCall call);
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a

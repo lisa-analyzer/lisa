@@ -33,4 +33,14 @@ public class VoidType implements Type {
 	public int hashCode() {
 		return System.identityHashCode(this);
 	}
+
+	@Override
+	public boolean canBeAssignedTo(Type other) {
+		return false;
+	}
+
+	@Override
+	public Type commonSupertype(Type other) {
+		return other == this ? this : Untyped.INSTANCE;
+	}
 }

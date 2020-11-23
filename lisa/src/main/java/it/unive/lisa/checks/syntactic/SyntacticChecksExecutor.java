@@ -41,6 +41,10 @@ public class SyntacticChecksExecutor {
 	private static void processCFG(CheckTool tool, CFG cfg, Collection<SyntacticCheck> checks) {
 		checks.forEach(c -> c.visitCFGDescriptor(tool, cfg.getDescriptor()));
 
+		// TODO it would be much better with a visitor pattern
+		// so that new instances of statement/expression are forced to define how they get visited
+		// instead of adding new instances here
+		
 		for (Statement st : cfg.getNodes()) 
 			if (st instanceof Expression)
 				processExpression(tool, checks, (Expression) st);
@@ -61,8 +65,8 @@ public class SyntacticChecksExecutor {
 		checks.forEach(c -> c.visitExpression(tool, expression));
 		
 		if (expression instanceof Assignment) {
-			processExpression(tool, checks, ((Assignment) expression).getTarget());
-			processExpression(tool, checks, ((Assignment) expression).getExpression());
+			processExpression(tool, checks, ((Assignment) expression).getLeft());
+			processExpression(tool, checks, ((Assignment) expression).getRight());
 		} else if (expression instanceof Call)
 			for (Expression param : ((Call) expression).getParameters())
 				processExpression(tool, checks, param);

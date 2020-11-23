@@ -35,6 +35,6 @@ public class FalseEdge extends Edge {
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException {
-		return sourceState.assume(new UnaryExpression(sourceState.getLastComputedExpression(), UnaryOperator.NOT));
+		return sourceState.assume(new UnaryExpression(sourceState.getLastComputedExpression(), UnaryOperator.LOGICAL_NOT));
 	}
 }

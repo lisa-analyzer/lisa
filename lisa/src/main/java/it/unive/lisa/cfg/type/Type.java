@@ -135,6 +135,27 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link ArrayType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isArrayType() {
+		return this instanceof ArrayType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link ArrayType}, only if
+	 * {@link #isArrayType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
+	 * 
+	 * @return this type casted as {@link ArrayType}, or {@code null}
+	 */
+	public default ArrayType asArrayType() {
+		return isArrayType() ? (ArrayType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link NullType}.
 	 * 
 	 * @return {@code true} if that condition holds
@@ -152,4 +173,25 @@ public interface Type {
 	public default NullType asNullType() {
 		return isNullType() ? (NullType) this : null;
 	}
+
+	/**
+	 * Determines if the type represented by this {@link Type} object is either the
+	 * same as, or is a subtype of, the type represented by {@code other}. It
+	 * returns {@code true} if so, and returns {@code false}.
+	 * 
+	 * @param other the other type
+	 * @return {@code true} if that condition holds
+	 */
+	boolean canBeAssignedTo(Type other);
+
+	/**
+	 * Yields the most specific common supertype between this {@link Type} and the
+	 * given one. If no common supertype exists, this method returns
+	 * {@link Untyped#INSTANCE}.
+	 * 
+	 * @param other the other type
+	 * @return the most specific common supertype berween {@code this} and
+	 *         {@code other}
+	 */
+	Type commonSupertype(Type other);
 }

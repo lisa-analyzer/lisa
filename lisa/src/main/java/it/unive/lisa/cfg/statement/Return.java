@@ -13,7 +13,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
- * Returns an expression to the caller CFG.
+ * Returns an expression to the caller CFG, terminating the execution of the CFG
+ * where this statement lies. For terminating CFGs that do not return any value,
+ * use {@link Ret}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -63,7 +65,7 @@ public class Return extends Statement implements MetaVariableCreator {
 	public final Expression getExpression() {
 		return expression;
 	}
-	
+
 	@Override
 	public int setOffset(int offset) {
 		this.offset = offset;

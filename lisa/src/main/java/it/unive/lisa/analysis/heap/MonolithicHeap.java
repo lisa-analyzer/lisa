@@ -3,34 +3,43 @@ package it.unive.lisa.analysis.heap;
 import java.util.Collections;
 import java.util.List;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
-public class MonolithicHeap extends BaseLattice<MonolithicHeap> implements HeapDomain<MonolithicHeap> {
+/**
+ * A monolithic heap implementation that abstracts all heap locations to a
+ * unique identifier.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap TOP = new MonolithicHeap();
 
 	private static final MonolithicHeap BOTTOM = new MonolithicHeap();
-	
+
 	private static final HeapIdentifier MONOLITH = new HeapIdentifier("heap");
 
 	private final ValueExpression rewritten;
-	
+
+	/**
+	 * Builds a new instance. Invoking {@link #getRewrittenExpression()} on this
+	 * instance will return an instance of {@link Skip}.
+	 */
 	public MonolithicHeap() {
 		rewritten = new Skip();
 	}
-	
+
 	private MonolithicHeap(ValueExpression rewritten) {
 		this.rewritten = rewritten;
 	}
-	
+
 	@Override
 	public ValueExpression getRewrittenExpression() {
 		return rewritten;
@@ -48,16 +57,15 @@ public class MonolithicHeap extends BaseLattice<MonolithicHeap> implements HeapD
 	}
 
 	@Override
-	public MonolithicHeap smallStepSemantics(SymbolicExpression expression) throws SemanticException {
-		if (expression instanceof HeapReference)
-			return new MonolithicHeap(MONOLITH);
-		
-		// TODO fill this when the symbolic expression structure will be filled in
-		
-		if (expression instanceof ValueExpression)
-			return new MonolithicHeap((ValueExpression) expression);
-		
-		return TOP;
+	protected MonolithicHeap mk(MonolithicHeap reference, ValueExpression expression) {
+		return new MonolithicHeap(expression);
+	}
+
+	@Override
+	protected MonolithicHeap semanticsOf(HeapExpression expression) {
+		// any expression accessing an area of the heap or instantiating a new one
+		// is modeled through the monolith
+		return new MonolithicHeap(MONOLITH);
 	}
 
 	@Override
@@ -74,7 +82,7 @@ public class MonolithicHeap extends BaseLattice<MonolithicHeap> implements HeapD
 
 	@Override
 	public MonolithicHeap forgetIdentifier(Identifier id) throws SemanticException {
-		return new MonolithicHeap();
+		return new MonolithicHeap(rewritten);
 	}
 
 	@Override
@@ -94,7 +102,7 @@ public class MonolithicHeap extends BaseLattice<MonolithicHeap> implements HeapD
 		checkExpression(other);
 		return true;
 	}
-	
+
 	private void checkExpression(MonolithicHeap other) throws SemanticException {
 		// TODO we want to eventually support this
 		if (!rewritten.equals(other.rewritten))

@@ -85,6 +85,21 @@ public class CFG {
 	}
 
 	/**
+	 * Builds the control flow graph.
+	 * 
+	 * @param descriptor      the descriptor of this cfg
+	 * @param entrypoints     the statements of this cfg that will be reachable from
+	 *                        other cfgs
+	 * @param adjacencyMatrix the matrix containing all the statements and the edges
+	 *                        that will be part of this cfg
+	 */
+	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints, AdjacencyMatrix adjacencyMatrix) {
+		this.adjacencyMatrix = adjacencyMatrix;
+		this.descriptor = descriptor;
+		this.entrypoints = entrypoints;
+	}
+
+	/**
 	 * Clones the given control flow graph.
 	 * 
 	 * @param other the original cfg
@@ -774,7 +789,7 @@ public class CFG {
 	 *                           of a statement, or if some unknown/invalid
 	 *                           statement ends up in the working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
 			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg) throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
@@ -814,7 +829,7 @@ public class CFG {
 	 *                           of an statement, or if some unknown/invalid
 	 *                           statement ends up in the working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
 			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, int widenAfter) throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
@@ -851,7 +866,7 @@ public class CFG {
 	 *                           of an statement, or if some unknown/invalid
 	 *                           statement ends up in the working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> computeFixpoint(
+	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
 			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws)
 			throws FixpointException {
 		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD);

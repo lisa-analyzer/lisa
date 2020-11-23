@@ -9,7 +9,7 @@ package it.unive.lisa.cfg.type;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class NullType implements Type {
+public class NullType implements PointerType {
 
 	/**
 	 * Unique instance of {@link NullType}.
@@ -32,5 +32,15 @@ public class NullType implements Type {
 	@Override
 	public int hashCode() {
 		return System.identityHashCode(this);
+	}
+
+	@Override
+	public boolean canBeAssignedTo(Type other) {
+		return other.isPointerType();
+	}
+
+	@Override
+	public Type commonSupertype(Type other) {
+		return other != null && other.isPointerType() ? other : Untyped.INSTANCE;
 	}
 }

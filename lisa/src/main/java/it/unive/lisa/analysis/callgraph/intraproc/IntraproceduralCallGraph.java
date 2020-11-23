@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.callgraph.intraproc;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,28 +16,73 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
+import it.unive.lisa.cfg.Parameter;
 import it.unive.lisa.cfg.statement.CFGCall;
+import it.unive.lisa.cfg.statement.Call;
+import it.unive.lisa.cfg.statement.Expression;
+import it.unive.lisa.cfg.statement.OpenCall;
+import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
+/**
+ * An instance of {@link CallGraph} that:
+ * <ul>
+ * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
+ * target's signature</li>
+ * <li>returns top when asked for the abstract result of a {@link CFGCall}</li>
+ * </ul>
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class IntraproceduralCallGraph implements CallGraph {
 
 	private static final Logger log = LogManager.getLogger(IntraproceduralCallGraph.class);
 
+	/**
+	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all the cfgs that have been added
+	 */
 	private final Map<CFG, CFGWithAnalysisResults<?, ?>> results;
 
+	/**
+	 * Builds the call graph.
+	 */
 	public IntraproceduralCallGraph() {
 		this.results = new ConcurrentHashMap<>();
 	}
-	
+
+	@Override
 	public void addCFG(CFG cfg) {
 		results.put(cfg, null);
 	}
 
 	@Override
-	public Collection<CFG> resolve(CFGCall call) {
-		return Collections.singleton(call.getTarget());
+	public Call resolve(UnresolvedCall call) {
+		Collection<CFG> targets = new ArrayList<>();
+		for (CFG cfg : results.keySet())
+			if (cfg.getDescriptor().getFullName().equals(call.getQualifiedName())
+					&& cfg.getDescriptor().getReturnType().canBeAssignedTo(call.getStaticType())
+					&& matchParametersTypes(cfg.getDescriptor().getArgs(), call.getParameters()))
+				targets.add(cfg);
+
+		if (targets.isEmpty())
+			return new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+					call.getQualifiedName(), call.getStaticType(), call.getParameters());
+		else
+			return new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+					call.getQualifiedName(), targets, call.getParameters());
+	}
+
+	private boolean matchParametersTypes(Parameter[] formals, Expression[] actuals) {
+		if (formals.length != actuals.length)
+			return false;
+
+		for (int i = 0; i < formals.length; i++)
+			if (!actuals[i].getStaticType().canBeAssignedTo(formals[i].getStaticType()))
+				return false;
+
+		return true;
 	}
 
 	@Override

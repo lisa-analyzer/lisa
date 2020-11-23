@@ -59,7 +59,7 @@ public abstract class Call extends Expression {
 	}
 	
 	@Override
-	public int setOffset(int offset) {
+	public final int setOffset(int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression param : parameters)
