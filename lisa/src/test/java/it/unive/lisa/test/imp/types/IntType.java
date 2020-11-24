@@ -6,7 +6,7 @@ import it.unive.lisa.cfg.type.Untyped;
 
 public class IntType implements NumericType {
 
-	public static IntType INSTANCE = new IntType();
+	public static final IntType INSTANCE = new IntType();
 
 	private IntType() {
 	}

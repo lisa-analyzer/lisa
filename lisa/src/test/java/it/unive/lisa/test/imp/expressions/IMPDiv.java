@@ -25,6 +25,7 @@ public class IMPDiv extends NativeCall {
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
 			throws SemanticException {
 		return new AnalysisState<>(computedState.getState(),
-				new BinaryExpression(params[0], params[1], BinaryOperator.NUMERIC_DIV));
+				// TODO should be runtime type
+				new BinaryExpression(getStaticType(), params[0], params[1], BinaryOperator.NUMERIC_DIV));
 	}
 }

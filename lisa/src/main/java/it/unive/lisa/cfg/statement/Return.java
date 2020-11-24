@@ -102,7 +102,8 @@ public class Return extends Statement implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier("ret_value@" + getCFG().getDescriptor().getName());
+		// TODO should be runtime type
+		return new ValueIdentifier(expression.getStaticType(), "ret_value@" + getCFG().getDescriptor().getName());
 	}
 
 	@Override

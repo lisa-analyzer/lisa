@@ -5,7 +5,7 @@ import it.unive.lisa.cfg.type.Untyped;
 
 public class StringType implements it.unive.lisa.cfg.type.StringType {
 
-	public static StringType INSTANCE = new StringType();
+	public static final StringType INSTANCE = new StringType();
 	
 	private StringType() {}
 

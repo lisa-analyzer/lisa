@@ -10,7 +10,6 @@ import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.value.Constant;
 
 /**
@@ -26,19 +25,6 @@ public class Literal extends Expression {
 	private final Object value;
 
 	/**
-	 * Builds an untyped literal, consisting of a constant value. The location where
-	 * this literal happens is unknown (i.e. no source file/line/column is
-	 * available). The type of this literal is unknown (i.e. its type is
-	 * {@link Untyped#INSTANCE}).
-	 * 
-	 * @param cfg   the cfg that this expression belongs to
-	 * @param value the value of this literal
-	 */
-	public Literal(CFG cfg, Object value) {
-		this(cfg, null, -1, -1, value, Untyped.INSTANCE);
-	}
-
-	/**
 	 * Builds a typed literal, consisting of a constant value. The location where
 	 * this literal happens is unknown (i.e. no source file/line/column is
 	 * available).
@@ -49,24 +35,6 @@ public class Literal extends Expression {
 	 */
 	public Literal(CFG cfg, Object value, Type staticType) {
 		this(cfg, null, -1, -1, value, staticType);
-	}
-
-	/**
-	 * Builds the untyped literal, consisting of a constant value, happening at the
-	 * given location in the program. The type of this literal is unknown (i.e. its
-	 * type is {@link Untyped#INSTANCE}).
-	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param value      the value of this literal
-	 */
-	public Literal(CFG cfg, String sourceFile, int line, int col, Object value) {
-		this(cfg, sourceFile, line, col, value, Untyped.INSTANCE);
 	}
 
 	/**
@@ -137,6 +105,6 @@ public class Literal extends Expression {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
 			throws SemanticException {
-		return new AnalysisState<>(entryState.getState(), new Constant(getValue()));
+		return new AnalysisState<>(entryState.getState(), new Constant(getStaticType(), getValue()));
 	}
 }

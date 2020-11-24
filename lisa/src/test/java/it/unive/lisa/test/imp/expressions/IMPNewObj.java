@@ -35,7 +35,8 @@ public class IMPNewObj extends NativeCall {
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
 			throws SemanticException {
 		CFGCall call = null; // TODO we need to resolve this to the actual constructor
-		HeapAllocation created = new HeapAllocation();
+		// TODO should be runtime type
+		HeapAllocation created = new HeapAllocation(getStaticType());
 		SymbolicExpression[] fullParams = ArrayUtils.insert(0, params, created);
 		AnalysisState<H, V> returned = callGraph.getAbstractResultOf(call, computedState, fullParams);
 		return new AnalysisState<>(computedState.getState().lub(returned.getState()), created);

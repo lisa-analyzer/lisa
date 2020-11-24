@@ -27,15 +27,16 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			H sem = smallStepSemantics(unary.getExpression());
-			return mk(sem, new UnaryExpression(sem.getRewrittenExpression(), unary.getOperator()));
+			return mk(sem,
+					new UnaryExpression(expression.getType(), sem.getRewrittenExpression(), unary.getOperator()));
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 			H sem1 = smallStepSemantics(binary.getLeft());
 			H sem2 = sem1.smallStepSemantics(binary.getRight());
-			return mk(sem2, new BinaryExpression(sem1.getRewrittenExpression(), sem2.getRewrittenExpression(),
-					binary.getOperator()));
+			return mk(sem2, new BinaryExpression(expression.getType(), sem1.getRewrittenExpression(),
+					sem2.getRewrittenExpression(), binary.getOperator()));
 		}
 
 		if (expression instanceof ValueExpression)

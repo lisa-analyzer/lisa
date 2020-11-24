@@ -11,11 +11,12 @@ import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.test.imp.types.BoolType;
 
 public class IMPNot extends NativeCall {
 	
 	public IMPNot(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col, "!", new Expression[] { expression });
+		super(cfg, sourceFile, line, col, "!", BoolType.INSTANCE, new Expression[] { expression });
 	}
 
 	@Override
@@ -23,6 +24,6 @@ public class IMPNot extends NativeCall {
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
 			throws SemanticException {
 		return new AnalysisState<>(computedState.getState(),
-				new UnaryExpression(params[0], UnaryOperator.LOGICAL_NOT));
+				new UnaryExpression(BoolType.INSTANCE, params[0], UnaryOperator.LOGICAL_NOT));
 	}
 }

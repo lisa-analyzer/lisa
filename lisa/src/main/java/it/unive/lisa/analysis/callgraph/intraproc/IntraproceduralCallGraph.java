@@ -109,7 +109,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return new AnalysisState<>(entryState.getState().top(), new ValueIdentifier("ret_value"));
+		return new AnalysisState<>(entryState.getState().top(), new ValueIdentifier(call.getStaticType(), "ret_value"));
 	}
 
 }

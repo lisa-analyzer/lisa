@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 
 /**
@@ -35,6 +36,7 @@ public class FalseEdge extends Edge {
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException {
-		return sourceState.assume(new UnaryExpression(sourceState.getLastComputedExpression(), UnaryOperator.LOGICAL_NOT));
+		SymbolicExpression expr = sourceState.getLastComputedExpression();
+		return sourceState.assume(new UnaryExpression(expr.getType(), expr, UnaryOperator.LOGICAL_NOT));
 	}
 }

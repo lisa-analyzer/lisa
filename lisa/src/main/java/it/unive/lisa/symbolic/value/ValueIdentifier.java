@@ -1,9 +1,26 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.cfg.type.Type;
+
+/**
+ * An identifier of a real program variable.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ValueIdentifier extends Identifier {
 
-	public ValueIdentifier(String name) {
-		// TODO Auto-generated constructor stub
+	/**
+	 * Builds the identifier.
+	 * 
+	 * @param type the runtime type of this expression
+	 * @param name the name of the identifier
+	 */
+	public ValueIdentifier(Type type, String name) {
+		super(type, name);
 	}
 
+	@Override
+	public String toString() {
+		return "vid$" + getName();
+	}
 }

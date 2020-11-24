@@ -25,6 +25,7 @@ public class IMPArrayAccess extends NativeCall {
 	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
 			throws SemanticException {
-		return new AnalysisState<>(computedState.getState(), new AccessChild(params[0], params[1]));
+		// TODO should be runtime type
+		return new AnalysisState<>(computedState.getState(), new AccessChild(getStaticType(), params[0], params[1]));
 	}
 }

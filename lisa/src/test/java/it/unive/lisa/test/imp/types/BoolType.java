@@ -6,7 +6,7 @@ import it.unive.lisa.cfg.type.Untyped;
 
 public class BoolType implements BooleanType {
 
-	public static BoolType INSTANCE = new BoolType();
+	public static final BoolType INSTANCE = new BoolType();
 	
 	private BoolType() {}
 

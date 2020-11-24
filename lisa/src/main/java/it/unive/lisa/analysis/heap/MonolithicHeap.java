@@ -24,7 +24,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap BOTTOM = new MonolithicHeap();
 
-	private static final HeapIdentifier MONOLITH = new HeapIdentifier("heap");
+	private static final String MONOLITH_NAME = "heap";
 
 	private final ValueExpression rewritten;
 
@@ -65,7 +65,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	protected MonolithicHeap semanticsOf(HeapExpression expression) {
 		// any expression accessing an area of the heap or instantiating a new one
 		// is modeled through the monolith
-		return new MonolithicHeap(MONOLITH);
+		return new MonolithicHeap(new HeapIdentifier(expression.getType(), MONOLITH_NAME));
 	}
 
 	@Override

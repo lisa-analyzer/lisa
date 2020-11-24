@@ -6,7 +6,7 @@ import it.unive.lisa.cfg.type.Untyped;
 
 public class FloatType implements NumericType {
 
-	public static FloatType INSTANCE = new FloatType();
+	public static final FloatType INSTANCE = new FloatType();
 	
 	private FloatType() {}
 

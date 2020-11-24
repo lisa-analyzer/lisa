@@ -26,6 +26,7 @@ public class IMPAdd extends NativeCall {
 			throws SemanticException {
 		// TODO what if this is a string concat?
 		return new AnalysisState<>(computedState.getState(),
-				new BinaryExpression(params[0], params[1], BinaryOperator.NUMERIC_ADD));
+				// TODO should be runtime type
+				new BinaryExpression(getStaticType(), params[0], params[1], BinaryOperator.NUMERIC_ADD));
 	}
 }

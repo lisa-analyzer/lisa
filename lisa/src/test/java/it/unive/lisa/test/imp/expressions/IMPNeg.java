@@ -24,6 +24,7 @@ public class IMPNeg extends NativeCall {
 			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
 			throws SemanticException {
 		return new AnalysisState<>(computedState.getState(),
-				new UnaryExpression(params[0], UnaryOperator.NUMERIC_NEG));
+				// TODO should be runtime type
+				new UnaryExpression(getStaticType(), params[0], UnaryOperator.NUMERIC_NEG));
 	}
 }

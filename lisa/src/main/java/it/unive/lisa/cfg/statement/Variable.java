@@ -11,6 +11,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
@@ -119,11 +120,16 @@ public class Variable extends Expression {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
 			throws SemanticException {
+		SymbolicExpression expr;
 		if (getStaticType().isPointerType())
 			// the smallStepSemantics will take care of converting that reference to a variable identifier
 			// setting also the identifier as computed expression
-			return entryState.smallStepSemantics(new HeapReference(getName()));
+			// TODO should be runtime type
+			expr = new HeapReference(getStaticType(), getName());
 		else 
-			return entryState.smallStepSemantics(new ValueIdentifier(getName()));
+			// TODO should be runtime type
+			expr = new ValueIdentifier(getStaticType(), getName());
+			
+		return entryState.smallStepSemantics(expr);
 	}
 }
