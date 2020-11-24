@@ -69,12 +69,16 @@ public class IntraproceduralCallGraph implements CallGraph {
 					&& matchParametersTypes(cfg.getDescriptor().getArgs(), call.getParameters()))
 				targets.add(cfg);
 
+		Call resolved;
 		if (targets.isEmpty())
-			return new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getQualifiedName(), call.getStaticType(), call.getParameters());
 		else
-			return new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getQualifiedName(), targets, call.getParameters());
+		
+		resolved.setOffset(call.getOffset());
+		return resolved;
 	}
 
 	private boolean matchParametersTypes(Parameter[] formals, Expression[] actuals) {

@@ -330,4 +330,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			return BOTTOM;
 		}
 	}
+	
+	String representation();
 }

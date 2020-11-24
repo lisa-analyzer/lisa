@@ -66,10 +66,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the state
 	 */
 	public final V getState(K key) {
-		if (this != bottom() && function.containsKey(key))
-			return function.get(key);
-		else
+		if (isBottom())
 			return lattice.bottom();
+		if (isTop())
+			return lattice.top();
+		if (function.containsKey(key))
+			return function.get(key);
+		return lattice.top();
 	}
 
 	@Override

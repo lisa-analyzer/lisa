@@ -119,4 +119,34 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	public MonolithicHeap bottom() {
 		return BOTTOM;
 	}
+	
+	@Override
+	public String representation() {
+		return "monolith";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((rewritten == null) ? 0 : rewritten.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonolithicHeap other = (MonolithicHeap) obj;
+		if (rewritten == null) {
+			if (other.rewritten != null)
+				return false;
+		} else if (!rewritten.equals(other.rewritten))
+			return false;
+		return true;
+	}
 }

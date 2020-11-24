@@ -52,4 +52,9 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 	public boolean isEmpty() {
 		return ws.isEmpty();
 	}
+	
+	@Override
+	public String toString() {
+		return ws.toString();
+	}
 }

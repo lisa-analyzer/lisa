@@ -283,7 +283,7 @@ public class CFG {
 	 *                     given writer
 	 */
 	public void dump(Writer writer, String name, Function<Statement, String> labelGenerator) throws IOException {
-		writer.write("digraph " + name + " {\n");
+		writer.write("digraph " + cleanupForDiagraphTitle(name) + " {\n");
 
 		Map<Statement, Integer> codes = new IdentityHashMap<>();
 		int code = 0;
@@ -318,6 +318,13 @@ public class CFG {
 		}
 
 		writer.write("}");
+	}
+	
+	private static String cleanupForDiagraphTitle(String name) {
+		String result = name.replace(' ', '_');
+		result = result.replace("(", "___");
+		result = result.replace(")", "___");
+		return result;
 	}
 
 	private String dotEscape(String extraLabel) {
@@ -939,8 +946,14 @@ public class CFG {
 
 				if (entrystate == null)
 					throw new FixpointException(current + " does not have an entry state");
-				oldApprox = result.get(current).getLeft();
-				oldExprs = result.get(current).getRight();
+
+				if (result.containsKey(current)) {
+					oldApprox = result.get(current).getLeft();
+					oldExprs = result.get(current).getRight();
+				} else {
+					oldApprox = null;
+					oldExprs = null;
+				}
 
 				try {
 					newApprox = current.semantics(entrystate, cg, newExprs = new ExpressionStates<>(entrystate));
@@ -976,7 +989,7 @@ public class CFG {
 								e);
 					}
 
-				if (!newApprox.lessOrEqual(oldApprox) || !newExprs.lessOrEqual(oldExprs)) {
+				if ((oldApprox == null && oldExprs == null) || !newApprox.lessOrEqual(oldApprox) || !newExprs.lessOrEqual(oldExprs)) {
 					result.put(current, Pair.of(newApprox, newExprs));
 					for (Statement instr : followersOf(current))
 						ws.push(instr);

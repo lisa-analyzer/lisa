@@ -24,7 +24,7 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkOutputFile(String name) throws IOException {
-		return mkOutputFile(name, false);
+		return mkOutputFile(cleanupForDotFile(name), false);
 	}
 
 	/**
@@ -38,15 +38,24 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkOutputFile(String name, boolean bom) throws IOException {
-		File file = new File(name);
+		File file = new File(cleanupForDotFile(name));
 
-		if (!file.getParentFile().exists())
-			file.getParentFile().mkdirs();
+		if (!file.getAbsoluteFile().getParentFile().exists())
+			file.getAbsoluteFile().getParentFile().mkdirs();
 
 		Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder());
 		if (bom)
 			writer.write('\ufeff');
 
 		return writer;
+	}
+	
+	public static Writer mkDotFile(String name) throws IOException {
+		return mkOutputFile(cleanupForDotFile(name), false);
+	}
+
+	private static String cleanupForDotFile(String name) {
+		String result = name.replace(' ', '_');
+		return result;
 	}
 }

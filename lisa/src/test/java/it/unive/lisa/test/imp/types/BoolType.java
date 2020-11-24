@@ -19,4 +19,19 @@ public class BoolType implements BooleanType {
 	public Type commonSupertype(Type other) {
 		return other.isBooleanType() ? this : Untyped.INSTANCE;
 	}
+
+	@Override
+	public String toString() {
+		return "bool";
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof BooleanType;
+	}
+
+	@Override
+	public int hashCode() {
+		return BooleanType.class.getName().hashCode();
+	}
 }

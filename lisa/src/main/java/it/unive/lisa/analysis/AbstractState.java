@@ -144,4 +144,45 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	public AbstractState<H, V> forgetIdentifier(Identifier id) throws SemanticException {
 		return new AbstractState<>(heapState.forgetIdentifier(id), valueState.forgetIdentifier(id));
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((heapState == null) ? 0 : heapState.hashCode());
+		result = prime * result + ((valueState == null) ? 0 : valueState.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AbstractState<?, ?> other = (AbstractState<?, ?>) obj;
+		if (heapState == null) {
+			if (other.heapState != null)
+				return false;
+		} else if (!heapState.equals(other.heapState))
+			return false;
+		if (valueState == null) {
+			if (other.valueState != null)
+				return false;
+		} else if (!valueState.equals(other.valueState))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String representation() {
+		return "heap [[ " + heapState.representation() + " ]]\nvalue [[ " + valueState.representation() + " ]]";
+	}
+	
+	@Override
+	public String toString() {
+		return representation();
+	}
 }

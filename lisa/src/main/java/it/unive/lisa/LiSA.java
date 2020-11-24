@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,8 +18,10 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.analysis.callgraph.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.nonrelational.Environment;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
+import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.NonRelationalValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.checks.CheckTool;
@@ -127,19 +130,41 @@ public class LiSA {
 	/**
 	 * Adds a new {@link HeapDomain} to execute during the analysis.
 	 * 
+	 * @param <T>    the concrete instance of domain to add
 	 * @param domain the domain to execute
 	 */
-	public void addHeapDomain(HeapDomain<?> domain) {
+	public <T extends HeapDomain<T>> void addHeapDomain(T domain) {
 		this.heapDomains.add(domain);
+	}
+
+	/**
+	 * Adds a new {@link NonRelationalHeapDomain} to execute during the analysis.
+	 * 
+	 * @param <T>    the concrete instance of domain to add
+	 * @param domain the domain to execute
+	 */
+	public <T extends NonRelationalHeapDomain<T>> void addNonRelationalHeapDomain(T domain) {
+		this.heapDomains.add(new HeapEnvironment<>(domain));
 	}
 
 	/**
 	 * Adds a new {@link ValueDomain} to execute during the analysis.
 	 * 
+	 * @param <T>    the concrete instance of domain to add
 	 * @param domain the domain to execute
 	 */
-	public void addValueDomain(ValueDomain<?> domain) {
+	public <T extends ValueDomain<T>> void addValueDomain(T domain) {
 		this.valueDomains.add(domain);
+	}
+
+	/**
+	 * Adds a new {@link NonRelationalValueDomain} to execute during the analysis.
+	 * 
+	 * @param <T>    the concrete instance of domain to add
+	 * @param domain the domain to execute
+	 */
+	public <T extends NonRelationalValueDomain<T>> void addNonRelationalValueDomain(T domain) {
+		this.valueDomains.add(new ValueEnvironment<>(domain));
 	}
 
 	/**
@@ -181,7 +206,7 @@ public class LiSA {
 		log.info("  " + heapDomains.size() + " heap domains to execute" + (heapDomains.isEmpty() ? "" : ":"));
 		for (HeapDomain<?> domain : heapDomains)
 			log.info("      " + domain.getClass().getSimpleName());
-		log.info("  " + heapDomains.size() + " value domains to execute" + (valueDomains.isEmpty() ? "" : ":"));
+		log.info("  " + valueDomains.size() + " value domains to execute" + (valueDomains.isEmpty() ? "" : ":"));
 		for (ValueDomain<?> domain : valueDomains)
 			log.info("      " + domain.getClass().getSimpleName());
 	}
@@ -204,46 +229,55 @@ public class LiSA {
 			log.warn("No call graph set for this analysis, defaulting to a non-interprocedural implementation");
 			callGraph = new IntraproceduralCallGraph();
 		}
-		
+
 		inputs.forEach(callGraph::addCFG);
 
-		if (heapDomains.isEmpty()) {
-			log.warn("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
-			heapDomains.add(new MonolithicHeap());
-		} else if (heapDomains.size() > 1) {
+		// to proceed, at least one domain must have been specified
+		if (valueDomains.isEmpty() && heapDomains.isEmpty()) {
+			log.warn("Skipping analysis execution since no abstract domains have been provided");
+			return;
+		}
+
+		// TODO we want to support these eventually
+		if (valueDomains.size() > 1) {
+			log.fatal("Analyses with a combination of value domains are not supported yet");
+			throw new AnalysisExecutionException("Analyses with a combination of value domains are not supported yet");
+		}
+
+		// TODO we want to support these eventually
+		if (heapDomains.size() > 1) {
 			log.fatal("Analyses with a combination of heap domains are not supported yet");
 			throw new AnalysisExecutionException("Analyses with a combination of heap domains are not supported yet");
 		}
 
-		if (valueDomains.isEmpty())
-			log.warn("Skipping analysis execution since no value domains have been provided");
-		else if (valueDomains.size() > 1) {
-			log.fatal("Analyses with a combination of value domains are not supported yet");
-			throw new AnalysisExecutionException("Analyses with a combination of value domains are not supported yet");
-		} else {
-			HeapDomain heap = heapDomains.iterator().next();
-			ValueDomain value = valueDomains.iterator().next();
-			if (value instanceof NonRelationalDomain)
-				value = new Environment<>((NonRelationalDomain) value);
+		if (heapDomains.isEmpty()) {
+			log.warn("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
+			heapDomains.add(new MonolithicHeap());
+		} else if (valueDomains.isEmpty()) {
+			// TODO we should have a base analysis that can serve as default
+			log.warn("Skipping analysis execution since no abstract domains have been provided");
+			return;
+		}
 
-			try {
-				callGraph.fixpoint(new AnalysisState(
-						new AbstractState((HeapDomain) heap.top(), (ValueDomain) value.top()), new Skip()));
-			} catch (FixpointException e) {
-				log.fatal("Exception during fixpoint computation", e);
-				throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-			}
+		HeapDomain heap = heapDomains.iterator().next();
+		ValueDomain value = valueDomains.iterator().next();
 
-			for (CFG cfg : inputs) {
-				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
-				try {
-					result.dump(FileManager.mkOutputFile(cfg.getDescriptor().getFullSignature()),
-							cfg.getDescriptor().getFullSignature(), st -> result.getAnalysisStateAt(st).toString());
-				} catch (IOException e) {
-					log.error(
-							"Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
-							e);
-				}
+		try {
+			callGraph.fixpoint(new AnalysisState(new AbstractState((HeapDomain) heap.top(), (ValueDomain) value.top()),
+					new Skip()));
+		} catch (FixpointException e) {
+			log.fatal("Exception during fixpoint computation", e);
+			throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+		}
+
+		for (CFG cfg : inputs) {
+			CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+			try (Writer file = FileManager.mkOutputFile(cfg.getDescriptor().getFullSignature() + ".dot")) {
+				result.dump(file, cfg.getDescriptor().getFullSignature(),
+						st -> result.getAnalysisStateAt(st).toString());
+			} catch (IOException e) {
+				log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
+						e);
 			}
 		}
 

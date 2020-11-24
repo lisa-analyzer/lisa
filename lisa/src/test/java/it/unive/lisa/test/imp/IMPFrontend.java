@@ -15,7 +15,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Triple;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -115,8 +115,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private CFG currentCFG;
 
-	private Statement lastStatement;
-
 	private IMPFrontend(String file) {
 		this.cfgs = new HashSet<CFG>();
 		this.file = file;
@@ -164,10 +162,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		// side effects on entrypoints and matrix will affect the cfg
 		currentCFG = new CFG(mkDescriptor(ctx), entrypoints, matrix);
 
-		lastStatement = null;
-		Triple<AdjacencyMatrix, Statement, Statement> visited = visitBlock(ctx.block());
-		entrypoints.add(visited.getMiddle());
-		matrix.mergeWith(visited.getMiddle(), visited.getLeft());
+		Pair<Statement, Statement> visited = visitBlock(ctx.block());
+		entrypoints.add(visited.getLeft());
 
 		currentCFG.simplify();
 		cfgs.add(currentCFG);
@@ -193,76 +189,69 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<AdjacencyMatrix, Statement, Statement> visitBlock(BlockContext ctx) {
+	public Pair<Statement, Statement> visitBlock(BlockContext ctx) {
 		Statement first = null, last = null;
-		AdjacencyMatrix matrix = new AdjacencyMatrix();
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			Triple<AdjacencyMatrix, Statement, Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
+			Pair<Statement, Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			if (first == null)
-				first = st.getMiddle();
-			matrix.addNode(st.getMiddle());
-			if (lastStatement != null)
-				matrix.addEdge(new SequentialEdge(lastStatement, st.getMiddle()));
-			if (st.getLeft() != null)
-				matrix.mergeWith(st.getMiddle(), st.getLeft());
-			lastStatement = st.getRight();
+				first = st.getLeft();
+			if (last != null)
+				matrix.addEdge(new SequentialEdge(last, st.getLeft()));
+			last = st.getRight();
 		}
 
-		return Triple.of(matrix, first, last);
+		return Pair.of(first, last);
 	}
 
 	@Override
-	public Triple<AdjacencyMatrix, Statement, Statement> visitBlockOrStatement(BlockOrStatementContext ctx) {
-		Statement tmp;
+	public Pair<Statement, Statement> visitBlockOrStatement(BlockOrStatementContext ctx) {
 		if (ctx.statement() != null)
-			return Triple.of(null, tmp = visitStatement(ctx.statement()), tmp);
+			return visitStatement(ctx.statement());
 		else
 			return visitBlock(ctx.block());
 	}
 
 	@Override
-	public Statement visitStatement(StatementContext ctx) {
+	public Pair<Statement, Statement> visitStatement(StatementContext ctx) {
+		Statement st;
 		if (ctx.assignment() != null)
-			return visitAssignment(ctx.assignment());
+			st = visitAssignment(ctx.assignment());
 		else if (ctx.ASSERT() != null)
-			return new IMPAssert(currentCFG, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
+			st = new IMPAssert(currentCFG, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
 		else if (ctx.RETURN() != null)
 			if (ctx.expression() != null)
-				return new Return(currentCFG, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
+				st = new Return(currentCFG, file, getLine(ctx), getCol(ctx),
+						visitExpression(ctx.expression()));
 			else
-				return new Ret(currentCFG, file, getLine(ctx), getCol(ctx));
+				st = new Ret(currentCFG, file, getLine(ctx), getCol(ctx));
 		else if (ctx.THROW() != null)
-			return new Throw(currentCFG, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
+			st = new Throw(currentCFG, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
 		else if (ctx.skip != null)
-			return new NoOp(currentCFG, file, getLine(ctx), getCol(ctx));
+			st = new NoOp(currentCFG, file, getLine(ctx), getCol(ctx));
 		else if (ctx.IF() != null)
 			return visitIf(ctx);
 		else if (ctx.loop() != null)
 			return visitLoop(ctx.loop());
 		else if (ctx.command != null)
-			return visitExpression(ctx.command);
+			st = visitExpression(ctx.command);
 		else
 			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
+		
+		matrix.addNode(st);
+		return Pair.of(st, st);
 	}
 
-	private Statement visitIf(StatementContext ctx) {
+	private Pair<Statement, Statement> visitIf(StatementContext ctx) {
 		Statement condition = visitParExpr(ctx.parExpr());
 		matrix.addNode(condition);
-		matrix.addEdge(new SequentialEdge(lastStatement, condition));
 
-		lastStatement = null; // this prevents the sequential edge between condition and next to be created
-		Triple<AdjacencyMatrix, Statement, Statement> then = visitBlockOrStatement(ctx.then);
-		matrix.addEdge(new TrueEdge(condition, then.getMiddle()));
-		if (then.getLeft() != null)
-			matrix.mergeWith(then.getMiddle(), then.getLeft());
+		Pair<Statement, Statement> then = visitBlockOrStatement(ctx.then);
+		matrix.addEdge(new TrueEdge(condition, then.getLeft()));
 
-		Triple<AdjacencyMatrix, Statement, Statement> otherwise = null;
+		Pair<Statement, Statement> otherwise = null;
 		if (ctx.otherwise != null) {
-			lastStatement = null; // this prevents the sequential edge between condition and next to be created
 			otherwise = visitBlockOrStatement(ctx.otherwise);
-			matrix.addEdge(new FalseEdge(condition, otherwise.getMiddle()));
-			if (otherwise.getLeft() != null)
-				matrix.mergeWith(otherwise.getMiddle(), otherwise.getLeft());
+			matrix.addEdge(new FalseEdge(condition, otherwise.getLeft()));
 		}
 
 		Statement noop = new NoOp(currentCFG, file, condition.getLine(), condition.getCol());
@@ -270,8 +259,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		matrix.addEdge(new SequentialEdge(then.getRight(), noop));
 		if (otherwise != null)
 			matrix.addEdge(new SequentialEdge(otherwise.getRight(), noop));
-		lastStatement = noop;
-		return noop;
+		
+		return Pair.of(condition, noop);
 	}
 
 	@Override
@@ -280,7 +269,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Statement visitLoop(LoopContext ctx) {
+	public Pair<Statement, Statement> visitLoop(LoopContext ctx) {
 		if (ctx.whileLoop() != null)
 			return visitWhileLoop(ctx.whileLoop());
 		else
@@ -288,62 +277,59 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Statement visitWhileLoop(WhileLoopContext ctx) {
+	public Pair<Statement, Statement> visitWhileLoop(WhileLoopContext ctx) {
 		Statement condition = visitParExpr(ctx.parExpr());
 		matrix.addNode(condition);
-		matrix.addEdge(new SequentialEdge(lastStatement, condition));
 
-		lastStatement = null; // this prevents the sequential edge between condition and next to be created
-		Triple<AdjacencyMatrix, Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		matrix.addEdge(new TrueEdge(condition, body.getMiddle()));
+		Pair<Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+		matrix.addEdge(new TrueEdge(condition, body.getLeft()));
 		matrix.addEdge(new SequentialEdge(body.getRight(), condition));
-		if (body.getLeft() != null)
-			matrix.mergeWith(body.getMiddle(), body.getLeft());
 
 		Statement noop = new NoOp(currentCFG, file, condition.getLine(), condition.getCol());
 		matrix.addNode(noop);
 		matrix.addEdge(new FalseEdge(condition, noop));
-		lastStatement = noop;
-		return noop;
+
+		return Pair.of(condition, noop);
 	}
 
 	@Override
-	public Statement visitForLoop(ForLoopContext ctx) {
+	public Pair<Statement, Statement> visitForLoop(ForLoopContext ctx) {
 		AssignmentContext init = ctx.forDeclaration().init;
 		ExpressionContext cond = ctx.forDeclaration().condition;
 		AssignmentContext post = ctx.forDeclaration().post;
 
+		Statement first = null, last = null;
 		if (init != null) {
 			Statement assignment = visitAssignment(init);
 			matrix.addNode(assignment);
-			matrix.addEdge(new SequentialEdge(lastStatement, assignment));
-			lastStatement = assignment;
+			first = assignment;
 		}
 
 		Statement condition = visitExpression(cond);
 		matrix.addNode(condition);
-		matrix.addEdge(new SequentialEdge(lastStatement, condition));
+		if (first == null)
+			first = condition;
+		else
+			matrix.addEdge(new SequentialEdge(first, condition));
 
-		lastStatement = null; // this prevents the sequential edge between condition and next to be created
-		Triple<AdjacencyMatrix, Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		matrix.addEdge(new TrueEdge(condition, body.getMiddle()));
-		if (body.getLeft() != null)
-			matrix.mergeWith(body.getMiddle(), body.getLeft());
+		Pair<Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+		matrix.addEdge(new TrueEdge(condition, body.getLeft()));
+		last = body.getRight();
 
-		lastStatement = body.getRight();
 		if (post != null) {
-			Statement assignment = visitAssignment(post);
-			matrix.addNode(assignment);
-			matrix.addEdge(new SequentialEdge(lastStatement, assignment));
-			lastStatement = assignment;
+			Assignment inc = visitAssignment(post);
+			matrix.addNode(inc);
+			matrix.addEdge(new SequentialEdge(body.getRight(), inc));
+			last = inc;
 		}
-		matrix.addEdge(new SequentialEdge(lastStatement, condition));
-
+		
+		matrix.addEdge(new SequentialEdge(last, condition));
+		
 		Statement noop = new NoOp(currentCFG, file, condition.getLine(), condition.getCol());
 		matrix.addNode(noop);
 		matrix.addEdge(new FalseEdge(condition, noop));
-		lastStatement = noop;
-		return noop;
+		
+		return Pair.of(first, noop);
 	}
 
 	@Override
@@ -418,32 +404,32 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
 				return new IMPMul(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.DIV() != null)
 				return new IMPDiv(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.MOD() != null)
 				return new IMPMod(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.ADD() != null)
 				return new IMPAdd(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.SUB() != null)
 				return new IMPSub(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.GT() != null)
 				return new IMPGreaterThan(currentCFG, file, line, col, visitExpression(ctx.left),
 						visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.GE() != null)
 				return new IMPGreaterOrEqual(currentCFG, file, line, col, visitExpression(ctx.left),
 						visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.LT() != null)
 				return new IMPLessThan(currentCFG, file, line, col, visitExpression(ctx.left),
 						visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.LE() != null)
 				return new IMPLessOrEqual(currentCFG, file, line, col, visitExpression(ctx.left),
 						visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.EQUAL() != null)
 				return new IMPEqual(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.NOTEQUAL() != null)
 				return new IMPNotEqual(currentCFG, file, line, col, visitExpression(ctx.left),
 						visitExpression(ctx.right));
-			else if (ctx.MUL() != null)
+			else if (ctx.AND() != null)
 				return new IMPAnd(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else
 				return new IMPOr(currentCFG, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));

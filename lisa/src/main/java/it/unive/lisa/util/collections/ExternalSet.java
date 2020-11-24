@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -475,6 +476,39 @@ public class ExternalSet<T> implements Iterable<T> {
 				res[otherlength] |= otherbits[otherlength];
 		}
 
+		return result;
+	}
+	
+	public boolean anyMatch(Predicate<T> predicate) {
+		for (T t : this)
+			if (predicate.test(t))
+				return true;
+		
+		return false;
+	}
+	
+	public boolean noneMatch(Predicate<T> predicate) {
+		for (T t : this)
+			if (predicate.test(t))
+				return false;
+		
+		return true;
+	}
+	
+	public boolean allMatch(Predicate<T> predicate) {
+		for (T t : this)
+			if (!predicate.test(t))
+				return false;
+		
+		return true;
+	}
+	
+	public ExternalSet<T> filter(Predicate<T> predicate) {
+		ExternalSet<T> result = copy();
+		for (T t : this)
+			if (!predicate.test(t))
+				result.remove(t);
+		
 		return result;
 	}
 

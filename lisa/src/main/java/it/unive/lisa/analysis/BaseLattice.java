@@ -15,10 +15,10 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	@Override
 	@SuppressWarnings("unchecked")
 	public final L lub(L other) throws SemanticException {
-		if (other == null || other == bottom() || this == top() || this == other || equals(other))
+		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
-		if (this == bottom() || other == top())
+		if (this.isBottom() || other.isTop())
 			return other;
 
 		return lubAux(other);
@@ -44,10 +44,10 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	@Override
 	@SuppressWarnings("unchecked")
 	public final L widening(L other) throws SemanticException {
-		if (other == null || other == bottom() || this == top() || this == other || equals(other))
+		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
-		if (this == bottom() || other == top())
+		if (this.isBottom() || other.isTop())
 			return other;
 
 		return wideningAux(other);
@@ -75,10 +75,10 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 		if (other == null)
 			return false;
 
-		if (this == other || this == bottom() || other == top() || equals(other))
+		if (this == other || this.isBottom() || other.isTop() || this.equals(other))
 			return true;
 
-		if (this == top() || other == bottom())
+		if (this.isTop() || other.isBottom())
 			return false;
 
 		return lessOrEqualAux(other);

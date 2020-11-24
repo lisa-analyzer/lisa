@@ -1,5 +1,6 @@
 package it.unive.lisa.test.imp.types;
 
+import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
@@ -44,5 +45,20 @@ public class IntType implements NumericType {
 	@Override
 	public Type commonSupertype(Type other) {
 		return other == this ? this : other == FloatType.INSTANCE ? other : Untyped.INSTANCE;
+	}
+
+	@Override
+	public String toString() {
+		return "int";
+	}
+
+	@Override
+	public boolean equals(Object other) {
+		return other instanceof NumericType && ((NumericType) other).is32Bits();
+	}
+
+	@Override
+	public int hashCode() {
+		return IntType.class.getName().hashCode();
 	}
 }

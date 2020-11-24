@@ -17,6 +17,11 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H> implements HeapDomain<H> {
+	
+	@Override
+	public final String toString() {
+		return representation();
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
