@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.callgraph.intraproc;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -41,9 +42,11 @@ public class IntraproceduralCallGraph implements CallGraph {
 	private static final Logger log = LogManager.getLogger(IntraproceduralCallGraph.class);
 
 	/**
-	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all the cfgs that have been added
+	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all the
+	 * cfgs that have been added. If a key's values's {@link Optional#isEmpty()}
+	 * yields true, then the fixpoint for that key has not be computed yet.
 	 */
-	private final Map<CFG, CFGWithAnalysisResults<?, ?>> results;
+	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?>>> results;
 
 	/**
 	 * Builds the call graph.
@@ -54,7 +57,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	public void addCFG(CFG cfg) {
-		results.put(cfg, null);
+		results.put(cfg, Optional.empty());
 	}
 
 	@Override
@@ -90,14 +93,14 @@ public class IntraproceduralCallGraph implements CallGraph {
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
 				"cfgs"))
-			results.put(cfg, cfg.fixpoint(entryState, this));
+			results.put(cfg, Optional.of(cfg.fixpoint(entryState, this)));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(
 			CFG cfg) {
-		return (CFGWithAnalysisResults<H, V>) results.get(cfg);
+		return (CFGWithAnalysisResults<H, V>) results.get(cfg).orElse(null);
 	}
 
 	@Override
