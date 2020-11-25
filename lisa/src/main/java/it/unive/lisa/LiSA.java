@@ -220,9 +220,10 @@ public class LiSA {
 	private void runAux() throws AnalysisExecutionException {
 		CheckTool tool = new CheckTool();
 
-		if (!syntacticChecks.isEmpty())
+		if (!syntacticChecks.isEmpty()) {
 			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
-		else
+			warnings.addAll(tool.getWarnings());
+		} else
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (callGraph == null) {
@@ -280,8 +281,6 @@ public class LiSA {
 						e);
 			}
 		}
-
-		warnings.addAll(tool.getWarnings());
 	}
 
 	/**
