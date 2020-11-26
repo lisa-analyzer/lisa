@@ -11,4 +11,32 @@ class typing {
 			x = "s";
 		return x;
 	}
+	
+	test3(i) {
+		while (i > 5)
+			i = i + 1;
+		return i;
+	}
+	
+	test4(i) {
+		for (;i > 5; i = i + 1)
+			x = "s";
+		return x;
+	}
+	
+	test5(i) {
+		for (;i > 5; i = i + 1)
+			if (i % 2 == 0)
+				x = "s";
+			else
+				x = "p";
+		return x;
+	}
+	
+	test6(i) {
+		if (i % 2 == 0)
+			for (;i > 5; i = i + 1)
+				x = "p";
+		return x;
+	}
 }

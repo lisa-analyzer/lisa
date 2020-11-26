@@ -284,42 +284,94 @@ public class CFG {
 	 */
 	public void dump(Writer writer, String name, Function<Statement, String> labelGenerator) throws IOException {
 		writer.write("digraph " + cleanupForDiagraphTitle(name) + " {\n");
+		writer.write("graph [ordering=\"out\"];\n");
+		writer.write("node [shape=rect,color=gray];\n");
 
 		Map<Statement, Integer> codes = new IdentityHashMap<>();
 		int code = 0;
 
+		// dump the entrypoints first for the layout
+		for (Statement st : entrypoints) {
+			StringBuilder label = new StringBuilder();
+			code = dotNode(codes, st, code, labelGenerator, label);
+			writer.write(label.toString());
+		}
+
+		// dump all other statements
+		for (Statement st : adjacencyMatrix.getNodes())
+			if (!entrypoints.contains(st)) {
+				StringBuilder label = new StringBuilder();
+				code = dotNode(codes, st, code, labelGenerator, label);
+				writer.write(label.toString());
+			}
+
 		for (Map.Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> entry : adjacencyMatrix) {
-			Statement current = entry.getKey();
-
-			if (!codes.containsKey(current))
-				codes.put(current, code++);
-
-			int id = codes.get(current);
-			String extraLabel = labelGenerator.apply(current);
-			if (!extraLabel.isEmpty())
-				extraLabel = "<BR/>" + dotEscape(extraLabel);
-
-			writer.write("node" + id + " [");
-			writer.write(provideVertexShapeIfNeeded(current));
-			writer.write("label = <" + dotEscape(current.toString()) + extraLabel + ">];\n");
-
+			int id = codes.get(entry.getKey());
 			for (Edge edge : entry.getValue().getRight()) {
-				Statement follower = edge.getDestination();
-				if (!codes.containsKey(follower))
-					codes.put(follower, code++);
-
-				int id1 = codes.get(follower);
+				int id1 = codes.get(edge.getDestination());
 				String label = provideEdgeLabelIfNeeded(edge);
 				if (!label.isEmpty())
-					writer.write("node" + id + " -> node" + id1 + " [label=\"" + label + "\"]\n");
+					writer.write("node" + id + " -> node" + id1 + " " + label + "\n");
 				else
 					writer.write("node" + id + " -> node" + id1 + "\n");
 			}
 		}
 
+		appendLegend(writer);
 		writer.write("}");
 	}
-	
+
+	private static void appendLegend(Writer writer) throws IOException {
+		writer.write("\nsubgraph cluster_01 {\n");
+		writer.write("  label = \"Nodes\";\n");
+		writer.write("  node [shape=plaintext];\n");
+		writer.write("  key0 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("    <tr><td align=\"left\">gray</td></tr>\n");
+		writer.write("    <tr><td align=\"left\">brack</td></tr>\n");
+		writer.write("    <tr><td align=\"left\">black, double</td></tr>\n");
+		writer.write("    </table>>];\n");
+		writer.write("  key3 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("    <tr><td align=\"right\">node border</td></tr>\n");
+		writer.write("    <tr><td align=\"right\">entrypoint border</td></tr>\n");
+		writer.write("    <tr><td align=\"right\">exitpoint border</td></tr>\n");
+		writer.write("    </table>>];\n");
+		writer.write("}\n");
+		
+		writer.write("\nsubgraph cluster_02 {\n");
+		writer.write("  label = \"Edges\";\n");
+		writer.write("  node [shape=plaintext];\n");
+		writer.write("  key2 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("    <tr><td port=\"e1\">&nbsp;</td></tr>\n");
+		writer.write("    <tr><td port=\"e2\">&nbsp;</td></tr>\n");
+		writer.write("    <tr><td port=\"e3\">&nbsp;</td></tr>\n");
+		writer.write("    </table>>];\n");
+		writer.write("  key [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("    <tr><td align=\"right\" port=\"i1\">sequential edge&nbsp;</td></tr>\n");
+		writer.write("    <tr><td align=\"right\" port=\"i2\">true edge&nbsp;</td></tr>\n");
+		writer.write("    <tr><td align=\"right\" port=\"i3\">false edge&nbsp;</td></tr>\n");
+		writer.write("    </table>>];\n");
+		writer.write("  key:i1:e -> key2:e1:w [constraint=false]\n");
+		writer.write("  key:i2:e -> key2:e2:w [style=dashed,color=red,constraint=false]\n");
+		writer.write("  key:i3:e -> key2:e3:w [style=dashed,color=blue,constraint=false]\n");
+		writer.write("}\n");
+		writer.write("key0 -> key2 [ltail=cluster_01,lhead=cluster_02,style=invis]\n");
+	}
+
+	private int dotNode(Map<Statement, Integer> codes, Statement st, int nextCode,
+			Function<Statement, String> labelGenerator, StringBuilder label) {
+		if (!codes.containsKey(st))
+			codes.put(st, nextCode++);
+
+		int id = codes.get(st);
+		String extraLabel = labelGenerator.apply(st);
+		if (!extraLabel.isEmpty())
+			extraLabel = "<BR/>" + dotEscape(extraLabel);
+
+		label.append("node").append(id).append(" [").append(provideVertexShapeIfNeeded(st)).append("label = <")
+				.append(dotEscape(st.toString())).append(extraLabel).append(">];\n");
+		return nextCode;
+	}
+
 	private static String cleanupForDiagraphTitle(String name) {
 		String result = name.replace(' ', '_');
 		result = result.replace("(", "___");
@@ -327,25 +379,24 @@ public class CFG {
 		return result;
 	}
 
-	private String dotEscape(String extraLabel) {
+	private static String dotEscape(String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
 		String replace = escapeHtml4.replaceAll("\\n", "<BR/>");
 		return replace.replace("\\", "\\\\");
 	}
-
 	private String provideVertexShapeIfNeeded(Statement vertex) {
-		String shape = "shape = rect,";
-		if (predecessorsOf(vertex).isEmpty() || followersOf(vertex).isEmpty())
-			shape += "peripheries=2,";
-
-		return shape;
+		if (followersOf(vertex).isEmpty())
+			return "peripheries=2,color=brack,";
+		if (entrypoints.contains(vertex))
+			return "color=black,";
+		return "";
 	}
 
 	private String provideEdgeLabelIfNeeded(Edge edge) {
 		if (edge instanceof TrueEdge)
-			return "true";
+			return "[style=dashed,color=blue]";
 		else if (edge instanceof FalseEdge)
-			return "false";
+			return "[style=dashed,color=red]";
 
 		return "";
 	}
@@ -931,10 +982,11 @@ public class CFG {
 				Statement current = ws.pop();
 
 				if (current == null)
-					throw new FixpointException("Unknown instruction encountered during fixpoint execution");
+					throw new FixpointException(
+							"Unknown instruction encountered during fixpoint execution in '" + descriptor + "'");
 				if (!adjacencyMatrix.getNodes().contains(current))
-					throw new FixpointException(current
-							+ " is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
+					throw new FixpointException("'" + current
+							+ "' is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
 
 				AnalysisState<H, V> entrystate;
 				try {
@@ -989,7 +1041,8 @@ public class CFG {
 								e);
 					}
 
-				if ((oldApprox == null && oldExprs == null) || !newApprox.lessOrEqual(oldApprox) || !newExprs.lessOrEqual(oldExprs)) {
+				if ((oldApprox == null && oldExprs == null) || !newApprox.lessOrEqual(oldApprox)
+						|| !newExprs.lessOrEqual(oldExprs)) {
 					result.put(current, Pair.of(newApprox, newExprs));
 					for (Statement instr : followersOf(current))
 						ws.push(instr);
@@ -1005,7 +1058,7 @@ public class CFG {
 
 			return new CFGWithAnalysisResults<>(this, finalResults);
 		} catch (Exception e) {
-			log.fatal("Unexpected exception during fixpoint computation of " + descriptor + ": " + e);
+			log.fatal("Unexpected exception during fixpoint computation of '" + descriptor + "': " + e);
 			throw new FixpointException("Unexpected exception during fixpoint computation", e);
 		}
 	}
@@ -1017,10 +1070,12 @@ public class CFG {
 		Collection<Statement> preds = predecessorsOf(current);
 		List<AnalysisState<H, V>> states = new ArrayList<>(preds.size());
 
-		for (Statement pred : preds) {
-			Edge edge = adjacencyMatrix.getEdgeConnecting(pred, current);
-			states.add(edge.traverse(result.get(edge.getSource()).getLeft()));
-		}
+		for (Statement pred : preds)
+			if (result.containsKey(pred)) {
+				// this might not have been computed yet
+				Edge edge = adjacencyMatrix.getEdgeConnecting(pred, current);
+				states.add(edge.traverse(result.get(edge.getSource()).getLeft()));
+			}
 
 		for (AnalysisState<H, V> s : states)
 			if (entrystate == null)
@@ -1066,7 +1121,7 @@ public class CFG {
 		public ExpressionStates<H, V> top() {
 			return new ExpressionStates<>(lattice.top());
 		}
-		
+
 		@Override
 		public boolean isTop() {
 			return lattice.isTop() && (function == null || function.isEmpty());

@@ -16,7 +16,7 @@ import it.unive.lisa.test.imp.IMPFrontend;
 
 public class TypeInferenceTest {
 	@Test
-	public void testSyntacticChecks() throws IOException {
+	public void testTypeInference() throws IOException {
 		LiSA lisa = new LiSA();
 
 		Collection<CFG> cfgs = IMPFrontend.processFile("imp-testcases/type-inference/program.imp");

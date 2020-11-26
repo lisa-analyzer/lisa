@@ -259,6 +259,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		matrix.addEdge(new SequentialEdge(then.getRight(), noop));
 		if (otherwise != null)
 			matrix.addEdge(new SequentialEdge(otherwise.getRight(), noop));
+		else 
+			matrix.addEdge(new FalseEdge(condition, noop));
+			
 		
 		return Pair.of(condition, noop);
 	}
