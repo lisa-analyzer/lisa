@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -63,46 +65,52 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	@Override
 	public AbstractState<H, V> assign(Identifier id, SymbolicExpression expression) throws SemanticException {
 		H heap = heapState.assign(id, expression);
-		ValueExpression expr = heap.getRewrittenExpression();
+		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
 			value = value.applySubstitution(heap.getSubstitution());
 
-		value = value.assign(id, expr);
+		for (ValueExpression expr : exprs)
+			value = value.assign(id, expr);
 		return new AbstractState<>(heap, value);
 	}
 
 	@Override
 	public AbstractState<H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
 		H heap = heapState.smallStepSemantics(expression);
-		ValueExpression expr = heap.getRewrittenExpression();
+		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
 			value = value.applySubstitution(heap.getSubstitution());
 
-		value = value.smallStepSemantics(expr);
+		for (ValueExpression expr : exprs)
+			value = value.smallStepSemantics(expr);
 		return new AbstractState<>(heap, value);
 	}
 
 	@Override
 	public AbstractState<H, V> assume(SymbolicExpression expression) throws SemanticException {
 		H heap = heapState.assume(expression);
-		ValueExpression expr = heap.getRewrittenExpression();
+		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
 			value = value.applySubstitution(heap.getSubstitution());
 
-		value = value.assume(expr);
+		for (ValueExpression expr : exprs)
+			value = value.assume(expr);
 		return new AbstractState<>(heap, value);
 	}
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
-		return heapState.satisfies(expression)
-				.glb(valueState.satisfies(heapState.smallStepSemantics(expression).getRewrittenExpression()));
+		Collection<ValueExpression> rewritten = heapState.smallStepSemantics(expression).getRewrittenExpressions();
+		Satisfiability result = Satisfiability.BOTTOM;
+		for (ValueExpression expr : rewritten)
+			result = result.lub(valueState.satisfies(expr));
+		return heapState.satisfies(expression).glb(result);
 	}
 
 	@Override
@@ -180,7 +188,7 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	public String representation() {
 		return "heap [[ " + heapState.representation() + " ]]\nvalue [[ " + valueState.representation() + " ]]";
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation();

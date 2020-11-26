@@ -1,5 +1,7 @@
 package it.unive.lisa.test.imp.expressions;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -24,8 +26,8 @@ public class IMPNewArray extends NativeCall {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		// TODO should be runtime type
 		return new AnalysisState<>(computedState.getState(), new HeapAllocation(getStaticType()));

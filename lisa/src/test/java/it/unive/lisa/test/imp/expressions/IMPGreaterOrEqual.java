@@ -1,5 +1,7 @@
 package it.unive.lisa.test.imp.expressions;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -22,10 +24,20 @@ public class IMPGreaterOrEqual extends NativeCall {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
-		return new AnalysisState<>(computedState.getState(),
-				new BinaryExpression(BoolType.INSTANCE, params[0], params[1], BinaryOperator.COMPARISON_GE));
+		AnalysisState<H, V> result = null;
+		for (SymbolicExpression expr1 : params[0])
+			for (SymbolicExpression expr2 : params[1]) {
+				// TODO should be runtime type
+				AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
+						new BinaryExpression(BoolType.INSTANCE, expr1, expr2, BinaryOperator.COMPARISON_GE));
+				if (result == null)
+					result = tmp;
+				else
+					result = result.lub(tmp);
+			}
+		return result;
 	}
 }

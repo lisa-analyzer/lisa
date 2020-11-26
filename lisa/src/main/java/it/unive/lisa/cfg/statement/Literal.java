@@ -65,7 +65,7 @@ public class Literal extends Expression {
 	public Object getValue() {
 		return value;
 	}
-	
+
 	@Override
 	public int setOffset(int offset) {
 		return this.offset = offset;

@@ -1,5 +1,7 @@
 package it.unive.lisa.cfg.edge;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -36,7 +38,16 @@ public class FalseEdge extends Edge {
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException {
-		SymbolicExpression expr = sourceState.getLastComputedExpression();
-		return sourceState.assume(new UnaryExpression(expr.getType(), expr, UnaryOperator.LOGICAL_NOT));
+		Collection<SymbolicExpression> exprs = sourceState.getComputedExpressions();
+		AnalysisState<H, V> result = null;
+		for (SymbolicExpression expr : exprs) {
+			AnalysisState<H, V> tmp = sourceState
+					.assume(new UnaryExpression(expr.getType(), expr, UnaryOperator.LOGICAL_NOT));
+			if (result == null)
+				result = tmp;
+			else
+				result = result.lub(tmp);
+		}
+		return result;
 	}
 }

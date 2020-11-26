@@ -1,6 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
@@ -57,7 +58,7 @@ public abstract class Call extends Expression {
 	public final Expression[] getParameters() {
 		return parameters;
 	}
-	
+
 	@Override
 	public final int setOffset(int offset) {
 		this.offset = offset;
@@ -123,13 +124,14 @@ public abstract class Call extends Expression {
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
 			throws SemanticException {
-		SymbolicExpression[] computed = new SymbolicExpression[parameters.length];
+		@SuppressWarnings("unchecked")
+		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
 		AnalysisState<H, V> current = entryState;
 		for (int i = 0; i < computed.length; i++) {
 			current = parameters[i].semantics(current, callGraph, expressions);
 			expressions.put(parameters[i], current);
-			computed[i] = current.getLastComputedExpression();
+			computed[i] = current.getComputedExpressions();
 		}
 
 		AnalysisState<H, V> result = callSemantics(current, callGraph, computed);
@@ -144,18 +146,18 @@ public abstract class Call extends Expression {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
-	 * @param <V>           the type of the value analysis
-	 * @param computedState the entry state that has been computed by chaining the
-	 *                      parameters' semantics evaluation
-	 * @param callGraph     the call graph of the program to analyze
-	 * @param params        the symbolic expressions representing the computed
-	 *                      values of the parameters of this call
+	 * @param <H>       the type of the heap analysis
+	 * @param <V>       the type of the value analysis
+	 * @param current   the entry state that has been computed by chaining the
+	 *                  parameters' semantics evaluation
+	 * @param callGraph the call graph of the program to analyze
+	 * @param params    the symbolic expressions representing the computed values of
+	 *                  the parameters of this call
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *         execution of this call
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> current, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException;
 }

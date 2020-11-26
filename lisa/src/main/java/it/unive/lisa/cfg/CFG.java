@@ -1064,7 +1064,12 @@ public class CFG {
 
 		@Override
 		public ExpressionStates<H, V> top() {
-			throw new IllegalStateException("top() should never be called on an instance of " + getClass().getName());
+			return new ExpressionStates<>(lattice.top());
+		}
+		
+		@Override
+		public boolean isTop() {
+			return lattice.isTop() && (function == null || function.isEmpty());
 		}
 
 		@Override
@@ -1074,7 +1079,7 @@ public class CFG {
 
 		@Override
 		public boolean isBottom() {
-			return function == null || function.isEmpty();
+			return lattice.isBottom() && (function == null || function.isEmpty());
 		}
 	}
 }

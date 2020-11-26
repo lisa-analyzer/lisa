@@ -27,19 +27,23 @@ public interface HeapDomain<D extends HeapDomain<D>>
 		extends SemanticDomain<D, SymbolicExpression, Identifier>, Lattice<D> {
 
 	/**
-	 * Yields the expression that was computed during the generation of this heap
+	 * Yields the expressions that were computed during the generation of this heap
 	 * domain. When evaluating semantics of expressions or assignments, a heap
-	 * domain might rewrite the original expression to get rid of the parts that
+	 * domain might rewrite an expression to get rid of the parts that
 	 * access heap structures, substituting them with synthetic
-	 * {@link HeapIdentifier}s representing the accessed locations. The expression
+	 * {@link HeapIdentifier}s representing the accessed locations. The expressions
 	 * returned by this method should not contain {@link HeapExpression}s.<br>
 	 * <br>
-	 * If no rewriting was necessary for the generation this domain instance, the
-	 * original expression is returned instead.
+	 * If no rewriting was necessary for the generation this domain instance, a
+	 * singleton collection containing just the original expression is returned
+	 * instead.<br>
+	 * <br>
+	 * The collection returned by this method usually contains one expression, but
+	 * instances created through lattice operations (e.g., lub) might contain more.
 	 * 
 	 * @return the rewritten expression, or the original one
 	 */
-	ValueExpression getRewrittenExpression();
+	Collection<ValueExpression> getRewrittenExpressions();
 
 	/**
 	 * Yields the substitution, in the form of a list of {@link Replacement}s that

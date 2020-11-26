@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
@@ -110,9 +111,19 @@ public class Return extends Statement implements MetaVariableCreator {
 	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
-		expressions.put(expression, result);
-		result = result.assign(getMetaVariable(), result.getLastComputedExpression());
+		AnalysisState<H, V> exprResult = expression.semantics(entryState, callGraph, expressions);
+		expressions.put(expression, exprResult);
+		
+		AnalysisState<H, V> result = null;
+		Identifier meta = getMetaVariable();
+		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
+			AnalysisState<H, V> tmp = exprResult.assign(meta, expr);
+			if (result == null)
+				result =  tmp;
+			else
+				result = result.lub(tmp);
+		}
+		
 		if (!expression.getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(expression.getMetaVariables());
 		return result;

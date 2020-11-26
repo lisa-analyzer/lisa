@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -102,8 +103,8 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		Call resolved = callGraph.resolve(this);
 		AnalysisState<H, V> result = resolved.callSemantics(computedState, callGraph, params);

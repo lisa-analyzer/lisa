@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -120,8 +121,8 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	}
 	
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params) {
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params) {
 		// TODO too coarse
 		AbstractState<H, V> poststate = computedState.getState().top();
 

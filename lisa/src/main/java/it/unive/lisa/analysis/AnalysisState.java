@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.apache.commons.collections.CollectionUtils;
+
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -7,9 +12,9 @@ import it.unive.lisa.symbolic.value.Skip;
 /**
  * The abstract analysis state at a given program point. An analysis state is
  * composed by an {@link AbstractState} modeling the abstract values of program
- * variables and heap locations, and a {@link SymbolicExpression} keeping trace
- * of what has been evaluated and is available for later computations, but is
- * not stored in memory (i.e. the stack).
+ * variables and heap locations, and a collection of {@link SymbolicExpression}s
+ * keeping trace of what has been evaluated and is available for later
+ * computations, but is not stored in memory (i.e. the stack).
  * 
  * @param <H> the type of heap analysis embedded in the abstract state
  * @param <V> the type of value analysis embedded in the abstract state
@@ -25,20 +30,32 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	private final AbstractState<H, V> state;
 
 	/**
-	 * The last expression that has been computed, carrying over abstract values
+	 * The last expressions that have been computed, representing side-effect free
+	 * expressions that are pending evaluation
 	 */
-	private final SymbolicExpression lastComputedExpression;
+	private final Collection<SymbolicExpression> computedExpressions;
 
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state                  the {@link AbstractState} to embed in this
-	 *                               analysis state
-	 * @param lastComputedExpression the last expression that has been computed
+	 * @param state              the {@link AbstractState} to embed in this analysis
+	 *                           state
+	 * @param computedExpression the expression that has been computed
 	 */
-	public AnalysisState(AbstractState<H, V> state, SymbolicExpression lastComputedExpression) {
+	public AnalysisState(AbstractState<H, V> state, SymbolicExpression computedExpression) {
+		this(state, Collections.singleton(computedExpression));
+	}
+
+	/**
+	 * Builds a new state.
+	 * 
+	 * @param state               the {@link AbstractState} to embed in this
+	 *                            analysis state
+	 * @param computedExpressions the expressions that have been computed
+	 */
+	public AnalysisState(AbstractState<H, V> state, Collection<SymbolicExpression> computedExpressions) {
 		this.state = state;
-		this.lastComputedExpression = lastComputedExpression;
+		this.computedExpressions = computedExpressions;
 	}
 
 	/**
@@ -56,12 +73,14 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	 * {@link SymbolicExpression} that will contain markers for all abstract values
 	 * that would be present on the stack, as well as variable identifiers for
 	 * values that should be read from the state. These are tied together in a form
-	 * of expression that abstract domains are able to interpret.
+	 * of expression that abstract domains are able to interpret. The collection
+	 * returned by this method usually contains one expression, but instances
+	 * created through lattice operations (e.g., lub) might contain more.
 	 * 
 	 * @return the last computed expression
 	 */
-	public SymbolicExpression getLastComputedExpression() {
-		return lastComputedExpression;
+	public Collection<SymbolicExpression> getComputedExpressions() {
+		return computedExpressions;
 	}
 
 	@Override
@@ -72,12 +91,15 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	@Override
 	public AnalysisState<H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
 		AbstractState<H, V> s = state.smallStepSemantics(expression);
-		return new AnalysisState<>(s, s.getHeapState().getRewrittenExpression());
+		@SuppressWarnings("unchecked")
+		Collection<SymbolicExpression> exprs = CollectionUtils.collect(s.getHeapState().getRewrittenExpressions(),
+				e -> (SymbolicExpression) e);
+		return new AnalysisState<>(s, exprs);
 	}
 
 	@Override
 	public AnalysisState<H, V> assume(SymbolicExpression expression) throws SemanticException {
-		return new AnalysisState<>(state.assume(expression), lastComputedExpression);
+		return new AnalysisState<>(state.assume(expression), computedExpressions);
 	}
 
 	@Override
@@ -86,28 +108,22 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public AnalysisState<H, V> lub(AnalysisState<H, V> other) throws SemanticException {
-		checkExpression(other);
-		return new AnalysisState<>(state.lub(other.state), lastComputedExpression);
+		return new AnalysisState<>(state.lub(other.state),
+				CollectionUtils.union(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public AnalysisState<H, V> widening(AnalysisState<H, V> other) throws SemanticException {
-		checkExpression(other);
-		return new AnalysisState<>(state.widening(other.state), lastComputedExpression);
+		return new AnalysisState<>(state.widening(other.state),
+				CollectionUtils.union(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
 	public boolean lessOrEqual(AnalysisState<H, V> other) throws SemanticException {
-		checkExpression(other);
 		return state.lessOrEqual(other.state);
-	}
-
-	private void checkExpression(AnalysisState<H, V> other) throws SemanticException {
-		// TODO we want to eventually support this
-		if (!lastComputedExpression.equals(other.lastComputedExpression))
-			throw new SemanticException(
-					"Semantic operations on instances with different expressions is not yet supported");
 	}
 
 	@Override
@@ -122,24 +138,26 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && lastComputedExpression instanceof Skip;
+		return state.isTop() && computedExpressions.size() == 1
+				&& computedExpressions.iterator().next() instanceof Skip;
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && lastComputedExpression instanceof Skip;
+		return state.isBottom() && computedExpressions.size() == 1
+				&& computedExpressions.iterator().next() instanceof Skip;
 	}
 
 	@Override
 	public AnalysisState<H, V> forgetIdentifier(Identifier id) throws SemanticException {
-		return new AnalysisState<>(state.forgetIdentifier(id), lastComputedExpression);
+		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((lastComputedExpression == null) ? 0 : lastComputedExpression.hashCode());
+		result = prime * result + ((computedExpressions == null) ? 0 : computedExpressions.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		return result;
 	}
@@ -153,10 +171,10 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 		if (getClass() != obj.getClass())
 			return false;
 		AnalysisState<?, ?> other = (AnalysisState<?, ?>) obj;
-		if (lastComputedExpression == null) {
-			if (other.lastComputedExpression != null)
+		if (computedExpressions == null) {
+			if (other.computedExpressions != null)
 				return false;
-		} else if (!lastComputedExpression.equals(other.lastComputedExpression))
+		} else if (!computedExpressions.equals(other.computedExpressions))
 			return false;
 		if (state == null) {
 			if (other.state != null)
@@ -168,9 +186,9 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 
 	@Override
 	public String representation() {
-		return "{{\n" + state + "\n}} -> " + lastComputedExpression;
+		return "{{\n" + state + "\n}} -> " + computedExpressions;
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation();

@@ -1,10 +1,13 @@
 package it.unive.lisa.cfg.edge;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
  * A sequential edge connecting two statements. The abstract analysis state gets
@@ -32,6 +35,15 @@ public class TrueEdge extends Edge {
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException {
-		return sourceState.assume(sourceState.getLastComputedExpression()); 
+		Collection<SymbolicExpression> exprs = sourceState.getComputedExpressions();
+		AnalysisState<H, V> result = null;
+		for (SymbolicExpression expr : exprs) {
+			AnalysisState<H, V> tmp = sourceState.assume(expr);
+			if (result == null)
+				result = tmp;
+			else
+				result = result.lub(tmp);
+		}
+		return result;
 	}
 }

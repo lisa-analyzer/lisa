@@ -1,7 +1,10 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import org.apache.commons.collections.CollectionUtils;
 
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,22 +29,26 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private final ValueExpression rewritten;
+	private final Collection<ValueExpression> rewritten;
 
 	/**
-	 * Builds a new instance. Invoking {@link #getRewrittenExpression()} on this
-	 * instance will return an instance of {@link Skip}.
+	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on this
+	 * instance will return a singleton set containing one {@link Skip}.
 	 */
 	public MonolithicHeap() {
-		rewritten = new Skip();
+		this(new Skip());
 	}
 
 	private MonolithicHeap(ValueExpression rewritten) {
+		this(Collections.singleton(rewritten));
+	}
+
+	private MonolithicHeap(Collection<ValueExpression> rewritten) {
 		this.rewritten = rewritten;
 	}
 
 	@Override
-	public ValueExpression getRewrittenExpression() {
+	public Collection<ValueExpression> getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -86,28 +93,19 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
-		checkExpression(other);
-		return this;
+		return new MonolithicHeap(CollectionUtils.union(rewritten, other.rewritten));
 	}
 
 	@Override
 	protected MonolithicHeap wideningAux(MonolithicHeap other) throws SemanticException {
-		checkExpression(other);
-		return this;
+		return lubAux(other);
 	}
 
 	@Override
 	protected boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
-		checkExpression(other);
 		return true;
-	}
-
-	private void checkExpression(MonolithicHeap other) throws SemanticException {
-		// TODO we want to eventually support this
-		if (!rewritten.equals(other.rewritten))
-			throw new SemanticException(
-					"Semantic operations on instances with different expressions is not yet supported");
 	}
 
 	@Override
@@ -119,7 +117,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	public MonolithicHeap bottom() {
 		return BOTTOM;
 	}
-	
+
 	@Override
 	public String representation() {
 		return "monolith";

@@ -22,7 +22,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	/**
 	 * The function implemented by this lattice
 	 */
-	protected final Map<K, V> function;
+	protected Map<K, V> function;
 
 	/**
 	 * The underlying lattice
@@ -36,7 +36,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	protected FunctionalLattice(V lattice) {
 		this.lattice = lattice;
-		this.function = new HashMap<>();
+		this.function = mkNewFunction();
 	}
 
 	/**
@@ -48,6 +48,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	protected FunctionalLattice(V lattice, Map<K, V> function) {
 		this.lattice = lattice;
 		this.function = function;
+	}
+
+	/**
+	 * This method exist just to ensure that all functions share the same type
+	 */
+	private Map<K, V> mkNewFunction() {
+		return new HashMap<>();
 	}
 
 	/**
@@ -91,7 +98,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
-
+		result.function = mkNewFunction();
 		Set<K> keys = new HashSet<>(function.keySet());
 		keys.addAll(other.function.keySet());
 		for (K key : keys)

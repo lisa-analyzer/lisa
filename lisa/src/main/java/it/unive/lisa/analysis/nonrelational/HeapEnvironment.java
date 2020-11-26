@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -104,7 +105,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public ValueExpression getRewrittenExpression() {
+	public Collection<ValueExpression> getRewrittenExpressions() {
 		// TODO Auto-generated method stub
 		return null;
 	}

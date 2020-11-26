@@ -186,21 +186,32 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		// this will contain only the information about the returned metavariable
 		AnalysisState<H, V> returned = callGraph.getAbstractResultOf(this, computedState, params);
 		// the lub will include the metavariable inside the state
-		AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState().lub(returned.getState()), new Skip());
+		AnalysisState<H, V> lub = new AnalysisState<>(computedState.getState().lub(returned.getState()), new Skip());
 
 		if (getStaticType().isVoidType())
 			// no need to add the meta variable since nothing has been pushed on the stack
-			return tmp;
+			return lub;
 
 		Identifier meta = getMetaVariable();
-		getMetaVariables().add((Identifier) returned.getLastComputedExpression());
+		for (SymbolicExpression expr : returned.getComputedExpressions())
+			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
-		return tmp.assign(meta, returned.getLastComputedExpression());
+		
+		AnalysisState<H, V> result = null;
+		for (SymbolicExpression expr : lub.getComputedExpressions()) {
+			AnalysisState<H, V> tmp = lub.assign(meta, expr);
+			if (result == null)
+				result =  tmp;
+			else
+				result = result.lub(tmp);
+		}
+		
+		return result;
 	}
 }

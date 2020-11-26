@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.callgraph.intraproc;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -76,7 +77,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		else
 			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getQualifiedName(), targets, call.getParameters());
-		
+
 		resolved.setOffset(call.getOffset());
 		return resolved;
 	}
@@ -109,11 +110,12 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,
-			AnalysisState<H, V> entryState, SymbolicExpression[] parameters) throws SemanticException {
+			AnalysisState<H, V> entryState, Collection<SymbolicExpression>[] parameters) throws SemanticException {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return new AnalysisState<>(entryState.getState().top(), new ValueIdentifier(call.getStaticType(), "ret_value"));
+		return new AnalysisState<>(entryState.getState().top(),
+				Collections.singleton(new ValueIdentifier(call.getStaticType(), "ret_value")));
 	}
 
 }

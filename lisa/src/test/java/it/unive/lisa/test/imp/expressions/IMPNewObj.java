@@ -1,5 +1,10 @@
 package it.unive.lisa.test.imp.expressions;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import it.unive.lisa.analysis.AnalysisState;
@@ -8,37 +13,37 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.statement.CFGCall;
+import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.cfg.statement.NativeCall;
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.cfg.statement.UnresolvedCall;
+import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 public class IMPNewObj extends NativeCall {
 
 	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, Expression... parameters) {
-		super(cfg, sourceFile, line, col, "new[]", type, parameters);
+		super(cfg, sourceFile, line, col, "new", type, parameters);
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression[] params)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
-		CFGCall call = null; // TODO we need to resolve this to the actual constructor
 		// TODO should be runtime type
 		HeapAllocation created = new HeapAllocation(getStaticType());
-		SymbolicExpression[] fullParams = ArrayUtils.insert(0, params, created);
-		AnalysisState<H, V> returned = callGraph.getAbstractResultOf(call, computedState, fullParams);
-		return new AnalysisState<>(computedState.getState().lub(returned.getState()), created);
+		
+		// we need to add the receiver to the parameters
+		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
+		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
+		
+		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(), getStaticType().toString(), fullExpressions);
+		Call resolved = callGraph.resolve(call);
+		return resolved.callSemantics(computedState, callGraph, fullParams);
 	}
 }

@@ -17,7 +17,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H> implements HeapDomain<H> {
-	
+
 	@Override
 	public final String toString() {
 		return representation();
@@ -32,16 +32,22 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			H sem = smallStepSemantics(unary.getExpression());
-			return mk(sem,
-					new UnaryExpression(expression.getType(), sem.getRewrittenExpression(), unary.getOperator()));
+			H result = bottom();
+			for (ValueExpression expr : sem.getRewrittenExpressions())
+				result = result.lub(mk(sem, new UnaryExpression(expression.getType(), expr, unary.getOperator())));
+			return result;
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 			H sem1 = smallStepSemantics(binary.getLeft());
 			H sem2 = sem1.smallStepSemantics(binary.getRight());
-			return mk(sem2, new BinaryExpression(expression.getType(), sem1.getRewrittenExpression(),
-					sem2.getRewrittenExpression(), binary.getOperator()));
+			H result = bottom();
+			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
+				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
+					result = result.lub(
+							mk(sem2, new BinaryExpression(expression.getType(), expr1, expr2, binary.getOperator())));
+			return result;
 		}
 
 		if (expression instanceof ValueExpression)

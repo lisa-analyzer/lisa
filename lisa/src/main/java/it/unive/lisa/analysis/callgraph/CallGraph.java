@@ -96,11 +96,11 @@ public interface CallGraph {
 	 * @param parameters the expressions representing the actual parameters of the
 	 *                   call
 	 * @return an abstract analysis state representing the abstract result of the
-	 *         cfg call. The {@link AnalysisState#getLastComputedExpression()} will
+	 *         cfg call. The {@link AnalysisState#getComputedExpressions()} will
 	 *         contain an {@link Identifier} pointing to the meta variable
 	 *         containing the abstraction of the returned value
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	<H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,
-			AnalysisState<H, V> entryState, SymbolicExpression[] parameters) throws SemanticException;
+			AnalysisState<H, V> entryState, Collection<SymbolicExpression>[] parameters) throws SemanticException;
 }
