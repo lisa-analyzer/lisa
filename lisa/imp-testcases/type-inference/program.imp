@@ -1,0 +1,14 @@
+class typing {
+	test1() {
+		i = 5;
+		x = "s";
+	}
+	
+	test2(i) {
+		if (i > 5)
+			x = 10;
+		else
+			x = "s";
+		return x;
+	}
+}
