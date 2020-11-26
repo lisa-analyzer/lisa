@@ -34,6 +34,11 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E e
 	 *         {@code expression} when evaluated on {@code environment}
 	 */
 	public T eval(E expression, F environment);
-	
+
+	/**
+	 * Yields a textual representation of the content of this domain's instance.
+	 * 
+	 * @return the textual representation
+	 */
 	String representation();
 }

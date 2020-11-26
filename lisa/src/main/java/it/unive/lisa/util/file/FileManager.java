@@ -38,7 +38,7 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkOutputFile(String name, boolean bom) throws IOException {
-		File file = new File(cleanupForDotFile(name));
+		File file = new File(name);
 
 		if (!file.getAbsoluteFile().getParentFile().exists())
 			file.getAbsoluteFile().getParentFile().mkdirs();
@@ -49,9 +49,19 @@ public class FileManager {
 
 		return writer;
 	}
-	
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the {@code dot}
+	 * extension. If name is a path, all missing directories will be created as
+	 * well. The name will be stripped of any characters that might cause problems
+	 * in the file name.
+	 * 
+	 * @param name the name of the file to create
+	 * @return a {@link Writer} instance that can write to the created file
+	 * @throws IOException if something goes wrong while creating the file
+	 */
 	public static Writer mkDotFile(String name) throws IOException {
-		return mkOutputFile(cleanupForDotFile(name), false);
+		return mkOutputFile(cleanupForDotFile(name) + ".dot", false);
 	}
 
 	private static String cleanupForDotFile(String name) {

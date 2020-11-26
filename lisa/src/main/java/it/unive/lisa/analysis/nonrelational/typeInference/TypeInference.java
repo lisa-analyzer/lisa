@@ -8,15 +8,21 @@ import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.types.BoolType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.NullConstant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.collections.ExternalSetCache;
 
+/**
+ * A type inference that collects the set of possible {@link Type}s of
+ * {@link Identifier}s.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 
 	private static final ExternalSetCache<Type> TYPES_CACHE = new ExternalSetCache<>();
-	
+
 	private static final TypeInference TOP = new TypeInference(Untyped.INSTANCE, true, false);
 
 	private static final TypeInference BOTTOM = new TypeInference(Untyped.INSTANCE, false, true);
@@ -25,6 +31,9 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 
 	private final boolean isTop, isBottom;
 
+	/**
+	 * Builds a type inference object that corresponds to the top element.
+	 */
 	public TypeInference() {
 		this(Untyped.INSTANCE, true, false);
 	}
@@ -32,7 +41,7 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 	private TypeInference(Type type) {
 		this(type, false, false);
 	}
-	
+
 	private TypeInference(ExternalSet<Type> types) {
 		this(types, false, false);
 	}
@@ -40,7 +49,7 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 	private TypeInference(Type type, boolean isTop, boolean isBottom) {
 		this(TYPES_CACHE.mkSingletonSet(type), isBottom, isTop);
 	}
-	
+
 	private TypeInference(ExternalSet<Type> types, boolean isTop, boolean isBottom) {
 		this.types = types.copy();
 		this.isBottom = isBottom;
@@ -73,7 +82,7 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 	}
 
 	@Override
-	protected TypeInference evalNullConstant(NullConstant constant) {
+	protected TypeInference evalNullConstant() {
 		return new TypeInference(NullType.INSTANCE);
 	}
 
@@ -133,8 +142,8 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 						result.add(t2);
 					else if (t2.canBeAssignedTo(t1))
 						result.add(t1);
-					// TODO this might be bottom, how do we add it to the set?
-					// there is no bottom type element
+			// TODO this might be bottom, how do we add it to the set?
+			// there is no bottom type element
 			return new TypeInference(result);
 		}
 		return top();
@@ -170,18 +179,18 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String representation() {
 		if (isTop())
 			return "TOP";
-		
+
 		if (isBottom())
 			return "BOTTOM";
-		
+
 		return types.toString();
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation();

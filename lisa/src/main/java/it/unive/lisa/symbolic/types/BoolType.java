@@ -4,8 +4,17 @@ import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
+/**
+ * An internal implementation of the {@link BoolType} interface that can be used
+ * by domains that need a concrete instance of that interface.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class BoolType implements BooleanType {
 
+	/**
+	 * The singleton instance of this class.
+	 */
 	public static final BoolType INSTANCE = new BoolType();
 
 	private BoolType() {

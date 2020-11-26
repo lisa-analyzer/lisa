@@ -478,37 +478,65 @@ public class ExternalSet<T> implements Iterable<T> {
 
 		return result;
 	}
-	
+
+	/**
+	 * Yields {@code true} iff at least one element contained in this set satisfies
+	 * the given predicate.
+	 * 
+	 * @param predicate the predicate to be used for testing the elements
+	 * @return {@code true} iff that condition holds, {@code false} otherwise
+	 */
 	public boolean anyMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return true;
-		
+
 		return false;
 	}
-	
+
+	/**
+	 * Yields {@code true} iff none of the elements contained in this set satisfy
+	 * the given predicate.
+	 * 
+	 * @param predicate the predicate to be used for testing the elements
+	 * @return {@code true} iff that condition holds, {@code false} otherwise
+	 */
 	public boolean noneMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return false;
-		
+
 		return true;
 	}
-	
+
+	/**
+	 * Yields {@code true} iff all the elements contained in this set satisfy the
+	 * given predicate.
+	 * 
+	 * @param predicate the predicate to be used for testing the elements
+	 * @return {@code true} iff that condition holds, {@code false} otherwise
+	 */
 	public boolean allMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (!predicate.test(t))
 				return false;
-		
+
 		return true;
 	}
-	
+
+	/**
+	 * Yields a new external set containing only the elements of this set that
+	 * satisfy the given predicate.
+	 * 
+	 * @param predicate the predicate to be used for testing the elements
+	 * @return a new external set filtered by {@code predicate}
+	 */
 	public ExternalSet<T> filter(Predicate<T> predicate) {
 		ExternalSet<T> result = copy();
 		for (T t : this)
 			if (!predicate.test(t))
 				result.remove(t);
-		
+
 		return result;
 	}
 

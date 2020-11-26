@@ -331,5 +331,10 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		}
 	}
 	
+	/**
+	 * Yields a textual representation of the content of this domain's instance.
+	 * 
+	 * @return the textual representation
+	 */
 	String representation();
 }

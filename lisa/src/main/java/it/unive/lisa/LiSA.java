@@ -273,7 +273,7 @@ public class LiSA {
 
 		for (CFG cfg : inputs) {
 			CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
-			try (Writer file = FileManager.mkOutputFile(cfg.getDescriptor().getFullSignature() + ".dot")) {
+			try (Writer file = FileManager.mkDotFile(cfg.getDescriptor().getFullSignature())) {
 				result.dump(file, cfg.getDescriptor().getFullSignature(),
 						st -> result.getAnalysisStateAt(st).toString());
 			} catch (IOException e) {
