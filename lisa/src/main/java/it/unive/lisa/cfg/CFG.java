@@ -321,40 +321,31 @@ public class CFG {
 		writer.write("}");
 	}
 
-	private static void appendLegend(Writer writer) throws IOException {
+	private static void appendLegend(Writer writer) throws IOException {		
 		writer.write("\nsubgraph cluster_01 {\n");
-		writer.write("  label = \"Nodes\";\n");
+		writer.write("  label = \"Legend\";\n");
+		writer.write("  style=dotted;\n");
 		writer.write("  node [shape=plaintext];\n");
-		writer.write("  key0 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("  values [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
 		writer.write("    <tr><td align=\"left\">gray</td></tr>\n");
-		writer.write("    <tr><td align=\"left\">brack</td></tr>\n");
+		writer.write("    <tr><td align=\"left\">black</td></tr>\n");
 		writer.write("    <tr><td align=\"left\">black, double</td></tr>\n");
-		writer.write("    </table>>];\n");
-		writer.write("  key3 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
-		writer.write("    <tr><td align=\"right\">node border</td></tr>\n");
-		writer.write("    <tr><td align=\"right\">entrypoint border</td></tr>\n");
-		writer.write("    <tr><td align=\"right\">exitpoint border</td></tr>\n");
-		writer.write("    </table>>];\n");
-		writer.write("}\n");
-		
-		writer.write("\nsubgraph cluster_02 {\n");
-		writer.write("  label = \"Edges\";\n");
-		writer.write("  node [shape=plaintext];\n");
-		writer.write("  key2 [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
 		writer.write("    <tr><td port=\"e1\">&nbsp;</td></tr>\n");
 		writer.write("    <tr><td port=\"e2\">&nbsp;</td></tr>\n");
 		writer.write("    <tr><td port=\"e3\">&nbsp;</td></tr>\n");
 		writer.write("    </table>>];\n");
-		writer.write("  key [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("  keys [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
+		writer.write("    <tr><td align=\"right\">node border</td></tr>\n");
+		writer.write("    <tr><td align=\"right\">entrypoint border</td></tr>\n");
+		writer.write("    <tr><td align=\"right\">exitpoint border</td></tr>\n");
 		writer.write("    <tr><td align=\"right\" port=\"i1\">sequential edge&nbsp;</td></tr>\n");
 		writer.write("    <tr><td align=\"right\" port=\"i2\">true edge&nbsp;</td></tr>\n");
 		writer.write("    <tr><td align=\"right\" port=\"i3\">false edge&nbsp;</td></tr>\n");
 		writer.write("    </table>>];\n");
-		writer.write("  key:i1:e -> key2:e1:w [constraint=false]\n");
-		writer.write("  key:i2:e -> key2:e2:w [style=dashed,color=red,constraint=false]\n");
-		writer.write("  key:i3:e -> key2:e3:w [style=dashed,color=blue,constraint=false]\n");
+		writer.write("  keys:i1:e -> values:e1:w [constraint=false]\n");
+		writer.write("  keys:i2:e -> values:e2:w [style=dashed,color=red,constraint=false]\n");
+		writer.write("  keys:i3:e -> values:e3:w [style=dashed,color=blue,constraint=false]\n");
 		writer.write("}\n");
-		writer.write("key0 -> key2 [ltail=cluster_01,lhead=cluster_02,style=invis]\n");
 	}
 
 	private int dotNode(Map<Statement, Integer> codes, Statement st, int nextCode,
@@ -386,7 +377,7 @@ public class CFG {
 	}
 	private String provideVertexShapeIfNeeded(Statement vertex) {
 		if (followersOf(vertex).isEmpty())
-			return "peripheries=2,color=brack,";
+			return "peripheries=2,color=black,";
 		if (entrypoints.contains(vertex))
 			return "color=black,";
 		return "";
