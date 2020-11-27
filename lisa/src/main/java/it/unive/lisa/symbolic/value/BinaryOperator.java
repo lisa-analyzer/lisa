@@ -82,7 +82,37 @@ public enum BinaryOperator implements Operator {
 	 * A comparison that tests if two numerical values of type {@link NumericType}
 	 * are in relation through the "less than" relation
 	 */
-	COMPARISON_LT("<");
+	COMPARISON_LT("<"),
+	
+	/**
+	 * Concatenates two strings
+	 */
+	STRING_CONCAT("strcat"),
+	
+	/**
+	 * Tests if a string is contained into another one
+	 */
+	STRING_CONTAINS("strcontains"),
+	
+	/**
+	 * Tests if a string starts with another one
+	 */
+	STRING_STARTS_WITH("strstarts"),
+	
+	/**
+	 * Tests if a string ends with another one
+	 */
+	STRING_ENDS_WITH("strends"),
+	
+	/**
+	 * Yields the index of the first occurrence of a string into another one
+	 */
+	STRING_INDEX_OF("strindexof"),
+	
+	/**
+	 * Tests if a string is exactly equals to another one
+	 */
+	STRING_EQUALS("strcmp");
 
 	private final String representation;
 

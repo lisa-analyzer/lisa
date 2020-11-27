@@ -6,9 +6,12 @@ import it.unive.lisa.cfg.type.NullType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.types.BoolType;
+import it.unive.lisa.symbolic.types.IntType;
+import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.collections.ExternalSetCache;
@@ -73,7 +76,8 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 
 	@Override
 	protected TypeInference wideningAux(TypeInference other) throws SemanticException {
-		return lubAux(other); // TODO not sure this is fine for languages like javascript
+		return lubAux(other); // TODO not sure this is fine for languages like
+								// javascript
 	}
 
 	@Override
@@ -92,16 +96,27 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 	}
 
 	@Override
+	protected TypeInference evalTypeConversion(Type type, TypeInference arg) {
+		if (arg.types.noneMatch(t -> t.canBeAssignedTo(type)))
+			return bottom();
+		return new TypeInference(arg.types.filter(t -> t.canBeAssignedTo(type)));
+	}
+
+	@Override
 	protected TypeInference evalUnaryExpression(UnaryOperator operator, TypeInference arg) {
 		switch (operator) {
 		case LOGICAL_NOT:
-			if (arg.types.anyMatch(type -> type.isBooleanType()))
-				return new TypeInference(BoolType.INSTANCE);
-			return bottom();
-		case NUMERIC_NEG:
-			if (!arg.types.anyMatch(type -> type.isNumericType()))
+			if (arg.types.noneMatch(Type::isBooleanType))
 				return bottom();
-			return new TypeInference(arg.types.filter(type -> type.isNumericType()));
+			return new TypeInference(BoolType.INSTANCE);
+		case NUMERIC_NEG:
+			if (arg.types.noneMatch(Type::isNumericType))
+				return bottom();
+			return new TypeInference(arg.types.filter(Type::isNumericType));
+		case STRING_LENGTH:
+			if (arg.types.noneMatch(Type::isStringType))
+				return bottom();
+			return new TypeInference(IntType.INSTANCE);
 		}
 		return top();
 	}
@@ -116,24 +131,20 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 		case COMPARISON_GT:
 		case COMPARISON_LE:
 		case COMPARISON_LT:
-			if (!left.types.anyMatch(type -> type.isNumericType()))
-				return bottom();
-			if (!right.types.anyMatch(type -> type.isNumericType()))
+			if (left.types.noneMatch(Type::isNumericType) || right.types.noneMatch(Type::isNumericType))
 				return bottom();
 			return new TypeInference(BoolType.INSTANCE);
 		case LOGICAL_AND:
 		case LOGICAL_OR:
-			if (left.types.anyMatch(type -> type.isBooleanType()) && right.types.anyMatch(type -> type.isBooleanType()))
-				return new TypeInference(BoolType.INSTANCE);
-			return bottom();
+			if (left.types.noneMatch(Type::isBooleanType) || right.types.noneMatch(Type::isBooleanType))
+				return bottom();
+			return new TypeInference(BoolType.INSTANCE);
 		case NUMERIC_ADD:
 		case NUMERIC_DIV:
 		case NUMERIC_MOD:
 		case NUMERIC_MUL:
 		case NUMERIC_SUB:
-			if (!left.types.anyMatch(type -> type.isNumericType()))
-				return bottom();
-			if (!right.types.anyMatch(type -> type.isNumericType()))
+			if (left.types.noneMatch(Type::isNumericType) || right.types.noneMatch(Type::isNumericType))
 				return bottom();
 			ExternalSet<Type> result = TYPES_CACHE.mkEmptySet();
 			for (Type t1 : left.types.filter(type -> type.isNumericType()))
@@ -142,9 +153,38 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 						result.add(t2);
 					else if (t2.canBeAssignedTo(t1))
 						result.add(t1);
-			// TODO this might be bottom, how do we add it to the set?
-			// there is no bottom type element
+					else
+						return bottom();
 			return new TypeInference(result);
+		case STRING_CONCAT:
+			if (left.types.noneMatch(Type::isStringType) || right.types.noneMatch(Type::isStringType))
+				return bottom();
+			return new TypeInference(StringType.INSTANCE);
+		case STRING_CONTAINS:
+		case STRING_ENDS_WITH:
+		case STRING_EQUALS:
+		case STRING_STARTS_WITH:
+			if (left.types.noneMatch(Type::isStringType) || right.types.noneMatch(Type::isStringType))
+				return bottom();
+			return new TypeInference(BoolType.INSTANCE);
+		case STRING_INDEX_OF:
+			if (left.types.noneMatch(Type::isStringType) || right.types.noneMatch(Type::isStringType))
+				return bottom();
+			return new TypeInference(IntType.INSTANCE);
+		}
+		return top();
+	}
+
+	@Override
+	protected TypeInference evalTernaryExpression(TernaryOperator operator, TypeInference left, TypeInference middle,
+			TypeInference right) {
+		switch (operator) {
+		case STRING_REPLACE:
+		case STRING_SUBSTRING:
+			if (left.types.noneMatch(Type::isStringType) || middle.types.noneMatch(Type::isStringType)
+					|| right.types.noneMatch(Type::isStringType))
+				return bottom();
+			return new TypeInference(StringType.INSTANCE);
 		}
 		return top();
 	}

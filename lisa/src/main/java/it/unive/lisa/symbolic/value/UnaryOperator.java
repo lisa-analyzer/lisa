@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.NumericType;
+import it.unive.lisa.cfg.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
@@ -19,7 +20,12 @@ public enum UnaryOperator implements Operator {
 	/**
 	 * The negation of a numerical value of type {@link NumericType}
 	 */
-	NUMERIC_NEG("-");
+	NUMERIC_NEG("-"),
+	
+	/**
+	 * The length of a variable of type {@link StringType}
+	 */
+	STRING_LENGTH("strlen");
 
 	private final String representation;
 
