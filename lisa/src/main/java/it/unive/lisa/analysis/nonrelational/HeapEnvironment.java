@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,16 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		extends FunctionalLattice<HeapEnvironment<T>, Identifier, T> implements HeapDomain<HeapEnvironment<T>> {
 
 	/**
+	 * The rewritten expressions
+	 */
+	private final Collection<ValueExpression> rewritten;
+
+	/**
+	 * The substitution
+	 */
+	private final List<HeapReplacement> substitution;
+
+	/**
 	 * Builds an empty environment.
 	 * 
 	 * @param domain a singleton instance to be used during semantic operations to
@@ -37,10 +48,15 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 */
 	public HeapEnvironment(T domain) {
 		super(domain);
+		rewritten = Collections.emptyList();
+		substitution = Collections.emptyList();
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function) {
+	private HeapEnvironment(T domain, Map<Identifier, T> function, Collection<ValueExpression> rewritten,
+			List<HeapReplacement> substitution) {
 		super(domain, function);
+		this.rewritten = rewritten;
+		this.substitution = substitution;
 	}
 
 	@Override
@@ -50,20 +66,21 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 			func = new HashMap<>();
 		else
 			func = new HashMap<>(function);
-		function.put(id, lattice.eval(value, this));
-		return new HeapEnvironment<>(lattice, func);
+		T eval = lattice.eval(value, this);
+		function.put(id, eval);
+		return new HeapEnvironment<>(lattice, func, eval.getRewrittenExpressions(), eval.getSubstitution());
 	}
 
 	@Override
 	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression) {
 		// environment should not change without an assignment
-		return new HeapEnvironment<>(lattice, function);
+		return new HeapEnvironment<>(lattice, function, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
 	public HeapEnvironment<T> assume(SymbolicExpression expression) throws SemanticException {
 		// TODO: to be refined
-		return new HeapEnvironment<>(lattice, function);
+		return new HeapEnvironment<>(lattice, function, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
@@ -74,12 +91,12 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	public HeapEnvironment<T> top() {
-		return new HeapEnvironment<T>(lattice.top(), null);
+		return new HeapEnvironment<T>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
 	public HeapEnvironment<T> bottom() {
-		return new HeapEnvironment<T>(lattice.bottom(), null);
+		return new HeapEnvironment<T>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
@@ -94,10 +111,10 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	public HeapEnvironment<T> forgetIdentifier(Identifier id) throws SemanticException {
-		if (function == null)
-			return new HeapEnvironment<>(lattice, null);
+		if (isTop() || isBottom())
+			return this;
 
-		HeapEnvironment<T> result = new HeapEnvironment<>(lattice, new HashMap<>(function));
+		HeapEnvironment<T> result = new HeapEnvironment<>(lattice, new HashMap<>(function), rewritten, substitution);
 		if (result.function.containsKey(id))
 			result.function.remove(id);
 
@@ -106,14 +123,12 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	public Collection<ValueExpression> getRewrittenExpressions() {
-		// TODO Auto-generated method stub
-		return null;
+		return rewritten;
 	}
 
 	@Override
-	public List<Replacement> getSubstitution() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<HeapReplacement> getSubstitution() {
+		return substitution;
 	}
 
 	@Override

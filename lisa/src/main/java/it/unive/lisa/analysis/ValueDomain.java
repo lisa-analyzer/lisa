@@ -2,7 +2,7 @@ package it.unive.lisa.analysis;
 
 import java.util.List;
 
-import it.unive.lisa.analysis.HeapDomain.Replacement;
+import it.unive.lisa.analysis.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
@@ -23,17 +23,17 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of the
 	 * abstraction provided in the {@link HeapDomain} of the analysis. A
-	 * substitution is composed by a list of {@link Replacement} instances, that
+	 * substitution is composed by a list of {@link HeapReplacement} instances, that
 	 * <b>must be applied in order</b>.
 	 * 
 	 * @param substitution the substitution to apply
 	 * @return the value domain instance modified by the substitution
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public default D applySubstitution(List<Replacement> substitution) throws SemanticException {
+	public default D applySubstitution(List<HeapReplacement> substitution) throws SemanticException {
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
-		for (Replacement r : substitution) {
+		for (HeapReplacement r : substitution) {
 			D lub = bottom();
 			for (Identifier source : r.getSources()) {
 				D partial = result;

@@ -53,7 +53,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public List<Replacement> getSubstitution() {
+	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
 	}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import it.unive.lisa.analysis.HeapSemanticOperation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -15,5 +16,5 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
-		extends Lattice<T>, NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>> {
+		extends Lattice<T>, NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>, HeapSemanticOperation {
 }
