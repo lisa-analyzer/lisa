@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.callgraph.intraproc;
+package it.unive.lisa.callgraph.impl.intraproc;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +15,7 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.callgraph.CallGraph;
+import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.Parameter;

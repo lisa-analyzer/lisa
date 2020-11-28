@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
-import it.unive.lisa.analysis.nonrelational.typeInference.TypeInference;
+import it.unive.lisa.analysis.impl.types.TypeInference;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.test.imp.IMPFrontend;
 

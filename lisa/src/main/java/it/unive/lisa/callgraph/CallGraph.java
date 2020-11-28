@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.callgraph;
+package it.unive.lisa.callgraph;
 
 import java.util.Collection;
 

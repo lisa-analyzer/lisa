@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.nonrelational.typeInference;
+package it.unive.lisa.analysis.impl.types;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
