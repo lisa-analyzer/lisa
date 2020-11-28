@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.type.Type;
 
 /**
@@ -21,7 +22,7 @@ public class Constant extends ValueExpression {
 	 * @param value the constant value
 	 */
 	public Constant(Type type, Object value) {
-		super(type);
+		super(Caches.types().mkSingletonSet(type));
 		this.value = value;
 	}
 

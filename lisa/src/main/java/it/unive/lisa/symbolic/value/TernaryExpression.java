@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A bynary expression that applies a {@link TernaryExpression} to three
@@ -34,15 +35,16 @@ public class TernaryExpression extends ValueExpression {
 	/**
 	 * Builds the binary expression.
 	 * 
-	 * @param type     the runtime type of this expression
+	 * @param types    the runtime types of this expression
 	 * @param left     the left-hand side operand of this expression
 	 * @param middle   the middle operand of this expression
 	 * @param right    the right-hand side operand of this expression
 	 * @param operator the operator to apply
 	 */
-	public TernaryExpression(Type type, SymbolicExpression left, SymbolicExpression middle, SymbolicExpression right,
+	public TernaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression middle,
+			SymbolicExpression right,
 			TernaryOperator operator) {
-		super(type);
+		super(types);
 		this.left = left;
 		this.middle = middle;
 		this.right = right;

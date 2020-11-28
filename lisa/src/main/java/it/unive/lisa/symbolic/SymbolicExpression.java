@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
@@ -11,33 +12,43 @@ import it.unive.lisa.cfg.type.Type;
 public abstract class SymbolicExpression {
 
 	/**
-	 * The runtime type of this expression
+	 * The runtime types of this expression
 	 */
-	private final Type type;
+	private final ExternalSet<Type> types;
 
 	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param type the runtime type of this expression
+	 * @param types the runtime types of this expression
 	 */
-	protected SymbolicExpression(Type type) {
-		this.type = type;
+	protected SymbolicExpression(ExternalSet<Type> types) {
+		this.types = types;
 	}
 
 	/**
-	 * Yields the runtime type of this expression.
+	 * Yields the runtime types of this expression.
 	 * 
-	 * @return the runtime type
+	 * @return the runtime types
 	 */
-	public final Type getType() {
-		return type;
+	public final ExternalSet<Type> getTypes() {
+		return types;
+	}
+	
+	public final Type getDynamicType() {
+		return types.reduce(types.first(), (result, t) -> {
+			if (result.canBeAssignedTo(t))
+				return t;
+			if (t.canBeAssignedTo(result))
+				return result;
+			return t.commonSupertype(result);
+		});
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
 
@@ -50,10 +61,10 @@ public abstract class SymbolicExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
-		if (type == null) {
-			if (other.type != null)
+		if (types == null) {
+			if (other.types != null)
 				return false;
-		} else if (!type.equals(other.type))
+		} else if (!types.equals(other.types))
 			return false;
 		return true;
 	}

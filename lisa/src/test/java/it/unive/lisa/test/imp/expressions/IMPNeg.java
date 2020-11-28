@@ -8,12 +8,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
@@ -29,9 +26,8 @@ public class IMPNeg extends NativeCall {
 			throws SemanticException {
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr : params[1]) {
-			// TODO should be runtime type
 			AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
-					new UnaryExpression(getStaticType(), expr, UnaryOperator.NUMERIC_NEG));
+					new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.NUMERIC_NEG));
 			if (result == null)
 				result = tmp;
 			else

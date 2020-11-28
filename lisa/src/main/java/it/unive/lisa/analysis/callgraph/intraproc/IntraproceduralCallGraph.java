@@ -60,6 +60,12 @@ public class IntraproceduralCallGraph implements CallGraph {
 	public void addCFG(CFG cfg) {
 		results.put(cfg, Optional.empty());
 	}
+	
+	@Override
+	public void clear() {
+		for (CFG cfg : results.keySet())
+			results.put(cfg, Optional.empty());
+	}
 
 	@Override
 	public Call resolve(UnresolvedCall call) {
@@ -115,7 +121,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			return entryState.top();
 
 		return new AnalysisState<>(entryState.getState().top(),
-				Collections.singleton(new ValueIdentifier(call.getStaticType(), "ret_value")));
+				Collections.singleton(new ValueIdentifier(call.getRuntimeTypes(), "ret_value")));
 	}
 
 }

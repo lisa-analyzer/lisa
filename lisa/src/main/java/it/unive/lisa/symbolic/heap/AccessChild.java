@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * An expression that accesses a memory location that is a <i>child</i> of
@@ -24,12 +25,12 @@ public class AccessChild extends HeapExpression {
 	/**
 	 * Builds the child access.
 	 * 
-	 * @param type      the runtime type of this expression
+	 * @param types     the runtime types of this expression
 	 * @param container the expression representing the parent memory location
 	 * @param child     the expression representing the child memory location
 	 */
-	public AccessChild(Type type, SymbolicExpression container, SymbolicExpression child) {
-		super(type);
+	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child) {
+		super(types);
 		this.container = container;
 		this.child = child;
 	}

@@ -7,12 +7,11 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.test.imp.types.BoolType;
@@ -29,9 +28,9 @@ public class IMPNot extends NativeCall {
 			throws SemanticException {
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr : params[1]) {
-			// TODO should be runtime type
 			AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
-					new UnaryExpression(BoolType.INSTANCE, expr, UnaryOperator.LOGICAL_NOT));
+					new UnaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), expr,
+							UnaryOperator.LOGICAL_NOT));
 			if (result == null)
 				result = tmp;
 			else

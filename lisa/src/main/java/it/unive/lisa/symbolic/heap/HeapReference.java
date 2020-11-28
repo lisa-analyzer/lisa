@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A reference to a memory location, identified by its name.
@@ -17,11 +18,11 @@ public class HeapReference extends HeapExpression {
 	/**
 	 * Builds the heap reference.
 	 * 
-	 * @param type the runtime type of this expression
-	 * @param name the name that identifies the memory location
+	 * @param types the runtime types of this expression
+	 * @param name  the name that identifies the memory location
 	 */
-	public HeapReference(Type type, String name) {
-		super(type);
+	public HeapReference(ExternalSet<Type> types, String name) {
+		super(types);
 		this.name = name;
 	}
 

@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * An allocation of a memory location.
@@ -12,10 +13,10 @@ public class HeapAllocation extends HeapExpression {
 	/**
 	 * Builds the heap allocation.
 	 * 
-	 * @param type the runtime type of this expression
+	 * @param types the runtime types of this expression
 	 */
-	public HeapAllocation(Type type) {
-		super(type);
+	public HeapAllocation(ExternalSet<Type> types) {
+		super(types);
 	}
 
 	@Override
@@ -36,6 +37,6 @@ public class HeapAllocation extends HeapExpression {
 
 	@Override
 	public String toString() {
-		return "new " + getType();
+		return "new " + getTypes();
 	}
 }

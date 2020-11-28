@@ -31,9 +31,8 @@ public class IMPArrayAccess extends NativeCall {
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr1 : params[0])
 			for (SymbolicExpression expr2 : params[1]) {
-				// TODO should be runtime type
 				AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
-						new AccessChild(getStaticType(), expr1, expr2));
+						new AccessChild(getRuntimeTypes(), expr1, expr2));
 				if (result == null)
 					result = tmp;
 				else

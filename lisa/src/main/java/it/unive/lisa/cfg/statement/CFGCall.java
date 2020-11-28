@@ -182,7 +182,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier(getStaticType(), "call_ret_value@" + offset);
+		return new ValueIdentifier(getRuntimeTypes(), "call_ret_value@" + offset);
 	}
 
 	@Override

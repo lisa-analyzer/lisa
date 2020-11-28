@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.nonrelational.typeInference;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.type.NullType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
@@ -24,7 +25,7 @@ import it.unive.lisa.util.collections.ExternalSetCache;
  */
 public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 
-	private static final ExternalSetCache<Type> TYPES_CACHE = new ExternalSetCache<>();
+	private static final ExternalSetCache<Type> TYPES_CACHE = Caches.types();
 
 	private static final TypeInference TOP = new TypeInference(Untyped.INSTANCE, true, false);
 
@@ -92,7 +93,7 @@ public class TypeInference extends BaseNonRelationalValueDomain<TypeInference> {
 
 	@Override
 	protected TypeInference evalNonNullConstant(Constant constant) {
-		return new TypeInference(constant.getType());
+		return new TypeInference(constant.getTypes());
 	}
 
 	@Override

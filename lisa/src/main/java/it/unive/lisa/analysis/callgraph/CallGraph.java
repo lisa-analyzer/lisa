@@ -32,18 +32,21 @@ public interface CallGraph {
 	void addCFG(CFG cfg);
 
 	/**
-	 * Yields a {@link Call} implementation that corresponds to the resolution of
+	 * Yields a {@link Call} implementation that corresponds to the resolution
+	 * of
 	 * the given {@link UnresolvedCall}. This method will return:
 	 * <ul>
 	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
 	 * {@link UnresolvedCall#getQualifiedName()} is found. The returned
-	 * {@link CFGCall} will be linked to all the possible runtime targets matching
+	 * {@link CFGCall} will be linked to all the possible runtime targets
+	 * matching
 	 * {@link UnresolvedCall#getQualifiedName()};</li>
 	 * <li>an {@link OpenCall}, if no {@link CFG} matching
 	 * {@link UnresolvedCall#getQualifiedName()} is found.</li>
 	 * </ul>
 	 * 
 	 * @param call the call to resolve
+	 * 
 	 * @return a collection of all the possible runtime targets
 	 */
 	Call resolve(UnresolvedCall call);
@@ -59,26 +62,37 @@ public interface CallGraph {
 	 * @param <H>        the type of {@link HeapDomain} to compute
 	 * @param <V>        the type of {@link ValueDomain} to compute
 	 * @param entryState the entry state for the {@link CFG}s that are the
-	 *                   entrypoints of the computation
+	 *                       entrypoints of the computation
+	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
-	 *                           fixpoint
+	 *                               fixpoint
 	 */
 	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState)
 			throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
-	 * given {@link CFG}. Results are provided as {@link CFGWithAnalysisResults}.
+	 * given {@link CFG}. Results are provided as
+	 * {@link CFGWithAnalysisResults}.
 	 * 
 	 * @param <H> the type of {@link HeapDomain} contained into the computed
-	 *            abstract state
+	 *                abstract state
 	 * @param <V> the type of {@link ValueDomain} contained into the computed
-	 *            abstract state
+	 *                abstract state
 	 * @param cfg the cfg whose fixpoint results needs to be retrieved
-	 * @return the result of the fixpoint computation of {@code valueDomain} over
-	 *         {@code cfg}
+	 * 
+	 * @return the result of the fixpoint computation of {@code valueDomain}
+	 *             over
+	 *             {@code cfg}
 	 */
 	<H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(CFG cfg);
+
+	/**
+	 * Clears all the data from the last fixpoint computation, effectively
+	 * re-initializing the call graph. The set of {@link CFG} under analysis
+	 * (added through {@link #addCFG(CFG)}) is not lost.
+	 */
+	void clear();
 
 	/**
 	 * Resolves the given call to all of its possible runtime targets, and then
@@ -87,18 +101,25 @@ public interface CallGraph {
 	 * parameters. The abstract value of each parameter is computed on
 	 * {@code entryState}.
 	 * 
-	 * @param <H>        the type of {@link HeapDomain} contained into the computed
-	 *                   abstract state
-	 * @param <V>        the type of {@link ValueDomain} contained into the computed
-	 *                   abstract state
+	 * @param <H>        the type of {@link HeapDomain} contained into the
+	 *                       computed
+	 *                       abstract state
+	 * @param <V>        the type of {@link ValueDomain} contained into the
+	 *                       computed
+	 *                       abstract state
 	 * @param call       the call to resolve and evaluate
 	 * @param entryState the abstract analysis state when the call is reached
-	 * @param parameters the expressions representing the actual parameters of the
-	 *                   call
-	 * @return an abstract analysis state representing the abstract result of the
-	 *         cfg call. The {@link AnalysisState#getComputedExpressions()} will
-	 *         contain an {@link Identifier} pointing to the meta variable
-	 *         containing the abstraction of the returned value
+	 * @param parameters the expressions representing the actual parameters of
+	 *                       the
+	 *                       call
+	 * 
+	 * @return an abstract analysis state representing the abstract result of
+	 *             the
+	 *             cfg call. The {@link AnalysisState#getComputedExpressions()}
+	 *             will
+	 *             contain an {@link Identifier} pointing to the meta variable
+	 *             containing the abstraction of the returned value
+	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	<H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,

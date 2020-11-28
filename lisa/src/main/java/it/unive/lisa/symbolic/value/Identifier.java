@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
@@ -19,11 +20,11 @@ public abstract class Identifier extends ValueExpression {
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param type the runtime type of this expression
-	 * @param name the name of the identifier
+	 * @param types the runtime types of this expression
+	 * @param name  the name of the identifier
 	 */
-	protected Identifier(Type type, String name) {
-		super(type);
+	protected Identifier(ExternalSet<Type> types, String name) {
+		super(types);
 		this.name = name;
 	}
 

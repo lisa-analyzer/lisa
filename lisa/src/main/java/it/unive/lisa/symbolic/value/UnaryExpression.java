@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A unary expression that applies a {@link UnaryOperator} to a
@@ -24,12 +25,12 @@ public class UnaryExpression extends ValueExpression {
 	/**
 	 * Builds the unary expression.
 	 * 
-	 * @param type       the runtime type of this expression
+	 * @param types      the runtime types of this expression
 	 * @param expression the inner expression
 	 * @param operator   the operator to apply
 	 */
-	public UnaryExpression(Type type, SymbolicExpression expression, UnaryOperator operator) {
-		super(type);
+	public UnaryExpression(ExternalSet<Type> types, SymbolicExpression expression, UnaryOperator operator) {
+		super(types);
 		this.expression = expression;
 		this.operator = operator;
 	}

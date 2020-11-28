@@ -34,7 +34,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			H sem = smallStepSemantics(unary.getExpression());
 			H result = bottom();
 			for (ValueExpression expr : sem.getRewrittenExpressions())
-				result = result.lub(mk(sem, new UnaryExpression(expression.getType(), expr, unary.getOperator())));
+				result = result.lub(mk(sem, new UnaryExpression(expression.getTypes(), expr, unary.getOperator())));
 			return result;
 		}
 
@@ -46,7 +46,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
 				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
 					result = result.lub(
-							mk(sem2, new BinaryExpression(expression.getType(), expr1, expr2, binary.getOperator())));
+							mk(sem2, new BinaryExpression(expression.getTypes(), expr1, expr2, binary.getOperator())));
 			return result;
 		}
 

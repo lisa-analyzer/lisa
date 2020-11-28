@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.statement.Expression;
@@ -30,9 +31,9 @@ public class IMPGreaterThan extends NativeCall {
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr1 : params[0])
 			for (SymbolicExpression expr2 : params[1]) {
-				// TODO should be runtime type
 				AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
-						new BinaryExpression(BoolType.INSTANCE, expr1, expr2, BinaryOperator.COMPARISON_GT));
+						new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), expr1, expr2,
+								BinaryOperator.COMPARISON_GT));
 				if (result == null)
 					result = tmp;
 				else

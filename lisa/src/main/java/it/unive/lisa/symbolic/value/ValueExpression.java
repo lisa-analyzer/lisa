@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A symbolic expression that represents an operation on the program's state.
@@ -18,10 +19,10 @@ public abstract class ValueExpression extends SymbolicExpression {
 	/**
 	 * Builds the heap expression.
 	 * 
-	 * @param type the runtime type of this expression
+	 * @param types the runtime types of this expression
 	 */
-	protected ValueExpression(Type type) {
-		super(type);
+	protected ValueExpression(ExternalSet<Type> types) {
+		super(types);
 	}
 
 }

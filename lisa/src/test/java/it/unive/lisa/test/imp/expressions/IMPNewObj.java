@@ -1,9 +1,7 @@
 package it.unive.lisa.test.imp.expressions;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -13,7 +11,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
@@ -21,7 +18,6 @@ import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 
 public class IMPNewObj extends NativeCall {
@@ -34,8 +30,7 @@ public class IMPNewObj extends NativeCall {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
 			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
-		// TODO should be runtime type
-		HeapAllocation created = new HeapAllocation(getStaticType());
+		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 		
 		// we need to add the receiver to the parameters
 		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());

@@ -28,7 +28,7 @@ public class TypeConversion extends ValueExpression {
 	 * @param operand the expression to cast
 	 */
 	public TypeConversion(Type toType, SymbolicExpression operand) {
-		super(toType);
+		super(operand.getTypes().filter(t -> t.canBeAssignedTo(toType)));
 		this.toType = toType;
 		this.operand = operand;
 	}

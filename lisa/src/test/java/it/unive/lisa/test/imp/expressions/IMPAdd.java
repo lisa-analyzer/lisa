@@ -12,6 +12,7 @@ import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -29,9 +30,14 @@ public class IMPAdd extends NativeCall {
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr1 : params[0])
 			for (SymbolicExpression expr2 : params[1]) {
-				// TODO should be runtime type
+				BinaryOperator op;
+				if (expr1.getDynamicType().isStringType() && expr2.getDynamicType().isStringType())
+					op = BinaryOperator.STRING_CONCAT;
+				else
+					op = BinaryOperator.NUMERIC_ADD;
+
 				AnalysisState<H, V> tmp = new AnalysisState<>(computedState.getState(),
-						new BinaryExpression(getStaticType(), expr1, expr2, BinaryOperator.NUMERIC_ADD));
+						new BinaryExpression(getRuntimeTypes(), expr1, expr2, op));
 				if (result == null)
 					result = tmp;
 				else

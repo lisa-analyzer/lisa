@@ -117,7 +117,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier(getStaticType(), "open_call_ret_value@" + offset);
+		return new ValueIdentifier(getRuntimeTypes(), "open_call_ret_value@" + offset);
 	}
 	
 	@Override

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
@@ -164,6 +166,26 @@ public class ExternalSet<T> implements Iterable<T> {
 			set(bits, pos);
 		} else
 			set(localbits, pos);
+	}
+	
+	public void addAll(ExternalSet<T> other) {
+		if (this == other)
+			return;
+		if (other == null)
+			return;
+		if (cache != other.cache)
+			return;
+
+		long[] localbits = this.bits, otherbits = other.bits;
+		int thislength = localbits.length, otherlength = otherbits.length;
+
+		if (thislength < otherlength) {
+			bits = new long[otherlength];
+			System.arraycopy(localbits, 0, bits, 0, localbits.length);
+		}
+		
+		for (--otherlength; otherlength >= 0; otherlength--)
+			bits[otherlength] |= otherbits[otherlength];
 	}
 
 	/**
@@ -538,6 +560,19 @@ public class ExternalSet<T> implements Iterable<T> {
 				result.remove(t);
 
 		return result;
+	}
+	
+	public T reduce(T base, BiFunction<T, T, T> reducer) {
+		T result = base;
+		for (T t : this)
+			result = reducer.apply(result, t);
+		return result;
+	}
+	
+	public T first() {
+		if (isEmpty())
+			throw new IllegalStateException("Cannot get first element from an empty set");
+		return iterator().next();
 	}
 
 	/**

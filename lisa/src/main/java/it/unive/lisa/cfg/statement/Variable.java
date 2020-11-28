@@ -124,11 +124,9 @@ public class Variable extends Expression {
 		if (getStaticType().isPointerType())
 			// the smallStepSemantics will take care of converting that reference to a variable identifier
 			// setting also the identifier as computed expression
-			// TODO should be runtime type
-			expr = new HeapReference(getStaticType(), getName());
+			expr = new HeapReference(getRuntimeTypes(), getName());
 		else 
-			// TODO should be runtime type
-			expr = new ValueIdentifier(getStaticType(), getName());
+			expr = new ValueIdentifier(getRuntimeTypes(), getName());
 			
 		return entryState.smallStepSemantics(expr);
 	}

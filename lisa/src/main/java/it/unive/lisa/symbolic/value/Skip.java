@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.type.VoidType;
 
 /**
@@ -13,7 +14,7 @@ public class Skip extends ValueExpression {
 	 * Builds the skip.
 	 */
 	public Skip() {
-		super(VoidType.INSTANCE);
+		super(Caches.types().mkSingletonSet(VoidType.INSTANCE));
 	}
 
 	@Override

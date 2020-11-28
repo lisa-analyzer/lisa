@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A bynary expression that applies a {@link BinaryOperator} to two
@@ -29,13 +30,14 @@ public class BinaryExpression extends ValueExpression {
 	/**
 	 * Builds the binary expression.
 	 * 
-	 * @param type     the runtime type of this expression
+	 * @param types    the runtime types of this expression
 	 * @param left     the left-hand side operand of this expression
 	 * @param right    the right-hand side operand of this expression
 	 * @param operator the operator to apply
 	 */
-	public BinaryExpression(Type type, SymbolicExpression left, SymbolicExpression right, BinaryOperator operator) {
-		super(type);
+	public BinaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression right,
+			BinaryOperator operator) {
+		super(types);
 		this.left = left;
 		this.right = right;
 		this.operator = operator;
