@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 
 /**
  * A file manager that provides standard functionalities for communicating with
@@ -15,12 +16,22 @@ import java.nio.charset.StandardCharsets;
  */
 public class FileManager {
 
+	private static File workdir;
+
+	public static void setWorkingDir(String workdir) {
+		FileManager.workdir = Paths.get(workdir).toFile();
+	}
+
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well.
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute.
 	 * 
 	 * @param name the name of the file to create
+	 * 
 	 * @return a {@link Writer} instance that can write to the created file
+	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkOutputFile(String name) throws IOException {
@@ -29,16 +40,20 @@ public class FileManager {
 
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
-	 * missing directories will be created as well.
+	 * missing directories will be created as well. The given name will be
+	 * joined with the workdir used to initialize this file manager, thus
+	 * raising an exception if {@code name} is absolute.
 	 * 
 	 * @param name the name of the file to create
-	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be written to
-	 *             the file
+	 * @param bom  if {@code true}, the bom marker {@code \ufeff} will be
+	 *                 written to the file
+	 * 
 	 * @return a {@link Writer} instance that can write to the created file
+	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkOutputFile(String name, boolean bom) throws IOException {
-		File file = new File(name);
+		File file = new File(workdir, name);
 
 		if (!file.getAbsoluteFile().getParentFile().exists())
 			file.getAbsoluteFile().getParentFile().mkdirs();
@@ -51,13 +66,17 @@ public class FileManager {
 	}
 
 	/**
-	 * Creates a UTF-8 encoded file with the given name, appending the {@code dot}
-	 * extension. If name is a path, all missing directories will be created as
-	 * well. The name will be stripped of any characters that might cause problems
-	 * in the file name.
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code dot} extension. If name is a path, all missing directories will be
+	 * created as well. The name will be stripped of any characters that might
+	 * cause problems in the file name. The given name will be joined with the
+	 * workdir used to initialize this file manager, thus raising an exception
+	 * if {@code name} is absolute.
 	 * 
 	 * @param name the name of the file to create
+	 * 
 	 * @return a {@link Writer} instance that can write to the created file
+	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public static Writer mkDotFile(String name) throws IOException {

@@ -42,3 +42,6 @@ local.properties
 
 # UML diagrams
 diagrams/
+
+# tests
+test-outputs/

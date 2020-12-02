@@ -20,6 +20,8 @@ public class TypesCollectionTest {
 		Collection<CFG> cfgs = IMPFrontend.processFile("imp-testcases/type-inference/program.imp");
 		cfgs.forEach(lisa::addCFG);
 		lisa.setInferTypes(true);
+		lisa.setDumpTypeInference(true);
+		lisa.setWorkdir("test-outputs/type-inference");
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {

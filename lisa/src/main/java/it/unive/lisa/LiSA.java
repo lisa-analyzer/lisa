@@ -1,11 +1,14 @@
 package it.unive.lisa;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +34,7 @@ import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.file.FileManager;
@@ -74,6 +78,31 @@ public class LiSA {
 	private boolean inferTypes;
 
 	/**
+	 * Whether or not the input cfgs should be dumped to dot format. This is
+	 * useful for checking if the inputs that reach LiSA are well formed.
+	 */
+	private boolean dumpCFGs;
+
+	/**
+	 * Whether or not the result of type inference should be dumped to dot
+	 * format, if it is executed
+	 */
+	private boolean dumpTypeInference;
+
+	/**
+	 * Whether or not the result of the analysis should be dumped to dot format,
+	 * if it is executed
+	 */
+	private boolean dumpAnalysis;
+
+	/**
+	 * The workdir that LiSA should use as root for all generated files (log
+	 * files excluded, use the logging configuration for controlling where those
+	 * are placed).
+	 */
+	private String workdir;
+
+	/**
 	 * The value domains to run during the analysis
 	 */
 	private final Collection<ValueDomain<?>> valueDomains;
@@ -96,6 +125,11 @@ public class LiSA {
 		this.warnings = new ArrayList<>();
 		this.valueDomains = new ArrayList<>();
 		this.heapDomains = new ArrayList<>();
+		this.inferTypes = false;
+		this.dumpCFGs = false;
+		this.dumpTypeInference = false;
+		this.dumpAnalysis = false;
+		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
 	}
 
 	/**
@@ -138,6 +172,22 @@ public class LiSA {
 
 	public void setInferTypes(boolean inferTypes) {
 		this.inferTypes = inferTypes;
+	}
+	
+	public void setDumpCFGs(boolean dumpCFGs) {
+		this.dumpCFGs = dumpCFGs;
+	}
+	
+	public void setDumpTypeInference(boolean dumpTypeInference) {
+		this.dumpTypeInference = dumpTypeInference;
+	}
+	
+	public void setDumpAnalysis(boolean dumpAnalysis) {
+		this.dumpAnalysis = dumpAnalysis;
+	}
+	
+	public void setWorkdir(String workdir) {
+		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
 	}
 
 	/**
@@ -211,14 +261,18 @@ public class LiSA {
 
 	private void printConfig() {
 		log.info("LiSA setup:");
+		log.info("  workdir: " + String.valueOf(workdir));
 		log.info("  " + inputs.size() + " CFGs to analyze");
+		log.info("  dump input cfgs: " + dumpCFGs);
+		log.info("  infer types: " + inferTypes);
+		log.info("  dump inferred types: " + dumpTypeInference);
+		log.info("  " + heapDomains.size() + " heap domains to execute");
+		log.info("  " + valueDomains.size() + " value domains to execute");
+		log.info("  dump analysis results: " + dumpAnalysis);
 		log.info("  " + syntacticChecks.size() + " syntactic checks to execute"
 				+ (syntacticChecks.isEmpty() ? "" : ":"));
 		for (SyntacticCheck check : syntacticChecks)
 			log.info("      " + check.getClass().getSimpleName());
-		log.info("  infer types: " + inferTypes);
-		log.info("  " + heapDomains.size() + " heap domains to execute" + (heapDomains.isEmpty() ? "" : ":"));
-		log.info("  " + valueDomains.size() + " value domains to execute" + (valueDomains.isEmpty() ? "" : ":"));
 	}
 
 	private void printStats() {
@@ -228,8 +282,13 @@ public class LiSA {
 
 	@SuppressWarnings({ "unchecked" })
 	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
+		FileManager.setWorkingDir(workdir);
+		
+		if (dumpCFGs)
+			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs")) 
+				dumpCFG("", cfg, st -> "");
+		
 		CheckTool tool = new CheckTool();
-
 		if (!syntacticChecks.isEmpty()) {
 			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
 			warnings.addAll(tool.getWarnings());
@@ -265,18 +324,12 @@ public class LiSA {
 		if (inferTypes) {
 			TimerLogger.execAction(log, "Computing type information",
 					() -> computeFixpoint(heap, new TypeEnvironment(), Statement::typeInference));
-
-			for (CFG cfg : inputs) {
-				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
-				try (Writer file = FileManager.mkDotFile("typing___" + cfg.getDescriptor().getFullSignature())) {
-					result.dump(file, cfg.getDescriptor().getFullSignature(),
-							st -> result.getAnalysisStateAt(st).toString());
-				} catch (IOException e) {
-					log.error(
-							"Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
-							e);
+			
+			if (dumpTypeInference)
+				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
+					CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				}
-			}
 
 			callGraph.clear();
 		} else
@@ -292,15 +345,19 @@ public class LiSA {
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> computeFixpoint(heap, value, Statement::semantics));
 
-		for (CFG cfg : inputs) {
-			CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
-			try (Writer file = FileManager.mkDotFile("analysis___" + cfg.getDescriptor().getFullSignature())) {
-				result.dump(file, cfg.getDescriptor().getFullSignature(),
-						st -> result.getAnalysisStateAt(st).toString());
-			} catch (IOException e) {
-				log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
-						e);
+		if (dumpAnalysis)
+			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping analysis results", "cfgs")) {
+				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
+	}
+
+	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
+		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignature())) {
+			cfg.dump(file, cfg.getDescriptor().getFullSignature(), st -> labelGenerator.apply(st));
+		} catch (IOException e) {
+			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
+					e);
 		}
 	}
 
