@@ -3,12 +3,13 @@ package it.unive.lisa.cfg.statement;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -26,7 +27,8 @@ public class Throw extends Statement {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error. The location where
-	 * this throw happens is unknown (i.e. no source file/line/column is available).
+	 * this throw happens is unknown (i.e. no source file/line/column is
+	 * available).
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param expression the expression to raise as error
@@ -36,16 +38,16 @@ public class Throw extends Statement {
 	}
 
 	/**
-	 * Builds the throw, raising {@code expression} as error, happening at the given
-	 * location in the program.
+	 * Builds the throw, raising {@code expression} as error, happening at the
+	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, String sourceFile, int line, int col, Expression expression) {
@@ -62,7 +64,7 @@ public class Throw extends Statement {
 	public final Expression getExpression() {
 		return expression;
 	}
-	
+
 	@Override
 	public int setOffset(int offset) {
 		this.offset = offset;
@@ -96,16 +98,26 @@ public class Throw extends Statement {
 	public final String toString() {
 		return "throw " + expression;
 	}
-
+	
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
+		expressions.put(expression, result);
+		if (!expression.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(expression.getMetaVariables());
+		return result.smallStepSemantics(new Skip());
+	}
+	
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
 			throws SemanticException {
 		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())
-			// TODO is this correct?
 			result = result.forgetIdentifiers(expression.getMetaVariables());
-		return new AnalysisState<>(result.getState(), new Skip());
+		return result.smallStepSemantics(new Skip());
 	}
 }

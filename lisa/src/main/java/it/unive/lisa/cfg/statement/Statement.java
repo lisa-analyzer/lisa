@@ -5,12 +5,15 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.InferredTypes;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
+import it.unive.lisa.cfg.type.Type;
 
 /**
  * A statement of the program to analyze.
@@ -25,20 +28,20 @@ public abstract class Statement implements Comparable<Statement> {
 	private final CFG cfg;
 
 	/**
-	 * The source file where this statement happens. If it is unknown, this field
-	 * might contain {@code null}.
+	 * The source file where this statement happens. If it is unknown, this
+	 * field might contain {@code null}.
 	 */
 	private final String sourceFile;
 
 	/**
-	 * The line where this statement happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The line where this statement happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int line;
 
 	/**
-	 * The column where this statement happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The column where this statement happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int col;
 
@@ -51,12 +54,12 @@ public abstract class Statement implements Comparable<Statement> {
 	 * Builds a statement happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 */
 	protected Statement(CFG cfg, String sourceFile, int line, int col) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
@@ -77,8 +80,8 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Yields the source file name where this statement happens. This method returns
-	 * {@code null} if the source file is unknown.
+	 * Yields the source file name where this statement happens. This method
+	 * returns {@code null} if the source file is unknown.
 	 * 
 	 * @return the source file, or {@code null}
 	 */
@@ -87,8 +90,8 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Yields the line number where this statement happens in the source file. This
-	 * method returns {@code -1} if the line number is unknown.
+	 * Yields the line number where this statement happens in the source file.
+	 * This method returns {@code -1} if the line number is unknown.
 	 * 
 	 * @return the line number, or {@code -1}
 	 */
@@ -116,12 +119,14 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Sets the offset of this statement to the given value, and then proceeds by
-	 * setting the one of its nested expressions to subsequent values. The last
-	 * offset used is returned.
+	 * Sets the offset of this statement to the given value, and then proceeds
+	 * by setting the one of its nested expressions to subsequent values. The
+	 * last offset used is returned.
 	 * 
 	 * @param offset the offset to set
-	 * @return the last offset used while setting the offsets of nested expressions
+	 * 
+	 * @return the last offset used while setting the offsets of nested
+	 *             expressions
 	 */
 	public abstract int setOffset(int offset);
 
@@ -136,13 +141,13 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * All statements use reference equality for equality checks, to allow different
-	 * statement with the same content but placed in different part of the cfg to
-	 * being not equal if there are no debug information available. For checking if
-	 * two statements are effectively equal (that is, they are different object with
-	 * the same structure) use {@link #isEqualTo(Statement)}. <br>
+	 * All statements use reference equality for equality checks, to allow
+	 * different statement with the same content but placed in different part of
+	 * the cfg to being not equal if there are no debug information available.
+	 * For checking if two statements are effectively equal (that is, they are
+	 * different object with the same structure) use
+	 * {@link #isEqualTo(Statement)}. <br>
 	 * <br>
-	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -151,12 +156,14 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Checks if this statement is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
+	 * Checks if this statement is effectively equal to the given one, that is,
+	 * if they have the same structure while potentially being different
+	 * instances.
 	 * 
 	 * @param st the other statement
+	 * 
 	 * @return {@code true} if this statement and the given one are effectively
-	 *         equals
+	 *             equals
 	 */
 	public boolean isEqualTo(Statement st) {
 		if (this == st)
@@ -200,22 +207,58 @@ public abstract class Statement implements Comparable<Statement> {
 	public abstract String toString();
 
 	/**
-	 * Computes the semantics of the statement, expressing how semantic information
-	 * is transformed by the execution of this statement.
+	 * Computes the runtime types for this statement, expressing how type
+	 * information is transformed by the execution of this statement. This
+	 * method is also responsible for recursively invoking the
+	 * {@link #typeInference(InferredTypes, CallGraph, ExpressionStore)} of each
+	 * nested {@link Expression}, saving the result of each call in
+	 * {@code expressions}. If this statement is an {@link Expression},
+	 * implementers of this method should call
+	 * {@link Expression#setRuntimeTypes(it.unive.lisa.util.collections.ExternalSet)}
+	 * with the computed set of {@link Type}s embedded in {@link InferredTypes}
+	 * as parameter, in order to register the computed runtime types in the
+	 * expression.
+	 * 
+	 * @param entryState  the entry state that represents the abstract values of
+	 *                        each program variable and memory location when the
+	 *                        execution reaches this statement
+	 * @param callGraph   the call graph of the program to analyze
+	 * @param expressions the cache where analysis states of intermediate
+	 *                        expressions must be stored
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this statement
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public abstract <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions)
+			throws SemanticException;
+
+	/**
+	 * Computes the semantics of the statement, expressing how semantic
+	 * information is transformed by the execution of this statement. This
+	 * method is also responsible for recursively invoking the
+	 * {@link #semantics(AnalysisState, CallGraph, ExpressionStore)} of each
+	 * nested {@link Expression}, saving the result of each call in
+	 * {@code expressions}.
 	 * 
 	 * @param <H>         the type of the heap analysis
 	 * @param <V>         the type of the value analysis
 	 * @param entryState  the entry state that represents the abstract values of
-	 *                    each program variable and memory location when the
-	 *                    execution reaches this statement
+	 *                        each program variable and memory location when the
+	 *                        execution reaches this statement
 	 * @param callGraph   the call graph of the program to analyze
 	 * @param expressions the cache where analysis states of intermediate
-	 *                    expressions must be stored
+	 *                        expressions must be stored
+	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
-	 *         execution of this statement
+	 *             execution of this statement
+	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
 			throws SemanticException;
 }

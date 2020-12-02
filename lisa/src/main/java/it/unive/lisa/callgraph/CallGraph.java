@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
+import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.OpenCall;
@@ -33,14 +34,12 @@ public interface CallGraph {
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
-	 * of
-	 * the given {@link UnresolvedCall}. This method will return:
+	 * of the given {@link UnresolvedCall}. This method will return:
 	 * <ul>
 	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
 	 * {@link UnresolvedCall#getQualifiedName()} is found. The returned
 	 * {@link CFGCall} will be linked to all the possible runtime targets
-	 * matching
-	 * {@link UnresolvedCall#getQualifiedName()};</li>
+	 * matching {@link UnresolvedCall#getQualifiedName()};</li>
 	 * <li>an {@link OpenCall}, if no {@link CFG} matching
 	 * {@link UnresolvedCall#getQualifiedName()} is found.</li>
 	 * </ul>
@@ -67,7 +66,8 @@ public interface CallGraph {
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState)
+	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState,
+			SemanticFunction<H, V> semantics)
 			throws FixpointException;
 
 	/**
@@ -82,8 +82,7 @@ public interface CallGraph {
 	 * @param cfg the cfg whose fixpoint results needs to be retrieved
 	 * 
 	 * @return the result of the fixpoint computation of {@code valueDomain}
-	 *             over
-	 *             {@code cfg}
+	 *             over {@code cfg}
 	 */
 	<H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(CFG cfg);
 
@@ -102,22 +101,18 @@ public interface CallGraph {
 	 * {@code entryState}.
 	 * 
 	 * @param <H>        the type of {@link HeapDomain} contained into the
-	 *                       computed
-	 *                       abstract state
+	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
-	 *                       computed
-	 *                       abstract state
+	 *                       computed abstract state
 	 * @param call       the call to resolve and evaluate
 	 * @param entryState the abstract analysis state when the call is reached
 	 * @param parameters the expressions representing the actual parameters of
-	 *                       the
-	 *                       call
+	 *                       the call
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
-	 *             the
-	 *             cfg call. The {@link AnalysisState#getComputedExpressions()}
-	 *             will
-	 *             contain an {@link Identifier} pointing to the meta variable
+	 *             the cfg call. The
+	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             an {@link Identifier} pointing to the meta variable
 	 *             containing the abstraction of the returned value
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation

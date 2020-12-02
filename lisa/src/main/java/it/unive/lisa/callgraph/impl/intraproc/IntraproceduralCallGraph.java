@@ -2,7 +2,6 @@ package it.unive.lisa.callgraph.impl.intraproc;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +18,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.Parameter;
+import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.Expression;
@@ -43,9 +43,10 @@ public class IntraproceduralCallGraph implements CallGraph {
 	private static final Logger log = LogManager.getLogger(IntraproceduralCallGraph.class);
 
 	/**
-	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all the
-	 * cfgs that have been added. If a key's values's {@link Optional#isEmpty()}
-	 * yields true, then the fixpoint for that key has not be computed yet.
+	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all
+	 * the cfgs that have been added. If a key's values's
+	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
+	 * has not be computed yet.
 	 */
 	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?>>> results;
 
@@ -60,7 +61,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 	public void addCFG(CFG cfg) {
 		results.put(cfg, Optional.empty());
 	}
-	
+
 	@Override
 	public void clear() {
 		for (CFG cfg : results.keySet())
@@ -93,18 +94,19 @@ public class IntraproceduralCallGraph implements CallGraph {
 			return false;
 
 		for (int i = 0; i < formals.length; i++)
-			if (!actuals[i].getStaticType().canBeAssignedTo(formals[i].getStaticType()))
+			if (!formals[i].getStaticType().canBeAssignedTo(actuals[i].getStaticType()))
 				return false;
 
 		return true;
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState)
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState,
+			SemanticFunction<H, V> semantics)
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
 				"cfgs"))
-			results.put(cfg, Optional.of(cfg.fixpoint(entryState, this)));
+			results.put(cfg, Optional.of(cfg.fixpoint(entryState, this, semantics)));
 	}
 
 	@Override
@@ -120,8 +122,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return new AnalysisState<>(entryState.getState().top(),
-				Collections.singleton(new ValueIdentifier(call.getRuntimeTypes(), "ret_value")));
+		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"));
 	}
 
 }

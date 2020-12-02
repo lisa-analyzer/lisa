@@ -1,4 +1,4 @@
- package it.unive.lisa.cfg.statement;
+package it.unive.lisa.cfg.statement;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
@@ -37,8 +38,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	private final String qualifiedName;
 
 	/**
-	 * Builds the CFG call. The location where this call happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds the CFG call. The location where this call happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param qualifiedName the qualified name of the static target of this call
@@ -50,8 +51,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	/**
-	 * Builds the CFG call. The location where this call happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds the CFG call. The location where this call happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param qualifiedName the qualified name of the static target of this call
@@ -67,11 +68,11 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param sourceFile    the source file where this expression happens. If
-	 *                      unknown, use {@code null}
+	 *                          unknown, use {@code null}
 	 * @param line          the line number where this expression happens in the
-	 *                      source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the source
-	 *                      file. If unknown, use {@code -1}
+	 *                          source file. If unknown, use {@code -1}
+	 * @param col           the column where this expression happens in the
+	 *                          source file. If unknown, use {@code -1}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param target        the CFG that is targeted by this CFG call
 	 * @param parameters    the parameters of this call
@@ -86,11 +87,11 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param sourceFile    the source file where this expression happens. If
-	 *                      unknown, use {@code null}
+	 *                          unknown, use {@code null}
 	 * @param line          the line number where this expression happens in the
-	 *                      source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the source
-	 *                      file. If unknown, use {@code -1}
+	 *                          source file. If unknown, use {@code -1}
+	 * @param col           the column where this expression happens in the
+	 *                          source file. If unknown, use {@code -1}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
@@ -111,7 +112,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		Type result = null;
 		while (it.hasNext()) {
 			Type current = it.next().getDescriptor().getReturnType();
-			if (result == null) 
+			if (result == null)
 				result = current;
 			else if (current.canBeAssignedTo(result))
 				continue;
@@ -119,7 +120,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 				result = current;
 			else
 				result = result.commonSupertype(current);
-			
+
 			if (current.isUntyped())
 				break;
 		}
@@ -186,32 +187,68 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
+			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+			Collection<SymbolicExpression>[] params) throws SemanticException {
+		// this will contain only the information about the returned
+		// metavariable
+		AnalysisState<H, TypeEnvironment> returned = callGraph.getAbstractResultOf(this, computedState, params);
+		// the lub will include the metavariable inside the state
+		AnalysisState<H, TypeEnvironment> lub = computedState.lub(returned).smallStepSemantics(new Skip());
+
+		AnalysisState<H, TypeEnvironment> result = null;
+		if (getStaticType().isVoidType())
+			// no need to add the meta variable since nothing has been pushed on
+			// the stack
+			result = lub;
+		else {
+			Identifier meta = getMetaVariable();
+			for (SymbolicExpression expr : returned.getComputedExpressions())
+				getMetaVariables().add((Identifier) expr);
+			getMetaVariables().add(meta);
+
+			for (SymbolicExpression expr : lub.getComputedExpressions()) {
+				AnalysisState<H, TypeEnvironment> tmp = lub.assign(meta, expr);
+				if (result == null)
+					result = tmp;
+				else
+					result = result.lub(tmp);
+			}
+		}
+
+		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		return result;
+	}
+
+	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
 			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
-		// this will contain only the information about the returned metavariable
+		// this will contain only the information about the returned
+		// metavariable
 		AnalysisState<H, V> returned = callGraph.getAbstractResultOf(this, computedState, params);
 		// the lub will include the metavariable inside the state
-		AnalysisState<H, V> lub = new AnalysisState<>(computedState.getState().lub(returned.getState()), new Skip());
+		AnalysisState<H, V> lub = computedState.lub(returned);
 
 		if (getStaticType().isVoidType())
-			// no need to add the meta variable since nothing has been pushed on the stack
-			return lub;
+			// no need to add the meta variable since nothing has been pushed on
+			// the stack
+			return lub.smallStepSemantics(new Skip());
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
 			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
-		
+
 		AnalysisState<H, V> result = null;
 		for (SymbolicExpression expr : lub.getComputedExpressions()) {
 			AnalysisState<H, V> tmp = lub.assign(meta, expr);
 			if (result == null)
-				result =  tmp;
+				result = tmp;
 			else
 				result = result.lub(tmp);
 		}
-		
+
 		return result;
 	}
 }

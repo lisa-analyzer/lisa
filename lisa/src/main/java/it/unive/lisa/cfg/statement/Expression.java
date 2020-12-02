@@ -77,7 +77,7 @@ public abstract class Expression extends Statement {
 		return staticType;
 	}
 	
-	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
+	protected final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
 		if (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes))
 			return;
 		

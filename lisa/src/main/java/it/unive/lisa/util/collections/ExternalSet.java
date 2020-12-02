@@ -2,12 +2,14 @@ package it.unive.lisa.util.collections;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -23,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ExternalSet<T> implements Iterable<T> {
+public class ExternalSet<T> implements Iterable<T>, Set<T> {
 
 	private static final int LENGTH_MASK = 0x3f;
 
@@ -35,14 +37,14 @@ public class ExternalSet<T> implements Iterable<T> {
 	 * @param n the number
 	 * @return the bitwise mask
 	 */
-	private static long bitmask(int n) {
+	private static int bitmask(int n) {
 		// assuming that n will be stored in the right long (obtained with toNLongs(n)),
 		// we have to determine which bit of the long has to be turned to 1. To do that,
 		// we take the 1L (that is just the right-most bit set to 1) and we shift it to
 		// the left. The amount of positions that we need to shift it is equal to n%64
 		// (we use bitwise and as a mask) that yields the correct bit to represent a
 		// number between 0 and 63 inside the long
-		return 1L << (n & LENGTH_MASK);
+		return (int) 1L << (n & LENGTH_MASK);
 	}
 
 	/**
@@ -148,12 +150,8 @@ public class ExternalSet<T> implements Iterable<T> {
 		return cache;
 	}
 
-	/**
-	 * Adds the given element to this set.
-	 * 
-	 * @param e the element to add
-	 */
-	public void add(T e) {
+	@Override
+	public boolean add(T e) {
 		long[] localbits = bits;
 		int pos = cache.indexOfOrAdd(e);
 		int bitvector = bitvector_index(pos);
@@ -164,8 +162,12 @@ public class ExternalSet<T> implements Iterable<T> {
 			bits = new long[1 + bitvector];
 			System.arraycopy(localbits, 0, bits, 0, localbits.length);
 			set(bits, pos);
-		} else
-			set(localbits, pos);
+			return true;
+		} else if (isset(localbits[bitvector], pos))
+			return  false; 
+		
+		set(localbits, pos);
+		return true;
 	}
 	
 	public void addAll(ExternalSet<T> other) {
@@ -188,22 +190,26 @@ public class ExternalSet<T> implements Iterable<T> {
 			bits[otherlength] |= otherbits[otherlength];
 	}
 
-	/**
-	 * Removes the given element from this set.
-	 * 
-	 * @param e the element to remove
-	 */
-	public void remove(T e) {
-		int pos = getCache().indexOf(e);
+	@Override
+	public boolean remove(Object e) {
+		int pos;
+		try {
+			pos = cache.indexOf((T) e);
+		} catch (ClassCastException ex) {
+			// ugly, but java and generics :/
+			return false;
+		}
+		
 		if (pos < 0)
-			return;
+			return false;
 
 		long[] localbits = this.bits;
 		if (bitvector_index(pos) >= localbits.length)
-			return;
+			return false;
 
 		unset(localbits, pos);
 		removeTrailingZeros();
+		return true;
 	}
 
 	/**
@@ -324,22 +330,6 @@ public class ExternalSet<T> implements Iterable<T> {
 	 */
 	public ExternalSet<T> copy() {
 		return new ExternalSet<>(this);
-	}
-
-	/**
-	 * Determines if an element belongs to this set.
-	 * 
-	 * @param e the element
-	 * @return true if and only if {@code e} is in this set
-	 */
-	public final boolean contains(T e) {
-		int pos = cache.indexOf(e);
-		if (pos < 0)
-			// if it's not inside the cache, it's not in the set
-			return false;
-
-		int bitvector = bitvector_index(pos);
-		return bitvector < bits.length && isset(bits[bitvector], pos);
 	}
 
 	/**
@@ -661,5 +651,77 @@ public class ExternalSet<T> implements Iterable<T> {
 		public void remove() {
 			throw new UnsupportedOperationException("Removal from a bitset is not supported");
 		}
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		int pos;
+		try {
+			pos = cache.indexOf((T) o);
+		} catch (ClassCastException e) {
+			// ugly, but java and generics :/
+			return false;
+		}
+		
+		if (pos < 0)
+			// if it's not inside the cache, it's not in the set
+			return false;
+
+		int bitvector = bitvector_index(pos);
+		return bitvector < bits.length && isset(bits[bitvector], pos);
+	}
+
+	@Override
+	public Object[] toArray() {
+		Object[] array = new Object[size()];
+		int i = 0;
+		for (T t : this)
+			array[i++] = t;
+		return array;
+	}
+
+	@Override
+	public <E> E[] toArray(E[] a) {
+		return new ArrayList<>(this).toArray(a);
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		for (Object o : c)
+			if (!contains(o))
+				return false;
+		return true;
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends T> c) {
+		boolean result = false;
+		for (T o : c)
+			result |= add(o);
+		return result;
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		Collection<T> toRemove = new ArrayList<>();
+		for (T o : this)
+			if (!c.contains(o))
+				toRemove.add(o);
+		
+		for (T o : toRemove)
+			remove(o);
+		return !toRemove.isEmpty();
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		Collection<T> toRemove = new ArrayList<>();
+		for (T o : this)
+			if (c.contains(o))
+				toRemove.add(o);
+		
+		for (T o : toRemove)
+			remove(o);
+		return !toRemove.isEmpty();
 	}
 }

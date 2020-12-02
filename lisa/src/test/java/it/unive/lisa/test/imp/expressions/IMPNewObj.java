@@ -9,9 +9,9 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
@@ -31,14 +31,34 @@ public class IMPNewObj extends NativeCall {
 			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
-		
+
 		// we need to add the receiver to the parameters
 		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
-		
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(), getStaticType().toString(), fullExpressions);
-		Call resolved = callGraph.resolve(call);
-		return resolved.callSemantics(computedState, callGraph, fullParams);
+
+		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
+				getStaticType().toString(), fullExpressions);
+		call.inheritRuntimeTypesFrom(this);
+		return call.callSemantics(computedState, callGraph, fullParams);
+	}
+
+	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
+			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+			Collection<SymbolicExpression>[] params) throws SemanticException {
+		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
+
+		// we need to add the receiver to the parameters
+		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
+		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
+
+		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
+				getStaticType().toString(), fullExpressions);
+		AnalysisState<H, TypeEnvironment> typing = call.callTypeInference(computedState, callGraph, fullParams);
+
+		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		return typing;
 	}
 }

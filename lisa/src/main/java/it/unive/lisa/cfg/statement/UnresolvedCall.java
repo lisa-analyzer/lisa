@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Untyped;
@@ -48,11 +49,11 @@ public class UnresolvedCall extends Call {
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param sourceFile    the source file where this expression happens. If
-	 *                      unknown, use {@code null}
+	 *                          unknown, use {@code null}
 	 * @param line          the line number where this expression happens in the
-	 *                      source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the source
-	 *                      file. If unknown, use {@code -1}
+	 *                          source file. If unknown, use {@code -1}
+	 * @param col           the column where this expression happens in the
+	 *                          source file. If unknown, use {@code -1}
 	 * @param qualifiedName the qualified name of the target of this call
 	 * @param parameters    the parameters of this call
 	 */
@@ -103,12 +104,28 @@ public class UnresolvedCall extends Call {
 	}
 
 	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
+			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+			Collection<SymbolicExpression>[] params) throws SemanticException {
+		Call resolved = callGraph.resolve(this);
+		AnalysisState<H, TypeEnvironment> result = resolved.callTypeInference(computedState, callGraph, params);
+		getMetaVariables().addAll(resolved.getMetaVariables());
+		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		return result;
+	}
+
+	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
 			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		Call resolved = callGraph.resolve(this);
+		resolved.setRuntimeTypes(getRuntimeTypes());
 		AnalysisState<H, V> result = resolved.callSemantics(computedState, callGraph, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
+	}
+	
+	public void inheritRuntimeTypesFrom(Expression other) {
+		setRuntimeTypes(other.getRuntimeTypes());
 	}
 }

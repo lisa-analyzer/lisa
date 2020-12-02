@@ -16,14 +16,17 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
-import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
+import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.FixpointException;
+import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
@@ -55,8 +58,8 @@ public class LiSA {
 	private final Collection<SyntacticCheck> syntacticChecks;
 
 	/**
-	 * The collection of warnings that will be filled with the results of all the
-	 * executed checks
+	 * The collection of warnings that will be filled with the results of all
+	 * the executed checks
 	 */
 	private final Collection<Warning> warnings;
 
@@ -64,6 +67,11 @@ public class LiSA {
 	 * The callgraph to use during the analysis
 	 */
 	private CallGraph callGraph;
+
+	/**
+	 * Whether or not type inference should be executed before the analysis
+	 */
+	private boolean inferTypes;
 
 	/**
 	 * The value domains to run during the analysis
@@ -81,7 +89,8 @@ public class LiSA {
 	public LiSA() {
 		this.inputs = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		// since the warnings collection will be filled AFTER the execution of every
+		// since the warnings collection will be filled AFTER the execution of
+		// every
 		// concurrent bit has completed its execution, it is fine to use a non
 		// thread-safe one
 		this.warnings = new ArrayList<>();
@@ -123,8 +132,12 @@ public class LiSA {
 	 * 
 	 * @param callGraph the callgraph to use
 	 */
-	public void setCallGraph(CallGraph callGraph) {
+	public <T extends CallGraph> void setCallGraph(T callGraph) {
 		this.callGraph = callGraph;
+	}
+
+	public void setInferTypes(boolean inferTypes) {
+		this.inferTypes = inferTypes;
 	}
 
 	/**
@@ -138,7 +151,8 @@ public class LiSA {
 	}
 
 	/**
-	 * Adds a new {@link NonRelationalHeapDomain} to execute during the analysis.
+	 * Adds a new {@link NonRelationalHeapDomain} to execute during the
+	 * analysis.
 	 * 
 	 * @param <T>    the concrete instance of domain to add
 	 * @param domain the domain to execute
@@ -158,7 +172,8 @@ public class LiSA {
 	}
 
 	/**
-	 * Adds a new {@link NonRelationalValueDomain} to execute during the analysis.
+	 * Adds a new {@link NonRelationalValueDomain} to execute during the
+	 * analysis.
 	 * 
 	 * @param <T>    the concrete instance of domain to add
 	 * @param domain the domain to execute
@@ -201,14 +216,9 @@ public class LiSA {
 				+ (syntacticChecks.isEmpty() ? "" : ":"));
 		for (SyntacticCheck check : syntacticChecks)
 			log.info("      " + check.getClass().getSimpleName());
-		log.info("  call graph implementation: "
-				+ (callGraph == null ? "none provided" : callGraph.getClass().getSimpleName()));
+		log.info("  infer types: " + inferTypes);
 		log.info("  " + heapDomains.size() + " heap domains to execute" + (heapDomains.isEmpty() ? "" : ":"));
-		for (HeapDomain<?> domain : heapDomains)
-			log.info("      " + domain.getClass().getSimpleName());
 		log.info("  " + valueDomains.size() + " value domains to execute" + (valueDomains.isEmpty() ? "" : ":"));
-		for (ValueDomain<?> domain : valueDomains)
-			log.info("      " + domain.getClass().getSimpleName());
 	}
 
 	private void printStats() {
@@ -216,8 +226,8 @@ public class LiSA {
 		log.info("  " + warnings.size() + " warnings generated");
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void runAux() throws AnalysisExecutionException {
+	@SuppressWarnings({ "unchecked" })
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
 		CheckTool tool = new CheckTool();
 
 		if (!syntacticChecks.isEmpty()) {
@@ -232,12 +242,6 @@ public class LiSA {
 		}
 
 		inputs.forEach(callGraph::addCFG);
-
-		// to proceed, at least one domain must have been specified
-		if (valueDomains.isEmpty() && heapDomains.isEmpty()) {
-			log.warn("Skipping analysis execution since no abstract domains have been provided");
-			return;
-		}
 
 		// TODO we want to support these eventually
 		if (valueDomains.size() > 1) {
@@ -254,26 +258,43 @@ public class LiSA {
 		if (heapDomains.isEmpty()) {
 			log.warn("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
 			heapDomains.add(new MonolithicHeap());
-		} else if (valueDomains.isEmpty()) {
+		}
+
+		H heap = (H) heapDomains.iterator().next();
+
+		if (inferTypes) {
+			TimerLogger.execAction(log, "Computing type information",
+					() -> computeFixpoint(heap, new TypeEnvironment(), Statement::typeInference));
+
+			for (CFG cfg : inputs) {
+				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+				try (Writer file = FileManager.mkDotFile("typing___" + cfg.getDescriptor().getFullSignature())) {
+					result.dump(file, cfg.getDescriptor().getFullSignature(),
+							st -> result.getAnalysisStateAt(st).toString());
+				} catch (IOException e) {
+					log.error(
+							"Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
+							e);
+				}
+			}
+
+			callGraph.clear();
+		} else
+			log.warn("No type domain provided: dynamic type information will not be available for following analyses");
+
+		if (valueDomains.isEmpty()) {
 			// TODO we should have a base analysis that can serve as default
 			log.warn("Skipping analysis execution since no abstract domains have been provided");
 			return;
 		}
 
-		HeapDomain heap = heapDomains.iterator().next();
-		ValueDomain value = valueDomains.iterator().next();
-
-		try {
-			callGraph.fixpoint(new AnalysisState(new AbstractState((HeapDomain) heap.top(), (ValueDomain) value.top()),
-					new Skip()));
-		} catch (FixpointException e) {
-			log.fatal("Exception during fixpoint computation", e);
-			throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-		}
+		V value = (V) valueDomains.iterator().next();
+		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
+				() -> computeFixpoint(heap, value, Statement::semantics));
 
 		for (CFG cfg : inputs) {
 			CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
-			try (Writer file = FileManager.mkDotFile(cfg.getDescriptor().getFullSignature())) {
+			try (Writer file = FileManager.mkDotFile("analysis___" + cfg.getDescriptor().getFullSignature())) {
 				result.dump(file, cfg.getDescriptor().getFullSignature(),
 						st -> result.getAnalysisStateAt(st).toString());
 			} catch (IOException e) {
@@ -283,10 +304,21 @@ public class LiSA {
 		}
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void computeFixpoint(H heap, V value,
+			SemanticFunction<H, V> semantics) {
+		try {
+			callGraph.fixpoint(new AnalysisState(new AbstractState(heap.top(), value.top()), new Skip()), semantics);
+		} catch (FixpointException e) {
+			log.fatal("Exception during fixpoint computation", e);
+			throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+		}
+	}
+
 	/**
-	 * Yields an unmodifiable view of the warnings that have been generated during
-	 * the analysis. Invoking this method before invoking {@link #run()} will return
-	 * an empty collection.
+	 * Yields an unmodifiable view of the warnings that have been generated
+	 * during the analysis. Invoking this method before invoking {@link #run()}
+	 * will return an empty collection.
 	 * 
 	 * @return a view of the generated warnings
 	 */

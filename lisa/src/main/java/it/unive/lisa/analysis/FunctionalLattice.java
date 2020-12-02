@@ -83,13 +83,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
-	public final F lubAux(F other) throws SemanticException {
+	public F lubAux(F other) throws SemanticException {
 		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
-	public final F wideningAux(F succ) throws SemanticException {
-		return functionalLift(succ, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+	public F wideningAux(F other) throws SemanticException {
+		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	private interface FunctionalLift<V extends Lattice<V>> {
@@ -112,7 +112,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
-	public final boolean lessOrEqualAux(F other) throws SemanticException {
+	public boolean lessOrEqualAux(F other) throws SemanticException {
 		for (K key : function.keySet())
 			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
 				return false;

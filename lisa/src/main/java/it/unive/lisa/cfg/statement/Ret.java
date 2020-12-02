@@ -1,12 +1,13 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -19,8 +20,8 @@ import it.unive.lisa.symbolic.value.Skip;
 public class Ret extends Statement {
 
 	/**
-	 * Builds the return. The location where this return happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds the return. The location where this return happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg the cfg that this statement belongs to
 	 */
@@ -32,12 +33,12 @@ public class Ret extends Statement {
 	 * Builds the return, happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 */
 	public Ret(CFG cfg, String sourceFile, int line, int col) {
 		super(cfg, sourceFile, line, col);
@@ -68,9 +69,16 @@ public class Ret extends Statement {
 	}
 
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+		return entryState.smallStepSemantics(new Skip());
+	}
+
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
 			throws SemanticException {
-		return new AnalysisState<>(entryState.getState(), new Skip());
+		return entryState.smallStepSemantics(new Skip());
 	}
 }

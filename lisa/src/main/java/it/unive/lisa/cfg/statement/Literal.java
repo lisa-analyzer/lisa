@@ -3,12 +3,13 @@ package it.unive.lisa.cfg.statement;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.ExpressionStates;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.Constant;
 
@@ -102,9 +103,18 @@ public class Literal extends Expression {
 	}
 
 	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
+		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		return typing;
+	}
+	
+	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStates<H, V> expressions)
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
 			throws SemanticException {
-		return new AnalysisState<>(entryState.getState(), new Constant(getStaticType(), getValue()));
+		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
 	}
 }
