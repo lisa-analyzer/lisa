@@ -9,7 +9,7 @@ import it.unive.lisa.test.imp.types.StringType;
 
 public class IMPIntLiteral extends Literal {
 
-	public IMPIntLiteral(CFG cfg, String sourceFile, int line, int col, float value) {
-		super(cfg, sourceFile, line, col, value, FloatType.INSTANCE);
+	public IMPIntLiteral(CFG cfg, String sourceFile, int line, int col, int value) {
+		super(cfg, sourceFile, line, col, value, IntType.INSTANCE);
 	}
 }

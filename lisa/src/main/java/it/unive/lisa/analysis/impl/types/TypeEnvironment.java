@@ -46,6 +46,8 @@ public final class TypeEnvironment extends FunctionalLattice<TypeEnvironment, Id
 	@Override
 	public TypeEnvironment smallStepSemantics(ValueExpression expression) {
 		// environment should not change without an assignment
+		if (expression instanceof Identifier)
+			return new TypeEnvironment(lattice, function, getState((Identifier) expression));
 		return new TypeEnvironment(lattice, function, new InferredTypes(expression.getTypes()));
 	}
 

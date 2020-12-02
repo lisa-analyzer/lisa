@@ -59,6 +59,6 @@ public class IntType implements NumericType {
 
 	@Override
 	public int hashCode() {
-		return IntType.class.getName().hashCode();
+		return NumericType.class.getName().hashCode();
 	}
 }

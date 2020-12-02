@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Collections;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
@@ -14,6 +15,7 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
@@ -135,7 +137,8 @@ public class Variable extends Expression {
 			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
 		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return typing;
+		// we have to recreate the variable for it to have the correct typing information
+		return typing.smallStepSemantics(getVariable());
 	}
 	
 	@Override

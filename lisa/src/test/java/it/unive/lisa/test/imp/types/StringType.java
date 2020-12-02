@@ -28,11 +28,11 @@ public class StringType implements it.unive.lisa.cfg.type.StringType {
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof StringType;
+		return other instanceof it.unive.lisa.symbolic.types.StringType;
 	}
 
 	@Override
 	public int hashCode() {
-		return StringType.class.getName().hashCode();
+		return it.unive.lisa.symbolic.types.StringType.class.getName().hashCode();
 	}
 }
