@@ -7,6 +7,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.TreeSet;
 
 /**
  * A file manager that provides standard functionalities for communicating with
@@ -17,9 +19,19 @@ import java.nio.file.Paths;
 public class FileManager {
 
 	private static File workdir;
+	
+	private static final Collection<String> createdFiles = new TreeSet<>();
 
-	public static void setWorkingDir(String workdir) {
+	public static void setWorkdir(String workdir) {
 		FileManager.workdir = Paths.get(workdir).toFile();
+	}
+	
+	public static void clearCreatedFiles() {
+		createdFiles.clear();
+	}
+	
+	public static Collection<String> createdFiles() {
+		return createdFiles;
 	}
 
 	/**
@@ -62,6 +74,8 @@ public class FileManager {
 		if (bom)
 			writer.write('\ufeff');
 
+		createdFiles.add(name);
+		
 		return writer;
 	}
 

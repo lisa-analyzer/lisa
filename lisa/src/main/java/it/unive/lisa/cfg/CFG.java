@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,7 +14,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,15 +26,13 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Ret;
 import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
 
@@ -292,114 +288,7 @@ public class CFG {
 	 *                         the given writer
 	 */
 	public void dump(Writer writer, String name, Function<Statement, String> labelGenerator) throws IOException {
-		writer.write("digraph " + cleanupForDiagraphTitle(name) + " {\n");
-		writer.write("graph [ordering=\"out\"];\n");
-		writer.write("node [shape=rect,color=gray];\n");
-
-		Map<Statement, Integer> codes = new IdentityHashMap<>();
-		int code = 0;
-
-		// dump the entrypoints first for the layout
-		for (Statement st : entrypoints) {
-			StringBuilder label = new StringBuilder();
-			code = dotNode(codes, st, code, labelGenerator, label);
-			writer.write(label.toString());
-		}
-
-		// dump all other statements
-		for (Statement st : adjacencyMatrix.getNodes())
-			if (!entrypoints.contains(st)) {
-				StringBuilder label = new StringBuilder();
-				code = dotNode(codes, st, code, labelGenerator, label);
-				writer.write(label.toString());
-			}
-
-		for (Map.Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> entry : adjacencyMatrix) {
-			int id = codes.get(entry.getKey());
-			for (Edge edge : entry.getValue().getRight()) {
-				int id1 = codes.get(edge.getDestination());
-				String label = provideEdgeLabelIfNeeded(edge);
-				if (!label.isEmpty())
-					writer.write("node" + id + " -> node" + id1 + " " + label + "\n");
-				else
-					writer.write("node" + id + " -> node" + id1 + "\n");
-			}
-		}
-
-		appendLegend(writer);
-		writer.write("}");
-	}
-
-	private static void appendLegend(Writer writer) throws IOException {
-		writer.write("\nsubgraph cluster_01 {\n");
-		writer.write("  label = \"Legend\";\n");
-		writer.write("  style=dotted;\n");
-		writer.write("  node [shape=plaintext];\n");
-		writer.write("  values [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
-		writer.write("    <tr><td align=\"left\">gray</td></tr>\n");
-		writer.write("    <tr><td align=\"left\">black</td></tr>\n");
-		writer.write("    <tr><td align=\"left\">black, double</td></tr>\n");
-		writer.write("    <tr><td port=\"e1\">&nbsp;</td></tr>\n");
-		writer.write("    <tr><td port=\"e2\">&nbsp;</td></tr>\n");
-		writer.write("    <tr><td port=\"e3\">&nbsp;</td></tr>\n");
-		writer.write("    </table>>];\n");
-		writer.write("  keys [label=<<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">\n");
-		writer.write("    <tr><td align=\"right\">node border</td></tr>\n");
-		writer.write("    <tr><td align=\"right\">entrypoint border</td></tr>\n");
-		writer.write("    <tr><td align=\"right\">exitpoint border</td></tr>\n");
-		writer.write("    <tr><td align=\"right\" port=\"i1\">sequential edge&nbsp;</td></tr>\n");
-		writer.write("    <tr><td align=\"right\" port=\"i2\">true edge&nbsp;</td></tr>\n");
-		writer.write("    <tr><td align=\"right\" port=\"i3\">false edge&nbsp;</td></tr>\n");
-		writer.write("    </table>>];\n");
-		writer.write("  keys:i1:e -> values:e1:w [constraint=false]\n");
-		writer.write("  keys:i2:e -> values:e2:w [style=dashed,color=red,constraint=false]\n");
-		writer.write("  keys:i3:e -> values:e3:w [style=dashed,color=blue,constraint=false]\n");
-		writer.write("}\n");
-	}
-
-	private int dotNode(Map<Statement, Integer> codes, Statement st, int nextCode,
-			Function<Statement, String> labelGenerator, StringBuilder label) {
-		if (!codes.containsKey(st))
-			codes.put(st, nextCode++);
-
-		int id = codes.get(st);
-		String extraLabel = labelGenerator.apply(st);
-		if (!extraLabel.isEmpty())
-			extraLabel = "<BR/>" + dotEscape(extraLabel);
-
-		label.append("node").append(id).append(" [").append(provideVertexShapeIfNeeded(st)).append("label = <")
-				.append(dotEscape(st.toString())).append(extraLabel).append(">];\n");
-		return nextCode;
-	}
-
-	private static String cleanupForDiagraphTitle(String name) {
-		String result = name.replace(' ', '_');
-		result = result.replace("(", "___");
-		result = result.replace(")", "___");
-		return result;
-	}
-
-	private static String dotEscape(String extraLabel) {
-		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
-		String replace = escapeHtml4.replaceAll("\\n", "<BR/>");
-		return replace.replace("\\", "\\\\");
-	}
-
-	private String provideVertexShapeIfNeeded(Statement vertex) {
-		if (followersOf(vertex).isEmpty())
-			return "peripheries=2,color=black,";
-		if (entrypoints.contains(vertex))
-			return "color=black,";
-		return "";
-	}
-
-	private String provideEdgeLabelIfNeeded(Edge edge) {
-		if (edge instanceof TrueEdge)
-			return "[style=dashed,color=blue]";
-		else if (edge instanceof FalseEdge)
-			return "[style=dashed,color=red]";
-
-		return "";
+		DotGraph.fromCFG(this, labelGenerator).dumpDot(writer);
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package it.unive.lisa;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Paths;
@@ -36,6 +35,7 @@ import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
+import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.file.FileManager;
 
@@ -94,6 +94,11 @@ public class LiSA {
 	 * if it is executed
 	 */
 	private boolean dumpAnalysis;
+	
+	/**
+	 * Whether or not the warning list should be dumped to a json file
+	 */
+	private boolean jsonOutput;
 
 	/**
 	 * The workdir that LiSA should use as root for all generated files (log
@@ -186,6 +191,10 @@ public class LiSA {
 		this.dumpAnalysis = dumpAnalysis;
 	}
 	
+	public void setJsonOutput(boolean jsonOutput) {
+		this.jsonOutput = jsonOutput;
+	}
+	
 	public void setWorkdir(String workdir) {
 		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
 	}
@@ -257,6 +266,19 @@ public class LiSA {
 		}
 
 		printStats();
+		
+		if (jsonOutput) {
+			log.info("Dumping reported warnings to 'report.json'");
+			JsonReport report = new JsonReport(warnings, FileManager.createdFiles());
+			try (Writer writer = FileManager.mkOutputFile("report.json")) {
+				report.dump(writer);
+		        log.info("Report file dumped to report.json");
+			} catch (IOException e) {
+				log.error("Unable to dump report file", e);
+			}
+		}
+		
+		FileManager.clearCreatedFiles();
 	}
 
 	private void printConfig() {
@@ -273,6 +295,7 @@ public class LiSA {
 				+ (syntacticChecks.isEmpty() ? "" : ":"));
 		for (SyntacticCheck check : syntacticChecks)
 			log.info("      " + check.getClass().getSimpleName());
+		log.info("  dump json report: " + jsonOutput);
 	}
 
 	private void printStats() {
@@ -282,7 +305,7 @@ public class LiSA {
 
 	@SuppressWarnings({ "unchecked" })
 	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
-		FileManager.setWorkingDir(workdir);
+		FileManager.setWorkdir(workdir);
 		
 		if (dumpCFGs)
 			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs")) 
