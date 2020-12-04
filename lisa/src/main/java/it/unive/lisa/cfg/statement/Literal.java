@@ -1,10 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.Objects;
 
 /**
  * A literal, representing a constant value.
@@ -19,9 +18,10 @@ public class Literal extends Expression {
 	private final Object value;
 
 	/**
-	 * Builds an untyped literal, consisting of a constant value. The location where this
-	 * literal happens is unknown (i.e. no source file/line/column is available).
-	 * The type of this literal is unknown (i.e. its type is {@link Untyped#INSTANCE}).
+	 * Builds an untyped literal, consisting of a constant value. The location
+	 * where this literal happens is unknown (i.e. no source file/line/column is
+	 * available). The type of this literal is unknown (i.e. its type is
+	 * {@link Untyped#INSTANCE}).
 	 * 
 	 * @param cfg   the cfg that this expression belongs to
 	 * @param value the value of this literal
@@ -29,13 +29,14 @@ public class Literal extends Expression {
 	public Literal(CFG cfg, Object value) {
 		this(cfg, null, -1, -1, value, Untyped.INSTANCE);
 	}
-	
+
 	/**
-	 * Builds a typed literal, consisting of a constant value. The location where this
-	 * literal happens is unknown (i.e. no source file/line/column is available).
+	 * Builds a typed literal, consisting of a constant value. The location
+	 * where this literal happens is unknown (i.e. no source file/line/column is
+	 * available).
 	 * 
-	 * @param cfg   	 the cfg that this literal belongs to
-	 * @param value 	 the value of this literal
+	 * @param cfg        the cfg that this literal belongs to
+	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */
 	public Literal(CFG cfg, Object value, Type staticType) {
@@ -43,34 +44,34 @@ public class Literal extends Expression {
 	}
 
 	/**
-	 * Builds the untyped literal, consisting of a constant value, happening at the given
-	 * location in the program.
-	 * The type of this literal is unknown (i.e. its type is {@link Untyped#INSTANCE}).
+	 * Builds the untyped literal, consisting of a constant value, happening at
+	 * the given location in the program. The type of this literal is unknown
+	 * (i.e. its type is {@link Untyped#INSTANCE}).
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param value      the value of this literal
 	 */
 	public Literal(CFG cfg, String sourceFile, int line, int col, Object value) {
 		this(cfg, sourceFile, line, col, value, Untyped.INSTANCE);
 	}
-	
+
 	/**
-	 * Builds a typed literal, consisting of a constant value, happening at the given
-	 * location in the program.
+	 * Builds a typed literal, consisting of a constant value, happening at the
+	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */

@@ -13,7 +13,7 @@ public final class ExpressionWarning extends StatementWarning {
 	 * Builds the warning.
 	 * 
 	 * @param expression the expression where this warning was reported on
-	 * @param message   the message of this warning
+	 * @param message    the message of this warning
 	 */
 	public ExpressionWarning(Expression expression, String message) {
 		super(expression, message);
@@ -27,7 +27,7 @@ public final class ExpressionWarning extends StatementWarning {
 	public final Expression getExpression() {
 		return (Expression) getStatement();
 	}
-	
+
 	@Override
 	public String getTag() {
 		return "EXPRESSION";

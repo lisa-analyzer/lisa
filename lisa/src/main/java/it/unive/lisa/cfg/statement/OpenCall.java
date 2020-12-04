@@ -1,12 +1,10 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -20,10 +18,10 @@ public class OpenCall extends Call {
 	 */
 	private final String targetName;
 
-	
 	/**
-	 * Builds the untyped open call. The location where this call happens is unknown (i.e.
-	 * no source file/line/column is available). The static type of this call is {@link Untyped}.
+	 * Builds the untyped open call. The location where this call happens is
+	 * unknown (i.e. no source file/line/column is available). The static type
+	 * of this call is {@link Untyped}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param targetName the name of the target of this open call
@@ -32,10 +30,10 @@ public class OpenCall extends Call {
 	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
 		this(cfg, null, -1, -1, targetName, Untyped.INSTANCE, parameters);
 	}
-	
+
 	/**
-	 * Builds the open call. The location where this call happens is unknown (i.e.
-	 * no source file/line/column is available).
+	 * Builds the open call. The location where this call happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param targetName the name of the target of this open call
@@ -50,17 +48,18 @@ public class OpenCall extends Call {
 	 * Builds the open call, happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Type staticType, Expression... parameters) {
+	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Type staticType,
+			Expression... parameters) {
 		super(cfg, sourceFile, line, col, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of an open call cannot be null");
 		this.targetName = targetName;

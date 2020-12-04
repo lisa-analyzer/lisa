@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -18,14 +17,16 @@ import org.apache.logging.log4j.Logger;
 public class IterationLogger {
 
 	/**
-	 * Wraps the given array into an {@link Iterable} instance that automatically
-	 * logs at level {@link Level#INFO} while traversing the array.
+	 * Wraps the given array into an {@link Iterable} instance that
+	 * automatically logs at level {@link Level#INFO} while traversing the
+	 * array.
 	 * 
 	 * @param <E>     the type of elements in the array
 	 * @param logger  the logger to log onto
 	 * @param array   the array to be iterated over
 	 * @param message the message to display at each update
 	 * @param objects the objects being counted
+	 * 
 	 * @return an iterable that automatically logs while traversing the array
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, E[] array, String message, String objects) {
@@ -33,8 +34,8 @@ public class IterationLogger {
 	}
 
 	/**
-	 * Wraps the given array into an {@link Iterable} instance that automatically
-	 * logs while traversing the array.
+	 * Wraps the given array into an {@link Iterable} instance that
+	 * automatically logs while traversing the array.
 	 * 
 	 * @param <E>     the type of elements in the array
 	 * @param logger  the logger to log onto
@@ -42,6 +43,7 @@ public class IterationLogger {
 	 * @param array   the array to be iterated over
 	 * @param message the message to display at each update
 	 * @param objects the objects being counted
+	 * 
 	 * @return an iterable that automatically logs while traversing the array
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Level level, E[] array, String message, String objects) {
@@ -58,7 +60,9 @@ public class IterationLogger {
 	 * @param collection the collection to be iterated over
 	 * @param message    the message to display at each update
 	 * @param objects    the objects being counted
-	 * @return an iterable that automatically logs while traversing the collection
+	 * 
+	 * @return an iterable that automatically logs while traversing the
+	 *             collection
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Collection<E> collection, String message, String objects) {
 		return iterate(logger, Level.INFO, collection, message, objects, collection.size());
@@ -74,7 +78,9 @@ public class IterationLogger {
 	 * @param collection the collection to be iterated over
 	 * @param message    the message to display at each update
 	 * @param objects    the objects being counted
-	 * @return an iterable that automatically logs while traversing the collection
+	 * 
+	 * @return an iterable that automatically logs while traversing the
+	 *             collection
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Level level, Collection<E> collection, String message,
 			String objects) {
@@ -82,14 +88,16 @@ public class IterationLogger {
 	}
 
 	/**
-	 * Wraps the given iterable into an {@link Iterable} instance that automatically
-	 * logs at level {@link Level#INFO} while traversing the array.
+	 * Wraps the given iterable into an {@link Iterable} instance that
+	 * automatically logs at level {@link Level#INFO} while traversing the
+	 * array.
 	 * 
 	 * @param <E>      the type of elements in the iterable
 	 * @param logger   the logger to log onto
 	 * @param iterable the iterable to be iterated over
 	 * @param message  the message to display at each update
 	 * @param objects  the objects being counted
+	 * 
 	 * @return an iterable that automatically logs while traversing the iterable
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Iterable<E> iterable, String message, String objects) {
@@ -97,8 +105,8 @@ public class IterationLogger {
 	}
 
 	/**
-	 * Wraps the given iterable into an {@link Iterable} instance that automatically
-	 * logs while traversing the iterable.
+	 * Wraps the given iterable into an {@link Iterable} instance that
+	 * automatically logs while traversing the iterable.
 	 * 
 	 * @param <E>      the type of elements in the iterable
 	 * @param logger   the logger to log onto
@@ -106,6 +114,7 @@ public class IterationLogger {
 	 * @param iterable the iterable to be iterated over
 	 * @param message  the message to display at each update
 	 * @param objects  the objects being counted
+	 * 
 	 * @return an iterable that automatically logs while traversing the iterable
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Level level, Iterable<E> iterable, String message,
@@ -118,25 +127,26 @@ public class IterationLogger {
 	}
 
 	/**
-	 * Wraps the given stream into an {@link Iterable} instance that automatically
-	 * logs at level {@link Level#INFO} while traversing a collection created from
-	 * the stream.
+	 * Wraps the given stream into an {@link Iterable} instance that
+	 * automatically logs at level {@link Level#INFO} while traversing a
+	 * collection created from the stream.
 	 * 
 	 * @param <E>     the type of elements in the stream
 	 * @param logger  the logger to log onto
 	 * @param stream  the stream to be iterated over
 	 * @param message the message to display at each update
 	 * @param objects the objects being counted
-	 * @return an iterable that automatically logs while traversing the collection
-	 *         created from the stream
+	 * 
+	 * @return an iterable that automatically logs while traversing the
+	 *             collection created from the stream
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Stream<E> stream, String message, String objects) {
 		return iterate(logger, Level.INFO, stream, message, objects);
 	}
 
 	/**
-	 * Wraps the given array into an {@link Iterable} instance that automatically
-	 * logs while traversing a collection created from the stream.
+	 * Wraps the given array into an {@link Iterable} instance that
+	 * automatically logs while traversing a collection created from the stream.
 	 * 
 	 * @param <E>     the type of elements in the stream
 	 * @param logger  the logger to log onto
@@ -144,8 +154,9 @@ public class IterationLogger {
 	 * @param stream  the array to be iterated over
 	 * @param message the message to display at each update
 	 * @param objects the objects being counted
-	 * @return an iterable that automatically logs while traversing the collection
-	 *         created from the stream
+	 * 
+	 * @return an iterable that automatically logs while traversing the
+	 *             collection created from the stream
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Level level, Stream<E> stream, String message,
 			String objects) {

@@ -72,14 +72,15 @@ public class StatementWarning extends WarningWithLocation {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public String getTag() {
 		return "STATEMENT";
 	}
-	
+
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignature() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignature() + "': "
+				+ getTaggedMessage();
 	}
 }

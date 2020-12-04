@@ -1,10 +1,8 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.cfg.CFG;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A statement of the program to analyze.
@@ -19,20 +17,20 @@ public abstract class Statement implements Comparable<Statement> {
 	private final CFG cfg;
 
 	/**
-	 * The source file where this statement happens. If it is unknown, this field
-	 * might contain {@code null}.
+	 * The source file where this statement happens. If it is unknown, this
+	 * field might contain {@code null}.
 	 */
 	private final String sourceFile;
 
 	/**
-	 * The line where this statement happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The line where this statement happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int line;
 
 	/**
-	 * The column where this statement happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The column where this statement happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int col;
 
@@ -40,12 +38,12 @@ public abstract class Statement implements Comparable<Statement> {
 	 * Builds a statement happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 */
 	protected Statement(CFG cfg, String sourceFile, int line, int col) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
@@ -65,8 +63,8 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Yields the source file name where this statement happens. This method returns
-	 * {@code null} if the source file is unknown.
+	 * Yields the source file name where this statement happens. This method
+	 * returns {@code null} if the source file is unknown.
 	 * 
 	 * @return the source file, or {@code null}
 	 */
@@ -75,8 +73,8 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Yields the line number where this statement happens in the source file. This
-	 * method returns {@code -1} if the line number is unknown.
+	 * Yields the line number where this statement happens in the source file.
+	 * This method returns {@code -1} if the line number is unknown.
 	 * 
 	 * @return the line number, or {@code -1}
 	 */
@@ -105,13 +103,13 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * All statements use reference equality for equality checks, to allow different
-	 * statement with the same content but placed in different part of the cfg to
-	 * being not equal if there are no debug information available. For checking if
-	 * two statements are effectively equal (that is, they are different object with
-	 * the same structure) use {@link #isEqualTo(Statement)}. <br>
+	 * All statements use reference equality for equality checks, to allow
+	 * different statement with the same content but placed in different part of
+	 * the cfg to being not equal if there are no debug information available.
+	 * For checking if two statements are effectively equal (that is, they are
+	 * different object with the same structure) use
+	 * {@link #isEqualTo(Statement)}. <br>
 	 * <br>
-	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -120,12 +118,14 @@ public abstract class Statement implements Comparable<Statement> {
 	}
 
 	/**
-	 * Checks if this statement is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
+	 * Checks if this statement is effectively equal to the given one, that is,
+	 * if they have the same structure while potentially being different
+	 * instances.
 	 * 
 	 * @param st the other statement
+	 * 
 	 * @return {@code true} if this statement and the given one are effectively
-	 *         equals
+	 *             equals
 	 */
 	public boolean isEqualTo(Statement st) {
 		if (this == st)

@@ -1,8 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
+import java.util.Objects;
 
 /**
  * A statement assigning the result of an expression to an assignable
@@ -18,13 +17,14 @@ public class Assignment extends Expression {
 	private final Expression target;
 
 	/**
-	 * The expression whose result is to be stored in the target of this assignment
+	 * The expression whose result is to be stored in the target of this
+	 * assignment
 	 */
 	private final Expression expression;
 
 	/**
-	 * Builds the assignment, assigning {@code expression} to {@code target}. The
-	 * location where this assignment happens is unknown (i.e. no source
+	 * Builds the assignment, assigning {@code expression} to {@code target}.
+	 * The location where this assignment happens is unknown (i.e. no source
 	 * file/line/column is available).
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
@@ -40,12 +40,12 @@ public class Assignment extends Expression {
 	 * happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
@@ -58,8 +58,8 @@ public class Assignment extends Expression {
 	}
 
 	/**
-	 * Yields the target of this assignment, that is, the expression whose value is
-	 * overwritten.
+	 * Yields the target of this assignment, that is, the expression whose value
+	 * is overwritten.
 	 * 
 	 * @return the target of this assignment
 	 */
@@ -68,15 +68,15 @@ public class Assignment extends Expression {
 	}
 
 	/**
-	 * Yields the expression of this assignment, that is, the expression whose value
-	 * is stored into the target of this assignment.
+	 * Yields the expression of this assignment, that is, the expression whose
+	 * value is stored into the target of this assignment.
 	 * 
 	 * @return the expression of this assignment
 	 */
 	public final Expression getExpression() {
 		return expression;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -1,25 +1,23 @@
 package it.unive.lisa.cfg;
 
-import java.util.Arrays;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.cfg.statement.Parameter;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.Arrays;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,
- * column) as well as metadata
+ * column) as well as metadata.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class CFGDescriptor {
 
 	/**
-	 * The source file where the CFG associated with this descriptor is defined. If
-	 * it is unknown, this field might contain {@code null}.
+	 * The source file where the CFG associated with this descriptor is defined.
+	 * If it is unknown, this field might contain {@code null}.
 	 */
 	private final String sourceFile;
 
@@ -30,8 +28,8 @@ public class CFGDescriptor {
 	private final int line;
 
 	/**
-	 * The column where the CFG associated with this descriptor is defined in the
-	 * source file. If it is unknown, this field might contain {@code -1}.
+	 * The column where the CFG associated with this descriptor is defined in
+	 * the source file. If it is unknown, this field might contain {@code -1}.
 	 */
 	private final int col;
 
@@ -52,11 +50,11 @@ public class CFGDescriptor {
 
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
-	 * (i.e. no source file/line/column is available) and with untyped return type,
-	 * that is its type is {@link Untyped#INSTANCE}.
+	 * (i.e. no source file/line/column is available) and with untyped return
+	 * type, that is its type is {@link Untyped#INSTANCE}.
 	 * 
-	 * @param name     the name of the CFG associated with this descriptor
-	 * @param args 	   the arguments of the CFG associated with this descriptor
+	 * @param name the name of the CFG associated with this descriptor
+	 * @param args the arguments of the CFG associated with this descriptor
 	 */
 	public CFGDescriptor(String name, Parameter... args) {
 		this(null, -1, -1, name, Untyped.INSTANCE, args);
@@ -66,9 +64,11 @@ public class CFGDescriptor {
 	 * Builds the descriptor for a method that is defined at an unknown location
 	 * (i.e. no source file/line/column is available).
 	 * 
-	 * @param name		 the name of the CFG associated with this descriptor
-	 * @param returnType the return type of the CFG associated with this descriptor
-	 * @param args 	   	 the arguments of the CFG associated with this descriptor
+	 * @param name       the name of the CFG associated with this descriptor
+	 * @param returnType the return type of the CFG associated with this
+	 *                       descriptor
+	 * @param args       the arguments of the CFG associated with this
+	 *                       descriptor
 	 */
 	public CFGDescriptor(String name, Type returnType, Parameter... args) {
 		this(null, -1, -1, name, returnType, args);
@@ -78,32 +78,37 @@ public class CFGDescriptor {
 	 * Builds the descriptor with {@link Untyped} return type.
 	 * 
 	 * @param sourceFile the source file where the CFG associated with this
-	 *                   descriptor is defined. If unknown, use {@code null}
+	 *                       descriptor is defined. If unknown, use {@code null}
 	 * @param line       the line number where the CFG associated with this
-	 *                   descriptor is defined in the source file. If unknown, use
-	 *                   {@code -1}
-	 * @param col        the column where the CFG associated with this descriptor is
-	 *                   defined in the source file. If unknown, use {@code -1}
+	 *                       descriptor is defined in the source file. If
+	 *                       unknown, use {@code -1}
+	 * @param col        the column where the CFG associated with this
+	 *                       descriptor is defined in the source file. If
+	 *                       unknown, use {@code -1}
 	 * @param name       the name of the CFG associated with this descriptor
-	 * @param args   	 the arguments of the CFG associated with this descriptor                
+	 * @param args       the arguments of the CFG associated with this
+	 *                       descriptor
 	 */
 	public CFGDescriptor(String sourceFile, int line, int col, String name, Parameter... args) {
 		this(sourceFile, line, col, name, Untyped.INSTANCE, args);
 	}
-	
+
 	/**
 	 * Builds the descriptor.
 	 * 
 	 * @param sourceFile the source file where the CFG associated with this
-	 *                   descriptor is defined. If unknown, use {@code null}
+	 *                       descriptor is defined. If unknown, use {@code null}
 	 * @param line       the line number where the CFG associated with this
-	 *                   descriptor is defined in the source file. If unknown, use
-	 *                   {@code -1}
-	 * @param col        the column where the CFG associated with this descriptor is
-	 *                   defined in the source file. If unknown, use {@code -1}
+	 *                       descriptor is defined in the source file. If
+	 *                       unknown, use {@code -1}
+	 * @param col        the column where the CFG associated with this
+	 *                       descriptor is defined in the source file. If
+	 *                       unknown, use {@code -1}
 	 * @param name       the name of the CFG associated with this descriptor
-	 * @param returnType the return type of the CFG associated with this descriptor
-	 * @param args   	 the arguments of the CFG associated with this descriptor                
+	 * @param returnType the return type of the CFG associated with this
+	 *                       descriptor
+	 * @param args       the arguments of the CFG associated with this
+	 *                       descriptor
 	 */
 	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Parameter... args) {
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
@@ -120,8 +125,9 @@ public class CFGDescriptor {
 	}
 
 	/**
-	 * Yields the source file name where the CFG associated with this descriptor is
-	 * defined. This method returns {@code null} if the source file is unknown.
+	 * Yields the source file name where the CFG associated with this descriptor
+	 * is defined. This method returns {@code null} if the source file is
+	 * unknown.
 	 * 
 	 * @return the source file, or {@code null}
 	 */
@@ -131,8 +137,8 @@ public class CFGDescriptor {
 
 	/**
 	 * Yields the line number where the CFG associated with this descriptor is
-	 * defined in the source file. This method returns {@code -1} if the line number
-	 * is unknown.
+	 * defined in the source file. This method returns {@code -1} if the line
+	 * number is unknown.
 	 * 
 	 * @return the line number, or {@code -1}
 	 */
@@ -141,9 +147,9 @@ public class CFGDescriptor {
 	}
 
 	/**
-	 * Yields the column where the CFG associated with this descriptor is defined in
-	 * the source file. This method returns {@code -1} if the line number is
-	 * unknown.
+	 * Yields the column where the CFG associated with this descriptor is
+	 * defined in the source file. This method returns {@code -1} if the line
+	 * number is unknown.
 	 * 
 	 * @return the column, or {@code -1}
 	 */
@@ -161,9 +167,9 @@ public class CFGDescriptor {
 	}
 
 	/**
-	 * Yields the full name of the CFG associated with this descriptor. This might
-	 * differ from its name (e.g. it might be fully qualified with the compilation
-	 * unit it belongs to).
+	 * Yields the full name of the CFG associated with this descriptor. This
+	 * might differ from its name (e.g. it might be fully qualified with the
+	 * compilation unit it belongs to).
 	 * 
 	 * @return the full name of the CFG
 	 */
@@ -174,15 +180,15 @@ public class CFGDescriptor {
 	/**
 	 * Yields the full signature of this cfg.
 	 * 
-	 * @return the full signature 
+	 * @return the full signature
 	 */
 	public String getFullSignature() {
-		return returnType + " " + name + "(" + StringUtils.join(args, ", ")+ ")";
+		return returnType + " " + name + "(" + StringUtils.join(args, ", ") + ")";
 	}
 
 	/**
-	 * Yields the array containing the arguments of the CFG associated
-	 * with this descriptor.
+	 * Yields the array containing the arguments of the CFG associated with this
+	 * descriptor.
 	 * 
 	 * @return the arguments
 	 */

@@ -1,5 +1,13 @@
 package it.unive.lisa.cfg;
 
+import it.unive.lisa.cfg.edge.Edge;
+import it.unive.lisa.cfg.edge.FalseEdge;
+import it.unive.lisa.cfg.edge.SequentialEdge;
+import it.unive.lisa.cfg.edge.TrueEdge;
+import it.unive.lisa.cfg.statement.NoOp;
+import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.ExternalSetCache;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -9,18 +17,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.edge.FalseEdge;
-import it.unive.lisa.cfg.edge.SequentialEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
-import it.unive.lisa.cfg.statement.NoOp;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.util.collections.ExternalSet;
-import it.unive.lisa.util.collections.ExternalSetCache;
 
 /**
  * An adjacency matrix for a graph that has {@link Statement}s as nodes and
@@ -54,8 +52,9 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Copies the given matrix by keeping the same edge {@link ExternalSetCache},
-	 * shallow-copying the {@link Statement}s and deep-copying the values.
+	 * Copies the given matrix by keeping the same edge
+	 * {@link ExternalSetCache}, shallow-copying the {@link Statement}s and
+	 * deep-copying the values.
 	 * 
 	 * @param other the matrix to copy
 	 */
@@ -85,11 +84,13 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Adds an edge to this matrix
+	 * Adds an edge to this matrix.
 	 * 
 	 * @param e the edge to add
-	 * @throws UnsupportedOperationException if the source or the destination of the
-	 *                                       given edge are not part of this matrix
+	 * 
+	 * @throws UnsupportedOperationException if the source or the destination of
+	 *                                           the given edge are not part of
+	 *                                           this matrix
 	 */
 	public void addEdge(Edge e) {
 		if (!matrix.containsKey(e.getSource()))
@@ -104,13 +105,14 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 
 	/**
 	 * Yields the edge connecting the two given statements, if any. Yields
-	 * {@code null} if such edge does not exist, or if one of the two statements is
-	 * not inside this matrix.
+	 * {@code null} if such edge does not exist, or if one of the two statements
+	 * is not inside this matrix.
 	 * 
 	 * @param source      the source statement
 	 * @param destination the destination statement
+	 * 
 	 * @return the edge connecting {@code source} to {@code destination}, or
-	 *         {@code null}
+	 *             {@code null}
 	 */
 	public final Edge getEdgeConnecting(Statement source, Statement destination) {
 		if (!matrix.containsKey(source))
@@ -135,12 +137,13 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Yields the collection of the nodes that are followers of the given one, that
-	 * is, all nodes such that there exist an edge in this matrix going from the
-	 * given node to such node. Yields {@code null} if the node is not in this
-	 * matrix.
+	 * Yields the collection of the nodes that are followers of the given one,
+	 * that is, all nodes such that there exist an edge in this matrix going
+	 * from the given node to such node. Yields {@code null} if the node is not
+	 * in this matrix.
 	 * 
 	 * @param node the node
+	 * 
 	 * @return the collection of followers
 	 */
 	public final Collection<Statement> followersOf(Statement node) {
@@ -151,12 +154,13 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Yields the collection of the nodes that are predecessors of the given vertex,
-	 * that is, all nodes such that there exist an edge in this matrix going from
-	 * such node to the given one. Yields {@code null} if the node is not in this
-	 * matrix.
+	 * Yields the collection of the nodes that are predecessors of the given
+	 * vertex, that is, all nodes such that there exist an edge in this matrix
+	 * going from such node to the given one. Yields {@code null} if the node is
+	 * not in this matrix.
 	 * 
 	 * @param node the node
+	 * 
 	 * @return the collection of predecessors
 	 */
 	public final Collection<Statement> predecessorsOf(Statement node) {
@@ -167,17 +171,18 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Simplifies this matrix, removing all {@link NoOp}s and rewriting the edge set
-	 * accordingly. This method will throw an {@link UnsupportedOperationException}
-	 * if one of the {@link NoOp}s has an outgoing edge that is not a
-	 * {@link SequentialEdge}, since such statement is expected to always be
-	 * sequential.
+	 * Simplifies this matrix, removing all {@link NoOp}s and rewriting the edge
+	 * set accordingly. This method will throw an
+	 * {@link UnsupportedOperationException} if one of the {@link NoOp}s has an
+	 * outgoing edge that is not a {@link SequentialEdge}, since such statement
+	 * is expected to always be sequential.
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one
-	 *                                       {@link NoOp} with an outgoing
-	 *                                       non-sequential edge, or if one of the
-	 *                                       ingoing edges to the {@link NoOp} is
-	 *                                       not currently supported.
+	 *                                           {@link NoOp} with an outgoing
+	 *                                           non-sequential edge, or if one
+	 *                                           of the ingoing edges to the
+	 *                                           {@link NoOp} is not currently
+	 *                                           supported.
 	 */
 	public synchronized void simplify() {
 		Set<Statement> noops = matrix.keySet().stream().filter(k -> k instanceof NoOp).collect(Collectors.toSet());
@@ -239,11 +244,13 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	}
 
 	/**
-	 * Checks if this matrix is effectively equal to the given one, that is, if they
-	 * have the same structure while potentially being different instances.
+	 * Checks if this matrix is effectively equal to the given one, that is, if
+	 * they have the same structure while potentially being different instances.
 	 * 
 	 * @param other the other matrix
-	 * @return {@code true} if this matrix and the given one are effectively equals
+	 * 
+	 * @return {@code true} if this matrix and the given one are effectively
+	 *             equals
 	 */
 	public boolean isEqualTo(AdjacencyMatrix other) {
 		if (this == other)

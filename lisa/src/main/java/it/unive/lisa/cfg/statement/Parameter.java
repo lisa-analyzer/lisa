@@ -1,37 +1,37 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.Objects;
 
 /**
- * A reference to a CFG parameter identified by its name and its type, containing
- * the information about the source file, line and column where a parameter appears.
- * No information about the CFG where the parameter appears is contained.
+ * A reference to a CFG parameter identified by its name and its type,
+ * containing the information about the source file, line and column where a
+ * parameter appears. No information about the CFG where the parameter appears
+ * is contained.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class Parameter {
 
 	/**
-	 * The source file where this parameter happens. If it is unknown, this field
-	 * might contain {@code null}.
+	 * The source file where this parameter happens. If it is unknown, this
+	 * field might contain {@code null}.
 	 */
 	private final String sourceFile;
 
 	/**
-	 * The line where this parameter happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The line where this parameter happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int line;
 
 	/**
-	 * The column where this parameter happens in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The column where this parameter happens in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int col;
-	
+
 	/**
 	 * The name of this parameter
 	 */
@@ -41,23 +41,23 @@ public class Parameter {
 	 * The static type of this parameter
 	 */
 	private final Type staticType;
-	
+
 	/**
-	 * Builds an untyped parameter reference, identified by its name. 
-	 * The location where this parameter reference happens is unknown 
-	 * (i.e. no source file/line/column is available) as well as
-	 * its type (i.e. it is {#link Untyped#INSTANCE}).
+	 * Builds an untyped parameter reference, identified by its name. The
+	 * location where this parameter reference happens is unknown (i.e. no
+	 * source file/line/column is available) as well as its type (i.e. it is
+	 * {#link Untyped#INSTANCE}).
 	 * 
-	 * @param name       the name of this parameter
+	 * @param name the name of this parameter
 	 */
 	public Parameter(String name) {
 		this(null, -1, -1, name, Untyped.INSTANCE);
 	}
-	
+
 	/**
-	 * Builds a typed parameter reference, identified by its name and its type. 
-	 * The location where this parameter reference happens is unknown 
-	 * (i.e. no source file/line/column is available).
+	 * Builds a typed parameter reference, identified by its name and its type.
+	 * The location where this parameter reference happens is unknown (i.e. no
+	 * source file/line/column is available).
 	 * 
 	 * @param name       the name of this parameter
 	 * @param staticType the type of this parameter
@@ -67,18 +67,18 @@ public class Parameter {
 	}
 
 	/**
-	 * Builds the parameter reference, identified by its name and its type, 
+	 * Builds the parameter reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param sourceFile the source file where this parameter happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this parameter happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this parameter happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this parameter happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this parameter happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param name       the name of this parameter
-	 * @param staticType the type of this parameter. If unknown,
-	 * 					 use {@link Untyped#INSTANCE}
+	 * @param staticType the type of this parameter. If unknown, use
+	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Parameter(String sourceFile, int line, int col, String name, Type staticType) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
@@ -107,9 +107,9 @@ public class Parameter {
 	public Type getStaticType() {
 		return staticType;
 	}
-	
+
 	/**
-	 * Yields the line number where this parameter happens in the source file. 
+	 * Yields the line number where this parameter happens in the source file.
 	 * This method returns {@code -1} if the line number is unknown.
 	 * 
 	 * @return the line number, or {@code -1}
@@ -119,15 +119,15 @@ public class Parameter {
 	}
 
 	/**
-	 * Yields the column where this parameter happens in the source file.
-	 * This method returns {@code -1} if the line number is unknown.
+	 * Yields the column where this parameter happens in the source file. This
+	 * method returns {@code -1} if the line number is unknown.
 	 * 
 	 * @return the column, or {@code -1}
 	 */
 	public final int getCol() {
 		return col;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -139,7 +139,7 @@ public class Parameter {
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -174,5 +174,5 @@ public class Parameter {
 	@Override
 	public String toString() {
 		return staticType + " " + name;
-	}	
+	}
 }

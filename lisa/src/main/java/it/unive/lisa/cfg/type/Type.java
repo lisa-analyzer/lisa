@@ -1,14 +1,14 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * Type interface. Any instance of a concrete type, instance of Type, 
- * should be unique and implemented following the singleton design pattern
- * (see for instance {@link Untyped} class).
+ * Type interface. Any instance of a concrete type, instance of Type, should be
+ * unique and implemented following the singleton design pattern (see for
+ * instance {@link Untyped} class).
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public interface Type {
-	
+
 	/**
 	 * Checks if this is a numeric type.
 	 * 
@@ -19,23 +19,23 @@ public interface Type {
 	}
 
 	/**
-	 * Checks if this is a boolean type
+	 * Checks if this is a boolean type.
 	 * 
 	 * @return true if this is a Boolean type; false otherwise.
 	 */
 	public default boolean isBoolean() {
 		return this instanceof BooleanType;
 	}
-	
+
 	/**
-	 * Checks if this is a string type
+	 * Checks if this is a string type.
 	 * 
 	 * @return true if this is a string type; false otherwise.
 	 */
 	public default boolean isString() {
 		return this instanceof StringType;
 	}
-	
+
 	/**
 	 * Returns true if this is untyped.
 	 * 
@@ -44,7 +44,7 @@ public interface Type {
 	public default boolean isUntyped() {
 		return this instanceof Untyped;
 	}
-	
+
 	/**
 	 * Returns this as numeric type.
 	 * 
@@ -53,7 +53,7 @@ public interface Type {
 	public default NumericType asNumeric() {
 		return isNumeric() ? (NumericType) this : null;
 	}
-	
+
 	/**
 	 * Returns this as Boolean type.
 	 * 
@@ -62,7 +62,7 @@ public interface Type {
 	public default BooleanType asBoolean() {
 		return isBoolean() ? (BooleanType) this : null;
 	}
-	
+
 	/**
 	 * Returns this as string type.
 	 * 

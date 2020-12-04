@@ -1,8 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
+import java.util.Objects;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -30,16 +29,16 @@ public class Throw extends Statement {
 	}
 
 	/**
-	 * Builds the throw, raising {@code expression} as error, happening at the given
-	 * location in the program.
+	 * Builds the throw, raising {@code expression} as error, happening at the
+	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, String sourceFile, int line, int col, Expression expression) {

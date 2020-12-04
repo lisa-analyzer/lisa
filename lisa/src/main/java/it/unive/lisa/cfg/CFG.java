@@ -1,5 +1,12 @@
 package it.unive.lisa.cfg;
 
+import it.unive.lisa.cfg.edge.Edge;
+import it.unive.lisa.cfg.edge.FalseEdge;
+import it.unive.lisa.cfg.edge.SequentialEdge;
+import it.unive.lisa.cfg.edge.TrueEdge;
+import it.unive.lisa.cfg.statement.NoOp;
+import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.util.collections.ExternalSet;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -8,17 +15,8 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
-
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.text.StringEscapeUtils;
-
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.edge.FalseEdge;
-import it.unive.lisa.cfg.edge.SequentialEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
-import it.unive.lisa.cfg.statement.NoOp;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -29,14 +27,14 @@ import it.unive.lisa.util.collections.ExternalSet;
 public class CFG {
 
 	/**
-	 * The adjacency matrix of this graph, mapping statements to the collection of
-	 * edges attached to it.
+	 * The adjacency matrix of this graph, mapping statements to the collection
+	 * of edges attached to it.
 	 */
 	private final AdjacencyMatrix adjacencyMatrix;
 
 	/**
-	 * The statements of this control flow graph that are entrypoints, that is, that
-	 * can be executed from other cfgs.
+	 * The statements of this control flow graph that are entrypoints, that is,
+	 * that can be executed from other cfgs.
 	 */
 	private Collection<Statement> entrypoints;
 
@@ -77,9 +75,9 @@ public class CFG {
 	}
 
 	/**
-	 * Yields the statements of this control flow graph that are entrypoints, that
-	 * is, that can be executed from other cfgs. This usually contains the first
-	 * statement of this cfg, but might also contain other ones.
+	 * Yields the statements of this control flow graph that are entrypoints,
+	 * that is, that can be executed from other cfgs. This usually contains the
+	 * first statement of this cfg, but might also contain other ones.
 	 * 
 	 * @return the entrypoints of this cfg.
 	 */
@@ -119,13 +117,13 @@ public class CFG {
 	/**
 	 * Adds the given node to the set of nodes, optionally marking this as
 	 * entrypoint (that is, reachable executable from other cfgs). The first
-	 * statement of a cfg should always be marked as entrypoint. Besides, statements
-	 * that might be reached through jumps from external cfgs should be marked as
-	 * entrypoints as well.
+	 * statement of a cfg should always be marked as entrypoint. Besides,
+	 * statements that might be reached through jumps from external cfgs should
+	 * be marked as entrypoints as well.
 	 * 
 	 * @param node       the node to add
-	 * @param entrypoint if {@code true} causes the given node to be considered as
-	 *                   an entrypoint.
+	 * @param entrypoint if {@code true} causes the given node to be considered
+	 *                       as an entrypoint.
 	 */
 	public final void addNode(Statement node, boolean entrypoint) {
 		adjacencyMatrix.addNode(node);
@@ -137,8 +135,10 @@ public class CFG {
 	 * Adds an edge to this control flow graph.
 	 * 
 	 * @param edge the edge to add
-	 * @throws UnsupportedOperationException if the source or the destination of the
-	 *                                       given edge are not part of this cfg
+	 * 
+	 * @throws UnsupportedOperationException if the source or the destination of
+	 *                                           the given edge are not part of
+	 *                                           this cfg
 	 */
 	public void addEdge(Edge edge) {
 		adjacencyMatrix.addEdge(edge);
@@ -164,25 +164,27 @@ public class CFG {
 
 	/**
 	 * Yields the edge connecting the two given statements, if any. Yields
-	 * {@code null} if such edge does not exist, or if one of the two statements is
-	 * not inside this cfg.
+	 * {@code null} if such edge does not exist, or if one of the two statements
+	 * is not inside this cfg.
 	 * 
 	 * @param source      the source statement
 	 * @param destination the destination statement
+	 * 
 	 * @return the edge connecting {@code source} to {@code destination}, or
-	 *         {@code null}
+	 *             {@code null}
 	 */
 	public final Edge getEdgeConnecting(Statement source, Statement destination) {
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
 
 	/**
-	 * Yields the collection of the nodes that are followers of the given one, that
-	 * is, all nodes such that there exist an edge in this control flow graph going
-	 * from the given node to such node. Yields {@code null} if the node is not in
-	 * this cfg.
+	 * Yields the collection of the nodes that are followers of the given one,
+	 * that is, all nodes such that there exist an edge in this control flow
+	 * graph going from the given node to such node. Yields {@code null} if the
+	 * node is not in this cfg.
 	 * 
 	 * @param node the node
+	 * 
 	 * @return the collection of followers
 	 */
 	public final Collection<Statement> followersOf(Statement node) {
@@ -190,12 +192,13 @@ public class CFG {
 	}
 
 	/**
-	 * Yields the collection of the nodes that are predecessors of the given vertex,
-	 * that is, all nodes such that there exist an edge in this control flow graph
-	 * going from such node to the given one. Yields {@code null} if the node is not
-	 * in this cfg.
+	 * Yields the collection of the nodes that are predecessors of the given
+	 * vertex, that is, all nodes such that there exist an edge in this control
+	 * flow graph going from such node to the given one. Yields {@code null} if
+	 * the node is not in this cfg.
 	 * 
 	 * @param node the node
+	 * 
 	 * @return the collection of predecessors
 	 */
 	public final Collection<Statement> predecessorsOf(Statement node) {
@@ -203,29 +206,32 @@ public class CFG {
 	}
 
 	/**
-	 * Dumps the content of this control flow graph in the given writer, formatted
-	 * as a dot file.
+	 * Dumps the content of this control flow graph in the given writer,
+	 * formatted as a dot file.
 	 * 
 	 * @param writer the writer where the content will be written
 	 * @param name   the name of the dot diagraph
-	 * @throws IOException if an exception happens while writing something to the
-	 *                     given writer
+	 * 
+	 * @throws IOException if an exception happens while writing something to
+	 *                         the given writer
 	 */
 	public void dump(Writer writer, String name) throws IOException {
 		dump(writer, name, st -> "");
 	}
 
 	/**
-	 * Dumps the content of this control flow graph in the given writer, formatted
-	 * as a dot file. The content of each vertex will be enriched by invoking
-	 * labelGenerator on the vertex itself, to obtain an extra description to be
-	 * concatenated with the standard call to the vertex's {@link #toString()}
+	 * Dumps the content of this control flow graph in the given writer,
+	 * formatted as a dot file. The content of each vertex will be enriched by
+	 * invoking labelGenerator on the vertex itself, to obtain an extra
+	 * description to be concatenated with the standard call to the vertex's
+	 * {@link #toString()}
 	 * 
 	 * @param writer         the writer where the content will be written
 	 * @param name           the name of the dot diagraph
 	 * @param labelGenerator the function used to generate extra labels
-	 * @throws IOException if an exception happens while writing something to the
-	 *                     given writer
+	 * 
+	 * @throws IOException if an exception happens while writing something to
+	 *                         the given writer
 	 */
 	public void dump(Writer writer, String name, Function<Statement, String> labelGenerator) throws IOException {
 		writer.write("digraph " + name + " {\n");
@@ -299,11 +305,10 @@ public class CFG {
 
 	/**
 	 * CFG instances use reference equality for equality checks, under the
-	 * assumption that every cfg is unique. For checking if two cfgs are effectively
-	 * equal (that is, they are different object with the same structure) use
-	 * {@link #isEqualTo(CFG)}. <br>
+	 * assumption that every cfg is unique. For checking if two cfgs are
+	 * effectively equal (that is, they are different object with the same
+	 * structure) use {@link #isEqualTo(CFG)}. <br>
 	 * <br>
-	 * 
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -312,10 +317,11 @@ public class CFG {
 	}
 
 	/**
-	 * Checks if this cfg is effectively equal to the given one, that is, if they
-	 * have the same structure while potentially being different instances.
+	 * Checks if this cfg is effectively equal to the given one, that is, if
+	 * they have the same structure while potentially being different instances.
 	 * 
 	 * @param cfg the other cfg
+	 * 
 	 * @return {@code true} if this cfg and the given one are effectively equals
 	 */
 	public boolean isEqualTo(CFG cfg) {
@@ -336,11 +342,13 @@ public class CFG {
 		} else if (entrypoints.size() != cfg.entrypoints.size())
 			return false;
 		else {
-			// statements use reference equality, thus entrypoint.equals(cfg.entrypoints)
+			// statements use reference equality, thus
+			// entrypoint.equals(cfg.entrypoints)
 			// won't
 			// achieve content comparison. Need to do this manually.
 
-			// the following keeps track of the unmatched statements in cfg.entrypoints
+			// the following keeps track of the unmatched statements in
+			// cfg.entrypoints
 			Collection<Statement> copy = new HashSet<>(cfg.entrypoints);
 			boolean found;
 			for (Statement s : entrypoints) {
@@ -356,7 +364,8 @@ public class CFG {
 			}
 
 			if (!copy.isEmpty())
-				// we also have to match all of the entrypoints in cfg.entrypoints
+				// we also have to match all of the entrypoints in
+				// cfg.entrypoints
 				return false;
 		}
 		if (adjacencyMatrix == null) {
@@ -373,17 +382,18 @@ public class CFG {
 	}
 
 	/**
-	 * Simplifies this cfg, removing all {@link NoOp}s and rewriting the edge set
-	 * accordingly. This method will throw an {@link UnsupportedOperationException}
-	 * if one of the {@link NoOp}s has an outgoing edge that is not a
-	 * {@link SequentialEdge}, since such statement is expected to always be
-	 * sequential.
+	 * Simplifies this cfg, removing all {@link NoOp}s and rewriting the edge
+	 * set accordingly. This method will throw an
+	 * {@link UnsupportedOperationException} if one of the {@link NoOp}s has an
+	 * outgoing edge that is not a {@link SequentialEdge}, since such statement
+	 * is expected to always be sequential.
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one
-	 *                                       {@link NoOp} with an outgoing
-	 *                                       non-sequential edge, or if one of the
-	 *                                       ingoing edges to the {@link NoOp} is
-	 *                                       not currently supported.
+	 *                                           {@link NoOp} with an outgoing
+	 *                                           non-sequential edge, or if one
+	 *                                           of the ingoing edges to the
+	 *                                           {@link NoOp} is not currently
+	 *                                           supported.
 	 */
 	public void simplify() {
 		adjacencyMatrix.simplify();

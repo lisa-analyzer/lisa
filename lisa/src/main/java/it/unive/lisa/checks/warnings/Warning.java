@@ -31,7 +31,7 @@ public class Warning implements Comparable<Warning> {
 	public final String getMessage() {
 		return message;
 	}
-	
+
 	/**
 	 * Yields the tag of this warning.
 	 * 
@@ -40,9 +40,10 @@ public class Warning implements Comparable<Warning> {
 	public String getTag() {
 		return "GENERIC";
 	}
-	
+
 	/**
-	 * Yields the message of this warning, preceeded by the tag under square brackets.
+	 * Yields the message of this warning, preceeded by the tag under square
+	 * brackets.
 	 * 
 	 * @return the tag and message of this warning
 	 */

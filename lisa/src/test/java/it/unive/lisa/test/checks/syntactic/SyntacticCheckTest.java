@@ -2,10 +2,6 @@ package it.unive.lisa.test.checks.syntactic;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.function.Consumer;
-
-import org.junit.Test;
-
 import it.unive.lisa.LiSA;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
@@ -20,6 +16,8 @@ import it.unive.lisa.cfg.statement.Throw;
 import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
+import java.util.function.Consumer;
+import org.junit.Test;
 
 public class SyntacticCheckTest {
 

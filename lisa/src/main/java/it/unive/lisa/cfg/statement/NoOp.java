@@ -11,8 +11,8 @@ import it.unive.lisa.cfg.CFG;
 public class NoOp extends Statement {
 
 	/**
-	 * Builds the no-op. The location where this no-op happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds the no-op. The location where this no-op happens is unknown (i.e.
+	 * no source file/line/column is available).
 	 * 
 	 * @param cfg the cfg that this statement belongs to
 	 */
@@ -21,16 +21,15 @@ public class NoOp extends Statement {
 	}
 
 	/**
-	 * Builds the no-op, happening at the given
-	 * location in the program.
+	 * Builds the no-op, happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 */
 	public NoOp(CFG cfg, String sourceFile, int line, int col) {
 		super(cfg, sourceFile, line, col);

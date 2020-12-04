@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentMap;
  * A cache for creating {@link ExternalSet}s of the elements contained in this
  * cache.
  * 
- * @param <T> the type of elements that this cache stores
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the type of elements that this cache stores
  */
 public class ExternalSetCache<T> {
 
@@ -45,10 +45,11 @@ public class ExternalSetCache<T> {
 	}
 
 	/**
-	 * Builds an {@link ExternalSet} that uses this cache and contains the elements
-	 * of the given iterable.
+	 * Builds an {@link ExternalSet} that uses this cache and contains the
+	 * elements of the given iterable.
 	 *
 	 * @param iterable the iterable
+	 * 
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSet(Iterable<T> iterable) {
@@ -60,6 +61,7 @@ public class ExternalSetCache<T> {
 	 * given element.
 	 * 
 	 * @param element the element
+	 * 
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSingletonSet(T element) {
@@ -70,6 +72,7 @@ public class ExternalSetCache<T> {
 	 * Yields the index where the given element is stored in this cache.
 	 * 
 	 * @param e the element
+	 * 
 	 * @return the index of {@code e}, or {@code -1}
 	 */
 	protected final int indexOf(T e) {
@@ -85,6 +88,7 @@ public class ExternalSetCache<T> {
 	 * element is not currently in this cache, it is added.
 	 * 
 	 * @param e the element
+	 * 
 	 * @return the index of {@code e}
 	 */
 	protected final int indexOfOrAdd(T e) {
@@ -113,7 +117,8 @@ public class ExternalSetCache<T> {
 	 * Yields the {@code pos}-th element of this cache.
 	 *
 	 * @param pos the position
-	 * @return the element 
+	 * 
+	 * @return the element
 	 */
 	protected final synchronized T get(int pos) {
 		return elements.get(pos);

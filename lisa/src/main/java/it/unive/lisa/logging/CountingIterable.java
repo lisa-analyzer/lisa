@@ -7,9 +7,9 @@ import java.util.Iterator;
  * {@link Counter} to progress each time the iterator underlying this iterable
  * is advances.
  * 
- * @param <E> the type of elements returned by the iterator
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <E> the type of elements returned by the iterator
  */
 final class CountingIterable<E> implements Iterable<E> {
 

@@ -4,23 +4,23 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on the program under analysis. This warning is
- * tied to a location, i.e. it might have information about source file, line number
- * and column. This does not mean that it will always have them, since CFGs and
- * statements might have been built without that information.
+ * tied to a location, i.e. it might have information about source file, line
+ * number and column. This does not mean that it will always have them, since
+ * CFGs and statements might have been built without that information.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class WarningWithLocation extends Warning {
 
 	/**
-	 * The source file where this warning is reported. If it is unknown, this field
-	 * might contain {@code null}.
+	 * The source file where this warning is reported. If it is unknown, this
+	 * field might contain {@code null}.
 	 */
 	private final String sourceFile;
 
 	/**
-	 * The line where this warning is reported in the source file. If it is unknown,
-	 * this field might contain {@code -1}.
+	 * The line where this warning is reported in the source file. If it is
+	 * unknown, this field might contain {@code -1}.
 	 */
 	private final int line;
 
@@ -33,12 +33,12 @@ public abstract class WarningWithLocation extends Warning {
 	/**
 	 * Builds the warning.
 	 * 
-	 * @param sourceFile the source file where this warning is reported. If unknown,
-	 *                   use {@code null}
+	 * @param sourceFile the source file where this warning is reported. If
+	 *                       unknown, use {@code null}
 	 * @param line       the line number where this warning is reported in the
-	 *                   source file. If unknown, use {@code -1}
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this warning is reported in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param message    the message of this warning
 	 */
 	public WarningWithLocation(String sourceFile, int line, int col, String message) {
@@ -147,7 +147,7 @@ public abstract class WarningWithLocation extends Warning {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public abstract String toString();
 }

@@ -1,13 +1,11 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.cfg.CFG;
 import java.util.Objects;
-
 import org.apache.commons.lang3.StringUtils;
 
-import it.unive.lisa.cfg.CFG;
-
 /**
- * A call to one of the CFG under analysis. 
+ * A call to one of the CFG under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -19,28 +17,29 @@ public class CFGCall extends Call {
 	private final CFG target;
 
 	/**
-	 * Builds the CFG call. The location where this call happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds the CFG call. The location where this call happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param target     the CFG that is targeted by this CFG call.
 	 * @param parameters the parameters of this call
 	 */
 	public CFGCall(CFG cfg, CFG target, Expression... parameters) {
-		this(cfg, null, -1, -1, target, parameters);		
+		this(cfg, null, -1, -1, target, parameters);
 	}
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program. 
-	 * The static type of this CFGCall is the one return type of the descriptor of {@code target}.
+	 * Builds the CFG call, happening at the given location in the program. The
+	 * static type of this CFGCall is the one return type of the descriptor of
+	 * {@code target}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param target     the CFG that is targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
@@ -58,7 +57,7 @@ public class CFGCall extends Call {
 	public CFG getTarget() {
 		return target;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -1,9 +1,5 @@
 package it.unive.lisa.checks;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
 import it.unive.lisa.cfg.statement.Expression;
@@ -13,6 +9,9 @@ import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An auxiliary tool that can be used by checks during their execution. It
@@ -36,9 +35,10 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new warning that is meant to be a generic warning on the program.
-	 * For warnings related to one of the components of the program (e.g., a CFG, a
-	 * statement, ...) rely on the other methods provided by this class.
+	 * Reports a new warning that is meant to be a generic warning on the
+	 * program. For warnings related to one of the components of the program
+	 * (e.g., a CFG, a statement, ...) rely on the other methods provided by
+	 * this class.
 	 * 
 	 * @param message the message of the warning
 	 */
@@ -47,8 +47,8 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the declaration of the given
-	 * cfg.
+	 * Reports a new warning with the given message on the declaration of the
+	 * given cfg.
 	 * 
 	 * @param cfg     the cfg to warn on
 	 * @param message the message of the warning
@@ -58,8 +58,8 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the declaration of the cfg
-	 * represented by the given descriptor.
+	 * Reports a new warning with the given message on the declaration of the
+	 * cfg represented by the given descriptor.
 	 * 
 	 * @param descriptor the descriptor cfg to warn on
 	 * @param message    the message of the warning
@@ -89,8 +89,8 @@ public class CheckTool {
 	}
 
 	/**
-	 * Returns an <b>unmodifiable</b> view of the warnings that have been generated
-	 * up to now using this tool.
+	 * Returns an <b>unmodifiable</b> view of the warnings that have been
+	 * generated up to now using this tool.
 	 * 
 	 * @return a view of the warnings
 	 */

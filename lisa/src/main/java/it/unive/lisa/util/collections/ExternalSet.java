@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -16,9 +15,9 @@ import org.apache.commons.lang3.StringUtils;
  * The indexes are stored through bit vectors, enabling better memory
  * efficiency.
  * 
- * @param <T> the type of elements inside this set
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the type of elements inside this set
  */
 public class ExternalSet<T> implements Iterable<T> {
 
@@ -26,18 +25,25 @@ public class ExternalSet<T> implements Iterable<T> {
 
 	/**
 	 * Yields a mask of {@code 0}s with one 1, represented as a long value, to
-	 * represent the given number inside a long bitvector. To determine the correct
-	 * long bitvector to apply this mask to, use {@link #bitvector_index(int)}
+	 * represent the given number inside a long bitvector. To determine the
+	 * correct long bitvector to apply this mask to, use
+	 * {@link #bitvector_index(int)}
 	 * 
 	 * @param n the number
+	 * 
 	 * @return the bitwise mask
 	 */
 	private static long bitmask(int n) {
-		// assuming that n will be stored in the right long (obtained with toNLongs(n)),
-		// we have to determine which bit of the long has to be turned to 1. To do that,
-		// we take the 1L (that is just the right-most bit set to 1) and we shift it to
-		// the left. The amount of positions that we need to shift it is equal to n%64
-		// (we use bitwise and as a mask) that yields the correct bit to represent a
+		// assuming that n will be stored in the right long (obtained with
+		// toNLongs(n)),
+		// we have to determine which bit of the long has to be turned to 1. To
+		// do that,
+		// we take the 1L (that is just the right-most bit set to 1) and we
+		// shift it to
+		// the left. The amount of positions that we need to shift it is equal
+		// to n%64
+		// (we use bitwise and as a mask) that yields the correct bit to
+		// represent a
 		// number between 0 and 63 inside the long
 		return 1L << (n & LENGTH_MASK);
 	}
@@ -47,6 +53,7 @@ public class ExternalSet<T> implements Iterable<T> {
 	 * given number lies.
 	 * 
 	 * @param n the number
+	 * 
 	 * @return the index
 	 */
 	private static int bitvector_index(int n) {
@@ -69,13 +76,14 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * The bits representing the set. If a bit is 1 then the corresponding element
-	 * of the cache is in the set.
+	 * The bits representing the set. If a bit is 1 then the corresponding
+	 * element of the cache is in the set.
 	 */
 	private long[] bits;
 
 	/**
-	 * The cache that generated this set and that contains the elements of this set.
+	 * The cache that generated this set and that contains the elements of this
+	 * set.
 	 */
 	private final ExternalSetCache<T> cache;
 
@@ -111,7 +119,8 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Builds a set containing exactly one element and connected to the given cache.
+	 * Builds a set containing exactly one element and connected to the given
+	 * cache.
 	 * 
 	 * @param cache   the cache
 	 * @param element the element
@@ -124,8 +133,8 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Builds a set containing all the elements of the given iterable and connected
-	 * to the given cache.
+	 * Builds a set containing all the elements of the given iterable and
+	 * connected to the given cache.
 	 * 
 	 * @param cache    the cache that must be used for this set
 	 * @param elements the elements put inside the set
@@ -246,9 +255,9 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Determines if this set is equal to the given one, that is, if they share the
-	 * cache (checked through reference equality) and contains the same elements.
-	 * <br>
+	 * Determines if this set is equal to the given one, that is, if they share
+	 * the cache (checked through reference equality) and contains the same
+	 * elements. <br>
 	 * <br>
 	 * {@inheritDoc}
 	 */
@@ -281,8 +290,8 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Yields a concrete list containing all the elements corresponding to the bits
-	 * in this set.
+	 * Yields a concrete list containing all the elements corresponding to the
+	 * bits in this set.
 	 * 
 	 * @return the collected elements
 	 */
@@ -294,8 +303,8 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Yields a fresh copy of this set, defined over the same cache and containing
-	 * the same elements.
+	 * Yields a fresh copy of this set, defined over the same cache and
+	 * containing the same elements.
 	 * 
 	 * @return the fresh copy
 	 */
@@ -307,6 +316,7 @@ public class ExternalSet<T> implements Iterable<T> {
 	 * Determines if an element belongs to this set.
 	 * 
 	 * @param e the element
+	 * 
 	 * @return true if and only if {@code e} is in this set
 	 */
 	public final boolean contains(T e) {
@@ -324,7 +334,9 @@ public class ExternalSet<T> implements Iterable<T> {
 	 * same cache.
 	 * 
 	 * @param other the other set
-	 * @return {@code true} if and only if {@code other} is included into this set
+	 * 
+	 * @return {@code true} if and only if {@code other} is included into this
+	 *             set
 	 */
 	public boolean contains(ExternalSet<T> other) {
 		if (this == other)
@@ -339,7 +351,8 @@ public class ExternalSet<T> implements Iterable<T> {
 			// clever check: this cannot contain other if other is bigger
 			return false;
 
-		// if at least one bit that is 0 in this is 1 in other, than this does not
+		// if at least one bit that is 0 in this is 1 in other, than this does
+		// not
 		// contain other
 		for (int i = otherbits.length; i >= 0; i--)
 			if ((localbits[i] | otherbits[i]) != localbits[i])
@@ -349,10 +362,11 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Determines if this set has at least an element in common with another if they
-	 * share the same cache.
+	 * Determines if this set has at least an element in common with another if
+	 * they share the same cache.
 	 * 
 	 * @param other the other set
+	 * 
 	 * @return true if and only if this set intersects the other
 	 */
 	public final boolean intersects(ExternalSet<T> other) {
@@ -379,6 +393,7 @@ public class ExternalSet<T> implements Iterable<T> {
 	 * defined over the same cache, this set is returned.
 	 * 
 	 * @param other the other set
+	 * 
 	 * @return the intersection of the two sets
 	 */
 	public ExternalSet<T> intersection(ExternalSet<T> other) {
@@ -393,7 +408,8 @@ public class ExternalSet<T> implements Iterable<T> {
 		long[] otherbits;
 		ExternalSet<T> result;
 
-		// copy the shortest one, then perform bitwise and with the longest one on
+		// copy the shortest one, then perform bitwise and with the longest one
+		// on
 		// common bits
 		if (this.bits.length > other.bits.length) {
 			otherbits = this.bits;
@@ -414,11 +430,13 @@ public class ExternalSet<T> implements Iterable<T> {
 
 	/**
 	 * Yields a new set obtained from this by removing the given elements. If
-	 * {@code other} is {@code null}, or if the two sets are not defined over the
-	 * same cache, this set is returned.
+	 * {@code other} is {@code null}, or if the two sets are not defined over
+	 * the same cache, this set is returned.
 	 * 
 	 * @param other the elements to remove
-	 * @return a set obtained from this by removing the elements in {@code other}
+	 * 
+	 * @return a set obtained from this by removing the elements in
+	 *             {@code other}
 	 */
 	public ExternalSet<T> difference(ExternalSet<T> other) {
 		if (this == other)
@@ -444,11 +462,12 @@ public class ExternalSet<T> implements Iterable<T> {
 	}
 
 	/**
-	 * Yields the union of this set and another. Neither of them gets modified. If
-	 * {@code other} is {@code null}, or if the two sets are not defined over the
-	 * same cache, this set is returned.
+	 * Yields the union of this set and another. Neither of them gets modified.
+	 * If {@code other} is {@code null}, or if the two sets are not defined over
+	 * the same cache, this set is returned.
 	 * 
 	 * @param other the other set
+	 * 
 	 * @return the union of this set and {@code other}
 	 */
 	public ExternalSet<T> union(ExternalSet<T> other) {
@@ -505,7 +524,8 @@ public class ExternalSet<T> implements Iterable<T> {
 		 */
 		private BitSetIterator() {
 			this.bits = ExternalSet.this.bits;
-			this.totalBits = bits.length << 6; // we go back to the integer representation
+			this.totalBits = bits.length << 6; // we go back to the integer
+												// representation
 			this.next = findNextBit();
 		}
 
@@ -513,7 +533,7 @@ public class ExternalSet<T> implements Iterable<T> {
 		 * Yields the next non-ZERO bit in the set.
 		 * 
 		 * @return the position of the next non-zero bit in the set, starting at
-		 *         {@code start} non-inclusive, or {@code -1}
+		 *             {@code start} non-inclusive, or {@code -1}
 		 */
 		private int findNextBit() {
 			long[] localbits = this.bits;

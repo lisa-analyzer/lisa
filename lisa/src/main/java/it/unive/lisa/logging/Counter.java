@@ -57,17 +57,18 @@ public final class Counter {
 
 	/**
 	 * Builds the counter. If {@code cap} is less than {@code 1} or
-	 * {@code updateFactor} is negative, each {@link #count()} call will cause a new
-	 * message to be logged. Otherwise, a message will be logged every
+	 * {@code updateFactor} is negative, each {@link #count()} call will cause a
+	 * new message to be logged. Otherwise, a message will be logged every
 	 * {@code max(1, cap * updateFactor)} {@link #count()} call.
 	 * 
 	 * @param logger       the logger to log onto
 	 * @param level        the level to log at
 	 * @param message      the message to display while counting
 	 * @param objects      the objects being counted
-	 * @param cap          the cap of the count, meaning the expected maximum number
-	 * @param updateFactor the percentage of {@code cap} to use as interval between
-	 *                     different log updates
+	 * @param cap          the cap of the count, meaning the expected maximum
+	 *                         number
+	 * @param updateFactor the percentage of {@code cap} to use as interval
+	 *                         between different log updates
 	 */
 	public Counter(Logger logger, Level level, String message, String objects, int cap, double updateFactor) {
 		this.level = level;
@@ -91,6 +92,8 @@ public final class Counter {
 
 	/**
 	 * Turns on the counter, logging the event.
+	 * 
+	 * @throws IllegalStateException if the counter is already logging
 	 */
 	public void on() {
 		if (logging)
@@ -99,9 +102,10 @@ public final class Counter {
 		startTime = System.nanoTime();
 		logger.log(level, message + " [start]");
 	}
-	
+
 	/**
 	 * Yields {@code true} if this counter is currently logging updates.
+	 * 
 	 * @return {@code true} if that condition holds
 	 */
 	public boolean isLogging() {

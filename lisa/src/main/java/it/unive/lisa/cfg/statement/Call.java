@@ -1,10 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Arrays;
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -25,12 +24,12 @@ public abstract class Call extends Expression {
 	 * Builds a call happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
@@ -77,7 +76,7 @@ public abstract class Call extends Expression {
 	private static boolean areEquals(Expression[] params, Expression[] otherParams) {
 		if (params == otherParams)
 			return true;
-		
+
 		if (params == null || otherParams == null)
 			return false;
 

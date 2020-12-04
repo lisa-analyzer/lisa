@@ -3,7 +3,6 @@ package it.unive.lisa.logging;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -16,9 +15,9 @@ import org.apache.logging.log4j.Logger;
 public class TimerLogger {
 
 	/**
-	 * Executes the given action, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given action, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param logger  the logger to log onto
 	 * @param message the message to display
@@ -29,8 +28,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given action, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given action, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param logger   the logger to log onto
 	 * @param logLevel the level to log at
@@ -42,8 +41,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given action, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given action, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param logger    the logger to log onto
 	 * @param logLevel  the level to log at
@@ -57,14 +56,15 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given supplier, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given supplier, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T>      the type of the supplied value
 	 * @param logger   the logger to log onto
 	 * @param message  the message to display
 	 * @param supplier the supplier to execute
+	 * 
 	 * @return the supplied value
 	 */
 	public static <T> T execSupplier(Logger logger, String message, LoggableSupplier<T> supplier) {
@@ -72,14 +72,15 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given supplier, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given supplier, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T>      the type of the supplied value
 	 * @param logger   the logger to log onto
 	 * @param logLevel the level to log at
 	 * @param message  the message to display
 	 * @param supplier the supplier to execute
+	 * 
 	 * @return the supplied value
 	 */
 	public static <T> T execSupplier(Logger logger, Level logLevel, String message, LoggableSupplier<T> supplier) {
@@ -87,8 +88,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given supplier, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given supplier, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T>       the type of the supplied value
 	 * @param logger    the logger to log onto
@@ -96,6 +97,7 @@ public class TimerLogger {
 	 * @param formatter the time format to log
 	 * @param message   the message to display
 	 * @param supplier  the supplier to execute
+	 * 
 	 * @return the supplied value
 	 */
 	public static <T> T execSupplier(Logger logger, Level logLevel, TimeFormat formatter, String message,
@@ -106,9 +108,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the return value
 	 * @param <T0>     the type of the first argument
@@ -116,6 +118,7 @@ public class TimerLogger {
 	 * @param message  the message to display
 	 * @param function the function to execute
 	 * @param arg0     the first argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0> R execFunction(Logger logger, String message, LoggableFunction<R, T0> function, T0 arg0) {
@@ -123,8 +126,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the return value
 	 * @param <T0>     the type of the first argument
@@ -133,6 +136,7 @@ public class TimerLogger {
 	 * @param message  the message to display
 	 * @param function the function to execute
 	 * @param arg0     the first argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0> R execFunction(Logger logger, Level logLevel, String message,
@@ -141,8 +145,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param <T0>      the type of the first argument
@@ -152,6 +156,7 @@ public class TimerLogger {
 	 * @param message   the message to display
 	 * @param function  the function to execute
 	 * @param arg0      the first argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0> R execFunction(Logger logger, Level logLevel, TimeFormat formatter, String message,
@@ -162,9 +167,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the return value
 	 * @param <T0>     the type of the first argument
@@ -174,6 +179,7 @@ public class TimerLogger {
 	 * @param function the function to execute
 	 * @param arg0     the first argument
 	 * @param arg1     the second argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1> R execFunction(Logger logger, String message, LoggableBiFunction<R, T0, T1> function,
@@ -182,8 +188,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the return value
 	 * @param <T0>     the type of the first argument
@@ -194,6 +200,7 @@ public class TimerLogger {
 	 * @param function the function to execute
 	 * @param arg0     the first argument
 	 * @param arg1     the second argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1> R execFunction(Logger logger, Level logLevel, String message,
@@ -202,8 +209,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param <T0>      the type of the first argument
@@ -215,6 +222,7 @@ public class TimerLogger {
 	 * @param function  the function to execute
 	 * @param arg0      the first argument
 	 * @param arg1      the second argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1> R execFunction(Logger logger, Level logLevel, TimeFormat formatter, String message,
@@ -225,9 +233,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -239,6 +247,7 @@ public class TimerLogger {
 	 * @param arg0     the first argument
 	 * @param arg1     the second argument
 	 * @param arg2     the third argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2> R execFunction(Logger logger, String message,
@@ -247,8 +256,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -261,6 +270,7 @@ public class TimerLogger {
 	 * @param arg0     the first argument
 	 * @param arg1     the second argument
 	 * @param arg2     the third argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2> R execFunction(Logger logger, Level logLevel, String message,
@@ -269,8 +279,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param <T0>      the type of the first argument
@@ -284,6 +294,7 @@ public class TimerLogger {
 	 * @param arg0      the first argument
 	 * @param arg1      the second argument
 	 * @param arg2      the third argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2> R execFunction(Logger logger, Level logLevel, TimeFormat formatter, String message,
@@ -294,9 +305,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -310,6 +321,7 @@ public class TimerLogger {
 	 * @param arg1     the second argument
 	 * @param arg2     the third argument
 	 * @param arg3     the fourth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3> R execFunction(Logger logger, String message,
@@ -318,8 +330,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -334,6 +346,7 @@ public class TimerLogger {
 	 * @param arg1     the second argument
 	 * @param arg2     the third argument
 	 * @param arg3     the fourth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3> R execFunction(Logger logger, Level logLevel, String message,
@@ -342,8 +355,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param <T0>      the type of the first argument
@@ -359,6 +372,7 @@ public class TimerLogger {
 	 * @param arg1      the second argument
 	 * @param arg2      the third argument
 	 * @param arg3      the fourth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3> R execFunction(Logger logger, Level logLevel, TimeFormat formatter,
@@ -369,9 +383,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -387,6 +401,7 @@ public class TimerLogger {
 	 * @param arg2     the third argument
 	 * @param arg3     the fourth argument
 	 * @param arg4     the fifth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3, T4> R execFunction(Logger logger, String message,
@@ -396,8 +411,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param <T0>     the type of the first argument
@@ -414,6 +429,7 @@ public class TimerLogger {
 	 * @param arg2     the third argument
 	 * @param arg3     the fourth argument
 	 * @param arg4     the fifth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3, T4> R execFunction(Logger logger, Level logLevel, String message,
@@ -423,8 +439,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param <T0>      the type of the first argument
@@ -442,6 +458,7 @@ public class TimerLogger {
 	 * @param arg2      the third argument
 	 * @param arg3      the fourth argument
 	 * @param arg4      the fifth argument
+	 * 
 	 * @return the returned value
 	 */
 	public static <R, T0, T1, T2, T3, T4> R execFunction(Logger logger, Level logLevel, TimeFormat formatter,
@@ -453,15 +470,16 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param logger   the logger to log onto
 	 * @param message  the message to display
 	 * @param function the function to execute
 	 * @param args     the arguments to be consumed
+	 * 
 	 * @return the returned value
 	 */
 	public static <R> R execFunction(Logger logger, String message, LoggableMultiFunction<R> function, Object... args) {
@@ -469,8 +487,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>      the type of the returned value
 	 * @param logger   the logger to log onto
@@ -478,6 +496,7 @@ public class TimerLogger {
 	 * @param message  the message to display
 	 * @param function the function to execute
 	 * @param args     the arguments to be consumed
+	 * 
 	 * @return the returned value
 	 */
 	public static <R> R execFunction(Logger logger, Level logLevel, String message, LoggableMultiFunction<R> function,
@@ -486,8 +505,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given function, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given function, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <R>       the type of the returned value
 	 * @param logger    the logger to log onto
@@ -496,6 +515,7 @@ public class TimerLogger {
 	 * @param message   the message to display
 	 * @param function  the function to execute
 	 * @param args      the arguments to be consumed
+	 * 
 	 * @return the returned value
 	 */
 	public static <R> R execFunction(Logger logger, Level logLevel, TimeFormat formatter, String message,
@@ -506,9 +526,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param logger   the logger to log onto
@@ -521,8 +541,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param logger   the logger to log onto
@@ -537,8 +557,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>      the type of the first argument
 	 * @param logger    the logger to log onto
@@ -554,9 +574,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -572,8 +592,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -590,8 +610,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>      the type of the first argument
 	 * @param <T1>      the type of the second argument
@@ -609,9 +629,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -629,8 +649,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -649,8 +669,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>      the type of the first argument
 	 * @param <T1>      the type of the second argument
@@ -670,9 +690,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -692,8 +712,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -714,8 +734,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>      the type of the first argument
 	 * @param <T1>      the type of the second argument
@@ -737,9 +757,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -761,8 +781,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>     the type of the first argument
 	 * @param <T1>     the type of the second argument
@@ -785,8 +805,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param <T0>      the type of the first argument
 	 * @param <T1>      the type of the second argument
@@ -811,9 +831,9 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The log is issued at {@link Level#INFO} level, and the elapsed time is
-	 * formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The log is issued at {@link Level#INFO} level, and the elapsed
+	 * time is formatted up to minutes.
 	 * 
 	 * @param logger   the logger to log onto
 	 * @param message  the message to display
@@ -825,8 +845,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param logger   the logger to log onto
 	 * @param logLevel the level to log at
@@ -840,8 +860,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * Executes the given consumer, while logging the time need for it to complete.
-	 * The elapsed time is formatted up to minutes.
+	 * Executes the given consumer, while logging the time need for it to
+	 * complete. The elapsed time is formatted up to minutes.
 	 * 
 	 * @param logger    the logger to log onto
 	 * @param logLevel  the level to log at
@@ -869,7 +889,8 @@ public class TimerLogger {
 	}
 
 	/**
-	 * A {@link Runnable} executing a function with no arguments a no return value.
+	 * A {@link Runnable} executing a function with no arguments a no return
+	 * value.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -886,6 +907,7 @@ public class TimerLogger {
 	 * A {@link Supplier} producing one element.
 	 * 
 	 * @param <R> the type of the supplied element
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -904,6 +926,7 @@ public class TimerLogger {
 	 * 
 	 * @param <T0> the type of the first argument
 	 * @param <R>  the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -913,6 +936,7 @@ public class TimerLogger {
 		 * Runs this function.
 		 * 
 		 * @param arg0 the first argument
+		 * 
 		 * @return the function result
 		 */
 		R run(T0 arg0);
@@ -924,6 +948,7 @@ public class TimerLogger {
 	 * @param <T0> the type of the first argument
 	 * @param <T1> the type of the second argument
 	 * @param <R>  the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -934,6 +959,7 @@ public class TimerLogger {
 		 * 
 		 * @param arg0 the first argument
 		 * @param arg1 the second argument
+		 * 
 		 * @return the function result
 		 */
 		R run(T0 arg0, T1 arg1);
@@ -946,6 +972,7 @@ public class TimerLogger {
 	 * @param <T1> the type of the second argument
 	 * @param <T2> the type of the third argument
 	 * @param <R>  the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -957,6 +984,7 @@ public class TimerLogger {
 		 * @param arg0 the first argument
 		 * @param arg1 the second argument
 		 * @param arg2 the third argument
+		 * 
 		 * @return the function result
 		 */
 		R run(T0 arg0, T1 arg1, T2 arg2);
@@ -970,6 +998,7 @@ public class TimerLogger {
 	 * @param <T2> the type of the third argument
 	 * @param <T3> the type of the fourth argument
 	 * @param <R>  the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -982,6 +1011,7 @@ public class TimerLogger {
 		 * @param arg1 the second argument
 		 * @param arg2 the third argument
 		 * @param arg3 the fourth argument
+		 * 
 		 * @return the function result
 		 */
 		R run(T0 arg0, T1 arg1, T2 arg2, T3 arg3);
@@ -996,6 +1026,7 @@ public class TimerLogger {
 	 * @param <T3> the type of the fourth argument
 	 * @param <T4> the type of the fifth argument
 	 * @param <R>  the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1009,6 +1040,7 @@ public class TimerLogger {
 		 * @param arg2 the third argument
 		 * @param arg3 the fourth argument
 		 * @param arg4 the fifth argument
+		 * 
 		 * @return the function result
 		 */
 		R run(T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4);
@@ -1018,6 +1050,7 @@ public class TimerLogger {
 	 * A {@link Function} consuming multiple arguments and producing one value.
 	 * 
 	 * @param <R> the type of the return value
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1026,6 +1059,7 @@ public class TimerLogger {
 		 * Runs this function.
 		 * 
 		 * @param args the arguments to be consumed
+		 * 
 		 * @return the function result
 		 */
 		R run(Object... args);
@@ -1035,6 +1069,7 @@ public class TimerLogger {
 	 * A {@link Consumer} consuming one argument.
 	 * 
 	 * @param <T0> the type of the argument
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1053,6 +1088,7 @@ public class TimerLogger {
 	 * 
 	 * @param <T0> the type of the first argument
 	 * @param <T1> the type of the second argument
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1073,6 +1109,7 @@ public class TimerLogger {
 	 * @param <T0> the type of the first argument
 	 * @param <T1> the type of the second argument
 	 * @param <T2> the type of the third argument
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1095,6 +1132,7 @@ public class TimerLogger {
 	 * @param <T1> the type of the second argument
 	 * @param <T2> the type of the third argument
 	 * @param <T3> the type of the fourth argument
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
@@ -1119,6 +1157,7 @@ public class TimerLogger {
 	 * @param <T2> the type of the third argument
 	 * @param <T3> the type of the fourth argument
 	 * @param <T4> the type of the fifth argument
+	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	@FunctionalInterface
