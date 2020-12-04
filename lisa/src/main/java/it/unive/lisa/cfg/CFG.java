@@ -420,8 +420,10 @@ public class CFG {
 	 *                       returned by {@link #getEntrypoints()}
 	 * @param cg         the callgraph that can be queried when a call towards
 	 *                       an other cfg is encountered
+	 * @param semantics  the {@link SemanticFunction} that will be used for
+	 *                       computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -462,9 +464,11 @@ public class CFG {
 	 *                       {@link Lattice#lub(Lattice)} invocation gets
 	 *                       replaced by the {@link Lattice#widening(Lattice)}
 	 *                       call. Use {@code 0} to <b>always</b> use
-	 *                       {@link Lattice#lub(Lattice)}.
+	 *                       {@link Lattice#lub(Lattice)}
+	 * @param semantics  the {@link SemanticFunction} that will be used for
+	 *                       computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -504,8 +508,10 @@ public class CFG {
 	 *                       an other cfg is encountered
 	 * @param ws         the {@link WorkingSet} instance to use for this
 	 *                       computation
+	 * @param semantics  the {@link SemanticFunction} that will be used for
+	 *                       computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -548,9 +554,11 @@ public class CFG {
 	 *                       {@link Lattice#lub(Lattice)} invocation gets
 	 *                       replaced by the {@link Lattice#widening(Lattice)}
 	 *                       call. Use {@code 0} to <b>always</b> use
-	 *                       {@link Lattice#lub(Lattice)}.
+	 *                       {@link Lattice#lub(Lattice)}
+	 * @param semantics  the {@link SemanticFunction} that will be used for
+	 *                       computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -595,8 +603,10 @@ public class CFG {
 	 *                        {@code entrypoints}
 	 * @param cg          the callgraph that can be queried when a call towards
 	 *                        an other cfg is encountered
+	 * @param semantics   the {@link SemanticFunction} that will be used for
+	 *                        computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -641,9 +651,11 @@ public class CFG {
 	 *                        {@link Lattice#lub(Lattice)} invocation gets
 	 *                        replaced by the {@link Lattice#widening(Lattice)}
 	 *                        call. Use {@code 0} to <b>always</b> use
-	 *                        {@link Lattice#lub(Lattice)}.
+	 *                        {@link Lattice#lub(Lattice)}
+	 * @param semantics   the {@link SemanticFunction} that will be used for
+	 *                        computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -687,8 +699,10 @@ public class CFG {
 	 *                        an other cfg is encountered
 	 * @param ws          the {@link WorkingSet} instance to use for this
 	 *                        computation
+	 * @param semantics   the {@link SemanticFunction} that will be used for
+	 *                        computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -735,9 +749,11 @@ public class CFG {
 	 *                        {@link Lattice#lub(Lattice)} invocation gets
 	 *                        replaced by the {@link Lattice#widening(Lattice)}
 	 *                        call. Use {@code 0} to <b>always</b> use
-	 *                        {@link Lattice#lub(Lattice)}.
+	 *                        {@link Lattice#lub(Lattice)}
+	 * @param semantics   the {@link SemanticFunction} that will be used for
+	 *                        computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -779,8 +795,10 @@ public class CFG {
 	 *                           apply on it
 	 * @param cg             the callgraph that can be queried when a call
 	 *                           towards an other cfg is encountered
+	 * @param semantics      the {@link SemanticFunction} that will be used for
+	 *                           computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -824,9 +842,11 @@ public class CFG {
 	 *                           replaced by the
 	 *                           {@link Lattice#widening(Lattice)} call. Use
 	 *                           {@code 0} to <b>always</b> use
-	 *                           {@link Lattice#lub(Lattice)}.
+	 *                           {@link Lattice#lub(Lattice)}
+	 * @param semantics      the {@link SemanticFunction} that will be used for
+	 *                           computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Expression} the result of the fixpoint computation
 	 * 
@@ -868,8 +888,10 @@ public class CFG {
 	 *                           towards an other cfg is encountered
 	 * @param ws             the {@link WorkingSet} instance to use for this
 	 *                           computation
+	 * @param semantics      the {@link SemanticFunction} that will be used for
+	 *                           computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Expression} the result of the fixpoint computation
 	 * 
@@ -922,9 +944,11 @@ public class CFG {
 	 *                           replaced by the
 	 *                           {@link Lattice#widening(Lattice)} call. Use
 	 *                           {@code 0} to <b>always</b> use
-	 *                           {@link Lattice#lub(Lattice)}.
+	 *                           {@link Lattice#lub(Lattice)}
+	 * @param semantics      the {@link SemanticFunction} that will be used for
+	 *                           computing the abstract post-state of statements
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that os equivalent to
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 

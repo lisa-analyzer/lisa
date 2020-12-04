@@ -94,7 +94,7 @@ public class LiSA {
 	 * if it is executed
 	 */
 	private boolean dumpAnalysis;
-	
+
 	/**
 	 * Whether or not the warning list should be dumped to a json file
 	 */
@@ -169,6 +169,7 @@ public class LiSA {
 	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
 	 * overwritten.
 	 * 
+	 * @param <T>       the concrete type of the call graph
 	 * @param callGraph the callgraph to use
 	 */
 	public <T extends CallGraph> void setCallGraph(T callGraph) {
@@ -178,23 +179,23 @@ public class LiSA {
 	public void setInferTypes(boolean inferTypes) {
 		this.inferTypes = inferTypes;
 	}
-	
+
 	public void setDumpCFGs(boolean dumpCFGs) {
 		this.dumpCFGs = dumpCFGs;
 	}
-	
+
 	public void setDumpTypeInference(boolean dumpTypeInference) {
 		this.dumpTypeInference = dumpTypeInference;
 	}
-	
+
 	public void setDumpAnalysis(boolean dumpAnalysis) {
 		this.dumpAnalysis = dumpAnalysis;
 	}
-	
+
 	public void setJsonOutput(boolean jsonOutput) {
 		this.jsonOutput = jsonOutput;
 	}
-	
+
 	public void setWorkdir(String workdir) {
 		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
 	}
@@ -266,18 +267,18 @@ public class LiSA {
 		}
 
 		printStats();
-		
+
 		if (jsonOutput) {
 			log.info("Dumping reported warnings to 'report.json'");
 			JsonReport report = new JsonReport(warnings, FileManager.createdFiles());
 			try (Writer writer = FileManager.mkOutputFile("report.json")) {
 				report.dump(writer);
-		        log.info("Report file dumped to report.json");
+				log.info("Report file dumped to report.json");
 			} catch (IOException e) {
 				log.error("Unable to dump report file", e);
 			}
 		}
-		
+
 		FileManager.clearCreatedFiles();
 	}
 
@@ -306,11 +307,11 @@ public class LiSA {
 	@SuppressWarnings({ "unchecked" })
 	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
-		
+
 		if (dumpCFGs)
-			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs")) 
+			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
-		
+
 		CheckTool tool = new CheckTool();
 		if (!syntacticChecks.isEmpty()) {
 			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
@@ -347,7 +348,7 @@ public class LiSA {
 		if (inferTypes) {
 			TimerLogger.execAction(log, "Computing type information",
 					() -> computeFixpoint(heap, new TypeEnvironment(), Statement::typeInference));
-			
+
 			if (dumpTypeInference)
 				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
 					CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);

@@ -210,7 +210,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * Computes the runtime types for this statement, expressing how type
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #typeInference(InferredTypes, CallGraph, ExpressionStore)} of each
+	 * {@link #typeInference(AnalysisState, CallGraph, ExpressionStore)} of each
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}. If this statement is an {@link Expression},
 	 * implementers of this method should call
@@ -219,6 +219,8 @@ public abstract class Statement implements Comparable<Statement> {
 	 * as parameter, in order to register the computed runtime types in the
 	 * expression.
 	 * 
+	 * @param <H>         the concrete type of {@link HeapDomain} that is run
+	 *                        during the type inference
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement
