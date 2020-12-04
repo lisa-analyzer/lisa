@@ -19,11 +19,9 @@ checkstyleTest {
         xml.enabled false
         html.enabled false
     }
-	// no test code require javadoc for now 
-    exclude '**/*.java'
-    // when tests that require javadoc are added,
-    // delete the exclude clause above and add them
-    // with: include 'it/unive/lisa/test/package_to_include/**/*.java'
+    
+    // only included files will be checked
+    include 'it/unive/lisa/test/imp/**/*.java'
 }
 
 task checkstyleErrorMessage {

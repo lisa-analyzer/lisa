@@ -23,6 +23,8 @@ plugins {
     
     // magic for getting eclipse to work with gradle
     id 'eclipse'
+    
+    // antlr plugin for the generation of the IMP parser
     id 'antlr'
     
     // automatic generation of plantuml files from the source code
@@ -79,16 +81,4 @@ apply from: 'dependencies.gradle'
 apply from: 'java.gradle'
 apply from: 'code-style.gradle'
 apply from: 'doc-extra.gradle'
-generateTestGrammarSource {
-    maxHeapSize = "64m"
-    arguments += ["-visitor", "-no-listener"]
-    
-    doLast {
-    	copy {
-      		from 'build/generated-src/antlr/test/'
-      		include '*.*'
-      		into 'build/generated-src/antlr/test/it/unive/lisa/test/antlr'
-    	}
-   		project.delete fileTree('build/generated-src/antlr/test').include('*.*')
-  	}
-}
+apply from: 'antlr.gradle'
