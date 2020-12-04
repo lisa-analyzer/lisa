@@ -22,7 +22,8 @@ public interface SyntacticCheck {
 	 * Callback invoked only once before the beginning of the inspection of the
 	 * program. Can be used to setup common data structures.
 	 * 
-	 * @param tool the auxiliary tool that this check can use during the execution
+	 * @param tool the auxiliary tool that this check can use during the
+	 *                 execution
 	 */
 	void beforeExecution(CheckTool tool);
 
@@ -30,7 +31,7 @@ public interface SyntacticCheck {
 	 * Callback invoked when inspecting the descriptor of a CFG.
 	 * 
 	 * @param tool       the auxiliary tool that this check can use during the
-	 *                   execution
+	 *                       execution
 	 * @param descriptor the descriptor that is currently being inspected
 	 */
 	void visitCFGDescriptor(CheckTool tool, CFGDescriptor descriptor);
@@ -41,26 +42,27 @@ public interface SyntacticCheck {
 	 * statement.
 	 * 
 	 * @param tool      the auxiliary tool that this check can use during the
-	 *                  execution
+	 *                      execution
 	 * @param statement the statement that is currently being inspected
 	 */
 	void visitStatement(CheckTool tool, Statement statement);
 
 	/**
-	 * Callback invoked when inspecting an expression. This method will be invoked
-	 * also on all expressions that are the root of a statement.
+	 * Callback invoked when inspecting an expression. This method will be
+	 * invoked also on all expressions that are the root of a statement.
 	 * 
 	 * @param tool       the auxiliary tool that this check can use during the
-	 *                   execution
+	 *                       execution
 	 * @param expression the expression that is currently being inspected
 	 */
 	void visitExpression(CheckTool tool, Expression expression);
 
 	/**
-	 * Callback invoked only once after the end of the inspection of the program.
-	 * Can be used to perform cleanups or to report summary warnings.
+	 * Callback invoked only once after the end of the inspection of the
+	 * program. Can be used to perform cleanups or to report summary warnings.
 	 * 
-	 * @param tool the auxiliary tool that this check can use during the execution
+	 * @param tool the auxiliary tool that this check can use during the
+	 *                 execution
 	 */
 	void afterExecution(CheckTool tool);
 }

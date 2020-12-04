@@ -1,10 +1,5 @@
 package it.unive.lisa.checks.syntactic;
 
-import java.util.Collection;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Assignment;
 import it.unive.lisa.cfg.statement.Call;
@@ -14,6 +9,9 @@ import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.logging.IterationLogger;
+import java.util.Collection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utility class that handles the execution of {@link SyntacticCheck}s.
@@ -21,8 +19,8 @@ import it.unive.lisa.logging.IterationLogger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class SyntacticChecksExecutor {
-	
-	private static final Logger log = LogManager.getLogger(SyntacticChecksExecutor.class); 
+
+	private static final Logger log = LogManager.getLogger(SyntacticChecksExecutor.class);
 
 	/**
 	 * Executes all the given checks on the given inputs cfgs.
@@ -48,13 +46,13 @@ public class SyntacticChecksExecutor {
 		for (Statement st : cfg.getNodes()) 
 			if (st instanceof Expression)
 				processExpression(tool, checks, (Expression) st);
-			else 
+			else
 				processStatement(tool, checks, st);
 	}
 
 	private static void processStatement(CheckTool tool, Collection<SyntacticCheck> checks, Statement st) {
 		checks.forEach(c -> c.visitStatement(tool, st));
-		
+
 		if (st instanceof Return)
 			processExpression(tool, checks, ((Return) st).getExpression());
 		else if (st instanceof Throw)
@@ -63,7 +61,7 @@ public class SyntacticChecksExecutor {
 
 	private static void processExpression(CheckTool tool, Collection<SyntacticCheck> checks, Expression expression) {
 		checks.forEach(c -> c.visitExpression(tool, expression));
-		
+
 		if (expression instanceof Assignment) {
 			processExpression(tool, checks, ((Assignment) expression).getLeft());
 			processExpression(tool, checks, ((Assignment) expression).getRight());

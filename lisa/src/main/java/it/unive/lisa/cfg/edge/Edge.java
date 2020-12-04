@@ -89,14 +89,16 @@ public abstract class Edge {
 	}
 
 	/**
-	 * Checks if this edge is effectively equal to the given one, that is, if they
-	 * have the same structure while potentially being different instances. This
-	 * translates into comparing source and destination statements with
+	 * Checks if this edge is effectively equal to the given one, that is, if
+	 * they have the same structure while potentially being different instances.
+	 * This translates into comparing source and destination statements with
 	 * {@link Statement#isEqualTo(Statement)} instead of using
 	 * {@link Statement#equals(Object)}
 	 * 
 	 * @param other the other edge
-	 * @return {@code true} if this edge and the given one are effectively equals
+	 * 
+	 * @return {@code true} if this edge and the given one are effectively
+	 *             equals
 	 */
 	public boolean isEqualTo(Edge other) {
 		if (this == other)

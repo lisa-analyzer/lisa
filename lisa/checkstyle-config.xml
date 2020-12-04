@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+          "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+          "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+	<module name="TreeWalker">
+		<module name="AtclauseOrder">
+			<property name="tagOrder"
+				value="@author, @param, @return, @throws, @see, @version, @since, @deprecated" />
+		</module>
+		<module name="InvalidJavadocPosition" />
+		<module name="JavadocBlockTagLocation" />
+		<module name="JavadocContentLocationCheck" />
+		<module name="JavadocMethod">
+			<property name="scope" value="package" />
+			<property name="validateThrows" value="true" />
+		</module>
+		<module name="JavadocMissingLeadingAsterisk" />
+		<module name="JavadocMissingWhitespaceAfterAsterisk" />
+		<module name="JavadocStyle">
+			<property name="scope" value="package" />
+			<property name="checkEmptyJavadoc" value="true" />
+		</module>
+		<module name="JavadocType">
+			<property name="scope" value="package" />
+		</module>
+		<module name="JavadocVariable">
+			<property name="scope" value="package" />
+		</module>
+		<module name="MissingJavadocMethod">
+			<property name="scope" value="package" />
+		</module>
+		<module name="MissingJavadocType">
+			<property name="scope" value="protected" />
+		</module>
+		<module name="NonEmptyAtclauseDescription" />
+	</module>
+</module>

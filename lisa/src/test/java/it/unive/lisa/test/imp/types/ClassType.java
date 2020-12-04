@@ -3,7 +3,6 @@ package it.unive.lisa.test.imp.types;
 import java.util.HashMap;
 import java.util.Map;
 
-import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.PointerType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;

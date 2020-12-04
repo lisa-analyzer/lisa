@@ -1,7 +1,5 @@
 package it.unive.lisa.test.imp.expressions;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,7 +9,6 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;

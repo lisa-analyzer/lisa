@@ -7,13 +7,10 @@ import java.util.Collection;
 import org.junit.Test;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
-import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;

@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public enum TimeFormat {
 
 	/**
-	 * Formats the given elapsed nanos as nanoseconds
+	 * Formats the given elapsed nanos as nanoseconds.
 	 */
 	NANOS {
 		@Override
@@ -20,7 +20,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as milliseconds
+	 * Formats the given elapsed nanos as milliseconds.
 	 */
 	MILLIS {
 		@Override
@@ -30,7 +30,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as seconds
+	 * Formats the given elapsed nanos as seconds.
 	 */
 	SECONDS {
 		@Override
@@ -40,7 +40,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as minutes
+	 * Formats the given elapsed nanos as minutes.
 	 */
 	MINUTES {
 		@Override
@@ -50,7 +50,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as hours
+	 * Formats the given elapsed nanos as hours.
 	 */
 	HOURS {
 		@Override
@@ -60,7 +60,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as seconds and milliseconds
+	 * Formats the given elapsed nanos as seconds and milliseconds.
 	 */
 	SECONDS_AND_MILLIS {
 		@Override
@@ -74,7 +74,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as minutes and seconds
+	 * Formats the given elapsed nanos as minutes and seconds.
 	 */
 	MINUTES_AND_SECONDS {
 		@Override
@@ -88,7 +88,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as milliseconds and nanoseconds
+	 * Formats the given elapsed nanos as milliseconds and nanoseconds.
 	 */
 	UP_TO_MILLIS {
 		@Override
@@ -102,7 +102,7 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as seconds, milliseconds and nanoseconds
+	 * Formats the given elapsed nanos as seconds, milliseconds and nanoseconds.
 	 */
 	UP_TO_SECONDS {
 		@Override
@@ -122,7 +122,7 @@ public enum TimeFormat {
 
 	/**
 	 * Formats the given elapsed nanos as minutes, seconds, milliseconds and
-	 * nanoseconds
+	 * nanoseconds.
 	 */
 	UP_TO_MINUTES {
 		@Override
@@ -145,8 +145,8 @@ public enum TimeFormat {
 	},
 
 	/**
-	 * Formats the given elapsed nanos as hours, minutes, seconds, milliseconds and
-	 * nanoseconds
+	 * Formats the given elapsed nanos as hours, minutes, seconds, milliseconds
+	 * and nanoseconds.
 	 */
 	UP_TO_HOURS {
 		@Override
@@ -180,9 +180,10 @@ public enum TimeFormat {
 	private static final String UNIT_NANOS = "ns";
 
 	/**
-	 * Formats the given elapsed nanos into a string with time units
+	 * Formats the given elapsed nanos into a string with time units.
 	 * 
 	 * @param nanos the elapsed time, in nanoseconds
+	 * 
 	 * @return the formatted string
 	 */
 	public String format(long nanos) {

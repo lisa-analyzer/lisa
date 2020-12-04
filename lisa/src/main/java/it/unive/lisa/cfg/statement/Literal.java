@@ -1,7 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -12,6 +10,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.Constant;
+import java.util.Objects;
 
 /**
  * A literal, representing a constant value.
@@ -43,12 +42,12 @@ public class Literal extends Expression {
 	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this expression happens in the source
-	 *                   file. If unknown, use {@code -1}
+	 *                       file. If unknown, use {@code -1}
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */

@@ -1,6 +1,5 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;

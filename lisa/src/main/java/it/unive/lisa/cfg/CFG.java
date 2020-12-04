@@ -48,7 +48,7 @@ public class CFG {
 
 	/**
 	 * The default number of fixpoint iteration on a given statement after which
-	 * calls ti {@link Lattice#lub(Lattice)} gets replaced with
+	 * calls to {@link Lattice#lub(Lattice)} gets replaced with
 	 * {@link Lattice#widening(Lattice)}.
 	 */
 	public static final int DEFAULT_WIDENING_THRESHOLD = 5;

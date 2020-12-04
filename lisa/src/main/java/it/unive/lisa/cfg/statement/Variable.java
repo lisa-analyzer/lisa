@@ -1,6 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Collections;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AnalysisState;
@@ -15,7 +14,6 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**

@@ -1,8 +1,7 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.cfg.CFG;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on one of the CFGs under analysis.
@@ -29,7 +28,7 @@ public class CFGWarning extends WarningWithLocation {
 	}
 
 	/**
-	 * Yields the cfg where this warning was reported on
+	 * Yields the cfg where this warning was reported on.
 	 * 
 	 * @return the cfg
 	 */
@@ -80,9 +79,10 @@ public class CFGWarning extends WarningWithLocation {
 	public String getTag() {
 		return "CFG";
 	}
-	
+
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignature() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignature() + "': "
+				+ getTaggedMessage();
 	}
 }

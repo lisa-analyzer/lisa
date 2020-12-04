@@ -1,7 +1,7 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * String type interface. Any concrete string type or string sub-interface 
+ * String type interface. Any concrete string type or string sub-interface
  * should implement/extend this interface.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
