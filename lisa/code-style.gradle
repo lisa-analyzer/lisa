@@ -1,0 +1,90 @@
+checkstyle {
+	configFile = file("checkstyle-config.xml")
+	sourceSets = []
+	showViolations = true
+	toolVersion '8.38' 
+}
+
+checkstyleMain {
+	finalizedBy 'checkstyleErrorMessage'
+    reports {
+        xml.enabled false
+        html.enabled false
+    }
+}
+
+checkstyleTest {
+	finalizedBy 'checkstyleErrorMessage'
+    reports {
+        xml.enabled false
+        html.enabled false
+    }
+	// no test code require javadoc for now 
+    exclude '**/*.java'
+    // when tests that require javadoc are added,
+    // delete the exclude clause above and add them
+    // with: include 'it/unive/lisa/test/package_to_include/**/*.java'
+}
+
+task checkstyleErrorMessage {
+	onlyIf {
+		checkstyleMain.state.failure != null || checkstyleTest.state.failure != null 
+	}
+	doLast {
+		logger.error('Checkstyle plugin thrown an error. This means that the javadoc is not correctly setup. Inspect console output to find problematic javadocs.')
+		logger.error('To reproduce locally, execute \'./gradlew checkstyleMain checkstyleTest\'')
+	}
+}
+
+spotless {
+  	enforceCheck = false
+  	encoding 'UTF-8'
+  	lineEndings 'UNIX'
+  	java {
+    	// tabs, no spaces
+    	indentWithTabs()
+    
+    	// keep imports clean 
+    	importOrder() 
+    	removeUnusedImports()
+    
+    	// use the eclipse formatting with the one provided with the project
+    	eclipse().configFile('spotless-formatting.xml')
+    
+    	// ignore generated code
+    	target project.fileTree(project.projectDir) {
+      		include '**/*.java'
+      		exclude '**/build/generated/**'
+      		exclude '**/build/generated-src/**'
+    	}
+  	}
+  	antlr4 {
+    	target 'src/*/antlr/**/*.g4'
+    	antlr4Formatter() 
+  	}
+}
+
+spotlessJavaCheck { 
+	finalizedBy 'spotlessErrorMessage'
+}
+
+spotlessAntlr4Check { 
+	finalizedBy 'spotlessErrorMessage'
+}
+
+task spotlessErrorMessage {
+	onlyIf {
+		spotlessJavaCheck.state.failure != null || spotlessAntlr4Check.state.failure != null
+	}
+	doLast {
+		logger.error('Spotless plugin thrown an error. This means that the code is not correctly formatted.')
+		logger.error('To reproduce locally, execute \'./gradlew spotlessCheck\'')
+		logger.error('To automatically fix all the problems, execute \'./gradlew spotlessApply\'')
+	}
+}
+
+tasks.register('checkCodeStyle') {
+    group = 'verification'
+    description = 'Execute spotless and checkstyle to ensure code and javadoc formatting'
+	dependsOn 'spotlessCheck', 'checkstyleMain', 'checkstyleTest'
+}

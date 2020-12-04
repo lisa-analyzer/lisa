@@ -1,3 +1,11 @@
+/*
+ * This file contains the general configuration of the build script and the list of plugins to apply.
+ * Anything else, with very few exceptions, should be placed into a separate gradle file that has to
+ * be applied at the end of this file. 
+ * 
+ * When defining a custom task, use 'tasks.register("taskname")', specifying also group and description,
+ * to help others understand the purpose of that task. 
+ */
 buildscript {
   	repositories {
   		jcenter()
@@ -10,93 +18,63 @@ buildscript {
 }
 
 plugins {
+	// telling gradle that we are building a library
     id 'java-library'
+    
+    // magic for getting eclipse to work with gradle
     id 'eclipse'
+    
+    // automatic generation of plantuml files from the source code
+    // for visualizing them: https://www.planttext.com/
     id 'com.github.roroche.plantuml' version '1.0.2'
+    
+    // parse git information during the build
     id 'org.ajoberstar.grgit' version '4.0.2'
+    
+    // code formatting task -- spotlessCheck for checking, spotlessApply for applying
+    id "com.diffplug.spotless" version "5.8.2"
+    
+    // javadoc checking - coding conventions
+    id 'checkstyle'
+    
+    // this enables './gradlew <task> taskTree' to show task dependencies
+    id "com.dorongold.task-tree" version "1.5"
+}
+
+// the code reading data from the git repo has to be placed in the same file where its
+// plugin is applied, otherwise it will fail to load the classes from it. We export the
+// properties that we read for using them later in the appropriate gradle files
+def ready = false
+def cid = ''
+def tag = ''
+def branch = ''
+def is_clean = ''
+try {
+	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
+	ready = true
+	cid = repo.head().abbreviatedId
+	tag = repo.describe(tags: true, always: true)
+	branch = repo.branch.current().getName()
+	is_clean = repo.status().isClean()
+} catch (Exception e) {
+	// this means we are building from outside of LiSA, probably from an outer model
+	// we can skip the manifest attributes injection here
+	println("Skipping manifest attriubtes injection because we are not directly building LiSA")
+	println(e)
+}
+
+ext {
+	git_ready = ready
+	git_cid = cid
+	git_tag = tag
+	git_branch = branch
+	git_is_clean = is_clean
 }
 
 group = 'it.unive'
 version = '0.1a1'
 
-repositories {
-    jcenter()
-    mavenCentral()
-}
-
-dependencies {
-    api 'org.apache.commons:commons-lang3:3.9'
-    api 'org.apache.commons:commons-text:1.9'
-	api 'org.apache.logging.log4j:log4j-api:2.13.0'
-	api 'org.apache.logging.log4j:log4j-core:2.13.0'
-
-    testImplementation 'junit:junit:4.12'
-}
-
-plugins.withType(JavaPlugin) {
-	def repo = null
-	try {
-		repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
-	} catch (Exception e) {
-		// this means we are building from outside of LiSA, probably from an outer model
-		// we can skip the manifest attributes injection here
-		println("Skipping manifest attriubtes injection because we are not directly building LiSA")
-	}
-	
-	if (repo != null) {
-		jar.doFirst {
-			manifest {
-				 attributes(
-					'Implementation-Title': rootProject.name,
-					'Implementation-Version': project.version,
-					'Implementation-Vendor': 'Ca\' Foscari University of Venice',
-					'Created-By': "Gradle ${gradle.gradleVersion}",
-					'Build-Revision': repo.head().abbreviatedId,
-					'Build-Tag': repo.describe(tags: true, always: true),
-					'Build-Branch': repo.branch.current().getName(),
-					'Build-Clean': repo.status().isClean(),
-					'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-					'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-					'Build-OS': "${System.properties['os.name']} ${System.properties['os.arch']} ${System.properties['os.version']}"
-				)
-			}
-		}
-	}
-}
-
-classDiagram { 
-    packageName = "it.unive.lisa"
-    outputFile = new File("${projectDir}/diagrams/class_diagram.plantuml")
-}
-
-buildClassDiagram {
-	doFirst {
-        mkdir new File("${projectDir}/diagrams/")
-	}
-}
-
-task copyJavadocToPages {
-	description 'Copies the generated javadoc in the github pages website, and also updates the files listing the available versions'
-	dependsOn 'javadoc'
-	doLast{
-		mkdir "../docs/javadoc/${project.version}"
-		copy {
-			from "build/docs/javadoc/"
-      		into "../docs/javadoc/${project.version}/"
-		}
-		
-		def f = new File('../docs/_data/sitemap.yml')
-		f.withWriterAppend { out ->
-			out.println "      - page: ${project.version}"
-			out.println "        url: javadoc/${project.version}/"
-		}
-		
-		f = new File('../docs/javadoc/index.md')
-		f.withWriterAppend { out ->
-		
-		out.println "\n### ${project.version}\n"
-
-		out.println "[Release](https://github.com/UniVE-SSV/lisa/releases/tag/v${project.version}) - [Javadoc](${project.version}/)"
-		}
-	}
-}
+apply from: 'dependencies.gradle'
+apply from: 'java.gradle'
+apply from: 'code-style.gradle'
+apply from: 'doc-extra.gradle'
