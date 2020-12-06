@@ -1,16 +1,14 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A semantic operation on the heap state of the program, that rewrites
@@ -20,30 +18,33 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public interface HeapSemanticOperation {
 	/**
-	 * Yields the expressions that were computed during the generation of this heap
-	 * domain. When evaluating semantics of expressions or assignments, a heap
-	 * domain might rewrite an expression to get rid of the parts that access heap
-	 * structures, substituting them with synthetic {@link HeapIdentifier}s
-	 * representing the accessed locations. The expressions returned by this method
-	 * should not contain {@link HeapExpression}s.<br>
+	 * Yields the expressions that were computed during the generation of this
+	 * heap domain. When evaluating semantics of expressions or assignments, a
+	 * heap domain might rewrite an expression to get rid of the parts that
+	 * access heap structures, substituting them with synthetic
+	 * {@link HeapIdentifier}s representing the accessed locations. The
+	 * expressions returned by this method should not contain
+	 * {@link HeapExpression}s.<br>
 	 * <br>
 	 * If no rewriting was necessary for the generation this domain instance, a
 	 * singleton collection containing just the original expression is returned
 	 * instead.<br>
 	 * <br>
-	 * The collection returned by this method usually contains one expression, but
-	 * instances created through lattice operations (e.g., lub) might contain more.
+	 * The collection returned by this method usually contains one expression,
+	 * but instances created through lattice operations (e.g., lub) might
+	 * contain more.
 	 * 
 	 * @return the rewritten expression, or the original one
 	 */
 	Collection<ValueExpression> getRewrittenExpressions();
 
 	/**
-	 * Yields the substitution, in the form of a list of {@link HeapReplacement}s
-	 * that <b>must</b> be processed in their order of appearance, that the creation
-	 * of this heap domain caused. This substitution maps {@link Identifier}s in the
-	 * pre-state to {@link Identifier}s in the post state. If no substitution needs
-	 * to be applied, this method should return an empty list.
+	 * Yields the substitution, in the form of a list of
+	 * {@link HeapReplacement}s that <b>must</b> be processed in their order of
+	 * appearance, that the creation of this heap domain caused. This
+	 * substitution maps {@link Identifier}s in the pre-state to
+	 * {@link Identifier}s in the post state. If no substitution needs to be
+	 * applied, this method should return an empty list.
 	 * 
 	 * @return the list of replacements
 	 */
@@ -51,11 +52,12 @@ public interface HeapSemanticOperation {
 
 	/**
 	 * A replacement between {@link Identifier}s caused by a change in the heap
-	 * abstraction. A replacement express a relation between two sets of identifiers
-	 * (returned by {@link #getSources()} and {@link #getTargets()}). The semantics
-	 * of a replacement is to assign to every identifier in {@link #getTargets()}
-	 * the upper bound of the value of each identifier in {@link #getSources()}, and
-	 * then forget about all the sources identifiers that are not also the targets.
+	 * abstraction. A replacement express a relation between two sets of
+	 * identifiers (returned by {@link #getSources()} and
+	 * {@link #getTargets()}). The semantics of a replacement is to assign to
+	 * every identifier in {@link #getTargets()} the upper bound of the value of
+	 * each identifier in {@link #getSources()}, and then forget about all the
+	 * sources identifiers that are not also the targets.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -72,9 +74,9 @@ public interface HeapSemanticOperation {
 		private final Set<Identifier> targets;
 
 		/**
-		 * Builds the replacement. It starts with empty sets of sources and targets. New
-		 * ones can be added with {@link #addSource(Identifier)} and
-		 * {@link #addTarget(Identifier)}.
+		 * Builds the replacement. It starts with empty sets of sources and
+		 * targets. New ones can be added with {@link #addSource(Identifier)}
+		 * and {@link #addTarget(Identifier)}.
 		 */
 		public HeapReplacement() {
 			this.sources = new HashSet<>();
@@ -82,10 +84,13 @@ public interface HeapSemanticOperation {
 		}
 
 		/**
-		 * Adds an {@link Identifier} to the set of identifiers that are the sources of
-		 * this replacement.
+		 * Adds an {@link Identifier} to the set of identifiers that are the
+		 * sources of this replacement.
 		 * 
 		 * @param id the identifier to add
+		 * 
+		 * @throws IllegalArgumentException if the given identifier is already
+		 *                                      in the set of target identifiers
 		 */
 		public void addSource(Identifier id) {
 			if (targets.contains(id))
@@ -96,10 +101,13 @@ public interface HeapSemanticOperation {
 		}
 
 		/**
-		 * Adds an {@link Identifier} to the set of identifiers that are the targets of
-		 * this replacement.
+		 * Adds an {@link Identifier} to the set of identifiers that are the
+		 * targets of this replacement.
 		 * 
 		 * @param id the identifier to add
+		 * 
+		 * @throws IllegalArgumentException if the given identifier is already
+		 *                                      in the set of source identifiers
 		 */
 		public void addTarget(Identifier id) {
 			if (sources.contains(id))
@@ -110,8 +118,8 @@ public interface HeapSemanticOperation {
 		}
 
 		/**
-		 * Yields the set of identifiers that this replacement originates from, that is,
-		 * the ones whose value will be assigned to the targets.
+		 * Yields the set of identifiers that this replacement originates from,
+		 * that is, the ones whose value will be assigned to the targets.
 		 * 
 		 * @return the sources of this replacement
 		 */
@@ -120,8 +128,8 @@ public interface HeapSemanticOperation {
 		}
 
 		/**
-		 * Yields the set of identifiers that are targeted by this replacement, that is,
-		 * the ones that will be assigned.
+		 * Yields the set of identifiers that are targeted by this replacement,
+		 * that is, the ones that will be assigned.
 		 * 
 		 * @return the targets of this replacement
 		 */

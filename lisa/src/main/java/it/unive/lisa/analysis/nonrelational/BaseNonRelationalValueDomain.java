@@ -21,9 +21,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * {@link NonRelationalValueDomain#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.FunctionalLattice)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
- * @param <T> the concrete type of this domain
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete type of this domain
  */
 public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDomain<T>> extends BaseLattice<T>
 		implements NonRelationalValueDomain<T> {
@@ -120,8 +120,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * {@link #bottom()}.
 	 * 
 	 * @param type the type to cast {@code arg} to
-	 * @param arg  the instance of this domain representing the abstract
-	 *                 value of the expresion's argument
+	 * @param arg  the instance of this domain representing the abstract value
+	 *                 of the expresion's argument
 	 * 
 	 * @return the evaluation of the expression
 	 */
@@ -161,8 +161,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the evaluation of a {@link TernaryExpression} applying
 	 * {@code operator} to two expressions whose abstract value are
 	 * {@code left}, {@code middle} and {@code right}, respectively. It is
-	 * guaranteed that both {@code left} and {@code right}
-	 * are neither {@link #top()} or {@link #bottom()}.
+	 * guaranteed that both {@code left} and {@code right} are neither
+	 * {@link #top()} or {@link #bottom()}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract

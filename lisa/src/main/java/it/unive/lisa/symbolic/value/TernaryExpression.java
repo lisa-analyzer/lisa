@@ -70,7 +70,7 @@ public class TernaryExpression extends ValueExpression {
 	}
 
 	/**
-	 * Yields the right-hand side operand of this expression
+	 * Yields the right-hand side operand of this expression.
 	 * 
 	 * @return the right operand
 	 */

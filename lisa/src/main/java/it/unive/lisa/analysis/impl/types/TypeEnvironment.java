@@ -1,21 +1,34 @@
 package it.unive.lisa.analysis.impl.types;
 
+import it.unive.lisa.analysis.FunctionalLattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
+import it.unive.lisa.caches.Caches;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import it.unive.lisa.analysis.FunctionalLattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-
+/**
+ * A type environment, mapping {@link Identifier}s to {@link InferredTypes}
+ * holding the runtime types of identifiers, that behave the similarly to a
+ * {@link ValueEnvironment}. The only difference is that
+ * {@link #smallStepSemantics(ValueExpression)} will store the runtime types of
+ * the given expression inside the domain, and those will be available through
+ * {@link #getLastComputedTypes()}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public final class TypeEnvironment extends FunctionalLattice<TypeEnvironment, Identifier, InferredTypes>
 		implements ValueDomain<TypeEnvironment> {
 
 	private final InferredTypes lastComputedTypes;
 
+	/**
+	 * Builds an empty type environment.
+	 */
 	public TypeEnvironment() {
 		super(new InferredTypes());
 		this.lastComputedTypes = new InferredTypes(Caches.types().mkEmptySet());
@@ -27,6 +40,13 @@ public final class TypeEnvironment extends FunctionalLattice<TypeEnvironment, Id
 		this.lastComputedTypes = lastComputedTypes;
 	}
 
+	/**
+	 * Yields the {@link InferredTypes} instance that has been computed during
+	 * the creation of this instance of {@link TypeEnvironment}. This represents
+	 * the runtime types of the last expression that has been computed.
+	 * 
+	 * @return the inferred runtime types of the last computed expression
+	 */
 	public InferredTypes getLastComputedTypes() {
 		return lastComputedTypes;
 	}

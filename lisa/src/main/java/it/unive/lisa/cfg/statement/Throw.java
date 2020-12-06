@@ -1,7 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -11,6 +9,7 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
+import java.util.Objects;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -98,7 +97,7 @@ public class Throw extends Statement {
 	public final String toString() {
 		return "throw " + expression;
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
@@ -109,7 +108,7 @@ public class Throw extends Statement {
 			result = result.forgetIdentifiers(expression.getMetaVariables());
 		return result.smallStepSemantics(new Skip());
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)

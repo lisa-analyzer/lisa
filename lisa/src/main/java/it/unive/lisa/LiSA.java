@@ -1,17 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -38,6 +26,16 @@ import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -176,26 +174,97 @@ public class LiSA {
 		this.callGraph = callGraph;
 	}
 
+	/**
+	 * Sets whether or not runtime types should be inferred before executing the
+	 * semantic analysis. If type inference is not executed, the runtime types
+	 * of expressions will correspond to their static type.
+	 * 
+	 * @param inferTypes if {@code true}, type inference will be ran before the
+	 *                       semantic analysis
+	 */
 	public void setInferTypes(boolean inferTypes) {
 		this.inferTypes = inferTypes;
 	}
 
+	/**
+	 * Sets whether or not dot files, named {@code <cfg name>.dot}, should be
+	 * created and dumped in the working directory at the start of the
+	 * execution. These files will contain a dot graph representing the each
+	 * input {@link CFG}s' structure.<br>
+	 * <br>
+	 * To customize where the graphs should be generated, use
+	 * {@link #setWorkdir(String)}.
+	 * 
+	 * @param dumpCFGs if {@code true}, a dot graph will be generated before
+	 *                     starting the analysis for each input cfg
+	 */
 	public void setDumpCFGs(boolean dumpCFGs) {
 		this.dumpCFGs = dumpCFGs;
 	}
 
+	/**
+	 * Sets whether or not dot files, named {@code typing__<cfg name>.dot},
+	 * should be created and dumped in the working directory at the end of the
+	 * type inference. These files will contain a dot graph representing the
+	 * each input {@link CFG}s' structure, and whose nodes will contain a
+	 * textual representation of the results of the type inference on each
+	 * {@link Statement}.<br>
+	 * <br>
+	 * To decide whether or not the type inference should be executed, use
+	 * {@link #setInferTypes(boolean)}.<br>
+	 * <br>
+	 * To customize where the graphs should be generated, use
+	 * {@link #setWorkdir(String)}.
+	 * 
+	 * @param dumpTypeInference if {@code true}, a dot graph will be generated
+	 *                              after the type inference for each input cfg
+	 */
 	public void setDumpTypeInference(boolean dumpTypeInference) {
 		this.dumpTypeInference = dumpTypeInference;
 	}
 
+	/**
+	 * Sets whether or not dot files, named {@code analysis__<cfg name>.dot},
+	 * should be created and dumped in the working directory at the end of the
+	 * analysis. These files will contain a dot graph representing the each
+	 * input {@link CFG}s' structure, and whose nodes will contain a textual
+	 * representation of the results of the semantic analysis on each
+	 * {@link Statement}.<br>
+	 * <br>
+	 * To customize where the graphs should be generated, use
+	 * {@link #setWorkdir(String)}.
+	 * 
+	 * @param dumpAnalysis if {@code true}, a dot graph will be generated after
+	 *                         the semantic analysis for each input cfg
+	 */
 	public void setDumpAnalysis(boolean dumpAnalysis) {
 		this.dumpAnalysis = dumpAnalysis;
 	}
 
+	/**
+	 * Sets whether or not a json report file, named {@code report.json}, should
+	 * be created and dumped in the working directory at the end of the
+	 * analysis. This file will contain all the {@link Warning}s that have been
+	 * generated, as well as a list of produced files.<br>
+	 * <br>
+	 * To customize where the report should be generated, use
+	 * {@link #setWorkdir(String)}.
+	 * 
+	 * @param jsonOutput if {@code true}, a json report will be generated after
+	 *                       the analysis
+	 */
 	public void setJsonOutput(boolean jsonOutput) {
 		this.jsonOutput = jsonOutput;
 	}
 
+	/**
+	 * Sets the working directory for this instance of LiSA, that is, the
+	 * directory files will be created, if any. If files need to be created and
+	 * this method has not been invoked, LiSA will create them in the directory
+	 * where it was executed from.
+	 * 
+	 * @param workdir the path (relative or absolute) to the working directory
+	 */
 	public void setWorkdir(String workdir) {
 		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
 	}

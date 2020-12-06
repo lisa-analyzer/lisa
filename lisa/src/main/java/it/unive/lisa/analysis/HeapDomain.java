@@ -11,9 +11,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  * instances of {@link HeapExpression}s, and manage identifiers that are
  * {@link HeapIdentifier}s.
  * 
- * @param <D> the concrete type of the {@link HeapDomain}
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <D> the concrete type of the {@link HeapDomain}
  */
 public interface HeapDomain<D extends HeapDomain<D>>
 		extends SemanticDomain<D, SymbolicExpression, Identifier>, Lattice<D>, HeapSemanticOperation {

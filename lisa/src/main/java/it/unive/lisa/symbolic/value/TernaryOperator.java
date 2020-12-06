@@ -11,12 +11,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 public enum TernaryOperator implements Operator {
 	// TODO the semantics of the operators should be clearly stated
 	/**
-	 * Replaces all occurrences of a string into another with the given one
+	 * Replaces all occurrences of a string into another with the given one.
 	 */
 	STRING_REPLACE("strreplace"),
 
 	/**
-	 * Computes the substring of a string between two indexes
+	 * Computes the substring of a string between two indexes.
 	 */
 	STRING_SUBSTRING("substr");
 

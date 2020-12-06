@@ -4,8 +4,20 @@ import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
+/**
+ * The signed 32-bit decimal {@link it.unive.lisa.cfg.type.NumericType} of the
+ * IMP language. The only singleton instance of this class can be retrieved
+ * trough field {@link #INSTANCE}. Instances of this class are equal to all
+ * other classes that implement the {@link it.unive.lisa.cfg.type.NumericType}
+ * interface and are 32 bits.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class IntType implements NumericType {
 
+	/**
+	 * The unique singleton instance of this type.
+	 */
 	public static final IntType INSTANCE = new IntType();
 
 	private IntType() {

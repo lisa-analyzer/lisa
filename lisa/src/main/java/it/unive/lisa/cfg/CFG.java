@@ -1,22 +1,5 @@
 package it.unive.lisa.cfg;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.ExpressionStore;
@@ -35,6 +18,21 @@ import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -907,8 +905,41 @@ public class CFG {
 		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
+	/**
+	 * A functional interface that can be used for compute the semantics of
+	 * {@link Statement}s, producing {@link AnalysisState}s.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
+	 *                analysis states
+	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
+	 *                analysis states
+	 */
 	@FunctionalInterface
 	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> {
+
+		/**
+		 * Computes the semantics of the given {@link Statement} {@code st},
+		 * assuming that the entry state is {@code entryState}. The results of
+		 * the semantic computations on inner {@link Expression}s must be saved
+		 * inside {@code expressions}. If the computation needs information
+		 * regarding the other {@link CFG}s, {@code callGraph} can be queried.
+		 * 
+		 * @param st          the statement whose semantics needs to be
+		 *                        evaluated
+		 * @param entryState  the entry state for the computation
+		 * @param callGraph   the call graph that can be used to obtain semantic
+		 *                        information on other cfgs
+		 * @param expressions the store where semantics results of inner
+		 *                        expressions must be stored
+		 * 
+		 * @return the abstract analysis state after the execution of the given
+		 *             statement
+		 * 
+		 * @throws SemanticException if something goes wrong during the
+		 *                               computation
+		 */
 		AnalysisState<H, V> compute(Statement st, AnalysisState<H, V> entryState, CallGraph callGraph,
 				ExpressionStore<AnalysisState<H, V>> expressions) throws SemanticException;
 	}

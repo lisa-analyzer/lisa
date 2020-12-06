@@ -1,21 +1,20 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collection;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
  * semantics of statements and expressions.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <D> the concrete {@link SemanticDomain} instance
  * @param <E> the type of {@link SymbolicExpression} that this domain can
- *            process
+ *                process
  * @param <I> the type of variable {@link Identifier} that this domain can
- *            handle
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *                handle
  */
 public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends SymbolicExpression, I extends Identifier> {
 
@@ -25,7 +24,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @param id         the identifier to assign the value to
 	 * @param expression the expression to assign
+	 * 
 	 * @return a copy of this domain, modified by the assignment
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D assign(I id, E expression) throws SemanticException;
@@ -35,42 +36,50 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * semantics of the given {@code expression}.
 	 * 
 	 * @param expression the expression whose semantics need to be computed
+	 * 
 	 * @return a copy of this domain, modified accordingly to the semantics of
-	 *         {@code expression}
+	 *             {@code expression}
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D smallStepSemantics(E expression) throws SemanticException;
 
 	/**
-	 * Yields a copy of this domain, modified by assuming that the given expression
-	 * holds. It is required that the returned domain is in relation with this one.
-	 * A safe (but imprecise) implementation of this method can always return
-	 * {@code this}.
+	 * Yields a copy of this domain, modified by assuming that the given
+	 * expression holds. It is required that the returned domain is in relation
+	 * with this one. A safe (but imprecise) implementation of this method can
+	 * always return {@code this}.
 	 * 
 	 * @param expression the expression to assume to hold.
+	 * 
 	 * @return the (optionally) modified copy of this domain
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D assume(E expression) throws SemanticException;
 
 	/**
-	 * Forgets an {@link Identifier}. This means that all information regarding the
-	 * given {@code id} will be lost. This method should be invoked whenever an
-	 * identifier gets out of scope.
+	 * Forgets an {@link Identifier}. This means that all information regarding
+	 * the given {@code id} will be lost. This method should be invoked whenever
+	 * an identifier gets out of scope.
 	 * 
 	 * @param id the identifier to forget
+	 * 
 	 * @return the semantic domain without information about the given id
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D forgetIdentifier(Identifier id) throws SemanticException;
 
 	/**
-	 * Forgets all the given {@link Identifier}s. The default implementation of this
-	 * method iterates on {@code ids}, invoking
+	 * Forgets all the given {@link Identifier}s. The default implementation of
+	 * this method iterates on {@code ids}, invoking
 	 * {@link #forgetIdentifier(Identifier)} on each element.
 	 * 
 	 * @param ids the collection of identifiers to forget
+	 * 
 	 * @return the semantic domain without information about the given ids
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public default D forgetIdentifiers(Collection<Identifier> ids) throws SemanticException {
@@ -82,16 +91,19 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	}
 
 	/**
-	 * Checks if the given expression is satisfied by the abstract values of this
-	 * domain, returning an instance of {@link Satisfiability}.
+	 * Checks if the given expression is satisfied by the abstract values of
+	 * this domain, returning an instance of {@link Satisfiability}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be evaluated
-	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied by
-	 *         the values of this domain, {@link Satisfiability#NOT_SATISFIED} if it
-	 *         is not satisfied, or {@link Satisfiability#UNKNOWN} if it is either
-	 *         impossible to determine if it satisfied, or if it is satisfied by
-	 *         some values and not by some others (this is equivalent to a TOP
-	 *         boolean value)
+	 * 
+	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
+	 *             by the values of this domain,
+	 *             {@link Satisfiability#NOT_SATISFIED} if it is not satisfied,
+	 *             or {@link Satisfiability#UNKNOWN} if it is either impossible
+	 *             to determine if it satisfied, or if it is satisfied by some
+	 *             values and not by some others (this is equivalent to a TOP
+	 *             boolean value)
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	Satisfiability satisfies(E expression) throws SemanticException;
@@ -191,8 +203,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		},
 
 		/**
-		 * Represent the fact that it is not possible to determine whether or not an
-		 * expression is satisfied.
+		 * Represent the fact that it is not possible to determine whether or
+		 * not an expression is satisfied.
 		 */
 		UNKNOWN {
 			@Override
@@ -238,7 +250,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		},
 
 		/**
-		 * Represent the fact that the satisfiability evaluation resulted in an error.
+		 * Represent the fact that the satisfiability evaluation resulted in an
+		 * error.
 		 */
 		BOTTOM {
 			@Override
@@ -288,6 +301,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * Performs a logical and between this satisfiability and the given one.
 		 * 
 		 * @param other the other satisfiability
+		 * 
 		 * @return the logical and between the two satisfiability instances
 		 */
 		public abstract Satisfiability and(Satisfiability other);
@@ -296,15 +310,17 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * Performs a logical or between this satisfiability and the given one.
 		 * 
 		 * @param other the other satisfiability
+		 * 
 		 * @return the logical or between the two satisfiability instances
 		 */
 		public abstract Satisfiability or(Satisfiability other);
 
 		/**
-		 * Performs the greatest lower bound operation between this satisfiability and
-		 * the given one.
+		 * Performs the greatest lower bound operation between this
+		 * satisfiability and the given one.
 		 * 
 		 * @param other the other satisfiability
+		 * 
 		 * @return the result of the greatest lower bound
 		 */
 		public abstract Satisfiability glb(Satisfiability other);
@@ -313,8 +329,9 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * Transforms a boolean value to a {@link Satisfiability} instance.
 		 * 
 		 * @param bool the boolean to transform
+		 * 
 		 * @return {@link #SATISFIED} if {@code bool} is {@code true},
-		 *         {@link #NOT_SATISFIED} otherwise
+		 *             {@link #NOT_SATISFIED} otherwise
 		 */
 		public static Satisfiability fromBoolean(boolean bool) {
 			return bool ? SATISFIED : NOT_SATISFIED;
@@ -330,7 +347,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			return BOTTOM;
 		}
 	}
-	
+
 	/**
 	 * Yields a textual representation of the content of this domain's instance.
 	 * 

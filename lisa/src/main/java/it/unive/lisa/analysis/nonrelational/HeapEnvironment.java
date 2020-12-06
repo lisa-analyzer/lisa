@@ -1,18 +1,17 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -22,10 +21,10 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * automatically lifted for individual elements of the environment if they are
  * mapped to the same key.
  * 
- * @param <T> the concrete instance of the {@link NonRelationalHeapDomain} whose
- *            instances are mapped in this environment
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete instance of the {@link NonRelationalHeapDomain} whose
+ *                instances are mapped in this environment
  */
 public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		extends FunctionalLattice<HeapEnvironment<T>, Identifier, T> implements HeapDomain<HeapEnvironment<T>> {
@@ -43,8 +42,8 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	/**
 	 * Builds an empty environment.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations to
-	 *               retrieve top and bottom values
+	 * @param domain a singleton instance to be used during semantic operations
+	 *                   to retrieve top and bottom values
 	 */
 	public HeapEnvironment(T domain) {
 		super(domain);

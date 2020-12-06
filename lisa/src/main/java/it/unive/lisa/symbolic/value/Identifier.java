@@ -40,7 +40,8 @@ public abstract class Identifier extends ValueExpression {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		// we do not call super here since variables should be uniquely identified
+		// we do not call super here since variables should be uniquely
+		// identified
 		// by their name, regardless of their type
 		int result = 1; // super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -51,10 +52,11 @@ public abstract class Identifier extends ValueExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		// we do not call super here since variables should be uniquely identified
+		// we do not call super here since variables should be uniquely
+		// identified
 		// by their name, regardless of their type
 		// if (!super.equals(obj))
-		//	return false;
+		// return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Identifier other = (Identifier) obj;

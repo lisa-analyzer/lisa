@@ -2,10 +2,6 @@ package it.unive.lisa.test.cfg;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,6 +22,8 @@ import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Collection;
+import org.junit.Test;
 
 public class CFGSimplificationTest {
 

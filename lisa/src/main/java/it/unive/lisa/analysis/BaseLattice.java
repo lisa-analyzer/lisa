@@ -6,9 +6,9 @@ package it.unive.lisa.analysis;
  * should inherit from this class for ensuring a consistent behavior on the base
  * cases, unless explicitly needed.
  * 
- * @param <L> the concrete {@link BaseLattice} instance
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <L> the concrete {@link BaseLattice} instance
  */
 public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L> {
 
@@ -25,18 +25,21 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	}
 
 	/**
-	 * Performs the least upper bound operation between this lattice element and the
-	 * given one, assuming that:
+	 * Performs the least upper bound operation between this lattice element and
+	 * the given one, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
 	 * <ul>
 	 * <li>{@code other} is not {@code null}</li>
 	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
 	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
-	 * <li>{@code this} and {@code other} are not the same object (according both to
-	 * {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * </ul>
 	 * 
 	 * @param other the other lattice element
+	 * 
 	 * @return the least upper bound
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract L lubAux(L other) throws SemanticException;
@@ -54,18 +57,21 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	}
 
 	/**
-	 * Performs the widening operation between this lattice element and the given
-	 * one, assuming that:
+	 * Performs the widening operation between this lattice element and the
+	 * given one, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
 	 * <ul>
 	 * <li>{@code other} is not {@code null}</li>
 	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
 	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
-	 * <li>{@code this} and {@code other} are not the same object (according both to
-	 * {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * </ul>
 	 * 
 	 * @param other the other lattice element
+	 * 
 	 * @return the least upper bound
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract L wideningAux(L other) throws SemanticException;
@@ -85,19 +91,28 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	}
 
 	/**
-	 * Yields {@code true} if and only if this lattice element is in relation with
-	 * (usually represented through &le;) the given one, assuming that:
+	 * Yields {@code true} if and only if this lattice element is in relation
+	 * with (usually represented through &le;) the given one, assuming that base
+	 * cases have already been handled. In particular, it is guaranteed that:
 	 * <ul>
 	 * <li>{@code other} is not {@code null}</li>
 	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
 	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
-	 * <li>{@code this} and {@code other} are not the same object (according both to
-	 * {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * </ul>
 	 * 
 	 * @param other the other lattice element
+	 * 
 	 * @return {@code true} if and only if that condition holds
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract boolean lessOrEqualAux(L other) throws SemanticException;
+
+	@Override
+	public abstract boolean equals(Object obj);
+
+	@Override
+	public abstract int hashCode();
 }

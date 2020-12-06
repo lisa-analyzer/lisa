@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalValueDomain}, that maps
@@ -18,10 +17,10 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * automatically lifted for individual elements of the environment if they are
  * mapped to the same key.
  * 
- * @param <T> the concrete instance of the {@link NonRelationalValueDomain}
- *            whose instances are mapped in this environment
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete instance of the {@link NonRelationalValueDomain}
+ *                whose instances are mapped in this environment
  */
 public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		extends FunctionalLattice<ValueEnvironment<T>, Identifier, T> implements ValueDomain<ValueEnvironment<T>> {
@@ -29,8 +28,8 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	/**
 	 * Builds an empty environment.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations to
-	 *               retrieve top and bottom values
+	 * @param domain a singleton instance to be used during semantic operations
+	 *                   to retrieve top and bottom values
 	 */
 	public ValueEnvironment(T domain) {
 		super(domain);
@@ -121,7 +120,7 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	public String toString() {
 		return representation();
 	}
-	
+
 	@Override
 	public String representation() {
 		if (isTop())

@@ -1,20 +1,19 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
  * memory layout and a value state modeling values of program variables and
  * memory locations.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 		implements Lattice<AbstractState<H, V>>, SemanticDomain<AbstractState<H, V>, SymbolicExpression, Identifier> {
@@ -25,17 +24,18 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	private final H heapState;
 
 	/**
-	 * The domain containing information regarding values of program variables and
-	 * concretized memory locations
+	 * The domain containing information regarding values of program variables
+	 * and concretized memory locations
 	 */
 	private final V valueState;
 
 	/**
 	 * Builds a new abstract state.
 	 * 
-	 * @param heapState  the domain containing information regarding heap structures
+	 * @param heapState  the domain containing information regarding heap
+	 *                       structures
 	 * @param valueState the domain containing information regarding values of
-	 *                   program variables and concretized memory locations
+	 *                       program variables and concretized memory locations
 	 */
 	public AbstractState(H heapState, V valueState) {
 		this.heapState = heapState;
@@ -43,8 +43,8 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	/**
-	 * Yields the instance of {@link HeapDomain} that contains the information on
-	 * heap structures contained in this abstract state.
+	 * Yields the instance of {@link HeapDomain} that contains the information
+	 * on heap structures contained in this abstract state.
 	 * 
 	 * @return the heap domain
 	 */
@@ -53,8 +53,8 @@ public class AbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	/**
-	 * Yields the instance of {@link ValueDomain} that contains the information on
-	 * values of program variables and concretized memory locations
+	 * Yields the instance of {@link ValueDomain} that contains the information
+	 * on values of program variables and concretized memory locations.
 	 * 
 	 * @return the value domain
 	 */

@@ -78,11 +78,11 @@ public class Assignment extends BinaryExpression {
 			result = result.forgetIdentifiers(getRight().getMetaVariables());
 		if (!getLeft().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getLeft().getMetaVariables());
-		
+
 		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		return result;
 	}
-	
+
 	/**
 	 * Semantics of an assignment ({@code left = right}) is evaluated as
 	 * follows:

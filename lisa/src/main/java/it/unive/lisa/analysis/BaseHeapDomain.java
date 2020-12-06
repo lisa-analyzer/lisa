@@ -12,9 +12,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * {@link HeapDomain} should inherit from this class for ensuring a consistent
  * behavior on the base cases, unless explicitly needed.
  * 
- * @param <H> the concrete {@link BaseHeapDomain} instance
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <H> the concrete {@link BaseHeapDomain} instance
  */
 public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H> implements HeapDomain<H> {
 
@@ -58,19 +58,23 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	/**
 	 * Creates a new instance of this domain containing the same abstract
-	 * information of reference, but setting as rewritten expression the given one.
+	 * information of reference, but setting as rewritten expression the given
+	 * one.
 	 * 
-	 * @param reference  the domain whose abstract information needs to be copied
+	 * @param reference  the domain whose abstract information needs to be
+	 *                       copied
 	 * @param expression the expression to set as the rewritten one
+	 * 
 	 * @return a new instance of this domain
 	 */
 	protected abstract H mk(H reference, ValueExpression expression);
 
 	/**
-	 * Yields a new instance of this domain, built by evaluating the semantics of
-	 * the given heap expression.
+	 * Yields a new instance of this domain, built by evaluating the semantics
+	 * of the given heap expression.
 	 * 
 	 * @param expression the expression to evaluate
+	 * 
 	 * @return a new instance of this domain
 	 */
 	protected abstract H semanticsOf(HeapExpression expression);

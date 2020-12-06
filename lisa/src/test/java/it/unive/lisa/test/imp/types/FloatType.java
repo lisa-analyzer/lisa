@@ -4,11 +4,24 @@ import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
+/**
+ * The signed 64-bit floating point {@link it.unive.lisa.cfg.type.NumericType}
+ * of the IMP language. The only singleton instance of this class can be
+ * retrieved trough field {@link #INSTANCE}. Instances of this class are equal
+ * to all other classes that implement the
+ * {@link it.unive.lisa.cfg.type.NumericType} interface and are 64 bits.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class FloatType implements NumericType {
 
+	/**
+	 * The unique singleton instance of this type.
+	 */
 	public static final FloatType INSTANCE = new FloatType();
-	
-	private FloatType() {}
+
+	private FloatType() {
+	}
 
 	@Override
 	public boolean is8Bits() {

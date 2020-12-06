@@ -14,8 +14,8 @@ public interface MetaVariableCreator {
 	/**
 	 * Yields the meta variable that is introduced during the evaluation of the
 	 * semantics of this object to store information about the value produced by
-	 * this object. Since the meta variable simulates a value pushed on the stack,
-	 * it should be forgotten after it is consumed.
+	 * this object. Since the meta variable simulates a value pushed on the
+	 * stack, it should be forgotten after it is consumed.
 	 * 
 	 * @return the meta variable introduced by this object
 	 */

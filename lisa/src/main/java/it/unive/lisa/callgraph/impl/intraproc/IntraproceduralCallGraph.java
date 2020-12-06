@@ -1,14 +1,5 @@
 package it.unive.lisa.callgraph.impl.intraproc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
@@ -16,9 +7,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.Parameter;
-import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.Expression;
@@ -27,9 +18,17 @@ import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
- * An instance of {@link CallGraph} that:
+ * An instance of {@link CallGraph} that does not handle interprocedurality. In
+ * particular:
  * <ul>
  * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
  * target's signature</li>

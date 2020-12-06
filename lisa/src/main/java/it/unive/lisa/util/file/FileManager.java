@@ -19,17 +19,32 @@ import java.util.TreeSet;
 public class FileManager {
 
 	private static File workdir;
-	
+
 	private static final Collection<String> createdFiles = new TreeSet<>();
 
+	/**
+	 * Sets the working directory that will be used as root folder for the
+	 * creation of all files.
+	 * 
+	 * @param workdir the working directory
+	 */
 	public static void setWorkdir(String workdir) {
 		FileManager.workdir = Paths.get(workdir).toFile();
 	}
-	
+
+	/**
+	 * Clears the list of names of created files.
+	 */
 	public static void clearCreatedFiles() {
 		createdFiles.clear();
 	}
-	
+
+	/**
+	 * Yields the collection of file names that have been created by this
+	 * manager from the last call to {@link #clearCreatedFiles()}.
+	 * 
+	 * @return the names of the created files
+	 */
 	public static Collection<String> createdFiles() {
 		return createdFiles;
 	}
@@ -75,7 +90,7 @@ public class FileManager {
 			writer.write('\ufeff');
 
 		createdFiles.add(name);
-		
+
 		return writer;
 	}
 

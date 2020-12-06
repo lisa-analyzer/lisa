@@ -1,7 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -13,6 +11,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.Objects;
 
 /**
  * Returns an expression to the caller CFG, terminating the execution of the CFG
@@ -113,7 +112,7 @@ public class Return extends Statement implements MetaVariableCreator {
 			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
 		AnalysisState<H, TypeEnvironment> exprResult = expression.typeInference(entryState, callGraph, expressions);
 		expressions.put(expression, exprResult);
-		
+
 		AnalysisState<H, TypeEnvironment> result = null;
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {

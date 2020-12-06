@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -14,6 +8,10 @@ import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -32,8 +30,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	private final Collection<ValueExpression> rewritten;
 
 	/**
-	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on this
-	 * instance will return a singleton set containing one {@link Skip}.
+	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on
+	 * this instance will return a singleton set containing one {@link Skip}.
 	 */
 	public MonolithicHeap() {
 		this(new Skip());
@@ -70,7 +68,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	protected MonolithicHeap semanticsOf(HeapExpression expression) {
-		// any expression accessing an area of the heap or instantiating a new one
+		// any expression accessing an area of the heap or instantiating a new
+		// one
 		// is modeled through the monolith
 		return new MonolithicHeap(new HeapIdentifier(expression.getTypes(), MONOLITH_NAME));
 	}

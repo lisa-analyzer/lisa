@@ -1,18 +1,5 @@
 package it.unive.lisa.cfg;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;
@@ -23,6 +10,17 @@ import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.collections.ExternalSetCache;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An adjacency matrix for a graph that has {@link Statement}s as nodes and
@@ -342,11 +340,12 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	/**
 	 * Merges this adjacency matrix with the given one. The algorithm used for
 	 * merging {@code code} into {@code this} treats {@code code} as a graph
-	 * starting at {@code root}. The algorithm traverses the graph adding all nodes
-	 * and edges to this matrix. <b>No edge between any node already existing into
-	 * {@code this} matrix and {@code root} is added.</b>
+	 * starting at {@code root}. The algorithm traverses the graph adding all
+	 * nodes and edges to this matrix. <b>No edge between any node already
+	 * existing into {@code this} matrix and {@code root} is added.</b>
 	 * 
-	 * @param root the statement where the exploration of {@code code} should start
+	 * @param root the statement where the exploration of {@code code} should
+	 *                 start
 	 * @param code the matrix to merge
 	 */
 	public final void mergeWith(Statement root, AdjacencyMatrix code) {

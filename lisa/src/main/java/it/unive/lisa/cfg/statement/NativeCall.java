@@ -40,8 +40,8 @@ public abstract class NativeCall extends Call {
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
-	 * @param parameters    the parameters of this call
 	 * @param staticType    the static type of this call
+	 * @param parameters    the parameters of this call
 	 */
 	protected NativeCall(CFG cfg, String constructName, Type staticType, Expression... parameters) {
 		this(cfg, null, -1, -1, constructName, staticType, parameters);
@@ -79,8 +79,8 @@ public abstract class NativeCall extends Call {
 	 *                          source file. If unknown, use {@code -1}
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
-	 * @param parameters    the parameters of this call
 	 * @param staticType    the static type of this call
+	 * @param parameters    the parameters of this call
 	 */
 	protected NativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
 			Expression... parameters) {

@@ -1,16 +1,36 @@
 package it.unive.lisa.test.imp.types;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import it.unive.lisa.cfg.type.PointerType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * A type representing an IMP class defined in an IMP program. ClassTypes are
+ * instances of {@link PointerType}, have a name and a supertype. To ensure
+ * uniqueness of ClassType objects, {@link #lookup(String, ClassType)} must be
+ * used to retrieve existing instances (or automatically create one if no
+ * matching instance exists).
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ClassType implements PointerType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
 
+	/**
+	 * Yields a unique instance (either an existing one or a fresh one) of
+	 * {@link ClassType} representing a class with the given {@code name} and
+	 * the given {@code supertype}.
+	 * 
+	 * @param name      the name of the class
+	 * @param supertype the supertype of the class, or {@code null} if the class
+	 *                      has no supertype.
+	 * 
+	 * @return the unique instance of {@link ClassType} representing the class
+	 *             with the given name
+	 */
 	public static ClassType lookup(String name, ClassType supertype) {
 		return types.computeIfAbsent(name, x -> new ClassType(name, supertype));
 	}

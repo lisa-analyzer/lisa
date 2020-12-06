@@ -1,13 +1,11 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
+import java.util.Collection;
+import java.util.Collections;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -16,10 +14,10 @@ import it.unive.lisa.symbolic.value.Skip;
  * keeping trace of what has been evaluated and is available for later
  * computations, but is not stored in memory (i.e. the stack).
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <H> the type of heap analysis embedded in the abstract state
  * @param <V> the type of value analysis embedded in the abstract state
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 		implements Lattice<AnalysisState<H, V>>, SemanticDomain<AnalysisState<H, V>, SymbolicExpression, Identifier> {
@@ -30,16 +28,16 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	private final AbstractState<H, V> state;
 
 	/**
-	 * The last expressions that have been computed, representing side-effect free
-	 * expressions that are pending evaluation
+	 * The last expressions that have been computed, representing side-effect
+	 * free expressions that are pending evaluation
 	 */
 	private final Collection<SymbolicExpression> computedExpressions;
 
 	/**
 	 * Builds a new state.
 	 * 
-	 * @param state              the {@link AbstractState} to embed in this analysis
-	 *                           state
+	 * @param state              the {@link AbstractState} to embed in this
+	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
 	 */
 	public AnalysisState(AbstractState<H, V> state, SymbolicExpression computedExpression) {
@@ -50,7 +48,7 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	 * Builds a new state.
 	 * 
 	 * @param state               the {@link AbstractState} to embed in this
-	 *                            analysis state
+	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 */
 	public AnalysisState(AbstractState<H, V> state, Collection<SymbolicExpression> computedExpressions) {
@@ -70,12 +68,13 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 
 	/**
 	 * Yields the last computed expression. This is an instance of
-	 * {@link SymbolicExpression} that will contain markers for all abstract values
-	 * that would be present on the stack, as well as variable identifiers for
-	 * values that should be read from the state. These are tied together in a form
-	 * of expression that abstract domains are able to interpret. The collection
-	 * returned by this method usually contains one expression, but instances
-	 * created through lattice operations (e.g., lub) might contain more.
+	 * {@link SymbolicExpression} that will contain markers for all abstract
+	 * values that would be present on the stack, as well as variable
+	 * identifiers for values that should be read from the state. These are tied
+	 * together in a form of expression that abstract domains are able to
+	 * interpret. The collection returned by this method usually contains one
+	 * expression, but instances created through lattice operations (e.g., lub)
+	 * might contain more.
 	 * 
 	 * @return the last computed expression
 	 */

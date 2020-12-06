@@ -4,6 +4,7 @@ package it.unive.lisa.util.workset;
  * A working set, containing items to be processed.
  * 
  * @author Luca Negrini
+ * 
  * @param <E> the type of the elements that this working set contains
  */
 public interface WorkingSet<E> {
@@ -16,8 +17,8 @@ public interface WorkingSet<E> {
 	void push(E e);
 
 	/**
-	 * Removes the next element to be processed from this working set and returns
-	 * it.
+	 * Removes the next element to be processed from this working set and
+	 * returns it.
 	 * 
 	 * @return the next element to process
 	 */

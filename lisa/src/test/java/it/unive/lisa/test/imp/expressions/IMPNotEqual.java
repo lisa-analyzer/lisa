@@ -14,10 +14,26 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.test.imp.types.BoolType;
 
+/**
+ * An expression modeling the inequality test ({@code !=}). The type of this
+ * expression is the {@link BoolType}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class IMPNotEqual extends BinaryNativeCall {
 
+	/**
+	 * Builds the inequality test.
+	 * 
+	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param sourceFile the source file name where this operation is defined
+	 * @param line       the line number where this operation is defined
+	 * @param col        the column where this operation is defined
+	 * @param left       the left-hand side of this operation
+	 * @param right      the right-hand side of this operation
+	 */
 	public IMPNotEqual(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
-		super(cfg, sourceFile, line, col, "!=", BoolType.INSTANCE, new Expression[] { left, right });
+		super(cfg, sourceFile, line, col, "!=", BoolType.INSTANCE, left, right);
 	}
 
 	@Override

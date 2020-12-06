@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -20,12 +20,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		extends BaseLattice<F> implements Iterable<Map.Entry<K, V>> {
 
 	/**
-	 * The function implemented by this lattice
+	 * The function implemented by this lattice.
 	 */
 	protected Map<K, V> function;
 
 	/**
-	 * The underlying lattice
+	 * The underlying lattice.
 	 */
 	protected final V lattice;
 
@@ -58,7 +58,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * Yields the set of keys currently in this lattice
+	 * Yields the set of keys currently in this lattice.
 	 * 
 	 * @return the set of keys
 	 */
@@ -70,6 +70,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * Yields the state associated to the given key.
 	 * 
 	 * @param key the key
+	 * 
 	 * @return the state
 	 */
 	public final V getState(K key) {
@@ -125,7 +126,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((function == null) ? 0 : function.hashCode());
-		// we use the name of the lattice's class since we do not care about the single
+		// we use the name of the lattice's class since we do not care about the
+		// single
 		// instance, but more about the type itself
 		result = prime * result + ((lattice == null) ? 0 : lattice.getClass().getName().hashCode());
 		return result;

@@ -21,8 +21,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link NumericType}, only if
-	 * {@link #isNumericType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isNumericType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link NumericType}, or {@code null}
 	 */
@@ -42,8 +42,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link BooleanType}, only if
-	 * {@link #isBooleanType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isBooleanType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link BooleanType}, or {@code null}
 	 */
@@ -63,8 +63,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link StringType}, only if
-	 * {@link #isStringType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isStringType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link StringType}, or {@code null}
 	 */
@@ -83,8 +83,9 @@ public interface Type {
 	}
 
 	/**
-	 * Returns this type casted as an {@link Untyped}, only if {@link #isUntyped()}
-	 * yields {@code true}. Otherwise, this method returns {@code null}.
+	 * Returns this type casted as an {@link Untyped}, only if
+	 * {@link #isUntyped()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
 	 * @return this type casted as {@link Untyped}, or {@code null}
 	 */
@@ -103,8 +104,9 @@ public interface Type {
 	}
 
 	/**
-	 * Returns this type casted as a {@link VoidType}, only if {@link #isVoidType()}
-	 * yields {@code true}. Otherwise, this method returns {@code null}.
+	 * Returns this type casted as a {@link VoidType}, only if
+	 * {@link #isVoidType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
 	 * @return this type casted as {@link VoidType}, or {@code null}
 	 */
@@ -124,8 +126,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link PointerType}, only if
-	 * {@link #isPointerType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isPointerType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link PointerType}, or {@code null}
 	 */
@@ -145,8 +147,8 @@ public interface Type {
 
 	/**
 	 * Returns this type casted as a {@link ArrayType}, only if
-	 * {@link #isArrayType()} yields {@code true}. Otherwise, this method returns
-	 * {@code null}.
+	 * {@link #isArrayType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
 	 * 
 	 * @return this type casted as {@link ArrayType}, or {@code null}
 	 */
@@ -165,8 +167,9 @@ public interface Type {
 	}
 
 	/**
-	 * Returns this type casted as a {@link NullType}, only if {@link #isNullType()}
-	 * yields {@code true}. Otherwise, this method returns {@code null}.
+	 * Returns this type casted as a {@link NullType}, only if
+	 * {@link #isNullType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
 	 * 
 	 * @return this type casted as {@link NullType}, or {@code null}
 	 */
@@ -175,23 +178,25 @@ public interface Type {
 	}
 
 	/**
-	 * Determines if the type represented by this {@link Type} object is either the
-	 * same as, or is a subtype of, the type represented by {@code other}. It
-	 * returns {@code true} if so, and returns {@code false}.
+	 * Determines if the type represented by this {@link Type} object is either
+	 * the same as, or is a subtype of, the type represented by {@code other}.
+	 * It returns {@code true} if so, and returns {@code false}.
 	 * 
 	 * @param other the other type
+	 * 
 	 * @return {@code true} if that condition holds
 	 */
 	boolean canBeAssignedTo(Type other);
 
 	/**
-	 * Yields the most specific common supertype between this {@link Type} and the
-	 * given one. If no common supertype exists, this method returns
+	 * Yields the most specific common supertype between this {@link Type} and
+	 * the given one. If no common supertype exists, this method returns
 	 * {@link Untyped#INSTANCE}.
 	 * 
 	 * @param other the other type
+	 * 
 	 * @return the most specific common supertype berween {@code this} and
-	 *         {@code other}
+	 *             {@code other}
 	 */
 	Type commonSupertype(Type other);
 }

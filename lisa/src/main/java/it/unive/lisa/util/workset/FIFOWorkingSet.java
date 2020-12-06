@@ -8,6 +8,7 @@ import java.util.LinkedList;
  * thread-safe.
  * 
  * @author Luca Negrini
+ * 
  * @param <E> the type of the elements that this working set contains
  */
 public class FIFOWorkingSet<E> implements WorkingSet<E> {
@@ -15,7 +16,9 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 	/**
 	 * Yields a new, empty working set.
 	 * 
-	 * @param <E> the type of the elements that the returned working set contains
+	 * @param <E> the type of the elements that the returned working set
+	 *                contains
+	 * 
 	 * @return the new working set
 	 */
 	public static <E> FIFOWorkingSet<E> mk() {
@@ -52,7 +55,7 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 	public boolean isEmpty() {
 		return ws.isEmpty();
 	}
-	
+
 	@Override
 	public String toString() {
 		return ws.toString();

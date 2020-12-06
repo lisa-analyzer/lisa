@@ -13,12 +13,12 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * {@link FunctionalLattice} to represent abstract values of individual
  * {@link Identifier}s.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <T> the concrete type of the domain
  * @param <E> the type of expressions that this domain can evaluate
  * @param <F> the type of functional lattice that is used in conjuntion with
- *            this domain
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ *                this domain
  */
 public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E extends SymbolicExpression, F extends FunctionalLattice<F, Identifier, T>>
 		extends Lattice<T> {
@@ -28,10 +28,11 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E e
 	 * variables are the ones stored in {@code environment}.
 	 * 
 	 * @param expression  the expression to evaluate
-	 * @param environment the environment containing the values of program variables
-	 *                    for the evaluation
-	 * @return an new instance of this domain, representing the abstract result of
-	 *         {@code expression} when evaluated on {@code environment}
+	 * @param environment the environment containing the values of program
+	 *                        variables for the evaluation
+	 * 
+	 * @return an new instance of this domain, representing the abstract result
+	 *             of {@code expression} when evaluated on {@code environment}
 	 */
 	public T eval(E expression, F environment);
 

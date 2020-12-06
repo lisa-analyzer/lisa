@@ -13,17 +13,17 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 public enum UnaryOperator implements Operator {
 	// TODO the semantics of the operators should be clearly stated
 	/**
-	 * The logical negation of a value of type {@link BooleanType}
+	 * The logical negation of a value of type {@link BooleanType}.
 	 */
 	LOGICAL_NOT("!"),
 
 	/**
-	 * The negation of a numerical value of type {@link NumericType}
+	 * The negation of a numerical value of type {@link NumericType}.
 	 */
 	NUMERIC_NEG("-"),
-	
+
 	/**
-	 * The length of a variable of type {@link StringType}
+	 * The length of a variable of type {@link StringType}.
 	 */
 	STRING_LENGTH("strlen");
 

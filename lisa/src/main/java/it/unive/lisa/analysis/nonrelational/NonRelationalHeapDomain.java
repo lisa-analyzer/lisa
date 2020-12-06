@@ -11,9 +11,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  * Instances of this class can be wrapped inside a {@link HeapEnvironment} to
  * represent abstract values of individual {@link Identifier}s.
  * 
- * @param <T> the concrete type of the domain
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete type of the domain
  */
 public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 		extends Lattice<T>, NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>, HeapSemanticOperation {

@@ -1,10 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Collection;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,6 +9,9 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Collection;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call that happens inside the program to analyze. At this stage, the
@@ -124,7 +122,13 @@ public class UnresolvedCall extends Call {
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}
-	
+
+	/**
+	 * Updates this call's runtime types to match the ones of the given
+	 * expression.
+	 * 
+	 * @param other the expression to inherit from
+	 */
 	public void inheritRuntimeTypesFrom(Expression other) {
 		setRuntimeTypes(other.getRuntimeTypes());
 	}

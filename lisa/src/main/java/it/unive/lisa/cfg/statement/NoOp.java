@@ -42,7 +42,7 @@ public class NoOp extends Statement {
 	public NoOp(CFG cfg, String sourceFile, int line, int col) {
 		super(cfg, sourceFile, line, col);
 	}
-	
+
 	@Override
 	public int setOffset(int offset) {
 		return this.offset = offset;
@@ -76,7 +76,7 @@ public class NoOp extends Statement {
 			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
 		return entryState.smallStepSemantics(new Skip());
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)

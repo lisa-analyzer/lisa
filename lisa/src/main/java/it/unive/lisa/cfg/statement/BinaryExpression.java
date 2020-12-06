@@ -1,8 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
+import java.util.Objects;
 
 /**
  * A binary expression.
@@ -16,8 +15,8 @@ public abstract class BinaryExpression extends Expression {
 	private final Expression right;
 
 	/**
-	 * Builds the binary expression. The location where it happens is unknown (i.e.
-	 * no source file/line/column is available).
+	 * Builds the binary expression. The location where it happens is unknown
+	 * (i.e. no source file/line/column is available).
 	 * 
 	 * @param cfg   the cfg that this statement belongs to
 	 * @param left  the left hand-side of the expression
@@ -28,15 +27,16 @@ public abstract class BinaryExpression extends Expression {
 	}
 
 	/**
-	 * Builds the binary expression, happening at the given location in the program.
+	 * Builds the binary expression, happening at the given location in the
+	 * program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If unknown,
-	 *                   use {@code null}
-	 * @param line       the line number where this statement happens in the source
-	 *                   file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source file.
-	 *                   If unknown, use {@code -1}
+	 * @param sourceFile the source file where this statement happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this statement happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this statement happens in the source
+	 *                       file. If unknown, use {@code -1}
 	 * @param left       the left hand-side of the expression
 	 * @param right      the right hand-side of the expression
 	 */

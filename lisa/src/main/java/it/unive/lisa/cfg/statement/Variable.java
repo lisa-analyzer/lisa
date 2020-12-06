@@ -1,7 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -15,6 +13,7 @@ import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.Objects;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -135,10 +134,11 @@ public class Variable extends Expression {
 			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
 		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		// we have to recreate the variable for it to have the correct typing information
+		// we have to recreate the variable for it to have the correct typing
+		// information
 		return typing.smallStepSemantics(getVariable());
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)

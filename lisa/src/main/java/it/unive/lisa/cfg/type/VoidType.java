@@ -1,11 +1,9 @@
 package it.unive.lisa.cfg.type;
 
 /**
- * The void type.
- * 
- * It implements the singleton design pattern, that is the instances of this
- * type are unique. The unique instance of this type can be retrieved by
- * {@link VoidType#INSTANCE}.
+ * The void type. It implements the singleton design pattern, that is the
+ * instances of this type are unique. The unique instance of this type can be
+ * retrieved by {@link VoidType#INSTANCE}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

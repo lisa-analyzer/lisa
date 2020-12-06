@@ -4,7 +4,6 @@ package it.unive.lisa.cfg.type;
  * The Null type, that is the type of {#link NullLiteral}. It implements the
  * singleton design pattern, that is the instances of this type are unique. The
  * unique instance of this type can be retrieved by {@link NullType#INSTANCE}.
- * 
  * It implements the singleton design pattern, that is the instances of this
  * type are unique. The unique instance of this type can be retrieved by
  * {@link NullType#INSTANCE}.

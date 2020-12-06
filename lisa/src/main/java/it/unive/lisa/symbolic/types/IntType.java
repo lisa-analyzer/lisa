@@ -5,8 +5,8 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
 /**
- * An internal implementation of the {@link NumericType} interface that can be used
- * by domains that need a concrete instance for integer values.
+ * An internal implementation of the {@link NumericType} interface that can be
+ * used by domains that need a concrete instance for integer values.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -22,12 +22,15 @@ public class IntType implements NumericType {
 
 	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return (other.isNumericType() && (other.asNumericType().is32Bits() || other.asNumericType().is64Bits())) || other.isUntyped();
+		return (other.isNumericType() && (other.asNumericType().is32Bits() || other.asNumericType().is64Bits()))
+				|| other.isUntyped();
 	}
 
 	@Override
 	public Type commonSupertype(Type other) {
-		return other.isNumericType() ? (canBeAssignedTo(other) ? other : other.canBeAssignedTo(this) ? this : Untyped.INSTANCE) : Untyped.INSTANCE;
+		return other.isNumericType()
+				? (canBeAssignedTo(other) ? other : other.canBeAssignedTo(this) ? this : Untyped.INSTANCE)
+				: Untyped.INSTANCE;
 	}
 
 	@Override

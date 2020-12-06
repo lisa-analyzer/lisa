@@ -1,9 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -14,6 +10,9 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -185,6 +184,23 @@ public abstract class Call extends Expression {
 		return result;
 	}
 
+	/**
+	 * Infer the types of the call, after the types of all parameters have been
+	 * inferred. Meta variables from the parameters will be forgotten after this
+	 * call returns.
+	 * 
+	 * @param <H>           the type of the heap analysis
+	 * @param computedState the entry state that has been computed by chaining
+	 *                          the parameters' type inference
+	 * @param callGraph     the call graph of the program to analyze
+	 * @param params        the symbolic expressions representing the computed
+	 *                          values of the parameters of this call
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this call
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public abstract <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
 			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
 			Collection<SymbolicExpression>[] params)

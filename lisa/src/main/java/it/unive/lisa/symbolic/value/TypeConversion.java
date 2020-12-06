@@ -22,7 +22,7 @@ public class TypeConversion extends ValueExpression {
 	private final SymbolicExpression operand;
 
 	/**
-	 * Builds the type conversion
+	 * Builds the type conversion.
 	 * 
 	 * @param toType  the type to cast {@code operand} to
 	 * @param operand the expression to cast

@@ -28,7 +28,8 @@ public enum BinaryOperator implements Operator {
 	NUMERIC_DIV("/"),
 
 	/**
-	 * A multiplication between two numerical values of type {@link NumericType}.
+	 * A multiplication between two numerical values of type
+	 * {@link NumericType}.
 	 */
 	NUMERIC_MUL("*"),
 
@@ -39,78 +40,80 @@ public enum BinaryOperator implements Operator {
 	NUMERIC_MOD("%"),
 
 	/**
-	 * The logical or between two values of type {@link BooleanType}
+	 * The logical or between two values of type {@link BooleanType}.
 	 */
 	LOGICAL_OR("||"),
 
 	/**
-	 * The logical and between two values of type {@link BooleanType}
+	 * The logical and between two values of type {@link BooleanType}.
 	 */
 	LOGICAL_AND("&&"),
 
 	/**
 	 * An operator that tests if two values are different (different type or
-	 * different value)
+	 * different value).
 	 */
 	COMPARISON_NE("!="),
 
 	/**
-	 * An operator that tests if two values are exactly equals (same type and same
-	 * value)
+	 * An operator that tests if two values are exactly equals (same type and
+	 * same value).
 	 */
 	COMPARISON_EQ("=="),
 
 	/**
-	 * A comparison that tests if two numerical values of type {@link NumericType}
-	 * are in relation through the "greater or equal than" relation
+	 * A comparison that tests if two numerical values of type
+	 * {@link NumericType} are in relation through the "greater or equal than"
+	 * relation.
 	 */
 	COMPARISON_GE(">="),
 
 	/**
-	 * A comparison that tests if two numerical values of type {@link NumericType}
-	 * are in relation through the "greater than" relation
+	 * A comparison that tests if two numerical values of type
+	 * {@link NumericType} are in relation through the "greater than" relation.
 	 */
 	COMPARISON_GT(">"),
 
 	/**
-	 * A comparison that tests if two numerical values of type {@link NumericType}
-	 * are in relation through the "less or equal than" relation
+	 * A comparison that tests if two numerical values of type
+	 * {@link NumericType} are in relation through the "less or equal than"
+	 * relation.
 	 */
 	COMPARISON_LE("<="),
 
 	/**
-	 * A comparison that tests if two numerical values of type {@link NumericType}
-	 * are in relation through the "less than" relation
+	 * A comparison that tests if two numerical values of type
+	 * {@link NumericType} are in relation through the "less than" relation.
 	 */
 	COMPARISON_LT("<"),
-	
+
 	/**
-	 * Concatenates two strings
+	 * Concatenates two strings.
 	 */
 	STRING_CONCAT("strcat"),
-	
+
 	/**
-	 * Tests if a string is contained into another one
+	 * Tests if a string is contained into another one.
 	 */
 	STRING_CONTAINS("strcontains"),
-	
+
 	/**
-	 * Tests if a string starts with another one
+	 * Tests if a string starts with another one.
 	 */
 	STRING_STARTS_WITH("strstarts"),
-	
+
 	/**
-	 * Tests if a string ends with another one
+	 * Tests if a string ends with another one.
 	 */
 	STRING_ENDS_WITH("strends"),
-	
+
 	/**
-	 * Yields the index of the first occurrence of a string into another one
+	 * Yields the index of the first occurrence of a string into another one.
 	 */
 	STRING_INDEX_OF("strindexof"),
-	
+
 	/**
-	 * Tests if a string is exactly equals to another one
+	 * Tests if a string is exactly equals to another one.
 	 */
 	STRING_EQUALS("strcmp");
 

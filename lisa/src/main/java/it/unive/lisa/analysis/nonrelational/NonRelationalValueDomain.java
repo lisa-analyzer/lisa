@@ -10,9 +10,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * Instances of this class can be wrapped inside an {@link ValueEnvironment} to
  * represent abstract values of individual {@link Identifier}s.
  * 
- * @param <T> the concrete type of the domain
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete type of the domain
  */
 public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
 		extends Lattice<T>, NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {

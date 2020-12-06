@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * A last-in, first-out working set. This implementation is thread-safe.
  * 
  * @author Luca Negrini
+ * 
  * @param <E> the type of the elements that this working set contains
  */
 public class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
@@ -14,7 +15,9 @@ public class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 	/**
 	 * Yields a new, empty working set.
 	 * 
-	 * @param <E> the type of the elements that the returned working set contains
+	 * @param <E> the type of the elements that the returned working set
+	 *                contains
+	 * 
 	 * @return the new working set
 	 */
 	public static <E> ConcurrentLIFOWorkingSet<E> mk() {
@@ -51,7 +54,7 @@ public class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 	public boolean isEmpty() {
 		return ws.isEmpty();
 	}
-	
+
 	@Override
 	public String toString() {
 		return ws.toString();

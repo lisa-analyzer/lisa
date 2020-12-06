@@ -25,8 +25,8 @@ public class Literal extends Expression {
 	private final Object value;
 
 	/**
-	 * Builds a typed literal, consisting of a constant value. The location where
-	 * this literal happens is unknown (i.e. no source file/line/column is
+	 * Builds a typed literal, consisting of a constant value. The location
+	 * where this literal happens is unknown (i.e. no source file/line/column is
 	 * available).
 	 * 
 	 * @param cfg        the cfg that this literal belongs to
@@ -105,11 +105,12 @@ public class Literal extends Expression {
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
 			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
+		AnalysisState<H, TypeEnvironment> typing = entryState
+				.smallStepSemantics(new Constant(getStaticType(), getValue()));
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		return typing;
 	}
-	
+
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)

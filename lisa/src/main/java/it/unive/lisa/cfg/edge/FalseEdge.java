@@ -1,15 +1,14 @@
 package it.unive.lisa.cfg.edge;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.UnaryOperator;
+import java.util.Collection;
 
 /**
  * A sequential edge connecting two statements. The abstract analysis state gets

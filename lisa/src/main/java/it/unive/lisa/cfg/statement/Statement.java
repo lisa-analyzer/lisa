@@ -1,9 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
@@ -14,6 +10,8 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A statement of the program to analyze.
@@ -46,7 +44,7 @@ public abstract class Statement implements Comparable<Statement> {
 	private final int col;
 
 	/**
-	 * The offset of the statement within the cfg
+	 * The offset of the statement within the cfg.
 	 */
 	protected int offset;
 

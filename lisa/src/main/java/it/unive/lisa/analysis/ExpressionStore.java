@@ -8,9 +8,9 @@ import it.unive.lisa.cfg.statement.Expression;
  * object enables easy fixpoint computation thanks to the function lub and
  * widening operations
  * 
- * @param <V> the type of lattice mapped from this store
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <V> the type of lattice mapped from this store
  */
 public class ExpressionStore<V extends Lattice<V>> extends FunctionalLattice<ExpressionStore<V>, Expression, V> {
 

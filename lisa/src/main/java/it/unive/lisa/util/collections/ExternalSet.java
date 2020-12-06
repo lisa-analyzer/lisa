@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -173,12 +172,19 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 			set(bits, pos);
 			return true;
 		} else if (isset(localbits[bitvector], pos))
-			return  false; 
-		
+			return false;
+
 		set(localbits, pos);
 		return true;
 	}
-	
+
+	/**
+	 * Adds to this set all elements contained into {@code other}. This method
+	 * is faster than {@link #addAll(Collection)} since it directly operates on
+	 * the underlying bit set.
+	 * 
+	 * @param other the other set
+	 */
 	public void addAll(ExternalSet<T> other) {
 		if (this == other)
 			return;
@@ -194,7 +200,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 			bits = new long[otherlength];
 			System.arraycopy(localbits, 0, bits, 0, localbits.length);
 		}
-		
+
 		for (--otherlength; otherlength >= 0; otherlength--)
 			bits[otherlength] |= otherbits[otherlength];
 	}
@@ -209,7 +215,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 			// ugly, but java and generics :/
 			return false;
 		}
-		
+
 		if (pos < 0)
 			return false;
 
@@ -344,7 +350,8 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 
 	/**
 	 * Determines if this set contains all elements of another if they share the
-	 * same cache.
+	 * same cache. This method is faster than {@link #containsAll(Collection)}
+	 * since it directly operates on the underlying bit set.
 	 * 
 	 * @param other the other set
 	 * 
@@ -511,10 +518,11 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 	}
 
 	/**
-	 * Yields {@code true} iff at least one element contained in this set satisfies
-	 * the given predicate.
+	 * Yields {@code true} iff at least one element contained in this set
+	 * satisfies the given predicate.
 	 * 
 	 * @param predicate the predicate to be used for testing the elements
+	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
 	public boolean anyMatch(Predicate<T> predicate) {
@@ -526,10 +534,11 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 	}
 
 	/**
-	 * Yields {@code true} iff none of the elements contained in this set satisfy
-	 * the given predicate.
+	 * Yields {@code true} iff none of the elements contained in this set
+	 * satisfy the given predicate.
 	 * 
 	 * @param predicate the predicate to be used for testing the elements
+	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
 	public boolean noneMatch(Predicate<T> predicate) {
@@ -541,10 +550,11 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 	}
 
 	/**
-	 * Yields {@code true} iff all the elements contained in this set satisfy the
-	 * given predicate.
+	 * Yields {@code true} iff all the elements contained in this set satisfy
+	 * the given predicate.
 	 * 
 	 * @param predicate the predicate to be used for testing the elements
+	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
 	public boolean allMatch(Predicate<T> predicate) {
@@ -560,6 +570,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 	 * satisfy the given predicate.
 	 * 
 	 * @param predicate the predicate to be used for testing the elements
+	 * 
 	 * @return a new external set filtered by {@code predicate}
 	 */
 	public ExternalSet<T> filter(Predicate<T> predicate) {
@@ -570,14 +581,31 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 
 		return result;
 	}
-	
+
+	/**
+	 * Reduces this set to a single element. The result starts at {@code base},
+	 * and it is transformed by invoking {@code reducer} on the current result
+	 * and each element inside this set.
+	 * 
+	 * @param base    the initial value for building the result
+	 * @param reducer the function that combines two elements into a new result
+	 * 
+	 * @return the reduced element
+	 */
 	public T reduce(T base, BiFunction<T, T, T> reducer) {
 		T result = base;
 		for (T t : this)
 			result = reducer.apply(result, t);
 		return result;
 	}
-	
+
+	/**
+	 * Yields the first element inside this set.
+	 * 
+	 * @return the first element
+	 * 
+	 * @throws IllegalStateException if this set is empty
+	 */
 	public T first() {
 		if (isEmpty())
 			throw new IllegalStateException("Cannot get first element from an empty set");
@@ -683,7 +711,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 			// ugly, but java and generics :/
 			return false;
 		}
-		
+
 		if (pos < 0)
 			// if it's not inside the cache, it's not in the set
 			return false;
@@ -728,7 +756,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 		for (T o : this)
 			if (!c.contains(o))
 				toRemove.add(o);
-		
+
 		for (T o : toRemove)
 			remove(o);
 		return !toRemove.isEmpty();
@@ -740,7 +768,7 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 		for (T o : this)
 			if (c.contains(o))
 				toRemove.add(o);
-		
+
 		for (T o : toRemove)
 			remove(o);
 		return !toRemove.isEmpty();

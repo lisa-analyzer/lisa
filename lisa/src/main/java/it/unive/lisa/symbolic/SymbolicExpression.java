@@ -33,7 +33,14 @@ public abstract class SymbolicExpression {
 	public final ExternalSet<Type> getTypes() {
 		return types;
 	}
-	
+
+	/**
+	 * Yields the dynamic type of this expression, that is, the most specific
+	 * common supertype of all its runtime types (available through
+	 * {@link #getTypes()}.
+	 * 
+	 * @return the dynamic type of this expression
+	 */
 	public final Type getDynamicType() {
 		return types.reduce(types.first(), (result, t) -> {
 			if (result.canBeAssignedTo(t))

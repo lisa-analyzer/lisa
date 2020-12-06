@@ -1,15 +1,14 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.ExternalSet;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * An expression that is part of a statement of the program.
@@ -77,6 +76,12 @@ public abstract class Expression extends Statement {
 		return staticType;
 	}
 
+	/**
+	 * Sets the runtime types of this expression.
+	 * 
+	 * @param runtimeTypes the set of concrete types that this expression can
+	 *                         have at runtime
+	 */
 	protected final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
 		if (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes))
 			return;
@@ -86,12 +91,26 @@ public abstract class Expression extends Statement {
 			this.runtimeTypes.addAll(runtimeTypes);
 	}
 
+	/**
+	 * The concrete types that this expression can have at runtime. If type
+	 * inference has not been executed, this method returns a singleton set
+	 * containing the static type of this expression.
+	 * 
+	 * @return the set of runtime types
+	 */
 	public final ExternalSet<Type> getRuntimeTypes() {
 		if (runtimeTypes.isEmpty())
 			return Caches.types().mkSingletonSet(staticType);
 		return runtimeTypes;
 	}
 
+	/**
+	 * Yields the dynamic type of this expression, that is, the most specific
+	 * common supertype of all its runtime types (available through
+	 * {@link #getRuntimeTypes()}.
+	 * 
+	 * @return the dynamic type of this expression
+	 */
 	public final Type getDynamicType() {
 		ExternalSet<Type> runtimes = getRuntimeTypes();
 		return runtimeTypes.reduce(runtimes.first(), (result, t) -> {

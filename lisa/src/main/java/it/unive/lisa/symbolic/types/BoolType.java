@@ -5,8 +5,8 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
 /**
- * An internal implementation of the {@link BooleanType} interface that can be used
- * by domains that need a concrete instance of that interface.
+ * An internal implementation of the {@link BooleanType} interface that can be
+ * used by domains that need a concrete instance of that interface.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

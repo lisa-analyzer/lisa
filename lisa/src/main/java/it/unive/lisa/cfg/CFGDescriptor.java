@@ -1,12 +1,10 @@
 package it.unive.lisa.cfg;
 
-import java.util.Arrays;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import java.util.Arrays;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,

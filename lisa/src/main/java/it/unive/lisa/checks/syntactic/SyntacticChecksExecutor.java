@@ -40,10 +40,11 @@ public class SyntacticChecksExecutor {
 		checks.forEach(c -> c.visitCFGDescriptor(tool, cfg.getDescriptor()));
 
 		// TODO it would be much better with a visitor pattern
-		// so that new instances of statement/expression are forced to define how they get visited
+		// so that new instances of statement/expression are forced to define
+		// how they get visited
 		// instead of adding new instances here
-		
-		for (Statement st : cfg.getNodes()) 
+
+		for (Statement st : cfg.getNodes())
 			if (st instanceof Expression)
 				processExpression(tool, checks, (Expression) st);
 			else

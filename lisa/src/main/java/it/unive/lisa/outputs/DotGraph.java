@@ -1,5 +1,12 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.edge.FalseEdge;
+import it.unive.lisa.cfg.edge.TrueEdge;
+import it.unive.lisa.cfg.statement.Ret;
+import it.unive.lisa.cfg.statement.Return;
+import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.cfg.statement.Throw;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,7 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
@@ -25,14 +31,14 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.FalseEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
-import it.unive.lisa.cfg.statement.Ret;
-import it.unive.lisa.cfg.statement.Return;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.Throw;
-
+/**
+ * A graph build from a {@link CFG} that can be dumped in dot format, together
+ * with a legend. Instances of this class can be created through
+ * {@link #fromCFG(CFG, Function)}, or read from a file through
+ * {@link #readDot(Reader)}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class DotGraph {
 
 	private static final String NODE_SHAPE = "rect";
@@ -80,12 +86,11 @@ public class DotGraph {
 
 	private long nextCode = 0;
 
-	public DotGraph(String name) {
+	private DotGraph(String name) {
 		this.graph = new MultiGraph(cleanupForDiagraphTitle(name));
-		// graph.setAttribute("ordering", "out");
 	}
 
-	public void addNode(Statement st, boolean entry, boolean exit, Function<Statement, String> labelGenerator) {
+	private void addNode(Statement st, boolean entry, boolean exit, Function<Statement, String> labelGenerator) {
 		Node n = graph.addNode(nodeName(nextCode));
 		codes.put(st, nextCode++);
 		n.setAttribute(SHAPE, NODE_SHAPE);
@@ -108,7 +113,7 @@ public class DotGraph {
 		return "node" + id;
 	}
 
-	public void addEdge(it.unive.lisa.cfg.edge.Edge edge) {
+	private void addEdge(it.unive.lisa.cfg.edge.Edge edge) {
 		long id = codes.get(edge.getSource());
 		long id1 = codes.get(edge.getDestination());
 
@@ -124,6 +129,14 @@ public class DotGraph {
 			e.setAttribute(COLOR, SEQUENTIAL_EDGE_COLOR);
 	}
 
+	/**
+	 * Dumps this graph through the given {@link Writer}. A legend will also be
+	 * added to the output, to improve its readability.
+	 * 
+	 * @param writer the writer to use for dumping the graph
+	 * 
+	 * @throws IOException if an I/O error occurs while writing
+	 */
 	public void dumpDot(Writer writer) throws IOException {
 		FileSinkDOT sink = new CustomDotSink() {
 			@Override
@@ -189,32 +202,35 @@ public class DotGraph {
 		List<String> fEdges = new ArrayList<>(), sEdges = new ArrayList<>();
 		parseEdges(first, fMapping, fNodes, fEdges);
 		parseEdges(second, sMapping, sNodes, sEdges);
-		
+
 		if (!fEdges.equals(sEdges))
 			return false;
-		
+
 		return true;
 	}
 
 	private static void parseEdges(Graph g, Map<Node, String> mapping, List<String> nodes, List<String> edges) {
 		g.edges().forEach(e -> {
-			// TODO the indexOf will return the index of the first node with that label,
-			// so edges targeting or originating different nodes might be collapsed on
-			// that one. This is a problem for graphs with nodes having the same label
+			// TODO the indexOf will return the index of the first node with
+			// that label,
+			// so edges targeting or originating different nodes might be
+			// collapsed on
+			// that one. This is a problem for graphs with nodes having the same
+			// label
 			int source = nodes.indexOf(mapping.get(e.getSourceNode()));
 			int dest = nodes.indexOf(mapping.get(e.getTargetNode()));
-			
+
 			if (e.hasAttribute(STYLE) && e.getAttribute(STYLE).equals(CONDITIONAL_EDGE_STYLE))
 				if (e.hasAttribute(COLOR))
 					if (e.getAttribute(COLOR).equals(TRUE_EDGE_COLOR))
 						edges.add(source + "T" + dest);
 					else if (e.getAttribute(COLOR).equals(FALSE_EDGE_COLOR))
 						edges.add(source + "F" + dest);
-					else 
+					else
 						edges.add(source + "S" + dest);
-				else 
+				else
 					edges.add(source + "S" + dest);
-			else 
+			else
 				edges.add(source + "S" + dest);
 		});
 		Collections.sort(edges);
@@ -245,6 +261,18 @@ public class DotGraph {
 		return graph.toString();
 	}
 
+	/**
+	 * Builds a {@link DotGraph} from a {@link CFG}. The label of a node
+	 * representing a statement {@code st} will be composed by joining
+	 * {@code st.toString()} ( {@link Statement#toString()}) with
+	 * {@code labelGenerator.apply(st)} ({@link Function#apply(Object)}) through
+	 * a new line.
+	 * 
+	 * @param cfg            the cfg to export into dot format
+	 * @param labelGenerator the function used to generate extra labels
+	 * 
+	 * @return the exported graph built starting from the cfg
+	 */
 	public static DotGraph fromCFG(CFG cfg, Function<Statement, String> labelGenerator) {
 		DotGraph graph = new DotGraph(cfg.getDescriptor().getFullName());
 
@@ -263,6 +291,16 @@ public class DotGraph {
 		return graph;
 	}
 
+	/**
+	 * Reads a graph through the given {@link Reader}. Any legend (i.e.,
+	 * subgraph) will be stripped from the input.
+	 * 
+	 * @param reader the reader to use for reading the graph
+	 * 
+	 * @return the {@link DotGraph} that has been read
+	 * 
+	 * @throws IOException if an I/O error occurs while reading
+	 */
 	public static DotGraph readDot(Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
