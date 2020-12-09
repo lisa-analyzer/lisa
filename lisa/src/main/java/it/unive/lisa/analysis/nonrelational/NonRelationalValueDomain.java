@@ -18,19 +18,23 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
 		extends Lattice<T>, NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
-	
+
 	/**
-	 * Checks if the given expression is satisfied by a given value environment 
-	 * tracking this abstract values, returning an instance of {@link Satisfiability}.
+	 * Checks if the given expression is satisfied by a given value environment
+	 * tracking this abstract values, returning an instance of
+	 * {@link Satisfiability}.
 	 * 
-	 * @param expression	the expression whose satisfiability is to be evaluated
-	 * @param environment	the environment where the expressions must be evaluated 
-	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied by
-	 *         the given environment, {@link Satisfiability#NOT_SATISFIED} if it
-	 *         is not satisfied, or {@link Satisfiability#UNKNOWN} if it is either
-	 *         impossible to determine if it satisfied, or if it is satisfied by
-	 *         some values and not by some others (this is equivalent to a TOP
-	 *         boolean value)
+	 * @param expression  the expression whose satisfiability is to be evaluated
+	 * @param environment the environment where the expressions must be
+	 *                        evaluated
+	 * 
+	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
+	 *             by the given environment,
+	 *             {@link Satisfiability#NOT_SATISFIED} if it is not satisfied,
+	 *             or {@link Satisfiability#UNKNOWN} if it is either impossible
+	 *             to determine if it satisfied, or if it is satisfied by some
+	 *             values and not by some others (this is equivalent to a TOP
+	 *             boolean value)
 	 */
 	Satisfiability satisfies(SymbolicExpression expression, ValueEnvironment<T> environment);
 }
