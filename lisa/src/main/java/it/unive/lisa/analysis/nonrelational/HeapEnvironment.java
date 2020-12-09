@@ -78,14 +78,18 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	public HeapEnvironment<T> assume(SymbolicExpression expression) throws SemanticException {
-		// TODO: to be refined
-		return new HeapEnvironment<>(lattice, function, Collections.emptyList(), Collections.emptyList());
+		if (lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED)
+			return bottom();
+		else if (lattice.satisfies(expression, this) == Satisfiability.SATISFIED)
+			return this;
+		else
+			//TODO: a more precise filtering is needed when satisfiability of expression is unknown
+			return this;
 	}
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression currentExpression) {
-		// TODO: to be refined
-		return Satisfiability.UNKNOWN;
+		return lattice.satisfies(currentExpression, this);
 	}
 
 	@Override

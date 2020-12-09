@@ -1055,8 +1055,8 @@ public class CFG {
 								newApprox = newApprox.lub(oldApprox);
 								newExprs = newExprs.lub(oldExprs);
 							} else {
-								newApprox = newApprox.widening(oldApprox);
-								newExprs = newExprs.widening(oldExprs);
+								newApprox = oldApprox.widening(newApprox);
+								newExprs = oldExprs.widening(newExprs);
 							}
 						}
 					} catch (SemanticException e) {
