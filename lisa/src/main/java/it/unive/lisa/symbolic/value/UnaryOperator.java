@@ -11,19 +11,25 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public enum UnaryOperator implements Operator {
-	// TODO the semantics of the operators should be clearly stated
 	/**
-	 * The logical negation of a value of type {@link BooleanType}.
+	 * Given a Boolean value of type {@link BooleanType}, this operator returns
+	 * the logical negation of the value: if the Boolean value represents true,
+	 * it returns false, and vice versa. The return type of this operation is
+	 * {@link BooleanType}.
 	 */
 	LOGICAL_NOT("!"),
 
 	/**
-	 * The negation of a numerical value of type {@link NumericType}.
+	 * Given a numeric value of type {@link NumericType}, this operator returns
+	 * the negation of the numerical value. The return type of this operator is
+	 * a signed {@link NumericType}.
 	 */
 	NUMERIC_NEG("-"),
 
 	/**
-	 * The length of a variable of type {@link StringType}.
+	 * Given a string of type {@link StringType} returns the length of that
+	 * string. If the value represents the empty string, it returns 0. The
+	 * return type of this operator is a 32 bit unsigned {@link NumericType}.
 	 */
 	STRING_LENGTH("strlen");
 

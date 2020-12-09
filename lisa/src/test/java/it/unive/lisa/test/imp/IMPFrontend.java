@@ -401,13 +401,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public IMPFieldAccess visitArrayAccess(ArrayAccessContext ctx) {
+	public IMPArrayAccess visitArrayAccess(ArrayAccessContext ctx) {
 		Variable receiver = visitVar(ctx.IDENTIFIER());
 		Expression result = receiver;
 		for (IndexContext i : ctx.index())
 			result = new IMPArrayAccess(currentCFG, file, getLine(i), getCol(i), result, visitIndex(i));
 
-		return (IMPFieldAccess) result;
+		return (IMPArrayAccess) result;
 	}
 
 	@Override

@@ -180,7 +180,7 @@ public interface Type {
 	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
-	 * It returns {@code true} if so, and returns {@code false}.
+	 * It returns {@code true} if so, and returns {@code false} otherwise.
 	 * 
 	 * @param other the other type
 	 * 

@@ -1,6 +1,5 @@
 package it.unive.lisa.symbolic.types;
 
-import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 
@@ -11,7 +10,7 @@ import it.unive.lisa.cfg.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringType implements BooleanType {
+public class StringType implements it.unive.lisa.cfg.type.StringType {
 
 	/**
 	 * The singleton instance of this class.
