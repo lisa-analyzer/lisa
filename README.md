@@ -27,9 +27,9 @@ We foresee at least five alpha releases that are meant as intermediate building 
 | Version | Release date | Contents |
 | --- | --- | --- |
 | [0.1a1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a1) | Oct. 19, 2020 | First draft of the prototype of the structure of the library, with syntactic checkers (no lattices, semantic domain, call graphs, …) |
-| 0.1a2 | Mid Nov. 2020 | Complete prototype of the structure of the library, including the definition of call graphs and heap abstractions, definition of first numerical value analyses (interface with apron) |
-| 0.1a3 | Mid Dec. 2020 | Implementations of heap abstractions |
-| 0.1a4 | Mid Jan. 2021 | Call graph abstractions |
+| [0.1a2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a2) | Dec. 11, 2020 | Complete prototype of the structure of the library, including the definition of call graphs and heap abstractions, type hierarchy, and type inference |
+| 0.1a3 | Mid Jan. 2021 | First value analyses and heap abstractions, extended program model |
+| 0.1a4 | Mid Feb. 2021 | Call graph abstractions |
 | 0.1a5+ | Feb. 2021 onwards | More value analyses (strings, …) and heap analyses (aliasing, sharing, …) |
 | 1.0 | TBD | First stable version |
 
