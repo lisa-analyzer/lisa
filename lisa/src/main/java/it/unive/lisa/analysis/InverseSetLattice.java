@@ -4,24 +4,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A generic set lattice containing a set of elements. Lattice operations
- * correspond to standard set operations:
+ * A generic inverse set lattice containing a set of elements. Lattice
+ * operations are the opposite of the {@link SetLattice} ones, namely:
  * <ul>
- * <li>the lub is the set union</li>
- * <li>the &le; is the set inclusion</li>
- * <li>...</li>
+ * <li>the lub is the set intersection</li>
+ * <li>the &le; is the inverse set inclusion</li>
  * </ul>
  * Widening on instances of this lattice depends on the cardinality of the
  * domain of the underlying elements. The provided implementation behave as the
- * domain is <b>finite</b>, thus invoking the lub. Set lattices defined on
- * infinite domains must implement a coherent widening logic.
+ * domain is <b>finite</b>, thus invoking the lub. Inverse set lattices defined
+ * on infinite domains must implement a coherent widening logic.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <S> the concrete instance of {@link SetLattice}
+ * @param <S> the concrete instance of {@link InverseSetLattice}
  * @param <E> the type of elements of the domain of this lattice
  */
-public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLattice<S> {
+public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> extends BaseLattice<S> {
 
 	/**
 	 * The set of elements contained in the lattice.
@@ -33,28 +32,28 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	 * 
 	 * @param elements the elements that are contained in the lattice
 	 */
-	protected SetLattice(Set<E> elements) {
+	protected InverseSetLattice(Set<E> elements) {
 		this.elements = elements;
 	}
 
 	/**
-	 * Utility for creating a concrete instance of {@link SetLattice} given a
-	 * set. This decouples the instance of set used during computation of the
-	 * elements to put in the lattice from the actual type of set underlying the
-	 * lattice.
+	 * Utility for creating a concrete instance of {@link InverseSetLattice}
+	 * given a set. This decouples the instance of set used during computation
+	 * of the elements to put in the lattice from the actual type of set
+	 * underlying the lattice.
 	 * 
 	 * @param set the set containing the elements that must be included in the
 	 *                lattice instance
 	 * 
-	 * @return a new concrete instance of {@link SetLattice} containing the
-	 *             elements of the given set
+	 * @return a new concrete instance of {@link InverseSetLattice} containing
+	 *             the elements of the given set
 	 */
 	protected abstract S mk(Set<E> set);
 
 	@Override
 	protected final S lubAux(S other) throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
-		lub.addAll(other.elements);
+		lub.retainAll(other.elements);
 		return mk(lub);
 	}
 
@@ -65,7 +64,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 
 	@Override
 	protected final boolean lessOrEqualAux(S other) throws SemanticException {
-		return other.elements.containsAll(elements);
+		return elements.containsAll(other.elements);
 	}
 
 	@Override
@@ -84,7 +83,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		SetLattice<?, ?> other = (SetLattice<?, ?>) obj;
+		InverseSetLattice<?, ?> other = (InverseSetLattice<?, ?>) obj;
 		if (elements == null) {
 			if (other.elements != null)
 				return false;
