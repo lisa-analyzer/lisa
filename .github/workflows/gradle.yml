@@ -22,3 +22,9 @@ jobs:
       run: chmod +x lisa/gradlew
     - name: Build with Gradle
       run: cd lisa && ./gradlew build
+    - name: Publish Unit Test Results
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        files: lisa/build/test-results/test/TEST-it.unive.lisa.test.*.xml
