@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.statement;
+package it.unive.lisa.cfg;
 
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;

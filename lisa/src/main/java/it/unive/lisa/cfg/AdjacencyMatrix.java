@@ -8,6 +8,8 @@ import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.collections.ExternalSetCache;
+import it.unive.lisa.util.workset.FIFOWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,13 +37,18 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	/**
 	 * The factory where edges are stored.
 	 */
-	private ExternalSetCache<Edge> edgeFactory;
+	private final ExternalSetCache<Edge> edgeFactory;
 
 	/**
 	 * The matrix. The left set in the mapped value is the set of ingoing edges,
 	 * while the right one is the set of outgoing edges.
 	 */
-	private Map<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> matrix;
+	private final Map<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> matrix;
+
+	/**
+	 * The next available offset to be assigned to the next statement
+	 */
+	private int nextOffset;
 
 	/**
 	 * Builds a new matrix.
@@ -49,6 +56,7 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	public AdjacencyMatrix() {
 		edgeFactory = new ExternalSetCache<>();
 		matrix = new ConcurrentHashMap<>();
+		nextOffset = 0;
 	}
 
 	/**
@@ -63,6 +71,7 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 		matrix = new ConcurrentHashMap<>();
 		for (Map.Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> entry : other.matrix.entrySet())
 			matrix.put(entry.getKey(), Pair.of(entry.getValue().getLeft().copy(), entry.getValue().getRight().copy()));
+		nextOffset = other.nextOffset;
 	}
 
 	/**
@@ -72,6 +81,7 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 	 */
 	public void addNode(Statement node) {
 		matrix.put(node, Pair.of(edgeFactory.mkEmptySet(), edgeFactory.mkEmptySet()));
+		nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
 	/**
@@ -325,5 +335,42 @@ public class AdjacencyMatrix implements Iterable<Map.Entry<Statement, Pair<Exter
 			res.append("\n]\n");
 		}
 		return res.toString();
+	}
+
+	/**
+	 * Merges this adjacency matrix with the given one. The algorithm used for
+	 * merging {@code code} into {@code this} treats {@code code} as a graph
+	 * starting at {@code root}. The algorithm traverses the graph adding all
+	 * nodes and edges to this matrix. <b>No edge between any node already
+	 * existing into {@code this} matrix and {@code root} is added.</b>
+	 * 
+	 * @param root the statement where the exploration of {@code code} should
+	 *                 start
+	 * @param code the matrix to merge
+	 */
+	public final void mergeWith(Statement root, AdjacencyMatrix code) {
+		WorkingSet<Statement> ws = FIFOWorkingSet.mk();
+		ws.push(root);
+
+		do {
+			Statement current = ws.pop();
+			if (!matrix.containsKey(current))
+				addNode(current);
+			for (Edge edge : code.matrix.get(current).getRight()) {
+				if (matrix.containsKey(edge.getDestination()))
+					continue;
+
+				addNode(edge.getDestination());
+				ws.push(edge.getDestination());
+				if (edge instanceof SequentialEdge)
+					addEdge(new SequentialEdge(current, edge.getDestination()));
+				else if (edge instanceof TrueEdge)
+					addEdge(new TrueEdge(current, edge.getDestination()));
+				else if (edge instanceof FalseEdge)
+					addEdge(new FalseEdge(current, edge.getDestination()));
+				else
+					throw new UnsupportedOperationException("Unsupported edge type " + edge.getClass().getName());
+			}
+		} while (!ws.isEmpty()); // this will remove unreachable code
 	}
 }

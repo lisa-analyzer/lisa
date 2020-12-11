@@ -40,8 +40,8 @@ public abstract class NativeCall extends Call {
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
-	 * @param parameters    the parameters of this call
 	 * @param staticType    the static type of this call
+	 * @param parameters    the parameters of this call
 	 */
 	protected NativeCall(CFG cfg, String constructName, Type staticType, Expression... parameters) {
 		this(cfg, null, -1, -1, constructName, staticType, parameters);
@@ -79,8 +79,8 @@ public abstract class NativeCall extends Call {
 	 *                          source file. If unknown, use {@code -1}
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
-	 * @param parameters    the parameters of this call
 	 * @param staticType    the static type of this call
+	 * @param parameters    the parameters of this call
 	 */
 	protected NativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
 			Expression... parameters) {
@@ -99,27 +99,26 @@ public abstract class NativeCall extends Call {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((constructName == null) ? 0 : constructName.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
+	public final boolean isEqualTo(Statement st) {
 		if (this == st)
 			return true;
 		if (getClass() != st.getClass())
+			return false;
+		if (!super.isEqualTo(st))
 			return false;
 		NativeCall other = (NativeCall) st;
 		if (constructName == null) {
 			if (other.constructName != null)
 				return false;
 		} else if (!constructName.equals(other.constructName))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return super.isEqualTo(other);
 	}

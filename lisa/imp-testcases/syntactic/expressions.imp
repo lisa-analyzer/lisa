@@ -1,0 +1,29 @@
+class expressions {
+	assignment() {
+		i = 5;
+		x = "s";
+	}
+	
+	_throw() {
+		throw x;
+		throw i;
+	}
+
+	_return() {
+		return i;
+		return x;
+	}
+
+	call() {
+		this.test(5);
+		this.test(i, 5);
+	}
+
+	nestedCall() {
+		this.test(5, this.test(i, 5));
+		this.test(x, this.test(i));
+		return this.test(i);
+		throw this.test(i);
+		x = this.test(i);
+	}
+}

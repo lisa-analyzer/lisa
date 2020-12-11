@@ -1,8 +1,19 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -11,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall extends Call {
+public class OpenCall extends Call implements MetaVariableCreator {
 
 	/**
 	 * The name of the target of this call
@@ -79,7 +90,6 @@ public class OpenCall extends Call {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -89,19 +99,53 @@ public class OpenCall extends Call {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		OpenCall other = (OpenCall) st;
 		if (targetName == null) {
 			if (other.targetName != null)
 				return false;
 		} else if (!targetName.equals(other.targetName))
 			return false;
-		if (!getStaticType().equals(other.getStaticType()))
-			return false;
 		return super.isEqualTo(other);
 	}
 
 	@Override
 	public String toString() {
-		return getStaticType() + " " + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return "[open call]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+	}
+
+	@Override
+	public final Identifier getMetaVariable() {
+		return new ValueIdentifier(getRuntimeTypes(), "open_call_ret_value@" + offset);
+	}
+
+	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
+			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+			Collection<SymbolicExpression>[] params) throws SemanticException {
+		// TODO too coarse
+		AnalysisState<H, TypeEnvironment> poststate = computedState.top();
+
+		if (getStaticType().isVoidType())
+			poststate = poststate.smallStepSemantics(new Skip());
+		else
+			poststate = poststate.smallStepSemantics(getMetaVariable());
+
+		setRuntimeTypes(poststate.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		return poststate;
+	}
+
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
+			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+			throws SemanticException {
+		// TODO too coarse
+		AnalysisState<H, V> poststate = computedState.top();
+
+		if (getStaticType().isVoidType())
+			return poststate.smallStepSemantics(new Skip());
+		else
+			return poststate.smallStepSemantics(getMetaVariable());
 	}
 }

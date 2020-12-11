@@ -1,6 +1,14 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.symbolic.value.Skip;
 import java.util.Objects;
 
 /**
@@ -57,6 +65,12 @@ public class Throw extends Statement {
 	}
 
 	@Override
+	public int setOffset(int offset) {
+		this.offset = offset;
+		return expression.setOffset(offset + 1);
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
@@ -82,5 +96,27 @@ public class Throw extends Statement {
 	@Override
 	public final String toString() {
 		return "throw " + expression;
+	}
+
+	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
+		expressions.put(expression, result);
+		if (!expression.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(expression.getMetaVariables());
+		return result.smallStepSemantics(new Skip());
+	}
+
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
+			throws SemanticException {
+		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
+		expressions.put(expression, result);
+		if (!expression.getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(expression.getMetaVariables());
+		return result.smallStepSemantics(new Skip());
 	}
 }

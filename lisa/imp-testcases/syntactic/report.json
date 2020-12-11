@@ -1,0 +1,22 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/syntactic/expressions.imp':13:9] on 'untyped _return()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':19:12] on 'untyped call()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':23:25] on 'untyped nestedCall()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':24:25] on 'untyped nestedCall()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':25:19] on 'untyped nestedCall()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':26:18] on 'untyped nestedCall()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':27:16] on 'untyped nestedCall()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':3:2] on 'untyped assignment()': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':9:8] on 'untyped _throw()': [EXPRESSION] Found variable i"
+  } ],
+  "files" : [ ]
+}

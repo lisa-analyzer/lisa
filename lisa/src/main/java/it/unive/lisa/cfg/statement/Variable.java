@@ -1,8 +1,18 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.ExpressionStore;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 import java.util.Objects;
 
 /**
@@ -62,6 +72,11 @@ public class Variable extends Expression {
 		this.name = name;
 	}
 
+	@Override
+	public int setOffset(int offset) {
+		return this.offset = offset;
+	}
+
 	/**
 	 * Yields the name of this variable.
 	 * 
@@ -76,7 +91,6 @@ public class Variable extends Expression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -86,13 +100,13 @@ public class Variable extends Expression {
 			return true;
 		if (getClass() != st.getClass())
 			return false;
+		if (!super.isEqualTo(st))
+			return false;
 		Variable other = (Variable) st;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (!getStaticType().equals(other.getStaticType()))
 			return false;
 		return true;
 	}
@@ -100,5 +114,36 @@ public class Variable extends Expression {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	private SymbolicExpression getVariable() {
+		SymbolicExpression expr;
+		if (getStaticType().isPointerType())
+			// the smallStepSemantics will take care of converting that
+			// reference to a variable identifier
+			// setting also the identifier as computed expression
+			expr = new HeapReference(getRuntimeTypes(), getName());
+		else
+			expr = new ValueIdentifier(getRuntimeTypes(), getName());
+		return expr;
+	}
+
+	@Override
+	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
+			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
+			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
+		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
+		// we have to recreate the variable for it to have the correct typing
+		// information
+		return typing.smallStepSemantics(getVariable());
+	}
+
+	@Override
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
+			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
+			throws SemanticException {
+		SymbolicExpression expr = getVariable();
+		return entryState.smallStepSemantics(expr);
 	}
 }

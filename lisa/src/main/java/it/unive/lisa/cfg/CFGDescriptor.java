@@ -1,6 +1,5 @@
 package it.unive.lisa.cfg;
 
-import it.unive.lisa.cfg.statement.Parameter;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import java.util.Arrays;

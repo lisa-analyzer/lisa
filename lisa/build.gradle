@@ -24,6 +24,9 @@ plugins {
     // magic for getting eclipse to work with gradle
     id 'eclipse'
     
+    // antlr plugin for the generation of the IMP parser
+    id 'antlr'
+    
     // automatic generation of plantuml files from the source code
     // for visualizing them: https://www.planttext.com/
     id 'com.github.roroche.plantuml' version '1.0.2'
@@ -78,3 +81,4 @@ apply from: 'dependencies.gradle'
 apply from: 'java.gradle'
 apply from: 'code-style.gradle'
 apply from: 'doc-extra.gradle'
+apply from: 'antlr.gradle'

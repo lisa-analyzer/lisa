@@ -1,6 +1,11 @@
 package it.unive.lisa.cfg.edge;
 
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
+import java.util.Objects;
 
 /**
  * An edge of a control flow graph, connecting two statements.
@@ -26,6 +31,8 @@ public abstract class Edge {
 	 * @param destination the destination statement
 	 */
 	protected Edge(Statement source, Statement destination) {
+		Objects.requireNonNull(source, "The source of an edge cannot be null");
+		Objects.requireNonNull(destination, "The destination of an edge cannot be null");
 		this.source = source;
 		this.destination = destination;
 	}
@@ -114,4 +121,20 @@ public abstract class Edge {
 
 	@Override
 	public abstract String toString();
+
+	/**
+	 * Traverses this edge, optionally modifying the given {@code sourceState}
+	 * by applying semantic assumptions.
+	 * 
+	 * @param <H>         the concrete {@link HeapDomain} instance
+	 * @param <V>         the concrete {@link ValueDomain} instance
+	 * @param sourceState the {@link AnalysisState} computed at the source of
+	 *                        this edge
+	 * 
+	 * @return the {@link AnalysisState} after traversing this edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
+			AnalysisState<H, V> sourceState) throws SemanticException;
 }

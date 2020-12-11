@@ -33,4 +33,14 @@ public class Untyped implements Type {
 	public int hashCode() {
 		return System.identityHashCode(this);
 	}
+
+	@Override
+	public boolean canBeAssignedTo(Type other) {
+		return other == this;
+	}
+
+	@Override
+	public Type commonSupertype(Type other) {
+		return this;
+	}
 }
