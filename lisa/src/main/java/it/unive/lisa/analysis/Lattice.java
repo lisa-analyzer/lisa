@@ -29,7 +29,7 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the least upper bound
+	 * @return the widening between this and other
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
