@@ -75,7 +75,7 @@ ext {
 }
 
 group = 'it.unive'
-version = '0.1a1'
+version = '0.1a2'
 
 apply from: 'dependencies.gradle'
 apply from: 'java.gradle'
