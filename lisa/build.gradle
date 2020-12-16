@@ -31,6 +31,10 @@ plugins {
     // for visualizing them: https://www.planttext.com/
     id 'com.github.roroche.plantuml' version '1.0.2'
     
+    // this can generate images from plantuml files
+	// it requires graphviz to be installed 
+	id "org.fmiw.plantuml" version "0.1"
+    
     // parse git information during the build
     id 'org.ajoberstar.grgit' version '4.0.2'
     
