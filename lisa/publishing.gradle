@@ -2,6 +2,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
         	artifactId = 'lisa'
+        	groupId = 'com.github.unive-ssv'
         	from components.java
             pom {
                 name = 'LiSA'
@@ -42,7 +43,7 @@ publishing {
                 }
                 scm {
                     connection = 'scm:git:git://github.com/UniVE-SSV/lisa.git'
-                    developerConnection = 'scm:git:git://github.com/UniVE-SSV/lisa.git'
+                    developerConnection = 'scm:git:ssh://github.com/UniVE-SSV/lisa.git'
                     url = 'https://github.com/UniVE-SSV/lisa'
                 }
             }
