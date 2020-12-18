@@ -46,6 +46,10 @@ plugins {
     
     // this enables './gradlew <task> taskTree' to show task dependencies
     id "com.dorongold.task-tree" version "1.5"
+    
+    // publication on maven central
+    id 'maven-publish'
+    id 'signing'
 }
 
 // the code reading data from the git repo has to be placed in the same file where its
@@ -86,3 +90,4 @@ apply from: 'java.gradle'
 apply from: 'code-style.gradle'
 apply from: 'doc-extra.gradle'
 apply from: 'antlr.gradle'
+apply from: 'publishing.gradle'
