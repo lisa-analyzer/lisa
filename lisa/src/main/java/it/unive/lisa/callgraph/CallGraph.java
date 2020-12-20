@@ -14,7 +14,6 @@ import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-
 import java.util.Collection;
 
 /**

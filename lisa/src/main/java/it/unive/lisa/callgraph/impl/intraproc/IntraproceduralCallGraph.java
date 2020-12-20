@@ -18,7 +18,6 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;

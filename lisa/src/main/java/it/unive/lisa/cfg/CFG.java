@@ -1,11 +1,5 @@
 package it.unive.lisa.cfg;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.FunctionalLattice;
@@ -28,6 +22,11 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -705,11 +704,11 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkNewIntermediate(
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkInternalStore(
 			AnalysisState<H, V> entrystate) {
 		return new StatementStore<>(entrystate);
 	}
-	
+
 	@Override
 	protected DotGraph<Statement, Edge> toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, labelGenerator);

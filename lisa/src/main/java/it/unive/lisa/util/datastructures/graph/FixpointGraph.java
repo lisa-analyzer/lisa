@@ -1,17 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
@@ -20,7 +8,26 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+/**
+ * A generic graph, backed by an {@link AdjacencyMatrix}, over which a fixpoint
+ * can be computed.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <N> the type of the nodes in this graph
+ * @param <E> the type of the edges in this graph
+ */
 public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N, E>> extends Graph<N, E> {
 	private static final Logger log = LogManager.getLogger(FixpointGraph.class);
 
@@ -65,10 +72,14 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
+	 * @param <N> the type of the nodes of the graph, where the semantic
+	 *                computation will happen
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
 	 *                analysis states
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
 	 *                analysis states
+	 * @param <F> the concrete type of {@link FunctionalLattice} where results
+	 *                on internal nodes will be stored
 	 */
 	@FunctionalInterface
 	public interface SemanticFunction<N extends Node<N>, H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
@@ -187,7 +198,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 				}
 
 				try {
-					newIntermediate = (F) mkNewIntermediate(entrystate);
+					newIntermediate = (F) mkInternalStore(entrystate);
 					newApprox = semantics.compute(current, entrystate, cg, newIntermediate);
 				} catch (SemanticException e) {
 					log.error("Evaluation of the semantics of '" + current + "' in " + this
@@ -244,7 +255,21 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 		}
 	}
 
-	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkNewIntermediate(
+	/**
+	 * Builds a new instance of the {@link FunctionalLattice} that is used to
+	 * store the fixpoint results on internal nodes, that is, node that are
+	 * nested within outer ones.
+	 * 
+	 * @param <H>        the type of heap analysis embedded in the abstract
+	 *                       state
+	 * @param <V>        the type of value analysis embedded in the abstract
+	 *                       state
+	 * @param entrystate the analysis state before the creation of this lattice
+	 * 
+	 * @return the functional lattice where results on internal nodes will be
+	 *             stored
+	 */
+	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkInternalStore(
 			AnalysisState<H, V> entrystate);
 
 	private <H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> AnalysisState<H, V> getEntryState(

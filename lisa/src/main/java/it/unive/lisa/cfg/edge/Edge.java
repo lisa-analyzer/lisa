@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.SemanticEdge;
-
 import java.util.Objects;
 
 /**

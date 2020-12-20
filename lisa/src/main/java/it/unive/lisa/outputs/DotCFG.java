@@ -1,10 +1,5 @@
 package it.unive.lisa.outputs;
 
-import java.io.Reader;
-import java.util.function.Function;
-
-import org.graphstream.graph.implementations.MultiGraph;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
@@ -13,6 +8,9 @@ import it.unive.lisa.cfg.statement.Ret;
 import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
+import java.io.Reader;
+import java.util.function.Function;
+import org.graphstream.graph.implementations.MultiGraph;
 
 /**
  * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be
@@ -65,10 +63,10 @@ public class DotCFG extends DotGraph<Statement, Edge> {
 		return graph;
 	}
 
-	public static class CFGLegend {
-		public final org.graphstream.graph.Graph graph;
+	private static class CFGLegend {
+		private final org.graphstream.graph.Graph graph;
 
-		public CFGLegend() {
+		private CFGLegend() {
 			graph = new MultiGraph("legend");
 			org.graphstream.graph.Node l = graph.addNode("legend");
 			StringBuilder builder = new StringBuilder();

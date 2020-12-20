@@ -1,9 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;

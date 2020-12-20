@@ -1,5 +1,6 @@
 package it.unive.lisa.util.datastructures.graph;
 
+import it.unive.lisa.outputs.DotGraph;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -7,8 +8,14 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Function;
 
-import it.unive.lisa.outputs.DotGraph;
-
+/**
+ * A generic graph, backed by an {@link AdjacencyMatrix}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <N> the type of the nodes in this graph
+ * @param <E> the type of the edges in this graph
+ */
 public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 
 	/**
@@ -214,6 +221,14 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 		toDot(labelGenerator).dumpDot(writer);
 	}
 
+	/**
+	 * Converts this graph to a {@link DotGraph} instance.
+	 * 
+	 * @param labelGenerator the generator that the {@link DotGraph} will use to
+	 *                           enrich node labels
+	 * 
+	 * @return the converted {@link DotGraph}
+	 */
 	protected abstract DotGraph<N, E> toDot(Function<N, String> labelGenerator);
 
 	@Override

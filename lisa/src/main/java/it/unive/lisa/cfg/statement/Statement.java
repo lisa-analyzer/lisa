@@ -1,9 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
@@ -11,7 +11,6 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.util.datastructures.graph.Node;
-
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 

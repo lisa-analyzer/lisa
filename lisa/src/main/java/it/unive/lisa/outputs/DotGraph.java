@@ -3,7 +3,6 @@ package it.unive.lisa.outputs;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.Node;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -31,36 +30,81 @@ import org.graphstream.stream.file.FileSourceDOT;
  * file through {@link #readDot(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <N> the type of the nodes in the original graph
+ * @param <E> the type of the edges in the original graph
  */
 public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 
-	protected static final String NODE_SHAPE = "rect";
-
-	protected static final String SHAPE = "shape";
-
-	protected static final String EXIT_NODE_EXTRA_VALUE = "2";
-
-	protected static final String EXIT_NODE_EXTRA_ATTR = "peripheries";
-
+	/**
+	 * The black color.
+	 */
 	protected static final String COLOR_BLACK = "black";
 
+	/**
+	 * The gray color.
+	 */
 	protected static final String COLOR_GRAY = "gray";
 
+	/**
+	 * The red color.
+	 */
 	protected static final String COLOR_RED = "red";
 
+	/**
+	 * The blue color.
+	 */
 	protected static final String COLOR_BLUE = "blue";
 
-	protected static final String SPECIAL_NODE_COLOR = COLOR_BLACK;
-
-	protected static final String NORMAL_NODE_COLOR = COLOR_GRAY;
-
-	protected static final String CONDITIONAL_EDGE_STYLE = "dashed";
-
+	/**
+	 * The style attribute name.
+	 */
 	protected static final String STYLE = "style";
 
+	/**
+	 * The color attribute name.
+	 */
 	protected static final String COLOR = "color";
 
-	protected static final String LABEL_ATTR = "label";
+	/**
+	 * The shape attribute name.
+	 */
+	protected static final String SHAPE = "shape";
+
+	/**
+	 * The label attribute name.
+	 */
+	protected static final String LABEL = "label";
+
+	/**
+	 * The name of the extra attribute identifying exit nodes.
+	 */
+	protected static final String EXIT_NODE_EXTRA_ATTR = "peripheries";
+
+	/**
+	 * The default shape of a node.
+	 */
+	protected static final String NODE_SHAPE = "rect";
+
+	/**
+	 * The value of the extra attribute identifying exit nodes.
+	 */
+	protected static final String EXIT_NODE_EXTRA_VALUE = "2";
+
+	/**
+	 * The color of a special node (entry or exit).
+	 */
+	protected static final String SPECIAL_NODE_COLOR = COLOR_BLACK;
+
+	/**
+	 * The color of a normal node.
+	 */
+	protected static final String NORMAL_NODE_COLOR = COLOR_GRAY;
+
+	/**
+	 * The style of conditional edges.
+	 */
+	protected static final String CONDITIONAL_EDGE_STYLE = "dashed";
 
 	private static String dotEscape(String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
@@ -74,11 +118,29 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 
 	private long nextCode = 0;
 
+	/**
+	 * Builds a graph.
+	 * 
+	 * @param legend the legend to append to the graph, if any
+	 */
 	protected DotGraph(org.graphstream.graph.Graph legend) {
 		this.graph = new MultiGraph("graph");
 		this.legend = legend;
 	}
 
+	/**
+	 * Adds a node to the graph. The label of {@code node} will be composed by
+	 * joining {@code node.toString()} ( {@link Object#toString()}) with
+	 * {@code labelGenerator.apply(node)} ({@link Function#apply(Object)})
+	 * through a new line.
+	 * 
+	 * @param node           the source node
+	 * @param entry          whether or not this edge is an entrypoint of the
+	 *                           graph
+	 * @param exit           whether or not this edge is an exitpoint of the
+	 *                           graph
+	 * @param labelGenerator the function that is used to enrich nodes labels
+	 */
 	protected void addNode(N node, boolean entry, boolean exit, Function<N, String> labelGenerator) {
 		org.graphstream.graph.Node n = graph.addNode(nodeName(codes.computeIfAbsent(node, nn -> nextCode++)));
 
@@ -95,13 +157,20 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 		String extraLabel = labelGenerator.apply(node);
 		if (!extraLabel.isEmpty())
 			extraLabel = "<BR/>" + dotEscape(extraLabel);
-		n.setAttribute(LABEL_ATTR, "<" + label + extraLabel + ">");
+		n.setAttribute(LABEL, "<" + label + extraLabel + ">");
 	}
 
 	private String nodeName(long id) {
 		return "node" + id;
 	}
 
+	/**
+	 * Adds an edge to the graph.
+	 * 
+	 * @param edge  the source edge
+	 * @param color the color of the edge, or {@code null} if none
+	 * @param style the style of the edge, or {@code null} if none
+	 */
 	protected void addEdge(E edge, String color, String style) {
 		long id = codes.computeIfAbsent(edge.getSource(), n -> nextCode++);
 		long id1 = codes.computeIfAbsent(edge.getDestination(), n -> nextCode++);
@@ -221,7 +290,7 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 			List<String> nodes, List<String> entries,
 			List<String> exits) {
 		g.nodes().forEach(n -> {
-			String label = n.getAttribute(LABEL_ATTR, String.class);
+			String label = n.getAttribute(LABEL, String.class);
 			mapping.put(n, label);
 			nodes.add(label);
 
@@ -259,8 +328,8 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;
-		String sentinel = LABEL_ATTR + "=<";
-		String replacement = LABEL_ATTR + "=\"<";
+		String sentinel = LABEL + "=<";
+		String replacement = LABEL + "=\"<";
 		String ending = ">];";
 		String endingReplacement = ">\"];";
 		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter();) {
@@ -294,62 +363,13 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 		return graph;
 	}
 
-	public static class CFGLegend {
-		public final org.graphstream.graph.Graph graph;
-
-		public CFGLegend() {
-			graph = new MultiGraph("legend");
-			org.graphstream.graph.Node l = graph.addNode("legend");
-			StringBuilder builder = new StringBuilder();
-			builder.append("<");
-			builder.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">");
-			builder.append("<tr><td align=\"right\">node border&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(NORMAL_NODE_COLOR);
-			builder.append("\">");
-			builder.append(NORMAL_NODE_COLOR);
-			builder.append("</font>, single</td></tr>");
-			builder.append("<tr><td align=\"right\">entrypoint border&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(SPECIAL_NODE_COLOR);
-			builder.append("\">");
-			builder.append(SPECIAL_NODE_COLOR);
-			builder.append("</font>, single</td></tr>");
-			builder.append("<tr><td align=\"right\">exitpoint border&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(SPECIAL_NODE_COLOR);
-			builder.append("\">");
-			builder.append(SPECIAL_NODE_COLOR);
-			builder.append("</font>, double</td></tr>");
-			builder.append("<tr><td align=\"right\">sequential edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(COLOR_BLACK);
-			builder.append("\">");
-			builder.append(COLOR_BLACK);
-			builder.append("</font>, solid</td></tr>");
-			builder.append("<tr><td align=\"right\">true edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(COLOR_BLUE);
-			builder.append("\">");
-			builder.append(COLOR_BLUE);
-			builder.append("</font>, ");
-			builder.append(CONDITIONAL_EDGE_STYLE);
-			builder.append("</td></tr>");
-			builder.append("<tr><td align=\"right\">false edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(COLOR_RED);
-			builder.append("\">");
-			builder.append(COLOR_RED);
-			builder.append("</font>, ");
-			builder.append(CONDITIONAL_EDGE_STYLE);
-			builder.append("</td></tr>");
-			builder.append("</table>");
-			builder.append(">");
-			l.setAttribute("label", builder.toString());
-		}
-	}
-
 	private static class CustomDotSink extends FileSinkDOT {
 
 		@Override
 		protected String outputAttribute(String key, Object value, boolean first) {
 			boolean quote = true;
 
-			if (value instanceof Number || key.equals(LABEL_ATTR))
+			if (value instanceof Number || key.equals(LABEL))
 				// labels that we output are always in html format
 				// so no need to quote them
 				quote = false;
@@ -367,11 +387,11 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 
 			StringBuilder buffer = new StringBuilder("[");
 			for (Entry<String, String> entry : attrs.entrySet())
-				if (!entry.getKey().equals(LABEL_ATTR))
+				if (!entry.getKey().equals(LABEL))
 					buffer.append(entry.getValue()).append(",");
 
-			if (attrs.containsKey(LABEL_ATTR))
-				buffer.append(attrs.get(LABEL_ATTR));
+			if (attrs.containsKey(LABEL))
+				buffer.append(attrs.get(LABEL));
 
 			String result = buffer.toString();
 			if (result.endsWith(","))

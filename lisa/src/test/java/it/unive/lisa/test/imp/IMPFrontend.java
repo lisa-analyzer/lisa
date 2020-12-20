@@ -79,7 +79,6 @@ import it.unive.lisa.test.imp.types.ClassType;
 import it.unive.lisa.test.imp.types.FloatType;
 import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
