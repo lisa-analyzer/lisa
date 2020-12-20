@@ -5,6 +5,8 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.util.datastructures.graph.SemanticEdge;
+
 import java.util.Objects;
 
 /**
@@ -12,7 +14,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge {
+public abstract class Edge implements SemanticEdge<Statement, Edge> {
 
 	/**
 	 * The source node.
@@ -37,20 +39,12 @@ public abstract class Edge {
 		this.destination = destination;
 	}
 
-	/**
-	 * Yields the statement where this edge originates.
-	 * 
-	 * @return the source statement
-	 */
+	@Override
 	public final Statement getSource() {
 		return source;
 	}
 
-	/**
-	 * Yields the statement where this edge ends.
-	 * 
-	 * @return the destination statement
-	 */
+	@Override
 	public final Statement getDestination() {
 		return destination;
 	}
@@ -87,18 +81,7 @@ public abstract class Edge {
 		return true;
 	}
 
-	/**
-	 * Checks if this edge is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
-	 * This translates into comparing source and destination statements with
-	 * {@link Statement#isEqualTo(Statement)} instead of using
-	 * {@link Statement#equals(Object)}
-	 * 
-	 * @param other the other edge
-	 * 
-	 * @return {@code true} if this edge and the given one are effectively
-	 *             equals
-	 */
+	@Override
 	public boolean isEqualTo(Edge other) {
 		if (this == other)
 			return true;
@@ -122,19 +105,7 @@ public abstract class Edge {
 	@Override
 	public abstract String toString();
 
-	/**
-	 * Traverses this edge, optionally modifying the given {@code sourceState}
-	 * by applying semantic assumptions.
-	 * 
-	 * @param <H>         the concrete {@link HeapDomain} instance
-	 * @param <V>         the concrete {@link ValueDomain} instance
-	 * @param sourceState the {@link AnalysisState} computed at the source of
-	 *                        this edge
-	 * 
-	 * @return the {@link AnalysisState} after traversing this edge
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
+	@Override
 	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException;
 }

@@ -1,14 +1,18 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.caches.Caches;
+import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.ExternalSet;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
 
 /**
  * An expression that is part of a statement of the program.
@@ -127,9 +131,9 @@ public abstract class Expression extends Statement {
 	 * expression. These should be removed as soon as the values computed by
 	 * those gets out of scope (e.g., popped from the stack). The returned
 	 * collection will be filled while evaluating this expression
-	 * {@link #semantics(it.unive.lisa.analysis.AnalysisState, it.unive.lisa.callgraph.CallGraph, it.unive.lisa.analysis.ExpressionStore)},
-	 * thus invoking this method before computing the semantics will yield an
-	 * empty collection.
+	 * {@link #semantics(AnalysisState, CallGraph, StatementStore)}, thus
+	 * invoking this method before computing the semantics will yield an empty
+	 * collection.
 	 * 
 	 * @return the meta variables
 	 */

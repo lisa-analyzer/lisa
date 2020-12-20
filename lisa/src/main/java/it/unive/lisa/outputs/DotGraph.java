@@ -1,12 +1,9 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.FalseEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
-import it.unive.lisa.cfg.statement.Ret;
-import it.unive.lisa.cfg.statement.Return;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.Throw;
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -23,49 +20,47 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import org.apache.commons.text.StringEscapeUtils;
-import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 
 /**
- * A graph build from a {@link CFG} that can be dumped in dot format, together
- * with a legend. Instances of this class can be created through
- * {@link #fromCFG(CFG, Function)}, or read from a file through
- * {@link #readDot(Reader)}.
+ * An auxiliary graph built from a {@link Graph} that can be dumped in dot
+ * format, together with a legend. Instances of this class can be read from a
+ * file through {@link #readDot(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotGraph {
+public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 
-	private static final String NODE_SHAPE = "rect";
+	protected static final String NODE_SHAPE = "rect";
 
-	private static final String SHAPE = "shape";
+	protected static final String SHAPE = "shape";
 
-	private static final String SPECIAL_NODE_COLOR = "black";
+	protected static final String EXIT_NODE_EXTRA_VALUE = "2";
 
-	private static final String NORMAL_NODE_COLOR = "gray";
+	protected static final String EXIT_NODE_EXTRA_ATTR = "peripheries";
 
-	private static final String EXIT_NODE_EXTRA_VALUE = "2";
+	protected static final String COLOR_BLACK = "black";
 
-	private static final String EXIT_NODE_EXTRA_ATTR = "peripheries";
+	protected static final String COLOR_GRAY = "gray";
 
-	private static final String SEQUENTIAL_EDGE_COLOR = "black";
+	protected static final String COLOR_RED = "red";
 
-	private static final String FALSE_EDGE_COLOR = "red";
+	protected static final String COLOR_BLUE = "blue";
 
-	private static final String TRUE_EDGE_COLOR = "blue";
+	protected static final String SPECIAL_NODE_COLOR = COLOR_BLACK;
 
-	private static final String CONDITIONAL_EDGE_STYLE = "dashed";
+	protected static final String NORMAL_NODE_COLOR = COLOR_GRAY;
 
-	private static final String STYLE = "style";
+	protected static final String CONDITIONAL_EDGE_STYLE = "dashed";
 
-	private static final String COLOR = "color";
+	protected static final String STYLE = "style";
 
-	private static final String LABEL_ATTR = "label";
+	protected static final String COLOR = "color";
+
+	protected static final String LABEL_ATTR = "label";
 
 	private static String dotEscape(String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
@@ -73,26 +68,20 @@ public class DotGraph {
 		return replace.replace("\\", "\\\\");
 	}
 
-	private static String cleanupForDiagraphTitle(String name) {
-		String result = name.replace(' ', '_');
-		result = result.replace("(", "___");
-		result = result.replace(")", "___");
-		return result;
-	}
+	private final org.graphstream.graph.Graph graph, legend;
 
-	private final Graph graph;
-
-	private final Map<Statement, Long> codes = new IdentityHashMap<>();
+	private final Map<N, Long> codes = new IdentityHashMap<>();
 
 	private long nextCode = 0;
 
-	private DotGraph(String name) {
-		this.graph = new MultiGraph(cleanupForDiagraphTitle(name));
+	protected DotGraph(org.graphstream.graph.Graph legend) {
+		this.graph = new MultiGraph("graph");
+		this.legend = legend;
 	}
 
-	private void addNode(Statement st, boolean entry, boolean exit, Function<Statement, String> labelGenerator) {
-		Node n = graph.addNode(nodeName(nextCode));
-		codes.put(st, nextCode++);
+	protected void addNode(N node, boolean entry, boolean exit, Function<N, String> labelGenerator) {
+		org.graphstream.graph.Node n = graph.addNode(nodeName(codes.computeIfAbsent(node, nn -> nextCode++)));
+
 		n.setAttribute(SHAPE, NODE_SHAPE);
 		if (entry || exit)
 			n.setAttribute(COLOR, SPECIAL_NODE_COLOR);
@@ -102,8 +91,8 @@ public class DotGraph {
 		if (exit)
 			n.setAttribute(EXIT_NODE_EXTRA_ATTR, EXIT_NODE_EXTRA_VALUE);
 
-		String label = dotEscape(st.toString());
-		String extraLabel = labelGenerator.apply(st);
+		String label = dotEscape(node.toString());
+		String extraLabel = labelGenerator.apply(node);
 		if (!extraLabel.isEmpty())
 			extraLabel = "<BR/>" + dotEscape(extraLabel);
 		n.setAttribute(LABEL_ATTR, "<" + label + extraLabel + ">");
@@ -113,20 +102,17 @@ public class DotGraph {
 		return "node" + id;
 	}
 
-	private void addEdge(it.unive.lisa.cfg.edge.Edge edge) {
-		long id = codes.get(edge.getSource());
-		long id1 = codes.get(edge.getDestination());
+	protected void addEdge(E edge, String color, String style) {
+		long id = codes.computeIfAbsent(edge.getSource(), n -> nextCode++);
+		long id1 = codes.computeIfAbsent(edge.getDestination(), n -> nextCode++);
 
-		Edge e = graph.addEdge("edge-" + id + "-" + id1, nodeName(id), nodeName(id1), true);
+		org.graphstream.graph.Edge e = graph.addEdge("edge-" + id + "-" + id1, nodeName(id), nodeName(id1), true);
 
-		if (edge instanceof TrueEdge) {
-			e.setAttribute(STYLE, CONDITIONAL_EDGE_STYLE);
-			e.setAttribute(COLOR, TRUE_EDGE_COLOR);
-		} else if (edge instanceof FalseEdge) {
-			e.setAttribute(STYLE, CONDITIONAL_EDGE_STYLE);
-			e.setAttribute(COLOR, FALSE_EDGE_COLOR);
-		} else
-			e.setAttribute(COLOR, SEQUENTIAL_EDGE_COLOR);
+		if (style != null)
+			e.setAttribute(STYLE, style);
+
+		if (color != null)
+			e.setAttribute(COLOR, color);
 	}
 
 	/**
@@ -141,11 +127,13 @@ public class DotGraph {
 		FileSinkDOT sink = new CustomDotSink() {
 			@Override
 			protected void outputEndOfFile() throws IOException {
-				LegendClusterSink legend = new LegendClusterSink();
-				legend.setDirected(true);
-				StringWriter sw = new StringWriter();
-				legend.writeAll(new Legend().graph, sw);
-				out.printf("%s%n", sw.toString());
+				if (DotGraph.this.legend != null) {
+					LegendClusterSink legend = new LegendClusterSink();
+					legend.setDirected(true);
+					StringWriter sw = new StringWriter();
+					legend.writeAll(DotGraph.this.legend, sw);
+					out.printf("%s%n", sw.toString());
+				}
 				super.outputEndOfFile();
 			}
 		};
@@ -169,7 +157,7 @@ public class DotGraph {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DotGraph other = (DotGraph) obj;
+		DotGraph<?, ?> other = (DotGraph<?, ?>) obj;
 		if (graph == null) {
 			if (other.graph != null)
 				return false;
@@ -179,14 +167,14 @@ public class DotGraph {
 		return true;
 	}
 
-	private static boolean sameGraphs(Graph first, Graph second) {
+	private static boolean sameGraphs(org.graphstream.graph.Graph first, org.graphstream.graph.Graph second) {
 		if (first.getNodeCount() != second.getNodeCount())
 			return false;
 
 		if (first.getEdgeCount() != second.getEdgeCount())
 			return false;
 
-		Map<Node, String> fMapping = new IdentityHashMap<>(), sMapping = new IdentityHashMap<>();
+		Map<org.graphstream.graph.Node, String> fMapping = new IdentityHashMap<>(), sMapping = new IdentityHashMap<>();
 		// we use lists to allow duplicates: different nodes might have the same
 		// label
 		List<String> fNodes = new ArrayList<>(), sNodes = new ArrayList<>();
@@ -209,34 +197,28 @@ public class DotGraph {
 		return true;
 	}
 
-	private static void parseEdges(Graph g, Map<Node, String> mapping, List<String> nodes, List<String> edges) {
+	private static void parseEdges(org.graphstream.graph.Graph g, Map<org.graphstream.graph.Node, String> mapping,
+			List<String> nodes, List<String> edges) {
 		g.edges().forEach(e -> {
 			// TODO the indexOf will return the index of the first node with
-			// that label,
-			// so edges targeting or originating different nodes might be
-			// collapsed on
-			// that one. This is a problem for graphs with nodes having the same
-			// label
+			// that label, so edges targeting or originating different nodes
+			// might be collapsed on that one. This is a problem for graphs with
+			// nodes having the same label
 			int source = nodes.indexOf(mapping.get(e.getSourceNode()));
 			int dest = nodes.indexOf(mapping.get(e.getTargetNode()));
 
-			if (e.hasAttribute(STYLE) && e.getAttribute(STYLE).equals(CONDITIONAL_EDGE_STYLE))
-				if (e.hasAttribute(COLOR))
-					if (e.getAttribute(COLOR).equals(TRUE_EDGE_COLOR))
-						edges.add(source + "T" + dest);
-					else if (e.getAttribute(COLOR).equals(FALSE_EDGE_COLOR))
-						edges.add(source + "F" + dest);
-					else
-						edges.add(source + "S" + dest);
-				else
-					edges.add(source + "S" + dest);
-			else
-				edges.add(source + "S" + dest);
+			String middle = "";
+			if (e.hasAttribute(STYLE))
+				middle += "_" + e.getAttribute(STYLE) + "_";
+			if (e.hasAttribute(COLOR))
+				middle += "_" + e.getAttribute(COLOR) + "_";
+			edges.add(source + middle + dest);
 		});
 		Collections.sort(edges);
 	}
 
-	private static void parseNodes(Graph g, Map<Node, String> mapping, List<String> nodes, List<String> entries,
+	private static void parseNodes(org.graphstream.graph.Graph g, Map<org.graphstream.graph.Node, String> mapping,
+			List<String> nodes, List<String> entries,
 			List<String> exits) {
 		g.nodes().forEach(n -> {
 			String label = n.getAttribute(LABEL_ATTR, String.class);
@@ -262,46 +244,18 @@ public class DotGraph {
 	}
 
 	/**
-	 * Builds a {@link DotGraph} from a {@link CFG}. The label of a node
-	 * representing a statement {@code st} will be composed by joining
-	 * {@code st.toString()} ( {@link Statement#toString()}) with
-	 * {@code labelGenerator.apply(st)} ({@link Function#apply(Object)}) through
-	 * a new line.
-	 * 
-	 * @param cfg            the cfg to export into dot format
-	 * @param labelGenerator the function used to generate extra labels
-	 * 
-	 * @return the exported graph built starting from the cfg
-	 */
-	public static DotGraph fromCFG(CFG cfg, Function<Statement, String> labelGenerator) {
-		DotGraph graph = new DotGraph(cfg.getDescriptor().getFullName());
-
-		for (Statement st : cfg.getEntrypoints())
-			graph.addNode(st, true, st instanceof Return || st instanceof Ret || st instanceof Throw, labelGenerator);
-
-		for (Statement st : cfg.getNodes())
-			if (!cfg.getEntrypoints().contains(st))
-				graph.addNode(st, false, st instanceof Return || st instanceof Ret || st instanceof Throw,
-						labelGenerator);
-
-		for (Statement source : cfg.getNodes())
-			for (Statement dest : cfg.followersOf(source))
-				graph.addEdge(cfg.getEdgeConnecting(source, dest));
-
-		return graph;
-	}
-
-	/**
 	 * Reads a graph through the given {@link Reader}. Any legend (i.e.,
 	 * subgraph) will be stripped from the input.
 	 * 
+	 * @param <N>    the type of nodes in the graph
+	 * @param <E>    the type of edges in the graph
 	 * @param reader the reader to use for reading the graph
 	 * 
 	 * @return the {@link DotGraph} that has been read
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static DotGraph readDot(Reader reader) throws IOException {
+	public static <N extends Node<N>, E extends Edge<N, E>> DotGraph<N, E> readDot(Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;
@@ -331,7 +285,8 @@ public class DotGraph {
 			content = writer.toString();
 		}
 		FileSourceDOT source = new FileSourceDOT();
-		DotGraph graph = new DotGraph("read");
+		DotGraph<N, E> graph = new DotGraph<>(null) {
+		};
 		source.addSink(graph.graph);
 		try (StringReader sr = new StringReader(content)) {
 			source.readAll(sr);
@@ -339,12 +294,12 @@ public class DotGraph {
 		return graph;
 	}
 
-	private static class Legend {
-		private final Graph graph;
+	public static class CFGLegend {
+		public final org.graphstream.graph.Graph graph;
 
-		private Legend() {
+		public CFGLegend() {
 			graph = new MultiGraph("legend");
-			Node l = graph.addNode("legend");
+			org.graphstream.graph.Node l = graph.addNode("legend");
 			StringBuilder builder = new StringBuilder();
 			builder.append("<");
 			builder.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">");
@@ -364,21 +319,21 @@ public class DotGraph {
 			builder.append(SPECIAL_NODE_COLOR);
 			builder.append("</font>, double</td></tr>");
 			builder.append("<tr><td align=\"right\">sequential edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(SEQUENTIAL_EDGE_COLOR);
+			builder.append(COLOR_BLACK);
 			builder.append("\">");
-			builder.append(SEQUENTIAL_EDGE_COLOR);
+			builder.append(COLOR_BLACK);
 			builder.append("</font>, solid</td></tr>");
 			builder.append("<tr><td align=\"right\">true edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(TRUE_EDGE_COLOR);
+			builder.append(COLOR_BLUE);
 			builder.append("\">");
-			builder.append(TRUE_EDGE_COLOR);
+			builder.append(COLOR_BLUE);
 			builder.append("</font>, ");
 			builder.append(CONDITIONAL_EDGE_STYLE);
 			builder.append("</td></tr>");
 			builder.append("<tr><td align=\"right\">false edge&nbsp;</td><td align=\"left\"><font color=\"");
-			builder.append(FALSE_EDGE_COLOR);
+			builder.append(COLOR_RED);
 			builder.append("\">");
-			builder.append(FALSE_EDGE_COLOR);
+			builder.append(COLOR_RED);
 			builder.append("</font>, ");
 			builder.append(CONDITIONAL_EDGE_STYLE);
 			builder.append("</td></tr>");

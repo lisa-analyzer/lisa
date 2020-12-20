@@ -9,7 +9,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
 
 /**
- * A sequential edge connecting two statements. The abstract analysis state gets
+ * An edge connecting two statements, that is traversed when the condition
+ * expressed in the source state holds. The abstract analysis state gets
  * modified by assuming that the statement where this edge originates does hold.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -44,5 +45,15 @@ public class TrueEdge extends Edge {
 				result = result.lub(tmp);
 		}
 		return result;
+	}
+
+	@Override
+	public boolean canBeSimplified() {
+		return false;
+	}
+
+	@Override
+	public TrueEdge newInstance(Statement source, Statement destination) {
+		return new TrueEdge(source, destination);
 	}
 }

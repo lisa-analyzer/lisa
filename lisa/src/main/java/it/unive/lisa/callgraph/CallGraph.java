@@ -7,13 +7,14 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.SemanticFunction;
-import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
 import it.unive.lisa.cfg.statement.OpenCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.datastructures.graph.FixpointException;
+
 import java.util.Collection;
 
 /**

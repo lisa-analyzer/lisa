@@ -1,7 +1,7 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.ExpressionStore;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
@@ -101,7 +101,7 @@ public class Throw extends Statement {
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
 		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())
@@ -111,7 +111,7 @@ public class Throw extends Statement {
 
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
+			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
 		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
 		expressions.put(expression, result);

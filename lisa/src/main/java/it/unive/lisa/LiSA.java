@@ -15,7 +15,6 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.SemanticFunction;
-import it.unive.lisa.cfg.FixpointException;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
@@ -25,6 +24,7 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
 import java.io.Writer;
@@ -447,7 +447,7 @@ public class LiSA {
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
 		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignature())) {
-			cfg.dump(file, cfg.getDescriptor().getFullSignature(), st -> labelGenerator.apply(st));
+			cfg.dump(file, st -> labelGenerator.apply(st));
 		} catch (IOException e) {
 			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
 					e);
