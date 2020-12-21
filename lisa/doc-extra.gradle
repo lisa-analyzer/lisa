@@ -1,11 +1,51 @@
-classDiagram { 
-    packageName = "it.unive.lisa"
-    outputFile = new File("${projectDir}/diagrams/class_diagram.plantuml")
-}
+import org.gradle.api.internal.tasks.userinput.UserInputHandler;
 
 buildClassDiagram {
+    doFirst {
+        mkdir new File("${projectDir}/diagrams/")
+        def handler = services.get(UserInputHandler)
+        def pkg = handler.askQuestion('> Target package (will be appended to \'it.unive.lisa.\'): ', '')
+        if (pkg && !pkg.allWhitespace)
+            pkg = '.' + pkg
+        def fname = handler.askQuestion('> File name (will be under the \'diagrams\' folder with \'.plantuml\' extension): ', 'class_diagram')
+		classDiagram.packageName = "it.unive.lisa" + pkg
+		classDiagram.outputFile = new File("${projectDir}/diagrams/" + fname + ".plantuml")
+    }
+}
+
+plantuml {
+	options {
+		outputDir = new File("${projectDir}/diagrams/")
+		format = 'png'
+	}
+  
+	diagrams {
+		uml {
+			sourceFile = new File('build.gradle')
+		}
+	}
+}
+
+def target
+generateDiagramUml {
+	outputs.upToDateWhen { false }
+	
 	doFirst {
         mkdir new File("${projectDir}/diagrams/")
+        def handler = services.get(UserInputHandler)
+        target = handler.askQuestion('> Filename (without the plantuml extension) to convert: ', '')
+		def file = new File("${projectDir}/diagrams/" + target + ".plantuml")
+		plantuml.diagrams.uml.sourceFile = file
+    }
+
+	doLast {
+		copy {
+			from "${projectDir}/diagrams/"
+			include 'uml.png'
+			into "${projectDir}/diagrams/"
+			rename 'uml.png', target + ".png"
+		}
+		delete "${projectDir}/diagrams/uml.png"
 	}
 }
 

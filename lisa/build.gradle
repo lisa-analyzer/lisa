@@ -31,6 +31,10 @@ plugins {
     // for visualizing them: https://www.planttext.com/
     id 'com.github.roroche.plantuml' version '1.0.2'
     
+    // this can generate images from plantuml files
+	// it requires graphviz to be installed 
+	id "org.fmiw.plantuml" version "0.1"
+    
     // parse git information during the build
     id 'org.ajoberstar.grgit' version '4.0.2'
     
@@ -42,6 +46,10 @@ plugins {
     
     // this enables './gradlew <task> taskTree' to show task dependencies
     id "com.dorongold.task-tree" version "1.5"
+    
+    // publication on maven central
+    id 'maven-publish'
+    id 'signing'
 }
 
 // the code reading data from the git repo has to be placed in the same file where its
@@ -82,3 +90,4 @@ apply from: 'java.gradle'
 apply from: 'code-style.gradle'
 apply from: 'doc-extra.gradle'
 apply from: 'antlr.gradle'
+apply from: 'publishing.gradle'

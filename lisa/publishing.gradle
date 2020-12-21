@@ -1,0 +1,77 @@
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+        	artifactId = 'lisa'
+        	groupId = 'com.github.unive-ssv'
+        	from components.java
+            pom {
+                name = 'LiSA'
+                description = 'A library for static analysis'
+                url = 'https://unive-ssv.github.io/lisa/'
+                packaging = 'jar'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'http://www.opensource.org/licenses/mit-license.php'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'lucaneg'
+                        name = 'Luca Negrini'
+                        email = 'luca.negrini@unive.it'
+                        url = 'https://lucaneg.github.io/'
+                        organization = 'Ca\' Foscari University of Venice, Italy'
+                        organizationUrl = 'https://www.unive.it/'
+                    }
+                    developer {
+                        id = 'VincenzoArceri'
+                        name = 'Vincenzo Arceri'
+                        email = 'vincenzo.arceri@unive.it'
+                        url = 'https://vincenzoarceri.github.io/'
+                        organization = 'Ca\' Foscari University of Venice, Italy'
+                        organizationUrl = 'https://www.unive.it/'
+                    }
+                    developer {
+                        id = 'pietroferrara'
+                        name = 'Pietro Ferrara'
+                        email = 'pietro.ferrara@unive.it'
+                        url = 'https://www.dais.unive.it/~ferrara/'
+                        organization = 'Ca\' Foscari University of Venice, Italy'
+                        organizationUrl = 'https://www.unive.it/'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/UniVE-SSV/lisa.git'
+                    developerConnection = 'scm:git:ssh://github.com/UniVE-SSV/lisa.git'
+                    url = 'https://github.com/UniVE-SSV/lisa'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            name = "OSSRH"
+	        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+	        credentials {
+	        	username = System.getenv("MAVEN_USERNAME")
+	          	password = System.getenv("MAVEN_PASSWORD")
+	      	}
+        }
+        maven {
+		    name = "GitHubPackages"
+		    url = "https://maven.pkg.github.com/UniVE-SSV/lisa"
+		    credentials {
+		      	username = System.getenv("GITHUB_ACTOR")
+		      	password = System.getenv("GITHUB_TOKEN")
+		    }
+	    }
+    }
+}
+
+signing {
+	def signingKey = System.getenv("SIGN_KEY")
+    def signingPassword = System.getenv("SIGN_PW")
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
+}
