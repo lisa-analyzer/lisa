@@ -57,7 +57,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	public Interval top() {
 		return TOP;
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return isTop;

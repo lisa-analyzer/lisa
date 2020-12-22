@@ -25,7 +25,6 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
-
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);
 
 	private final boolean isTop, isBottom;

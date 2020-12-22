@@ -25,8 +25,8 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	private static final Sign POS = new Sign(false, false);
-	public static final Sign NEG = new Sign(false, false);
-	public static final Sign ZERO = new Sign(false, false);
+	private static final Sign NEG = new Sign(false, false);
+	private static final Sign ZERO = new Sign(false, false);
 	private static final Sign TOP = new Sign();
 	private static final Sign BOTTOM = new Sign(false, true);
 
@@ -54,7 +54,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	public Sign top() {
 		return TOP;
 	}
-	
+
 	@Override
 	public Sign bottom() {
 		return BOTTOM;
@@ -62,14 +62,14 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public String representation() {
-		 if (equals(BOTTOM))
+		if (equals(BOTTOM))
 			return "BOTTOM";
 		else if (equals(ZERO))
 			return "0";
 		else if (equals(POS))
 			return "+";
 		else if (equals(NEG))
-				return "-";
+			return "-";
 		else
 			return "TOP";
 	}

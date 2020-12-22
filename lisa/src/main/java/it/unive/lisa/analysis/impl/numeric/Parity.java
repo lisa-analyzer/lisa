@@ -24,12 +24,12 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	private static final Parity EVEN = new Parity(false, false);
-	public static final Parity ODD = new Parity(false, false);
-	public static final Parity TOP = new Parity();
+	private static final Parity ODD = new Parity(false, false);
+	private static final Parity TOP = new Parity();
 	private static final Parity BOTTOM = new Parity(false, true);
 
 	private final boolean isTop, isBottom;
-	
+
 	/**
 	 * Builds the parity abstract domain, representing the top of the parity
 	 * abstract domain.
@@ -37,17 +37,17 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	public Parity() {
 		this(true, false);
 	}
-	
+
 	private Parity(boolean isTop, boolean isBottom) {
 		this.isTop = isTop;
 		this.isBottom = isBottom;
 	}
-	
+
 	@Override
 	public Parity top() {
 		return TOP;
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return isTop;
