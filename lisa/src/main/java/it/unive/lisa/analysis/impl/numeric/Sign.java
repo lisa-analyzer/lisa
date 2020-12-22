@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
@@ -25,11 +24,31 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
  */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private static final Sign POS = new Sign();
-	private static final Sign NEG = new Sign();
-	private static final Sign ZERO = new Sign();
+	private static final Sign POS = new Sign(false, false);
+	private static final Sign NEG = new Sign(false, false);
+	private static final Sign ZERO = new Sign(false, false);
 	private static final Sign TOP = new Sign();
-	private static final Sign BOTTOM = new Sign();
+	private static final Sign BOTTOM = new Sign(false, true);
+
+	private final boolean isTop, isBottom;
+
+	/**
+	 * Builds the sign abstract domain, representing the top of the sign
+	 * abstract domain.
+	 */
+	public Sign() {
+		this(true, false);
+	}
+
+	private Sign(boolean isTop, boolean isBottom) {
+		this.isTop = isTop;
+		this.isBottom = isBottom;
+	}
+
+	@Override
+	public boolean isTop() {
+		return isTop;
+	}
 
 	@Override
 	public Sign top() {
@@ -192,7 +211,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesIdentifier(Identifier identifier) {
+	protected Satisfiability satisfiesAbstractValue(Sign value) {
 		return Satisfiability.UNKNOWN;
 	}
 

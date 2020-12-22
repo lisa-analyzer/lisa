@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
@@ -137,7 +136,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesIdentifier(Identifier identifier) {
+	protected Satisfiability satisfiesAbstractValue(Parity value) {
 		return Satisfiability.UNKNOWN;
 	}
 

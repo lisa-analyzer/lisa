@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
@@ -174,7 +173,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected Satisfiability satisfiesIdentifier(Identifier identifier) {
+	protected Satisfiability satisfiesAbstractValue(IntegerConstantPropagation value) {
 		return Satisfiability.UNKNOWN;
 	}
 
