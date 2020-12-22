@@ -11,7 +11,8 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import java.util.Collection;
 
 /**
- * A sequential edge connecting two statements. The abstract analysis state gets
+ * An edge connecting two statements, that is traversed when the condition
+ * expressed in the source state does not hold. The abstract analysis state gets
  * modified by assuming that the statement where this edge originates does not
  * hold.
  * 
@@ -48,5 +49,15 @@ public class FalseEdge extends Edge {
 				result = result.lub(tmp);
 		}
 		return result;
+	}
+
+	@Override
+	public boolean canBeSimplified() {
+		return false;
+	}
+
+	@Override
+	public FalseEdge newInstance(Statement source, Statement destination) {
+		return new FalseEdge(source, destination);
 	}
 }

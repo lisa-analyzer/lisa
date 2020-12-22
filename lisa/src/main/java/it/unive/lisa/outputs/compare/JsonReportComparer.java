@@ -1,5 +1,7 @@
 package it.unive.lisa.outputs.compare;
 
+import it.unive.lisa.cfg.edge.Edge;
+import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
@@ -193,8 +195,8 @@ public class JsonReportComparer {
 	}
 
 	private static boolean matchDotGraphs(File left, File right) throws IOException {
-		DotGraph lDot = DotGraph.readDot(new FileReader(left));
-		DotGraph rDot = DotGraph.readDot(new FileReader(right));
+		DotGraph<Statement, Edge> lDot = DotGraph.readDot(new FileReader(left));
+		DotGraph<Statement, Edge> rDot = DotGraph.readDot(new FileReader(right));
 		return lDot.equals(rDot);
 	}
 

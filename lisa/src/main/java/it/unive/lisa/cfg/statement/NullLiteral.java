@@ -1,9 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
@@ -55,7 +55,7 @@ public class NullLiteral extends Literal {
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions) throws SemanticException {
+			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
 		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(NullConstant.INSTANCE);
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		return typing;
@@ -63,7 +63,7 @@ public class NullLiteral extends Literal {
 
 	@Override
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
+			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
 		return entryState.smallStepSemantics(NullConstant.INSTANCE);
 	}

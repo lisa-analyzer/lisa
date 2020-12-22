@@ -2,10 +2,10 @@ package it.unive.lisa.cfg;
 
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.ExpressionStore;
+import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.edge.Edge;
@@ -15,24 +15,18 @@ import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Ret;
 import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.FixpointException;
+import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -40,28 +34,7 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG {
-
-	private static final Logger log = LogManager.getLogger(CFG.class);
-
-	/**
-	 * The default number of fixpoint iteration on a given statement after which
-	 * calls to {@link Lattice#lub(Lattice)} gets replaced with
-	 * {@link Lattice#widening(Lattice)}.
-	 */
-	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
-
-	/**
-	 * The adjacency matrix of this graph, mapping statements to the collection
-	 * of edges attached to it.
-	 */
-	private final AdjacencyMatrix adjacencyMatrix;
-
-	/**
-	 * The statements of this control flow graph that are entrypoints, that is,
-	 * that can be executed from other cfgs.
-	 */
-	private Collection<Statement> entrypoints;
+public class CFG extends FixpointGraph<Statement, Edge> {
 
 	/**
 	 * The descriptor of this control flow graph.
@@ -74,9 +47,8 @@ public class CFG {
 	 * @param descriptor the descriptor of this cfg
 	 */
 	public CFG(CFGDescriptor descriptor) {
-		this.adjacencyMatrix = new AdjacencyMatrix();
+		super();
 		this.descriptor = descriptor;
-		this.entrypoints = new HashSet<>();
 	}
 
 	/**
@@ -88,10 +60,10 @@ public class CFG {
 	 * @param adjacencyMatrix the matrix containing all the statements and the
 	 *                            edges that will be part of this cfg
 	 */
-	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints, AdjacencyMatrix adjacencyMatrix) {
-		this.adjacencyMatrix = adjacencyMatrix;
+	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints,
+			AdjacencyMatrix<Statement, Edge> adjacencyMatrix) {
+		super(entrypoints, adjacencyMatrix);
 		this.descriptor = descriptor;
-		this.entrypoints = entrypoints;
 	}
 
 	/**
@@ -100,8 +72,7 @@ public class CFG {
 	 * @param other the original cfg
 	 */
 	protected CFG(CFG other) {
-		this.adjacencyMatrix = new AdjacencyMatrix(other.adjacencyMatrix);
-		this.entrypoints = new ArrayList<>(other.entrypoints);
+		super(other.entrypoints, other.adjacencyMatrix);
 		this.descriptor = other.descriptor;
 	}
 
@@ -112,17 +83,6 @@ public class CFG {
 	 */
 	public final CFGDescriptor getDescriptor() {
 		return descriptor;
-	}
-
-	/**
-	 * Yields the statements of this control flow graph that are entrypoints,
-	 * that is, that can be executed from other cfgs. This usually contains the
-	 * first statement of this cfg, but might also contain other ones.
-	 * 
-	 * @return the entrypoints of this cfg.
-	 */
-	public final Collection<Statement> getEntrypoints() {
-		return entrypoints;
 	}
 
 	/**
@@ -137,238 +97,12 @@ public class CFG {
 				.collect(Collectors.toList());
 	}
 
-	/**
-	 * Yields the set of nodes of this control flow graph.
-	 * 
-	 * @return the collection of nodes
-	 */
-	public final Collection<Statement> getNodes() {
-		return adjacencyMatrix.getNodes();
-	}
-
-	/**
-	 * Yields the set of edges of this control flow graph.
-	 * 
-	 * @return the collection of edges
-	 */
-	public final Collection<Edge> getEdges() {
-		return adjacencyMatrix.getEdges();
-	}
-
-	/**
-	 * Adds the given node to the set of nodes, optionally setting that as root.
-	 * This is equivalent to invoking {@link #addNode(Statement, boolean)} with
-	 * {@code false} as second parameter.
-	 * 
-	 * @param node the node to add
-	 */
-	public final void addNode(Statement node) {
-		addNode(node, false);
-	}
-
-	/**
-	 * Adds the given node to the set of nodes, optionally marking this as
-	 * entrypoint (that is, reachable executable from other cfgs). The first
-	 * statement of a cfg should always be marked as entrypoint. Besides,
-	 * statements that might be reached through jumps from external cfgs should
-	 * be marked as entrypoints as well.
-	 * 
-	 * @param node       the node to add
-	 * @param entrypoint if {@code true} causes the given node to be considered
-	 *                       as an entrypoint.
-	 */
-	public final void addNode(Statement node, boolean entrypoint) {
-		adjacencyMatrix.addNode(node);
-		if (entrypoint)
-			this.entrypoints.add(node);
-	}
-
-	/**
-	 * Adds an edge to this control flow graph.
-	 * 
-	 * @param edge the edge to add
-	 * 
-	 * @throws UnsupportedOperationException if the source or the destination of
-	 *                                           the given edge are not part of
-	 *                                           this cfg
-	 */
-	public void addEdge(Edge edge) {
-		adjacencyMatrix.addEdge(edge);
-	}
-
-	/**
-	 * Yields the total number of nodes of this control flow graph.
-	 * 
-	 * @return the number of nodes
-	 */
-	public final int getNodesCount() {
-		return getNodes().size();
-	}
-
-	/**
-	 * Yields the total number of edges of this control flow graph.
-	 * 
-	 * @return the number of edges
-	 */
-	public final int getEdgesCount() {
-		return getEdges().size();
-	}
-
-	/**
-	 * Yields the edge connecting the two given statements, if any. Yields
-	 * {@code null} if such edge does not exist, or if one of the two statements
-	 * is not inside this cfg.
-	 * 
-	 * @param source      the source statement
-	 * @param destination the destination statement
-	 * 
-	 * @return the edge connecting {@code source} to {@code destination}, or
-	 *             {@code null}
-	 */
-	public final Edge getEdgeConnecting(Statement source, Statement destination) {
-		return adjacencyMatrix.getEdgeConnecting(source, destination);
-	}
-
-	/**
-	 * Yields the collection of the nodes that are followers of the given one,
-	 * that is, all nodes such that there exist an edge in this control flow
-	 * graph going from the given node to such node. Yields {@code null} if the
-	 * node is not in this cfg.
-	 * 
-	 * @param node the node
-	 * 
-	 * @return the collection of followers
-	 */
-	public final Collection<Statement> followersOf(Statement node) {
-		return adjacencyMatrix.followersOf(node);
-	}
-
-	/**
-	 * Yields the collection of the nodes that are predecessors of the given
-	 * vertex, that is, all nodes such that there exist an edge in this control
-	 * flow graph going from such node to the given one. Yields {@code null} if
-	 * the node is not in this cfg.
-	 * 
-	 * @param node the node
-	 * 
-	 * @return the collection of predecessors
-	 */
-	public final Collection<Statement> predecessorsOf(Statement node) {
-		return adjacencyMatrix.predecessorsOf(node);
-	}
-
-	/**
-	 * Dumps the content of this control flow graph in the given writer,
-	 * formatted as a dot file.
-	 * 
-	 * @param writer the writer where the content will be written
-	 * @param name   the name of the dot diagraph
-	 * 
-	 * @throws IOException if an exception happens while writing something to
-	 *                         the given writer
-	 */
-	public void dump(Writer writer, String name) throws IOException {
-		dump(writer, name, st -> "");
-	}
-
-	/**
-	 * Dumps the content of this control flow graph in the given writer,
-	 * formatted as a dot file. The content of each vertex will be enriched by
-	 * invoking labelGenerator on the vertex itself, to obtain an extra
-	 * description to be concatenated with the standard call to the vertex's
-	 * {@link #toString()}
-	 * 
-	 * @param writer         the writer where the content will be written
-	 * @param name           the name of the dot diagraph
-	 * @param labelGenerator the function used to generate extra labels
-	 * 
-	 * @throws IOException if an exception happens while writing something to
-	 *                         the given writer
-	 */
-	public void dump(Writer writer, String name, Function<Statement, String> labelGenerator) throws IOException {
-		DotGraph.fromCFG(this, labelGenerator).dumpDot(writer);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
-		result = prime * result + ((entrypoints == null) ? 0 : entrypoints.hashCode());
 		return result;
-	}
-
-	/**
-	 * CFG instances use reference equality for equality checks, under the
-	 * assumption that every cfg is unique. For checking if two cfgs are
-	 * effectively equal (that is, they are different object with the same
-	 * structure) use {@link #isEqualTo(CFG)}. <br>
-	 * <br>
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return this == obj;
-	}
-
-	/**
-	 * Checks if this cfg is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
-	 * 
-	 * @param cfg the other cfg
-	 * 
-	 * @return {@code true} if this cfg and the given one are effectively equals
-	 */
-	public boolean isEqualTo(CFG cfg) {
-		if (this == cfg)
-			return true;
-		if (cfg == null)
-			return false;
-		if (getClass() != cfg.getClass())
-			return false;
-		if (descriptor == null) {
-			if (cfg.descriptor != null)
-				return false;
-		} else if (!descriptor.equals(cfg.descriptor))
-			return false;
-		if (entrypoints == null) {
-			if (cfg.entrypoints != null)
-				return false;
-		} else if (entrypoints.size() != cfg.entrypoints.size())
-			return false;
-		else {
-			// statements use reference equality, thus
-			// entrypoint.equals(cfg.entrypoints)
-			// won't
-			// achieve content comparison. Need to do this manually.
-
-			// the following keeps track of the unmatched statements in
-			// cfg.entrypoints
-			Collection<Statement> copy = new HashSet<>(cfg.entrypoints);
-			boolean found;
-			for (Statement s : entrypoints) {
-				found = false;
-				for (Statement ss : cfg.entrypoints)
-					if (copy.contains(ss) && s.isEqualTo(ss)) {
-						copy.remove(ss);
-						found = true;
-						break;
-					}
-				if (!found)
-					return false;
-			}
-
-			if (!copy.isEmpty())
-				// we also have to match all of the entrypoints in
-				// cfg.entrypoints
-				return false;
-		}
-		if (adjacencyMatrix == null) {
-			if (cfg.adjacencyMatrix != null)
-				return false;
-		} else if (!adjacencyMatrix.isEqualTo(cfg.adjacencyMatrix))
-			return false;
-		return true;
 	}
 
 	@Override
@@ -385,13 +119,10 @@ public class CFG {
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one
 	 *                                           {@link NoOp} with an outgoing
-	 *                                           non-sequential edge, or if one
-	 *                                           of the ingoing edges to the
-	 *                                           {@link NoOp} is not currently
-	 *                                           supported.
+	 *                                           non-sequential edge.
 	 */
 	public void simplify() {
-		adjacencyMatrix.simplify();
+		super.simplify(NoOp.class);
 	}
 
 	/**
@@ -916,32 +647,9 @@ public class CFG {
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
 	 *                analysis states
 	 */
-	@FunctionalInterface
-	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> {
+	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> extends
+			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, H, V, StatementStore<H, V>> {
 
-		/**
-		 * Computes the semantics of the given {@link Statement} {@code st},
-		 * assuming that the entry state is {@code entryState}. The results of
-		 * the semantic computations on inner {@link Expression}s must be saved
-		 * inside {@code expressions}. If the computation needs information
-		 * regarding the other {@link CFG}s, {@code callGraph} can be queried.
-		 * 
-		 * @param st          the statement whose semantics needs to be
-		 *                        evaluated
-		 * @param entryState  the entry state for the computation
-		 * @param callGraph   the call graph that can be used to obtain semantic
-		 *                        information on other cfgs
-		 * @param expressions the store where semantics results of inner
-		 *                        expressions must be stored
-		 * 
-		 * @return the abstract analysis state after the execution of the given
-		 *             statement
-		 * 
-		 * @throws SemanticException if something goes wrong during the
-		 *                               computation
-		 */
-		AnalysisState<H, V> compute(Statement st, AnalysisState<H, V> entryState, CallGraph callGraph,
-				ExpressionStore<AnalysisState<H, V>> expressions) throws SemanticException;
 	}
 
 	/**
@@ -988,127 +696,21 @@ public class CFG {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
+	public <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
 			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws, int widenAfter,
 			SemanticFunction<H, V> semantics)
 			throws FixpointException {
-		int size = adjacencyMatrix.getNodes().size();
-		Map<Statement, AtomicInteger> lubs = new HashMap<>(size);
-		Map<Statement, Pair<AnalysisState<H, V>, ExpressionStore<AnalysisState<H, V>>>> result = new HashMap<>(size);
-		startingPoints.keySet().forEach(ws::push);
-
-		AnalysisState<H, V> oldApprox = null, newApprox;
-		ExpressionStore<AnalysisState<H, V>> oldExprs = null, newExprs;
-		try {
-			while (!ws.isEmpty()) {
-				Statement current = ws.pop();
-
-				if (current == null)
-					throw new FixpointException(
-							"Unknown instruction encountered during fixpoint execution in '" + descriptor + "'");
-				if (!adjacencyMatrix.getNodes().contains(current))
-					throw new FixpointException("'" + current
-							+ "' is not part of this control flow graph, and cannot be analyzed in this fixpoint computation");
-
-				AnalysisState<H, V> entrystate;
-				try {
-					entrystate = getEntryState(current, startingPoints, result);
-				} catch (SemanticException e) {
-					throw new FixpointException(
-							"Exception while computing the entry state for '" + current + "' in " + descriptor, e);
-				}
-
-				if (entrystate == null)
-					throw new FixpointException(current + " does not have an entry state");
-
-				if (result.containsKey(current)) {
-					oldApprox = result.get(current).getLeft();
-					oldExprs = result.get(current).getRight();
-				} else {
-					oldApprox = null;
-					oldExprs = null;
-				}
-
-				try {
-					newExprs = new ExpressionStore<>(entrystate);
-					newApprox = semantics.compute(current, entrystate, cg, newExprs);
-				} catch (SemanticException e) {
-					log.error("Evaluation of the semantics of '" + current + "' in " + descriptor
-							+ " led to an exception: " + e);
-					throw new FixpointException("Semantic exception during fixpoint computation", e);
-				}
-
-				if (oldApprox != null && oldExprs != null)
-					try {
-						if (widenAfter == 0) {
-							newApprox = newApprox.lub(oldApprox);
-							newExprs = newExprs.lub(oldExprs);
-						} else {
-							// we multiply by the number of predecessors since
-							// if we have more than one
-							// the threshold will be reached faster
-							int lub = lubs
-									.computeIfAbsent(current,
-											e -> new AtomicInteger(widenAfter * predecessorsOf(e).size()))
-									.getAndDecrement();
-							if (lub > 0) {
-								newApprox = newApprox.lub(oldApprox);
-								newExprs = newExprs.lub(oldExprs);
-							} else {
-								newApprox = oldApprox.widening(newApprox);
-								newExprs = oldExprs.widening(newExprs);
-							}
-						}
-					} catch (SemanticException e) {
-						throw new FixpointException(
-								"Exception while updating the analysis results of '" + current + "' in " + descriptor,
-								e);
-					}
-
-				if ((oldApprox == null && oldExprs == null) || !newApprox.lessOrEqual(oldApprox)
-						|| !newExprs.lessOrEqual(oldExprs)) {
-					result.put(current, Pair.of(newApprox, newExprs));
-					for (Statement instr : followersOf(current))
-						ws.push(instr);
-				}
-			}
-
-			HashMap<Statement, AnalysisState<H, V>> finalResults = new HashMap<>(result.size());
-			for (Entry<Statement, Pair<AnalysisState<H, V>, ExpressionStore<AnalysisState<H, V>>>> e : result
-					.entrySet()) {
-				finalResults.put(e.getKey(), e.getValue().getLeft());
-				for (Entry<Expression, AnalysisState<H, V>> ee : e.getValue().getRight())
-					finalResults.put(ee.getKey(), ee.getValue());
-			}
-
-			return new CFGWithAnalysisResults<>(this, finalResults);
-		} catch (Exception e) {
-			log.fatal("Unexpected exception during fixpoint computation of '" + descriptor + "': " + e);
-			throw new FixpointException("Unexpected exception during fixpoint computation", e);
-		}
+		return new CFGWithAnalysisResults<>(this, super.fixpoint(startingPoints, cg, ws, widenAfter, semantics));
 	}
 
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getEntryState(Statement current,
-			Map<Statement, AnalysisState<H, V>> startingPoints,
-			Map<Statement, Pair<AnalysisState<H, V>, ExpressionStore<AnalysisState<H, V>>>> result)
-			throws SemanticException {
-		AnalysisState<H, V> entrystate = startingPoints.get(current);
-		Collection<Statement> preds = predecessorsOf(current);
-		List<AnalysisState<H, V>> states = new ArrayList<>(preds.size());
+	@Override
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkInternalStore(
+			AnalysisState<H, V> entrystate) {
+		return new StatementStore<>(entrystate);
+	}
 
-		for (Statement pred : preds)
-			if (result.containsKey(pred)) {
-				// this might not have been computed yet
-				Edge edge = adjacencyMatrix.getEdgeConnecting(pred, current);
-				states.add(edge.traverse(result.get(edge.getSource()).getLeft()));
-			}
-
-		for (AnalysisState<H, V> s : states)
-			if (entrystate == null)
-				entrystate = s;
-			else
-				entrystate = entrystate.lub(s);
-
-		return entrystate;
+	@Override
+	protected DotGraph<Statement, Edge> toDot(Function<Statement, String> labelGenerator) {
+		return DotCFG.fromCFG(this, labelGenerator);
 	}
 }
