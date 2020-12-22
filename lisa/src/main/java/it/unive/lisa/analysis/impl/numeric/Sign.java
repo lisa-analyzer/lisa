@@ -25,8 +25,8 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	private static final Sign POS = new Sign(false, false);
-	private static final Sign NEG = new Sign(false, false);
-	private static final Sign ZERO = new Sign(false, false);
+	public static final Sign NEG = new Sign(false, false);
+	public static final Sign ZERO = new Sign(false, false);
 	private static final Sign TOP = new Sign();
 	private static final Sign BOTTOM = new Sign(false, true);
 
@@ -54,7 +54,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	public Sign top() {
 		return TOP;
 	}
-
+	
 	@Override
 	public Sign bottom() {
 		return BOTTOM;
@@ -62,16 +62,16 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public String representation() {
-		if (equals(TOP))
-			return "TOP";
-		else if (equals(BOTTOM))
+		 if (equals(BOTTOM))
 			return "BOTTOM";
 		else if (equals(ZERO))
 			return "0";
 		else if (equals(POS))
 			return "+";
+		else if (equals(NEG))
+				return "-";
 		else
-			return "-";
+			return "TOP";
 	}
 
 	@Override
@@ -193,21 +193,32 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public int hashCode() {
-		if (this == TOP)
-			return 1;
-		else if (this == BOTTOM)
-			return 2;
-		else if (this == ZERO)
-			return 3;
+		if (this == ZERO)
+			return 0;
 		else if (this == POS)
-			return 4;
+			return 1;
+		else if (this == NEG)
+			return 2;
+		else if (this == BOTTOM)
+			return 3;
 		else
-			return 5;
+			return 4;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return this == obj;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Sign other = (Sign) obj;
+		if (isBottom != other.isBottom)
+			return false;
+		if (isTop != other.isTop)
+			return false;
+		return isTop && other.isTop;
 	}
 
 	@Override

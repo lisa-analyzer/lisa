@@ -57,6 +57,11 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	public Interval top() {
 		return TOP;
 	}
+	
+	@Override
+	public boolean isTop() {
+		return isTop;
+	}
 
 	@Override
 	public Interval bottom() {
@@ -154,7 +159,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected boolean lessOrEqualAux(Interval other) throws SemanticException {
-		return geqLow(low, other.low) && lessOrEqualHigh(high, other.high);
+		return geqLow(low, other.low) && leqHigh(high, other.high);
 	}
 
 	@Override
@@ -382,7 +387,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	 * 
 	 * @return {@code true} iff iff h1 <= h2, taking into account +Inf values;
 	 */
-	private boolean lessOrEqualHigh(Integer h1, Integer h2) {
+	private boolean leqHigh(Integer h1, Integer h2) {
 		if (h1 == null) {
 			if (h2 == null)
 				return true;
@@ -430,6 +435,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return false;
 		} else if (!low.equals(other.low))
 			return false;
-		return true;
+		return isTop && other.isTop;
 	}
 }

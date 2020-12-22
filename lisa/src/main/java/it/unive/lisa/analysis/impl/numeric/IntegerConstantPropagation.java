@@ -30,7 +30,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	private final boolean isTop, isBottom;
 
-	private final Long value;
+	private final Integer value;
 
 	/**
 	 * Builds the top abstract value.
@@ -39,13 +39,13 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 		this(null, true, false);
 	}
 
-	private IntegerConstantPropagation(Long value, boolean isTop, boolean isBottom) {
+	private IntegerConstantPropagation(Integer value, boolean isTop, boolean isBottom) {
 		this.value = value;
 		this.isTop = isTop;
 		this.isBottom = isBottom;
 	}
 
-	private IntegerConstantPropagation(Long value) {
+	private IntegerConstantPropagation(Integer value) {
 		this(value, false, false);
 	}
 
@@ -56,6 +56,11 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	public IntegerConstantPropagation top() {
 		return TOP;
+	}
+
+	@Override
+	public boolean isTop() {
+		return isTop;
 	}
 
 	@Override
@@ -75,8 +80,8 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	protected IntegerConstantPropagation evalNonNullConstant(Constant constant) {
-		if (constant.getValue() instanceof Long)
-			return new IntegerConstantPropagation((Long) constant.getValue());
+		if (constant.getValue() instanceof Integer)
+			return new IntegerConstantPropagation((Integer) constant.getValue());
 		return top();
 	}
 
@@ -128,7 +133,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	protected IntegerConstantPropagation lubAux(IntegerConstantPropagation other) throws SemanticException {
-		return bottom();
+		return TOP;
 	}
 
 	@Override
@@ -143,6 +148,11 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	public int hashCode() {
+		if (isTop())
+			return 1;
+		else if (isBottom())
+			return 2;
+
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (isBottom ? 1231 : 1237);
@@ -169,7 +179,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 				return false;
 		} else if (!value.equals(other.value))
 			return false;
-		return true;
+		return isTop && other.isTop;
 	}
 
 	@Override

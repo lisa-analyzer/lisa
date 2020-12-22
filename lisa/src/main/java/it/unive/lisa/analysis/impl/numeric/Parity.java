@@ -23,14 +23,34 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
  */
 public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
-	private static final Parity EVEN = new Parity();
-	private static final Parity ODD = new Parity();
-	private static final Parity TOP = new Parity();
-	private static final Parity BOTTOM = new Parity();
+	private static final Parity EVEN = new Parity(false, false);
+	public static final Parity ODD = new Parity(false, false);
+	public static final Parity TOP = new Parity();
+	private static final Parity BOTTOM = new Parity(false, true);
 
+	private final boolean isTop, isBottom;
+	
+	/**
+	 * Builds the parity abstract domain, representing the top of the parity
+	 * abstract domain.
+	 */
+	public Parity() {
+		this(true, false);
+	}
+	
+	private Parity(boolean isTop, boolean isBottom) {
+		this.isTop = isTop;
+		this.isBottom = isBottom;
+	}
+	
 	@Override
 	public Parity top() {
 		return TOP;
+	}
+	
+	@Override
+	public boolean isTop() {
+		return isTop;
 	}
 
 	@Override
@@ -42,12 +62,12 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	public String representation() {
 		if (equals(BOTTOM))
 			return "BOTTOM";
-		else if (equals(TOP))
-			return "TOP";
+		else if (equals(EVEN))
+			return "Even";
 		else if (equals(ODD))
 			return "Odd";
 		else
-			return "Even";
+			return "TOP";
 	}
 
 	@Override
@@ -57,8 +77,8 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity evalNonNullConstant(Constant constant) {
-		if (constant.getValue() instanceof Long) {
-			Long i = (Long) constant.getValue();
+		if (constant.getValue() instanceof Integer) {
+			Integer i = (Integer) constant.getValue();
 			return i % 2 == 0 ? EVEN : ODD;
 		}
 
@@ -90,7 +110,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right) {
-
 		switch (operator) {
 		case NUMERIC_ADD:
 		case NUMERIC_SUB:
@@ -109,20 +128,20 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 			else
 				return right.isOdd() ? EVEN : TOP;
 		case NUMERIC_MOD:
-			return top();
+			return TOP;
 		default:
-			return top();
+			return TOP;
 		}
 	}
 
 	@Override
 	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right) {
-		return top();
+		return TOP;
 	}
 
 	@Override
 	protected Parity lubAux(Parity other) throws SemanticException {
-		return BOTTOM;
+		return TOP;
 	}
 
 	@Override
@@ -173,9 +192,9 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	public int hashCode() {
-		if (this == TOP)
+		if (isBottom())
 			return 1;
-		else if (this == BOTTOM)
+		else if (this == EVEN)
 			return 2;
 		else if (this == ODD)
 			return 3;
@@ -185,6 +204,17 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	public boolean equals(Object obj) {
-		return this == obj;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Parity other = (Parity) obj;
+		if (isBottom != other.isBottom)
+			return false;
+		if (isTop != other.isTop)
+			return false;
+		return isTop && other.isTop;
 	}
 }
