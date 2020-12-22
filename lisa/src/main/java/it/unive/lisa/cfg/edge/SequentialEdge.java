@@ -33,4 +33,14 @@ public class SequentialEdge extends Edge {
 			AnalysisState<H, V> sourceState) {
 		return sourceState;
 	}
+
+	@Override
+	public boolean canBeSimplified() {
+		return true;
+	}
+
+	@Override
+	public SequentialEdge newInstance(Statement source, Statement destination) {
+		return new SequentialEdge(source, destination);
+	}
 }

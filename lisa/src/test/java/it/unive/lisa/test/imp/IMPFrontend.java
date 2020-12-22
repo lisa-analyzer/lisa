@@ -1,9 +1,9 @@
 package it.unive.lisa.test.imp;
 
-import it.unive.lisa.cfg.AdjacencyMatrix;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
 import it.unive.lisa.cfg.Parameter;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;
 import it.unive.lisa.cfg.edge.TrueEdge;
@@ -78,6 +78,7 @@ import it.unive.lisa.test.imp.types.BoolType;
 import it.unive.lisa.test.imp.types.ClassType;
 import it.unive.lisa.test.imp.types.FloatType;
 import it.unive.lisa.test.imp.types.IntType;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -128,7 +129,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private Collection<CFG> cfgs;
 
-	private AdjacencyMatrix matrix;
+	private AdjacencyMatrix<Statement, Edge> matrix;
 
 	private CFG currentCFG;
 
@@ -187,7 +188,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
 		Collection<Statement> entrypoints = new HashSet<>();
-		matrix = new AdjacencyMatrix();
+		matrix = new AdjacencyMatrix<>();
 		// side effects on entrypoints and matrix will affect the cfg
 		currentCFG = new CFG(mkDescriptor(ctx), entrypoints, matrix);
 

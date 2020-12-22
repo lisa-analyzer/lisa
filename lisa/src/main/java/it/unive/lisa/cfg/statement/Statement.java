@@ -1,15 +1,16 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.ExpressionStore;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -18,7 +19,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements Comparable<Statement> {
+public abstract class Statement implements Comparable<Statement>, Node<Statement> {
 
 	/**
 	 * The cfg containing this statement.
@@ -116,18 +117,6 @@ public abstract class Statement implements Comparable<Statement> {
 		return offset;
 	}
 
-	/**
-	 * Sets the offset of this statement to the given value, and then proceeds
-	 * by setting the one of its nested expressions to subsequent values. The
-	 * last offset used is returned.
-	 * 
-	 * @param offset the offset to set
-	 * 
-	 * @return the last offset used while setting the offsets of nested
-	 *             expressions
-	 */
-	public abstract int setOffset(int offset);
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -153,16 +142,7 @@ public abstract class Statement implements Comparable<Statement> {
 		return this == obj;
 	}
 
-	/**
-	 * Checks if this statement is effectively equal to the given one, that is,
-	 * if they have the same structure while potentially being different
-	 * instances.
-	 * 
-	 * @param st the other statement
-	 * 
-	 * @return {@code true} if this statement and the given one are effectively
-	 *             equals
-	 */
+	@Override
 	public boolean isEqualTo(Statement st) {
 		if (this == st)
 			return true;
@@ -208,7 +188,7 @@ public abstract class Statement implements Comparable<Statement> {
 	 * Computes the runtime types for this statement, expressing how type
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #typeInference(AnalysisState, CallGraph, ExpressionStore)} of each
+	 * {@link #typeInference(AnalysisState, CallGraph, StatementStore)} of each
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}. If this statement is an {@link Expression},
 	 * implementers of this method should call
@@ -233,14 +213,14 @@ public abstract class Statement implements Comparable<Statement> {
 	 */
 	public abstract <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			ExpressionStore<AnalysisState<H, TypeEnvironment>> expressions)
+			StatementStore<H, TypeEnvironment> expressions)
 			throws SemanticException;
 
 	/**
 	 * Computes the semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #semantics(AnalysisState, CallGraph, ExpressionStore)} of each
+	 * {@link #semantics(AnalysisState, CallGraph, StatementStore)} of each
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
@@ -259,6 +239,6 @@ public abstract class Statement implements Comparable<Statement> {
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, ExpressionStore<AnalysisState<H, V>> expressions)
+			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException;
 }
