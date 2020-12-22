@@ -1,5 +1,6 @@
-package it.unive.lisa.test.imp.tutorial;
+package it.unive.lisa.analysis.impl.numeric;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
@@ -10,61 +11,44 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
+/**
+ * The Parity abstract domain, tracking if a numeric value is even or odd,
+ * implemented as a {@link BaseNonRelationalValueDomain}, handling top and
+ * bottom values for the expression evaluation and bottom values for the
+ * expression satisfiability. Top and bottom cases for least upper bound,
+ * widening and less or equals operations are handled by {@link BaseLattice} in
+ * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
+ * {@link BaseLattice#lessOrEqual} methods, respectively.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
-	private enum Values {
-		ODD,
-		EVEN,
-		TOP,
-		BOT
-	}
-
-	private final Values parity;
-
-	private Parity(Values parity) {
-		this.parity = parity;
-	}
-
-	public Parity() {
-		this(Values.TOP);
-	}
+	private static final Parity EVEN = new Parity();
+	private static final Parity ODD = new Parity();
+	private static final Parity TOP = new Parity();
+	private static final Parity BOTTOM = new Parity();
 
 	@Override
 	public Parity top() {
-		return new Parity(Values.TOP);
-	}
-
-	@Override
-	public boolean isTop() {
-		return getParity() == Values.TOP;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return getParity() == Values.BOT;
+		return TOP;
 	}
 
 	@Override
 	public Parity bottom() {
-		return new Parity(Values.BOT);
+		return BOTTOM;
 	}
 
 	@Override
 	public String representation() {
-		switch (parity) {
-		case BOT:
-			return "BOT";
-		case ODD:
-			return "Odd";
-		case EVEN:
-			return "Even";
-		default:
+		if (equals(BOTTOM))
+			return "BOTTOM";
+		else if (equals(TOP))
 			return "TOP";
-		}
-	}
-
-	public Values getParity() {
-		return parity;
+		else if (equals(ODD))
+			return "Odd";
+		else
+			return "Even";
 	}
 
 	@Override
@@ -74,28 +58,20 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity evalNonNullConstant(Constant constant) {
-		if (constant.getValue() instanceof Integer) {
-			Integer i = (Integer) constant.getValue();
-			return i % 2 == 0 ? even() : odd();
+		if (constant.getValue() instanceof Long) {
+			Long i = (Long) constant.getValue();
+			return i % 2 == 0 ? EVEN : ODD;
 		}
 
 		return top();
 	}
 
-	private Parity odd() {
-		return new Parity(Values.ODD);
-	}
-
-	private Parity even() {
-		return new Parity(Values.EVEN);
-	}
-
 	private boolean isEven() {
-		return parity == Values.EVEN;
+		return this == EVEN;
 	}
 
 	private boolean isOdd() {
-		return parity == Values.ODD;
+		return this == ODD;
 	}
 
 	@Override
@@ -120,19 +96,19 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		case NUMERIC_ADD:
 		case NUMERIC_SUB:
 			if (right.equals(left))
-				return even();
+				return EVEN;
 			else
-				return odd();
+				return ODD;
 		case NUMERIC_MUL:
 			if (left.isEven() || right.isEven())
-				return even();
+				return EVEN;
 			else
-				return odd();
+				return ODD;
 		case NUMERIC_DIV:
 			if (left.isOdd())
-				return right.isOdd() ? odd() : even();
+				return right.isOdd() ? ODD : EVEN;
 			else
-				return right.isOdd() ? even() : top();
+				return right.isOdd() ? EVEN : TOP;
 		case NUMERIC_MOD:
 			return top();
 		default:
@@ -147,7 +123,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity lubAux(Parity other) throws SemanticException {
-		return equals(other) ? other : top();
+		return BOTTOM;
 	}
 
 	@Override
@@ -157,7 +133,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected boolean lessOrEqualAux(Parity other) throws SemanticException {
-		return equals(other);
+		return false;
 	}
 
 	@Override
@@ -198,23 +174,18 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((parity == null) ? 0 : parity.hashCode());
-		return result;
+		if (this == TOP)
+			return 1;
+		else if (this == BOTTOM)
+			return 2;
+		else if (this == ODD)
+			return 3;
+		else
+			return 4;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Parity other = (Parity) obj;
-		if (parity != other.parity)
-			return false;
-		return true;
+		return this == obj;
 	}
 }

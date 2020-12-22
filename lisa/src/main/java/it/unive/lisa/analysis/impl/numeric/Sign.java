@@ -1,5 +1,6 @@
-package it.unive.lisa.test.imp.tutorial;
+package it.unive.lisa.analysis.impl.numeric;
 
+import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
@@ -10,109 +11,81 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
+/**
+ * The basic Sign abstract domain, tracking zero, strictly positive and strictly
+ * negative integer values, implemented as a
+ * {@link BaseNonRelationalValueDomain}, handling top and bottom values for the
+ * expression evaluation and bottom values for the expression satisfiability.
+ * Top and bottom cases for least upper bounds, widening and less or equals
+ * operations are handled by {@link BaseLattice} in {@link BaseLattice#lub},
+ * {@link BaseLattice#widening} and {@link BaseLattice#lessOrEqual} methods,
+ * respectively.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private enum Values {
-		POS,
-		NEG,
-		ZERO,
-		TOP,
-		BOT
-	}
-
-	private final Values sign;
-
-	private Sign(Values sign) {
-		this.sign = sign;
-	}
-
-	public Sign() {
-		this(Values.TOP);
-	}
+	private static final Sign POS = new Sign();
+	private static final Sign NEG = new Sign();
+	private static final Sign ZERO = new Sign();
+	private static final Sign TOP = new Sign();
+	private static final Sign BOTTOM = new Sign();
 
 	@Override
 	public Sign top() {
-		return new Sign(Values.TOP);
-	}
-
-	@Override
-	public boolean isTop() {
-		return getSign() == Values.TOP;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return getSign() == Values.BOT;
+		return TOP;
 	}
 
 	@Override
 	public Sign bottom() {
-		return new Sign(Values.BOT);
+		return BOTTOM;
 	}
 
 	@Override
 	public String representation() {
-		switch (sign) {
-		case BOT:
-			return "Bottom";
-		case NEG:
-			return "-";
-		case POS:
-			return "+";
-		case ZERO:
+		if (equals(TOP))
+			return "TOP";
+		else if (equals(BOTTOM))
+			return "BOTTOM";
+		else if (equals(ZERO))
 			return "0";
-		default:
-			return "Unknown sign";
-		}
-	}
-
-	public Values getSign() {
-		return sign;
+		else if (equals(POS))
+			return "+";
+		else
+			return "-";
 	}
 
 	@Override
 	protected Sign evalNullConstant() {
-		return bottom();
+		return top();
 	}
 
 	@Override
 	protected Sign evalNonNullConstant(Constant constant) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
-			return i == 0 ? zero() : i > 0 ? pos() : neg();
+			return i == 0 ? ZERO : i > 0 ? POS : NEG;
 		}
 
 		return top();
 	}
 
-	private Sign pos() {
-		return new Sign(Values.POS);
-	}
-
-	private Sign neg() {
-		return new Sign(Values.NEG);
-	}
-
-	private Sign zero() {
-		return new Sign(Values.ZERO);
-	}
-
 	private boolean isPositive() {
-		return sign == Values.POS;
+		return this == POS;
 	}
 
 	private boolean isZero() {
-		return sign == Values.ZERO;
+		return this == ZERO;
 	}
 
 	private boolean isNegative() {
-		return sign == Values.NEG;
+		return this == NEG;
 	}
 
 	private Sign opposite() {
 		if (isTop() || isBottom())
 			return this;
-		return isPositive() ? neg() : isNegative() ? pos() : zero();
+		return isPositive() ? NEG : isNegative() ? POS : ZERO;
 	}
 
 	@Override
@@ -125,15 +98,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		switch (operator) {
 		case NUMERIC_NEG:
 			if (arg.isPositive())
-				return neg();
+				return NEG;
 			else if (arg.isNegative())
-				return pos();
+				return POS;
 			else if (arg.isZero())
-				return zero();
+				return ZERO;
 			else
-				return top();
+				return TOP;
 		default:
-			return top();
+			return TOP;
 		}
 	}
 
@@ -162,20 +135,20 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			if (right.isZero())
 				return bottom();
 			else if (left.isZero())
-				return zero();
+				return ZERO;
 			else if (left.equals(right))
 				return top();
 		case NUMERIC_MOD:
 			return top();
 		case NUMERIC_MUL:
 			if (left.isZero() || right.isZero())
-				return zero();
+				return ZERO;
 			else if (left.equals(right))
-				return pos();
+				return POS;
 			else
-				return neg();
+				return NEG;
 		default:
-			return top();
+			return TOP;
 		}
 	}
 
@@ -186,7 +159,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	protected Sign lubAux(Sign other) throws SemanticException {
-		return equals(other) ? other : top();
+		return BOTTOM;
 	}
 
 	@Override
@@ -196,29 +169,26 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	protected boolean lessOrEqualAux(Sign other) throws SemanticException {
-		return equals(other);
+		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((sign == null) ? 0 : sign.hashCode());
-		return result;
+		if (this == TOP)
+			return 1;
+		else if (this == BOTTOM)
+			return 2;
+		else if (this == ZERO)
+			return 3;
+		else if (this == POS)
+			return 4;
+		else
+			return 5;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Sign other = (Sign) obj;
-		if (sign != other.sign)
-			return false;
-		return true;
+		return this == obj;
 	}
 
 	@Override
