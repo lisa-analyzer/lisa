@@ -40,9 +40,12 @@ public class IMPOr extends BinaryNativeCall {
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
-			throws SemanticException {
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					SymbolicExpression right)
+					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isBooleanType() && !left.getDynamicType().isUntyped())
 			return computedState.bottom();

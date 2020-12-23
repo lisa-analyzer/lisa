@@ -1,9 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -15,6 +11,9 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -170,9 +169,10 @@ public abstract class Call extends Expression {
 					throws SemanticException;
 
 	@Override
-	public final <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+	public final <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
@@ -207,8 +207,9 @@ public abstract class Call extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params)
-			throws SemanticException;
+	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params)
+					throws SemanticException;
 }

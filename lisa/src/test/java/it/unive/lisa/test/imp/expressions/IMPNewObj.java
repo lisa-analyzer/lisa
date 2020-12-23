@@ -1,10 +1,5 @@
 package it.unive.lisa.test.imp.expressions;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -21,6 +16,9 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.types.ClassType;
+import java.util.Collection;
+import java.util.Collections;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -50,9 +48,11 @@ public class IMPNewObj extends NativeCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
@@ -67,9 +67,10 @@ public class IMPNewObj extends NativeCall {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// we still need to compute the call to ensure that the type information
 		// is propagated in the constructor
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());

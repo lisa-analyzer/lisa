@@ -18,7 +18,8 @@ import java.util.Map;
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
  */
-public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> extends CFG {
+public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
+		extends CFG {
 
 	/**
 	 * The map storing the analysis results

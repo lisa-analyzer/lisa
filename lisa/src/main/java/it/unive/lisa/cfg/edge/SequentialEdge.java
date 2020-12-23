@@ -30,8 +30,10 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
-			AnalysisState<A, H, V> sourceState) {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
+					AnalysisState<A, H, V> sourceState) {
 		return sourceState;
 	}
 

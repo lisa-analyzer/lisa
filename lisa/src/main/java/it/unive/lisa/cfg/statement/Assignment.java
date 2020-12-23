@@ -57,9 +57,10 @@ public class Assignment extends BinaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> right = getRight().typeInference(entryState, callGraph, expressions);
 		AnalysisState<A, H, TypeEnvironment> left = getLeft().typeInference(right, callGraph, expressions);
 		expressions.put(getRight(), right);
@@ -103,9 +104,11 @@ public class Assignment extends BinaryExpression {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
-			throws SemanticException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		AnalysisState<A, H, V> right = getRight().semantics(entryState, callGraph, expressions);
 		AnalysisState<A, H, V> left = getLeft().semantics(right, callGraph, expressions);
 		expressions.put(getRight(), right);

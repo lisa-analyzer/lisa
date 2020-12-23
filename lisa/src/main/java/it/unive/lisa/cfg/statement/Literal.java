@@ -1,7 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -13,6 +11,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.Constant;
+import java.util.Objects;
 
 /**
  * A literal, representing a constant value.
@@ -104,9 +103,10 @@ public class Literal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> typing = entryState
 				.smallStepSemantics(new Constant(getStaticType(), getValue()));
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
@@ -114,9 +114,11 @@ public class Literal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
 	}
 }

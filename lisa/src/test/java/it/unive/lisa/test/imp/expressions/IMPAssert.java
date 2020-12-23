@@ -56,9 +56,10 @@ public class IMPAssert extends Statement {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())
@@ -69,9 +70,11 @@ public class IMPAssert extends Statement {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		AnalysisState<A, H, V> result = expression.semantics(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())

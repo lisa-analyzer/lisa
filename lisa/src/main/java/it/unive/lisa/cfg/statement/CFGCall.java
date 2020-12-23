@@ -1,12 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -20,6 +13,11 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -188,9 +186,10 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, TypeEnvironment> returned = callGraph.getAbstractResultOf(this, computedState, params);
@@ -222,9 +221,11 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					throws SemanticException {
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, computedState, params);

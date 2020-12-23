@@ -37,8 +37,11 @@ public class IMPNeg extends UnaryNativeCall {
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr) throws SemanticException {
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isNumericType() && !expr.getDynamicType().isUntyped())
 			return computedState.bottom();

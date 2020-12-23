@@ -1,7 +1,5 @@
 package it.unive.lisa.callgraph;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -17,6 +15,7 @@ import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
+import java.util.Collection;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic

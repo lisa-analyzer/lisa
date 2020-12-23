@@ -1,10 +1,5 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Collection;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -19,6 +14,9 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.Collection;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -124,9 +122,10 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params) throws SemanticException {
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// TODO too coarse
 		AnalysisState<A, H, TypeEnvironment> poststate = computedState.top();
 
@@ -140,9 +139,11 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					throws SemanticException {
 		// TODO too coarse
 		AnalysisState<A, H, V> poststate = computedState.top();
 

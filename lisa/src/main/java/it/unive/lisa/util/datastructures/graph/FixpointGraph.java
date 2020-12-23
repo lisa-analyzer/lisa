@@ -115,9 +115,9 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 
 	/**
 	 * Computes a fixpoint over this graph. This method returns a
-	 * {@code Map<N, AnalysisState<A, H, V>>} instance mapping each {@link Node} to
-	 * the {@link AnalysisState} computed by this method. Note that the returned
-	 * map has entries also for inner nodes. The computation uses
+	 * {@code Map<N, AnalysisState<A, H, V>>} instance mapping each {@link Node}
+	 * to the {@link AnalysisState} computed by this method. Note that the
+	 * returned map has entries also for inner nodes. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
 	 * {@code predecessors_number} is the number of expressions that are

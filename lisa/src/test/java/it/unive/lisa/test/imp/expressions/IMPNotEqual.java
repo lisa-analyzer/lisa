@@ -38,9 +38,12 @@ public class IMPNotEqual extends BinaryNativeCall {
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
-			throws SemanticException {
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					SymbolicExpression right)
+					throws SemanticException {
 		return computedState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
 						BinaryOperator.COMPARISON_NE));

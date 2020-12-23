@@ -2,8 +2,6 @@ package it.unive.lisa.test.cfg;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -25,6 +23,7 @@ import it.unive.lisa.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import org.junit.Test;
 
 public class CFGSimplificationTest {
 

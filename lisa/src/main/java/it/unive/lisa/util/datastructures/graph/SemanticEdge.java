@@ -30,7 +30,9 @@ public interface SemanticEdge<N extends Node<N>, E extends SemanticEdge<N, E>> e
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
-			AnalysisState<A, H, V> sourceState)
-			throws SemanticException;
+	<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
+					AnalysisState<A, H, V> sourceState)
+					throws SemanticException;
 }

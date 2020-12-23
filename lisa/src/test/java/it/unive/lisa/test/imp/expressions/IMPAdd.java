@@ -48,9 +48,12 @@ public class IMPAdd extends BinaryNativeCall implements BinaryNumericalOperation
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
-			throws SemanticException {
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					SymbolicExpression right)
+					throws SemanticException {
 		BinaryOperator op;
 		ExternalSet<Type> types;
 		if (left.getDynamicType().isStringType() && right.getDynamicType().isStringType()) {
