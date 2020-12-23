@@ -84,7 +84,10 @@ public class AnalysisState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 
 	@Override
 	public AnalysisState<H, V> assign(Identifier id, SymbolicExpression value) throws SemanticException {
-		return new AnalysisState<>(getState().assign(id, value), id);
+		AbstractState<H, V> assigned = getState().assign(id, value);
+		if (id.isWeak())
+			assigned = state.lub(assigned);
+		return new AnalysisState<>(assigned, id);
 	}
 
 	@Override

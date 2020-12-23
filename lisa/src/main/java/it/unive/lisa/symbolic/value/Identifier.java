@@ -18,14 +18,23 @@ public abstract class Identifier extends ValueExpression {
 	private final String name;
 
 	/**
+	 * Whether or not this identifier is weak, meaning that it should only
+	 * receive weak assignments
+	 */
+	private final boolean weak;
+
+	/**
 	 * Builds the identifier.
 	 * 
 	 * @param types the runtime types of this expression
 	 * @param name  the name of the identifier
+	 * @param weak  whether or not this identifier is weak, meaning that it
+	 *                  should only receive weak assignments
 	 */
-	protected Identifier(ExternalSet<Type> types, String name) {
+	protected Identifier(ExternalSet<Type> types, String name, boolean weak) {
 		super(types);
 		this.name = name;
+		this.weak = weak;
 	}
 
 	/**
@@ -37,13 +46,25 @@ public abstract class Identifier extends ValueExpression {
 		return name;
 	}
 
+	/**
+	 * Yields whether or not this identifier is weak. Weak identifiers should
+	 * only receive weak assignments, that is, the value of the identifier after
+	 * the assignment should be the least upper bound between its old value and
+	 * the fresh value being assigned. With strong identifiers instead, the new
+	 * value corresponds to the freshly provided value.
+	 * 
+	 * @return {@code true} if this identifier is weak, {@code false} otherwise
+	 */
+	public boolean isWeak() {
+		return weak;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		// we do not call super here since variables should be uniquely
-		// identified
-		// by their name, regardless of their type
-		int result = 1; // super.hashCode();
+		// identified by their name, regardless of their type
+		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -53,10 +74,7 @@ public abstract class Identifier extends ValueExpression {
 		if (this == obj)
 			return true;
 		// we do not call super here since variables should be uniquely
-		// identified
-		// by their name, regardless of their type
-		// if (!super.equals(obj))
-		// return false;
+		// identified by their name, regardless of their type
 		if (getClass() != obj.getClass())
 			return false;
 		Identifier other = (Identifier) obj;
