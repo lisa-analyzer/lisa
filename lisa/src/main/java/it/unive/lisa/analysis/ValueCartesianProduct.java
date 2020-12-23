@@ -74,14 +74,20 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 			ValueEnvironment<?> leftEnv = (ValueEnvironment<?>) left;
 			ValueEnvironment<?> rightEnv = (ValueEnvironment<?>) right;
 			String result = "";
-			if (!leftEnv.isTop())
+			if (!leftEnv.isTop() && !leftEnv.isBottom()) {
 				for (Identifier x : leftEnv.getKeys())
 					result += x + ": (" + leftEnv.getState(x).representation() + ", "
-							+ rightEnv.getState(x).representation() + ") ";
-			return result;
+							+ rightEnv.getState(x).representation() + ")\n";
+				return result;
+			} else if (!rightEnv.isTop() && !rightEnv.isBottom()) {
+				for (Identifier x : rightEnv.getKeys())
+					result += x + ": (" + leftEnv.getState(x).representation() + ", "
+							+ rightEnv.getState(x).representation() + ")\n";
+				return result;
+			}
 		}
 
-		return left.representation() + ", " + right.representation();
+		return "(" + left.representation() + ", " + right.representation() + ")";
 	}
 
 	@Override
