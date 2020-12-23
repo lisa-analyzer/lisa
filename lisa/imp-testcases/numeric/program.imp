@@ -1,11 +1,11 @@
-class phdcourse {
+class tutorial {
 
-	constants(a) {
-		b = a;
+	constants() {
 		c = 1;
-   		while (b < a) 
+		b = 0;
+   		while (b < 10) 
         	b = b + c;
-   		return a;
+   		return b;
     }
     
 	sign_parity_example() {
@@ -16,19 +16,10 @@ class phdcourse {
 		return i;
 	}
 	
-	constants(a) {
-		b = 0;
-		c = 1;
-   		while (b < a) 
-        	b = b + c;
-   		return a;
-    }
-	
-	intv_dec(c,d) {
+	intv_dec() {
 		i = 1000;
 		while (i > 0) 
 			i = i - 1;
-			
 		return i;
 	}
 	
@@ -49,7 +40,7 @@ class phdcourse {
 		return i;
 	}
 
-	ub_example() {
+	ub_example(y,z) {
 		if (y < z) 
 			x = y - 1;
 		else

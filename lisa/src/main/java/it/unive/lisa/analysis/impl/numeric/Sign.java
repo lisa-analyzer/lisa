@@ -178,7 +178,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	protected Sign lubAux(Sign other) throws SemanticException {
-		return BOTTOM;
+		return TOP;
 	}
 
 	@Override
