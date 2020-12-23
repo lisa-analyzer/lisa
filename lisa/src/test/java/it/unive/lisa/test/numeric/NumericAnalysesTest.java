@@ -44,7 +44,7 @@ public class NumericAnalysesTest {
 		}
 
 		File actFile = new File("tmp/report.json");
-		File expFile = new File("test-outputs/numeric/sign/report.json");
+		File expFile = new File("imp-testcases/numeric/sign/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
@@ -74,7 +74,7 @@ public class NumericAnalysesTest {
 		}
 
 		File actFile = new File("tmp/report.json");
-		File expFile = new File("test-outputs/numeric/parity/report.json");
+		File expFile = new File("imp-testcases/numeric/parity/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
@@ -104,7 +104,7 @@ public class NumericAnalysesTest {
 		}
 
 		File actFile = new File("tmp/report.json");
-		File expFile = new File("test-outputs/numeric/interval/report.json");
+		File expFile = new File("imp-testcases/numeric/interval/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
@@ -134,7 +134,7 @@ public class NumericAnalysesTest {
 		}
 
 		File actFile = new File("tmp/report.json");
-		File expFile = new File("test-outputs/numeric/int-const/report.json");
+		File expFile = new File("imp-testcases/numeric/int-const/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
