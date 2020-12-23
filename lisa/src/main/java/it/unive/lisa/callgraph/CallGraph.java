@@ -1,5 +1,8 @@
 package it.unive.lisa.callgraph;
 
+import java.util.Collection;
+
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
@@ -14,7 +17,6 @@ import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.Collection;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic
@@ -67,8 +69,9 @@ public interface CallGraph {
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState,
-			SemanticFunction<H, V> semantics)
+	<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
+			AnalysisState<A, H, V> entryState,
+			SemanticFunction<A, H, V> semantics)
 			throws FixpointException;
 
 	/**
@@ -85,7 +88,9 @@ public interface CallGraph {
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(CFG cfg);
+	<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Clears all the data from the last fixpoint computation, effectively
@@ -118,6 +123,9 @@ public interface CallGraph {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,
-			AnalysisState<H, V> entryState, Collection<SymbolicExpression>[] parameters) throws SemanticException;
+	<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
+					AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+					throws SemanticException;
 }

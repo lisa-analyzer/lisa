@@ -1,9 +1,22 @@
 package it.unive.lisa;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
@@ -26,16 +39,6 @@ import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -374,7 +377,7 @@ public class LiSA {
 	}
 
 	@SuppressWarnings({ "unchecked" })
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
+	private <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
 
 		if (dumpCFGs)
@@ -420,7 +423,7 @@ public class LiSA {
 
 			if (dumpTypeInference)
 				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
-					CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+					CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				}
 
@@ -440,7 +443,7 @@ public class LiSA {
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping analysis results", "cfgs")) {
-				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+				CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
 	}
@@ -455,10 +458,10 @@ public class LiSA {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void computeFixpoint(H heap, V value,
-			SemanticFunction<H, V> semantics) {
+	private <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> void computeFixpoint(H heap, V value,
+			SemanticFunction<A, H, V> semantics) {
 		try {
-			callGraph.fixpoint(new AnalysisState(new AbstractState(heap.top(), value.top()), new Skip()), semantics);
+			callGraph.fixpoint(new AnalysisState(new SimpleAbstractState<>(heap.top(), value.top()), new Skip()), semantics);
 		} catch (FixpointException e) {
 			log.fatal("Exception during fixpoint computation", e);
 			throw new AnalysisExecutionException("Exception during fixpoint computation", e);

@@ -1,5 +1,6 @@
 package it.unive.lisa.test.imp.expressions;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -39,8 +40,8 @@ public class IMPLessThan extends BinaryNativeCall {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> binarySemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
+	protected <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
 			throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isNumericType() && !left.getDynamicType().isUntyped())

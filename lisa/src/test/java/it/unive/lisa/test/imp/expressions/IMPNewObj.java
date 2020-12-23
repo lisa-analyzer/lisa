@@ -1,5 +1,11 @@
 package it.unive.lisa.test.imp.expressions;
 
+import java.util.Collection;
+import java.util.Collections;
+
+import org.apache.commons.lang3.ArrayUtils;
+
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -15,9 +21,6 @@ import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.types.ClassType;
-import java.util.Collection;
-import java.util.Collections;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -47,8 +50,8 @@ public class IMPNewObj extends NativeCall {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+			AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
@@ -64,8 +67,8 @@ public class IMPNewObj extends NativeCall {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
 			Collection<SymbolicExpression>[] params) throws SemanticException {
 		// we still need to compute the call to ensure that the type information
 		// is propagated in the constructor
@@ -85,7 +88,7 @@ public class IMPNewObj extends NativeCall {
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
 				getStaticType().toString(), fullExpressions);
-		AnalysisState<H, TypeEnvironment> typing = call.callTypeInference(computedState, callGraph, fullParams);
+		AnalysisState<A, H, TypeEnvironment> typing = call.callTypeInference(computedState, callGraph, fullParams);
 
 		// at this stage, the runtime types correspond to the singleton set
 		// containing only the static type. This is fine since we are creating

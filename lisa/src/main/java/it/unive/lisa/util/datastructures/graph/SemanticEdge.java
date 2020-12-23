@@ -1,5 +1,6 @@
 package it.unive.lisa.util.datastructures.graph;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -29,6 +30,7 @@ public interface SemanticEdge<N extends Node<N>, E extends SemanticEdge<N, E>> e
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(AnalysisState<H, V> sourceState)
+	<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
+			AnalysisState<A, H, V> sourceState)
 			throws SemanticException;
 }

@@ -1,7 +1,8 @@
 package it.unive.lisa.cfg.statement;
 
-import it.unive.lisa.cfg.CFG;
 import java.util.Objects;
+
+import it.unive.lisa.cfg.CFG;
 
 /**
  * A binary expression.

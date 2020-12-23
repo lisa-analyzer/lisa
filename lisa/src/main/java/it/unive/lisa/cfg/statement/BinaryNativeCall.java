@@ -1,5 +1,8 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Collection;
+
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,7 +13,6 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import java.util.Collection;
 
 /**
  * A {@link NativeCall} with a exactly two arguments.
@@ -92,13 +94,13 @@ public abstract class BinaryNativeCall extends NativeCall {
 	}
 
 	@Override
-	public final <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
+	public final <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+			AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
 			Collection<SymbolicExpression>[] params) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> result = null;
+		AnalysisState<A, H, TypeEnvironment> result = null;
 		for (SymbolicExpression expr1 : params[0])
 			for (SymbolicExpression expr2 : params[1]) {
-				AnalysisState<H, TypeEnvironment> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
+				AnalysisState<A, H, TypeEnvironment> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
 				if (result == null)
 					result = tmp;
 				else
@@ -110,13 +112,13 @@ public abstract class BinaryNativeCall extends NativeCall {
 	}
 
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+	public final <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+			AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
 			throws SemanticException {
-		AnalysisState<H, V> result = null;
+		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr1 : params[0])
 			for (SymbolicExpression expr2 : params[1]) {
-				AnalysisState<H, V> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
+				AnalysisState<A, H, V> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
 				if (result == null)
 					result = tmp;
 				else
@@ -145,7 +147,7 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> binarySemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
+	protected abstract <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left, SymbolicExpression right)
 			throws SemanticException;
 }

@@ -1,5 +1,15 @@
 package it.unive.lisa.callgraph.impl.intraproc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
@@ -18,13 +28,6 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In
@@ -47,7 +50,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
-	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?>>> results;
+	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?, ?>>> results;
 
 	/**
 	 * Builds the call graph.
@@ -100,8 +103,9 @@ public class IntraproceduralCallGraph implements CallGraph {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState,
-			SemanticFunction<H, V> semantics)
+	public <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
+			AnalysisState<A, H, V> entryState,
+			SemanticFunction<A, H, V> semantics)
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
 				"cfgs"))
@@ -110,14 +114,19 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(
-			CFG cfg) {
-		return (CFGWithAnalysisResults<H, V>) results.get(cfg).orElse(null);
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> getAnalysisResultsOf(
+					CFG cfg) {
+		return (CFGWithAnalysisResults<A, H, V>) results.get(cfg).orElse(null);
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,
-			AnalysisState<H, V> entryState, Collection<SymbolicExpression>[] parameters) throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
+					AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+					throws SemanticException {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 

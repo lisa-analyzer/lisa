@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -56,18 +57,18 @@ public class Assignment extends BinaryExpression {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> right = getRight().typeInference(entryState, callGraph, expressions);
-		AnalysisState<H, TypeEnvironment> left = getLeft().typeInference(right, callGraph, expressions);
+	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+		AnalysisState<A, H, TypeEnvironment> right = getRight().typeInference(entryState, callGraph, expressions);
+		AnalysisState<A, H, TypeEnvironment> left = getLeft().typeInference(right, callGraph, expressions);
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 
-		AnalysisState<H, TypeEnvironment> result = null;
+		AnalysisState<A, H, TypeEnvironment> result = null;
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<H, TypeEnvironment> tmp = left.assign((Identifier) expr1, expr2);
+				AnalysisState<A, H, TypeEnvironment> tmp = left.assign((Identifier) expr1, expr2);
 				if (result == null)
 					result = tmp;
 				else
@@ -102,18 +103,18 @@ public class Assignment extends BinaryExpression {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
+	public final <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> right = getRight().semantics(entryState, callGraph, expressions);
-		AnalysisState<H, V> left = getLeft().semantics(right, callGraph, expressions);
+		AnalysisState<A, H, V> right = getRight().semantics(entryState, callGraph, expressions);
+		AnalysisState<A, H, V> left = getLeft().semantics(right, callGraph, expressions);
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 
-		AnalysisState<H, V> result = null;
+		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<H, V> tmp = left.assign((Identifier) expr1, expr2);
+				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2);
 				if (result == null)
 					result = tmp;
 				else

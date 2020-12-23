@@ -1,5 +1,8 @@
 package it.unive.lisa.cfg.statement;
 
+import java.util.Objects;
+
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -9,7 +12,6 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
-import java.util.Objects;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -99,10 +101,10 @@ public class Throw extends Statement {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
+	public <A extends AbstractState<A, H, TypeEnvironment>, H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+			AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+			StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+		AnalysisState<A, H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(expression.getMetaVariables());
@@ -110,10 +112,10 @@ public class Throw extends Statement {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
+	public <A extends AbstractState<A, H, V>,H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
+		AnalysisState<A, H, V> result = expression.semantics(entryState, callGraph, expressions);
 		expressions.put(expression, result);
 		if (!expression.getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(expression.getMetaVariables());
