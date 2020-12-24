@@ -61,11 +61,11 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		if (lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED)
 			return bottom();
 		else if (lattice.satisfies(expression, this) == Satisfiability.SATISFIED)
-			return this;
+			return new ValueEnvironment<>(lattice, function);
 		else
 			// TODO: a more precise filtering is needed when satisfiability of
 			// expression is unknown
-			return this;
+			return new ValueEnvironment<>(lattice, function);
 	}
 
 	@Override
