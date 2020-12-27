@@ -4,6 +4,13 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.LiSA;
@@ -18,11 +25,6 @@ import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collection;
-import org.junit.Test;
 
 public class NumericAnalysesTest {
 
@@ -38,7 +40,7 @@ public class NumericAnalysesTest {
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
-		lisa.setWorkdir("tmp");
+		lisa.setWorkdir("test-outputs/numeric/sign");
 
 		try {
 			lisa.run();
@@ -47,15 +49,13 @@ public class NumericAnalysesTest {
 			fail("Analysis terminated with errors");
 		}
 
-		File actFile = new File("tmp/report.json");
+		File actFile = new File("test-outputs/numeric/sign/report.json");
 		File expFile = new File("imp-testcases/numeric/sign/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
 		assertTrue("Results are different",
 				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-
-		deleteTmpDir(actFile.getParentFile());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class NumericAnalysesTest {
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
-		lisa.setWorkdir("tmp");
+		lisa.setWorkdir("test-outputs/numeric/parity");
 
 		try {
 			lisa.run();
@@ -77,15 +77,13 @@ public class NumericAnalysesTest {
 			fail("Analysis terminated with errors");
 		}
 
-		File actFile = new File("tmp/report.json");
+		File actFile = new File("test-outputs/numeric/parity/report.json");
 		File expFile = new File("imp-testcases/numeric/parity/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
 		assertTrue("Results are different",
 				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-
-		deleteTmpDir(actFile.getParentFile());
 	}
 
 	@Test
@@ -98,7 +96,7 @@ public class NumericAnalysesTest {
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
-		lisa.setWorkdir("tmp");
+		lisa.setWorkdir("test-outputs/numeric/interval");
 
 		try {
 			lisa.run();
@@ -107,15 +105,13 @@ public class NumericAnalysesTest {
 			fail("Analysis terminated with errors");
 		}
 
-		File actFile = new File("tmp/report.json");
+		File actFile = new File("test-outputs/numeric/interval/report.json");
 		File expFile = new File("imp-testcases/numeric/interval/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
 		assertTrue("Results are different",
 				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-
-		deleteTmpDir(actFile.getParentFile());
 	}
 
 	@Test
@@ -129,7 +125,7 @@ public class NumericAnalysesTest {
 				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new IntegerConstantPropagation()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
-		lisa.setWorkdir("tmp");
+		lisa.setWorkdir("test-outputs/numeric/int-const");
 
 		try {
 			lisa.run();
@@ -138,20 +134,12 @@ public class NumericAnalysesTest {
 			fail("Analysis terminated with errors");
 		}
 
-		File actFile = new File("tmp/report.json");
+		File actFile = new File("test-outputs/numeric/int-const/report.json");
 		File expFile = new File("imp-testcases/numeric/int-const/report.json");
 		JsonReport expected = JsonReport.read(new FileReader(expFile));
 		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
 		assertTrue("Results are different",
 				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-
-		deleteTmpDir(actFile.getParentFile());
-	}
-
-	private void deleteTmpDir(File dir) {
-		for (File f : dir.listFiles())
-			f.delete();
-		dir.delete();
 	}
 }
