@@ -1,14 +1,19 @@
 package it.unive.lisa.test.numeric;
 
+import static it.unive.lisa.LiSAFactory.getDefaultFor;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import it.unive.lisa.AnalysisException;
+import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.LiSA;
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.impl.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.impl.numeric.Parity;
 import it.unive.lisa.analysis.impl.numeric.Sign;
+import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
@@ -25,13 +30,14 @@ public class NumericAnalysesTest {
 	private final String filePath = "imp-testcases/numeric/program.imp";
 
 	@Test
-	public void testSign() throws IOException, ParsingException {
+	public void testSign() throws IOException, ParsingException, AnalysisSetupException {
 		System.out.println("Testing sign analysis...");
 		LiSA lisa = new LiSA();
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.addNonRelationalValueDomain(new Sign());
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
+				new ValueEnvironment<>(new Sign())));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -55,13 +61,14 @@ public class NumericAnalysesTest {
 	}
 
 	@Test
-	public void testParity() throws IOException, ParsingException {
+	public void testParity() throws IOException, ParsingException, AnalysisSetupException {
 		System.out.println("Testing parity analysis...");
 		LiSA lisa = new LiSA();
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.addNonRelationalValueDomain(new Parity());
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
+				new ValueEnvironment<>(new Parity())));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -85,13 +92,14 @@ public class NumericAnalysesTest {
 	}
 
 	@Test
-	public void testInterval() throws IOException, ParsingException {
+	public void testInterval() throws IOException, ParsingException, AnalysisSetupException {
 		System.out.println("Testing interval analysis...");
 		LiSA lisa = new LiSA();
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.addNonRelationalValueDomain(new Interval());
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
+				new ValueEnvironment<>(new Interval())));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -115,13 +123,15 @@ public class NumericAnalysesTest {
 	}
 
 	@Test
-	public void testIntegerConstantPropagation() throws IOException, ParsingException {
+	public void testIntegerConstantPropagation() throws IOException, ParsingException, AnalysisSetupException {
 		System.out.println("Testing integer constant propagation...");
 		LiSA lisa = new LiSA();
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.addNonRelationalValueDomain(new IntegerConstantPropagation());
+		lisa.setAbstractState(
+				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
+						new ValueEnvironment<>(new IntegerConstantPropagation())));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
