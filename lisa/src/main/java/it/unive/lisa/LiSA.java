@@ -166,10 +166,9 @@ public class LiSA {
 	 * Sets the {@link AbstractState} to use for the analysis. Any existing
 	 * value is overwritten.
 	 * 
-	 * @param <T>   the concrete type of the abstract state
 	 * @param state the abstract state to use
 	 */
-	public <T extends AbstractState<T, ?, ?>> void setAbstractState(T state) {
+	public void setAbstractState(AbstractState<?, ?, ?> state) {
 		this.state = state;
 	}
 
@@ -357,11 +356,14 @@ public class LiSA {
 		if (inferTypes) {
 			AbstractState<?, ?, ?> tmp;
 			try {
-				// type inference is always executed with the simplest abstract state
+				// type inference is always executed with the simplest abstract
+				// state
 				if (state != null)
-					tmp = LiSAFactory.getInstance(SimpleAbstractState.class, state.getHeapState(), new TypeEnvironment());
-				else 
-					tmp = LiSAFactory.getInstance(SimpleAbstractState.class, LiSAFactory.getDefaultFor(HeapDomain.class), new TypeEnvironment());
+					tmp = LiSAFactory.getInstance(SimpleAbstractState.class, state.getHeapState(),
+							new TypeEnvironment());
+				else
+					tmp = LiSAFactory.getInstance(SimpleAbstractState.class,
+							LiSAFactory.getDefaultFor(HeapDomain.class), new TypeEnvironment());
 			} catch (AnalysisSetupException e) {
 				throw new AnalysisExecutionException("Unable to itialize type inference", e);
 			}
@@ -371,7 +373,8 @@ public class LiSA {
 			TimerLogger.execAction(log, "Computing type information",
 					() -> {
 						try {
-							callGraph.fixpoint(new AnalysisState<>(typesState.top(), new Skip()), Statement::typeInference);
+							callGraph.fixpoint(new AnalysisState<>(typesState.top(), new Skip()),
+									Statement::typeInference);
 						} catch (FixpointException e) {
 							log.fatal("Exception during fixpoint computation", e);
 							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -387,7 +390,7 @@ public class LiSA {
 			callGraph.clear();
 		} else
 			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
-		
+
 		if (state == null) {
 			log.warn("Skipping analysis execution since no abstract sate has been provided");
 			return;
