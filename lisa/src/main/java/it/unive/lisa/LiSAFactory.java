@@ -92,15 +92,11 @@ public class LiSAFactory {
 			if (defaultParams == null)
 				return (T) construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
 
-			Class<?>[] types = new Class[defaultParams.value().length];
 			Object[] defaults = new Object[defaultParams.value().length];
-			for (int i = 0; i < defaults.length; i++) {
-				DefaultParameter par = defaultParams.value()[i];
-				types[i] = par.type();
-				defaults[i] = getInstance(par.value());
-			}
+			for (int i = 0; i < defaults.length; i++) 
+				defaults[i] = getInstance(defaultParams.value()[i]);
 
-			return (T) construct(component, types, defaults);
+			return (T) construct(component, findConstructorSignature(component, defaults), defaults);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}

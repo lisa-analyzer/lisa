@@ -2,7 +2,6 @@ package it.unive.lisa.analysis;
 
 import java.util.Collection;
 
-import it.unive.lisa.DefaultParameter;
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
@@ -20,10 +19,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
  */
-@DefaultParameters({
-		@DefaultParameter(value = MonolithicHeap.class, type = HeapDomain.class),
-		@DefaultParameter(value = Interval.class, type = ValueDomain.class)
-})
+@DefaultParameters({ MonolithicHeap.class, Interval.class })
 public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 		implements AbstractState<SimpleAbstractState<H, V>, H, V> {
 
