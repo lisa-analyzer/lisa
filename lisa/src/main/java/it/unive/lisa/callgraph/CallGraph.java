@@ -1,11 +1,13 @@
 package it.unive.lisa.callgraph;
 
+import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.CFGCall;
@@ -23,6 +25,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@DefaultImplementation(IntraproceduralCallGraph.class)
 public interface CallGraph {
 
 	/**
