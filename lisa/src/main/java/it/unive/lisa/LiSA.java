@@ -1,5 +1,8 @@
 package it.unive.lisa;
 
+import static it.unive.lisa.LiSAFactory.getDefaultFor;
+import static it.unive.lisa.LiSAFactory.getInstance;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Paths;
@@ -121,6 +124,10 @@ public class LiSA {
 		this.dumpTypeInference = false;
 		this.dumpAnalysis = false;
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
+	}
+
+	public void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
+		LiSAFactory.customDefaults.put(component, defaultImplementation);
 	}
 
 	/**
@@ -327,7 +334,8 @@ public class LiSA {
 		log.info("  " + warnings.size() + " warnings generated");
 	}
 
-	private <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux()
+	@SuppressWarnings("unchecked")
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>, A extends AbstractState<A, H, V>, T extends AbstractState<T, H, TypeEnvironment>> void runAux()
 			throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
 
@@ -344,7 +352,7 @@ public class LiSA {
 
 		if (callGraph == null) {
 			try {
-				callGraph = LiSAFactory.getDefaultFor(CallGraph.class);
+				callGraph = getDefaultFor(CallGraph.class);
 			} catch (AnalysisSetupException e) {
 				throw new AnalysisExecutionException("Unable to create default call graph", e);
 			}
@@ -354,27 +362,25 @@ public class LiSA {
 		inputs.forEach(callGraph::addCFG);
 
 		if (inferTypes) {
-			AbstractState<?, ?, ?> tmp;
+			T tmp;
 			try {
 				// type inference is always executed with the simplest abstract
 				// state
 				if (state != null)
-					tmp = LiSAFactory.getInstance(SimpleAbstractState.class, state.getHeapState(),
+					tmp = (T) getInstance(SimpleAbstractState.class, state.getHeapState(),
 							new TypeEnvironment());
 				else
-					tmp = LiSAFactory.getInstance(SimpleAbstractState.class,
-							LiSAFactory.getDefaultFor(HeapDomain.class), new TypeEnvironment());
+					tmp = (T) getInstance(SimpleAbstractState.class,
+							getDefaultFor(HeapDomain.class), new TypeEnvironment());
 			} catch (AnalysisSetupException e) {
 				throw new AnalysisExecutionException("Unable to itialize type inference", e);
 			}
 
-			@SuppressWarnings("unchecked")
-			AbstractState<?, ?, TypeEnvironment> typesState = (AbstractState<?, ?, TypeEnvironment>) tmp;
+			T typesState = tmp.top();
 			TimerLogger.execAction(log, "Computing type information",
 					() -> {
 						try {
-							callGraph.fixpoint(new AnalysisState<>(typesState.top(), new Skip()),
-									Statement::typeInference);
+							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()), Statement::typeInference);
 						} catch (FixpointException e) {
 							log.fatal("Exception during fixpoint computation", e);
 							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -396,10 +402,11 @@ public class LiSA {
 			return;
 		}
 
+		A state = (A) this.state.top();
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						callGraph.fixpoint(new AnalysisState<>(state.top(), new Skip()), Statement::semantics);
+						callGraph.fixpoint(new AnalysisState<>(state, new Skip()), Statement::semantics);
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);

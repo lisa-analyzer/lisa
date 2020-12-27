@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,9 +103,14 @@ public class LiSAFactory {
 		}
 	}
 
+	// we do not make it final here just to ensure that different lisa objects created from the same jvm will not share this
+	static Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
+	
 	@SuppressWarnings("unchecked")
 	public static <T> T getDefaultFor(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
+			if (customDefaults.containsKey(component))
+				return getInstance((Class<T>) customDefaults.get(component), params);
 			return getInstance((Class<T>) component.getAnnotation(DefaultImplementation.class).value(), params);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
