@@ -13,7 +13,6 @@ import it.unive.lisa.analysis.impl.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.impl.numeric.Parity;
 import it.unive.lisa.analysis.impl.numeric.Sign;
-import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
@@ -36,8 +35,7 @@ public class NumericAnalysesTest {
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
-				new ValueEnvironment<>(new Sign())));
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -67,8 +65,7 @@ public class NumericAnalysesTest {
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
-				new ValueEnvironment<>(new Parity())));
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -98,8 +95,7 @@ public class NumericAnalysesTest {
 
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
-		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
-				new ValueEnvironment<>(new Interval())));
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");
@@ -130,8 +126,7 @@ public class NumericAnalysesTest {
 		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
 		cfgs.forEach(lisa::addCFG);
 		lisa.setAbstractState(
-				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
-						new ValueEnvironment<>(new IntegerConstantPropagation())));
+				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new IntegerConstantPropagation()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
 		lisa.setWorkdir("tmp");

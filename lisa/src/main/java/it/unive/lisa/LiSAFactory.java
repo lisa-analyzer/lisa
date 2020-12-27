@@ -4,9 +4,18 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
+
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.NonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 
 public class LiSAFactory {
 
@@ -22,20 +31,31 @@ public class LiSAFactory {
 		}
 	}
 
-	private static Class<?>[] findConstructorSignature(Class<?> component, Object... params)
+	private static Class<?>[] findConstructorSignature(Class<?> component, Object[] params)
 			throws AnalysisSetupException {
-		List<Constructor<?>> candidates = new ArrayList<>();
+		Map<Constructor<?>, List<Integer>> candidates = new IdentityHashMap<>();
 		Class<?>[] types;
 		outer: for (Constructor<?> constructor : component.getConstructors()) {
 			types = constructor.getParameterTypes();
 			if (params.length != types.length)
 				continue;
 
+			List<Integer> toWrap = new ArrayList<>();
 			for (int i = 0; i < types.length; i++)
-				if (!types[i].isAssignableFrom(params[i].getClass()))
+				if (types[i].isAssignableFrom(params[i].getClass()))
+					continue;
+				else if (NonRelationalHeapDomain.class.isAssignableFrom(params[i].getClass())
+						&& types[i].isAssignableFrom(HeapDomain.class)) {
+					toWrap.add(i);
+					continue;
+				} else if (NonRelationalValueDomain.class.isAssignableFrom(params[i].getClass())
+						&& types[i].isAssignableFrom(ValueDomain.class)) {
+					toWrap.add(i);
+					continue;
+				} else
 					continue outer;
 
-			candidates.add(constructor);
+			candidates.put(constructor, toWrap);
 		}
 
 		if (candidates.isEmpty())
@@ -48,7 +68,19 @@ public class LiSAFactory {
 					"Constructor call of " + component.getSimpleName() + " is ambiguous for argument types "
 							+ Arrays.toString(Arrays.stream(params).map(p -> p.getClass()).toArray(Class[]::new)));
 
-		return candidates.iterator().next().getParameterTypes();
+		for (int p : candidates.values().iterator().next())
+			params[p] = wrapParam(params[p]);
+
+		return candidates.keySet().iterator().next().getParameterTypes();
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static Object wrapParam(Object param) {
+		if (NonRelationalHeapDomain.class.isAssignableFrom(param.getClass()))
+			return new HeapEnvironment((NonRelationalHeapDomain<?>) param);
+		else if (NonRelationalValueDomain.class.isAssignableFrom(param.getClass()))
+			return new ValueEnvironment((NonRelationalValueDomain<?>) param);
+		return param;
 	}
 
 	public static <T> T getInstance(Class<T> component, Object... params) throws AnalysisSetupException {
