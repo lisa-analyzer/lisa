@@ -1,0 +1,51 @@
+class tutorial {
+
+	constants() {
+		c = 1;
+		b = 0;
+   		while (b < 10) 
+        	b = b + c;
+   		return b;
+    }
+    
+	sign_parity_example() {
+		i = 2;
+		max = 10;
+		while (i < max) 
+			i = i + 1;
+		return i;
+	}
+	
+	intv_dec() {
+		i = 1000;
+		while (i > 0) 
+			i = i - 1;
+		return i;
+	}
+	
+	gcd(a, b) {
+   		while (a != b) 
+        	if (a > b) 
+            	a = a - b;
+        	else
+            	b = b - a;
+   		return a;
+    }
+	
+	div(i,j) {
+		if (j != 0)
+			i = i / j;
+		else
+			i = j / i;
+		return i;
+	}
+
+	ub_example(y,z) {
+		if (y < z) 
+			x = y - 1;
+		else
+			x = z - 1;
+			
+		return x;
+	}
+}

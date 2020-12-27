@@ -3,7 +3,6 @@ package it.unive.lisa.analysis.nonrelational;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -31,9 +30,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		implements NonRelationalValueDomain<T> {
 
 	@Override
-	public final Satisfiability satisfies(SymbolicExpression expression, ValueEnvironment<T> environment) {
+	public final Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment) {
 		if (expression instanceof Identifier)
-			return satisfiesIdentifier((Identifier) expression);
+			return satisfiesAbstractValue(environment.getState((Identifier) expression));
 
 		if (expression instanceof NullConstant)
 			return satisfiesNullConstant();
@@ -55,7 +54,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			UnaryExpression unary = (UnaryExpression) expression;
 
 			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT)
-				return satisfies(unary.getExpression(), environment).negate();
+				return satisfies((ValueExpression) unary.getExpression(), environment).negate();
 			else {
 				T arg = eval((ValueExpression) unary.getExpression(), environment);
 				if (arg.isBottom())
@@ -68,9 +67,11 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			BinaryExpression binary = (BinaryExpression) expression;
 
 			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
-				return satisfies(binary.getLeft(), environment).and(satisfies(binary.getRight(), environment));
+				return satisfies((ValueExpression) binary.getLeft(), environment)
+						.and(satisfies((ValueExpression) binary.getRight(), environment));
 			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
-				return satisfies(binary.getLeft(), environment).or(satisfies(binary.getRight(), environment));
+				return satisfies((ValueExpression) binary.getLeft(), environment)
+						.or(satisfies((ValueExpression) binary.getRight(), environment));
 			else {
 				T left = eval((ValueExpression) binary.getLeft(), environment);
 				T right = eval((ValueExpression) binary.getRight(), environment);
@@ -245,10 +246,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	protected abstract T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right);
 
 	/**
-	 * Yields the satisfiability of the identifier {@code identifier} on this
-	 * abstract domain.
+	 * Yields the satisfiability of an abstract value of type {@link T}.
 	 * 
-	 * @param identifier the identifier whose satisfiability is to be evaluated
+	 * @param value the abstract value whose satisfiability is to be evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -257,7 +257,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesIdentifier(Identifier identifier);
+	protected abstract Satisfiability satisfiesAbstractValue(T value);
 
 	/**
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
