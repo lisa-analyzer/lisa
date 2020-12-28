@@ -53,12 +53,7 @@ public class LiSAFactory {
 			for (int i = 0; i < types.length; i++)
 				if (types[i].isAssignableFrom(params[i].getClass()))
 					continue;
-				else if (NonRelationalHeapDomain.class.isAssignableFrom(params[i].getClass())
-						&& types[i].isAssignableFrom(HeapDomain.class)) {
-					toWrap.add(i);
-					continue;
-				} else if (NonRelationalValueDomain.class.isAssignableFrom(params[i].getClass())
-						&& types[i].isAssignableFrom(ValueDomain.class)) {
+				else if (needsWrapping(params[i].getClass(), types[i])) {
 					toWrap.add(i);
 					continue;
 				} else
@@ -81,6 +76,15 @@ public class LiSAFactory {
 			params[p] = wrapParam(params[p]);
 
 		return candidates.keySet().iterator().next().getParameterTypes();
+	}
+	
+	private static boolean needsWrapping(Class<?> actual, Class<?> desired) {
+		if (NonRelationalHeapDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(HeapDomain.class)) 
+			return true;
+		else if (NonRelationalValueDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class)) 
+			return true;
+		else
+			return false;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -127,9 +131,14 @@ public class LiSAFactory {
 		return (Class<? extends T>) defaultImpl.value();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static <T> T getDefaultFor(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
-			return getInstance(getDefaultClassFor(component), params);
+			Class<? extends T> def = getDefaultClassFor(component);
+			if (needsWrapping(def, component)) 
+				return (T) wrapParam(getInstance(def, params));
+			else 
+				return getInstance(def, params);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}
