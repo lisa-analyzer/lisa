@@ -20,7 +20,10 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <I>  the type of {@link Identifier} that {@link T1} and {@link T2},
  *                 and in turn this domain, handle
  */
-public abstract class CartesianProduct<T1 extends SemanticDomain<T1, E, I>, T2 extends SemanticDomain<T2, E, I>, E extends SymbolicExpression, I extends Identifier> {
+public abstract class CartesianProduct<T1 extends SemanticDomain<T1, E, I>,
+		T2 extends SemanticDomain<T2, E, I>,
+		E extends SymbolicExpression,
+		I extends Identifier> {
 
 	/**
 	 * The left-hand side abstract domain.

@@ -4,13 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.LiSAFactory;
@@ -21,6 +14,11 @@ import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import org.junit.Test;
 
 public class LiSAFactoryTest {
 
