@@ -2,21 +2,29 @@ package it.unive.lisa;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
+import it.unive.lisa.callgraph.CallGraph;
 
 public class LiSAFactory {
 
@@ -94,7 +102,7 @@ public class LiSAFactory {
 				return (T) construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
 
 			Object[] defaults = new Object[defaultParams.value().length];
-			for (int i = 0; i < defaults.length; i++) 
+			for (int i = 0; i < defaults.length; i++)
 				defaults[i] = getInstance(defaultParams.value()[i]);
 
 			return (T) construct(component, findConstructorSignature(component, defaults), defaults);
@@ -103,17 +111,65 @@ public class LiSAFactory {
 		}
 	}
 
-	// we do not make it final here just to ensure that different lisa objects created from the same jvm will not share this
-	static Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
-	
+	static final Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
+
 	@SuppressWarnings("unchecked")
+	private static <T> Class<? extends T> getDefaultClassFor(Class<T> component) {
+		if (customDefaults.containsKey(component))
+			return (Class<? extends T>) customDefaults.get(component);
+		DefaultImplementation defaultImpl = component.getAnnotation(DefaultImplementation.class);
+		if (defaultImpl == null)
+			return null;
+		return (Class<? extends T>) defaultImpl.value();
+	}
+
 	public static <T> T getDefaultFor(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
-			if (customDefaults.containsKey(component))
-				return getInstance((Class<T>) customDefaults.get(component), params);
-			return getInstance((Class<T>) component.getAnnotation(DefaultImplementation.class).value(), params);
+			return getInstance(getDefaultClassFor(component), params);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}
+	}
+
+	public static class ConfigurableComponent<T> {
+		private static final Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+
+		private final Class<T> component;
+		private final Class<? extends T> defaultInstance;
+		private final Collection<Class<? extends T>> alternatives;
+
+		private ConfigurableComponent(Class<T> component) {
+			this.component = component;
+			this.defaultInstance = getDefaultClassFor(component);
+			this.alternatives = scanner.getSubTypesOf(component)
+					.stream()
+					.map(c -> Pair.of(c, c.getModifiers()))
+					.filter(p -> !Modifier.isAbstract(p.getRight()) && !Modifier.isInterface(p.getRight()))
+					.map(p -> p.getLeft())
+					.collect(Collectors.toList());
+		}
+
+		public Class<T> getComponent() {
+			return component;
+		}
+
+		public Class<? extends T> getDefaultInstance() {
+			return defaultInstance;
+		}
+
+		public Collection<Class<? extends T>> getAlternatives() {
+			return alternatives;
+		}
+	}
+
+	public static Collection<ConfigurableComponent<?>> configurableComponents() {
+		Collection<ConfigurableComponent<?>> in = new ArrayList<>();
+		in.add(new ConfigurableComponent<>(CallGraph.class));
+		in.add(new ConfigurableComponent<>(AbstractState.class));
+		in.add(new ConfigurableComponent<>(HeapDomain.class));
+		in.add(new ConfigurableComponent<>(ValueDomain.class));
+		in.add(new ConfigurableComponent<>(NonRelationalHeapDomain.class));
+		in.add(new ConfigurableComponent<>(NonRelationalValueDomain.class));
+		return in;
 	}
 }
