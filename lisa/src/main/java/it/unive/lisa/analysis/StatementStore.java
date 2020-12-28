@@ -9,8 +9,9 @@ import it.unive.lisa.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the type of the heap analysis
- * @param <V> the type of the value analysis
+ * @param <A> the type of {@link AbstractState}
+ * @param <H> the type of the {@link HeapDomain}
+ * @param <V> the type of the {@link ValueDomain}
  */
 public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
 		extends FunctionalLattice<StatementStore<A, H, V>, Statement, AnalysisState<A, H, V>> {

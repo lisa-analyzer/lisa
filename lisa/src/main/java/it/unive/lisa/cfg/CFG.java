@@ -142,6 +142,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * instance of {@link FIFOWorkingSet} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -185,6 +187,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * instance of {@link FIFOWorkingSet} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -234,6 +238,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -279,6 +285,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -333,6 +341,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * {@link FIFOWorkingSet} is used as working set for the statements to
 	 * process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -379,6 +389,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * {@link FIFOWorkingSet} is used as working set for the statements to
 	 * process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -431,6 +443,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -480,6 +494,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -536,6 +552,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -581,6 +599,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -632,6 +652,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while {@code ws} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -671,6 +693,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
+	 * @param <A> the type of {@link AbstractState} contained into the analysis
+	 *                state
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
 	 *                analysis states
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
@@ -698,6 +722,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while {@code ws} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the

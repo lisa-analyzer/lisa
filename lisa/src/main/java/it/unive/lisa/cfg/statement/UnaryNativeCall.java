@@ -128,8 +128,9 @@ public abstract class UnaryNativeCall extends NativeCall {
 	 * has been computed. Meta variables from the parameter will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
-	 * @param <V>           the type of the value analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
+	 * @param <V>           the type of the {@link ValueDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameter's semantics evaluation
 	 * @param callGraph     the call graph of the program to analyze

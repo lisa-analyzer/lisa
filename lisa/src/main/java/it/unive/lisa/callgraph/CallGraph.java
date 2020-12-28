@@ -61,6 +61,7 @@ public interface CallGraph {
 	 * of its overloads. Results of individual cfgs are then available through
 	 * {@link #getAnalysisResultsOf(CFG)}.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} to compute
 	 * @param <H>        the type of {@link HeapDomain} to compute
 	 * @param <V>        the type of {@link ValueDomain} to compute
 	 * @param entryState the entry state for the {@link CFG}s that are the
@@ -81,6 +82,8 @@ public interface CallGraph {
 	 * given {@link CFG}. Results are provided as
 	 * {@link CFGWithAnalysisResults}.
 	 * 
+	 * @param <A> the type of {@link AbstractState} contained into the analysis
+	 *                state
 	 * @param <H> the type of {@link HeapDomain} contained into the computed
 	 *                abstract state
 	 * @param <V> the type of {@link ValueDomain} contained into the computed
@@ -108,6 +111,8 @@ public interface CallGraph {
 	 * parameters. The abstract value of each parameter is computed on
 	 * {@code entryState}.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the

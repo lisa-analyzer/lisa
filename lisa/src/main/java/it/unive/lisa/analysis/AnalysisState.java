@@ -17,8 +17,9 @@ import org.apache.commons.collections.CollectionUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the type of heap analysis embedded in the abstract state
- * @param <V> the type of value analysis embedded in the abstract state
+ * @param <A> the type of {@link AbstractState} embedded in this state
+ * @param <H> the type of {@link HeapDomain} embedded in the abstract state
+ * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
 		implements Lattice<AnalysisState<A, H, V>>,

@@ -21,6 +21,7 @@ public interface SemanticEdge<N extends Node<N>, E extends SemanticEdge<N, E>> e
 	 * Traverses this edge, optionally modifying the given {@code sourceState}
 	 * by applying semantic assumptions.
 	 * 
+	 * @param <A>         the concrete {@link AbstractState} instance
 	 * @param <H>         the concrete {@link HeapDomain} instance
 	 * @param <V>         the concrete {@link ValueDomain} instance
 	 * @param sourceState the {@link AnalysisState} computed at the source of

@@ -149,8 +149,9 @@ public abstract class Call extends Expression {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
-	 * @param <V>           the type of the value analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
+	 * @param <V>           the type of the {@link ValueDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameters' semantics evaluation
 	 * @param callGraph     the call graph of the program to analyze
@@ -195,7 +196,8 @@ public abstract class Call extends Expression {
 	 * inferred. Meta variables from the parameters will be forgotten after this
 	 * call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameters' type inference
 	 * @param callGraph     the call graph of the program to analyze

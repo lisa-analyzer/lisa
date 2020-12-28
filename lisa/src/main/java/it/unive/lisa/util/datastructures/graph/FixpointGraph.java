@@ -75,6 +75,8 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * 
 	 * @param <N> the type of the nodes of the graph, where the semantic
 	 *                computation will happen
+	 * @param <A> the type of {@link AbstractState} embedded in the analysis
+	 *                states
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
 	 *                analysis states
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
@@ -128,6 +130,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * all invoked graphs, while {@code ws} is used as working set for the nodes
 	 * to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState}
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -268,10 +271,11 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * store the fixpoint results on internal nodes, that is, node that are
 	 * nested within outer ones.
 	 * 
-	 * @param <H>        the type of heap analysis embedded in the abstract
+	 * @param <A>        the type of {@link AbstractState}
+	 * @param <H>        the type of {@link HeapDomain} embedded in the abstract
 	 *                       state
-	 * @param <V>        the type of value analysis embedded in the abstract
-	 *                       state
+	 * @param <V>        the type of {@link ValueDomain} embedded in the
+	 *                       abstract state
 	 * @param entrystate the analysis state before the creation of this lattice
 	 * 
 	 * @return the functional lattice where results on internal nodes will be

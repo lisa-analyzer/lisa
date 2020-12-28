@@ -198,8 +198,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * as parameter, in order to register the computed runtime types in the
 	 * expression.
 	 * 
-	 * @param <H>         the concrete type of {@link HeapDomain} that is run
-	 *                        during the type inference
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of {@link HeapDomain} that is run during the
+	 *                        type inference
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement
@@ -226,8 +227,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
-	 * @param <H>         the type of the heap analysis
-	 * @param <V>         the type of the value analysis
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of the {@link HeapDomain}
+	 * @param <V>         the type of the {@link ValueDomain}
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement

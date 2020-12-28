@@ -13,6 +13,8 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state
  * @param <H> the type of {@link HeapDomain} contained into the computed
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
