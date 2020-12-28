@@ -111,7 +111,11 @@ public class LiSAFactory {
 		}
 	}
 
-	static final Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
+	private static final Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
+	
+	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
+		customDefaults.put(component, defaultImplementation);
+	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> Class<? extends T> getDefaultClassFor(Class<T> component) {

@@ -126,10 +126,6 @@ public class LiSA {
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
 	}
 
-	public void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
-		LiSAFactory.customDefaults.put(component, defaultImplementation);
-	}
-
 	/**
 	 * Adds the given cfg to the ones under analysis.
 	 * 
