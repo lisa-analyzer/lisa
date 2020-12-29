@@ -5,10 +5,10 @@ import it.unive.lisa.cfg.type.Untyped;
 import java.util.Objects;
 
 /**
- * A reference to a CFG parameter identified by its name and its type,
- * containing the information about the source file, line and column where a
- * parameter appears. No information about the CFG where the parameter appears
- * is contained.
+ * A CFG parameter identified by its name and its type, containing the
+ * information about the source file, line and column where the parameter is
+ * defined. No information about the CFG where the parameter appears is
+ * contained.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
@@ -106,6 +106,16 @@ public class Parameter {
 	 */
 	public Type getStaticType() {
 		return staticType;
+	}
+
+	/**
+	 * Yields the source file name where this parameter happens. This method
+	 * returns {@code null} if the source file is unknown.
+	 * 
+	 * @return the source file, or {@code null}
+	 */
+	public String getSourceFile() {
+		return sourceFile;
 	}
 
 	/**

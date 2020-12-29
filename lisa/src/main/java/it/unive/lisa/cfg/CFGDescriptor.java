@@ -1,10 +1,14 @@
 package it.unive.lisa.cfg;
 
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
-import java.util.Arrays;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,
@@ -46,6 +50,11 @@ public class CFGDescriptor {
 	 * The return type of the CFG associated with this descriptor.
 	 */
 	private final Type returnType;
+	
+	/**
+	 * The list of variables defined in the cfg
+	 */
+	private final List<VariableTableEntry> variables;
 
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
@@ -121,6 +130,11 @@ public class CFGDescriptor {
 		this.name = name;
 		this.args = args;
 		this.returnType = returnType;
+		
+		this.variables = new LinkedList<>();
+		int i = 0;
+		for (Parameter arg : args)
+			variables.add(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, -1, -1, arg.getName(), arg.getStaticType()));
 	}
 
 	/**
@@ -202,6 +216,26 @@ public class CFGDescriptor {
 	 */
 	public Type getReturnType() {
 		return returnType;
+	}
+	
+	public List<VariableTableEntry> getVariables() {
+		return variables;
+	}
+	
+	public void addVariable(String name) {
+		addVariable(null, -1, -1, -1, -1,name, Untyped.INSTANCE);
+	}
+	
+	public void addVariable(int scopeStart, int scopeEnd, String name) {
+		addVariable(null, -1, -1, scopeStart, scopeEnd, name, Untyped.INSTANCE);
+	}
+	
+	public void addVariable(int scopeStart, int scopeEnd, String name, Type staticType) {
+		addVariable(null, -1, -1, scopeStart, scopeEnd, name, staticType);
+	}
+	
+	public void addVariable(String sourceFile, int line, int col, int scopeStart, int scopeEnd, String name, Type staticType) {
+		variables.add(new VariableTableEntry(sourceFile, line, col, variables.size(), scopeStart, scopeEnd, name, staticType));
 	}
 
 	@Override
