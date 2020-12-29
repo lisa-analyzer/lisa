@@ -82,7 +82,10 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 *                on internal nodes will be stored
 	 */
 	@FunctionalInterface
-	public interface SemanticFunction<N extends Node<N>, H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
+	public interface SemanticFunction<N extends Node<N>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
 
 		/**
 		 * Computes the semantics of the given {@link Node} {@code node},
@@ -156,10 +159,12 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 *                               set
 	 */
 	@SuppressWarnings("unchecked")
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> Map<N, AnalysisState<H, V>> fixpoint(
-			Map<N, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
-			SemanticFunction<N, H, V, F> semantics)
-			throws FixpointException {
+	protected <H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> Map<N, AnalysisState<H, V>> fixpoint(
+					Map<N, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
+					SemanticFunction<N, H, V, F> semantics)
+					throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);
 		Map<N, Pair<AnalysisState<H, V>, F>> result = new HashMap<>(size);
@@ -269,14 +274,17 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * @return the functional lattice where results on internal nodes will be
 	 *             stored
 	 */
-	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkInternalStore(
-			AnalysisState<H, V> entrystate);
+	protected abstract <H extends HeapDomain<H>,
+			V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkInternalStore(
+					AnalysisState<H, V> entrystate);
 
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> AnalysisState<H, V> getEntryState(
-			N current,
-			Map<N, AnalysisState<H, V>> startingPoints,
-			Map<N, Pair<AnalysisState<H, V>, F>> result)
-			throws SemanticException {
+	private <H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> AnalysisState<H, V> getEntryState(
+					N current,
+					Map<N, AnalysisState<H, V>> startingPoints,
+					Map<N, Pair<AnalysisState<H, V>, F>> result)
+					throws SemanticException {
 		AnalysisState<H, V> entrystate = startingPoints.get(current);
 		Collection<N> preds = predecessorsOf(current);
 		List<AnalysisState<H, V>> states = new ArrayList<>(preds.size());
@@ -294,6 +302,12 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 			else
 				entrystate = entrystate.lub(s);
 
+		return cleanUpEntryState(current, entrystate);
+	}
+
+	protected <H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<H, V> cleanUpEntryState(N node, AnalysisState<H, V> entrystate)
+					throws SemanticException {
 		return entrystate;
 	}
 }

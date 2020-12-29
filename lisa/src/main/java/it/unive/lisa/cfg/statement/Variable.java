@@ -116,7 +116,7 @@ public class Variable extends Expression {
 		return name;
 	}
 
-	private SymbolicExpression getVariable() {
+	public SymbolicExpression getVariable() {
 		SymbolicExpression expr;
 		if (getStaticType().isPointerType())
 			// the smallStepSemantics will take care of converting that

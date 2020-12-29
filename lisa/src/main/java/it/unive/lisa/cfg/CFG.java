@@ -1,10 +1,19 @@
 package it.unive.lisa.cfg;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
@@ -17,16 +26,13 @@ import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -648,7 +654,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                analysis states
 	 */
 	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> extends
-			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, H, V, StatementStore<H, V>> {
+			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, H, V,
+					StatementStore<H, V>> {
 
 	}
 
@@ -704,9 +711,41 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkInternalStore(
-			AnalysisState<H, V> entrystate) {
+	protected <H extends HeapDomain<H>,
+			V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkInternalStore(
+					AnalysisState<H, V> entrystate) {
 		return new StatementStore<>(entrystate);
+	}
+
+	@Override
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> cleanUpEntryState(Statement node,
+			AnalysisState<H, V> entrystate) throws SemanticException {
+		Collection<Identifier> toForget = null;
+		for (Statement pred : predecessorsOf(node))
+			// we remove only the variables that are always out of scope
+			if (toForget == null)
+				toForget = removedVariables(pred, entrystate);
+			else
+				toForget.retainAll(removedVariables(pred, entrystate));
+
+		return entrystate.forgetIdentifiers(toForget);
+	}
+
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>> Collection<Identifier> removedVariables(Statement st,
+			AnalysisState<H, V> state) throws SemanticException {
+		List<VariableTableEntry> toRemove = new LinkedList<>();
+		for (VariableTableEntry entry : descriptor.getVariables())
+			if (entry.getScopeEnd() == st.getOffset())
+				toRemove.add(entry);
+
+		Collection<Identifier> ids = new LinkedList<>();
+		for (VariableTableEntry entry : toRemove) {
+			SymbolicExpression v = entry.createReference(this).getVariable();
+			for (SymbolicExpression expr : state.smallStepSemantics(v).getComputedExpressions())
+				ids.add((Identifier) expr);
+		}
+
+		return ids;
 	}
 
 	@Override
