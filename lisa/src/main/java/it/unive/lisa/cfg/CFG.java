@@ -728,7 +728,10 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 			else
 				toForget.retainAll(removedVariables(pred, entrystate));
 
-		return entrystate.forgetIdentifiers(toForget);
+		if (toForget != null && !toForget.isEmpty())
+			return entrystate.forgetIdentifiers(toForget);
+		
+		return entrystate;
 	}
 
 	private <H extends HeapDomain<H>, V extends ValueDomain<V>> Collection<Identifier> removedVariables(Statement st,

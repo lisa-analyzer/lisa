@@ -132,6 +132,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private AdjacencyMatrix<Statement, Edge> matrix;
 
 	private CFG currentCFG;
+	
+	private CFGDescriptor currentDescriptor;
 
 	private IMPFrontend(String file) {
 		this.cfgs = new HashSet<CFG>();
@@ -190,7 +192,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		Collection<Statement> entrypoints = new HashSet<>();
 		matrix = new AdjacencyMatrix<>();
 		// side effects on entrypoints and matrix will affect the cfg
-		currentCFG = new CFG(mkDescriptor(ctx), entrypoints, matrix);
+		currentDescriptor = mkDescriptor(ctx);
+		currentCFG = new CFG(currentDescriptor, entrypoints, matrix);
 
 		Pair<Statement, Statement> visited = visitBlock(ctx.block());
 		entrypoints.add(visited.getLeft());
@@ -368,9 +371,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Assignment visitAssignment(AssignmentContext ctx) {
 		Expression expression = visitExpression(ctx.expression());
 		Expression target = null;
-		if (ctx.IDENTIFIER() != null)
-			target = visitVar(ctx.IDENTIFIER());
-		else if (ctx.fieldAccess() != null)
+		if (ctx.IDENTIFIER() != null) {
+			VariableRef ref = visitVar(ctx.IDENTIFIER());
+			// since variables are visible until the end of the method (like python), 
+			// searching for a variable with the same name is enough 
+			if (currentDescriptor.getVariables().stream().noneMatch(v -> v.getName().equals(ref.getName())))
+				currentDescriptor.addVariable(file, ref.getLine(), ref.getCol(), ref.getOffset(), -1, ref.getName(), ref.getStaticType());
+			target = ref;
+		} else if (ctx.fieldAccess() != null)
 			target = visitFieldAccess(ctx.fieldAccess());
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
