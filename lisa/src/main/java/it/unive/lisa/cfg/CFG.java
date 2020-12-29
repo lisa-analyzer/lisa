@@ -25,7 +25,6 @@ import it.unive.lisa.cfg.statement.Ret;
 import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotCFG;
-import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
@@ -40,7 +39,7 @@ import it.unive.lisa.util.workset.WorkingSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG extends FixpointGraph<Statement, Edge> {
+public class CFG extends FixpointGraph<CFG, Statement, Edge> {
 
 	/**
 	 * The descriptor of this control flow graph.
@@ -67,7 +66,7 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                            edges that will be part of this cfg
 	 */
 	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints,
-			AdjacencyMatrix<Statement, Edge> adjacencyMatrix) {
+			AdjacencyMatrix<Statement, Edge, CFG> adjacencyMatrix) {
 		super(entrypoints, adjacencyMatrix);
 		this.descriptor = descriptor;
 	}
@@ -654,7 +653,7 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                analysis states
 	 */
 	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> extends
-			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, H, V,
+			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, Edge, CFG, H, V,
 					StatementStore<H, V>> {
 
 	}
@@ -730,7 +729,7 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 
 		if (toForget != null && !toForget.isEmpty())
 			return entrystate.forgetIdentifiers(toForget);
-		
+
 		return entrystate;
 	}
 
@@ -752,7 +751,7 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	}
 
 	@Override
-	protected DotGraph<Statement, Edge> toDot(Function<Statement, String> labelGenerator) {
+	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, labelGenerator);
 	}
 }

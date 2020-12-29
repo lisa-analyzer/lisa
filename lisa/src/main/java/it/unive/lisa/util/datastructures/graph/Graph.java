@@ -1,12 +1,13 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.outputs.DotGraph;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Function;
+
+import it.unive.lisa.outputs.DotGraph;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.
@@ -16,13 +17,13 @@ import java.util.function.Function;
  * @param <N> the type of the nodes in this graph
  * @param <E> the type of the edges in this graph
  */
-public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
+public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>> {
 
 	/**
 	 * The adjacency matrix of this graph, mapping nodes to the collection of
 	 * edges attached to it.
 	 */
-	protected final AdjacencyMatrix<N, E> adjacencyMatrix;
+	protected final AdjacencyMatrix<N, E, G> adjacencyMatrix;
 
 	/**
 	 * The nodes of this graph that are entrypoints, that is, that can be
@@ -46,7 +47,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
 	 *                            that will be part of this graph
 	 */
-	protected Graph(Collection<N> entrypoints, AdjacencyMatrix<N, E> adjacencyMatrix) {
+	protected Graph(Collection<N> entrypoints, AdjacencyMatrix<N, E, G> adjacencyMatrix) {
 		this.adjacencyMatrix = adjacencyMatrix;
 		this.entrypoints = entrypoints;
 	}
@@ -56,7 +57,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * 
 	 * @param other the original graph
 	 */
-	protected Graph(Graph<N, E> other) {
+	protected Graph(G other) {
 		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 	}
@@ -229,7 +230,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * 
 	 * @return the converted {@link DotGraph}
 	 */
-	protected abstract DotGraph<N, E> toDot(Function<N, String> labelGenerator);
+	protected abstract DotGraph<N, E, G> toDot(Function<N, String> labelGenerator);
 
 	@Override
 	public int hashCode() {
@@ -262,7 +263,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * @return {@code true} if this graph and the given one are effectively
 	 *             equals
 	 */
-	public boolean isEqualTo(Graph<N, E> graph) {
+	public boolean isEqualTo(G graph) {
 		if (this == graph)
 			return true;
 		if (graph == null)
@@ -329,5 +330,19 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 */
 	protected final <T extends N> void simplify(Class<T> target) {
 		adjacencyMatrix.simplify(target);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <V extends VisitTool> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
+		if (!visitor.visit(tool, (G) this))
+			return;
+			
+		for (N node : getNodes())
+			if (!node.accept(visitor, tool))
+				return;
+		
+		for (E edge : getEdges())
+			if (!edge.accept(visitor, tool))
+				return;
 	}
 }

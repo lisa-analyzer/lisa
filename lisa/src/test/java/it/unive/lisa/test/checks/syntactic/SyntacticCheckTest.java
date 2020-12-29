@@ -3,11 +3,17 @@ package it.unive.lisa.test.checks.syntactic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFGDescriptor;
-import it.unive.lisa.cfg.statement.Expression;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.checks.CheckTool;
@@ -16,25 +22,10 @@ import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collection;
-import org.junit.Test;
 
 public class SyntacticCheckTest {
 
 	private static class VariableI implements SyntacticCheck {
-
-		@Override
-		public void visitStatement(CheckTool tool, Statement statement) {
-			if (statement instanceof Expression)
-				visitExpression(tool, (Expression) statement);
-		}
-
-		@Override
-		public void visitCFGDescriptor(CheckTool tool, CFGDescriptor descriptor) {
-		}
 
 		@Override
 		public void beforeExecution(CheckTool tool) {
@@ -45,9 +36,20 @@ public class SyntacticCheckTest {
 		}
 
 		@Override
-		public void visitExpression(CheckTool tool, Expression expression) {
-			if (expression instanceof VariableRef && ((VariableRef) expression).getName().equals("i"))
-				tool.warnOn(expression, "Found variable i");
+		public boolean visit(CheckTool tool, CFG graph, Statement node) {
+			if (node instanceof VariableRef && ((VariableRef) node).getName().equals("i"))
+				tool.warnOn(node, "Found variable i");
+			return true;
+		}
+
+		@Override
+		public boolean visit(CheckTool tool, CFG g) {
+			return true;
+		}
+
+		@Override
+		public boolean visit(CheckTool tool, CFG graph, Edge edge) {
+			return true;
 		}
 	}
 

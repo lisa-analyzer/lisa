@@ -129,7 +129,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private Collection<CFG> cfgs;
 
-	private AdjacencyMatrix<Statement, Edge> matrix;
+	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
 	private CFG currentCFG;
 	

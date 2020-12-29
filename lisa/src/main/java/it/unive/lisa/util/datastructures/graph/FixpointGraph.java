@@ -28,7 +28,10 @@ import org.apache.logging.log4j.Logger;
  * @param <N> the type of the nodes in this graph
  * @param <E> the type of the edges in this graph
  */
-public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N, E>> extends Graph<N, E> {
+public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
+		N extends Node<N, E, G>,
+		E extends SemanticEdge<N, E, G>> extends Graph<G, N, E> {
+
 	private static final Logger log = LogManager.getLogger(FixpointGraph.class);
 
 	/**
@@ -53,7 +56,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
 	 *                            that will be part of this graph
 	 */
-	protected FixpointGraph(Collection<N> entrypoints, AdjacencyMatrix<N, E> adjacencyMatrix) {
+	protected FixpointGraph(Collection<N> entrypoints, AdjacencyMatrix<N, E, G> adjacencyMatrix) {
 		super(entrypoints, adjacencyMatrix);
 	}
 
@@ -62,7 +65,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * 
 	 * @param other the original graph
 	 */
-	protected FixpointGraph(FixpointGraph<N, E> other) {
+	protected FixpointGraph(G other) {
 		super(other);
 	}
 
@@ -82,7 +85,9 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 *                on internal nodes will be stored
 	 */
 	@FunctionalInterface
-	public interface SemanticFunction<N extends Node<N>,
+	public interface SemanticFunction<N extends Node<N, E, G>,
+			E extends SemanticEdge<N, E, G>,
+			G extends FixpointGraph<G, N, E>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
@@ -163,7 +168,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 			V extends ValueDomain<V>,
 			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> Map<N, AnalysisState<H, V>> fixpoint(
 					Map<N, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
-					SemanticFunction<N, H, V, F> semantics)
+					SemanticFunction<N, E, G, H, V, F> semantics)
 					throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);

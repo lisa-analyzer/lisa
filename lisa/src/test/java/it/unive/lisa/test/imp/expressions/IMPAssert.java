@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -17,9 +17,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAssert extends Statement {
-
-	private final Expression expression;
+public class IMPAssert extends UnaryStatement {
 
 	/**
 	 * Builds the assertion.
@@ -31,38 +29,23 @@ public class IMPAssert extends Statement {
 	 * @param expression the expression being asserted
 	 */
 	public IMPAssert(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col);
-		this.expression = expression;
-	}
-
-	@Override
-	public int setOffset(int offset) {
-		return this.offset = offset;
+		super(cfg, sourceFile, line, col, expression);
 	}
 
 	@Override
 	public String toString() {
-		return "assert " + expression;
-	}
-
-	/**
-	 * Yields the expression being asserted.
-	 * 
-	 * @return the expression
-	 */
-	public Expression getExpression() {
-		return expression;
+		return "assert " + getExpression();
 	}
 
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
 			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
-		expressions.put(expression, result);
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
-		if (!expression.getDynamicType().isBooleanType())
+		AnalysisState<H, TypeEnvironment> result = getExpression().typeInference(entryState, callGraph, expressions);
+		expressions.put(getExpression(), result);
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
+		if (!getExpression().getDynamicType().isBooleanType())
 			return result.bottom();
 		return result.smallStepSemantics(new Skip());
 	}
@@ -71,11 +54,11 @@ public class IMPAssert extends Statement {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
-		expressions.put(expression, result);
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
-		if (!expression.getDynamicType().isBooleanType())
+		AnalysisState<H, V> result = getExpression().semantics(entryState, callGraph, expressions);
+		expressions.put(getExpression(), result);
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
+		if (!getExpression().getDynamicType().isBooleanType())
 			return result.bottom();
 		return result.smallStepSemantics(new Skip());
 	}

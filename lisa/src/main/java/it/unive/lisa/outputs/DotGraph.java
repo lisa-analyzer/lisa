@@ -34,7 +34,7 @@ import org.graphstream.stream.file.FileSourceDOT;
  * @param <N> the type of the nodes in the original graph
  * @param <E> the type of the edges in the original graph
  */
-public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
+public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
 
 	/**
 	 * The black color.
@@ -226,7 +226,7 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		DotGraph<?, ?> other = (DotGraph<?, ?>) obj;
+		DotGraph<?, ?, ?> other = (DotGraph<?, ?, ?>) obj;
 		if (graph == null) {
 			if (other.graph != null)
 				return false;
@@ -324,7 +324,9 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static <N extends Node<N>, E extends Edge<N, E>> DotGraph<N, E> readDot(Reader reader) throws IOException {
+	public static <N extends Node<N, E, G>,
+			E extends Edge<N, E, G>,
+			G extends Graph<G, N, E>> DotGraph<N, E, G> readDot(Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;
@@ -354,7 +356,7 @@ public abstract class DotGraph<N extends Node<N>, E extends Edge<N, E>> {
 			content = writer.toString();
 		}
 		FileSourceDOT source = new FileSourceDOT();
-		DotGraph<N, E> graph = new DotGraph<>(null) {
+		DotGraph<N, E, G> graph = new DotGraph<>(null) {
 		};
 		source.addSink(graph.graph);
 		try (StringReader sr = new StringReader(content)) {

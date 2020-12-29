@@ -8,7 +8,7 @@ package it.unive.lisa.util.datastructures.graph;
  * @param <N> the type of nodes connected to this edge
  * @param <E> the type of this edge
  */
-public interface Edge<N extends Node<N>, E extends Edge<N, E>> {
+public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
 
 	/**
 	 * Yields the node where this edge originates.
@@ -56,4 +56,6 @@ public interface Edge<N extends Node<N>, E extends Edge<N, E>> {
 	 * @return a new instance of this edge, connecting the given nodes
 	 */
 	E newInstance(N source, N destination);
+
+	<V extends VisitTool> boolean accept(GraphVisitor<G, N, E, V> visitor, V tool);
 }

@@ -14,7 +14,7 @@ import it.unive.lisa.analysis.ValueDomain;
  * @param <N> the type of nodes connected to this edge
  * @param <E> the type of this edge
  */
-public interface SemanticEdge<N extends Node<N>, E extends SemanticEdge<N, E>> extends Edge<N, E> {
+public interface SemanticEdge<N extends Node<N, E, G>, E extends SemanticEdge<N, E, G>, G extends Graph<G, N, E>> extends Edge<N, E, G> {
 
 	/**
 	 * Traverses this edge, optionally modifying the given {@code sourceState}

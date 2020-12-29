@@ -9,7 +9,6 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
-import java.util.Objects;
 
 /**
  * A statement that raises an error, stopping the execution of the current CFG
@@ -17,12 +16,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Throw extends Statement {
-
-	/**
-	 * The expression representing the error to raise
-	 */
-	private final Expression expression;
+public class Throw extends UnaryStatement {
 
 	/**
 	 * Builds the throw, raising {@code expression} as error. The location where
@@ -50,62 +44,22 @@ public class Throw extends Statement {
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col);
-		Objects.requireNonNull(expression, "The expression of a throw cannot be null");
-		this.expression = expression;
-	}
-
-	/**
-	 * Yields the expression that is being raised as error.
-	 * 
-	 * @return the expression being raised
-	 */
-	public final Expression getExpression() {
-		return expression;
-	}
-
-	@Override
-	public int setOffset(int offset) {
-		this.offset = offset;
-		return expression.setOffset(offset + 1);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
-			return true;
-		if (getClass() != st.getClass())
-			return false;
-		Throw other = (Throw) st;
-		if (expression == null) {
-			if (other.expression != null)
-				return false;
-		} else if (!expression.isEqualTo(other.expression))
-			return false;
-		return true;
+		super(cfg, sourceFile, line, col, expression);
 	}
 
 	@Override
 	public final String toString() {
-		return "throw " + expression;
+		return "throw " + getExpression();
 	}
 
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
 			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> result = expression.typeInference(entryState, callGraph, expressions);
-		expressions.put(expression, result);
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
+		AnalysisState<H, TypeEnvironment> result = getExpression().typeInference(entryState, callGraph, expressions);
+		expressions.put(getExpression(), result);
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
 		return result.smallStepSemantics(new Skip());
 	}
 
@@ -113,10 +67,10 @@ public class Throw extends Statement {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> result = expression.semantics(entryState, callGraph, expressions);
-		expressions.put(expression, result);
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
+		AnalysisState<H, V> result = getExpression().semantics(entryState, callGraph, expressions);
+		expressions.put(getExpression(), result);
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
 		return result.smallStepSemantics(new Skip());
 	}
 }

@@ -7,7 +7,7 @@ package it.unive.lisa.util.datastructures.graph;
  * 
  * @param <N> the type of this node
  */
-public interface Node<N extends Node<N>> {
+public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
 
 	/**
 	 * Sets the offset of this node to the given value, and then proceeds by
@@ -30,4 +30,6 @@ public interface Node<N extends Node<N>> {
 	 *             equals
 	 */
 	boolean isEqualTo(N other);
+
+	<V extends VisitTool> boolean accept(GraphVisitor<G, N, E, V> visitor, V tool);
 }

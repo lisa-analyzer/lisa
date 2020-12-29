@@ -1,9 +1,10 @@
 package it.unive.lisa.checks.syntactic;
 
-import it.unive.lisa.cfg.CFGDescriptor;
-import it.unive.lisa.cfg.statement.Expression;
+import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.CheckTool;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
  * A check that inspects the syntactic structure of the program to report
@@ -16,7 +17,7 @@ import it.unive.lisa.checks.CheckTool;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface SyntacticCheck {
+public interface SyntacticCheck extends GraphVisitor<CFG, Statement, Edge, CheckTool> {
 
 	/**
 	 * Callback invoked only once before the beginning of the inspection of the
@@ -26,36 +27,6 @@ public interface SyntacticCheck {
 	 *                 execution
 	 */
 	void beforeExecution(CheckTool tool);
-
-	/**
-	 * Callback invoked when inspecting the descriptor of a CFG.
-	 * 
-	 * @param tool       the auxiliary tool that this check can use during the
-	 *                       execution
-	 * @param descriptor the descriptor that is currently being inspected
-	 */
-	void visitCFGDescriptor(CheckTool tool, CFGDescriptor descriptor);
-
-	/**
-	 * Callback invoked when inspecting a statement. This method <b>will not be
-	 * invoked</b> with {@link Expression} instances that are the root of a
-	 * statement.
-	 * 
-	 * @param tool      the auxiliary tool that this check can use during the
-	 *                      execution
-	 * @param statement the statement that is currently being inspected
-	 */
-	void visitStatement(CheckTool tool, Statement statement);
-
-	/**
-	 * Callback invoked when inspecting an expression. This method will be
-	 * invoked also on all expressions that are the root of a statement.
-	 * 
-	 * @param tool       the auxiliary tool that this check can use during the
-	 *                       execution
-	 * @param expression the expression that is currently being inspected
-	 */
-	void visitExpression(CheckTool tool, Expression expression);
 
 	/**
 	 * Callback invoked only once after the end of the inspection of the

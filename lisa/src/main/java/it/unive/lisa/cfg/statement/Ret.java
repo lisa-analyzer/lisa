@@ -8,7 +8,10 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
 
 /**
  * Terminates the execution of the CFG where this statement lies, without
@@ -80,5 +83,10 @@ public class Ret extends Statement {
 			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
 		return entryState.smallStepSemantics(new Skip());
+	}
+	
+	@Override
+	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+		return visitor.visit(tool, getCFG(), this);
 	}
 }

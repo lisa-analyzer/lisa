@@ -9,6 +9,8 @@ import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,7 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CheckTool {
+public class CheckTool implements VisitTool {
 
 	/**
 	 * The collection of generated warnings
@@ -69,13 +71,18 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the given statement.
+	 * Reports a new warning with the given message on the given statement. If
+	 * {@code statement} is an instance of {@link Expression}, then
+	 * {@link #warnOn(Expression, String)} is invoked.
 	 * 
 	 * @param statement the statement to warn on
 	 * @param message   the message of the warning
 	 */
 	public void warnOn(Statement statement, String message) {
-		warnings.add(new StatementWarning(statement, message));
+		if (statement instanceof Expression)
+			warnOn((Expression) statement, message);
+		else
+			warnings.add(new StatementWarning(statement, message));
 	}
 
 	/**

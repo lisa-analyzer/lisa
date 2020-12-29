@@ -1,7 +1,10 @@
 package it.unive.lisa.cfg.statement;
 
-import it.unive.lisa.cfg.CFG;
 import java.util.Objects;
+
+import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
 
 /**
  * A binary expression.
@@ -101,5 +104,18 @@ public abstract class BinaryExpression extends Expression {
 		} else if (!left.isEqualTo(other.left))
 			return false;
 		return true;
+	}
+
+	@Override
+	public final <V extends VisitTool> boolean accept(
+			GraphVisitor<CFG, Statement, it.unive.lisa.cfg.edge.Edge, V> visitor,
+			V tool) {
+		if (!left.accept(visitor, tool))
+			return false;
+
+		if (!right.accept(visitor, tool))
+			return false;
+
+		return visitor.visit(tool, getCFG(), this);
 	}
 }

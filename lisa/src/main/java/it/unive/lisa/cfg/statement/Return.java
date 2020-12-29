@@ -11,7 +11,6 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
-import java.util.Objects;
 
 /**
  * Returns an expression to the caller CFG, terminating the execution of the CFG
@@ -20,12 +19,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Return extends Statement implements MetaVariableCreator {
-
-	/**
-	 * The expression being returned
-	 */
-	private final Expression expression;
+public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	/**
 	 * Builds the return, returning {@code expression} to the caller CFG. The
@@ -53,65 +47,27 @@ public class Return extends Statement implements MetaVariableCreator {
 	 * @param expression the expression to return
 	 */
 	public Return(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col);
-		Objects.requireNonNull(expression, "The expression of a return cannot be null");
-		this.expression = expression;
-	}
-
-	/**
-	 * Yields the expression that is being returned.
-	 * 
-	 * @return the expression being returned
-	 */
-	public final Expression getExpression() {
-		return expression;
-	}
-
-	@Override
-	public int setOffset(int offset) {
-		this.offset = offset;
-		return expression.setOffset(offset + 1);
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
-			return true;
-		if (getClass() != st.getClass())
-			return false;
-		Return other = (Return) st;
-		if (expression == null) {
-			if (other.expression != null)
-				return false;
-		} else if (!expression.isEqualTo(other.expression))
-			return false;
-		return true;
+		super(cfg, sourceFile, line, col, expression);
 	}
 
 	@Override
 	public final String toString() {
-		return "return " + expression;
+		return "return " + getExpression();
 	}
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier(expression.getRuntimeTypes(), "ret_value@" + getCFG().getDescriptor().getName());
+		return new ValueIdentifier(getExpression().getRuntimeTypes(),
+				"ret_value@" + getCFG().getDescriptor().getName());
 	}
 
 	@Override
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
 			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> exprResult = expression.typeInference(entryState, callGraph, expressions);
-		expressions.put(expression, exprResult);
+		AnalysisState<H,
+				TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph, expressions);
+		expressions.put(getExpression(), exprResult);
 
 		AnalysisState<H, TypeEnvironment> result = null;
 		Identifier meta = getMetaVariable();
@@ -123,8 +79,8 @@ public class Return extends Statement implements MetaVariableCreator {
 				result = result.lub(tmp);
 		}
 
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
 		return result;
 	}
 
@@ -132,8 +88,8 @@ public class Return extends Statement implements MetaVariableCreator {
 	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
 			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
 			throws SemanticException {
-		AnalysisState<H, V> exprResult = expression.semantics(entryState, callGraph, expressions);
-		expressions.put(expression, exprResult);
+		AnalysisState<H, V> exprResult = getExpression().semantics(entryState, callGraph, expressions);
+		expressions.put(getExpression(), exprResult);
 
 		AnalysisState<H, V> result = null;
 		Identifier meta = getMetaVariable();
@@ -145,8 +101,8 @@ public class Return extends Statement implements MetaVariableCreator {
 				result = result.lub(tmp);
 		}
 
-		if (!expression.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(expression.getMetaVariables());
+		if (!getExpression().getMetaVariables().isEmpty())
+			result = result.forgetIdentifiers(getExpression().getMetaVariables());
 		return result;
 	}
 }

@@ -8,8 +8,12 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -205,4 +209,12 @@ public abstract class Call extends Expression {
 			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
 			Collection<SymbolicExpression>[] params)
 			throws SemanticException;
+	
+	@Override
+	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+		for (Expression par : parameters) 
+			if (!par.accept(visitor, tool))
+				return false;
+		return visitor.visit(tool, getCFG(), this);
+	}
 }

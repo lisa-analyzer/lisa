@@ -1,19 +1,23 @@
 package it.unive.lisa.cfg.edge;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.SemanticEdge;
-import java.util.Objects;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
 
 /**
  * An edge of a control flow graph, connecting two statements.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements SemanticEdge<Statement, Edge> {
+public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 
 	/**
 	 * The source node.
@@ -107,4 +111,9 @@ public abstract class Edge implements SemanticEdge<Statement, Edge> {
 	@Override
 	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
 			AnalysisState<H, V> sourceState) throws SemanticException;
+	
+	@Override
+	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+		return visitor.visit(tool, source.getCFG(), this);
+	}
 }

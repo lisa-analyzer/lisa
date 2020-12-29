@@ -19,7 +19,7 @@ import org.graphstream.graph.implementations.MultiGraph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotCFG extends DotGraph<Statement, Edge> {
+public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 
 	private DotCFG() {
 		super(new CFGLegend().graph);

@@ -8,11 +8,15 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 import java.util.Objects;
 
 /**
@@ -145,5 +149,10 @@ public class VariableRef extends Expression {
 			throws SemanticException {
 		SymbolicExpression expr = getVariable();
 		return entryState.smallStepSemantics(expr);
+	}
+	
+	@Override
+	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+		return visitor.visit(tool, getCFG(), this);
 	}
 }
