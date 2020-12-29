@@ -9,7 +9,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.outputs.JsonReport;
@@ -46,7 +46,7 @@ public class SyntacticCheckTest {
 
 		@Override
 		public void visitExpression(CheckTool tool, Expression expression) {
-			if (expression instanceof Variable && ((Variable) expression).getName().equals("i"))
+			if (expression instanceof VariableRef && ((VariableRef) expression).getName().equals("i"))
 				tool.warnOn(expression, "Found variable i");
 		}
 	}

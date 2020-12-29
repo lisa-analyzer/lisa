@@ -20,7 +20,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Variable extends Expression {
+public class VariableRef extends Expression {
 
 	/**
 	 * The name of this variable
@@ -35,7 +35,7 @@ public class Variable extends Expression {
 	 * @param cfg  the cfg that this expression belongs to
 	 * @param name the name of this variable
 	 */
-	public Variable(CFG cfg, String name) {
+	public VariableRef(CFG cfg, String name) {
 		this(cfg, null, -1, -1, name, Untyped.INSTANCE);
 	}
 
@@ -48,7 +48,7 @@ public class Variable extends Expression {
 	 * @param name the name of this variable
 	 * @param type the type of this variable
 	 */
-	public Variable(CFG cfg, String name, Type type) {
+	public VariableRef(CFG cfg, String name, Type type) {
 		this(cfg, null, -1, -1, name, type);
 	}
 
@@ -66,7 +66,7 @@ public class Variable extends Expression {
 	 * @param name       the name of this variable
 	 * @param type       the type of this variable
 	 */
-	public Variable(CFG cfg, String sourceFile, int line, int col, String name, Type type) {
+	public VariableRef(CFG cfg, String sourceFile, int line, int col, String name, Type type) {
 		super(cfg, sourceFile, line, col, type);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
@@ -102,7 +102,7 @@ public class Variable extends Expression {
 			return false;
 		if (!super.isEqualTo(st))
 			return false;
-		Variable other = (Variable) st;
+		VariableRef other = (VariableRef) st;
 		if (name == null) {
 			if (other.name != null)
 				return false;

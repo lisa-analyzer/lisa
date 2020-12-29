@@ -19,7 +19,7 @@ import it.unive.lisa.cfg.statement.Literal;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Return;
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
@@ -30,9 +30,9 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimpleSimplification() {
 		CFG first = new CFG(new CFGDescriptor("foo"));
-		Assignment assign = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
-		Return ret = new Return(first, new Variable(first, "x"));
+		Return ret = new Return(first, new VariableRef(first, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
@@ -40,8 +40,8 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop, ret));
 
 		CFG second = new CFG(new CFGDescriptor("foo"));
-		assign = new Assignment(second, new Variable(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new Variable(second, "x"));
+		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		ret = new Return(second, new VariableRef(second, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -55,10 +55,10 @@ public class CFGSimplificationTest {
 	@Test
 	public void testDoubleSimplification() {
 		CFG first = new CFG(new CFGDescriptor("foo"));
-		Assignment assign = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop1 = new NoOp(first);
 		NoOp noop2 = new NoOp(first);
-		Return ret = new Return(first, new Variable(first, "x"));
+		Return ret = new Return(first, new VariableRef(first, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop1);
 		first.addNode(noop2);
@@ -68,8 +68,8 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop2, ret));
 
 		CFG second = new CFG(new CFGDescriptor("foo"));
-		assign = new Assignment(second, new Variable(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new Variable(second, "x"));
+		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		ret = new Return(second, new VariableRef(second, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -123,12 +123,12 @@ public class CFGSimplificationTest {
 		}
 
 		CFG first = new CFG(new CFGDescriptor("foo"));
-		Assignment assign = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		GT gt = new GT(first, new Variable(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
+		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		GT gt = new GT(first, new VariableRef(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
 		Print print = new Print(first, new Literal(first, "f", Untyped.INSTANCE));
 		NoOp noop1 = new NoOp(first);
 		NoOp noop2 = new NoOp(first);
-		Return ret = new Return(first, new Variable(first, "x", Untyped.INSTANCE));
+		Return ret = new Return(first, new VariableRef(first, "x", Untyped.INSTANCE));
 		first.addNode(assign, true);
 		first.addNode(gt);
 		first.addNode(print);
@@ -143,10 +143,10 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop2, ret));
 
 		CFG second = new CFG(new CFGDescriptor("foo"));
-		assign = new Assignment(second, new Variable(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		gt = new GT(second, new Variable(second, "x"), new Literal(second, 2, Untyped.INSTANCE));
+		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		gt = new GT(second, new VariableRef(second, "x"), new Literal(second, 2, Untyped.INSTANCE));
 		print = new Print(second, new Literal(second, "f", Untyped.INSTANCE));
-		ret = new Return(second, new Variable(second, "x", Untyped.INSTANCE));
+		ret = new Return(second, new VariableRef(second, "x", Untyped.INSTANCE));
 
 		second.addNode(assign, true);
 		second.addNode(gt);
@@ -165,9 +165,9 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationWithDuplicateStatements() {
 		CFG first = new CFG(new CFGDescriptor("foo"));
-		Assignment assign = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
-		Assignment ret = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		Assignment ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		first.addNode(assign);
 		first.addNode(noop);
 		first.addNode(ret);
@@ -175,8 +175,8 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop, ret));
 
 		CFG second = new CFG(new CFGDescriptor("foo"));
-		assign = new Assignment(second, new Variable(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Assignment(first, new Variable(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 
 		second.addNode(assign);
 		second.addNode(ret);

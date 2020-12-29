@@ -1,6 +1,6 @@
 package it.unive.lisa.cfg;
 
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import java.util.Objects;
@@ -206,8 +206,8 @@ public class VariableTableEntry {
 		return col;
 	}
 
-	public Variable createReference(CFG cfg) {
-		return new Variable(cfg, cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(),
+	public VariableRef createReference(CFG cfg) {
+		return new VariableRef(cfg, cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(),
 				cfg.getDescriptor().getCol(), name, staticType);
 	}
 

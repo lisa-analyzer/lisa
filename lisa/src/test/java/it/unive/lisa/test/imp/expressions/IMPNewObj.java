@@ -10,7 +10,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
@@ -53,7 +53,7 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
@@ -72,7 +72,7 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 

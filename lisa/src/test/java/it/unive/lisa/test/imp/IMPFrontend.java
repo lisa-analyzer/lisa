@@ -17,7 +17,7 @@ import it.unive.lisa.cfg.statement.Return;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
-import it.unive.lisa.cfg.statement.Variable;
+import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.test.antlr.IMPLexer;
@@ -378,8 +378,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return new Assignment(currentCFG, file, getLine(ctx), getCol(ctx), target, expression);
 	}
 
-	private Variable visitVar(TerminalNode identifier) {
-		return new Variable(currentCFG, file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol()),
+	private VariableRef visitVar(TerminalNode identifier) {
+		return new VariableRef(currentCFG, file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol()),
 				identifier.getText(), Untyped.INSTANCE);
 	}
 
@@ -403,7 +403,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public IMPArrayAccess visitArrayAccess(ArrayAccessContext ctx) {
-		Variable receiver = visitVar(ctx.IDENTIFIER());
+		VariableRef receiver = visitVar(ctx.IDENTIFIER());
 		Expression result = receiver;
 		for (IndexContext i : ctx.index())
 			result = new IMPArrayAccess(currentCFG, file, getLine(i), getCol(i), result, visitIndex(i));
