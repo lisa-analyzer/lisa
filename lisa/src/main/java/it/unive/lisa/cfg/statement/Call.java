@@ -12,7 +12,7 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -211,7 +211,7 @@ public abstract class Call extends Expression {
 			throws SemanticException;
 	
 	@Override
-	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		for (Expression par : parameters) 
 			if (!par.accept(visitor, tool))
 				return false;

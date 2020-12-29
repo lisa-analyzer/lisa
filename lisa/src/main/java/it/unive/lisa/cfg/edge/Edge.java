@@ -10,7 +10,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.SemanticEdge;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 /**
  * An edge of a control flow graph, connecting two statements.
@@ -113,7 +113,7 @@ public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 			AnalysisState<H, V> sourceState) throws SemanticException;
 	
 	@Override
-	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
 	}
 }

@@ -11,7 +11,7 @@ import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 /**
  * Terminates the execution of the CFG where this statement lies, without
@@ -86,7 +86,7 @@ public class Ret extends Statement {
 	}
 	
 	@Override
-	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

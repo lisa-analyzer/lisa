@@ -15,7 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 import java.util.Objects;
 
@@ -152,7 +152,7 @@ public class VariableRef extends Expression {
 	}
 	
 	@Override
-	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

@@ -12,7 +12,7 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 import java.util.Objects;
 
@@ -123,7 +123,7 @@ public class Literal extends Expression {
 	}
 	
 	@Override
-	public <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

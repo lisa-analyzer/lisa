@@ -31,5 +31,5 @@ public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extend
 	 */
 	boolean isEqualTo(N other);
 
-	<V extends VisitTool> boolean accept(GraphVisitor<G, N, E, V> visitor, V tool);
+	<V> boolean accept(GraphVisitor<G, N, E, V> visitor, V tool);
 }

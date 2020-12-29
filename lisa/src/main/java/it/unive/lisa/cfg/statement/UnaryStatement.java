@@ -5,7 +5,7 @@ import java.util.Objects;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.VisitTool;
+
 
 /**
  * A unary statement.
@@ -85,7 +85,7 @@ public abstract class UnaryStatement extends Statement {
 	}
 
 	@Override
-	public final <V extends VisitTool> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		if (!expression.accept(visitor, tool))
 			return false;
 		return visitor.visit(tool, getCFG(), this);

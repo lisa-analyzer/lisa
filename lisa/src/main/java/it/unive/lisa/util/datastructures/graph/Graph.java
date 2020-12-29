@@ -333,7 +333,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <V extends VisitTool> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
+	public <V> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
 		if (!visitor.visit(tool, (G) this))
 			return;
 			
