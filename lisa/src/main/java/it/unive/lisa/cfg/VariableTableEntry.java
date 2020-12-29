@@ -79,8 +79,14 @@ public class VariableTableEntry {
 	 * file/line/column is available) as well as its type (i.e. it is {#link
 	 * Untyped#INSTANCE}).
 	 * 
-	 * @param index the index of the variable entry
-	 * @param name  the name of this variable
+	 * @param index      the index of the variable entry
+	 * @param scopeStart the offset of the statement where this variable is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where this variable is last
+	 *                       visible, {@code -1} means that this variable is
+	 *                       visible until the end of the cfg
+	 * @param name       the name of this variable
 	 */
 	public VariableTableEntry(int index, int scopeStart, int scopeEnd, String name) {
 		this(null, -1, -1, index, scopeStart, scopeEnd, name, Untyped.INSTANCE);
@@ -92,6 +98,12 @@ public class VariableTableEntry {
 	 * file/line/column is available).
 	 * 
 	 * @param index      the index of the variable entry
+	 * @param scopeStart the offset of the statement where this variable is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where this variable is last
+	 *                       visible, {@code -1} means that this variable is
+	 *                       visible until the end of the cfg
 	 * @param name       the name of this variable
 	 * @param staticType the type of this variable
 	 */
@@ -110,6 +122,12 @@ public class VariableTableEntry {
 	 * @param col        the column where this variable happens in the source
 	 *                       file. If unknown, use {@code -1}
 	 * @param index      the index of the variable entry
+	 * @param scopeStart the offset of the statement where this variable is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where this variable is last
+	 *                       visible, {@code -1} means that this variable is
+	 *                       visible until the end of the cfg
 	 * @param name       the name of this variable
 	 * @param staticType the type of this variable. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
@@ -206,6 +224,15 @@ public class VariableTableEntry {
 		return col;
 	}
 
+	/**
+	 * Creates a {@link VariableRef} for the variable depicted by this entry,
+	 * happening in the given {@link CFG} at the source file location of its
+	 * descriptor.
+	 * 
+	 * @param cfg the cfg that the returned variable reference will be linked to
+	 * 
+	 * @return a reference to the variable depicted by this entry
+	 */
 	public VariableRef createReference(CFG cfg) {
 		return new VariableRef(cfg, cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(),
 				cfg.getDescriptor().getCol(), name, staticType);

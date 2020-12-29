@@ -65,8 +65,8 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
 			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
 			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H,
-				TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph, expressions);
+		AnalysisState<H, TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph,
+				expressions);
 		expressions.put(getExpression(), exprResult);
 
 		AnalysisState<H, TypeEnvironment> result = null;

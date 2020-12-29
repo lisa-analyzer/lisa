@@ -1,10 +1,8 @@
 package it.unive.lisa.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-
+import java.util.Objects;
 
 /**
  * A binary expression.

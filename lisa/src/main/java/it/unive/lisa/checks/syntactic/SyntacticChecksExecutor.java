@@ -1,13 +1,11 @@
 package it.unive.lisa.checks.syntactic;
 
-import java.util.Collection;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.logging.IterationLogger;
+import java.util.Collection;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utility class that handles the execution of {@link SyntacticCheck}s.

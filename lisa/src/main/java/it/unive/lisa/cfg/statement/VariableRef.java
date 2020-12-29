@@ -15,8 +15,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-
-
 import java.util.Objects;
 
 /**
@@ -120,6 +118,11 @@ public class VariableRef extends Expression {
 		return name;
 	}
 
+	/**
+	 * Yields a {@link SymbolicExpression} representing the referenced variable.
+	 * 
+	 * @return the expression representing the variable
+	 */
 	public SymbolicExpression getVariable() {
 		SymbolicExpression expr;
 		if (getStaticType().isPointerType())
@@ -150,7 +153,7 @@ public class VariableRef extends Expression {
 		SymbolicExpression expr = getVariable();
 		return entryState.smallStepSemantics(expr);
 	}
-	
+
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);

@@ -12,8 +12,6 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -209,10 +207,10 @@ public abstract class Call extends Expression {
 			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
 			Collection<SymbolicExpression>[] params)
 			throws SemanticException;
-	
+
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
-		for (Expression par : parameters) 
+		for (Expression par : parameters)
 			if (!par.accept(visitor, tool))
 				return false;
 		return visitor.visit(tool, getCFG(), this);

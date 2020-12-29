@@ -53,7 +53,8 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
+				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
@@ -72,7 +73,8 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
+				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 

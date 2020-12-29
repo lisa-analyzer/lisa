@@ -1,13 +1,5 @@
 package it.unive.lisa.outputs.compare;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collection;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.statement.Statement;
@@ -15,6 +7,12 @@ import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Collection;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class providing capabilities for finding differences between two

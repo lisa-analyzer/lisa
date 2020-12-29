@@ -31,8 +31,9 @@ import org.graphstream.stream.file.FileSourceDOT;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in the original graph
- * @param <E> the type of the edges in the original graph
+ * @param <N> the type of the {@link Node}s in the original graph
+ * @param <E> the type of the {@link Edge}s in the original graph
+ * @param <G> the type of the original {@link Graph}s
  */
 public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
 
@@ -316,17 +317,17 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * Reads a graph through the given {@link Reader}. Any legend (i.e.,
 	 * subgraph) will be stripped from the input.
 	 * 
-	 * @param <N>    the type of nodes in the graph
-	 * @param <E>    the type of edges in the graph
+	 * @param <N>    the type of {@link Node}s in the graph
+	 * @param <E>    the type of {@link Edge}s in the graph
+	 * @param <G>    the type of the {@link Graph}
 	 * @param reader the reader to use for reading the graph
 	 * 
 	 * @return the {@link DotGraph} that has been read
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static <N extends Node<N, E, G>,
-			E extends Edge<N, E, G>,
-			G extends Graph<G, N, E>> DotGraph<N, E, G> readDot(Reader reader) throws IOException {
+	public static <N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> DotGraph<N, E, G> readDot(
+			Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;

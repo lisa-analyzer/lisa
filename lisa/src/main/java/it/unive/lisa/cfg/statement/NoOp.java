@@ -12,7 +12,6 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
-
 /**
  * A statement that does nothing. Can be used for instrumenting branching
  * operations.
@@ -86,7 +85,7 @@ public class NoOp extends Statement {
 			throws SemanticException {
 		return entryState.smallStepSemantics(new Skip());
 	}
-	
+
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);

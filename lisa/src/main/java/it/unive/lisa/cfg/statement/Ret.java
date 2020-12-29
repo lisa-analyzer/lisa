@@ -12,7 +12,6 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
-
 /**
  * Terminates the execution of the CFG where this statement lies, without
  * returning anything to the caller. For terminating CFGs that must return a
@@ -84,7 +83,7 @@ public class Ret extends Statement {
 			throws SemanticException {
 		return entryState.smallStepSemantics(new Skip());
 	}
-	
+
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);

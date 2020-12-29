@@ -25,12 +25,12 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in this graph
- * @param <E> the type of the edges in this graph
+ * @param <N> the type of {@link Node}s in this graph
+ * @param <E> the type of {@link SemanticEdge}s in this graph
+ * @param <G> the type of this graph
  */
-public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
-		N extends Node<N, E, G>,
-		E extends SemanticEdge<N, E, G>> extends Graph<G, N, E> {
+public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>, N extends Node<N, E, G>, E extends SemanticEdge<N, E, G>>
+		extends Graph<G, N, E> {
 
 	private static final Logger log = LogManager.getLogger(FixpointGraph.class);
 
@@ -75,8 +75,10 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
-	 * @param <N> the type of the nodes of the graph, where the semantic
+	 * @param <N> the type of the {@link Node}s of the graph, where the semantic
 	 *                computation will happen
+	 * @param <E> the type of {@link Edge}s in the target graph
+	 * @param <G> the type of the target {@link Graph}
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
 	 *                analysis states
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
@@ -85,12 +87,7 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 	 *                on internal nodes will be stored
 	 */
 	@FunctionalInterface
-	public interface SemanticFunction<N extends Node<N, E, G>,
-			E extends SemanticEdge<N, E, G>,
-			G extends FixpointGraph<G, N, E>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
+	public interface SemanticFunction<N extends Node<N, E, G>, E extends SemanticEdge<N, E, G>, G extends FixpointGraph<G, N, E>, H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> {
 
 		/**
 		 * Computes the semantics of the given {@link Node} {@code node},
@@ -164,12 +161,10 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 	 *                               set
 	 */
 	@SuppressWarnings("unchecked")
-	protected <H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> Map<N, AnalysisState<H, V>> fixpoint(
-					Map<N, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
-					SemanticFunction<N, E, G, H, V, F> semantics)
-					throws FixpointException {
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> Map<N, AnalysisState<H, V>> fixpoint(
+			Map<N, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
+			SemanticFunction<N, E, G, H, V, F> semantics)
+			throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);
 		Map<N, Pair<AnalysisState<H, V>, F>> result = new HashMap<>(size);
@@ -270,26 +265,23 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 	 * store the fixpoint results on internal nodes, that is, node that are
 	 * nested within outer ones.
 	 * 
-	 * @param <H>        the type of heap analysis embedded in the abstract
+	 * @param <H>        the type of {@link HeapDomain} embedded in the abstract
 	 *                       state
-	 * @param <V>        the type of value analysis embedded in the abstract
-	 *                       state
+	 * @param <V>        the type of {@link ValueDomain} embedded in the
+	 *                       abstract state
 	 * @param entrystate the analysis state before the creation of this lattice
 	 * 
 	 * @return the functional lattice where results on internal nodes will be
 	 *             stored
 	 */
-	protected abstract <H extends HeapDomain<H>,
-			V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkInternalStore(
-					AnalysisState<H, V> entrystate);
+	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, N, AnalysisState<H, V>> mkInternalStore(
+			AnalysisState<H, V> entrystate);
 
-	private <H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			F extends FunctionalLattice<F, N, AnalysisState<H, V>>> AnalysisState<H, V> getEntryState(
-					N current,
-					Map<N, AnalysisState<H, V>> startingPoints,
-					Map<N, Pair<AnalysisState<H, V>, F>> result)
-					throws SemanticException {
+	private <H extends HeapDomain<H>, V extends ValueDomain<V>, F extends FunctionalLattice<F, N, AnalysisState<H, V>>> AnalysisState<H, V> getEntryState(
+			N current,
+			Map<N, AnalysisState<H, V>> startingPoints,
+			Map<N, Pair<AnalysisState<H, V>, F>> result)
+			throws SemanticException {
 		AnalysisState<H, V> entrystate = startingPoints.get(current);
 		Collection<N> preds = predecessorsOf(current);
 		List<AnalysisState<H, V>> states = new ArrayList<>(preds.size());
@@ -310,9 +302,26 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 		return cleanUpEntryState(current, entrystate);
 	}
 
-	protected <H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<H, V> cleanUpEntryState(N node, AnalysisState<H, V> entrystate)
-					throws SemanticException {
+	/**
+	 * Cleans up the entry state of a node. This is an optional operation: the
+	 * default implementation of this method returns the given
+	 * {@code entrystate}.
+	 * 
+	 * @param <H>        the type of {@link HeapDomain} embedded in the abstract
+	 *                       state
+	 * @param <V>        the type of {@link ValueDomain} embedded in the
+	 *                       abstract state
+	 * @param node       the node where the entrystate has been computed
+	 * @param entrystate the computed entrystate for the given node
+	 * 
+	 * @return a cleaned version of the entrystate, according to the logic of
+	 *             the fixpoint graph
+	 * 
+	 * @throws SemanticException if an error happens while cleaning the state
+	 */
+	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> cleanUpEntryState(N node,
+			AnalysisState<H, V> entrystate)
+			throws SemanticException {
 		return entrystate;
 	}
 }

@@ -1,14 +1,12 @@
 package it.unive.lisa.cfg;
 
+import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.cfg.type.Untyped;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
 import org.apache.commons.lang3.StringUtils;
-
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,
@@ -50,7 +48,7 @@ public class CFGDescriptor {
 	 * The return type of the CFG associated with this descriptor.
 	 */
 	private final Type returnType;
-	
+
 	/**
 	 * The list of variables defined in the cfg
 	 */
@@ -130,11 +128,12 @@ public class CFGDescriptor {
 		this.name = name;
 		this.args = args;
 		this.returnType = returnType;
-		
+
 		this.variables = new LinkedList<>();
 		int i = 0;
 		for (Parameter arg : args)
-			variables.add(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, -1, -1, arg.getName(), arg.getStaticType()));
+			variables.add(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, -1, -1,
+					arg.getName(), arg.getStaticType()));
 	}
 
 	/**
@@ -217,25 +216,93 @@ public class CFGDescriptor {
 	public Type getReturnType() {
 		return returnType;
 	}
-	
+
+	/**
+	 * Yields the list of {@link VariableTableEntry}s that have been added to
+	 * this descriptor.
+	 * 
+	 * @return the list of variables entries
+	 */
 	public List<VariableTableEntry> getVariables() {
 		return variables;
 	}
-	
+
+	/**
+	 * Builds a new {@link VariableTableEntry}, populating it with the given
+	 * data, and adds it at the end of the variable table. The variable is
+	 * defined at an unknown code location. The variable has an {@link Untyped}
+	 * static type and is visible from the beginning to the end of the
+	 * {@link CFG}.
+	 * 
+	 * @param name the name of the variable being added
+	 */
 	public void addVariable(String name) {
-		addVariable(null, -1, -1, -1, -1,name, Untyped.INSTANCE);
+		addVariable(null, -1, -1, -1, -1, name, Untyped.INSTANCE);
 	}
-	
+
+	/**
+	 * Builds a new {@link VariableTableEntry}, populating it with the given
+	 * data, and adds it at the end of the variable table. The variable is
+	 * defined at an unknown code location. The variable has an {@link Untyped}
+	 * static type.
+	 * 
+	 * @param scopeStart the offset of the statement the variable being added is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where the variable being
+	 *                       added is last visible, {@code -1} means that this
+	 *                       variable is visible until the end of the cfg
+	 * @param name       the name of the variable being added
+	 */
 	public void addVariable(int scopeStart, int scopeEnd, String name) {
 		addVariable(null, -1, -1, scopeStart, scopeEnd, name, Untyped.INSTANCE);
 	}
-	
+
+	/**
+	 * Builds a new {@link VariableTableEntry}, populating it with the given
+	 * data, and adds it at the end of the variable table. The variable is
+	 * defined at an unknown code location.
+	 * 
+	 * @param scopeStart the offset of the statement the variable being added is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where the variable being
+	 *                       added is last visible, {@code -1} means that this
+	 *                       variable is visible until the end of the cfg
+	 * @param name       the name of the variable being added
+	 * @param staticType the type of the variable being added. If unknown, use
+	 *                       {@link Untyped#INSTANCE}
+	 */
 	public void addVariable(int scopeStart, int scopeEnd, String name, Type staticType) {
 		addVariable(null, -1, -1, scopeStart, scopeEnd, name, staticType);
 	}
-	
-	public void addVariable(String sourceFile, int line, int col, int scopeStart, int scopeEnd, String name, Type staticType) {
-		variables.add(new VariableTableEntry(sourceFile, line, col, variables.size(), scopeStart, scopeEnd, name, staticType));
+
+	/**
+	 * Builds a new {@link VariableTableEntry}, populating it with the given
+	 * data, and adds it at the end of the variable table.
+	 * 
+	 * @param sourceFile the source file where the variable being added is
+	 *                       defined. If unknown, use {@code null}
+	 * @param line       the line number where the the variable being added is
+	 *                       defined in the source file. If unknown, use
+	 *                       {@code -1}
+	 * @param col        the column where the the variable being added is
+	 *                       defined in the source file. If unknown, use
+	 *                       {@code -1}
+	 * @param scopeStart the offset of the statement the variable being added is
+	 *                       first visible, {@code -1} means that this variable
+	 *                       is visible since the beginning of the cfg
+	 * @param scopeEnd   the offset of the statement where the variable being
+	 *                       added is last visible, {@code -1} means that this
+	 *                       variable is visible until the end of the cfg
+	 * @param name       the name of the variable being added
+	 * @param staticType the type of the variable being added. If unknown, use
+	 *                       {@link Untyped#INSTANCE}
+	 */
+	public void addVariable(String sourceFile, int line, int col, int scopeStart, int scopeEnd, String name,
+			Type staticType) {
+		variables.add(new VariableTableEntry(sourceFile, line, col, variables.size(), scopeStart, scopeEnd, name,
+				staticType));
 	}
 
 	@Override

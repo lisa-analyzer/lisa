@@ -132,7 +132,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
 	private CFG currentCFG;
-	
+
 	private CFGDescriptor currentDescriptor;
 
 	private IMPFrontend(String file) {
@@ -373,10 +373,12 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		Expression target = null;
 		if (ctx.IDENTIFIER() != null) {
 			VariableRef ref = visitVar(ctx.IDENTIFIER());
-			// since variables are visible until the end of the method (like python), 
-			// searching for a variable with the same name is enough 
+			// since variables are visible until the end of the method (like
+			// python),
+			// searching for a variable with the same name is enough
 			if (currentDescriptor.getVariables().stream().noneMatch(v -> v.getName().equals(ref.getName())))
-				currentDescriptor.addVariable(file, ref.getLine(), ref.getCol(), ref.getOffset(), -1, ref.getName(), ref.getStaticType());
+				currentDescriptor.addVariable(file, ref.getLine(), ref.getCol(), ref.getOffset(), -1, ref.getName(),
+						ref.getStaticType());
 			target = ref;
 		} else if (ctx.fieldAccess() != null)
 			target = visitFieldAccess(ctx.fieldAccess());

@@ -24,8 +24,9 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in this matrix
- * @param <E> the type of the edges in this matrix
+ * @param <N> the type of the {@link Node}s in this matrix
+ * @param <E> the type of the {@link Edge}s in this matrix
+ * @param <G> the type of the {@link Graph}s this matrix can be used in
  */
 public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>>
 		implements Iterable<Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>>> {

@@ -12,8 +12,6 @@ import it.unive.lisa.cfg.edge.Edge;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-
-
 import java.util.Objects;
 
 /**
@@ -121,7 +119,7 @@ public class Literal extends Expression {
 			throws SemanticException {
 		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
 	}
-	
+
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
