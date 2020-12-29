@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -88,12 +89,13 @@ public abstract class UnaryNativeCall extends NativeCall {
 	}
 
 	@Override
-	public final <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> result = null;
+	public final <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params) throws SemanticException {
+		AnalysisState<A, H, TypeEnvironment> result = null;
 		for (SymbolicExpression expr : params[0]) {
-			AnalysisState<H, TypeEnvironment> tmp = unarySemantics(computedState, callGraph, expr);
+			AnalysisState<A, H, TypeEnvironment> tmp = unarySemantics(computedState, callGraph, expr);
 			if (result == null)
 				result = tmp;
 			else
@@ -105,12 +107,14 @@ public abstract class UnaryNativeCall extends NativeCall {
 	}
 
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-			throws SemanticException {
-		AnalysisState<H, V> result = null;
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					throws SemanticException {
+		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : params[0]) {
-			AnalysisState<H, V> tmp = unarySemantics(computedState, callGraph, expr);
+			AnalysisState<A, H, V> tmp = unarySemantics(computedState, callGraph, expr);
 			if (result == null)
 				result = tmp;
 			else
@@ -124,8 +128,9 @@ public abstract class UnaryNativeCall extends NativeCall {
 	 * has been computed. Meta variables from the parameter will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
-	 * @param <V>           the type of the value analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
+	 * @param <V>           the type of the {@link ValueDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameter's semantics evaluation
 	 * @param callGraph     the call graph of the program to analyze
@@ -137,7 +142,9 @@ public abstract class UnaryNativeCall extends NativeCall {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> unarySemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
-			throws SemanticException;
+	protected abstract <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+					throws SemanticException;
 }

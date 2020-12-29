@@ -17,7 +17,7 @@ public class ValueIdentifier extends Identifier {
 	 * @param name  the name of the identifier
 	 */
 	public ValueIdentifier(ExternalSet<Type> types, String name) {
-		super(types, name);
+		super(types, name, false);
 	}
 
 	@Override

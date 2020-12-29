@@ -2,11 +2,11 @@ package it.unive.lisa.test.cfg;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFGDescriptor;
@@ -14,15 +14,15 @@ import it.unive.lisa.cfg.edge.FalseEdge;
 import it.unive.lisa.cfg.edge.SequentialEdge;
 import it.unive.lisa.cfg.edge.TrueEdge;
 import it.unive.lisa.cfg.statement.Assignment;
+import it.unive.lisa.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.Literal;
-import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.NoOp;
 import it.unive.lisa.cfg.statement.Return;
+import it.unive.lisa.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import java.util.Collection;
 import org.junit.Test;
 
 public class CFGSimplificationTest {
@@ -82,42 +82,32 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testConditionalSimplification() {
-		class GT extends NativeCall {
+		class GT extends BinaryNativeCall {
 			protected GT(CFG cfg, Expression left, Expression right) {
 				super(cfg, "gt", left, right);
 			}
 
 			@Override
-			public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-					AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-					throws SemanticException {
-				return computedState;
-			}
-
-			@Override
-			public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-					AnalysisState<H, TypeEnvironment> computedState,
-					CallGraph callGraph, Collection<SymbolicExpression>[] params) throws SemanticException {
+			protected <A extends AbstractState<A, H, V>,
+					H extends HeapDomain<H>,
+					V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+							AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+							SymbolicExpression right) throws SemanticException {
 				return computedState;
 			}
 		}
 
-		class Print extends NativeCall {
+		class Print extends UnaryNativeCall {
 			protected Print(CFG cfg, Expression arg) {
 				super(cfg, "print", arg);
 			}
 
 			@Override
-			public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-					AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-					throws SemanticException {
-				return computedState;
-			}
-
-			@Override
-			public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-					AnalysisState<H, TypeEnvironment> computedState,
-					CallGraph callGraph, Collection<SymbolicExpression>[] params) throws SemanticException {
+			protected <A extends AbstractState<A, H, V>,
+					H extends HeapDomain<H>,
+					V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+							AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+							throws SemanticException {
 				return computedState;
 			}
 		}

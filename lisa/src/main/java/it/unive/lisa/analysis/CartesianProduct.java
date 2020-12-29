@@ -15,12 +15,15 @@ import it.unive.lisa.symbolic.value.Identifier;
  *                 the Cartesian product
  * @param <T2> the concrete instance of the right-hand side abstract domain of
  *                 the Cartesian product
- * @param <E>  the type of {@link SymbolicExpression} that {@link T1} and
- *                 {@link T2}, and in turn this domain, can process
- * @param <I>  the type of {@link Identifier} that {@link T1} and {@link T2},
- *                 and in turn this domain, handle
+ * @param <E>  the type of {@link SymbolicExpression} that {@code <T1>} and
+ *                 {@code <T2>}, and in turn this domain, can process
+ * @param <I>  the type of {@link Identifier} that {@code <T1>} and
+ *                 {@code <T2>}, and in turn this domain, handle
  */
-public abstract class CartesianProduct<T1 extends SemanticDomain<T1, E, I>, T2 extends SemanticDomain<T2, E, I>, E extends SymbolicExpression, I extends Identifier> {
+public abstract class CartesianProduct<T1 extends SemanticDomain<T1, E, I>,
+		T2 extends SemanticDomain<T2, E, I>,
+		E extends SymbolicExpression,
+		I extends Identifier> {
 
 	/**
 	 * The left-hand side abstract domain.
@@ -72,7 +75,7 @@ public abstract class CartesianProduct<T1 extends SemanticDomain<T1, E, I>, T2 e
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CartesianProduct other = (CartesianProduct) obj;
+		CartesianProduct<?, ?, ?, ?> other = (CartesianProduct<?, ?, ?, ?>) obj;
 		if (left == null) {
 			if (other.left != null)
 				return false;

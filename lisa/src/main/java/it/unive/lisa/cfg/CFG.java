@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.FunctionalLattice;
@@ -141,6 +142,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * instance of {@link FIFOWorkingSet} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -161,8 +164,11 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, SemanticFunction<H, V> semantics) throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					AnalysisState<A, H, V> entryState, CallGraph cg, SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -181,6 +187,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * instance of {@link FIFOWorkingSet} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -206,9 +214,12 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, int widenAfter, SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
 	}
 
@@ -227,6 +238,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -249,9 +262,12 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -269,6 +285,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * invoked to get the approximation of all invoked cfgs, while {@code ws} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -296,11 +314,13 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter,
-			SemanticFunction<H, V> semantics)
-			throws FixpointException {
-		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
+		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(start, cg, ws, widenAfter, semantics);
 	}
@@ -321,6 +341,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * {@link FIFOWorkingSet} is used as working set for the statements to
 	 * process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -344,9 +366,11 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg,
-			SemanticFunction<H, V> semantics) throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
+					SemanticFunction<A, H, V> semantics) throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -365,6 +389,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * {@link FIFOWorkingSet} is used as working set for the statements to
 	 * process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -393,10 +419,12 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, int widenAfter,
-			SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
 	}
 
@@ -415,6 +443,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -440,10 +470,13 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
-			SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
+					WorkingSet<Statement> ws,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -461,6 +494,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
+	 * @param <A>         the type of {@link AbstractState} contained into the
+	 *                        analysis state
 	 * @param <H>         the type of {@link HeapDomain} contained into the
 	 *                        computed abstract state
 	 * @param <V>         the type of {@link ValueDomain} contained into the
@@ -491,10 +526,13 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Collection<Statement> entrypoints, AnalysisState<H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
-			int widenAfter, SemanticFunction<H, V> semantics) throws FixpointException {
-		Map<Statement, AnalysisState<H, V>> start = new HashMap<>();
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
+					WorkingSet<Statement> ws,
+					int widenAfter, SemanticFunction<A, H, V> semantics) throws FixpointException {
+		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(start, cg, ws, widenAfter, semantics);
 	}
@@ -514,6 +552,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -536,9 +576,12 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -556,6 +599,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while a fresh instance of {@link FIFOWorkingSet} is
 	 * used as working set for the statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -584,9 +629,11 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, int widenAfter,
-			SemanticFunction<H, V> semantics) throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, int widenAfter,
+					SemanticFunction<A, H, V> semantics) throws FixpointException {
 		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
 	}
 
@@ -605,6 +652,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while {@code ws} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -629,10 +678,12 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
-			SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
 	}
 
@@ -642,13 +693,18 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
+	 * @param <A> the type of {@link AbstractState} contained into the analysis
+	 *                state
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
 	 *                analysis states
 	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
 	 *                analysis states
 	 */
-	public interface SemanticFunction<H extends HeapDomain<H>, V extends ValueDomain<V>> extends
-			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, H, V, StatementStore<H, V>> {
+	public interface SemanticFunction<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> extends
+			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, A, H, V,
+					StatementStore<A, H, V>> {
 
 	}
 
@@ -666,6 +722,8 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 * all invoked cfgs, while {@code ws} is used as working set for the
 	 * statements to process.
 	 * 
+	 * @param <A>            the type of {@link AbstractState} contained into
+	 *                           the analysis state
 	 * @param <H>            the type of {@link HeapDomain} contained into the
 	 *                           computed abstract state
 	 * @param <V>            the type of {@link ValueDomain} contained into the
@@ -696,16 +754,21 @@ public class CFG extends FixpointGraph<Statement, Edge> {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> fixpoint(
-			Map<Statement, AnalysisState<H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws, int widenAfter,
-			SemanticFunction<H, V> semantics)
-			throws FixpointException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
+					int widenAfter,
+					SemanticFunction<A, H, V> semantics)
+					throws FixpointException {
 		return new CFGWithAnalysisResults<>(this, super.fixpoint(startingPoints, cg, ws, widenAfter, semantics));
 	}
 
 	@Override
-	protected <H extends HeapDomain<H>, V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<H, V>> mkInternalStore(
-			AnalysisState<H, V> entrystate) {
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> FunctionalLattice<?, Statement, AnalysisState<A, H, V>> mkInternalStore(
+					AnalysisState<A, H, V> entrystate) {
 		return new StatementStore<>(entrystate);
 	}
 

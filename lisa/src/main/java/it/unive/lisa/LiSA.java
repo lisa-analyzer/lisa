@@ -1,20 +1,17 @@
 package it.unive.lisa;
 
+import static it.unive.lisa.LiSAFactory.getDefaultFor;
+import static it.unive.lisa.LiSAFactory.getInstance;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
-import it.unive.lisa.analysis.nonrelational.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.nonrelational.NonRelationalValueDomain;
-import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
@@ -71,6 +68,11 @@ public class LiSA {
 	private CallGraph callGraph;
 
 	/**
+	 * The abstract state to run during the analysis
+	 */
+	private AbstractState<?, ?, ?> state;
+
+	/**
 	 * Whether or not type inference should be executed before the analysis
 	 */
 	private boolean inferTypes;
@@ -106,28 +108,15 @@ public class LiSA {
 	private String workdir;
 
 	/**
-	 * The value domains to run during the analysis
-	 */
-	private final Collection<ValueDomain<?>> valueDomains;
-
-	/**
-	 * The heap domains to run during the analysis
-	 */
-	private final Collection<HeapDomain<?>> heapDomains;
-
-	/**
 	 * Builds a new LiSA instance.
 	 */
 	public LiSA() {
 		this.inputs = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		// since the warnings collection will be filled AFTER the execution of
-		// every
-		// concurrent bit has completed its execution, it is fine to use a non
-		// thread-safe one
+		// every concurrent bit has completed its execution, it is fine to use a
+		// non thread-safe one
 		this.warnings = new ArrayList<>();
-		this.valueDomains = new ArrayList<>();
-		this.heapDomains = new ArrayList<>();
 		this.inferTypes = false;
 		this.dumpCFGs = false;
 		this.dumpTypeInference = false;
@@ -172,6 +161,16 @@ public class LiSA {
 	 */
 	public <T extends CallGraph> void setCallGraph(T callGraph) {
 		this.callGraph = callGraph;
+	}
+
+	/**
+	 * Sets the {@link AbstractState} to use for the analysis. Any existing
+	 * value is overwritten.
+	 * 
+	 * @param state the abstract state to use
+	 */
+	public void setAbstractState(AbstractState<?, ?, ?> state) {
+		this.state = state;
 	}
 
 	/**
@@ -270,48 +269,6 @@ public class LiSA {
 	}
 
 	/**
-	 * Adds a new {@link HeapDomain} to execute during the analysis.
-	 * 
-	 * @param <T>    the concrete instance of domain to add
-	 * @param domain the domain to execute
-	 */
-	public <T extends HeapDomain<T>> void addHeapDomain(T domain) {
-		this.heapDomains.add(domain);
-	}
-
-	/**
-	 * Adds a new {@link NonRelationalHeapDomain} to execute during the
-	 * analysis.
-	 * 
-	 * @param <T>    the concrete instance of domain to add
-	 * @param domain the domain to execute
-	 */
-	public <T extends NonRelationalHeapDomain<T>> void addNonRelationalHeapDomain(T domain) {
-		this.heapDomains.add(new HeapEnvironment<>(domain));
-	}
-
-	/**
-	 * Adds a new {@link ValueDomain} to execute during the analysis.
-	 * 
-	 * @param <T>    the concrete instance of domain to add
-	 * @param domain the domain to execute
-	 */
-	public <T extends ValueDomain<T>> void addValueDomain(T domain) {
-		this.valueDomains.add(domain);
-	}
-
-	/**
-	 * Adds a new {@link NonRelationalValueDomain} to execute during the
-	 * analysis.
-	 * 
-	 * @param <T>    the concrete instance of domain to add
-	 * @param domain the domain to execute
-	 */
-	public <T extends NonRelationalValueDomain<T>> void addNonRelationalValueDomain(T domain) {
-		this.valueDomains.add(new ValueEnvironment<>(domain));
-	}
-
-	/**
 	 * Adds the given syntactic checks to the ones that will be executed. These
 	 * checks will be immediately executed after LiSA is started.
 	 * 
@@ -358,8 +315,6 @@ public class LiSA {
 		log.info("  dump input cfgs: " + dumpCFGs);
 		log.info("  infer types: " + inferTypes);
 		log.info("  dump inferred types: " + dumpTypeInference);
-		log.info("  " + heapDomains.size() + " heap domains to execute");
-		log.info("  " + valueDomains.size() + " value domains to execute");
 		log.info("  dump analysis results: " + dumpAnalysis);
 		log.info("  " + syntacticChecks.size() + " syntactic checks to execute"
 				+ (syntacticChecks.isEmpty() ? "" : ":"));
@@ -373,8 +328,12 @@ public class LiSA {
 		log.info("  " + warnings.size() + " warnings generated");
 	}
 
-	@SuppressWarnings({ "unchecked" })
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void runAux() throws AnalysisExecutionException {
+	@SuppressWarnings("unchecked")
+	private <H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			A extends AbstractState<A, H, V>,
+			T extends AbstractState<T, H, TypeEnvironment>> void runAux()
+					throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
 
 		if (dumpCFGs)
@@ -389,58 +348,71 @@ public class LiSA {
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
 		if (callGraph == null) {
-			log.warn("No call graph set for this analysis, defaulting to a non-interprocedural implementation");
-			callGraph = new IntraproceduralCallGraph();
+			try {
+				callGraph = getDefaultFor(CallGraph.class);
+			} catch (AnalysisSetupException e) {
+				throw new AnalysisExecutionException("Unable to create default call graph", e);
+			}
+			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
 		}
 
 		inputs.forEach(callGraph::addCFG);
 
-		// TODO we want to support these eventually
-		if (valueDomains.size() > 1) {
-			log.fatal("Analyses with a combination of value domains are not supported yet");
-			throw new AnalysisExecutionException("Analyses with a combination of value domains are not supported yet");
-		}
-
-		// TODO we want to support these eventually
-		if (heapDomains.size() > 1) {
-			log.fatal("Analyses with a combination of heap domains are not supported yet");
-			throw new AnalysisExecutionException("Analyses with a combination of heap domains are not supported yet");
-		}
-
-		if (heapDomains.isEmpty()) {
-			log.warn("No heap domain has been set for this analysis, defaulting to a monolithic implementation");
-			heapDomains.add(new MonolithicHeap());
-		}
-
-		H heap = (H) heapDomains.iterator().next();
-
 		if (inferTypes) {
+			T tmp;
+			try {
+				// type inference is always executed with the simplest abstract
+				// state
+				if (state != null)
+					tmp = (T) getInstance(SimpleAbstractState.class, state.getHeapState(),
+							new TypeEnvironment());
+				else
+					tmp = (T) getInstance(SimpleAbstractState.class,
+							getDefaultFor(HeapDomain.class), new TypeEnvironment());
+			} catch (AnalysisSetupException e) {
+				throw new AnalysisExecutionException("Unable to itialize type inference", e);
+			}
+
+			T typesState = tmp.top();
 			TimerLogger.execAction(log, "Computing type information",
-					() -> computeFixpoint(heap, new TypeEnvironment(), Statement::typeInference));
+					() -> {
+						try {
+							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()), Statement::typeInference);
+						} catch (FixpointException e) {
+							log.fatal("Exception during fixpoint computation", e);
+							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+						}
+					});
 
 			if (dumpTypeInference)
 				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
-					CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+					CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				}
 
 			callGraph.clear();
 		} else
-			log.warn("No type domain provided: dynamic type information will not be available for following analyses");
+			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
-		if (valueDomains.isEmpty()) {
-			// TODO we should have a base analysis that can serve as default
-			log.warn("Skipping analysis execution since no abstract domains have been provided");
+		if (state == null) {
+			log.warn("Skipping analysis execution since no abstract sate has been provided");
 			return;
 		}
 
-		V value = (V) valueDomains.iterator().next();
+		A state = (A) this.state.top();
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
-				() -> computeFixpoint(heap, value, Statement::semantics));
+				() -> {
+					try {
+						callGraph.fixpoint(new AnalysisState<>(state, new Skip()), Statement::semantics);
+					} catch (FixpointException e) {
+						log.fatal("Exception during fixpoint computation", e);
+						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+					}
+				});
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping analysis results", "cfgs")) {
-				CFGWithAnalysisResults<?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+				CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
 	}
@@ -451,17 +423,6 @@ public class LiSA {
 		} catch (IOException e) {
 			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
 					e);
-		}
-	}
-
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <H extends HeapDomain<H>, V extends ValueDomain<V>> void computeFixpoint(H heap, V value,
-			SemanticFunction<H, V> semantics) {
-		try {
-			callGraph.fixpoint(new AnalysisState(new AbstractState(heap.top(), value.top()), new Skip()), semantics);
-		} catch (FixpointException e) {
-			log.fatal("Exception during fixpoint computation", e);
-			throw new AnalysisExecutionException("Exception during fixpoint computation", e);
 		}
 	}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -121,20 +122,22 @@ public abstract class Call extends Expression {
 	 * {@inheritDoc}
 	 */
 	@Override
-	public final <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
-			throws SemanticException {
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
-		AnalysisState<H, V> current = entryState;
+		AnalysisState<A, H, V> current = entryState;
 		for (int i = 0; i < computed.length; i++) {
 			current = parameters[i].semantics(current, callGraph, expressions);
 			expressions.put(parameters[i], current);
 			computed[i] = current.getComputedExpressions();
 		}
 
-		AnalysisState<H, V> result = callSemantics(current, callGraph, computed);
+		AnalysisState<A, H, V> result = callSemantics(current, callGraph, computed);
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
@@ -146,8 +149,9 @@ public abstract class Call extends Expression {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
-	 * @param <V>           the type of the value analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
+	 * @param <V>           the type of the {@link ValueDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameters' semantics evaluation
 	 * @param callGraph     the call graph of the program to analyze
@@ -159,25 +163,28 @@ public abstract class Call extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> callSemantics(
-			AnalysisState<H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
-			throws SemanticException;
+	public abstract <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					throws SemanticException;
 
 	@Override
-	public final <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
+	public final <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
-		AnalysisState<H, TypeEnvironment> current = entryState;
+		AnalysisState<A, H, TypeEnvironment> current = entryState;
 		for (int i = 0; i < computed.length; i++) {
 			current = parameters[i].typeInference(current, callGraph, expressions);
 			expressions.put(parameters[i], current);
 			computed[i] = current.getComputedExpressions();
 		}
 
-		AnalysisState<H, TypeEnvironment> result = callSemantics(current, callGraph, computed);
+		AnalysisState<A, H, TypeEnvironment> result = callSemantics(current, callGraph, computed);
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
@@ -189,7 +196,8 @@ public abstract class Call extends Expression {
 	 * inferred. Meta variables from the parameters will be forgotten after this
 	 * call returns.
 	 * 
-	 * @param <H>           the type of the heap analysis
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of the {@link HeapDomain}
 	 * @param computedState the entry state that has been computed by chaining
 	 *                          the parameters' type inference
 	 * @param callGraph     the call graph of the program to analyze
@@ -201,8 +209,9 @@ public abstract class Call extends Expression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> callTypeInference(
-			AnalysisState<H, TypeEnvironment> computedState, CallGraph callGraph,
-			Collection<SymbolicExpression>[] params)
-			throws SemanticException;
+	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
+					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					Collection<SymbolicExpression>[] params)
+					throws SemanticException;
 }

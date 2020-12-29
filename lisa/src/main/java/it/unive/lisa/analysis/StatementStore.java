@@ -9,18 +9,19 @@ import it.unive.lisa.cfg.statement.Statement;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <H> the type of the heap analysis
- * @param <V> the type of the value analysis
+ * @param <A> the type of {@link AbstractState}
+ * @param <H> the type of the {@link HeapDomain}
+ * @param <V> the type of the {@link ValueDomain}
  */
-public class StatementStore<H extends HeapDomain<H>, V extends ValueDomain<V>>
-		extends FunctionalLattice<StatementStore<H, V>, Statement, AnalysisState<H, V>> {
+public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
+		extends FunctionalLattice<StatementStore<A, H, V>, Statement, AnalysisState<A, H, V>> {
 
 	/**
 	 * Builds the store.
 	 * 
 	 * @param state an instance of the underlying lattice
 	 */
-	public StatementStore(AnalysisState<H, V> state) {
+	public StatementStore(AnalysisState<A, H, V> state) {
 		super(state);
 	}
 
@@ -34,12 +35,12 @@ public class StatementStore<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	 * 
 	 * @return the previous state mapped to {@code expression}, or {@code null}
 	 */
-	public AnalysisState<H, V> put(Statement st, AnalysisState<H, V> state) {
+	public AnalysisState<A, H, V> put(Statement st, AnalysisState<A, H, V> state) {
 		return function.put(st, state);
 	}
 
 	@Override
-	public StatementStore<H, V> top() {
+	public StatementStore<A, H, V> top() {
 		return new StatementStore<>(lattice.top());
 	}
 
@@ -49,7 +50,7 @@ public class StatementStore<H extends HeapDomain<H>, V extends ValueDomain<V>>
 	}
 
 	@Override
-	public StatementStore<H, V> bottom() {
+	public StatementStore<A, H, V> bottom() {
 		return new StatementStore<>(lattice.bottom());
 	}
 

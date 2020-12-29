@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.DefaultImplementation;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -15,6 +17,7 @@ import it.unive.lisa.symbolic.value.Identifier;
  * 
  * @param <D> the concrete type of the {@link HeapDomain}
  */
+@DefaultImplementation(MonolithicHeap.class)
 public interface HeapDomain<D extends HeapDomain<D>>
 		extends SemanticDomain<D, SymbolicExpression, Identifier>, Lattice<D>, HeapSemanticOperation {
 }
