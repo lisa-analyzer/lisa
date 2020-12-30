@@ -1,0 +1,154 @@
+// this is a line comment
+
+/* while this is a block comment */
+
+/*
+ * Few characteristics of the IMP language:
+ * - IMP is dynamically typed, all declarations do not specify typing information
+ * - IMP has no visibility modifiers (public, private, ...)
+ * - IMP has no concept of static or final members
+ */
+
+/* 
+ * similarly to java, an imp file contains zero or more classes 
+ * whose body is enclosed within braces
+ */
+class first {}
+
+/*
+ * an imp class can also have one superclass
+ */
+class second extends first {}
+
+/*
+ * the body of a class is a list of fields, constructors and methods
+ */
+class example {
+	
+	/* 
+	 * fields are declared by just specifying their name
+	 * and do not support in-place initialization 
+	 */
+	field;
+	
+	/*
+	 * methods are declared by specifying their name and their parameters
+	 */
+	foo1() {}
+	foo2() { 
+		// void methods can also have explicit return statements
+		return; 
+	}
+	foo3(i, j) { 
+		// return statements can return something
+		return i + j; 
+	}
+	
+	/*
+	 * by convention, methods with the same name as the class are constructors
+	 * and cannot be overridden
+	 */
+	example() {
+		x = 10;
+	}
+	
+	types() {
+		// 6 types are supported in imp:
+		// - boolean
+		// - integer
+		// - float
+		// - string
+		// - reference types defined by the classes
+		// - arrays of the types above
+	}
+	
+	expressions(e1, e2) {
+		// an expression can be:
+		
+		// 1) a literal 
+		5; "s"; true; null; -5.2;
+		
+		// 2) an identifier of some sort
+		this; super; e1;
+		
+		// 3) a logical operation on other expressions
+		!e1; e1 && e2; e1 || e2;
+		
+		// 4) an arithmetic expression
+		-e1; e1 + e2; e1 - e2; e1 / e2; e1 % e2;
+		// + can also be used to join strings!
+		
+		// 5) a comparison
+		e1 > e2; e1 >= e2; e1 < e2; e1 <= e2; e1 == e2; e1 != e2;
+		
+		// 6) an array creation
+		new int[5]; new float[5]; new boolean[5]; new example[5];
+		
+		// 7) an object creation
+		new example(); // as method calls, constructor calls can also recieve parameters
+
+		// 8) an access to an array element 
+		// only arrays stored in variables or parameters are supported
+		intArray[2];
+		
+		// 9) a field access
+		// the receiver must always be explicit (this, super or a variable/parameter)
+		this.field;
+		obj.field;
+		
+		// 10) a method call
+		// the receiver must always be explicit (this, super or a variable/parameter)
+		obj.foo();
+		obj.foo3(5, 3);
+		// arguments of calls can be:
+		// - literals
+		// - variables
+		// - this
+		// - a field access
+		// - an array access
+		// - another method call
+		
+		// all expressions can also be grouped between parenthesis!
+	}
+	
+	statements(x) {
+		// each line must end with a semicolon!
+		
+		// variables are declared when they are first assigned
+		// and are always visible until the end of the method
+		y = 10;
+		
+		// assignments can be performed by assigning an expression to:
+		// - variables
+		// - fields (through field accesses)
+		// - array elements (through array accesses)
+		
+		// conditional execution
+		if (y != 5) {
+			return y;
+		} else {
+			y = y + 1;
+		}
+		
+		if (x != y)
+			// braces can also be omitted in case of a single instuction
+			return y;
+		// the else branch is optional and can be entirely omitted
+		
+		// loops
+		// as with conditional executions, braces are not required if the body
+		// of the loop contains a single instruction
+		while (y < 100)
+			y = y * 2;
+		for (i = 0; i < 20; i = i + 1)
+			y = y % 5;
+		
+		// you can throw any object to raise errors
+		throw new example();
+		ex = new example();
+		throw ex;
+		
+		// you can write assertions
+		assert y == 10;
+	}
+}
