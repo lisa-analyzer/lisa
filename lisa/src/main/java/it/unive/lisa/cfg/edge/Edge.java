@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.edge;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -107,8 +108,10 @@ public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 	public abstract String toString();
 
 	@Override
-	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
-			AnalysisState<H, V> sourceState) throws SemanticException;
+	public abstract <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
+					AnalysisState<A, H, V> sourceState) throws SemanticException;
 
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {

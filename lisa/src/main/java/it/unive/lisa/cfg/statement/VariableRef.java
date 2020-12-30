@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -136,10 +137,11 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+		AnalysisState<A, H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
 		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		// we have to recreate the variable for it to have the correct typing
 		// information
@@ -147,9 +149,11 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		SymbolicExpression expr = getVariable();
 		return entryState.smallStepSemantics(expr);
 	}

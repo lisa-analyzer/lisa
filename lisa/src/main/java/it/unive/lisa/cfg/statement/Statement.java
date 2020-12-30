@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -198,8 +199,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * as parameter, in order to register the computed runtime types in the
 	 * expression.
 	 * 
-	 * @param <H>         the concrete type of {@link HeapDomain} that is run
-	 *                        during the type inference
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of {@link HeapDomain} that is run during the
+	 *                        type inference
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement
@@ -212,10 +214,11 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions)
-			throws SemanticException;
+	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions)
+					throws SemanticException;
 
 	/**
 	 * Computes the semantics of the statement, expressing how semantic
@@ -225,8 +228,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
-	 * @param <H>         the type of the heap analysis
-	 * @param <V>         the type of the value analysis
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of the {@link HeapDomain}
+	 * @param <V>         the type of the {@link ValueDomain}
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement
@@ -239,7 +243,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public abstract <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
-			throws SemanticException;
+	public abstract <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException;
 }

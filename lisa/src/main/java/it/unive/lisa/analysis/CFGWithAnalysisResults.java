@@ -13,17 +13,20 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state
  * @param <H> the type of {@link HeapDomain} contained into the computed
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
  */
-public class CFGWithAnalysisResults<H extends HeapDomain<H>, V extends ValueDomain<V>> extends CFG {
+public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
+		extends CFG {
 
 	/**
 	 * The map storing the analysis results
 	 */
-	private final Map<Statement, AnalysisState<H, V>> results;
+	private final Map<Statement, AnalysisState<A, H, V>> results;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
@@ -32,7 +35,7 @@ public class CFGWithAnalysisResults<H extends HeapDomain<H>, V extends ValueDoma
 	 * @param cfg     the original control flow graph
 	 * @param results the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<H, V>> results) {
+	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<A, H, V>> results) {
 		super(cfg);
 		this.results = results;
 	}
@@ -44,7 +47,7 @@ public class CFGWithAnalysisResults<H extends HeapDomain<H>, V extends ValueDoma
 	 * 
 	 * @return the result computed at the given statement
 	 */
-	public final AnalysisState<H, V> getAnalysisStateAt(Statement st) {
+	public final AnalysisState<A, H, V> getAnalysisStateAt(Statement st) {
 		return results.get(st);
 	}
 }

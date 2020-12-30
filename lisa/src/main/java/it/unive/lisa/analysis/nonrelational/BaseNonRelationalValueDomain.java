@@ -246,7 +246,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	protected abstract T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right);
 
 	/**
-	 * Yields the satisfiability of an abstract value of type {@link T}.
+	 * Yields the satisfiability of an abstract value of type {@code <T>}.
 	 * 
 	 * @param value the abstract value whose satisfiability is to be evaluated
 	 * 

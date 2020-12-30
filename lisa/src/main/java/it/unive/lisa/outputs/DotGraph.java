@@ -326,8 +326,10 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static <N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> DotGraph<N, E, G> readDot(
-			Reader reader) throws IOException {
+	public static <N extends Node<N, E, G>,
+			E extends Edge<N, E, G>,
+			G extends Graph<G, N, E>> DotGraph<N, E, G> readDot(
+					Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;

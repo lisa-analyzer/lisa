@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.statement;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -62,17 +63,18 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>> AnalysisState<H, TypeEnvironment> typeInference(
-			AnalysisState<H, TypeEnvironment> entryState, CallGraph callGraph,
-			StatementStore<H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<H, TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph,
-				expressions);
+	public <A extends AbstractState<A, H, TypeEnvironment>,
+			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
+		AnalysisState<A, H,
+				TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph, expressions);
 		expressions.put(getExpression(), exprResult);
 
-		AnalysisState<H, TypeEnvironment> result = null;
+		AnalysisState<A, H, TypeEnvironment> result = null;
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<H, TypeEnvironment> tmp = exprResult.assign(meta, expr);
+			AnalysisState<A, H, TypeEnvironment> tmp = exprResult.assign(meta, expr);
 			if (result == null)
 				result = tmp;
 			else
@@ -85,16 +87,18 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> semantics(
-			AnalysisState<H, V> entryState, CallGraph callGraph, StatementStore<H, V> expressions)
-			throws SemanticException {
-		AnalysisState<H, V> exprResult = getExpression().semantics(entryState, callGraph, expressions);
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
+		AnalysisState<A, H, V> exprResult = getExpression().semantics(entryState, callGraph, expressions);
 		expressions.put(getExpression(), exprResult);
 
-		AnalysisState<H, V> result = null;
+		AnalysisState<A, H, V> result = null;
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<H, V> tmp = exprResult.assign(meta, expr);
+			AnalysisState<A, H, V> tmp = exprResult.assign(meta, expr);
 			if (result == null)
 				result = tmp;
 			else

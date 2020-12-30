@@ -20,7 +20,9 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <F> the type of functional lattice that is used in conjuntion with
  *                this domain
  */
-public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E extends SymbolicExpression, F extends FunctionalLattice<F, Identifier, T>>
+public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
+		E extends SymbolicExpression,
+		F extends FunctionalLattice<F, Identifier, T>>
 		extends Lattice<T> {
 
 	/**

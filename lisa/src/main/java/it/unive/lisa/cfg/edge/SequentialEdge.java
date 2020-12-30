@@ -1,5 +1,6 @@
 package it.unive.lisa.cfg.edge;
 
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.ValueDomain;
@@ -29,8 +30,10 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public <H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> traverse(
-			AnalysisState<H, V> sourceState) {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
+					AnalysisState<A, H, V> sourceState) {
 		return sourceState;
 	}
 

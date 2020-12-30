@@ -1,10 +1,13 @@
 package it.unive.lisa.callgraph;
 
+import it.unive.lisa.DefaultImplementation;
+import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.statement.CFGCall;
@@ -22,6 +25,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@DefaultImplementation(IntraproceduralCallGraph.class)
 public interface CallGraph {
 
 	/**
@@ -57,6 +61,7 @@ public interface CallGraph {
 	 * of its overloads. Results of individual cfgs are then available through
 	 * {@link #getAnalysisResultsOf(CFG)}.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} to compute
 	 * @param <H>        the type of {@link HeapDomain} to compute
 	 * @param <V>        the type of {@link ValueDomain} to compute
 	 * @param entryState the entry state for the {@link CFG}s that are the
@@ -67,8 +72,9 @@ public interface CallGraph {
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(AnalysisState<H, V> entryState,
-			SemanticFunction<H, V> semantics)
+	<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
+			AnalysisState<A, H, V> entryState,
+			SemanticFunction<A, H, V> semantics)
 			throws FixpointException;
 
 	/**
@@ -76,6 +82,8 @@ public interface CallGraph {
 	 * given {@link CFG}. Results are provided as
 	 * {@link CFGWithAnalysisResults}.
 	 * 
+	 * @param <A> the type of {@link AbstractState} contained into the analysis
+	 *                state
 	 * @param <H> the type of {@link HeapDomain} contained into the computed
 	 *                abstract state
 	 * @param <V> the type of {@link ValueDomain} contained into the computed
@@ -85,7 +93,9 @@ public interface CallGraph {
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> CFGWithAnalysisResults<H, V> getAnalysisResultsOf(CFG cfg);
+	<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Clears all the data from the last fixpoint computation, effectively
@@ -101,6 +111,8 @@ public interface CallGraph {
 	 * parameters. The abstract value of each parameter is computed on
 	 * {@code entryState}.
 	 * 
+	 * @param <A>        the type of {@link AbstractState} contained into the
+	 *                       analysis state
 	 * @param <H>        the type of {@link HeapDomain} contained into the
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
@@ -118,6 +130,9 @@ public interface CallGraph {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<H, V> getAbstractResultOf(CFGCall call,
-			AnalysisState<H, V> entryState, Collection<SymbolicExpression>[] parameters) throws SemanticException;
+	<A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
+					AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+					throws SemanticException;
 }
