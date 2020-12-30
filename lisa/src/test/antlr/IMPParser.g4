@@ -28,6 +28,7 @@ primitiveType
    : BOOLEAN
    | INT
    | FLOAT
+   | STRING
    ;
 /*
  * PARAMETER LIST
@@ -191,15 +192,11 @@ blockOrStatement
    
    
 memberDeclarations
-   : (methodDeclaration | fieldDeclaration | constructorDeclaration)*
+   : (methodDeclaration | fieldDeclaration)*
    ;
 
 fieldDeclaration
    : name = IDENTIFIER SEMI
-   ;
-
-constructorDeclaration
-   : name = IDENTIFIER pars = formals code = block
    ;
 
 methodDeclaration

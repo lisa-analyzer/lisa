@@ -15,6 +15,10 @@ BOOLEAN
    : 'boolean'
    ;
 
+STRING
+   : 'string'
+   ;
+   
 FLOAT
    : 'float'
    ;
