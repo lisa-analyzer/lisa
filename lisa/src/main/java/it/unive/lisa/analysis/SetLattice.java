@@ -95,6 +95,21 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 
 	@Override
 	public final String toString() {
-		return isTop() ? "TOP" : isBottom() ? "BOTTOM" : elements.toString();
+		if (isTop())
+			return "TOP";
+
+		if (isBottom())
+			return "BOTTOM";
+
+		StringBuilder res = new StringBuilder("[");
+		int count = 0;
+		for (E e : elements) {
+			res.append(e);
+			count++;
+			if (count != elements.size())
+				res.append(", ");
+		}
+		
+		return res.append("]").toString();
 	}
 }

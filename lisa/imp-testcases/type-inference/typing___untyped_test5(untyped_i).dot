@@ -1,17 +1,17 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [int, untyped] ]]<BR/>}} -&gt; [vid$i &gt; 5]>];
-	"node1" [shape="rect",color="gray",label=<x = &quot;s&quot;<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [int, untyped] ]]<BR/>}} -&gt; [vid$x]>];
-	"node2" [shape="rect",color="gray",label=<x = &quot;p&quot;<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [int, untyped] ]]<BR/>}} -&gt; [vid$x]>];
-	"node3" [shape="rect",color="gray",label=<==(%(i, 2), 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [int, untyped] ]]<BR/>}} -&gt; [vid$i % 2 == 0]>];
-	"node4" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: [int]<BR/>vid$x: [string] ]]<BR/>}} -&gt; [vid$i]>];
-	"node5" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$ret_value@test5: [untyped, string]<BR/>vid$x: [string]<BR/>vid$i: [int, untyped] ]]<BR/>}} -&gt; [vid$ret_value@test5]>];
-	"node1" -> "node4" [color="black"];
-	"node0" -> "node3" [color="blue",style="dashed"];
-	"node0" -> "node5" [color="red",style="dashed"];
-	"node2" -> "node4" [color="black"];
-	"node3" -> "node1" [color="blue",style="dashed"];
-	"node3" -> "node2" [color="red",style="dashed"];
-	"node4" -> "node0" [color="black"];
+	"node0" [shape="rect",color="black",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [untyped, int] ]]<BR/>}} -&gt; [vid$i &gt; 5]>];
+	"node1" [shape="rect",color="gray",label=<x = &quot;p&quot;<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [untyped, int] ]]<BR/>}} -&gt; [vid$x]>];
+	"node2" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: [int]<BR/>vid$x: [string] ]]<BR/>}} -&gt; [vid$i]>];
+	"node3" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$ret_value@test5: [untyped, string]<BR/>vid$x: [string]<BR/>vid$i: [untyped, int] ]]<BR/>}} -&gt; [vid$ret_value@test5]>];
+	"node4" [shape="rect",color="gray",label=<x = &quot;s&quot;<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [untyped, int] ]]<BR/>}} -&gt; [vid$x]>];
+	"node5" [shape="rect",color="gray",label=<==(%(i, 2), 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [string]<BR/>vid$i: [untyped, int] ]]<BR/>}} -&gt; [vid$i % 2 == 0]>];
+	"node1" -> "node2" [color="black"];
+	"node0" -> "node3" [color="red",style="dashed"];
+	"node0" -> "node5" [color="blue",style="dashed"];
+	"node2" -> "node0" [color="black"];
+	"node4" -> "node2" [color="black"];
+	"node5" -> "node1" [color="red",style="dashed"];
+	"node5" -> "node4" [color="blue",style="dashed"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
