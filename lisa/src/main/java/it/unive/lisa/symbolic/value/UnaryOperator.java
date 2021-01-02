@@ -31,7 +31,9 @@ public enum UnaryOperator implements Operator {
 	 * string. If the value represents the empty string, it returns 0. The
 	 * return type of this operator is a 32 bit unsigned {@link NumericType}.
 	 */
-	STRING_LENGTH("strlen");
+	STRING_LENGTH("strlen"),
+	
+	TYPEOF("typeof");
 
 	private final String representation;
 

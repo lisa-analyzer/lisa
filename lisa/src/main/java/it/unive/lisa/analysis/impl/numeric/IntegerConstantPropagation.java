@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -81,11 +80,6 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	protected IntegerConstantPropagation evalNonNullConstant(Constant constant) {
 		if (constant.getValue() instanceof Integer)
 			return new IntegerConstantPropagation((Integer) constant.getValue());
-		return top();
-	}
-
-	@Override
-	protected IntegerConstantPropagation evalTypeConversion(Type type, IntegerConstantPropagation arg) {
 		return top();
 	}
 
@@ -193,11 +187,6 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTypeConversion(Type type, IntegerConstantPropagation right) {
 		return Satisfiability.UNKNOWN;
 	}
 

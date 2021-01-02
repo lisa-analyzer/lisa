@@ -101,7 +101,7 @@ public class Literal extends Expression {
 
 	@Override
 	public String toString() {
-		return value.toString();
+		return String.valueOf(value);
 	}
 
 	@Override

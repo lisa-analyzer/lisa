@@ -2,16 +2,15 @@ package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.TernaryOperator;
-import it.unive.lisa.symbolic.value.TypeConversion;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -43,12 +42,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof Skip)
 			return Satisfiability.UNKNOWN;
 
-		if (expression instanceof TypeConversion) {
-			TypeConversion conv = (TypeConversion) expression;
-
-			T arg = eval((ValueExpression) conv.getOperand(), environment);
-			return satisfiesTypeConversion(conv.getToType(), arg);
-		}
+		if (expression instanceof PushAny) 
+			return Satisfiability.UNKNOWN;
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -111,15 +106,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof Skip)
 			return bottom();
 
-		if (expression instanceof TypeConversion) {
-			TypeConversion conv = (TypeConversion) expression;
-
-			T arg = eval((ValueExpression) conv.getOperand(), environment);
-			if (arg.isTop() || arg.isBottom())
-				return arg;
-
-			return evalTypeConversion(conv.getToType(), arg);
-		}
+		if (expression instanceof PushAny) 
+			return top();
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -181,20 +169,6 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @return the evaluation of the constant
 	 */
 	protected abstract T evalNonNullConstant(Constant constant);
-
-	/**
-	 * Yields the evaluation of a {@link TypeConversion} converting an
-	 * expression whose abstract value is {@code arg} to the given {@link Type}.
-	 * It is guaranteed that {@code arg} is neither {@link #top()} or
-	 * {@link #bottom()}.
-	 * 
-	 * @param type the type to cast {@code arg} to
-	 * @param arg  the instance of this domain representing the abstract value
-	 *                 of the expresion's argument
-	 * 
-	 * @return the evaluation of the expression
-	 */
-	protected abstract T evalTypeConversion(Type type, T arg);
 
 	/**
 	 * Yields the evaluation of a {@link UnaryExpression} applying
@@ -286,25 +260,6 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             equivalent to a TOP boolean value)
 	 */
 	protected abstract Satisfiability satisfiesNonNullConstant(Constant constant);
-
-	/**
-	 * Yields the satisfiability of a {@link TypeConversion} converting an
-	 * expression whose abstract value is {@code arg} to the given {@link Type}.
-	 * This method returns an instance of {@link Satisfiability} and it is
-	 * guaranteed that {@code arg} is not {@link #bottom()}.
-	 * 
-	 * @param type the type to cast {@code arg} to
-	 * @param arg  the instance of this domain representing the abstract value
-	 *                 of the expression's argument
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
-	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
-	 *             not satisfied, or {@link Satisfiability#UNKNOWN} if it is
-	 *             either impossible to determine if it satisfied, or if it is
-	 *             satisfied by some values and not by some others (this is
-	 *             equivalent to a TOP boolean value)
-	 */
-	protected abstract Satisfiability satisfiesTypeConversion(Type type, T arg);
 
 	/**
 	 * Yields the satisfiability of a {@link UnaryExpression} applying

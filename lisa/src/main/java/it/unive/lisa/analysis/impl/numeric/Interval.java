@@ -1,17 +1,17 @@
 package it.unive.lisa.analysis.impl.numeric;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The interval abstract domain, approximating integer values as the minimum
@@ -94,11 +94,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalTypeConversion(Type type, Interval arg) {
-		return top();
-	}
-
-	@Override
 	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg) {
 
 		switch (operator) {
@@ -174,11 +169,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTypeConversion(Type type, Interval right) {
 		return Satisfiability.UNKNOWN;
 	}
 

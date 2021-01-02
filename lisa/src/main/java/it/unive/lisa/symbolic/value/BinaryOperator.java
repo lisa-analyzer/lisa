@@ -172,7 +172,11 @@ public enum BinaryOperator implements Operator {
 	 * two strings are equals. The return type of this operator is
 	 * {@link it.unive.lisa.cfg.type.StringType}.
 	 */
-	STRING_EQUALS("strcmp");
+	STRING_EQUALS("strcmp"),
+	
+	TYPE_CAST("as"),
+	
+	TYPE_CHECK("is");
 
 	private final String representation;
 

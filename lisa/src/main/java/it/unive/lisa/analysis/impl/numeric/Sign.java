@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -105,11 +104,6 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		if (isTop() || isBottom())
 			return this;
 		return isPositive() ? NEG : isNegative() ? POS : ZERO;
-	}
-
-	@Override
-	protected Sign evalTypeConversion(Type type, Sign arg) {
-		return top();
 	}
 
 	@Override
@@ -233,11 +227,6 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTypeConversion(Type type, Sign right) {
 		return Satisfiability.UNKNOWN;
 	}
 
