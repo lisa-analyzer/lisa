@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -9,42 +11,23 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Node;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A statement of the program to analyze.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements Comparable<Statement>, Node<Statement, Edge, CFG> {
+public abstract class Statement extends CodeElement implements Node<Statement, Edge, CFG> {
 
 	/**
 	 * The cfg containing this statement.
 	 */
 	private final CFG cfg;
-
-	/**
-	 * The source file where this statement happens. If it is unknown, this
-	 * field might contain {@code null}.
-	 */
-	private final String sourceFile;
-
-	/**
-	 * The line where this statement happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int line;
-
-	/**
-	 * The column where this statement happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int col;
 
 	/**
 	 * The offset of the statement within the cfg.
@@ -63,11 +46,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 *                       file. If unknown, use {@code -1}
 	 */
 	protected Statement(CFG cfg, String sourceFile, int line, int col) {
+		super(sourceFile, line, col);
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
 		this.cfg = cfg;
-		this.sourceFile = sourceFile;
-		this.line = line;
-		this.col = col;
 		this.offset = -1;
 	}
 
@@ -78,36 +59,6 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	 */
 	public final CFG getCFG() {
 		return cfg;
-	}
-
-	/**
-	 * Yields the source file name where this statement happens. This method
-	 * returns {@code null} if the source file is unknown.
-	 * 
-	 * @return the source file, or {@code null}
-	 */
-	public final String getSourceFile() {
-		return sourceFile;
-	}
-
-	/**
-	 * Yields the line number where this statement happens in the source file.
-	 * This method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the line number, or {@code -1}
-	 */
-	public final int getLine() {
-		return line;
-	}
-
-	/**
-	 * Yields the column where this statement happens in the source file. This
-	 * method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the column, or {@code -1}
-	 */
-	public final int getCol() {
-		return col;
 	}
 
 	/**
@@ -122,10 +73,8 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + col;
-		result = prime * result + line;
-		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
+		int result = super.hashCode();
+		result = prime * result + offset;
 		return result;
 	}
 
@@ -152,35 +101,9 @@ public abstract class Statement implements Comparable<Statement>, Node<Statement
 			return false;
 		if (getClass() != st.getClass())
 			return false;
-		if (col != st.col)
-			return false;
-		if (line != st.line)
-			return false;
-		if (sourceFile == null) {
-			if (st.sourceFile != null)
-				return false;
-		} else if (!sourceFile.equals(st.sourceFile))
+		if (!super.equals(st)) // checking source code location
 			return false;
 		return true;
-	}
-
-	/**
-	 * Compares two statements in terms of order of appearance in the program,
-	 * comparing source files first, followed by lines and columns at last. <br>
-	 * <br>
-	 * {@inheritDoc}
-	 */
-	@Override
-	public final int compareTo(Statement o) {
-		int cmp;
-
-		if ((cmp = StringUtils.compare(sourceFile, o.sourceFile)) != 0)
-			return cmp;
-
-		if ((cmp = Integer.compare(line, o.line)) != 0)
-			return cmp;
-
-		return Integer.compare(col, o.col);
 	}
 
 	@Override

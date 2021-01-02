@@ -1,5 +1,6 @@
 package it.unive.lisa.program.cfg;
 
+import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -13,25 +14,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableTableEntry {
-
-	/**
-	 * The source file where this variable happens. If it is unknown, this field
-	 * might contain {@code null}.
-	 */
-	private final String sourceFile;
-
-	/**
-	 * The line where this variable happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int line;
-
-	/**
-	 * The column where this variable happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int col;
+public class VariableTableEntry extends CodeElement {
 
 	/**
 	 * The index of the variable
@@ -135,11 +118,9 @@ public class VariableTableEntry {
 	 */
 	public VariableTableEntry(String sourceFile, int line, int col, int index, int scopeStart, int scopeEnd,
 			String name, Type staticType) {
+		super(sourceFile, line, col);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		Objects.requireNonNull(staticType, "The type of a variable cannot be null");
-		this.sourceFile = sourceFile;
-		this.line = line;
-		this.col = col;
 		this.index = index;
 		this.name = name;
 		this.staticType = staticType;
@@ -178,16 +159,6 @@ public class VariableTableEntry {
 	}
 
 	/**
-	 * Yields the source file name where the variable is defined. This method
-	 * returns {@code null} if the source file is unknown.
-	 * 
-	 * @return the source file, or {@code null}
-	 */
-	public String getSourceFile() {
-		return sourceFile;
-	}
-
-	/**
 	 * Yields the name of this variable.
 	 * 
 	 * @return the name of this variable
@@ -203,26 +174,6 @@ public class VariableTableEntry {
 	 */
 	public Type getStaticType() {
 		return staticType;
-	}
-
-	/**
-	 * Yields the line number where the variable is defined in the source file.
-	 * This method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the line number, or {@code -1}
-	 */
-	public final int getLine() {
-		return line;
-	}
-
-	/**
-	 * Yields the column where the variable is defined in the source file. This
-	 * method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the column, or {@code -1}
-	 */
-	public final int getCol() {
-		return col;
 	}
 
 	/**
@@ -242,14 +193,11 @@ public class VariableTableEntry {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + index;
-		result = prime * result + scopeStart;
-		result = prime * result + scopeEnd;
-		result = prime * result + col;
-		result = prime * result + line;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
+		result = prime * result + scopeEnd;
+		result = prime * result + scopeStart;
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
@@ -258,30 +206,21 @@ public class VariableTableEntry {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		VariableTableEntry other = (VariableTableEntry) obj;
 		if (index != other.index)
 			return false;
-		if (scopeStart != other.scopeStart)
-			return false;
-		if (scopeEnd != other.scopeEnd)
-			return false;
-		if (col != other.col)
-			return false;
-		if (line != other.line)
-			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (sourceFile == null) {
-			if (other.sourceFile != null)
-				return false;
-		} else if (!sourceFile.equals(other.sourceFile))
+		if (scopeEnd != other.scopeEnd)
+			return false;
+		if (scopeStart != other.scopeStart)
 			return false;
 		if (staticType == null) {
 			if (other.staticType != null)

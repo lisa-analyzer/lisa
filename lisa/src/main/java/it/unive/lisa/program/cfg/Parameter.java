@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg;
 
 import java.util.Objects;
 
+import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
@@ -13,25 +14,7 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Parameter {
-
-	/**
-	 * The source file where this parameter happens. If it is unknown, this
-	 * field might contain {@code null}.
-	 */
-	private final String sourceFile;
-
-	/**
-	 * The line where this parameter happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int line;
-
-	/**
-	 * The column where this parameter happens in the source file. If it is
-	 * unknown, this field might contain {@code -1}.
-	 */
-	private final int col;
+public class Parameter extends CodeElement {
 
 	/**
 	 * The name of this parameter
@@ -82,11 +65,9 @@ public class Parameter {
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Parameter(String sourceFile, int line, int col, String name, Type staticType) {
+		super(sourceFile, line, col);
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
-		this.sourceFile = sourceFile;
-		this.line = line;
-		this.col = col;
 		this.name = name;
 		this.staticType = staticType;
 	}
@@ -109,44 +90,11 @@ public class Parameter {
 		return staticType;
 	}
 
-	/**
-	 * Yields the source file name where this parameter happens. This method
-	 * returns {@code null} if the source file is unknown.
-	 * 
-	 * @return the source file, or {@code null}
-	 */
-	public String getSourceFile() {
-		return sourceFile;
-	}
-
-	/**
-	 * Yields the line number where this parameter happens in the source file.
-	 * This method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the line number, or {@code -1}
-	 */
-	public final int getLine() {
-		return line;
-	}
-
-	/**
-	 * Yields the column where this parameter happens in the source file. This
-	 * method returns {@code -1} if the line number is unknown.
-	 * 
-	 * @return the column, or {@code -1}
-	 */
-	public final int getCol() {
-		return col;
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
-		result = prime * result + col;
-		result = prime * result + line;
+		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((sourceFile == null) ? 0 : sourceFile.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
@@ -155,24 +103,15 @@ public class Parameter {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Parameter other = (Parameter) obj;
-		if (col != other.col)
-			return false;
-		if (line != other.line)
-			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (sourceFile == null) {
-			if (other.sourceFile != null)
-				return false;
-		} else if (!sourceFile.equals(other.sourceFile))
 			return false;
 		if (staticType == null) {
 			if (other.staticType != null)
