@@ -174,6 +174,7 @@ public class JsonReportComparer {
 		if (!warnings.sameContent() || !files.sameContent())
 			return false;
 
+		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
 			File right = new File(secondFileRoot, pair.getRight());
@@ -188,11 +189,11 @@ public class JsonReportComparer {
 			if (left.getName().endsWith(".dot"))
 				if (!matchDotGraphs(left, right)) {
 					reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
-					return false;
+					diffFound = true;
 				}
 		}
 
-		return true;
+		return !diffFound;
 	}
 
 	private static boolean matchDotGraphs(File left, File right) throws IOException {
