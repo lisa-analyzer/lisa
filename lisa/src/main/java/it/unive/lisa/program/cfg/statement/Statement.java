@@ -74,8 +74,7 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + offset;
-		return result;
+		return prime * result;
 	}
 
 	/**
