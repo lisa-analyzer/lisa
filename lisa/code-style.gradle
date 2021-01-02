@@ -22,6 +22,7 @@ checkstyleTest {
     
     // only included files will be checked
     include 'it/unive/lisa/test/imp/**/*.java'
+    exclude '**/*Test.java'
 }
 
 task checkstyleErrorMessage {

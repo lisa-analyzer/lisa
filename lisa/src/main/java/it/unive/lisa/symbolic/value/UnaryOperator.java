@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.cfg.type.StringType;
+import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
@@ -32,7 +33,10 @@ public enum UnaryOperator implements Operator {
 	 * return type of this operator is a 32 bit unsigned {@link NumericType}.
 	 */
 	STRING_LENGTH("strlen"),
-	
+
+	/**
+	 * Yields the {@link Type} of an expression.
+	 */
 	TYPEOF("typeof");
 
 	private final String representation;

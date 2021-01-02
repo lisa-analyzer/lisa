@@ -18,7 +18,7 @@ BOOLEAN
 STRING
    : 'string'
    ;
-   
+
 FLOAT
    : 'float'
    ;

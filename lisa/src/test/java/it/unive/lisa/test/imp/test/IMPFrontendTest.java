@@ -2,10 +2,9 @@ package it.unive.lisa.test.imp.test;
 
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
+import org.junit.Test;
 
 public class IMPFrontendTest {
 

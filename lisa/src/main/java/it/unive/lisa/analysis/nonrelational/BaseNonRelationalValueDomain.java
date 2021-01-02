@@ -42,7 +42,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof Skip)
 			return Satisfiability.UNKNOWN;
 
-		if (expression instanceof PushAny) 
+		if (expression instanceof PushAny)
 			return Satisfiability.UNKNOWN;
 
 		if (expression instanceof UnaryExpression) {
@@ -106,7 +106,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof Skip)
 			return bottom();
 
-		if (expression instanceof PushAny) 
+		if (expression instanceof PushAny)
 			return top();
 
 		if (expression instanceof UnaryExpression) {

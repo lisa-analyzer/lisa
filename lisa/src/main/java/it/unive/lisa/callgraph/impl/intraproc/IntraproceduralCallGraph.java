@@ -120,7 +120,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	private <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg) throws SemanticException {
+			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
+					throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
 		for (Parameter arg : cfg.getDescriptor().getArgs()) {
 			SymbolicExpression expr;
@@ -128,7 +129,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 				expr = new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
 			else
 				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
-			prepared = prepared.assign((Identifier) expr, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
+			prepared = prepared.assign((Identifier) expr,
+					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
 		}
 		return prepared;
 	}
