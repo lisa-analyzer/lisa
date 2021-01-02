@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * Numeric type interface. Any concrete numerical type or numerical

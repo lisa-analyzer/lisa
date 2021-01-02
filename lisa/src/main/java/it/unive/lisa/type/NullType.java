@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * The Null type, that is the type of {#link NullLiteral}. It implements the

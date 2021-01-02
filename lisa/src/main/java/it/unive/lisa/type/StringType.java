@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * String type interface. Any concrete string type or string sub-interface

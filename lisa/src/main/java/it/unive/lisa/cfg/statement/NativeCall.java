@@ -1,8 +1,9 @@
 package it.unive.lisa.cfg.statement;
 
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 

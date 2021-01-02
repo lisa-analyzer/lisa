@@ -9,10 +9,10 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.type.NumericType;
 
 /**
  * An expression modeling the division operation ({@code /}). Both operands'

@@ -1,14 +1,14 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.BooleanType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
- * The {@link it.unive.lisa.cfg.type.BooleanType} of the IMP language. The only
+ * The {@link it.unive.lisa.type.BooleanType} of the IMP language. The only
  * singleton instance of this class can be retrieved trough field
  * {@link #INSTANCE}. Instances of this class are equal to all other classes
- * that implement the {@link it.unive.lisa.cfg.type.BooleanType} interface.
+ * that implement the {@link it.unive.lisa.type.BooleanType} interface.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

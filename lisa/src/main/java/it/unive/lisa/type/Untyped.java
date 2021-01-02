@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * The untyped type, corresponding to an unknown/untyped type. This type is used

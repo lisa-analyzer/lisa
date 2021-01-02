@@ -1,6 +1,6 @@
 package it.unive.lisa.symbolic.heap;
 
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 
 /**

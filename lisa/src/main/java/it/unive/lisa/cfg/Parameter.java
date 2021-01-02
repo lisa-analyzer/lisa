@@ -1,8 +1,9 @@
 package it.unive.lisa.cfg;
 
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
 import java.util.Objects;
+
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
  * A CFG parameter identified by its name and its type, containing the

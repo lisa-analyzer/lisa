@@ -1,14 +1,14 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
- * The signed 32-bit decimal {@link it.unive.lisa.cfg.type.NumericType} of the
+ * The signed 32-bit decimal {@link it.unive.lisa.type.NumericType} of the
  * IMP language. The only singleton instance of this class can be retrieved
  * trough field {@link #INSTANCE}. Instances of this class are equal to all
- * other classes that implement the {@link it.unive.lisa.cfg.type.NumericType}
+ * other classes that implement the {@link it.unive.lisa.type.NumericType}
  * interface and are 32 bits.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

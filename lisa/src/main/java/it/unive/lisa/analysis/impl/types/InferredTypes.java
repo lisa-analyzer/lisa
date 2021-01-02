@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.impl.types;
 import it.unive.lisa.analysis.SetLattice;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 import java.util.Set;
 

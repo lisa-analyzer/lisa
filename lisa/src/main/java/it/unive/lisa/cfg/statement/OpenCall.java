@@ -8,12 +8,13 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
 import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;

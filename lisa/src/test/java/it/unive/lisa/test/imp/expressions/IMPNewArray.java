@@ -11,10 +11,11 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.types.ArrayType;
+import it.unive.lisa.type.Type;
+
 import java.util.Collection;
 
 /**

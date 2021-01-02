@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * The void type. It implements the singleton design pattern, that is the

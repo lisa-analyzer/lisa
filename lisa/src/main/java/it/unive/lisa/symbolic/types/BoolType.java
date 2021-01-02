@@ -1,8 +1,8 @@
 package it.unive.lisa.symbolic.types;
 
-import it.unive.lisa.cfg.type.BooleanType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
  * An internal implementation of the {@link BooleanType} interface that can be

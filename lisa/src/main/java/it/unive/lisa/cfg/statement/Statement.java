@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;

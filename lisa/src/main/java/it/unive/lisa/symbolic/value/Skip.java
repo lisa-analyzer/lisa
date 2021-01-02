@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.cfg.type.VoidType;
+import it.unive.lisa.type.VoidType;
 
 /**
  * An expression that does nothing.

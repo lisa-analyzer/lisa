@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.type.NullType;
 import it.unive.lisa.symbolic.value.NullConstant;
+import it.unive.lisa.type.NullType;
 
 /**
  * A literal representing the {@code null} constant.

@@ -1,21 +1,22 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
 /**
  * A type representing an IMP array defined in an IMP program. ArrayTypes are
- * instances of {@link it.unive.lisa.cfg.type.ArrayType}, have a {@link Type}
+ * instances of {@link it.unive.lisa.type.ArrayType}, have a {@link Type}
  * and a dimension. To ensure uniqueness of ArrayType objects,
  * {@link #lookup(Type, int)} must be used to retrieve existing instances (or
  * automatically create one if no matching instance exists).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ArrayType implements it.unive.lisa.cfg.type.ArrayType {
+public class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 

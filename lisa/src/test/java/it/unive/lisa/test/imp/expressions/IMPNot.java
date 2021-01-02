@@ -10,11 +10,11 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.UnaryNativeCall;
-import it.unive.lisa.cfg.type.BooleanType;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.test.imp.types.BoolType;
+import it.unive.lisa.type.BooleanType;
 
 /**
  * An expression modeling the logical not operation ({@code !}). The operand's

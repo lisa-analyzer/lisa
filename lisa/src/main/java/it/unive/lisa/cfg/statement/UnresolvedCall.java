@@ -9,8 +9,9 @@ import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.Parameter;
-import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.Untyped;
+
 import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;

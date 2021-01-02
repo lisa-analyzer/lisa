@@ -1,9 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.cfg.type.BooleanType;
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 
 /**
  * A binary operator that can be applied to a pair of

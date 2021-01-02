@@ -12,10 +12,11 @@ import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.NativeCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.cfg.statement.VariableRef;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.types.ClassType;
+import it.unive.lisa.type.Type;
+
 import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;

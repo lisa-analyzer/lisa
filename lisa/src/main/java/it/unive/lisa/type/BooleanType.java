@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * Boolean type interface. Any concrete Boolean type or Boolean sub-interface

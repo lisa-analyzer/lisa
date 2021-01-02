@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.type;
+package it.unive.lisa.type;
 
 /**
  * Type interface. Any instance of a concrete type, instance of Type, should be
