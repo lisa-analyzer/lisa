@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.cfg.CFG.SemanticFunction;
@@ -17,6 +18,9 @@ import it.unive.lisa.cfg.statement.OpenCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import java.util.ArrayList;
@@ -107,7 +111,26 @@ public class IntraproceduralCallGraph implements CallGraph {
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
 				"cfgs"))
-			results.put(cfg, Optional.of(cfg.fixpoint(entryState, this, semantics)));
+			try {
+				results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this, semantics)));
+			} catch (SemanticException e) {
+				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
+			}
+	}
+
+	private <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg) throws SemanticException {
+		AnalysisState<A, H, V> prepared = entryState;
+		for (Parameter arg : cfg.getDescriptor().getArgs()) {
+			SymbolicExpression expr;
+			if (arg.getStaticType().isPointerType())
+				expr = new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
+			else
+				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
+			prepared = prepared.assign((Identifier) expr, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
+		}
+		return prepared;
 	}
 
 	@Override
