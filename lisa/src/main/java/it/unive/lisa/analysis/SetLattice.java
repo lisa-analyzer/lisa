@@ -109,7 +109,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			if (count != elements.size())
 				res.append(", ");
 		}
-		
+
 		return res.append("]").toString();
 	}
 }

@@ -108,7 +108,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 			if (count != elements.size())
 				res.append(", ");
 		}
-		
+
 		return res.append("]").toString();
 	}
 }

@@ -18,6 +18,7 @@ import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.cfg.statement.Throw;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.cfg.statement.VariableRef;
+import it.unive.lisa.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.cfg.type.Untyped;
 import it.unive.lisa.test.antlr.IMPLexer;
@@ -110,6 +111,8 @@ import org.apache.logging.log4j.Logger;
 public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
+	
+	public static final ResolutionStrategy CALL_STRATEGY = ResolutionStrategy.FIRST_DYNAMIC_THEN_STATIC;
 
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
@@ -574,7 +577,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(currentCFG, file, getLine(ctx), getCol(ctx), name, args);
+		return new UnresolvedCall(currentCFG, file, getLine(ctx), getCol(ctx), CALL_STRATEGY, name, args);
 	}
 
 	@Override

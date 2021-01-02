@@ -20,6 +20,8 @@ import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;
 
+import it.unive.lisa.test.imp.IMPFrontend;
+
 /**
  * An expression modeling the object allocation and initialization operation
  * ({@code new className(...)}). The type of this expression is the
@@ -62,7 +64,7 @@ public class IMPNewObj extends NativeCall {
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		return call.callSemantics(computedState, callGraph, fullParams).smallStepSemantics(created);
 	}
@@ -90,7 +92,7 @@ public class IMPNewObj extends NativeCall {
 			}
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, getStaticType().toString(), fullExpressions);
 		AnalysisState<A, H, TypeEnvironment> typing = call.callTypeInference(computedState, callGraph, fullParams);
 
 		// at this stage, the runtime types correspond to the singleton set

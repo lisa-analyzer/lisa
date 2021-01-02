@@ -13,7 +13,6 @@ import it.unive.lisa.cfg.CFG.SemanticFunction;
 import it.unive.lisa.cfg.Parameter;
 import it.unive.lisa.cfg.statement.CFGCall;
 import it.unive.lisa.cfg.statement.Call;
-import it.unive.lisa.cfg.statement.Expression;
 import it.unive.lisa.cfg.statement.OpenCall;
 import it.unive.lisa.cfg.statement.UnresolvedCall;
 import it.unive.lisa.logging.IterationLogger;
@@ -77,8 +76,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		Collection<CFG> targets = new ArrayList<>();
 		for (CFG cfg : results.keySet())
 			if (cfg.getDescriptor().getFullName().equals(call.getQualifiedName())
-					&& cfg.getDescriptor().getReturnType().canBeAssignedTo(call.getStaticType())
-					&& matchParametersTypes(cfg.getDescriptor().getArgs(), call.getParameters()))
+					&& call.getStrategy().matches(cfg.getDescriptor().getArgs(), call.getParameters()))
 				targets.add(cfg);
 
 		Call resolved;
@@ -91,17 +89,6 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 		resolved.setOffset(call.getOffset());
 		return resolved;
-	}
-
-	private boolean matchParametersTypes(Parameter[] formals, Expression[] actuals) {
-		if (formals.length != actuals.length)
-			return false;
-
-		for (int i = 0; i < formals.length; i++)
-			if (!formals[i].getStaticType().canBeAssignedTo(actuals[i].getStaticType()))
-				return false;
-
-		return true;
 	}
 
 	@Override
