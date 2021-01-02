@@ -188,13 +188,18 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	@Override
 	public <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
+		// it corresponds to the analysis state after the evaluation of all the
+		// parameter of this call
+		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates[computedStates.length - 1];
+
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, TypeEnvironment> returned = callGraph.getAbstractResultOf(this, computedState, params);
+		AnalysisState<A, H, TypeEnvironment> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
 		// the lub will include the metavariable inside the state
-		AnalysisState<A, H, TypeEnvironment> lub = computedState.lub(returned).smallStepSemantics(new Skip());
+		AnalysisState<A, H, TypeEnvironment> lub = lastPostState.lub(returned).smallStepSemantics(new Skip());
 
 		AnalysisState<A, H, TypeEnvironment> result = null;
 		if (getStaticType().isVoidType())
@@ -224,13 +229,20 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
+		// it corresponds to the analysis state after the evaluation of all the
+		// parameters of this call
+		// (the semantics of this call does not need information about the
+		// intermediate analysis states)
+		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
+
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, computedState, params);
+		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
 		// the lub will include the metavariable inside the state
-		AnalysisState<A, H, V> lub = computedState.lub(returned);
+		AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
 		if (getStaticType().isVoidType())
 			// no need to add the meta variable since nothing has been pushed on

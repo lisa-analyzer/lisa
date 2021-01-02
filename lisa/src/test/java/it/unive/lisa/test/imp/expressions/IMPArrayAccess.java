@@ -36,19 +36,22 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		super(cfg, sourceFile, line, col, "[]", container, location);
 	}
 
-	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					AnalysisState<A, H, V> entryState, CallGraph callGraph,
+					AnalysisState<A, H, V> leftState,
+					SymbolicExpression left,
+					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
+
 					throws SemanticException {
 		if (!left.getDynamicType().isArrayType() || !left.getDynamicType().isUntyped())
-			return computedState.bottom();
+			return entryState.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		return computedState.smallStepSemantics(new AccessChild(getRuntimeTypes(), left, right));
+		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), left, right));
 	}
 }

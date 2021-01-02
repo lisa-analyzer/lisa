@@ -39,20 +39,23 @@ public class IMPGreaterThan extends BinaryNativeCall {
 		super(cfg, sourceFile, line, col, ">", BoolType.INSTANCE, left, right);
 	}
 
-	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					AnalysisState<A, H, V> entryState, CallGraph callGraph,
+					AnalysisState<A, H, V> leftState,
+					SymbolicExpression left,
+					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
+
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isNumericType() && !left.getDynamicType().isUntyped())
-			return computedState.bottom();
+			return entryState.bottom();
 		if (!right.getDynamicType().isNumericType() && !right.getDynamicType().isUntyped())
-			return computedState.bottom();
+			return entryState.bottom();
 
-		return computedState
+		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
 						BinaryOperator.COMPARISON_GT));
 	}

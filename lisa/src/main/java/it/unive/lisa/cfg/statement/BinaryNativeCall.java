@@ -95,12 +95,14 @@ public abstract class BinaryNativeCall extends NativeCall {
 	@Override
 	public final <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState,
+					CallGraph callGraph, AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> result = null;
-		for (SymbolicExpression expr1 : params[0])
-			for (SymbolicExpression expr2 : params[1]) {
-				AnalysisState<A, H, TypeEnvironment> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
+		for (SymbolicExpression left : params[0])
+			for (SymbolicExpression right : params[1]) {
+				AnalysisState<A, H, TypeEnvironment> tmp = binarySemantics(entryState, callGraph, computedStates[0],
+						left, computedStates[1], right);
 				if (result == null)
 					result = tmp;
 				else
@@ -115,17 +117,22 @@ public abstract class BinaryNativeCall extends NativeCall {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState,
+					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = null;
-		for (SymbolicExpression expr1 : params[0])
-			for (SymbolicExpression expr2 : params[1]) {
-				AnalysisState<A, H, V> tmp = binarySemantics(computedState, callGraph, expr1, expr2);
+
+		for (SymbolicExpression left : params[0])
+			for (SymbolicExpression right : params[1]) {
+				AnalysisState<A, H, V> tmp = binarySemantics(entryState, callGraph, computedStates[0], left,
+						computedStates[1], right);
 				if (result == null)
 					result = tmp;
 				else
 					result = result.lub(tmp);
 			}
+
 		return result;
 	}
 
@@ -134,16 +141,19 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <A>           the type of {@link AbstractState}
-	 * @param <H>           the type of the {@link HeapDomain}
-	 * @param <V>           the type of the {@link ValueDomain}
-	 * @param computedState the entry state that has been computed by chaining
-	 *                          the parameters' semantics evaluation
-	 * @param callGraph     the call graph of the program to analyze
-	 * @param left          the symbolic expressions representing the computed
-	 *                          value of the first parameter of this call
-	 * @param right         the symbolic expressions representing the computed
-	 *                          value of the second parameter of this call
+	 * @param <A>        the type of {@link AbstractState}
+	 * @param <H>        the type of the {@link HeapDomain}
+	 * @param <V>        the type of the {@link ValueDomain}
+	 * @param entryState the entry state of this binary call
+	 * @param callGraph  the call graph of the program to analyze
+	 * @param leftState  the state obtained by evaluating {@code left} in
+	 *                       {@code entryState}
+	 * @param leftExp    the symbolic expression representing the computed value
+	 *                       of the first parameter of this call
+	 * @param rightState the state obtained by evaluating {@code right} in
+	 *                       {@code rightState}
+	 * @param rightExp   the symbolic expression representing the computed value
+	 *                       of the second parameter of this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -153,7 +163,9 @@ public abstract class BinaryNativeCall extends NativeCall {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
-					SymbolicExpression right)
+					AnalysisState<A, H, V> entryState,
+					CallGraph callGraph,
+					AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
+					AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
 					throws SemanticException;
 }
