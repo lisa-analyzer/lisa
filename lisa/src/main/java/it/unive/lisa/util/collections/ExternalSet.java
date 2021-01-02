@@ -25,8 +25,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ExternalSet<T> implements Iterable<T>, Set<T> {
 
-	private static final int LENGTH_MASK = 0x3f;
-
 	/**
 	 * Yields a mask of {@code 0}s with one 1, represented as a long value, to
 	 * represent the given number inside a long bitvector. To determine the
@@ -37,19 +35,14 @@ public class ExternalSet<T> implements Iterable<T>, Set<T> {
 	 * 
 	 * @return the bitwise mask
 	 */
-	private static int bitmask(int n) {
+	private static long bitmask(int n) {
 		// assuming that n will be stored in the right long (obtained with
-		// toNLongs(n)),
-		// we have to determine which bit of the long has to be turned to 1. To
-		// do that,
-		// we take the 1L (that is just the right-most bit set to 1) and we
-		// shift it to
-		// the left. The amount of positions that we need to shift it is equal
-		// to n%64
-		// (we use bitwise and as a mask) that yields the correct bit to
-		// represent a
-		// number between 0 and 63 inside the long
-		return (int) 1L << (n & LENGTH_MASK);
+		// toNLongs(n)), we have to determine which bit of the long has to be
+		// turned to 1. To do that, we take the 1L (that is just the right-most
+		// bit set to 1) and we shift it to the left. The amount of positions
+		// that we need to shift it is equal to n%64 that yields the correct bit
+		// to represent a number between 0 and 63 inside the long
+		return 1L << (n % 64);
 	}
 
 	/**
