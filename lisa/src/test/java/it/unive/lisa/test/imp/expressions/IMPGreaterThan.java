@@ -39,6 +39,7 @@ public class IMPGreaterThan extends BinaryNativeCall {
 		super(cfg, sourceFile, line, col, ">", BoolType.INSTANCE, left, right);
 	}
 
+	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(

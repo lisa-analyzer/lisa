@@ -36,6 +36,7 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		super(cfg, sourceFile, line, col, "[]", container, location);
 	}
 
+	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
