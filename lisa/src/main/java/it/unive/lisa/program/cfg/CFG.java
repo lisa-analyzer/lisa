@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg;
+package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -10,14 +10,14 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.edge.SequentialEdge;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.NoOp;
-import it.unive.lisa.cfg.statement.Ret;
-import it.unive.lisa.cfg.statement.Return;
-import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotCFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NoOp;
+import it.unive.lisa.program.cfg.statement.Ret;
+import it.unive.lisa.program.cfg.statement.Return;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;

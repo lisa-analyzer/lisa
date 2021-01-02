@@ -5,14 +5,14 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.VariableRef;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 import java.io.File;

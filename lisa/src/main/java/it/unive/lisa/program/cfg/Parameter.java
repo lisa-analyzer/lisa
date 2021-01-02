@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg;
+package it.unive.lisa.program.cfg;
 
 import java.util.Objects;
 

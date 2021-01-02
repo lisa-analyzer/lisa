@@ -1,14 +1,15 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFGDescriptor;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.warnings.CFGDesccriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,9 +1,9 @@
 package it.unive.lisa.checks.syntactic;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.CheckTool;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**

@@ -1,10 +1,10 @@
-package it.unive.lisa.cfg.edge;
+package it.unive.lisa.program.cfg.edge;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A sequential edge connecting two statement. The abstract analysis state does

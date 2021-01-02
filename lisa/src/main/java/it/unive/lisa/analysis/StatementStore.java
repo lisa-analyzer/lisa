@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A functional lattice that stores instances of {@link AnalysisState} computed

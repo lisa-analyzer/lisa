@@ -5,9 +5,9 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
-import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 import java.io.File;

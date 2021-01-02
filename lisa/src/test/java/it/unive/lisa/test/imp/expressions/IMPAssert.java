@@ -8,9 +8,9 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.UnaryStatement;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**

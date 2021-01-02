@@ -1,7 +1,7 @@
 package it.unive.lisa.test.imp.expressions;
 
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.cfg.statement.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;

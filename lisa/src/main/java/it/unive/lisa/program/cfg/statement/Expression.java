@@ -1,10 +1,10 @@
-package it.unive.lisa.cfg.statement;
+package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;

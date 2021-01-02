@@ -1,7 +1,7 @@
-package it.unive.lisa.cfg.statement;
+package it.unive.lisa.program.cfg.statement;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Objects;
 

@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.statement;
+package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -8,7 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 

@@ -1,6 +1,6 @@
-package it.unive.lisa.cfg;
+package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 

@@ -1,11 +1,11 @@
-package it.unive.lisa.cfg.edge;
+package it.unive.lisa.program.cfg.edge;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Collection;
 

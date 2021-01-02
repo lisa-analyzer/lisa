@@ -1,4 +1,4 @@
-package it.unive.lisa.cfg.statement;
+package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.symbolic.value.Identifier;
 

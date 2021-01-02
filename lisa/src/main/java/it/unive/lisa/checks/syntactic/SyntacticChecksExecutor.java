@@ -1,8 +1,9 @@
 package it.unive.lisa.checks.syntactic;
 
-import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.logging.IterationLogger;
+import it.unive.lisa.program.cfg.CFG;
+
 import java.util.Collection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
