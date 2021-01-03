@@ -1,14 +1,14 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<c = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$c]>];
-	"node1" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, +Inf]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b &lt; 10]>];
-	"node2" [shape="rect",color="gray",label=<b = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [1, +Inf]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b]>];
-	"node3" [shape="rect",color="black",peripheries="2",label=<return b<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, +Inf]<BR/>vid$c: [1, 1]<BR/>vid$ret_value@constants: [0, +Inf] ]]<BR/>}} -&gt; [vid$ret_value@constants]>];
-	"node4" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, 0]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b]>];
-	"node1" -> "node2" [color="blue",style="dashed"];
-	"node1" -> "node3" [color="red",style="dashed"];
-	"node2" -> "node1" [color="black"];
-	"node0" -> "node4" [color="black"];
-	"node4" -> "node1" [color="black"];
+	"node1" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, 0]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b]>];
+	"node2" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, +Inf]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b &lt; 10]>];
+	"node3" [shape="rect",color="gray",label=<b = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [1, +Inf]<BR/>vid$c: [1, 1] ]]<BR/>}} -&gt; [vid$b]>];
+	"node4" [shape="rect",color="black",peripheries="2",label=<return b<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: [0, +Inf]<BR/>vid$c: [1, 1]<BR/>vid$ret_value@constants: [0, +Inf] ]]<BR/>}} -&gt; [vid$ret_value@constants]>];
+	"node1" -> "node2" [color="black"];
+	"node2" -> "node3" [color="blue",style="dashed"];
+	"node2" -> "node4" [color="red",style="dashed"];
+	"node3" -> "node2" [color="black"];
+	"node0" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

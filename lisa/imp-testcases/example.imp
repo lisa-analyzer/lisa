@@ -45,10 +45,10 @@ class example {
 	}
 	
 	/*
-	 * by convention, methods with the same name as the class are constructors
-	 * and cannot be overridden
+	 * methods starting with ~ are constructors and cannot be overridden,
+	 * but you can omit the ~ to invoke them
 	 */
-	example() {
+	~example() {
 		x = 10;
 	}
 	

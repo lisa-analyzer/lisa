@@ -114,6 +114,7 @@ public class FileManager {
 
 	private static String cleanupForDotFile(String name) {
 		String result = name.replace(' ', '_');
+		result = result.replace("::", ".");
 		return result;
 	}
 }

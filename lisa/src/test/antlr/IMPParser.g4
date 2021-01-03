@@ -192,15 +192,19 @@ blockOrStatement
    
    
 memberDeclarations
-   : (methodDeclaration | fieldDeclaration)*
+   : (methodDeclaration | fieldDeclaration | constructorDeclaration)*
    ;
 
 fieldDeclaration
    : name = IDENTIFIER SEMI
    ;
 
+constructorDeclaration
+   : TILDE name = IDENTIFIER pars = formals code = block
+   ;
+
 methodDeclaration
-   : name = IDENTIFIER pars = formals code = block
+   : FINAL? name = IDENTIFIER pars = formals code = block
    ;
 /*
  * CLASS

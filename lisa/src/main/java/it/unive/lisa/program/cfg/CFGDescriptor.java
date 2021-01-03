@@ -7,6 +7,7 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
@@ -18,6 +19,11 @@ import it.unive.lisa.type.Untyped;
  */
 public class CFGDescriptor extends CodeElement {
 
+	/**
+	 * The unit the cfg belongs to 
+	 */
+	private final Unit unit;
+	
 	/**
 	 * The name of the CFG associated with this descriptor.
 	 */
@@ -37,6 +43,11 @@ public class CFGDescriptor extends CodeElement {
 	 * The list of variables defined in the cfg
 	 */
 	private final List<VariableTableEntry> variables;
+	
+	/**
+	 * Whether or not the cfg can be overridden
+	 */
+	private boolean overridable;
 
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
@@ -46,8 +57,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param name the name of the CFG associated with this descriptor
 	 * @param args the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(String name, Parameter... args) {
-		this(null, -1, -1, name, Untyped.INSTANCE, args);
+	public CFGDescriptor(Unit unit, String name, Parameter... args) {
+		this(null, -1, -1, unit, name, Untyped.INSTANCE, args);
 	}
 
 	/**
@@ -60,8 +71,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String name, Type returnType, Parameter... args) {
-		this(null, -1, -1, name, returnType, args);
+	public CFGDescriptor(Unit unit, String name, Type returnType, Parameter... args) {
+		this(null, -1, -1, unit, name, returnType, args);
 	}
 
 	/**
@@ -79,8 +90,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, String name, Parameter... args) {
-		this(sourceFile, line, col, name, Untyped.INSTANCE, args);
+	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Parameter... args) {
+		this(sourceFile, line, col, unit, name, Untyped.INSTANCE, args);
 	}
 
 	/**
@@ -100,16 +111,20 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, String name, Type returnType, Parameter... args) {
+	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Type returnType, Parameter... args) {
 		super(sourceFile, line, col);
+		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
 		for (int i = 0; i < args.length; i++)
 			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
+		this.unit = unit;
 		this.name = name;
 		this.args = args;
 		this.returnType = returnType;
+		
+		overridable = true;
 
 		this.variables = new LinkedList<>();
 		int i = 0;
@@ -135,7 +150,7 @@ public class CFGDescriptor extends CodeElement {
 	 * @return the full name of the CFG
 	 */
 	public String getFullName() {
-		return name;
+		return unit.getName() + "::" + getName();
 	}
 
 	/**
@@ -144,7 +159,7 @@ public class CFGDescriptor extends CodeElement {
 	 * @return the full signature
 	 */
 	public String getFullSignature() {
-		return returnType + " " + name + "(" + StringUtils.join(args, ", ") + ")";
+		return returnType + " " + getFullName() + "(" + StringUtils.join(args, ", ") + ")";
 	}
 
 	/**
@@ -253,12 +268,22 @@ public class CFGDescriptor extends CodeElement {
 		variables.add(new VariableTableEntry(sourceFile, line, col, variables.size(), scopeStart, scopeEnd, name,
 				staticType));
 	}
+	
+	public boolean isOverridable() {
+		return overridable;
+	}
+	
+	public void setOverridable(boolean overridable) {
+		this.overridable = overridable;
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + Boolean.hashCode(overridable);
 		result = prime * result + Arrays.hashCode(args);
+		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
 		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
@@ -274,6 +299,13 @@ public class CFGDescriptor extends CodeElement {
 		if (getClass() != obj.getClass())
 			return false;
 		CFGDescriptor other = (CFGDescriptor) obj;
+		if (overridable != other.overridable)
+			return false;
+		if (unit == null) {
+			if (other.unit != null)
+				return false;
+		} else if (!unit.equals(other.unit))
+			return false;
 		if (!Arrays.equals(args, other.args))
 			return false;
 		if (name == null) {

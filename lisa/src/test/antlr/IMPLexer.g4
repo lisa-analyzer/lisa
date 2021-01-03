@@ -54,6 +54,10 @@ EXTENDS
    : 'extends'
    ;
    // method body    
+
+FINAL
+   : 'final'
+   ; 
    
 RETURN
    : 'return'
@@ -129,7 +133,11 @@ RBRACK
    : ']'
    ;
    // separators
-   
+
+TILDE
+   : '~'
+   ;
+      
 SEMI
    : ';'
    ;

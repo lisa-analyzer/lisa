@@ -54,6 +54,7 @@ import it.unive.lisa.test.antlr.IMPParser.AssignmentContext;
 import it.unive.lisa.test.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockOrStatementContext;
+import it.unive.lisa.test.antlr.IMPParser.ConstructorDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldDeclarationContext;
@@ -118,7 +119,7 @@ import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
-	
+
 	public static final ResolutionStrategy CALL_STRATEGY = ResolutionStrategy.FIRST_DYNAMIC_THEN_STATIC;
 
 	/**
@@ -139,6 +140,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private final String file;
 
 	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
+
+	private CompilationUnit currentUnit;
 
 	private CFG currentCFG;
 
@@ -193,43 +196,75 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private int getLine(Token ctx) {
 		return ctx.getLine();
 	}
-	
+
 	@Override
 	public Program visitFile(FileContext ctx) {
 		Program prog = new Program();
 		for (UnitContext unit : ctx.unit())
 			prog.addCompilationUnit(visitUnit(unit));
-		
+
 		return prog;
 	}
-	
+
 	@Override
 	public CompilationUnit visitUnit(UnitContext ctx) {
-		CompilationUnit unit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
+		currentUnit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
 
-		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration()) 
-			unit.addInstanceCFG(visitMethodDeclaration(decl));
-		
-		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration()) 
-			unit.addInstanceGlobal(visitFieldDeclaration(decl));
-		
-		return unit;
+		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
+			currentUnit.addInstanceCFG(visitMethodDeclaration(decl));
+
+		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
+			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
+
+		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
+			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
+
+		return currentUnit;
 	}
-	
+
 	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
 		return new Global(file, getLine(ctx), getCol(ctx), ctx.name.getText(), Untyped.INSTANCE);
 	}
 
 	@Override
+	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
+		currentDescriptor = mkDescriptor(ctx);
+		return visitCodeMember(ctx.block());
+	}
+	
+	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
+		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit, ctx.name.getText(),
+				visitFormals(ctx.formals()));
+		descriptor.setOverridable(false);
+		return descriptor;
+	}
+
+	@Override
 	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
+		currentDescriptor = mkDescriptor(ctx);
+		return visitCodeMember(ctx.block());
+	}
+
+	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
+		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit, ctx.name.getText(),
+				visitFormals(ctx.formals()));
+
+		if (ctx.FINAL() != null)
+			descriptor.setOverridable(false);
+		else
+			descriptor.setOverridable(true);
+
+		return descriptor;
+	}
+	
+	private CFG visitCodeMember(BlockContext ctx) {
+		// side effects on entrypoints and matrix will affect the cfg
 		Collection<Statement> entrypoints = new HashSet<>();
 		matrix = new AdjacencyMatrix<>();
-		// side effects on entrypoints and matrix will affect the cfg
-		currentDescriptor = mkDescriptor(ctx);
 		currentCFG = new CFG(currentDescriptor, entrypoints, matrix);
 
-		Pair<Statement, Statement> visited = visitBlock(ctx.block());
+		Pair<Statement, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 
 		if (currentCFG.getNormalExitpoints().isEmpty()) {
@@ -253,10 +288,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 		currentCFG.simplify();
 		return currentCFG;
-	}
-
-	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
-		return new CFGDescriptor(file, getLine(ctx), getCol(ctx), ctx.name.getText(), visitFormals(ctx.formals()));
 	}
 
 	@Override
