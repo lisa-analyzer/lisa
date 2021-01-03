@@ -1,5 +1,29 @@
 package it.unive.lisa.test.imp;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -17,8 +41,8 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.test.antlr.IMPLexer;
 import it.unive.lisa.test.antlr.IMPParser;
 import it.unive.lisa.test.antlr.IMPParser.ArgContext;
@@ -31,6 +55,7 @@ import it.unive.lisa.test.antlr.IMPParser.BlockContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockOrStatementContext;
 import it.unive.lisa.test.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldAccessContext;
+import it.unive.lisa.test.antlr.IMPParser.FieldDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.FileContext;
 import it.unive.lisa.test.antlr.IMPParser.ForLoopContext;
 import it.unive.lisa.test.antlr.IMPParser.FormalContext;
@@ -46,6 +71,7 @@ import it.unive.lisa.test.antlr.IMPParser.ParExprContext;
 import it.unive.lisa.test.antlr.IMPParser.PrimitiveTypeContext;
 import it.unive.lisa.test.antlr.IMPParser.ReceiverContext;
 import it.unive.lisa.test.antlr.IMPParser.StatementContext;
+import it.unive.lisa.test.antlr.IMPParser.UnitContext;
 import it.unive.lisa.test.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.test.imp.expressions.IMPAdd;
@@ -80,25 +106,6 @@ import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -125,13 +132,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
-	public static Collection<CFG> processFile(String file) throws ParsingException {
+	public static Program processFile(String file) throws ParsingException {
 		return new IMPFrontend(file).work();
 	}
 
 	private final String file;
-
-	private Collection<CFG> cfgs;
 
 	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
@@ -140,11 +145,10 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CFGDescriptor currentDescriptor;
 
 	private IMPFrontend(String file) {
-		this.cfgs = new HashSet<CFG>();
 		this.file = file;
 	}
 
-	private Collection<CFG> work() throws ParsingException {
+	private Program work() throws ParsingException {
 		log.info("Reading file... " + file);
 		try (InputStream stream = new FileInputStream(file)) {
 			// common antlr4 initialization
@@ -158,8 +162,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
 
 			FileContext file = parser.file();
-			visitFile(file);
-			return cfgs;
+			return visitFile(file);
 		} catch (FileNotFoundException e) {
 			log.fatal(file + " does not exist", e);
 			throw new ParsingException("Target file '" + file + "' does not exist", e);
@@ -189,6 +192,33 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private int getLine(Token ctx) {
 		return ctx.getLine();
+	}
+	
+	@Override
+	public Program visitFile(FileContext ctx) {
+		Program prog = new Program();
+		for (UnitContext unit : ctx.unit())
+			prog.addCompilationUnit(visitUnit(unit));
+		
+		return prog;
+	}
+	
+	@Override
+	public CompilationUnit visitUnit(UnitContext ctx) {
+		CompilationUnit unit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
+
+		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration()) 
+			unit.addInstanceCFG(visitMethodDeclaration(decl));
+		
+		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration()) 
+			unit.addInstanceGlobal(visitFieldDeclaration(decl));
+		
+		return unit;
+	}
+	
+	@Override
+	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
+		return new Global(file, getLine(ctx), getCol(ctx), ctx.name.getText(), Untyped.INSTANCE);
 	}
 
 	@Override
@@ -222,7 +252,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		}
 
 		currentCFG.simplify();
-		cfgs.add(currentCFG);
 		return currentCFG;
 	}
 

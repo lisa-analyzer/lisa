@@ -18,6 +18,7 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
@@ -47,9 +48,9 @@ public class LiSA {
 	private static final Logger log = LogManager.getLogger(LiSA.class);
 
 	/**
-	 * The collection of CFG instances that are to be analyzed
+	 * The program to analyze
 	 */
-	private final Collection<CFG> inputs;
+	private Program program;
 
 	/**
 	 * The collection of syntactic checks to execute
@@ -111,7 +112,6 @@ public class LiSA {
 	 * Builds a new LiSA instance.
 	 */
 	public LiSA() {
-		this.inputs = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		// since the warnings collection will be filled AFTER the execution of
 		// every concurrent bit has completed its execution, it is fine to use a
@@ -125,21 +125,13 @@ public class LiSA {
 	}
 
 	/**
-	 * Adds the given cfg to the ones under analysis.
+	 * Sets the program to analyze. Any previous value set through this method
+	 * is lost.
 	 * 
-	 * @param cfg the cfg to analyze
+	 * @param program the program to analyze
 	 */
-	public void addCFG(CFG cfg) {
-		inputs.add(cfg);
-	}
-
-	/**
-	 * Adds the given cfgs to the ones under analysis.
-	 * 
-	 * @param cfgs the cfgs to analyze
-	 */
-	public void addCFGs(Collection<CFG> cfgs) {
-		inputs.addAll(cfgs);
+	public void setProgram(Program program) {
+		this.program = program;
 	}
 
 	/**
@@ -311,7 +303,6 @@ public class LiSA {
 	private void printConfig() {
 		log.info("LiSA setup:");
 		log.info("  workdir: " + String.valueOf(workdir));
-		log.info("  " + inputs.size() + " CFGs to analyze");
 		log.info("  dump input cfgs: " + dumpCFGs);
 		log.info("  infer types: " + inferTypes);
 		log.info("  dump inferred types: " + dumpTypeInference);
@@ -335,14 +326,15 @@ public class LiSA {
 			T extends AbstractState<T, H, TypeEnvironment>> void runAux()
 					throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
-
+		Collection<CFG> allCFGs = program.getAllCFGs();
+		
 		if (dumpCFGs)
-			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs"))
+			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
 		if (!syntacticChecks.isEmpty()) {
-			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
+			SyntacticChecksExecutor.executeAll(tool, allCFGs, syntacticChecks);
 			warnings.addAll(tool.getWarnings());
 		} else
 			log.warn("Skipping syntactic checks execution since none have been provided");
@@ -356,7 +348,7 @@ public class LiSA {
 			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
 		}
 
-		inputs.forEach(callGraph::addCFG);
+		allCFGs.forEach(callGraph::addCFG);
 
 		if (inferTypes) {
 			T tmp;
@@ -385,7 +377,7 @@ public class LiSA {
 					});
 
 			if (dumpTypeInference)
-				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
+				for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping type analysis", "cfgs")) {
 					CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				}
@@ -411,7 +403,7 @@ public class LiSA {
 				});
 
 		if (dumpAnalysis)
-			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping analysis results", "cfgs")) {
+			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
 				CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}

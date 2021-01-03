@@ -3,23 +3,25 @@ package it.unive.lisa.test.checks.syntactic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collection;
-import org.junit.Test;
 
 public class SyntacticCheckTest {
 
@@ -57,8 +59,8 @@ public class SyntacticCheckTest {
 		LiSA lisa = new LiSA();
 		lisa.addSyntacticCheck(new VariableI());
 
-		Collection<CFG> cfgs = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp");
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp");
+		lisa.setProgram(program);
 		lisa.setWorkdir("test-outputs/syntactic");
 		lisa.setJsonOutput(true);
 		try {
