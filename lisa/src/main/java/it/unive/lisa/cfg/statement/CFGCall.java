@@ -192,8 +192,12 @@ public class CFGCall extends Call implements MetaVariableCreator {
 					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the
-		// parameter of this call
-		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates[computedStates.length - 1];
+		// parameters of this call, it is the entry state if this call has no
+		// parameters
+		// (the semantics of this call does not need information about the
+		// intermediate analysis states)
+		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates.length == 0 ? entryState
+				: computedStates[computedStates.length - 1];
 
 		// this will contain only the information about the returned
 		// metavariable
@@ -233,10 +237,12 @@ public class CFGCall extends Call implements MetaVariableCreator {
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call
+		// parameters of this call, it is the entry state if this call has no
+		// parameters
 		// (the semantics of this call does not need information about the
 		// intermediate analysis states)
-		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
+		AnalysisState<A, H,
+				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
 
 		// this will contain only the information about the returned
 		// metavariable
