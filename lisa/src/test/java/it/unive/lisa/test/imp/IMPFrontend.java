@@ -31,6 +31,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.statement.AccessUnitGlobal;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
@@ -81,7 +82,6 @@ import it.unive.lisa.test.imp.expressions.IMPAssert;
 import it.unive.lisa.test.imp.expressions.IMPDiv;
 import it.unive.lisa.test.imp.expressions.IMPEqual;
 import it.unive.lisa.test.imp.expressions.IMPFalseLiteral;
-import it.unive.lisa.test.imp.expressions.IMPFieldAccess;
 import it.unive.lisa.test.imp.expressions.IMPFloatLiteral;
 import it.unive.lisa.test.imp.expressions.IMPGreaterOrEqual;
 import it.unive.lisa.test.imp.expressions.IMPGreaterThan;
@@ -446,11 +446,10 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public IMPFieldAccess visitFieldAccess(FieldAccessContext ctx) {
+	public AccessUnitGlobal visitFieldAccess(FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
-		IMPStringLiteral id = new IMPStringLiteral(currentCFG, file, getLine(ctx.name), getCol(ctx.name),
-				ctx.name.getText());
-		return new IMPFieldAccess(currentCFG, file, getLine(ctx), getCol(ctx), receiver, id);
+		Global id = new Global(file, getLine(ctx.name), getCol(ctx.name), ctx.name.getText(), Untyped.INSTANCE);
+		return new AccessUnitGlobal(currentCFG, file, getLine(ctx), getCol(ctx), receiver, id);
 	}
 
 	@Override
