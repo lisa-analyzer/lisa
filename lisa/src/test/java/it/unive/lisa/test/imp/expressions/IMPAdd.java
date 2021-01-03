@@ -51,8 +51,12 @@ public class IMPAdd extends BinaryNativeCall implements BinaryNumericalOperation
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+					AnalysisState<A, H, V> entryState, CallGraph callGraph,
+					AnalysisState<A, H, V> leftState,
+					SymbolicExpression left,
+					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
+
 					throws SemanticException {
 		BinaryOperator op;
 		ExternalSet<Type> types;
@@ -64,9 +68,9 @@ public class IMPAdd extends BinaryNativeCall implements BinaryNumericalOperation
 			op = BinaryOperator.NUMERIC_ADD;
 			types = commonNumericalType(left, right);
 		} else
-			return computedState.bottom();
+			return entryState.bottom();
 
-		return computedState
+		return rightState
 				.smallStepSemantics(new BinaryExpression(types, left, right, op));
 	}
 }

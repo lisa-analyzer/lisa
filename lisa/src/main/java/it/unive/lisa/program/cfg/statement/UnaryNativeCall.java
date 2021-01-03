@@ -92,11 +92,12 @@ public abstract class UnaryNativeCall extends NativeCall {
 	@Override
 	public final <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> result = null;
 		for (SymbolicExpression expr : params[0]) {
-			AnalysisState<A, H, TypeEnvironment> tmp = unarySemantics(computedState, callGraph, expr);
+			AnalysisState<A, H, TypeEnvironment> tmp = unarySemantics(entryState, callGraph, computedStates[0], expr);
 			if (result == null)
 				result = tmp;
 			else
@@ -111,11 +112,13 @@ public abstract class UnaryNativeCall extends NativeCall {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState,
+					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : params[0]) {
-			AnalysisState<A, H, V> tmp = unarySemantics(computedState, callGraph, expr);
+			AnalysisState<A, H, V> tmp = unarySemantics(entryState, callGraph, computedStates[0], expr);
 			if (result == null)
 				result = tmp;
 			else
@@ -129,14 +132,15 @@ public abstract class UnaryNativeCall extends NativeCall {
 	 * has been computed. Meta variables from the parameter will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <A>           the type of {@link AbstractState}
-	 * @param <H>           the type of the {@link HeapDomain}
-	 * @param <V>           the type of the {@link ValueDomain}
-	 * @param computedState the entry state that has been computed by chaining
-	 *                          the parameter's semantics evaluation
-	 * @param callGraph     the call graph of the program to analyze
-	 * @param expr          the symbolic expressions representing the computed
-	 *                          value of the parameter of this call
+	 * @param <A>        the type of {@link AbstractState}
+	 * @param <H>        the type of the {@link HeapDomain}
+	 * @param <V>        the type of the {@link ValueDomain}
+	 * @param entryState the entry state of this unary call
+	 * @param callGraph  the call graph of the program to analyze
+	 * @param exprState  the state obtained by evaluating {@code expr} in
+	 *                       {@code entryState}
+	 * @param expr       the symbolic expressions representing the computed
+	 *                       value of the parameter of this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -146,6 +150,7 @@ public abstract class UnaryNativeCall extends NativeCall {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
+					SymbolicExpression expr)
 					throws SemanticException;
 }

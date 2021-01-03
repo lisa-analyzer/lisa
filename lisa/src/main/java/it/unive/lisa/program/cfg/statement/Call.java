@@ -132,14 +132,16 @@ public abstract class Call extends Expression {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
-		AnalysisState<A, H, V> current = entryState;
+		@SuppressWarnings("unchecked")
+		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
+		AnalysisState<A, H, V> preState = entryState;
 		for (int i = 0; i < computed.length; i++) {
-			current = parameters[i].semantics(current, callGraph, expressions);
-			expressions.put(parameters[i], current);
-			computed[i] = current.getComputedExpressions();
+			preState = paramStates[i] = parameters[i].semantics(preState, callGraph, expressions);
+			expressions.put(parameters[i], paramStates[i]);
+			computed[i] = paramStates[i].getComputedExpressions();
 		}
 
-		AnalysisState<A, H, V> result = callSemantics(current, callGraph, computed);
+		AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
@@ -151,14 +153,21 @@ public abstract class Call extends Expression {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <A>           the type of {@link AbstractState}
-	 * @param <H>           the type of the {@link HeapDomain}
-	 * @param <V>           the type of the {@link ValueDomain}
-	 * @param computedState the entry state that has been computed by chaining
-	 *                          the parameters' semantics evaluation
-	 * @param callGraph     the call graph of the program to analyze
-	 * @param params        the symbolic expressions representing the computed
-	 *                          values of the parameters of this call
+	 * @param <A>            the type of {@link AbstractState}
+	 * @param <H>            the type of the {@link HeapDomain}
+	 * @param <V>            the type of the {@link ValueDomain}
+	 * @param entryState     the entry state of this call
+	 * @param callGraph      the call graph of the program to analyze
+	 * @param computedStates the array of states chaining the parameters'
+	 *                           semantics evaluation starting from
+	 *                           {@code entryState}, namely
+	 *                           {@code computedState[i]} corresponds to the
+	 *                           state obtained by the evaluation of
+	 *                           {@code params[i]} in the state
+	 *                           {@code computedState[i-1]} ({@code params[0]}
+	 *                           is evaluated in {@code entryState})
+	 * @param params         the symbolic expressions representing the computed
+	 *                           values of the parameters of this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -168,7 +177,9 @@ public abstract class Call extends Expression {
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState,
+					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException;
 
 	@Override
@@ -179,14 +190,16 @@ public abstract class Call extends Expression {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
 
-		AnalysisState<A, H, TypeEnvironment> current = entryState;
+		@SuppressWarnings("unchecked")
+		AnalysisState<A, H, TypeEnvironment>[] currents = new AnalysisState[parameters.length];
+
 		for (int i = 0; i < computed.length; i++) {
-			current = parameters[i].typeInference(current, callGraph, expressions);
-			expressions.put(parameters[i], current);
-			computed[i] = current.getComputedExpressions();
+			currents[i] = parameters[i].typeInference(entryState, callGraph, expressions);
+			expressions.put(parameters[i], currents[i]);
+			computed[i] = currents[i].getComputedExpressions();
 		}
 
-		AnalysisState<A, H, TypeEnvironment> result = callSemantics(current, callGraph, computed);
+		AnalysisState<A, H, TypeEnvironment> result = callSemantics(entryState, callGraph, currents, computed);
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
@@ -198,13 +211,20 @@ public abstract class Call extends Expression {
 	 * inferred. Meta variables from the parameters will be forgotten after this
 	 * call returns.
 	 * 
-	 * @param <A>           the type of {@link AbstractState}
-	 * @param <H>           the type of the {@link HeapDomain}
-	 * @param computedState the entry state that has been computed by chaining
-	 *                          the parameters' type inference
-	 * @param callGraph     the call graph of the program to analyze
-	 * @param params        the symbolic expressions representing the computed
-	 *                          values of the parameters of this call
+	 * @param <A>            the type of {@link AbstractState}
+	 * @param <H>            the type of the {@link HeapDomain}
+	 * @param entryState     the entry state of this call
+	 * @param callGraph      the call graph of the program to analyze
+	 * @param computedStates the array of states chaining the parameters'
+	 *                           semantics evaluation starting from
+	 *                           {@code entryState}, namely
+	 *                           {@code computedState[i]} corresponds to the
+	 *                           state obtained by the evaluation of
+	 *                           {@code params[i]} in the state
+	 *                           {@code computedState[i-1]} ({@code params[0]}
+	 *                           is evaluated in {@code entryState})
+	 * @param params         the symbolic expressions representing the computed
+	 *                           values of the parameters of this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -213,7 +233,8 @@ public abstract class Call extends Expression {
 	 */
 	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState,
+					CallGraph callGraph, AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException;
 

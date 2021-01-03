@@ -46,16 +46,28 @@ public class IMPNewArray extends NativeCall {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
-		return computedState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()));
+		// it corresponds to the analysis state after the evaluation of all the
+		// parameters of this call
+		// (the semantics of this call does not need information about the
+		// intermediate analysis states)
+		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
+		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()));
 	}
 
 	@Override
 	public <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
-		return computedState.smallStepSemantics(new HeapAllocation(Caches.types().mkSingletonSet(getStaticType())));
+		// it corresponds to the analysis state after the evaluation of all the
+		// parameters of this call
+		// (the semantics of this call does not need information about the
+		// intermediate analysis states)
+		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates[computedStates.length - 1];
+		return lastPostState.smallStepSemantics(new HeapAllocation(Caches.types().mkSingletonSet(getStaticType())));
 	}
 }

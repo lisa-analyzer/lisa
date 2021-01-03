@@ -42,13 +42,14 @@ public class IMPNot extends UnaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
+					SymbolicExpression expr)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isBooleanType() && !expr.getDynamicType().isUntyped())
-			return computedState.bottom();
+			return entryState.bottom();
 
-		return computedState.smallStepSemantics(
+		return exprState.smallStepSemantics(
 				new UnaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), expr, UnaryOperator.LOGICAL_NOT));
 	}
 }

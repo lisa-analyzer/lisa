@@ -125,10 +125,11 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	@Override
 	public <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// TODO too coarse
-		AnalysisState<A, H, TypeEnvironment> poststate = computedState.top();
+		AnalysisState<A, H, TypeEnvironment> poststate = entryState.top();
 
 		if (getStaticType().isVoidType())
 			poststate = poststate.smallStepSemantics(new Skip());
@@ -143,10 +144,11 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		// TODO too coarse
-		AnalysisState<A, H, V> poststate = computedState.top();
+		AnalysisState<A, H, V> poststate = entryState.top();
 
 		if (getStaticType().isVoidType())
 			return poststate.smallStepSemantics(new Skip());

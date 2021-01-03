@@ -216,10 +216,12 @@ public class UnresolvedCall extends Call {
 	@Override
 	public <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		Call resolved = callGraph.resolve(this);
-		AnalysisState<A, H, TypeEnvironment> result = resolved.callTypeInference(computedState, callGraph, params);
+		AnalysisState<A, H,
+				TypeEnvironment> result = resolved.callTypeInference(entryState, callGraph, computedStates, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		return result;
@@ -229,11 +231,13 @@ public class UnresolvedCall extends Call {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
+
 		Call resolved = callGraph.resolve(this);
 		resolved.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H, V> result = resolved.callSemantics(computedState, callGraph, params);
+		AnalysisState<A, H, V> result = resolved.callSemantics(entryState, callGraph, computedStates, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}

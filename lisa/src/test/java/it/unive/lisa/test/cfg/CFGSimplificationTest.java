@@ -92,9 +92,11 @@ public class CFGSimplificationTest {
 			protected <A extends AbstractState<A, H, V>,
 					H extends HeapDomain<H>,
 					V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-							AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression left,
+							AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> leftState,
+							SymbolicExpression left,
+							AnalysisState<A, H, V> rightState,
 							SymbolicExpression right) throws SemanticException {
-				return computedState;
+				return rightState;
 			}
 		}
 
@@ -107,9 +109,10 @@ public class CFGSimplificationTest {
 			protected <A extends AbstractState<A, H, V>,
 					H extends HeapDomain<H>,
 					V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-							AnalysisState<A, H, V> computedState, CallGraph callGraph, SymbolicExpression expr)
+							AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
+							SymbolicExpression expr)
 							throws SemanticException {
-				return computedState;
+				return entryState;
 			}
 		}
 
