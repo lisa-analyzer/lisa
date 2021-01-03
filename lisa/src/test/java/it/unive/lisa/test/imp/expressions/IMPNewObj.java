@@ -51,7 +51,8 @@ public class IMPNewObj extends NativeCall {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> computedState, CallGraph callGraph, Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
@@ -63,13 +64,14 @@ public class IMPNewObj extends NativeCall {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
 				getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
-		return call.callSemantics(computedState, callGraph, fullParams).smallStepSemantics(created);
+		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created);
 	}
 
 	@Override
 	public <A extends AbstractState<A, H, TypeEnvironment>,
 			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> computedState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
+					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		// we still need to compute the call to ensure that the type information
 		// is propagated in the constructor
@@ -84,12 +86,13 @@ public class IMPNewObj extends NativeCall {
 			for (SymbolicExpression e : fullParams[i]) {
 				Type ref = fullExpressions[i].getStaticType();
 				if (!e.getDynamicType().isUntyped() && !e.getTypes().anyMatch(t -> t.canBeAssignedTo(ref)))
-					return computedState.bottom();
+					return entryState.bottom();
 			}
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
 				getStaticType().toString(), fullExpressions);
-		AnalysisState<A, H, TypeEnvironment> typing = call.callTypeInference(computedState, callGraph, fullParams);
+		AnalysisState<A, H,
+				TypeEnvironment> typing = call.callTypeInference(entryState, callGraph, computedStates, fullParams);
 
 		// at this stage, the runtime types correspond to the singleton set
 		// containing only the static type. This is fine since we are creating
