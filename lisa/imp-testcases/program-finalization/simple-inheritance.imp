@@ -1,0 +1,19 @@
+class first {
+	field;
+	~first(x) {
+		field = x;
+	}
+	foo(i, j) {
+		return i + j;
+	}
+}
+
+class second extends first {
+	field2;
+	~second(x) {
+		field2 = x;
+	}
+	foo(i, j) {
+		return i + j + 1;
+	}
+}

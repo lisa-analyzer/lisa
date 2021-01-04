@@ -24,6 +24,10 @@ public class Program extends Unit {
 		return this.units.addAll(units);
 	}
 	
+	public Collection<CompilationUnit> getUnits() {
+		return units;
+	}
+	
 	public Collection<CFG> getAllCFGs() {
 		Collection<CFG> all = new LinkedList<>(getCfgs());
 		
@@ -33,5 +37,9 @@ public class Program extends Unit {
 		}
 		
 		return all;
+	}
+	
+	public void finalize() {
+		units.forEach(CompilationUnit::computeHierarchy);
 	}
 }

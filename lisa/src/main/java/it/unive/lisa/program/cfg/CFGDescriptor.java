@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -48,6 +50,10 @@ public class CFGDescriptor extends CodeElement {
 	 * Whether or not the cfg can be overridden
 	 */
 	private boolean overridable;
+	
+	private final Collection<CFG> overriddenBy;
+
+	private final Collection<CFG> overrides;
 
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
@@ -125,6 +131,8 @@ public class CFGDescriptor extends CodeElement {
 		this.returnType = returnType;
 		
 		overridable = true;
+		overriddenBy = new HashSet<>();
+		overrides = new HashSet<>();
 
 		this.variables = new LinkedList<>();
 		int i = 0;
@@ -276,6 +284,18 @@ public class CFGDescriptor extends CodeElement {
 	public void setOverridable(boolean overridable) {
 		this.overridable = overridable;
 	}
+	
+	public Unit getUnit() {
+		return unit;
+	}
+	
+	public Collection<CFG> overriddenBy() {
+		return overriddenBy;
+	}
+	
+	public Collection<CFG> overrides() {
+		return overrides;
+	}
 
 	@Override
 	public int hashCode() {
@@ -329,5 +349,20 @@ public class CFGDescriptor extends CodeElement {
 	@Override
 	public String toString() {
 		return getFullSignature() + " [at '" + String.valueOf(getSourceFile()) + "':" + getLine() + ":" + getCol() + "]";
+	}
+
+	public boolean matchesSignature(CFGDescriptor signature) {
+		if (!name.equals(signature.name))
+			return false;
+		
+		if (args.length != signature.args.length)
+			return false;
+		
+		for (int i = 0; i < args.length; i++)
+			if (!args[i].getStaticType().canBeAssignedTo(signature.args[i].getStaticType()))
+				// TODO not sure if this is generic enough
+				return false;
+		
+		return true;
 	}
 }
