@@ -144,8 +144,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
 	private CompilationUnit currentUnit;
-	
-	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap; 
+
+	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap;
 
 	private CFG currentCFG;
 
@@ -174,6 +174,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		} catch (FileNotFoundException e) {
 			log.fatal(file + " does not exist", e);
 			throw new ParsingException("Target file '" + file + "' does not exist", e);
+		} catch (IMPException e) {
+			log.fatal(file + " is not well-formed", e);
+			throw new ParsingException("Incorrect IMP file: " + file, e);
 		} catch (RecognitionException e) {
 			throw Antlr4Util.handleRecognitionException(file, e);
 		} catch (Exception e) {
@@ -211,7 +214,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (Pair<CompilationUnit, String> unit : inheritanceMap.values())
 			if (unit.getRight() != null)
 				unit.getLeft().addSuperUnit(inheritanceMap.get(unit.getRight()).getLeft());
-		
+
 		return prog;
 	}
 
@@ -220,7 +223,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		currentUnit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
 		if (ctx.superclass != null)
 			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, ctx.superclass.getText()));
-		else 
+		else
 			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, null));
 
 		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
@@ -229,8 +232,19 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
+		for (CFG cfg : currentUnit.getInstanceCfgs())
+			if (currentUnit.getInstanceCfgs().stream()
+					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
+							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPException("Duplicate cfg: " + cfg);
+
 		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
 			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
+
+		for (Global global : currentUnit.getInstanceGlobals())
+			if (currentUnit.getInstanceGlobals().stream()
+					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
+				throw new IMPException("Duplicate global: " + global);
 
 		return currentUnit;
 	}
@@ -243,9 +257,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		currentDescriptor = mkDescriptor(ctx);
+		if (!currentUnit.getName().equals(currentDescriptor.getName()))
+			throw new IMPException("Constructor does not have the same name as its containing class");
 		return visitCodeMember(ctx.block());
 	}
-	
+
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit, ctx.name.getText(),
 				visitFormals(ctx.formals()));
@@ -270,7 +286,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 		return descriptor;
 	}
-	
+
 	private CFG visitCodeMember(BlockContext ctx) {
 		// side effects on entrypoints and matrix will affect the cfg
 		Collection<Statement> entrypoints = new HashSet<>();
