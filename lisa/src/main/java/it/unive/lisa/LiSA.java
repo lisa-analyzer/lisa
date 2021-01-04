@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
@@ -327,9 +328,9 @@ public class LiSA {
 					throws AnalysisExecutionException {
 		FileManager.setWorkdir(workdir);
 		Collection<CFG> allCFGs = program.getAllCFGs();
-		
+
 		TimerLogger.execAction(log, "Finalizing input program", program::finalize);
-		
+
 		if (dumpCFGs)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
@@ -350,7 +351,12 @@ public class LiSA {
 			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
 		}
 
-		allCFGs.forEach(callGraph::addCFG);
+		try {
+			callGraph.build(program);
+		} catch (CallGraphConstructionException e) {
+			log.fatal("Exception while building the call graph for the input program", e);
+			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
+		}
 
 		if (inferTypes) {
 			T tmp;

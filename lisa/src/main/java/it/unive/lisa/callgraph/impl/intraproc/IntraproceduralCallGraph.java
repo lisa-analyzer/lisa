@@ -8,7 +8,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.CFG.SemanticFunction;
@@ -61,8 +63,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 	}
 
 	@Override
-	public void addCFG(CFG cfg) {
-		results.put(cfg, Optional.empty());
+	public void build(Program program) throws CallGraphConstructionException {
+		program.getAllCFGs().forEach(cfg -> results.put(cfg, Optional.empty()));
 	}
 
 	@Override

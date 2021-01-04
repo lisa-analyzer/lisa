@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFG.SemanticFunction;
 import it.unive.lisa.program.cfg.statement.CFGCall;
@@ -29,11 +30,14 @@ import java.util.Collection;
 public interface CallGraph {
 
 	/**
-	 * Adds a new cfg to this call graph.
+	 * Builds the call graph of the given program.
 	 * 
-	 * @param cfg the cfg to add
+	 * @param program the program to analyze
+	 * 
+	 * @throws CallGraphConstructionException if an exception happens while
+	 *                                            building the call graph
 	 */
-	void addCFG(CFG cfg);
+	void build(Program program) throws CallGraphConstructionException;
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
@@ -99,8 +103,8 @@ public interface CallGraph {
 
 	/**
 	 * Clears all the data from the last fixpoint computation, effectively
-	 * re-initializing the call graph. The set of {@link CFG} under analysis
-	 * (added through {@link #addCFG(CFG)}) is not lost.
+	 * re-initializing the call graph. The call graph structure obtained throug
+	 * {@link #build(Program)} is not lost.
 	 */
 	void clear();
 
