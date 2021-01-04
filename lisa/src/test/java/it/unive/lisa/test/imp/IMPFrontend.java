@@ -5,8 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.Map;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
@@ -142,6 +144,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
 	private CompilationUnit currentUnit;
+	
+	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap; 
 
 	private CFG currentCFG;
 
@@ -149,6 +153,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private IMPFrontend(String file) {
 		this.file = file;
+		inheritanceMap = new HashMap<>();
 	}
 
 	private Program work() throws ParsingException {
@@ -203,12 +208,20 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (UnitContext unit : ctx.unit())
 			prog.addCompilationUnit(visitUnit(unit));
 
+		for (Pair<CompilationUnit, String> unit : inheritanceMap.values())
+			if (unit.getRight() != null)
+				unit.getLeft().addSuperUnit(inheritanceMap.get(unit.getRight()).getLeft());
+		
 		return prog;
 	}
 
 	@Override
 	public CompilationUnit visitUnit(UnitContext ctx) {
 		currentUnit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
+		if (ctx.superclass != null)
+			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, ctx.superclass.getText()));
+		else 
+			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, null));
 
 		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
 			currentUnit.addInstanceCFG(visitMethodDeclaration(decl));
