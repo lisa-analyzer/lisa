@@ -39,7 +39,7 @@ public class Program extends Unit {
 		return all;
 	}
 	
-	public void finalize() {
+	public void computeHiearchies() {
 		units.forEach(CompilationUnit::computeHierarchy);
 	}
 }

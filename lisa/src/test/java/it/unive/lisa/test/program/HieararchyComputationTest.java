@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 
-public class ProgramFinalizationTest {
+public class HieararchyComputationTest {
 
 	private static CompilationUnit findUnit(Program prog, String name) {
 		CompilationUnit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
@@ -68,14 +68,14 @@ public class ProgramFinalizationTest {
 	@Test
 	public void testSingle() throws ParsingException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp");
-		prog.finalize();
+		prog.computeHiearchies();
 		// we just check that no exception is thrown
 	}
 
 	@Test
 	public void testSimpleInheritance() throws ParsingException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp");
-		prog.finalize();
+		prog.computeHiearchies();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");
@@ -94,7 +94,7 @@ public class ProgramFinalizationTest {
 	@Test
 	public void testFinalCfg() throws ParsingException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp");
-		prog.finalize();
+		prog.computeHiearchies();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");
@@ -113,7 +113,7 @@ public class ProgramFinalizationTest {
 	@Test
 	public void testTree() throws ParsingException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp");
-		prog.finalize();
+		prog.computeHiearchies();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");

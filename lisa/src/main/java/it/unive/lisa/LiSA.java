@@ -329,7 +329,7 @@ public class LiSA {
 		FileManager.setWorkdir(workdir);
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
-		TimerLogger.execAction(log, "Finalizing input program", program::finalize);
+		TimerLogger.execAction(log, "Finalizing input program", program::computeHiearchies);
 
 		if (dumpCFGs)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
