@@ -1,12 +1,12 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<i = 1000<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: 1000 ]]<BR/>}} -&gt; [vid$i]>];
-	"node1" [shape="rect",color="gray",label=<i = -(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: TOP ]]<BR/>}} -&gt; [vid$i]>];
-	"node2" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$ret_value@intv_dec: TOP<BR/>vid$i: TOP ]]<BR/>}} -&gt; [vid$ret_value@intv_dec]>];
-	"node3" [shape="rect",color="gray",label=<&gt;(i, 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: TOP ]]<BR/>}} -&gt; [vid$i &gt; 0]>];
-	"node1" -> "node3" [color="black"];
-	"node0" -> "node3" [color="black"];
-	"node3" -> "node1" [color="blue",style="dashed"];
-	"node3" -> "node2" [color="red",style="dashed"];
+	"node1" [shape="rect",color="gray",label=<&gt;(i, 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: TOP ]]<BR/>}} -&gt; [vid$i &gt; 0]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$ret_value@intv_dec: TOP ]]<BR/>}} -&gt; [vid$ret_value@intv_dec]>];
+	"node3" [shape="rect",color="gray",label=<i = -(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: TOP ]]<BR/>}} -&gt; [vid$i]>];
+	"node0" -> "node1" [color="black"];
+	"node1" -> "node2" [color="red",style="dashed"];
+	"node1" -> "node3" [color="blue",style="dashed"];
+	"node3" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

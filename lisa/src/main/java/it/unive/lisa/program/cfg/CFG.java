@@ -1,5 +1,16 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -25,13 +36,6 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -40,6 +44,8 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class CFG extends FixpointGraph<CFG, Statement, Edge> {
+
+	private static final Logger log = LogManager.getLogger(CFG.class);
 
 	/**
 	 * The descriptor of this control flow graph.
@@ -779,43 +785,95 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> {
 	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> cleanUpEntryState(Statement node,
-					AnalysisState<A, H, V> entrystate) throws SemanticException {
-		Collection<Identifier> toForget = null;
-		for (Statement pred : predecessorsOf(node))
-			// we remove only the variables that are always out of scope
-			if (toForget == null)
-				toForget = removedVariables(pred, entrystate);
-			else
-				toForget.retainAll(removedVariables(pred, entrystate));
-
-		if (toForget != null && !toForget.isEmpty())
-			return entrystate.forgetIdentifiers(toForget);
-
-		return entrystate;
-	}
-
-	private <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> Collection<Identifier> removedVariables(Statement st,
-					AnalysisState<A, H, V> state) throws SemanticException {
+			V extends ValueDomain<V>> AnalysisState<A, H, V> cleanUpPostState(Statement node,
+					AnalysisState<A, H, V> computedState) throws SemanticException {
 		List<VariableTableEntry> toRemove = new LinkedList<>();
 		for (VariableTableEntry entry : descriptor.getVariables())
-			if (entry.getScopeEnd() == st.getOffset())
+			if (entry.getScopeEnd() == node)
 				toRemove.add(entry);
 
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(this).getVariable();
-			for (SymbolicExpression expr : state.smallStepSemantics(v).getComputedExpressions())
+			for (SymbolicExpression expr : computedState.smallStepSemantics(v).getComputedExpressions())
 				ids.add((Identifier) expr);
 		}
 
-		return ids;
+		if (ids != null && !ids.isEmpty())
+			return computedState.forgetIdentifiers(ids);
+
+		return computedState;
 	}
 
 	@Override
 	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, labelGenerator);
+	}
+
+	protected void preSimplify(Statement node) {
+		Collection<
+				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
+						.collect(Collectors.toList());
+		Collection<VariableTableEntry> ending = descriptor.getVariables().stream().filter(v -> v.getScopeEnd() == node)
+				.collect(Collectors.toList());
+		if (ending.isEmpty() && starting.isEmpty())
+			return;
+
+		Collection<Statement> predecessors = predecessorsOf(node);
+		Collection<Statement> followers = followersOf(node);
+
+		if (predecessors.isEmpty() && followers.isEmpty()) {
+			log.warn("Simplifying the only statement of '" + this
+					+ "': all variables will be made visible for the entire cfg");
+			starting.forEach(v -> v.setScopeStart(null));
+			ending.forEach(v -> v.setScopeEnd(null));
+			return;
+		}
+
+		String format = "Simplifying the scope-%s statement of a variable with %s "
+				+ "is not supported: %s will be made visible %s of '" + this + "'";
+		if (!starting.isEmpty())
+			if (predecessors.isEmpty()) {
+				// no predecessors: move the starting scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					log.warn(String.format(format, "starting", "no predecessors and multiple followers", starting,
+							"from the start"));
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				starting.forEach(v -> v.setScopeStart(follow));
+			} else {
+				// move the starting scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					log.warn(String.format(format, "starting", "multiple predecessors", starting, "from the start"));
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				starting.forEach(v -> v.setScopeStart(pred));
+			}
+
+		if (!ending.isEmpty())
+			if (followers.isEmpty()) {
+				// no followers: move the ending scope backward
+				Statement pred;
+				if (predecessors.size() > 1) {
+					log.warn(String.format(format, "ending", "no followers and multiple predecessors", ending,
+							"until the end"));
+					pred = null;
+				} else
+					pred = predecessors.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(pred));
+			} else {
+				// move the ending scope forward
+				Statement follow;
+				if (followers.size() > 1) {
+					log.warn(String.format(format, "ending", "multiple followers", ending, "until the end"));
+					follow = null;
+				} else
+					follow = followers.iterator().next();
+				ending.forEach(v -> v.setScopeEnd(follow));
+			}
 	}
 }

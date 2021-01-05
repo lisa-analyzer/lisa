@@ -31,6 +31,7 @@ public class AccessUnitGlobal extends Expression {
 		super(cfg, sourceFile, line, col);
 		this.receiver = receiver;
 		this.target = target;
+		receiver.setParentStatement(this);
 	}
 
 	@Override

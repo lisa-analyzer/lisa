@@ -178,24 +178,20 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	}
 
 	/**
-	 * Simplifies this matrix, removing all nodes that are instances of
-	 * {@code <T>} and rewriting the edge set accordingly. This method will
-	 * throw an {@link UnsupportedOperationException} if one of the nodes being
+	 * Simplifies this matrix, removing all the given nodes and rewriting the
+	 * edge set accordingly. This method will throw an
+	 * {@link UnsupportedOperationException} if one of the nodes being
 	 * simplified has an outgoing edge that is not simplifiable, according to
 	 * {@link Edge#canBeSimplified()}.
 	 * 
-	 * @param <T>    the type of {@link Node} that needs to be simplified
-	 * @param target the class of the {@link Node} that needs to be simplified
+	 * @param targets the set of the {@link Node}s that needs to be simplified
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one node
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	@SuppressWarnings("unchecked")
-	public synchronized <T extends N> void simplify(Class<T> target) {
-		Set<T> targets = matrix.keySet().stream().filter(k -> target.isAssignableFrom(k.getClass())).map(k -> (T) k)
-				.collect(Collectors.toSet());
-		for (T t : targets) {
+	public synchronized void simplify(Set<N> targets) {
+		for (N t : targets) {
 			for (E ingoing : matrix.get(t).getLeft())
 				for (E outgoing : matrix.get(t).getRight()) {
 					if (!outgoing.canBeSimplified())

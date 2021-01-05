@@ -22,10 +22,10 @@ import it.unive.lisa.type.Untyped;
 public class CFGDescriptor extends CodeElement {
 
 	/**
-	 * The unit the cfg belongs to 
+	 * The unit the cfg belongs to
 	 */
 	private final Unit unit;
-	
+
 	/**
 	 * The name of the CFG associated with this descriptor.
 	 */
@@ -45,12 +45,12 @@ public class CFGDescriptor extends CodeElement {
 	 * The list of variables defined in the cfg
 	 */
 	private final List<VariableTableEntry> variables;
-	
+
 	/**
 	 * Whether or not the cfg can be overridden
 	 */
 	private boolean overridable;
-	
+
 	private final Collection<CFG> overriddenBy;
 
 	private final Collection<CFG> overrides;
@@ -117,7 +117,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Type returnType, Parameter... args) {
+	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Type returnType,
+			Parameter... args) {
 		super(sourceFile, line, col);
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
@@ -129,7 +130,7 @@ public class CFGDescriptor extends CodeElement {
 		this.name = name;
 		this.args = args;
 		this.returnType = returnType;
-		
+
 		overridable = true;
 		overriddenBy = new HashSet<>();
 		overrides = new HashSet<>();
@@ -137,7 +138,7 @@ public class CFGDescriptor extends CodeElement {
 		this.variables = new LinkedList<>();
 		int i = 0;
 		for (Parameter arg : args)
-			variables.add(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, -1, -1,
+			addVariable(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, null, null,
 					arg.getName(), arg.getStaticType()));
 	}
 
@@ -200,99 +201,34 @@ public class CFGDescriptor extends CodeElement {
 	}
 
 	/**
-	 * Builds a new {@link VariableTableEntry}, populating it with the given
-	 * data, and adds it at the end of the variable table. The variable is
-	 * defined at an unknown code location. The variable has an {@link Untyped}
-	 * static type and is visible from the beginning to the end of the
-	 * {@link CFG}.
+	 * Adds a {@link VariableTableEntry} at the end of the variable table. The
+	 * index of the variable gets overwritten with the first free index for this
+	 * descriptor.
 	 * 
-	 * @param name the name of the variable being added
+	 * @param variable the entry to add
 	 */
-	public void addVariable(String name) {
-		addVariable(null, -1, -1, -1, -1, name, Untyped.INSTANCE);
+	public void addVariable(VariableTableEntry variable) {
+		if (variable.getIndex() != variables.size())
+			variable.setIndex(variables.size());
+		variables.add(variable);
 	}
 
-	/**
-	 * Builds a new {@link VariableTableEntry}, populating it with the given
-	 * data, and adds it at the end of the variable table. The variable is
-	 * defined at an unknown code location. The variable has an {@link Untyped}
-	 * static type.
-	 * 
-	 * @param scopeStart the offset of the statement the variable being added is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where the variable being
-	 *                       added is last visible, {@code -1} means that this
-	 *                       variable is visible until the end of the cfg
-	 * @param name       the name of the variable being added
-	 */
-	public void addVariable(int scopeStart, int scopeEnd, String name) {
-		addVariable(null, -1, -1, scopeStart, scopeEnd, name, Untyped.INSTANCE);
-	}
-
-	/**
-	 * Builds a new {@link VariableTableEntry}, populating it with the given
-	 * data, and adds it at the end of the variable table. The variable is
-	 * defined at an unknown code location.
-	 * 
-	 * @param scopeStart the offset of the statement the variable being added is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where the variable being
-	 *                       added is last visible, {@code -1} means that this
-	 *                       variable is visible until the end of the cfg
-	 * @param name       the name of the variable being added
-	 * @param staticType the type of the variable being added. If unknown, use
-	 *                       {@link Untyped#INSTANCE}
-	 */
-	public void addVariable(int scopeStart, int scopeEnd, String name, Type staticType) {
-		addVariable(null, -1, -1, scopeStart, scopeEnd, name, staticType);
-	}
-
-	/**
-	 * Builds a new {@link VariableTableEntry}, populating it with the given
-	 * data, and adds it at the end of the variable table.
-	 * 
-	 * @param sourceFile the source file where the variable being added is
-	 *                       defined. If unknown, use {@code null}
-	 * @param line       the line number where the the variable being added is
-	 *                       defined in the source file. If unknown, use
-	 *                       {@code -1}
-	 * @param col        the column where the the variable being added is
-	 *                       defined in the source file. If unknown, use
-	 *                       {@code -1}
-	 * @param scopeStart the offset of the statement the variable being added is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where the variable being
-	 *                       added is last visible, {@code -1} means that this
-	 *                       variable is visible until the end of the cfg
-	 * @param name       the name of the variable being added
-	 * @param staticType the type of the variable being added. If unknown, use
-	 *                       {@link Untyped#INSTANCE}
-	 */
-	public void addVariable(String sourceFile, int line, int col, int scopeStart, int scopeEnd, String name,
-			Type staticType) {
-		variables.add(new VariableTableEntry(sourceFile, line, col, variables.size(), scopeStart, scopeEnd, name,
-				staticType));
-	}
-	
 	public boolean isOverridable() {
 		return overridable;
 	}
-	
+
 	public void setOverridable(boolean overridable) {
 		this.overridable = overridable;
 	}
-	
+
 	public Unit getUnit() {
 		return unit;
 	}
-	
+
 	public Collection<CFG> overriddenBy() {
 		return overriddenBy;
 	}
-	
+
 	public Collection<CFG> overrides() {
 		return overrides;
 	}
@@ -348,21 +284,22 @@ public class CFGDescriptor extends CodeElement {
 
 	@Override
 	public String toString() {
-		return getFullSignature() + " [at '" + String.valueOf(getSourceFile()) + "':" + getLine() + ":" + getCol() + "]";
+		return getFullSignature() + " [at '" + String.valueOf(getSourceFile()) + "':" + getLine() + ":" + getCol()
+				+ "]";
 	}
 
 	public boolean matchesSignature(CFGDescriptor signature) {
 		if (!name.equals(signature.name))
 			return false;
-		
+
 		if (args.length != signature.args.length)
 			return false;
-		
+
 		for (int i = 0; i < args.length; i++)
 			if (!args[i].getStaticType().canBeAssignedTo(signature.args[i].getStaticType()))
 				// TODO not sure if this is generic enough
 				return false;
-		
+
 		return true;
 	}
 }

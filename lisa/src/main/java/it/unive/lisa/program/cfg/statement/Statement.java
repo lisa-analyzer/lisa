@@ -33,7 +33,7 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	 * The offset of the statement within the cfg.
 	 */
 	protected int offset;
-
+	
 	/**
 	 * Builds a statement happening at the given source location.
 	 * 

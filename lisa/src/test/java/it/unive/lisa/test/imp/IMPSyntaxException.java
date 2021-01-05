@@ -5,14 +5,14 @@ package it.unive.lisa.test.imp;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPException extends RuntimeException {
+public class IMPSyntaxException extends RuntimeException {
 
 	private static final long serialVersionUID = 4950907533241537847L;
 
 	/**
 	 * Builds the exception.
 	 */
-	public IMPException() {
+	public IMPSyntaxException() {
 		super();
 	}
 
@@ -22,7 +22,7 @@ public class IMPException extends RuntimeException {
 	 * @param message the message of this exception
 	 * @param cause   the inner cause of this exception
 	 */
-	public IMPException(String message, Throwable cause) {
+	public IMPSyntaxException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +31,7 @@ public class IMPException extends RuntimeException {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public IMPException(String message) {
+	public IMPSyntaxException(String message) {
 		super(message);
 	}
 
@@ -40,7 +40,7 @@ public class IMPException extends RuntimeException {
 	 * 
 	 * @param cause the inner cause of this exception
 	 */
-	public IMPException(Throwable cause) {
+	public IMPSyntaxException(Throwable cause) {
 		super(cause);
 	}
 }

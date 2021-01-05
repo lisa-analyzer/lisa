@@ -42,6 +42,7 @@ public abstract class UnaryStatement extends Statement {
 		super(cfg, sourceFile, line, col);
 		Objects.requireNonNull(expression, "The argument of a unary statement cannot be null");
 		this.expression = expression;
+		expression.setParentStatement(this);
 	}
 
 	/**

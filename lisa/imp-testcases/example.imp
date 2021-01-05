@@ -49,7 +49,8 @@ class example {
 	 * but you can omit the ~ to invoke them
 	 */
 	~example() {
-		x = 10;
+		// variable definitions are preceeded by the def keyword
+		def x = 10;
 	}
 	
 	types() {
@@ -82,10 +83,11 @@ class example {
 		e1 > e2; e1 >= e2; e1 < e2; e1 <= e2; e1 == e2; e1 != e2;
 		
 		// 6) an array creation
-		new int[5]; new float[5]; new boolean[5]; new example[5];
+		def intArray = new int[5]; 
+		new float[5]; new boolean[5]; new example[5];
 		
 		// 7) an object creation
-		new example(); // as method calls, constructor calls can also recieve parameters
+		def obj = new example(); // as method calls, constructor calls can also recieve parameters
 
 		// 8) an access to an array element 
 		// only arrays stored in variables or parameters are supported
@@ -111,12 +113,13 @@ class example {
 		// all expressions can also be grouped between parenthesis!
 	}
 	
-	statements(x) {
+	// methods can be final to avoid overriding by subclasses
+	final statements(x) {
 		// each line must end with a semicolon!
 		
-		// variables are declared when they are first assigned
-		// and are always visible until the end of the method
-		y = 10;
+		// variable definitions are preceeded by the def keyword
+		// scoping of variables is the same as java
+		def y = 10;
 		
 		// assignments can be performed by assigning an expression to:
 		// - variables
@@ -140,12 +143,12 @@ class example {
 		// of the loop contains a single instruction
 		while (y < 100)
 			y = y * 2;
-		for (i = 0; i < 20; i = i + 1)
+		for (def i = 0; i < 20; i = i + 1)
 			y = y % 5;
 		
 		// you can throw any object to raise errors
 		throw new example();
-		ex = new example();
+		def ex = new example();
 		throw ex;
 		
 		// you can write assertions

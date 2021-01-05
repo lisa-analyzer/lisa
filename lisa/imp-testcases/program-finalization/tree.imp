@@ -1,7 +1,7 @@
 class first {
 	field;
 	~first(x) {
-		field = x;
+		this.field = x;
 	}
 	foo(i, j) {
 		return i + j;
@@ -11,7 +11,7 @@ class first {
 class second extends first {
 	field2;
 	~second(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	foo(i, j) {
 		return i + j + 1;
@@ -21,7 +21,7 @@ class second extends first {
 class third extends first {
 	field3;
 	~third(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	final foo(i, j) {
 		return i + j + 2;
@@ -31,7 +31,7 @@ class third extends first {
 class fourth extends second {
 	field4;
 	~fourth(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	foo(i, j) {
 		return i + j + 3;
@@ -41,7 +41,7 @@ class fourth extends second {
 class fifth extends second {
 	field5;
 	~fifth(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	foo(i, j) {
 		return i + j + 4;
@@ -51,7 +51,7 @@ class fifth extends second {
 class sixth extends third {
 	field3;
 	~sixth(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	foo(i, j) {
 		return i + j + 5;

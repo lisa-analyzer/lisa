@@ -1,7 +1,7 @@
 class first {
 	field;
 	~first(x) {
-		field = x;
+		this.field = x;
 	}
 	foo(i, j) {
 		return i + j;
@@ -11,7 +11,7 @@ class first {
 class second extends first {
 	field2;
 	~second(x) {
-		field2 = x;
+		this.field2 = x;
 	}
 	foo(i, j) {
 		return i + j + 1;

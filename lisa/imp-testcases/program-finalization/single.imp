@@ -1,7 +1,7 @@
 class single {
 	field;
 	~single(x) {
-		field = x;
+		this.field = x;
 	}
 	foo(i, j) {
 		return i + j;

@@ -220,6 +220,7 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 				try {
 					newIntermediate = (F) mkInternalStore(entrystate);
 					newApprox = semantics.compute(current, entrystate, cg, newIntermediate);
+					newApprox = cleanUpPostState(current, newApprox);
 				} catch (SemanticException e) {
 					log.error("Evaluation of the semantics of '" + current + "' in " + this
 							+ " led to an exception: " + e);
@@ -320,32 +321,32 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 			else
 				entrystate = entrystate.lub(s);
 
-		return cleanUpEntryState(current, entrystate);
+		return entrystate;
 	}
 
 	/**
-	 * Cleans up the entry state of a node. This is an optional operation: the
+	 * Cleans up the exit state of a node. This is an optional operation: the
 	 * default implementation of this method returns the given
-	 * {@code entrystate}.
+	 * {@code computedState}.
 	 * 
-	 * @param <A>        the type of {@link AbstractState}
-	 * @param <H>        the type of {@link HeapDomain} embedded in the abstract
-	 *                       state
-	 * @param <V>        the type of {@link ValueDomain} embedded in the
-	 *                       abstract state
-	 * @param node       the node where the entrystate has been computed
-	 * @param entrystate the computed entrystate for the given node
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of {@link HeapDomain} embedded in the
+	 *                          abstract state
+	 * @param <V>           the type of {@link ValueDomain} embedded in the
+	 *                          abstract state
+	 * @param node          the node where the computedState has been computed
+	 * @param computedState the computed computedState for the given node
 	 * 
-	 * @return a cleaned version of the entrystate, according to the logic of
+	 * @return a cleaned version of the computedState, according to the logic of
 	 *             the fixpoint graph
 	 * 
 	 * @throws SemanticException if an error happens while cleaning the state
 	 */
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> cleanUpEntryState(N node,
-					AnalysisState<A, H, V> entrystate)
+			V extends ValueDomain<V>> AnalysisState<A, H, V> cleanUpPostState(N node,
+					AnalysisState<A, H, V> computedState)
 					throws SemanticException {
-		return entrystate;
+		return computedState;
 	}
 }

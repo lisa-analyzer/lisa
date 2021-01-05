@@ -55,6 +55,8 @@ EXTENDS
    ;
    // method body    
 
+DEFINE : 'def' ;
+
 FINAL
    : 'final'
    ; 

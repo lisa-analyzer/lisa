@@ -6,7 +6,9 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.
@@ -329,7 +331,19 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                                           outgoing non-simplifiable edge
 	 */
 	protected final <T extends N> void simplify(Class<T> target) {
-		adjacencyMatrix.simplify(target);
+		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
+				.collect(Collectors.toSet());
+		targets.forEach(this::preSimplify);
+		adjacencyMatrix.simplify(targets);
+	}
+
+	/**
+	 * Callback that is invoked on a node before simplifying it.
+	 * 
+	 * @param node the node about to be simplified
+	 */
+	protected void preSimplify(N node) {
+		// nothing to do, but subclasses might redefine
 	}
 
 	/**

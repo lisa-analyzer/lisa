@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -19,7 +20,7 @@ public class VariableTableEntry extends CodeElement {
 	/**
 	 * The index of the variable
 	 */
-	private final int index;
+	private int index;
 
 	/**
 	 * The name of this variable
@@ -32,17 +33,16 @@ public class VariableTableEntry extends CodeElement {
 	private final Type staticType;
 
 	/**
-	 * The offset of the statement where this variable is first visible.
-	 * {@code -1} means that this variable is visible since the beginning of the
-	 * cfg.
+	 * The statement where this variable is first visible. {@code -1} means that
+	 * this variable is visible since the beginning of the cfg.
 	 */
-	private final int scopeStart;
+	private Statement scopeStart;
 
 	/**
-	 * The offset of the statement where this variable is last visible.
-	 * {@code -1} means that this variable is visible until the end of the cfg.
+	 * The statement where this variable is last visible. {@code -1} means that
+	 * this variable is visible until the end of the cfg.
 	 */
-	private final int scopeEnd;
+	private Statement scopeEnd;
 
 	/**
 	 * Builds an untyped variable table entry, identified by its index. The
@@ -54,7 +54,7 @@ public class VariableTableEntry extends CodeElement {
 	 * @param name  the name of this variable
 	 */
 	public VariableTableEntry(int index, String name) {
-		this(null, -1, -1, index, -1, -1, name, Untyped.INSTANCE);
+		this(null, -1, -1, index, null, null, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -64,15 +64,15 @@ public class VariableTableEntry extends CodeElement {
 	 * Untyped#INSTANCE}).
 	 * 
 	 * @param index      the index of the variable entry
-	 * @param scopeStart the offset of the statement where this variable is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where this variable is last
-	 *                       visible, {@code -1} means that this variable is
-	 *                       visible until the end of the cfg
+	 * @param scopeStart the statement where this variable is first visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       since the beginning of the cfg
+	 * @param scopeEnd   the statement where this variable is last visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       until the end of the cfg
 	 * @param name       the name of this variable
 	 */
-	public VariableTableEntry(int index, int scopeStart, int scopeEnd, String name) {
+	public VariableTableEntry(int index, Statement scopeStart, Statement scopeEnd, String name) {
 		this(null, -1, -1, index, scopeStart, scopeEnd, name, Untyped.INSTANCE);
 	}
 
@@ -82,16 +82,16 @@ public class VariableTableEntry extends CodeElement {
 	 * file/line/column is available).
 	 * 
 	 * @param index      the index of the variable entry
-	 * @param scopeStart the offset of the statement where this variable is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where this variable is last
-	 *                       visible, {@code -1} means that this variable is
-	 *                       visible until the end of the cfg
+	 * @param scopeStart the statement where this variable is first visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       since the beginning of the cfg
+	 * @param scopeEnd   the statement where this variable is last visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       until the end of the cfg
 	 * @param name       the name of this variable
 	 * @param staticType the type of this variable
 	 */
-	public VariableTableEntry(int index, int scopeStart, int scopeEnd, String name, Type staticType) {
+	public VariableTableEntry(int index, Statement scopeStart, Statement scopeEnd, String name, Type staticType) {
 		this(null, -1, -1, index, scopeStart, scopeEnd, name, staticType);
 	}
 
@@ -106,17 +106,17 @@ public class VariableTableEntry extends CodeElement {
 	 * @param col        the column where this variable happens in the source
 	 *                       file. If unknown, use {@code -1}
 	 * @param index      the index of the variable entry
-	 * @param scopeStart the offset of the statement where this variable is
-	 *                       first visible, {@code -1} means that this variable
-	 *                       is visible since the beginning of the cfg
-	 * @param scopeEnd   the offset of the statement where this variable is last
-	 *                       visible, {@code -1} means that this variable is
-	 *                       visible until the end of the cfg
+	 * @param scopeStart the statement where this variable is first visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       since the beginning of the cfg
+	 * @param scopeEnd   the statement where this variable is last visible,
+	 *                       {@code null} means that this variable is visible
+	 *                       until the end of the cfg
 	 * @param name       the name of this variable
 	 * @param staticType the type of this variable. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public VariableTableEntry(String sourceFile, int line, int col, int index, int scopeStart, int scopeEnd,
+	public VariableTableEntry(String sourceFile, int line, int col, int index, Statement scopeStart, Statement scopeEnd,
 			String name, Type staticType) {
 		super(sourceFile, line, col);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
@@ -138,24 +138,57 @@ public class VariableTableEntry extends CodeElement {
 	}
 
 	/**
-	 * Yields the offset of the statement where this variable is first visible.
-	 * {@code -1} means that this variable is visible since the beginning of the
-	 * cfg.
+	 * Sets the index of this variable.
 	 * 
-	 * @return the scope start, or {@code -1}
+	 * @param index the new index of this variable
 	 */
-	public int getScopeStart() {
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	/**
+	 * Yields the statement where this variable is first visible. {@code null}
+	 * means that this variable is visible since the beginning of the cfg.
+	 * 
+	 * @return the scope start, or {@code null}
+	 */
+	public Statement getScopeStart() {
 		return scopeStart;
 	}
 
 	/**
-	 * Yields the offset of the statement where this variable is last visible.
-	 * {@code -1} means that this variable is visible until the end of the cfg.
+	 * Sets the statement where this variable is first visible. {@code null}
+	 * means that this variable is visible since the beginning of the cfg.
+	 * Changing the starting scope should be performed whenever the starting
+	 * scope is removed from the cfg due to simplifications or code
+	 * transformations.
 	 * 
-	 * @return the scope start, or {@code -1}
+	 * @param scopeStart the scope start, or {@code null}
 	 */
-	public int getScopeEnd() {
+	public void setScopeStart(Statement scopeStart) {
+		this.scopeStart = scopeStart;
+	}
+
+	/**
+	 * Yields the statement where this variable is last visible. {@code null}
+	 * means that this variable is visible until the end of the cfg.
+	 * 
+	 * @return the scope end, or {@code null}
+	 */
+	public Statement getScopeEnd() {
 		return scopeEnd;
+	}
+
+	/**
+	 * Sets the statement where this variable is last visible. {@code null}
+	 * means that this variable is visible until the end of the cfg. Changing
+	 * the ending scope should be performed whenever the ending scope is removed
+	 * from the cfg due to simplifications or code transformations.
+	 * 
+	 * @param scopeEnd the scope end, or {@code null}
+	 */
+	public void setScopeEnd(Statement scopeEnd) {
+		this.scopeEnd = scopeEnd;
 	}
 
 	/**
@@ -196,8 +229,8 @@ public class VariableTableEntry extends CodeElement {
 		int result = super.hashCode();
 		result = prime * result + index;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + scopeEnd;
-		result = prime * result + scopeStart;
+		result = prime * result + ((scopeStart == null) ? 0 : scopeStart.hashCode());
+		result = prime * result + ((scopeEnd == null) ? 0 : scopeEnd.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
@@ -232,6 +265,6 @@ public class VariableTableEntry extends CodeElement {
 
 	@Override
 	public String toString() {
-		return "[" + index + "]" + staticType + " " + name;
+		return "[" + index + "] " + staticType + " " + name;
 	}
 }

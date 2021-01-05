@@ -47,6 +47,8 @@ public abstract class BinaryExpression extends Expression {
 		Objects.requireNonNull(right, "The right-handside of a binary expression cannot be null");
 		this.left = left;
 		this.right = right;
+		left.setParentStatement(this);
+		right.setParentStatement(this);
 	}
 
 	/**

@@ -1,22 +1,22 @@
 {
   "warnings" : [ {
-    "message" : "['imp-testcases/syntactic/expressions.imp':13:9] on 'untyped expressions::_return()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':13:9] on 'untyped expressions::_return(untyped x, untyped i)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':19:12] on 'untyped expressions::call()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':19:12] on 'untyped expressions::call(untyped i)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':23:25] on 'untyped expressions::nestedCall()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':23:25] on 'untyped expressions::nestedCall(untyped i, untyped x)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':24:25] on 'untyped expressions::nestedCall()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':24:25] on 'untyped expressions::nestedCall(untyped i, untyped x)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':25:19] on 'untyped expressions::nestedCall()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':25:19] on 'untyped expressions::nestedCall(untyped i, untyped x)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':26:18] on 'untyped expressions::nestedCall()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':26:18] on 'untyped expressions::nestedCall(untyped i, untyped x)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':27:16] on 'untyped expressions::nestedCall()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':27:16] on 'untyped expressions::nestedCall(untyped i, untyped x)': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':3:2] on 'untyped expressions::assignment()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':3:6] on 'untyped expressions::assignment()': [EXPRESSION] Found variable i"
   }, {
-    "message" : "['imp-testcases/syntactic/expressions.imp':9:8] on 'untyped expressions::_throw()': [EXPRESSION] Found variable i"
+    "message" : "['imp-testcases/syntactic/expressions.imp':9:8] on 'untyped expressions::_throw(untyped x, untyped i)': [EXPRESSION] Found variable i"
   } ],
   "files" : [ ]
 }
