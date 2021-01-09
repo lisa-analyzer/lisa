@@ -44,18 +44,21 @@ public interface CallGraph {
 	 * of the given {@link UnresolvedCall}. This method will return:
 	 * <ul>
 	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
-	 * {@link UnresolvedCall#getQualifiedName()} is found. The returned
+	 * {@link UnresolvedCall#getTargetName()} is found. The returned
 	 * {@link CFGCall} will be linked to all the possible runtime targets
-	 * matching {@link UnresolvedCall#getQualifiedName()};</li>
+	 * matching {@link UnresolvedCall#getTargetName()};</li>
 	 * <li>an {@link OpenCall}, if no {@link CFG} matching
-	 * {@link UnresolvedCall#getQualifiedName()} is found.</li>
+	 * {@link UnresolvedCall#getTargetName()} is found.</li>
 	 * </ul>
 	 * 
 	 * @param call the call to resolve
 	 * 
 	 * @return a collection of all the possible runtime targets
+	 * 
+	 * @throws CallResolutionException if this call graph is unable to resolve
+	 *                                     the given call
 	 */
-	Call resolve(UnresolvedCall call);
+	Call resolve(UnresolvedCall call) throws CallResolutionException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a

@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -121,22 +122,31 @@ public class UnresolvedCall extends Call {
 	private final ResolutionStrategy strategy;
 
 	/**
-	 * The qualified name of the call target
+	 * The name of the call target
 	 */
-	private final String qualifiedName;
+	private final String targetName;
+
+	/**
+	 * Whether or not this is a call to an instance method of a unit (that can
+	 * be overridden) or not.
+	 */
+	private final boolean instanceCall;
 
 	/**
 	 * Builds the call. The location where this call happens is unknown (i.e. no
 	 * source file/line/column is available).
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param strategy      the {@link ResolutionStrategy} of the parameters of
-	 *                          this call
-	 * @param qualifiedName the qualified name of the target of this call
-	 * @param parameters    the parameters of this call
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
+	 *                         this call
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not.
+	 * @param targetName   the name of the target of this call
+	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, ResolutionStrategy strategy, String qualifiedName, Expression... parameters) {
-		this(cfg, null, -1, -1, strategy, qualifiedName, parameters);
+	public UnresolvedCall(CFG cfg, ResolutionStrategy strategy, boolean instanceCall, String targetName,
+			Expression... parameters) {
+		this(cfg, null, -1, -1, strategy, instanceCall, targetName, parameters);
 	}
 
 	/**
@@ -144,25 +154,27 @@ public class UnresolvedCall extends Call {
 	 * static type of this CFGCall is the one return type of the descriptor of
 	 * {@code target}.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param strategy      the {@link ResolutionStrategy} of the parameters of
-	 *                          this call
-	 * @param qualifiedName the qualified name of the target of this call
-	 * @param parameters    the parameters of this call
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param sourceFile   the source file where this expression happens. If
+	 *                         unknown, use {@code null}
+	 * @param line         the line number where this expression happens in the
+	 *                         source file. If unknown, use {@code -1}
+	 * @param col          the column where this expression happens in the
+	 *                         source file. If unknown, use {@code -1}
+	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
+	 *                         this call
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not.
+	 * @param targetName   the name of the target of this call
+	 * @param parameters   the parameters of this call
 	 */
 	public UnresolvedCall(CFG cfg, String sourceFile, int line, int col, ResolutionStrategy strategy,
-			String qualifiedName,
-			Expression... parameters) {
+			boolean instanceCall, String targetName, Expression... parameters) {
 		super(cfg, sourceFile, line, col, Untyped.INSTANCE, parameters);
-		Objects.requireNonNull(qualifiedName, "The qualified name of an unresolved call cannot be null");
+		Objects.requireNonNull(targetName, "The target's name of an unresolved call cannot be null");
 		this.strategy = strategy;
-		this.qualifiedName = qualifiedName;
+		this.targetName = targetName;
+		this.instanceCall = instanceCall;
 	}
 
 	/**
@@ -175,19 +187,30 @@ public class UnresolvedCall extends Call {
 	}
 
 	/**
-	 * Yields the qualified name of the target of this call.
+	 * Yields the name of the target of this call.
 	 * 
-	 * @return the qualified name of the target
+	 * @return the name of the target
 	 */
-	public String getQualifiedName() {
-		return qualifiedName;
+	public String getTargetName() {
+		return targetName;
+	}
+
+	/**
+	 * Yields whether or not this is a call to an instance method of a unit
+	 * (that can be overridden) or not.
+	 * 
+	 * @return {@code true} if this call targets instance cfgs, {@code false}
+	 *             otherwise
+	 */
+	public boolean isInstanceCall() {
+		return instanceCall;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((qualifiedName == null) ? 0 : qualifiedName.hashCode());
+		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 		return result;
 	}
 
@@ -200,17 +223,17 @@ public class UnresolvedCall extends Call {
 		if (!super.isEqualTo(st))
 			return false;
 		UnresolvedCall other = (UnresolvedCall) st;
-		if (qualifiedName == null) {
-			if (other.qualifiedName != null)
+		if (targetName == null) {
+			if (other.targetName != null)
 				return false;
-		} else if (!qualifiedName.equals(other.qualifiedName))
+		} else if (!targetName.equals(other.targetName))
 			return false;
 		return super.isEqualTo(other);
 	}
 
 	@Override
 	public String toString() {
-		return "[unresolved]" + qualifiedName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return "[unresolved]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
 	}
 
 	@Override
@@ -219,7 +242,12 @@ public class UnresolvedCall extends Call {
 					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
 					AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params) throws SemanticException {
-		Call resolved = callGraph.resolve(this);
+		Call resolved;
+		try {
+			resolved = callGraph.resolve(this);
+		} catch (CallResolutionException e) {
+			throw new SemanticException("Unable to resolve call " + this, e);
+		}
 		AnalysisState<A, H,
 				TypeEnvironment> result = resolved.callTypeInference(entryState, callGraph, computedStates, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
@@ -234,8 +262,12 @@ public class UnresolvedCall extends Call {
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
-
-		Call resolved = callGraph.resolve(this);
+		Call resolved;
+		try {
+			resolved = callGraph.resolve(this);
+		} catch (CallResolutionException e) {
+			throw new SemanticException("Unable to resolve call " + this, e);
+		}
 		resolved.setRuntimeTypes(getRuntimeTypes());
 		AnalysisState<A, H, V> result = resolved.callSemantics(entryState, callGraph, computedStates, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());

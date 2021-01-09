@@ -47,6 +47,11 @@ public class CFGDescriptor extends CodeElement {
 	private final List<VariableTableEntry> variables;
 
 	/**
+	 * Whether or not the cfg is an instance cfg
+	 */
+	private final boolean instance;
+
+	/**
 	 * Whether or not the cfg can be overridden
 	 */
 	private boolean overridable;
@@ -63,8 +68,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param name the name of the CFG associated with this descriptor
 	 * @param args the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(Unit unit, String name, Parameter... args) {
-		this(null, -1, -1, unit, name, Untyped.INSTANCE, args);
+	public CFGDescriptor(Unit unit, boolean instance, String name, Parameter... args) {
+		this(null, -1, -1, unit, instance, name, Untyped.INSTANCE, args);
 	}
 
 	/**
@@ -77,8 +82,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(Unit unit, String name, Type returnType, Parameter... args) {
-		this(null, -1, -1, unit, name, returnType, args);
+	public CFGDescriptor(Unit unit, boolean instance, String name, Type returnType, Parameter... args) {
+		this(null, -1, -1, unit, instance, name, returnType, args);
 	}
 
 	/**
@@ -96,8 +101,9 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Parameter... args) {
-		this(sourceFile, line, col, unit, name, Untyped.INSTANCE, args);
+	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, boolean instance, String name,
+			Parameter... args) {
+		this(sourceFile, line, col, unit, instance, name, Untyped.INSTANCE, args);
 	}
 
 	/**
@@ -117,8 +123,8 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, String name, Type returnType,
-			Parameter... args) {
+	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, boolean instance, String name,
+			Type returnType, Parameter... args) {
 		super(sourceFile, line, col);
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
@@ -130,6 +136,7 @@ public class CFGDescriptor extends CodeElement {
 		this.name = name;
 		this.args = args;
 		this.returnType = returnType;
+		this.instance = instance;
 
 		overridable = true;
 		overriddenBy = new HashSet<>();
@@ -140,6 +147,10 @@ public class CFGDescriptor extends CodeElement {
 		for (Parameter arg : args)
 			addVariable(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, null, null,
 					arg.getName(), arg.getStaticType()));
+	}
+	
+	public boolean isInstance() {
+		return instance;
 	}
 
 	/**

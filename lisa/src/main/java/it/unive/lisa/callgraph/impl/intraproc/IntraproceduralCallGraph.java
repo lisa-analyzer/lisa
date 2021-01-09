@@ -1,5 +1,14 @@
 package it.unive.lisa.callgraph.impl.intraproc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -9,13 +18,16 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
+import it.unive.lisa.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.CFG.SemanticFunction;
+import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -23,14 +35,8 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In
@@ -74,21 +80,39 @@ public class IntraproceduralCallGraph implements CallGraph {
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) {
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
 		Collection<CFG> targets = new ArrayList<>();
-		for (CFG cfg : results.keySet())
-			if (cfg.getDescriptor().getFullName().equals(call.getQualifiedName())
-					&& call.getStrategy().matches(cfg.getDescriptor().getArgs(), call.getParameters()))
-				targets.add(cfg);
+
+		if (call.isInstanceCall()) {
+			if (call.getParameters().length == 0)
+				throw new CallResolutionException(
+						"An instance call should have at least one parameter to be used as the receiver of the call");
+			Expression receiver = call.getParameters()[0];
+			for (Type recType : receiver.getRuntimeTypes()) {
+				if (!recType.isUnitType())
+					continue;
+
+				CompilationUnit unit = recType.asUnitType().getUnit();
+				Collection<CFG> candidates = unit.getInstanceCFGsByName(call.getTargetName(), true);
+				for (CFG candidate : candidates)
+					if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
+						targets.add(candidate);
+			}
+		} else {
+			for (CFG cfg : results.keySet())
+				if (cfg.getDescriptor().isInstance() && cfg.getDescriptor().getName().equals(call.getTargetName())
+						&& call.getStrategy().matches(cfg.getDescriptor().getArgs(), call.getParameters()))
+					targets.add(cfg);
+		}
 
 		Call resolved;
 		if (targets.isEmpty())
 			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getQualifiedName(), call.getStaticType(), call.getParameters());
+					call.getTargetName(), call.getStaticType(), call.getParameters());
 		else
 			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getQualifiedName(), targets, call.getParameters());
-
+					call.getTargetName(), targets, call.getParameters());
+		
 		resolved.setOffset(call.getOffset());
 		return resolved;
 	}

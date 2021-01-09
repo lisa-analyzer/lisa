@@ -1,6 +1,7 @@
 package it.unive.lisa.program;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,11 +49,11 @@ public abstract class Unit extends CodeElement {
 	}
 	
 	public Collection<CFG> getAllCFGs() {
-		return getCFGs();
+		return new HashSet<>(getCFGs());
 	}
 	
 	public Collection<Global> getAllGlobals() {
-		return getGlobals();
+		return new HashSet<>(getGlobals());
 	}
 
 	public boolean addGlobal(Global global) {

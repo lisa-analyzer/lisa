@@ -3,9 +3,9 @@ package it.unive.lisa.program;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
@@ -44,7 +44,7 @@ public class CompilationUnit extends Unit {
 		return instanceGlobals.values();
 	}
 
-	public Collection<CFG> getInstanceCfgs() {
+	public Collection<CFG> getInstanceCFGs() {
 		return instanceCfgs.values();
 	}
 
@@ -62,7 +62,7 @@ public class CompilationUnit extends Unit {
 
 	public boolean addInstanceGlobals(Collection<? extends Global> globals) {
 		AtomicBoolean bool = new AtomicBoolean(true);
-		globals.forEach(g ->  bool.set(bool.get() && addInstanceGlobal(g)));
+		globals.forEach(g -> bool.set(bool.get() && addInstanceGlobal(g)));
 		return bool.get();
 	}
 
@@ -76,11 +76,20 @@ public class CompilationUnit extends Unit {
 		return bool.get();
 	}
 
-	public CFG getMatchingInstanceCFG(CFGDescriptor signature) {
+	public CFG getMatchingInstanceCFG(CFGDescriptor signature, boolean traverseHierarchy) {
 		for (CFG cfg : instanceCfgs.values())
 			if (cfg.getDescriptor().matchesSignature(signature))
 				return cfg;
-		return null;
+
+		if (!traverseHierarchy)
+			return null;
+
+		Optional<CFG> sup = superUnits.stream().map(u -> u.getMatchingInstanceCFG(signature, true))
+				.filter(c -> c != null).findFirst();
+		if (sup.isEmpty())
+			return null;
+
+		return sup.get();
 	}
 
 	public boolean isInstanceOf(CompilationUnit unit) {
@@ -102,7 +111,7 @@ public class CompilationUnit extends Unit {
 		CFG over;
 		for (CFG cfg : instanceCfgs.values())
 			for (CompilationUnit s : superUnits)
-				if ((over = s.getMatchingInstanceCFG(cfg.getDescriptor())) != null
+				if ((over = s.getMatchingInstanceCFG(cfg.getDescriptor(), true)) != null
 						&& over.getDescriptor().isOverridable()) {
 					cfg.getDescriptor().overrides().addAll(over.getDescriptor().overrides());
 					cfg.getDescriptor().overrides().add(over);
@@ -116,9 +125,23 @@ public class CompilationUnit extends Unit {
 		return instanceCfgs.get(signature);
 	}
 
-	public Collection<CFG> getInstanceCFGsByName(String name) {
-		return instanceCfgs.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
-				.collect(Collectors.toList());
+	public Collection<CFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
+		Collection<CFG> result = Collections.emptySet();
+		for (CFG cfg : instanceCfgs.values())
+			if (cfg.getDescriptor().getName().equals(name))
+				result.add(cfg);
+
+		if (!traverseHierarchy)
+			return result;
+
+		for (CompilationUnit cu : superUnits)
+			for (CFG sup : cu.getInstanceCFGsByName(name, true))
+				if (result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
+					continue;
+				else
+					result.add(sup);
+
+		return result;
 	}
 
 	public Global getInstanceGlobal(String name) {
