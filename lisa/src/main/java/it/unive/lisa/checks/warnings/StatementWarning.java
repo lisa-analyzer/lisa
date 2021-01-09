@@ -80,7 +80,7 @@ public class StatementWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignature() + "': "
+		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignatureWithParNames() + "': "
 				+ getTaggedMessage();
 	}
 }

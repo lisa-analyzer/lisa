@@ -83,7 +83,7 @@ public class CFGWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignature() + "': "
+		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignatureWithParNames() + "': "
 				+ getTaggedMessage();
 	}
 }
