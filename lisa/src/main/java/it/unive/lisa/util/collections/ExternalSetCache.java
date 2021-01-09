@@ -1,6 +1,8 @@
 package it.unive.lisa.util.collections;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -41,7 +43,7 @@ public class ExternalSetCache<T> {
 	 * @return the empty set
 	 */
 	public ExternalSet<T> mkEmptySet() {
-		return new ExternalSet<T>(this);
+		return new BitExternalSet<T>(this);
 	}
 
 	/**
@@ -53,7 +55,7 @@ public class ExternalSetCache<T> {
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSet(Iterable<T> iterable) {
-		return new ExternalSet<T>(this, iterable);
+		return new BitExternalSet<T>(this, iterable);
 	}
 
 	/**
@@ -65,7 +67,17 @@ public class ExternalSetCache<T> {
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSingletonSet(T element) {
-		return new ExternalSet<T>(this, element);
+		return new BitExternalSet<T>(this, element);
+	}
+
+	/**
+	 * Builds an {@link ExternalSet} that uses this cache and contains all of
+	 * its elements. The returned set will stay up to date with this cache.
+	 * 
+	 * @return the set
+	 */
+	public ExternalSet<T> mkUniversalSet() {
+		return new UniversalExternalSet<T>(this);
 	}
 
 	/**
@@ -136,5 +148,9 @@ public class ExternalSetCache<T> {
 	@Override
 	public final synchronized String toString() {
 		return elements.toString();
+	}
+
+	synchronized Collection<T> getAllElements() {
+		return Collections.unmodifiableCollection(elements);
 	}
 }
