@@ -14,8 +14,8 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
-import it.unive.lisa.test.imp.types.ClassType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -26,7 +26,7 @@ import it.unive.lisa.test.imp.IMPFrontend;
 /**
  * An expression modeling the object allocation and initialization operation
  * ({@code new className(...)}). The type of this expression is the
- * {@link ClassType} representing the created class. This expression corresponds
+ * {@link UnitType} representing the created class. This expression corresponds
  * to a {@link HeapAllocation} that is used as first parameter (i.e.,
  * {@code this}) for the {@link UnresolvedCall} targeting the invoked
  * constructor. All parameters of the constructor call are provided to the

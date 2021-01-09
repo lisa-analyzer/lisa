@@ -36,6 +36,7 @@ import it.unive.lisa.test.antlr.IMPParser.FormalContext;
 import it.unive.lisa.test.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.test.antlr.IMPParser.MethodDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.UnitContext;
+import it.unive.lisa.test.imp.types.ClassType;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Untyped;
 
@@ -70,13 +71,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
-	private CompilationUnit currentUnit;
-
 	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap;
+
+	private final Program program;
+
+	private CompilationUnit currentUnit;
 
 	private IMPFrontend(String file) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
+		program = new Program();
 	}
 
 	private Program work() throws ParsingException {
@@ -114,20 +118,28 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Program visitFile(FileContext ctx) {
-		Program prog = new Program();
+		for (UnitContext unit : ctx.unit()) {
+			// we add all the units first, so that type resolution an work
+			CompilationUnit u = new CompilationUnit(file, getLine(ctx), getCol(ctx), unit.name.getText());
+			program.addCompilationUnit(u);
+			ClassType.lookup(u.getName(), u);
+		}
+
 		for (UnitContext unit : ctx.unit())
-			prog.addCompilationUnit(visitUnit(unit));
+			// now we populate each unit
+			visitUnit(unit);
 
 		for (Pair<CompilationUnit, String> unit : inheritanceMap.values())
 			if (unit.getRight() != null)
 				unit.getLeft().addSuperUnit(inheritanceMap.get(unit.getRight()).getLeft());
 
-		return prog;
+		return program;
 	}
 
 	@Override
 	public CompilationUnit visitUnit(UnitContext ctx) {
-		currentUnit = new CompilationUnit(file, getLine(ctx), getCol(ctx), ctx.name.getText());
+		currentUnit = program.getUnit(ctx.name.getText());
+		
 		if (ctx.superclass != null)
 			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, ctx.superclass.getText()));
 		else

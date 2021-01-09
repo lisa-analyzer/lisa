@@ -146,7 +146,7 @@ public class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				matrix.addNode(ret);
 				for (Statement st : preExits)
 					matrix.addEdge(new SequentialEdge(st, ret));
-				
+
 				for (VariableTableEntry entry : descriptor.getVariables())
 					if (preExits.contains(entry.getScopeEnd()))
 						entry.setScopeEnd(ret);
@@ -507,6 +507,8 @@ public class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Expression visitNewReferenceType(NewReferenceTypeContext ctx) {
+		// null since we do not want to create a new one, class types should
+		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
 			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base,

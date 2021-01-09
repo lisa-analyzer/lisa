@@ -178,6 +178,27 @@ public interface Type {
 	}
 
 	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link UnitType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isUnitType() {
+		return this instanceof UnitType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link UnitType}, only if
+	 * {@link #isUnitType()} yields {@code true}. Otherwise, this method returns
+	 * {@code null}.
+	 * 
+	 * @return this type casted as {@link UnitType}, or {@code null}
+	 */
+	public default UnitType asUnitType() {
+		return isUnitType() ? (UnitType) this : null;
+	}
+
+	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
 	 * It returns {@code true} if so, and returns {@code false} otherwise.
