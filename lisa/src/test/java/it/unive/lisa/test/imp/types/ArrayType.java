@@ -1,5 +1,7 @@
 package it.unive.lisa.test.imp.types;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
@@ -110,5 +112,10 @@ public class ArrayType implements it.unive.lisa.type.ArrayType {
 	@Override
 	public Type getBaseType() {
 		return base;
+	}
+	
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

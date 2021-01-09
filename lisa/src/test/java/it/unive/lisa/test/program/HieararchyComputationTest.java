@@ -21,7 +21,7 @@ public class HieararchyComputationTest {
 	}
 
 	private static CFG findCFG(CompilationUnit unit, String name) {
-		CFG cfg = unit.getInstanceCfgs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
+		CFG cfg = unit.getInstanceCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
@@ -53,7 +53,7 @@ public class HieararchyComputationTest {
 						+ "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
-	
+
 	private static void notOverrides(CFG sup, CFG cfg) {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
@@ -128,7 +128,7 @@ public class HieararchyComputationTest {
 		isInstance(fourth, fourth);
 		isInstance(fifth, fifth);
 		isInstance(sixth, sixth);
-		
+
 		isInstance(first, second);
 		isInstance(first, third);
 		isInstance(first, fourth);
@@ -144,10 +144,10 @@ public class HieararchyComputationTest {
 		isInstance(second, fifth);
 		notInstance(fourth, second);
 		notInstance(fifth, second);
-		
+
 		notInstance(fourth, fifth);
 		notInstance(fifth, fourth);
-		
+
 		isInstance(third, sixth);
 		notInstance(sixth, third);
 		notInstance(third, second);
@@ -156,7 +156,7 @@ public class HieararchyComputationTest {
 		notInstance(second, third);
 		notInstance(fourth, third);
 		notInstance(fifth, third);
-		
+
 		CFG fooFirst = findCFG(first, "foo");
 		CFG fooSecond = findCFG(second, "foo");
 		CFG fooThird = findCFG(third, "foo");
@@ -174,5 +174,26 @@ public class HieararchyComputationTest {
 		notOverrides(fooFifth, fooFourth);
 		notOverrides(fooFirst, fooSixth);
 		notOverrides(fooThird, fooSixth);
+	}
+
+	@Test
+	public void testSkipOne() throws ParsingException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp");
+		prog.computeHiearchies();
+
+		CompilationUnit first = findUnit(prog, "first");
+		CompilationUnit second = findUnit(prog, "second");
+		CompilationUnit third = findUnit(prog, "third");
+
+		isInstance(first, first);
+		isInstance(second, second);
+		isInstance(third, third);
+		isInstance(first, third);
+		isInstance(second, third);
+
+		CFG fooFirst = findCFG(first, "foo");
+		CFG fooThird = findCFG(third, "foo");
+
+		overrides(fooFirst, fooThird);
 	}
 }

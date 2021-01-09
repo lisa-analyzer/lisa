@@ -32,7 +32,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimpleSimplification() {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
-		CFG first = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
 		Return ret = new Return(first, new VariableRef(first, "x"));
@@ -42,7 +42,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		ret = new Return(second, new VariableRef(second, "x"));
 
@@ -58,7 +58,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testDoubleSimplification() {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
-		CFG first = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop1 = new NoOp(first);
 		NoOp noop2 = new NoOp(first);
@@ -71,7 +71,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		ret = new Return(second, new VariableRef(second, "x"));
 
@@ -120,7 +120,7 @@ public class CFGSimplificationTest {
 		}
 
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
-		CFG first = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		GT gt = new GT(first, new VariableRef(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
 		Print print = new Print(first, new Literal(first, "f", Untyped.INSTANCE));
@@ -140,7 +140,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(print, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		gt = new GT(second, new VariableRef(second, "x"), new Literal(second, 2, Untyped.INSTANCE));
 		print = new Print(second, new Literal(second, "f", Untyped.INSTANCE));
@@ -163,7 +163,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationWithDuplicateStatements() {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
-		CFG first = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
 		Assignment ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
@@ -173,7 +173,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, "foo"));
+		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 

@@ -1,5 +1,8 @@
 package it.unive.lisa.test.imp.types;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -71,5 +74,10 @@ public class IntType implements NumericType {
 	@Override
 	public int hashCode() {
 		return NumericType.class.getName().hashCode();
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

@@ -66,7 +66,7 @@ public class IMPNewObj extends NativeCall {
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				IMPFrontend.CALL_STRATEGY, getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created);
 	}
@@ -95,7 +95,7 @@ public class IMPNewObj extends NativeCall {
 			}
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				IMPFrontend.CALL_STRATEGY, getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		AnalysisState<A, H,
 				TypeEnvironment> typing = call.callTypeInference(entryState, callGraph, computedStates, fullParams);
 

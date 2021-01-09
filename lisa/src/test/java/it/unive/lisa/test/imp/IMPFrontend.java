@@ -139,7 +139,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public CompilationUnit visitUnit(UnitContext ctx) {
 		currentUnit = program.getUnit(ctx.name.getText());
-		
+
 		if (ctx.superclass != null)
 			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, ctx.superclass.getText()));
 		else
@@ -151,8 +151,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (CFG cfg : currentUnit.getInstanceCfgs())
-			if (currentUnit.getInstanceCfgs().stream()
+		for (CFG cfg : currentUnit.getInstanceCFGs())
+			if (currentUnit.getInstanceCFGs().stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
@@ -189,16 +189,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit,
-				ctx.name.getText(),
-				visitFormals(ctx.formals()));
+				true, ctx.name.getText(), visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
 		return descriptor;
 	}
 
 	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit,
-				ctx.name.getText(),
-				visitFormals(ctx.formals()));
+				true, ctx.name.getText(), visitFormals(ctx.formals()));
 
 		if (ctx.FINAL() != null)
 			descriptor.setOverridable(false);
