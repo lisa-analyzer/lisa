@@ -1,45 +1,54 @@
 package it.unive.lisa.program;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unive.lisa.program.cfg.CFG;
 
 public class Program extends Unit {
-	
-	private final Collection<CompilationUnit> units;
-	
+
+	private final Map<String, CompilationUnit> units;
+
 	public Program() {
 		super(null, -1, -1, "~LiSAProgram");
-		units = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		units = new ConcurrentHashMap<>();
 	}
 
 	public boolean addCompilationUnit(CompilationUnit unit) {
-		return units.add(unit);
+		return units.putIfAbsent(unit.getName(), unit) == null;
 	}
 
 	public boolean addCompilationUnits(Collection<? extends CompilationUnit> units) {
-		return this.units.addAll(units);
+		AtomicBoolean bool = new AtomicBoolean(true);
+		units.forEach(u -> bool.set(bool.get() && addCompilationUnit(u)));
+		return bool.get();
 	}
-	
+
 	public Collection<CompilationUnit> getUnits() {
-		return units;
+		return units.values();
 	}
-	
+
+	public CompilationUnit getUnit(String name) {
+		return units.get(name);
+	}
+
+	@Override
 	public Collection<CFG> getAllCFGs() {
-		Collection<CFG> all = new LinkedList<>(getCfgs());
-		
-		for (CompilationUnit unit : units) {
-			all.addAll(unit.getCfgs());
-			all.addAll(unit.getInstanceCfgs());
-		}
-		
+		Collection<CFG> all = super.getAllCFGs();
+		units.values().stream().flatMap(u -> u.getAllCFGs().stream()).forEach(all::add);
 		return all;
 	}
-	
+
+	@Override
+	public Collection<Global> getAllGlobals() {
+		Collection<Global> all = super.getAllGlobals();
+		units.values().stream().flatMap(u -> u.getAllGlobals().stream()).forEach(all::add);
+		return all;
+	}
+
 	public void computeHiearchies() {
-		units.forEach(CompilationUnit::computeHierarchy);
+		units.values().forEach(CompilationUnit::computeHierarchy);
 	}
 }

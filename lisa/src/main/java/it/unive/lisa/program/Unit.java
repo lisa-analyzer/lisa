@@ -1,8 +1,10 @@
 package it.unive.lisa.program;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import it.unive.lisa.program.cfg.CFG;
 
@@ -10,15 +12,15 @@ public abstract class Unit extends CodeElement {
 	
 	private final String name;
 	
-	private final Collection<Global> globals;
+	private final Map<String, Global> globals;
 	
-	private final Collection<CFG> cfgs;
+	private final Map<String, CFG> cfgs;
 
 	protected Unit(String sourceFile, int line, int col, String name) {
 		super(sourceFile, line, col);
 		this.name = name;
-		this.globals = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		this.cfgs = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		this.globals = new ConcurrentHashMap<>();
+		this.cfgs = new ConcurrentHashMap<>();
 	}
 
 	public String getName() {
@@ -26,27 +28,51 @@ public abstract class Unit extends CodeElement {
 	}
 	
 	public Collection<Global> getGlobals() {
-		return globals;
+		return globals.values();
 	}
 
-	public Collection<CFG> getCfgs() {
-		return cfgs;
+	public Collection<CFG> getCFGs() {
+		return cfgs.values();
+	}
+	
+	public CFG getCFG(String signature) {
+		return cfgs.get(signature);
+	}
+	
+	public Collection<CFG> getCFGsByName(String name) {
+		return cfgs.values().stream().filter(c -> c.getDescriptor().getName().equals(name)).collect(Collectors.toList());
+	}
+	
+	public Global getGlobal(String name) {
+		return globals.get(name);
+	}
+	
+	public Collection<CFG> getAllCFGs() {
+		return getCFGs();
+	}
+	
+	public Collection<Global> getAllGlobals() {
+		return getGlobals();
 	}
 
 	public boolean addGlobal(Global global) {
-		return globals.add(global);
+		return globals.putIfAbsent(global.getName(), global) == null;
 	}
 
 	public boolean addGlobals(Collection<? extends Global> globals) {
-		return this.globals.addAll(globals);
+		AtomicBoolean bool = new AtomicBoolean(true);
+		globals.forEach(g ->  bool.set(bool.get() && addGlobal(g)));
+		return bool.get();
 	}
 
 	public boolean addCFG(CFG cfg) {
-		return cfgs.add(cfg);
+		return cfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
 
 	public boolean addCFGs(Collection<? extends CFG> cfgs) {
-		return this.cfgs.addAll(cfgs);
+		AtomicBoolean bool = new AtomicBoolean(true);
+		cfgs.forEach(c ->  bool.set(bool.get() && addCFG(c)));
+		return bool.get();
 	}
 
 	@Override

@@ -163,12 +163,47 @@ public class CFGDescriptor extends CodeElement {
 	}
 
 	/**
-	 * Yields the full signature of this cfg.
+	 * Yields the signature of this cfg, composed by its {@link #getFullName()}
+	 * followed by its parameters types.
+	 * 
+	 * @return the signature
+	 */
+	public String getSignature() {
+		Type[] types = new Type[args.length];
+		for (int i = 0; i < types.length; i++) 
+			types[i] = args[i].getStaticType();
+		return getFullName() + "(" + StringUtils.join(types, ", ") + ")";
+	}
+
+	/**
+	 * Yields the signature of this cfg, composed by its {@link #getFullName()}
+	 * followed by its parameters (types and names).
+	 * 
+	 * @return the signature with parameters names included
+	 */
+	public String getSignatureWithParNames() {
+		return getFullName() + "(" + StringUtils.join(args, ", ") + ")";
+	}
+
+	/**
+	 * Yields the full signature of this cfg, that is, {@link #getSignature()}
+	 * preceded by the cfg's return type.
 	 * 
 	 * @return the full signature
 	 */
 	public String getFullSignature() {
-		return returnType + " " + getFullName() + "(" + StringUtils.join(args, ", ") + ")";
+		return returnType + " " + getSignature();
+	}
+
+	/**
+	 * Yields the full signature of this cfg including parameters names, that
+	 * is, {@link #getSignatureWithParNames()} preceded by the cfg's return
+	 * type.
+	 * 
+	 * @return the full signature with parameters names included
+	 */
+	public String getFullSignatureWithParNames() {
+		return returnType + " " + getSignatureWithParNames();
 	}
 
 	/**

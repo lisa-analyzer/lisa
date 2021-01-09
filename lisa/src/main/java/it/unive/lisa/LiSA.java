@@ -418,7 +418,7 @@ public class LiSA {
 	}
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
-		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignature())) {
+		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
 			cfg.dump(file, st -> labelGenerator.apply(st));
 		} catch (IOException e) {
 			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
