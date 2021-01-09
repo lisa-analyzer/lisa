@@ -1,5 +1,7 @@
 package it.unive.lisa.type;
 
+import java.util.Collection;
+
 /**
  * Type interface. Any instance of a concrete type, instance of Type, should be
  * unique and implemented following the singleton design pattern (see for
@@ -216,8 +218,15 @@ public interface Type {
 	 * 
 	 * @param other the other type
 	 * 
-	 * @return the most specific common supertype berween {@code this} and
+	 * @return the most specific common supertype between {@code this} and
 	 *             {@code other}
 	 */
 	Type commonSupertype(Type other);
+
+	/**
+	 * Yields all possible instances of this type, including itself.
+	 * 
+	 * @return the possible instances
+	 */
+	Collection<Type> allInstances();
 }

@@ -112,7 +112,7 @@ public abstract class Expression extends Statement {
 	 */
 	public final ExternalSet<Type> getRuntimeTypes() {
 		if (runtimeTypes.isEmpty())
-			return Caches.types().mkSingletonSet(staticType);
+			return Caches.types().mkSet(staticType.allInstances());
 		return runtimeTypes;
 	}
 

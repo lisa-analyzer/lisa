@@ -1,5 +1,8 @@
 package it.unive.lisa.type;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * The Null type, that is the type of {#link NullLiteral}. It implements the
  * singleton design pattern, that is the instances of this type are unique. The
@@ -43,5 +46,10 @@ public class NullType implements PointerType {
 	@Override
 	public Type commonSupertype(Type other) {
 		return other != null && other.isPointerType() ? other : Untyped.INSTANCE;
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

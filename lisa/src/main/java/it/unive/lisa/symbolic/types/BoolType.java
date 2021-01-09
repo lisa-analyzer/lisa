@@ -1,5 +1,8 @@
 package it.unive.lisa.symbolic.types;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -43,5 +46,10 @@ public class BoolType implements BooleanType {
 	@Override
 	public int hashCode() {
 		return BooleanType.class.getName().hashCode();
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

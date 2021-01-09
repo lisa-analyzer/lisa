@@ -1,5 +1,9 @@
 package it.unive.lisa.type;
 
+import java.util.Collection;
+
+import it.unive.lisa.caches.Caches;
+
 /**
  * The untyped type, corresponding to an unknown/untyped type. This type is used
  * as default when no type information is provided for LiSA constructs (e.g.,
@@ -42,5 +46,10 @@ public class Untyped implements Type {
 	@Override
 	public Type commonSupertype(Type other) {
 		return this;
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Caches.types().mkUniversalSet();
 	}
 }

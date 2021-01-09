@@ -1,5 +1,8 @@
 package it.unive.lisa.type;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * The void type. It implements the singleton design pattern, that is the
  * instances of this type are unique. The unique instance of this type can be
@@ -40,5 +43,10 @@ public class VoidType implements Type {
 	@Override
 	public Type commonSupertype(Type other) {
 		return other == this ? this : Untyped.INSTANCE;
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }
