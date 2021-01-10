@@ -6,13 +6,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.NativeCFG;
 
 public class Program extends Unit {
+
+	public static final String PROGRAM_NAME = "~LiSAProgram";
 
 	private final Map<String, CompilationUnit> units;
 
 	public Program() {
-		super(null, -1, -1, "~LiSAProgram");
+		super(null, -1, -1, PROGRAM_NAME);
 		units = new ConcurrentHashMap<>();
 	}
 
@@ -38,6 +41,13 @@ public class Program extends Unit {
 	public Collection<CFG> getAllCFGs() {
 		Collection<CFG> all = super.getAllCFGs();
 		units.values().stream().flatMap(u -> u.getAllCFGs().stream()).forEach(all::add);
+		return all;
+	}
+
+	@Override
+	public Collection<NativeCFG> getAllConstructs() {
+		Collection<NativeCFG> all = super.getAllConstructs();
+		units.values().stream().flatMap(u -> u.getAllConstructs().stream()).forEach(all::add);
 		return all;
 	}
 

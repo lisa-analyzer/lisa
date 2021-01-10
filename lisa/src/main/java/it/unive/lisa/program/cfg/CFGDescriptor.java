@@ -56,9 +56,9 @@ public class CFGDescriptor extends CodeElement {
 	 */
 	private boolean overridable;
 
-	private final Collection<CFG> overriddenBy;
+	private final Collection<CodeMember> overriddenBy;
 
-	private final Collection<CFG> overrides;
+	private final Collection<CodeMember> overrides;
 
 	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
@@ -148,7 +148,7 @@ public class CFGDescriptor extends CodeElement {
 			addVariable(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, null, null,
 					arg.getName(), arg.getStaticType()));
 	}
-	
+
 	public boolean isInstance() {
 		return instance;
 	}
@@ -181,7 +181,7 @@ public class CFGDescriptor extends CodeElement {
 	 */
 	public String getSignature() {
 		Type[] types = new Type[args.length];
-		for (int i = 0; i < types.length; i++) 
+		for (int i = 0; i < types.length; i++)
 			types[i] = args[i].getStaticType();
 		return getFullName() + "(" + StringUtils.join(types, ", ") + ")";
 	}
@@ -271,11 +271,11 @@ public class CFGDescriptor extends CodeElement {
 		return unit;
 	}
 
-	public Collection<CFG> overriddenBy() {
+	public Collection<CodeMember> overriddenBy() {
 		return overriddenBy;
 	}
 
-	public Collection<CFG> overrides() {
+	public Collection<CodeMember> overrides() {
 		return overrides;
 	}
 

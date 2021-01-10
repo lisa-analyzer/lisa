@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +25,8 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFG.SemanticFunction;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
@@ -61,6 +64,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 	 */
 	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?, ?>>> results;
 
+	private Program program;
+
 	/**
 	 * Builds the call graph.
 	 */
@@ -70,18 +75,17 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	public void build(Program program) throws CallGraphConstructionException {
-		program.getAllCFGs().forEach(cfg -> results.put(cfg, Optional.empty()));
+		this.program = program;
 	}
 
 	@Override
 	public void clear() {
-		for (CFG cfg : results.keySet())
-			results.put(cfg, Optional.empty());
+		results.clear();
 	}
 
 	@Override
 	public Call resolve(UnresolvedCall call) throws CallResolutionException {
-		Collection<CFG> targets = new ArrayList<>();
+		Collection<CodeMember> targets = new ArrayList<>();
 
 		if (call.isInstanceCall()) {
 			if (call.getParameters().length == 0)
@@ -93,26 +97,35 @@ public class IntraproceduralCallGraph implements CallGraph {
 					continue;
 
 				CompilationUnit unit = recType.asUnitType().getUnit();
-				Collection<CFG> candidates = unit.getInstanceCFGsByName(call.getTargetName(), true);
-				for (CFG candidate : candidates)
+				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
+				for (CodeMember candidate : candidates)
 					if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
 						targets.add(candidate);
 			}
 		} else {
-			for (CFG cfg : results.keySet())
-				if (cfg.getDescriptor().isInstance() && cfg.getDescriptor().getName().equals(call.getTargetName())
-						&& call.getStrategy().matches(cfg.getDescriptor().getArgs(), call.getParameters()))
-					targets.add(cfg);
+			for (CodeMember cm : program.getAllCodeMembers())
+				if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
+						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
+					targets.add(cm);
 		}
 
 		Call resolved;
 		if (targets.isEmpty())
 			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getTargetName(), call.getStaticType(), call.getParameters());
-		else
+		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
+			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call.getCFG(), call.getSourceFile(),
+					call.getLine(), call.getCol(), call.getParameters());
+		else {
+			if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
+				throw new CallResolutionException(
+						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
+
 			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getTargetName(), targets, call.getParameters());
-		
+					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
+					call.getParameters());
+		}
+
 		resolved.setOffset(call.getOffset());
 		return resolved;
 	}
@@ -122,7 +135,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			AnalysisState<A, H, V> entryState,
 			SemanticFunction<A, H, V> semantics)
 			throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
+		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this, semantics)));

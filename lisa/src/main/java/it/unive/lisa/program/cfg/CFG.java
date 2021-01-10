@@ -43,7 +43,7 @@ import it.unive.lisa.util.workset.WorkingSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG extends FixpointGraph<CFG, Statement, Edge> {
+public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMember {
 
 	private static final Logger log = LogManager.getLogger(CFG.class);
 

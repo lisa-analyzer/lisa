@@ -2,13 +2,16 @@ package it.unive.lisa.program;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
 
 public class CompilationUnit extends Unit {
 
@@ -20,6 +23,8 @@ public class CompilationUnit extends Unit {
 
 	private final Map<String, CFG> instanceCfgs;
 
+	private final Map<String, NativeCFG> instanceConstructs;
+
 	private boolean hierarchyComputed;
 
 	public CompilationUnit(String sourceFile, int line, int col, String name) {
@@ -28,6 +33,7 @@ public class CompilationUnit extends Unit {
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instanceGlobals = new ConcurrentHashMap<>();
 		instanceCfgs = new ConcurrentHashMap<>();
+		instanceConstructs = new ConcurrentHashMap<>();
 
 		hierarchyComputed = false;
 	}
@@ -48,48 +54,99 @@ public class CompilationUnit extends Unit {
 		return instanceCfgs.values();
 	}
 
-	public boolean addSuperUnit(CompilationUnit unit) {
-		return superUnits.add(unit);
+	public Collection<NativeCFG> getInstanceConstructs() {
+		return instanceConstructs.values();
 	}
 
-	public boolean addSuperUnits(Collection<? extends CompilationUnit> units) {
-		return this.superUnits.addAll(units);
+	public boolean addSuperUnit(CompilationUnit unit) {
+		return superUnits.add(unit);
 	}
 
 	public boolean addInstanceGlobal(Global global) {
 		return instanceGlobals.putIfAbsent(global.getName(), global) == null;
 	}
 
-	public boolean addInstanceGlobals(Collection<? extends Global> globals) {
-		AtomicBoolean bool = new AtomicBoolean(true);
-		globals.forEach(g -> bool.set(bool.get() && addInstanceGlobal(g)));
-		return bool.get();
-	}
-
 	public boolean addInstanceCFG(CFG cfg) {
 		return instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
 
-	public boolean addInstanceCFGs(Collection<? extends CFG> cfgs) {
-		AtomicBoolean bool = new AtomicBoolean(true);
-		cfgs.forEach(c -> bool.set(bool.get() && addInstanceCFG(c)));
-		return bool.get();
+	public boolean addInstanceConstruct(NativeCFG construct) {
+		return instanceConstructs.putIfAbsent(construct.getDescriptor().getSignature(), construct) == null;
 	}
 
-	public CFG getMatchingInstanceCFG(CFGDescriptor signature, boolean traverseHierarchy) {
+	public CFG getInstanceCFG(String signature) {
+		return instanceCfgs.get(signature);
+	}
+
+	public NativeCFG getInstanceConstruct(String signature) {
+		return instanceConstructs.get(signature);
+	}
+
+	public Global getInstanceGlobal(String name) {
+		return instanceGlobals.get(name);
+	}
+
+	public Collection<NativeCFG> getInstanceConstructsByName(String name) {
+		return instanceConstructs.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.collect(Collectors.toList());
+	}
+
+	public Collection<CodeMember> getMatchingInstanceCodeMember(CFGDescriptor signature, boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm.getDescriptor().matchesSignature(signature), traverseHierarchy);
+	}
+
+	public Collection<CodeMember> getInstanceCodeMembersByName(String name, boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), traverseHierarchy);
+	}
+
+	private Collection<CodeMember> searchCodeMembers(Function<CodeMember, Boolean> filter, boolean traverseHierarchy) {
+		Collection<CodeMember> result = Collections.emptySet();
 		for (CFG cfg : instanceCfgs.values())
-			if (cfg.getDescriptor().matchesSignature(signature))
-				return cfg;
+			if (filter.apply(cfg))
+				result.add(cfg);
+
+		for (NativeCFG construct : instanceConstructs.values())
+			if (filter.apply(construct))
+				result.add(construct);
 
 		if (!traverseHierarchy)
-			return null;
+			return result;
 
-		Optional<CFG> sup = superUnits.stream().map(u -> u.getMatchingInstanceCFG(signature, true))
-				.filter(c -> c != null).findFirst();
-		if (sup.isEmpty())
-			return null;
+		for (CompilationUnit cu : superUnits)
+			for (CodeMember sup : cu.searchCodeMembers(filter, true))
+				if (result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
+					continue;
+				else
+					result.add(sup);
 
-		return sup.get();
+		return result;
+	}
+
+	@Override
+	public Collection<CFG> getAllCFGs() {
+		Collection<CFG> all = super.getAllCFGs();
+		instanceCfgs.values().forEach(all::add);
+		return all;
+	}
+
+	@Override
+	public Collection<Global> getAllGlobals() {
+		Collection<Global> all = super.getAllGlobals();
+		instanceGlobals.values().forEach(all::add);
+		return all;
+	}
+
+	@Override
+	public Collection<NativeCFG> getAllConstructs() {
+		Collection<NativeCFG> all = super.getAllConstructs();
+		instanceConstructs.values().forEach(all::add);
+		return all;
+	}
+
+	public Collection<CodeMember> getInstanceCodeMembers() {
+		HashSet<CodeMember> all = new HashSet<>(getInstanceCFGs());
+		all.addAll(getInstanceConstructs());
+		return all;
 	}
 
 	public boolean isInstanceOf(CompilationUnit unit) {
@@ -108,57 +165,17 @@ public class CompilationUnit extends Unit {
 		superUnits.forEach(s -> s.computeHierarchy());
 		addInstance(this);
 
-		CFG over;
-		for (CFG cfg : instanceCfgs.values())
+		for (CodeMember cfg : getInstanceCodeMembers())
 			for (CompilationUnit s : superUnits)
-				if ((over = s.getMatchingInstanceCFG(cfg.getDescriptor(), true)) != null
-						&& over.getDescriptor().isOverridable()) {
-					cfg.getDescriptor().overrides().addAll(over.getDescriptor().overrides());
-					cfg.getDescriptor().overrides().add(over);
-					cfg.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(cfg));
-				}
+				for (CodeMember over : s.getMatchingInstanceCodeMember(cfg.getDescriptor(), true))
+					if (over.getDescriptor().isOverridable()) {
+						cfg.getDescriptor().overrides().addAll(over.getDescriptor().overrides());
+						cfg.getDescriptor().overrides().add(over);
+						cfg.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(cfg));
+					}
+
+		// TODO check for duplicates
 
 		hierarchyComputed = true;
-	}
-
-	public CFG getInstanceCFG(String signature) {
-		return instanceCfgs.get(signature);
-	}
-
-	public Collection<CFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
-		Collection<CFG> result = Collections.emptySet();
-		for (CFG cfg : instanceCfgs.values())
-			if (cfg.getDescriptor().getName().equals(name))
-				result.add(cfg);
-
-		if (!traverseHierarchy)
-			return result;
-
-		for (CompilationUnit cu : superUnits)
-			for (CFG sup : cu.getInstanceCFGsByName(name, true))
-				if (result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
-					continue;
-				else
-					result.add(sup);
-
-		return result;
-	}
-
-	public Global getInstanceGlobal(String name) {
-		return instanceGlobals.get(name);
-	}
-
-	@Override
-	public Collection<CFG> getAllCFGs() {
-		Collection<CFG> all = super.getAllCFGs();
-		instanceCfgs.values().forEach(all::add);
-		return all;
-	}
-
-	@Override
-	public Collection<Global> getAllGlobals() {
-		Collection<Global> all = super.getAllGlobals();
-		instanceGlobals.values().forEach(all::add);
-		return all;
 	}
 }
