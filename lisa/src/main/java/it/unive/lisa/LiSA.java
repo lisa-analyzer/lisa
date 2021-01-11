@@ -32,6 +32,7 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
@@ -331,7 +332,13 @@ public class LiSA {
 		FileManager.setWorkdir(workdir);
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
-		TimerLogger.execAction(log, "Finalizing input program", program::computeHiearchies);
+		TimerLogger.execAction(log, "Finalizing input program", () -> {
+			try {
+				program.validateAndFinalize();
+			} catch (ProgramValidationException e) {
+				throw new AnalysisExecutionException("Unable to finalize target program", e);
+			}
+		});
 
 		if (dumpCFGs)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))

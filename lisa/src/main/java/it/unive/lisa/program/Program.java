@@ -58,7 +58,8 @@ public class Program extends Unit {
 		return all;
 	}
 
-	public void computeHiearchies() {
-		units.values().forEach(CompilationUnit::computeHierarchy);
+	public void validateAndFinalize() throws ProgramValidationException {
+		for (CompilationUnit unit : getUnits())
+			unit.validateAndFinalize();
 	}
 }

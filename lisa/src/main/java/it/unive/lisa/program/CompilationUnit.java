@@ -100,7 +100,7 @@ public class CompilationUnit extends Unit {
 	}
 
 	private Collection<CodeMember> searchCodeMembers(Function<CodeMember, Boolean> filter, boolean traverseHierarchy) {
-		Collection<CodeMember> result = Collections.emptySet();
+		Collection<CodeMember> result = new HashSet<>();
 		for (CFG cfg : instanceCfgs.values())
 			if (filter.apply(cfg))
 				result.add(cfg);
@@ -158,23 +158,30 @@ public class CompilationUnit extends Unit {
 		superUnits.forEach(s -> s.addInstance(unit));
 	}
 
-	public void computeHierarchy() {
+	public void validateAndFinalize() throws ProgramValidationException {
 		if (hierarchyComputed)
 			return;
 
-		superUnits.forEach(s -> s.computeHierarchy());
+		for (CompilationUnit sup : superUnits)
+			sup.validateAndFinalize();
 		addInstance(this);
 
-		for (CodeMember cfg : getInstanceCodeMembers())
+		for (CodeMember cfg : getInstanceCodeMembers()) {
+			Collection<CodeMember> matching = getMatchingInstanceCodeMember(cfg.getDescriptor(), false);
+			if (matching.size() != 1 || matching.iterator().next() != cfg)
+				throw new ProgramValidationException(
+						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
+
 			for (CompilationUnit s : superUnits)
 				for (CodeMember over : s.getMatchingInstanceCodeMember(cfg.getDescriptor(), true))
 					if (over.getDescriptor().isOverridable()) {
 						cfg.getDescriptor().overrides().addAll(over.getDescriptor().overrides());
 						cfg.getDescriptor().overrides().add(over);
 						cfg.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(cfg));
-					}
-
-		// TODO check for duplicates
+					} else
+						throw new ProgramValidationException(
+								this + " overrides the non-overridable cfg " + over.getDescriptor().getSignature());
+		}
 
 		hierarchyComputed = true;
 	}

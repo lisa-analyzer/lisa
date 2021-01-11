@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
@@ -66,16 +67,16 @@ public class HieararchyComputationTest {
 	}
 
 	@Test
-	public void testSingle() throws ParsingException {
+	public void testSingle() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp");
-		prog.computeHiearchies();
+		prog.validateAndFinalize();
 		// we just check that no exception is thrown
 	}
 
 	@Test
-	public void testSimpleInheritance() throws ParsingException {
+	public void testSimpleInheritance() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp");
-		prog.computeHiearchies();
+		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");
@@ -92,9 +93,9 @@ public class HieararchyComputationTest {
 	}
 
 	@Test
-	public void testFinalCfg() throws ParsingException {
+	public void testFinalCfg() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp");
-		prog.computeHiearchies();
+		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");
@@ -111,9 +112,9 @@ public class HieararchyComputationTest {
 	}
 
 	@Test
-	public void testTree() throws ParsingException {
+	public void testTree() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp");
-		prog.computeHiearchies();
+		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");
@@ -177,9 +178,9 @@ public class HieararchyComputationTest {
 	}
 
 	@Test
-	public void testSkipOne() throws ParsingException {
+	public void testSkipOne() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp");
-		prog.computeHiearchies();
+		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
 		CompilationUnit second = findUnit(prog, "second");

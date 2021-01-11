@@ -1,7 +1,6 @@
 package it.unive.lisa.test.imp.types;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -144,7 +143,7 @@ public class ClassType implements PointerType, UnitType {
 
 	@Override
 	public Collection<Type> allInstances() {
-		Collection<Type> instances = Collections.emptySet();
+		Collection<Type> instances = new HashSet<>();
 		for (CompilationUnit in : unit.getInstances())
 			instances.add(lookup(in.getName(), null));
 		return instances;
