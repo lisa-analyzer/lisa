@@ -32,7 +32,7 @@ public class TypesCollectionTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 

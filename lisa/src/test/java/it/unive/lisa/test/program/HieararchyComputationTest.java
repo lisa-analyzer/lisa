@@ -92,28 +92,21 @@ public class HieararchyComputationTest {
 		overrides(fooFirst, fooSecond);
 	}
 
-	@Test
+	@Test(expected = ProgramValidationException.class)
 	public void testFinalCfg() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp");
 		prog.validateAndFinalize();
-
-		CompilationUnit first = findUnit(prog, "first");
-		CompilationUnit second = findUnit(prog, "second");
-
-		isInstance(first, first);
-		isInstance(second, second);
-		isInstance(first, second);
-		notInstance(second, first);
-
-		CFG fooFirst = findCFG(first, "foo");
-		CFG fooSecond = findCFG(second, "foo");
-
-		notOverrides(fooFirst, fooSecond);
 	}
 
-	@Test
+	@Test(expected = ProgramValidationException.class)
 	public void testTree() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp");
+		prog.validateAndFinalize();
+	}
+	
+	@Test
+	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp");
 		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
@@ -163,7 +156,6 @@ public class HieararchyComputationTest {
 		CFG fooThird = findCFG(third, "foo");
 		CFG fooFourth = findCFG(fourth, "foo");
 		CFG fooFifth = findCFG(fifth, "foo");
-		CFG fooSixth = findCFG(sixth, "foo");
 
 		overrides(fooFirst, fooSecond);
 		overrides(fooFirst, fooThird);
@@ -173,8 +165,6 @@ public class HieararchyComputationTest {
 		overrides(fooSecond, fooFifth);
 		notOverrides(fooFourth, fooFifth);
 		notOverrides(fooFifth, fooFourth);
-		notOverrides(fooFirst, fooSixth);
-		notOverrides(fooThird, fooSixth);
 	}
 
 	@Test
