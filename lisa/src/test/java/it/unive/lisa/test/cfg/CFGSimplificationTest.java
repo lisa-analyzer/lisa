@@ -31,7 +31,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimpleSimplification() {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
@@ -57,7 +57,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testDoubleSimplification() {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop1 = new NoOp(first);
@@ -119,7 +119,7 @@ public class CFGSimplificationTest {
 			}
 		}
 
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		GT gt = new GT(first, new VariableRef(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
@@ -162,7 +162,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationWithDuplicateStatements() {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo");
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);

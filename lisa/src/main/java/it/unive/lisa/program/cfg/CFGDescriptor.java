@@ -138,7 +138,7 @@ public class CFGDescriptor extends CodeElement {
 		this.returnType = returnType;
 		this.instance = instance;
 
-		overridable = true;
+		overridable = instance;
 		overriddenBy = new HashSet<>();
 		overrides = new HashSet<>();
 

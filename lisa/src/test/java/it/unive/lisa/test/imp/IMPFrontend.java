@@ -120,7 +120,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Program visitFile(FileContext ctx) {
 		for (UnitContext unit : ctx.unit()) {
 			// we add all the units first, so that type resolution an work
-			CompilationUnit u = new CompilationUnit(file, getLine(ctx), getCol(ctx), unit.name.getText());
+			CompilationUnit u = new CompilationUnit(file, getLine(ctx), getCol(ctx), unit.name.getText(), false);
 			program.addCompilationUnit(u);
 			ClassType.lookup(u.getName(), u);
 		}

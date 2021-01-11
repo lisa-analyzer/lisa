@@ -25,17 +25,23 @@ public class CompilationUnit extends Unit {
 
 	private final Map<String, NativeCFG> instanceConstructs;
 
+	private final boolean sealed;
+
 	private boolean hierarchyComputed;
 
-	public CompilationUnit(String sourceFile, int line, int col, String name) {
+	public CompilationUnit(String sourceFile, int line, int col, String name, boolean sealed) {
 		super(sourceFile, line, col, name);
+		this.sealed = sealed;
 		superUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instanceGlobals = new ConcurrentHashMap<>();
 		instanceCfgs = new ConcurrentHashMap<>();
 		instanceConstructs = new ConcurrentHashMap<>();
-
 		hierarchyComputed = false;
+	}
+
+	public boolean isSealed() {
+		return sealed;
 	}
 
 	public Collection<CompilationUnit> getSuperUnits() {
@@ -67,11 +73,23 @@ public class CompilationUnit extends Unit {
 	}
 
 	public boolean addInstanceCFG(CFG cfg) {
-		return instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
+		CFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
+		if (sealed)
+			if (c == null)
+				cfg.getDescriptor().setOverridable(false);
+			else
+				c.getDescriptor().setOverridable(false);
+		return c == null;
 	}
 
 	public boolean addInstanceConstruct(NativeCFG construct) {
-		return instanceConstructs.putIfAbsent(construct.getDescriptor().getSignature(), construct) == null;
+		NativeCFG c = instanceConstructs.putIfAbsent(construct.getDescriptor().getSignature(), construct);
+		if (sealed)
+			if (c == null)
+				construct.getDescriptor().setOverridable(false);
+			else
+				c.getDescriptor().setOverridable(false);
+		return c == null;
 	}
 
 	public CFG getInstanceCFG(String signature) {
@@ -163,7 +181,10 @@ public class CompilationUnit extends Unit {
 			return;
 
 		for (CompilationUnit sup : superUnits)
-			sup.validateAndFinalize();
+			if (sup.sealed)
+				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
+			else
+				sup.validateAndFinalize();
 		addInstance(this);
 
 		for (CodeMember cfg : getInstanceCodeMembers()) {
