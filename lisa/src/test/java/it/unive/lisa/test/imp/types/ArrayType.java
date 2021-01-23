@@ -22,6 +22,14 @@ public class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 
+	public static void clearAll() {
+		types.clear();
+	}
+	
+	public static Collection<ArrayType> all() {
+		return types.values();
+	}
+	
 	/**
 	 * Yields a unique instance (either an existing one or a fresh one) of
 	 * {@link ArrayType} representing an array with the given {@code base} type

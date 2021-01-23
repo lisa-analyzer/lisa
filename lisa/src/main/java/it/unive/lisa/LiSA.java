@@ -22,6 +22,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
@@ -36,6 +37,8 @@ import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 
@@ -329,6 +332,14 @@ public class LiSA {
 			A extends AbstractState<A, H, V>,
 			T extends AbstractState<T, H, TypeEnvironment>> void runAux()
 					throws AnalysisExecutionException {
+		Caches.init();
+		
+		// fill up the types cache by side effect on an external set
+		ExternalSet<Type> types = Caches.types().mkEmptySet();
+		program.getRegisteredTypes().forEach(types::add);
+		types = null;
+		
+		
 		FileManager.setWorkdir(workdir);
 		Collection<CFG> allCFGs = program.getAllCFGs();
 

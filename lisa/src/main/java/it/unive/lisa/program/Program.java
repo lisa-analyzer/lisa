@@ -1,5 +1,6 @@
 package it.unive.lisa.program;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,18 +8,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.type.Type;
 
 public class Program extends Unit {
 
 	public static final String PROGRAM_NAME = "~LiSAProgram";
 
 	private final Map<String, CompilationUnit> units;
+	
+	private Collection<Type> types;
 
 	public Program() {
 		super(null, -1, -1, PROGRAM_NAME);
 		units = new ConcurrentHashMap<>();
+		types = new ArrayList<>();
 	}
 
+	public boolean registerType(Type type) {
+		return types.add(type);
+	}
+	
+	public Collection<Type> getRegisteredTypes() {
+		return types;
+	}
+	
 	public boolean addCompilationUnit(CompilationUnit unit) {
 		return units.putIfAbsent(unit.getName(), unit) == null;
 	}
@@ -59,6 +72,9 @@ public class Program extends Unit {
 	}
 
 	public void validateAndFinalize() throws ProgramValidationException {
+		// shrink memory fingerprint
+		types = null;
+		
 		for (CompilationUnit unit : getUnits())
 			unit.validateAndFinalize();
 	}

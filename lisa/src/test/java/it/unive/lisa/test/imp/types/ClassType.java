@@ -27,6 +27,14 @@ import it.unive.lisa.util.workset.WorkingSet;
 public class ClassType implements PointerType, UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
+	
+	public static void clearAll() {
+		types.clear();
+	}
+	
+	public static Collection<ClassType> all() {
+		return types.values();
+	}
 
 	/**
 	 * Yields a unique instance (either an existing one or a fresh one) of

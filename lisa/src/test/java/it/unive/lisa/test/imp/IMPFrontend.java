@@ -36,8 +36,13 @@ import it.unive.lisa.test.antlr.IMPParser.FormalContext;
 import it.unive.lisa.test.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.test.antlr.IMPParser.MethodDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.UnitContext;
-import it.unive.lisa.test.imp.types.ClassType;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
+import it.unive.lisa.test.imp.types.ArrayType;
+import it.unive.lisa.test.imp.types.BoolType;
+import it.unive.lisa.test.imp.types.ClassType;
+import it.unive.lisa.test.imp.types.FloatType;
+import it.unive.lisa.test.imp.types.IntType;
+import it.unive.lisa.test.imp.types.StringType;
 import it.unive.lisa.type.Untyped;
 
 /**
@@ -84,6 +89,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	private Program work() throws ParsingException {
+		// first remove all cached types from previous executions
+		ClassType.clearAll();
+		
 		log.info("Reading file... " + file);
 		try (InputStream stream = new FileInputStream(file)) {
 			// common antlr4 initialization
@@ -96,8 +104,17 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			parser.setErrorHandler(new BailErrorStrategy());
 			parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
 
-			FileContext file = parser.file();
-			return visitFile(file);
+			Program p = visitFile(parser.file());
+			
+			// register all possible types
+			p.registerType(BoolType.INSTANCE);
+			p.registerType(FloatType.INSTANCE);
+			p.registerType(IntType.INSTANCE);
+			p.registerType(StringType.INSTANCE);
+			ClassType.all().forEach(p::registerType);
+			ArrayType.all().forEach(p::registerType);
+			
+			return p;
 		} catch (FileNotFoundException e) {
 			log.fatal(file + " does not exist", e);
 			throw new ParsingException("Target file '" + file + "' does not exist", e);
