@@ -3,17 +3,6 @@ package it.unive.lisa.test.imp;
 import static it.unive.lisa.test.imp.Antlr4Util.getCol;
 import static it.unive.lisa.test.imp.Antlr4Util.getLine;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
@@ -92,6 +81,15 @@ import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -99,7 +97,7 @@ import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
+class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
@@ -113,7 +111,14 @@ public class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final CFGDescriptor descriptor;
 
-	public IMPCodeMemberVisitor(String file, CFGDescriptor descriptor) {
+	/**
+	 * Builds the visitor of an IMP method or constructor.
+	 * 
+	 * @param file       the path of the file where the method or constructor
+	 *                       appears
+	 * @param descriptor the descriptor of the method or constructor
+	 */
+	IMPCodeMemberVisitor(String file, CFGDescriptor descriptor) {
 		this.file = file;
 		this.descriptor = descriptor;
 		matrix = new AdjacencyMatrix<>();
@@ -126,7 +131,15 @@ public class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			visibleIds.put(par.getName(), par.createReference(cfg));
 	}
 
-	public CFG visitCodeMember(BlockContext ctx) {
+	/**
+	 * Visits the code of a {@link BlockContext} representing the code block of
+	 * a method or constructor.
+	 * 
+	 * @param ctx the block context
+	 * 
+	 * @return the {@link CFG} built from the block
+	 */
+	CFG visitCodeMember(BlockContext ctx) {
 		Pair<Statement, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 

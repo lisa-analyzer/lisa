@@ -14,7 +14,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-
 import java.util.Collection;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;

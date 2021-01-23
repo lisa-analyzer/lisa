@@ -175,22 +175,43 @@ public abstract class Expression extends Statement {
 		// we ignore the meta variables on purpose
 		return true;
 	}
-	
+
+	/**
+	 * Sets the {@link Statement} that contains this expression.
+	 * 
+	 * @param st the containing statement
+	 */
 	public final void setParentStatement(Statement st) {
 		this.parent = st;
 	}
-	
+
+	/**
+	 * Yields the {@link Statement} that contains this expression, if any. If
+	 * this method returns {@code null}, than this expression is used as a
+	 * command: it is the root statement of a node in the cfg, and its returned
+	 * value is discarded.
+	 * 
+	 * @return the statement that contains this expression, if any
+	 */
 	public final Statement getParentStatement() {
 		return parent;
 	}
-	
+
+	/**
+	 * Yields the outer-most {@link Statement} containing this expression, that
+	 * is used as a node in the cfg. If this expression is used a command, then
+	 * this method return {@code this}.
+	 * 
+	 * @return the outer-most statement containing this expression, or
+	 *             {@code this}
+	 */
 	public final Statement getRootStatement() {
 		if (parent == null)
 			return this;
-		
+
 		if (parent instanceof Statement)
 			return parent;
-		
+
 		return ((Expression) parent).getRootStatement();
 	}
 }

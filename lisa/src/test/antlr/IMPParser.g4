@@ -117,7 +117,7 @@ receiver
    | SUPER
    | IDENTIFIER
    ;
-   
+
 arrayAccess
    : receiver (LBRACK index RBRACK)+
    ;

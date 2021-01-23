@@ -3,22 +3,6 @@ package it.unive.lisa.test.imp;
 import static it.unive.lisa.test.imp.Antlr4Util.getCol;
 import static it.unive.lisa.test.imp.Antlr4Util.getLine;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -52,6 +36,20 @@ import it.unive.lisa.test.imp.types.FloatType;
 import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.test.imp.types.StringType;
 import it.unive.lisa.type.Untyped;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -65,6 +63,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
 
+	/**
+	 * The resolution strategy for IMP calling expressions.
+	 */
 	public static final ResolutionStrategy CALL_STRATEGY = ResolutionStrategy.FIRST_DYNAMIC_THEN_STATIC;
 
 	/**
@@ -187,8 +188,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (CFG cfg : currentUnit.getInstanceCFGs())
-			if (currentUnit.getInstanceCFGs().stream()
+		for (CFG cfg : currentUnit.getInstanceCFGs(false))
+			if (currentUnit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
@@ -196,8 +197,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
 			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
 
-		for (Global global : currentUnit.getInstanceGlobals())
-			if (currentUnit.getInstanceGlobals().stream()
+		for (Global global : currentUnit.getInstanceGlobals(false))
+			if (currentUnit.getInstanceGlobals(false).stream()
 					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
 				throw new IMPSyntaxException("Duplicate global: " + global);
 

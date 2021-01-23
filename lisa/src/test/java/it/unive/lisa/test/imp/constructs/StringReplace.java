@@ -19,8 +19,21 @@ import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.test.imp.types.BoolType;
 import it.unive.lisa.test.imp.types.StringType;
 
+/**
+ * The native construct representing the replace operation. This construct can
+ * be invoked on a string variable {@code x} with
+ * {@code x.replace(search, replacement)}, where {@code search} is the string to
+ * replace and {@code replacement} is the string to use as a replacement.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class StringReplace extends NativeCFG {
 
+	/**
+	 * Builds the construct.
+	 * 
+	 * @param stringUnit the unit where this construct is defined
+	 */
 	public StringReplace(CompilationUnit stringUnit) {
 		super(new CFGDescriptor(stringUnit, true, "replace", BoolType.INSTANCE,
 				new Parameter("this", StringType.INSTANCE), new Parameter("search", StringType.INSTANCE),
@@ -28,7 +41,27 @@ public class StringReplace extends NativeCFG {
 				IMPStringReplace.class);
 	}
 
+	/**
+	 * An expression modeling the string replace operation. The type of all
+	 * three operands must be {@link StringType}. The type of this expression is
+	 * the {@link StringType}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static class IMPStringReplace extends TernaryNativeCall {
+
+		/**
+		 * Builds the replace.
+		 * 
+		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param sourceFile the source file name where this operation is
+		 *                       defined
+		 * @param line       the line number where this operation is defined
+		 * @param col        the column where this operation is defined
+		 * @param left       the left-hand side of this operation
+		 * @param middle     the middle operand of this operation
+		 * @param right      the right-hand side of this operation
+		 */
 		public IMPStringReplace(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression middle, Expression right) {
 			super(cfg, sourceFile, line, col, "replace", StringType.INSTANCE, left, middle, right);

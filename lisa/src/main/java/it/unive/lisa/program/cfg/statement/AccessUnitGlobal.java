@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -17,18 +18,52 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
+/**
+ * An access to an instance {@link Global} of a {@link CompilationUnit}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class AccessUnitGlobal extends Expression {
 
+	/**
+	 * The receiver of the access
+	 */
 	private final Expression receiver;
 
+	/**
+	 * The global being accessed
+	 */
 	private final Global target;
 
+	/**
+	 * Builds the global access. The location where this access happens is
+	 * unknown (i.e. no source file/line/column is available) and its type is
+	 * the one of the accessed global.
+	 * 
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param receiver the expression that determines the accessed instance
+	 * @param target   the accessed global
+	 */
 	public AccessUnitGlobal(CFG cfg, Expression receiver, Global target) {
 		this(cfg, null, -1, -1, receiver, target);
 	}
 
+	/**
+	 * Builds the global access, happening at the given location in the program.
+	 * The type of this expression is the one of the accessed global.
+	 * 
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param sourceFile the source file where this expression happens. If
+	 *                       unknown, use {@code null}
+	 * @param line       the line number where this expression happens in the
+	 *                       source file. If unknown, use {@code -1}
+	 * @param col        the column where this expression happens in the source
+	 *                       file. If unknown, use {@code -1}
+	 * @param receiver   the expression that determines the accessed instance
+	 * @param target     the accessed global
+	 */
 	public AccessUnitGlobal(CFG cfg, String sourceFile, int line, int col, Expression receiver, Global target) {
-		super(cfg, sourceFile, line, col);
+		super(cfg, sourceFile, line, col, target.getStaticType());
 		this.receiver = receiver;
 		this.target = target;
 		receiver.setParentStatement(this);

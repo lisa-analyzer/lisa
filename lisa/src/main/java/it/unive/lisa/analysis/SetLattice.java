@@ -1,10 +1,9 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.util.collections.Utils;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeSet;
-
-import it.unive.lisa.util.collections.Utils;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations

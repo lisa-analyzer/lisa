@@ -1,12 +1,5 @@
 package it.unive.lisa.test.imp.types;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.type.PointerType;
 import it.unive.lisa.type.Type;
@@ -14,6 +7,12 @@ import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A type representing an IMP class defined in an IMP program. ClassTypes are
@@ -27,11 +26,19 @@ import it.unive.lisa.util.workset.WorkingSet;
 public class ClassType implements PointerType, UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
-	
+
+	/**
+	 * Clears the cache of {@link ClassType}s created up to now.
+	 */
 	public static void clearAll() {
 		types.clear();
 	}
-	
+
+	/**
+	 * Yields all the {@link ClassType}s defined up to now.
+	 * 
+	 * @return the collection of all the class types
+	 */
 	public static Collection<ClassType> all() {
 		return types.values();
 	}

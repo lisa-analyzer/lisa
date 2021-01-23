@@ -19,16 +19,47 @@ import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.test.imp.types.BoolType;
 import it.unive.lisa.test.imp.types.StringType;
 
+/**
+ * The native construct representing the startsWith operation. This construct
+ * can be invoked on a string variable {@code x} with
+ * {@code x.startsWith(other)}, where {@code other} is the string that will be
+ * checked against prefixes of {@code x}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class StringStartsWIth extends NativeCFG {
 
+	/**
+	 * Builds the construct.
+	 * 
+	 * @param stringUnit the unit where this construct is defined
+	 */
 	public StringStartsWIth(CompilationUnit stringUnit) {
 		super(new CFGDescriptor(stringUnit, true, "startsWith", BoolType.INSTANCE,
 				new Parameter("this", StringType.INSTANCE), new Parameter("other", StringType.INSTANCE)),
 				IMPStringStartsWith.class);
 	}
 
+	/**
+	 * An expression modeling the string startsWith operation. The type of both
+	 * operands must be {@link StringType}. The type of this expression is the
+	 * {@link BoolType}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static class IMPStringStartsWith extends BinaryNativeCall {
 
+		/**
+		 * Builds the startsWith.
+		 * 
+		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param sourceFile the source file name where this operation is
+		 *                       defined
+		 * @param line       the line number where this operation is defined
+		 * @param col        the column where this operation is defined
+		 * @param left       the left-hand side of this operation
+		 * @param right      the right-hand side of this operation
+		 */
 		public IMPStringStartsWith(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression right) {
 			super(cfg, sourceFile, line, col, "startsWith", BoolType.INSTANCE, left, right);

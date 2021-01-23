@@ -13,18 +13,16 @@ import it.unive.lisa.util.collections.ExternalSetCache;
  */
 public class Caches {
 
-	private static ExternalSetCache<Type> types;
-	
-	public static void init() {
-		types = new ExternalSetCache<>();
-	}
+	/**
+	 * The cache of types
+	 */
+	private static final ExternalSetCache<Type> types = new ExternalSetCache<>();
 
 	/**
 	 * Yields the globally defined cache for {@link ExternalSet}s containing
 	 * {@link Type}s.
 	 * 
-	 * @return the types cache, or {@code null} if {@link #init()} has never
-	 *             been called
+	 * @return the types cache
 	 */
 	public static ExternalSetCache<Type> types() {
 		return types;

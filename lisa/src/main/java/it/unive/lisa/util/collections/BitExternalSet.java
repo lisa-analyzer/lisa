@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
-
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -311,7 +310,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 
 		if (!(other instanceof BitExternalSet))
 			return ExternalSet.super.contains(other);
-		
+
 		BitExternalSet<T> o = (BitExternalSet<T>) other;
 		long[] otherbits = o.bits, localbits = bits;
 		if (otherbits.length > localbits.length)
@@ -336,7 +335,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 		if (cache != other.getCache())
 			return false;
-		
+
 		if (!(other instanceof BitExternalSet))
 			return ExternalSet.super.intersects(other);
 
@@ -359,12 +358,12 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return this;
 		if (cache != other.getCache())
 			return this;
-		
+
 		if (!(other instanceof BitExternalSet))
 			return ExternalSet.super.intersection(other);
 
 		BitExternalSet<T> o = (BitExternalSet<T>) other;
-		
+
 		int index;
 		long[] otherbits;
 		BitExternalSet<T> result;
@@ -397,7 +396,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return this;
 		if (cache != other.getCache())
 			return this;
-		
+
 		if (!(other instanceof BitExternalSet))
 			return ExternalSet.super.difference(other);
 
@@ -426,7 +425,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return this;
 		if (cache != other.getCache())
 			return this;
-		
+
 		if (!(other instanceof BitExternalSet))
 			return ExternalSet.super.union(other);
 

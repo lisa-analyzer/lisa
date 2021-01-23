@@ -1,9 +1,5 @@
 package it.unive.lisa.outputs;
 
-import java.io.Reader;
-import java.util.function.Function;
-import org.graphstream.graph.implementations.MultiGraph;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
@@ -12,6 +8,9 @@ import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
+import java.io.Reader;
+import java.util.function.Function;
+import org.graphstream.graph.implementations.MultiGraph;
 
 /**
  * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be

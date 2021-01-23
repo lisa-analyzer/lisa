@@ -1,10 +1,9 @@
 package it.unive.lisa.analysis;
 
-import java.util.Map;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s

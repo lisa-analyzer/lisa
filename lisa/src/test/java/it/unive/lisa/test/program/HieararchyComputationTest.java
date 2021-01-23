@@ -4,14 +4,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
+import org.junit.Test;
 
 public class HieararchyComputationTest {
 
@@ -22,7 +21,7 @@ public class HieararchyComputationTest {
 	}
 
 	private static CFG findCFG(CompilationUnit unit, String name) {
-		CFG cfg = unit.getInstanceCFGs().stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
+		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
@@ -103,7 +102,7 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp");
 		prog.validateAndFinalize();
 	}
-	
+
 	@Test
 	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp");

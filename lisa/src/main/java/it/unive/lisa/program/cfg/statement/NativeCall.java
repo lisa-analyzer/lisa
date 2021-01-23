@@ -3,7 +3,6 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 

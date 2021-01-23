@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-
 import java.util.Collection;
 
 /**

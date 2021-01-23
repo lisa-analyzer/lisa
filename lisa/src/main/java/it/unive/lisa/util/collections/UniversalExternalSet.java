@@ -3,6 +3,14 @@ package it.unive.lisa.util.collections;
 import java.util.Collection;
 import java.util.Iterator;
 
+/**
+ * An {@link ExternalSet} that always stays up-to-date with the contents of the
+ * underlying factory, but that cannot be modified.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the type of elements inside this set
+ */
 public class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	/**
@@ -11,6 +19,11 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 	 */
 	private final ExternalSetCache<T> cache;
 
+	/**
+	 * Builds a set connected to the given cache.
+	 * 
+	 * @param cache the cache
+	 */
 	UniversalExternalSet(ExternalSetCache<T> cache) {
 		this.cache = cache;
 	}

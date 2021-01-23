@@ -19,16 +19,44 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.test.imp.types.StringType;
 
+/**
+ * The native construct representing the length operation. This construct can be
+ * invoked on a string variable {@code x} with {@code x.len()}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class StringLength extends NativeCFG {
 
+	/**
+	 * Builds the construct.
+	 * 
+	 * @param stringUnit the unit where this construct is defined
+	 */
 	public StringLength(CompilationUnit stringUnit) {
 		super(new CFGDescriptor(stringUnit, true, "len", IntType.INSTANCE,
 				new Parameter("this", StringType.INSTANCE)),
 				IMPStringLength.class);
 	}
 
+	/**
+	 * An expression modeling the string length operation. The type of the
+	 * operand must be {@link StringType}. The type of this expression is the
+	 * {@link IntType}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static class IMPStringLength extends UnaryNativeCall {
 
+		/**
+		 * Builds the length.
+		 * 
+		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param sourceFile the source file name where this operation is
+		 *                       defined
+		 * @param line       the line number where this operation is defined
+		 * @param col        the column where this operation is defined
+		 * @param parameter  the operand of this operation
+		 */
 		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
 			super(cfg, sourceFile, line, col, "len", IntType.INSTANCE, parameter);

@@ -1,15 +1,18 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.Statement;
-
 /**
- * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
- * as edges.
+ * A program member that has code within it. It exposes a method for retrieving
+ * a {@link CFGDescriptor} containing its signature.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface CodeMember {
 
+	/**
+	 * Yields the {@link CFGDescriptor} containing the signature of this code
+	 * member.
+	 * 
+	 * @return the descriptor of this code member
+	 */
 	CFGDescriptor getDescriptor();
 }

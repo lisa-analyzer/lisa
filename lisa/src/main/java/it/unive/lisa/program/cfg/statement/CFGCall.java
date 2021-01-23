@@ -13,7 +13,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;

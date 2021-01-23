@@ -1,8 +1,7 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on the descriptor of one of the CFGs under
@@ -83,6 +82,7 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + descriptor.getFullSignatureWithParNames() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + descriptor.getFullSignatureWithParNames() + "': "
+				+ getTaggedMessage();
 	}
 }

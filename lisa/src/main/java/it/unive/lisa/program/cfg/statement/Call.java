@@ -51,7 +51,7 @@ public abstract class Call extends Expression {
 		for (int i = 0; i < parameters.length; i++)
 			Objects.requireNonNull(parameters[i], "The " + i + "-th parameter of a call cannot be null");
 		this.parameters = parameters;
-		for (Expression param : parameters) 
+		for (Expression param : parameters)
 			param.setParentStatement(this);
 	}
 

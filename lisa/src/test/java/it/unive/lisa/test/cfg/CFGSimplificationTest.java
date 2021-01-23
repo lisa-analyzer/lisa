@@ -24,7 +24,6 @@ import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
-
 import org.junit.Test;
 
 public class CFGSimplificationTest {

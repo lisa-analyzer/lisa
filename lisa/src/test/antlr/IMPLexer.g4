@@ -54,13 +54,15 @@ EXTENDS
    : 'extends'
    ;
    // method body    
-
-DEFINE : 'def' ;
+   
+DEFINE
+   : 'def'
+   ;
 
 FINAL
    : 'final'
-   ; 
-   
+   ;
+
 RETURN
    : 'return'
    ;
@@ -135,11 +137,11 @@ RBRACK
    : ']'
    ;
    // separators
-
+   
 TILDE
    : '~'
    ;
-      
+
 SEMI
    : ';'
    ;

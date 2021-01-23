@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg;
 
+import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -7,11 +11,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
-
-import it.unive.lisa.program.CodeElement;
-import it.unive.lisa.program.Unit;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,
@@ -65,8 +64,12 @@ public class CFGDescriptor extends CodeElement {
 	 * (i.e. no source file/line/column is available) and with untyped return
 	 * type, that is its type is {@link Untyped#INSTANCE}.
 	 * 
-	 * @param name the name of the CFG associated with this descriptor
-	 * @param args the arguments of the CFG associated with this descriptor
+	 * @param unit     the {@link Unit} containing the cfg associated to this
+	 *                     descriptor
+	 * @param instance whether or not the cfg associated to this descriptor is
+	 *                     an instance cfg
+	 * @param name     the name of the CFG associated with this descriptor
+	 * @param args     the arguments of the CFG associated with this descriptor
 	 */
 	public CFGDescriptor(Unit unit, boolean instance, String name, Parameter... args) {
 		this(null, -1, -1, unit, instance, name, Untyped.INSTANCE, args);
@@ -76,6 +79,10 @@ public class CFGDescriptor extends CodeElement {
 	 * Builds the descriptor for a method that is defined at an unknown location
 	 * (i.e. no source file/line/column is available).
 	 * 
+	 * @param unit       the {@link Unit} containing the cfg associated to this
+	 *                       descriptor
+	 * @param instance   whether or not the cfg associated to this descriptor is
+	 *                       an instance cfg
 	 * @param name       the name of the CFG associated with this descriptor
 	 * @param returnType the return type of the CFG associated with this
 	 *                       descriptor
@@ -97,6 +104,10 @@ public class CFGDescriptor extends CodeElement {
 	 * @param col        the column where the CFG associated with this
 	 *                       descriptor is defined in the source file. If
 	 *                       unknown, use {@code -1}
+	 * @param unit       the {@link Unit} containing the cfg associated to this
+	 *                       descriptor
+	 * @param instance   whether or not the cfg associated to this descriptor is
+	 *                       an instance cfg
 	 * @param name       the name of the CFG associated with this descriptor
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
@@ -117,6 +128,10 @@ public class CFGDescriptor extends CodeElement {
 	 * @param col        the column where the CFG associated with this
 	 *                       descriptor is defined in the source file. If
 	 *                       unknown, use {@code -1}
+	 * @param unit       the {@link Unit} containing the cfg associated to this
+	 *                       descriptor
+	 * @param instance   whether or not the cfg associated to this descriptor is
+	 *                       an instance cfg
 	 * @param name       the name of the CFG associated with this descriptor
 	 * @param returnType the return type of the CFG associated with this
 	 *                       descriptor
@@ -149,6 +164,12 @@ public class CFGDescriptor extends CodeElement {
 					arg.getName(), arg.getStaticType()));
 	}
 
+	/**
+	 * Yields {@code true} if and only if the cfg associated to this descriptor
+	 * is an instance cfg.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean isInstance() {
 		return instance;
 	}
@@ -259,22 +280,52 @@ public class CFGDescriptor extends CodeElement {
 		variables.add(variable);
 	}
 
+	/**
+	 * Yields {@code true} if and only if the cfg associated to this descriptor
+	 * is can be overridden by cfgs in {@link Unit}s that inherit for the cfg's
+	 * unit.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean isOverridable() {
 		return overridable;
 	}
 
+	/**
+	 * Sets whether or not the cfg associated to this descriptor can be
+	 * overridden.
+	 * 
+	 * @param overridable the overridability of the cfg
+	 */
 	public void setOverridable(boolean overridable) {
 		this.overridable = overridable;
 	}
 
+	/**
+	 * Yields the {@link Unit} containing the cfg associated to this descriptor.
+	 * 
+	 * @return the unit
+	 */
 	public Unit getUnit() {
 		return unit;
 	}
 
+	/**
+	 * Yields the collection of {@link CodeMember} that override the cfg
+	 * associated with this descriptor.
+	 * 
+	 * @return the collection of code members
+	 */
 	public Collection<CodeMember> overriddenBy() {
 		return overriddenBy;
 	}
 
+	/**
+	 * Yields the collection of {@link CodeMember} that the cfg associated with
+	 * this descriptor overrides.
+	 * 
+	 * @return the collection of code members
+	 */
 	public Collection<CodeMember> overrides() {
 		return overrides;
 	}
@@ -334,6 +385,22 @@ public class CFGDescriptor extends CodeElement {
 				+ "]";
 	}
 
+	/**
+	 * Checks if the signature defined by the given descriptor is matched by the
+	 * one this descriptor. For two signatures to match, it is required that:
+	 * <ul>
+	 * <li>both signatures have the same name</li>
+	 * <li>both signatures have the same number of arguments</li>
+	 * <li>for each argument, the static type of the matching signature (i.e.,
+	 * {@code this}) can be assigned to the static type of the matched signature
+	 * (i.e., {@code signature})</li>
+	 * </ul>
+	 * 
+	 * @param signature the other signature
+	 * 
+	 * @return {@code true} if the two signatures are compatible, {@code false}
+	 *             otherwise
+	 */
 	public boolean matchesSignature(CFGDescriptor signature) {
 		if (!name.equals(signature.name))
 			return false;

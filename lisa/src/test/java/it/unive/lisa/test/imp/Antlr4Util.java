@@ -111,20 +111,48 @@ public class Antlr4Util {
 
 		return expectedBuilder.toString().trim();
 	}
-	
-	public static int getLine(ParserRuleContext ctx) {
+
+	/**
+	 * Extracts the line number from an antlr context.
+	 * 
+	 * @param ctx the context
+	 * 
+	 * @return the line number where the context appears
+	 */
+	static int getLine(ParserRuleContext ctx) {
 		return ctx.getStart().getLine();
 	}
 
-	public static int getCol(ParserRuleContext ctx) {
+	/**
+	 * Extracts the column number from an antlr context.
+	 * 
+	 * @param ctx the context
+	 * 
+	 * @return the column number where the context appears
+	 */
+	static int getCol(ParserRuleContext ctx) {
 		return ctx.getStop().getCharPositionInLine();
 	}
 
-	public static int getCol(Token ctx) {
-		return ctx.getCharPositionInLine();
+	/**
+	 * Extracts the line number from an antlr token.
+	 * 
+	 * @param tok the token
+	 * 
+	 * @return the line number where the token appears
+	 */
+	static int getLine(Token tok) {
+		return tok.getLine();
 	}
 
-	public static int getLine(Token ctx) {
-		return ctx.getLine();
+	/**
+	 * Extracts the column number from an antlr token.
+	 * 
+	 * @param tok the token
+	 * 
+	 * @return the column number where the token appears
+	 */
+	static int getCol(Token tok) {
+		return tok.getCharPositionInLine();
 	}
 }

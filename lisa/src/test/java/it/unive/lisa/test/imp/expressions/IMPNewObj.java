@@ -14,14 +14,12 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-
 import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;
-
-import it.unive.lisa.test.imp.IMPFrontend;
 
 /**
  * An expression modeling the object allocation and initialization operation

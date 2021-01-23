@@ -1,18 +1,17 @@
 package it.unive.lisa.test.imp.types;
 
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
-
 /**
  * A type representing an IMP array defined in an IMP program. ArrayTypes are
- * instances of {@link it.unive.lisa.type.ArrayType}, have a {@link Type}
- * and a dimension. To ensure uniqueness of ArrayType objects,
+ * instances of {@link it.unive.lisa.type.ArrayType}, have a {@link Type} and a
+ * dimension. To ensure uniqueness of ArrayType objects,
  * {@link #lookup(Type, int)} must be used to retrieve existing instances (or
  * automatically create one if no matching instance exists).
  * 
@@ -22,14 +21,22 @@ public class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 
+	/**
+	 * Clears the cache of {@link ArrayType}s created up to now.
+	 */
 	public static void clearAll() {
 		types.clear();
 	}
-	
+
+	/**
+	 * Yields all the {@link ArrayType}s defined up to now.
+	 * 
+	 * @return the collection of all the array types
+	 */
 	public static Collection<ArrayType> all() {
 		return types.values();
 	}
-	
+
 	/**
 	 * Yields a unique instance (either an existing one or a fresh one) of
 	 * {@link ArrayType} representing an array with the given {@code base} type
@@ -121,7 +128,7 @@ public class ArrayType implements it.unive.lisa.type.ArrayType {
 	public Type getBaseType() {
 		return base;
 	}
-	
+
 	@Override
 	public Collection<Type> allInstances() {
 		return Collections.singleton(this);

@@ -1,16 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -36,6 +25,15 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -810,6 +808,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		return DotCFG.fromCFG(this, labelGenerator);
 	}
 
+	@Override
 	protected void preSimplify(Statement node) {
 		Collection<
 				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)

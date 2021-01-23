@@ -150,6 +150,12 @@ public class ExternalSetCache<T> {
 		return elements.toString();
 	}
 
+	/**
+	 * Yields an unmodifiable view of all the elements currently in the cache.
+	 * For a view that always stays up-to-date, use {@link #mkUniversalSet()}.
+	 * 
+	 * @return a view of the elements inside this cache
+	 */
 	synchronized Collection<T> getAllElements() {
 		return Collections.unmodifiableCollection(elements);
 	}
