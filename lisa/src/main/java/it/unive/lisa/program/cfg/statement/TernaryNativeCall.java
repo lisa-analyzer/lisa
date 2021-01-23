@@ -15,11 +15,11 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 
 /**
- * A {@link NativeCall} with a exactly two arguments.
+ * A {@link NativeCall} with a exactly three arguments.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class BinaryNativeCall extends NativeCall {
+public abstract class TernaryNativeCall extends NativeCall {
 
 	/**
 	 * Builds the untyped native call. The location where this call happens is
@@ -30,10 +30,11 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
 	 * @param left          the first parameter of this call
-	 * @param right         the second parameter of this call
+	 * @param middle        the second parameter of this call
+	 * @param right         the third parameter of this call
 	 */
-	protected BinaryNativeCall(CFG cfg, String constructName, Expression left, Expression right) {
-		super(cfg, constructName, left, right);
+	protected TernaryNativeCall(CFG cfg, String constructName, Expression left, Expression middle, Expression right) {
+		super(cfg, constructName, left, middle, right);
 	}
 
 	/**
@@ -45,10 +46,12 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 *                          call
 	 * @param staticType    the static type of this call
 	 * @param left          the first parameter of this call
+	 * @param middle        the second parameter of this call
 	 * @param right         the second parameter of this call
 	 */
-	protected BinaryNativeCall(CFG cfg, String constructName, Type staticType, Expression left, Expression right) {
-		super(cfg, constructName, staticType, left, right);
+	protected TernaryNativeCall(CFG cfg, String constructName, Type staticType, Expression left, Expression middle,
+			Expression right) {
+		super(cfg, constructName, staticType, left, middle, right);
 	}
 
 	/**
@@ -65,11 +68,12 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
 	 * @param left          the first parameter of this call
+	 * @param middle        the second parameter of this call
 	 * @param right         the second parameter of this call
 	 */
-	protected BinaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName,
-			Expression left, Expression right) {
-		super(cfg, sourceFile, line, col, constructName, left, right);
+	protected TernaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName,
+			Expression left, Expression middle, Expression right) {
+		super(cfg, sourceFile, line, col, constructName, left, middle, right);
 	}
 
 	/**
@@ -86,11 +90,12 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 *                          call
 	 * @param staticType    the static type of this call
 	 * @param left          the first parameter of this call
+	 * @param middle        the second parameter of this call
 	 * @param right         the second parameter of this call
 	 */
-	protected BinaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
-			Expression left, Expression right) {
-		super(cfg, sourceFile, line, col, constructName, staticType, left, right);
+	protected TernaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
+			Expression left, Expression middle, Expression right) {
+		super(cfg, sourceFile, line, col, constructName, staticType, left, middle, right);
 	}
 
 	@Override
@@ -101,14 +106,16 @@ public abstract class BinaryNativeCall extends NativeCall {
 					Collection<SymbolicExpression>[] params) throws SemanticException {
 		AnalysisState<A, H, TypeEnvironment> result = null;
 		for (SymbolicExpression left : params[0])
-			for (SymbolicExpression right : params[1]) {
-				AnalysisState<A, H, TypeEnvironment> tmp = binarySemantics(entryState, callGraph, computedStates[0],
-						left, computedStates[1], right);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
-			}
+			for (SymbolicExpression middle : params[1])
+				for (SymbolicExpression right : params[2]) {
+					AnalysisState<A, H,
+							TypeEnvironment> tmp = ternarySemantics(entryState, callGraph, computedStates[0],
+									left, computedStates[1], middle, computedStates[2], right);
+					if (result == null)
+						result = tmp;
+					else
+						result = result.lub(tmp);
+				}
 
 		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
 		return result;
@@ -125,14 +132,16 @@ public abstract class BinaryNativeCall extends NativeCall {
 		AnalysisState<A, H, V> result = null;
 
 		for (SymbolicExpression left : params[0])
-			for (SymbolicExpression right : params[1]) {
-				AnalysisState<A, H, V> tmp = binarySemantics(entryState, callGraph, computedStates[0], left,
-						computedStates[1], right);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
-			}
+			for (SymbolicExpression middle : params[1])
+				for (SymbolicExpression right : params[2]) {
+					AnalysisState<A, H,
+							V> tmp = ternarySemantics(entryState, callGraph, computedStates[0], left, computedStates[1],
+									middle, computedStates[2], right);
+					if (result == null)
+						result = tmp;
+					else
+						result = result.lub(tmp);
+				}
 
 		return result;
 	}
@@ -142,19 +151,23 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <A>        the type of {@link AbstractState}
-	 * @param <H>        the type of the {@link HeapDomain}
-	 * @param <V>        the type of the {@link ValueDomain}
-	 * @param entryState the entry state of this binary call
-	 * @param callGraph  the call graph of the program to analyze
-	 * @param leftState  the state obtained by evaluating {@code left} in
-	 *                       {@code entryState}
-	 * @param leftExp    the symbolic expression representing the computed value
-	 *                       of the first parameter of this call
-	 * @param rightState the state obtained by evaluating {@code right} in
-	 *                       {@code leftState}
-	 * @param rightExp   the symbolic expression representing the computed value
-	 *                       of the second parameter of this call
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of the {@link HeapDomain}
+	 * @param <V>         the type of the {@link ValueDomain}
+	 * @param entryState  the entry state of this binary call
+	 * @param callGraph   the call graph of the program to analyze
+	 * @param leftState   the state obtained by evaluating {@code left} in
+	 *                        {@code entryState}
+	 * @param leftExp     the symbolic expression representing the computed
+	 *                        value of the first parameter of this call
+	 * @param middleState the state obtained by evaluating {@code middle} in
+	 *                        {@code leftState}
+	 * @param middleExp   the symbolic expression representing the computed
+	 *                        value of the second parameter of this call
+	 * @param rightState  the state obtained by evaluating {@code right} in
+	 *                        {@code middleState}
+	 * @param rightExp    the symbolic expression representing the computed
+	 *                        value of the third parameter of this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -163,10 +176,11 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 */
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			V extends ValueDomain<V>> AnalysisState<A, H, V> ternarySemantics(
 					AnalysisState<A, H, V> entryState,
 					CallGraph callGraph,
 					AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
+					AnalysisState<A, H, V> middleState, SymbolicExpression middleExp,
 					AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
 					throws SemanticException;
 }

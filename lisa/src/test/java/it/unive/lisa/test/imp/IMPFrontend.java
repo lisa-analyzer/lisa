@@ -37,6 +37,14 @@ import it.unive.lisa.test.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.test.antlr.IMPParser.MethodDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.UnitContext;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
+import it.unive.lisa.test.imp.constructs.StringContains;
+import it.unive.lisa.test.imp.constructs.StringEndsWith;
+import it.unive.lisa.test.imp.constructs.StringEquals;
+import it.unive.lisa.test.imp.constructs.StringIndexOf;
+import it.unive.lisa.test.imp.constructs.StringLength;
+import it.unive.lisa.test.imp.constructs.StringReplace;
+import it.unive.lisa.test.imp.constructs.StringStartsWIth;
+import it.unive.lisa.test.imp.constructs.StringSubstring;
 import it.unive.lisa.test.imp.types.ArrayType;
 import it.unive.lisa.test.imp.types.BoolType;
 import it.unive.lisa.test.imp.types.ClassType;
@@ -91,7 +99,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private Program work() throws ParsingException {
 		// first remove all cached types from previous executions
 		ClassType.clearAll();
-		
+
 		log.info("Reading file... " + file);
 		try (InputStream stream = new FileInputStream(file)) {
 			// common antlr4 initialization
@@ -105,7 +113,18 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
 
 			Program p = visitFile(parser.file());
-			
+
+			// add constructs
+			CompilationUnit str = new CompilationUnit(null, -1, -1, "string", true);
+			str.addInstanceConstruct(new StringContains(str));
+			str.addInstanceConstruct(new StringEndsWith(str));
+			str.addInstanceConstruct(new StringEquals(str));
+			str.addInstanceConstruct(new StringIndexOf(str));
+			str.addInstanceConstruct(new StringLength(str));
+			str.addInstanceConstruct(new StringReplace(str));
+			str.addInstanceConstruct(new StringStartsWIth(str));
+			str.addInstanceConstruct(new StringSubstring(str));
+
 			// register all possible types
 			p.registerType(BoolType.INSTANCE);
 			p.registerType(FloatType.INSTANCE);
@@ -113,7 +132,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			p.registerType(StringType.INSTANCE);
 			ClassType.all().forEach(p::registerType);
 			ArrayType.all().forEach(p::registerType);
-			
+
 			return p;
 		} catch (FileNotFoundException e) {
 			log.fatal(file + " does not exist", e);
