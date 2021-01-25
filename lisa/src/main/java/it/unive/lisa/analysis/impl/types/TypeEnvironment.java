@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.impl.types;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.nonrelational.ValueEnvironment;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;

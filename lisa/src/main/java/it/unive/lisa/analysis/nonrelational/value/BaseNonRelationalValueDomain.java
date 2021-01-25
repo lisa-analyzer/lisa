@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.nonrelational;
+package it.unive.lisa.analysis.nonrelational.value;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;

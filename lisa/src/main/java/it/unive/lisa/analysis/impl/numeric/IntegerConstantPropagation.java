@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;

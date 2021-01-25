@@ -36,7 +36,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	protected FunctionalLattice(V lattice) {
 		this.lattice = lattice;
-		this.function = mkNewFunction();
+		this.function = mkNewFunction(null);
 	}
 
 	/**
@@ -51,10 +51,19 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * This method exist just to ensure that all functions share the same type
+	 * Creates a new instance of the underlying function. The purpose of this
+	 * method is to provide a common function implementation to every subclass
+	 * that does not have implementation-specific requirements.
+	 * 
+	 * @param other an optional function to copy, can be {@code null}
+	 * 
+	 * @return a new function, either empty or containing the same data of the
+	 *             given one
 	 */
-	private Map<K, V> mkNewFunction() {
-		return new HashMap<>();
+	protected Map<K, V> mkNewFunction(Map<K, V> other) {
+		if (other == null)
+			return new HashMap<>();
+		return new HashMap<>(other);
 	}
 
 	/**
@@ -99,7 +108,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
-		result.function = mkNewFunction();
+		result.function = mkNewFunction(null);
 		Set<K> keys = new HashSet<>(function.keySet());
 		keys.addAll(other.function.keySet());
 		for (K key : keys)
@@ -159,12 +168,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	@Override
 	public String toString() {
-		if (this == bottom())
-			return "#BOTTOM#";
-
-		if (this == top())
-			return "#TOP#";
-
+		if (isTop())
+			return "TOP";
+		
+		if (isBottom())
+			return "BOTTOM";
+		
 		return function.toString();
 	}
 
