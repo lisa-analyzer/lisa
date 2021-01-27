@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import java.lang.reflect.Constructor;
@@ -93,6 +95,8 @@ public class LiSAFactory {
 			return true;
 		else if (NonRelationalValueDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
+		else if (InferredValue.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
+			return true;
 		else
 			return false;
 	}
@@ -103,6 +107,8 @@ public class LiSAFactory {
 			return new HeapEnvironment((NonRelationalHeapDomain<?>) param);
 		else if (NonRelationalValueDomain.class.isAssignableFrom(param.getClass()))
 			return new ValueEnvironment((NonRelationalValueDomain<?>) param);
+		else if (InferredValue.class.isAssignableFrom(param.getClass()))
+			return new InferenceSystem((InferredValue<?>) param);
 		return param;
 	}
 
