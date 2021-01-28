@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational.inference;
 import java.util.Map;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -19,7 +20,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * 
  * @param <T> the type of {@link InferredValue} in this inference system
  */
-public class InferenceSystem<T extends InferredValue<T>> extends Environment<InferenceSystem<T>, ValueExpression, T> {
+public class InferenceSystem<T extends InferredValue<T>> extends Environment<InferenceSystem<T>, ValueExpression, T>
+		implements ValueDomain<InferenceSystem<T>> {
 
 	private final T inferredValue;
 
@@ -116,5 +118,14 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 			return false;
 
 		return inferredValue.lessOrEqual(other.inferredValue);
+	}
+
+	@Override
+	public String representation() {
+		if (isBottom() || isTop())
+			return super.representation();
+
+		return super.representation() + "\n[inferred: " + inferredValue + ", state: " + inferredValue.executionState()
+				+ "]";
 	}
 }

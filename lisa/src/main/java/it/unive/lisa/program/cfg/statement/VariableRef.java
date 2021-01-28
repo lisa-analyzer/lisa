@@ -1,12 +1,13 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -16,7 +17,6 @@ import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -134,18 +134,6 @@ public class VariableRef extends Expression {
 		else
 			expr = new ValueIdentifier(getRuntimeTypes(), getName());
 		return expr;
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> typing = entryState.smallStepSemantics(getVariable());
-		setRuntimeTypes(typing.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		// we have to recreate the variable for it to have the correct typing
-		// information
-		return typing.smallStepSemantics(getVariable());
 	}
 
 	@Override

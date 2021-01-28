@@ -1,5 +1,16 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -25,15 +36,6 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -160,8 +162,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                       returned by {@link #getEntrypoints()}
 	 * @param cg         the callgraph that can be queried when a call towards
 	 *                       an other cfg is encountered
-	 * @param semantics  the {@link SemanticFunction} that will be used for
-	 *                       computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -175,9 +175,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState, CallGraph cg, SemanticFunction<A, H, V> semantics)
+					AnalysisState<A, H, V> entryState, CallGraph cg)
 					throws FixpointException {
-		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
+		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -210,8 +210,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                       replaced by the {@link Lattice#widening(Lattice)}
 	 *                       call. Use {@code 0} to <b>always</b> use
 	 *                       {@link Lattice#lub(Lattice)}
-	 * @param semantics  the {@link SemanticFunction} that will be used for
-	 *                       computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -225,10 +223,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter,
-					SemanticFunction<A, H, V> semantics)
+					AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter)
 					throws FixpointException {
-		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
+		return fixpoint(entryState, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
 	/**
@@ -258,8 +255,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                       an other cfg is encountered
 	 * @param ws         the {@link WorkingSet} instance to use for this
 	 *                       computation
-	 * @param semantics  the {@link SemanticFunction} that will be used for
-	 *                       computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -273,10 +268,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws,
-					SemanticFunction<A, H, V> semantics)
+					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws)
 					throws FixpointException {
-		return fixpoint(entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
+		return fixpoint(entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -310,8 +304,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                       replaced by the {@link Lattice#widening(Lattice)}
 	 *                       call. Use {@code 0} to <b>always</b> use
 	 *                       {@link Lattice#lub(Lattice)}
-	 * @param semantics  the {@link SemanticFunction} that will be used for
-	 *                       computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -325,12 +317,11 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter,
-					SemanticFunction<A, H, V> semantics)
+					AnalysisState<A, H, V> entryState, CallGraph cg, WorkingSet<Statement> ws, int widenAfter)
 					throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(start, cg, ws, widenAfter, semantics);
+		return fixpoint(start, cg, ws, widenAfter);
 	}
 
 	/**
@@ -362,8 +353,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                        {@code entrypoints}
 	 * @param cg          the callgraph that can be queried when a call towards
 	 *                        an other cfg is encountered
-	 * @param semantics   the {@link SemanticFunction} that will be used for
-	 *                        computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -377,9 +366,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
-					SemanticFunction<A, H, V> semantics) throws FixpointException {
-		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg)
+					throws FixpointException {
+		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -415,8 +404,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                        replaced by the {@link Lattice#widening(Lattice)}
 	 *                        call. Use {@code 0} to <b>always</b> use
 	 *                        {@link Lattice#lub(Lattice)}
-	 * @param semantics   the {@link SemanticFunction} that will be used for
-	 *                        computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -430,10 +417,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter,
-					SemanticFunction<A, H, V> semantics)
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg, int widenAfter)
 					throws FixpointException {
-		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
+		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
 	/**
@@ -466,8 +452,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                        an other cfg is encountered
 	 * @param ws          the {@link WorkingSet} instance to use for this
 	 *                        computation
-	 * @param semantics   the {@link SemanticFunction} that will be used for
-	 *                        computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -482,10 +466,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
 					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
-					WorkingSet<Statement> ws,
-					SemanticFunction<A, H, V> semantics)
+					WorkingSet<Statement> ws)
 					throws FixpointException {
-		return fixpoint(entrypoints, entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
+		return fixpoint(entrypoints, entryState, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -522,8 +505,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                        replaced by the {@link Lattice#widening(Lattice)}
 	 *                        call. Use {@code 0} to <b>always</b> use
 	 *                        {@link Lattice#lub(Lattice)}
-	 * @param semantics   the {@link SemanticFunction} that will be used for
-	 *                        computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -539,10 +520,10 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
 					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, CallGraph cg,
 					WorkingSet<Statement> ws,
-					int widenAfter, SemanticFunction<A, H, V> semantics) throws FixpointException {
+					int widenAfter) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(start, cg, ws, widenAfter, semantics);
+		return fixpoint(start, cg, ws, widenAfter);
 	}
 
 	/**
@@ -572,8 +553,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                           apply on it
 	 * @param cg             the callgraph that can be queried when a call
 	 *                           towards an other cfg is encountered
-	 * @param semantics      the {@link SemanticFunction} that will be used for
-	 *                           computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -587,10 +566,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg,
-					SemanticFunction<A, H, V> semantics)
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg)
 					throws FixpointException {
-		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD, semantics);
+		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -625,8 +603,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                           {@link Lattice#widening(Lattice)} call. Use
 	 *                           {@code 0} to <b>always</b> use
 	 *                           {@link Lattice#lub(Lattice)}
-	 * @param semantics      the {@link SemanticFunction} that will be used for
-	 *                           computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -640,9 +616,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, int widenAfter,
-					SemanticFunction<A, H, V> semantics) throws FixpointException {
-		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter, semantics);
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, int widenAfter)
+					throws FixpointException {
+		return fixpoint(startingPoints, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
 
 	/**
@@ -674,8 +650,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                           towards an other cfg is encountered
 	 * @param ws             the {@link WorkingSet} instance to use for this
 	 *                           computation
-	 * @param semantics      the {@link SemanticFunction} that will be used for
-	 *                           computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -689,31 +663,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
-					SemanticFunction<A, H, V> semantics)
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws)
 					throws FixpointException {
-		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD, semantics);
-	}
-
-	/**
-	 * A functional interface that can be used for compute the semantics of
-	 * {@link Statement}s, producing {@link AnalysisState}s.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 * 
-	 * @param <A> the type of {@link AbstractState} contained into the analysis
-	 *                state
-	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
-	 *                analysis states
-	 * @param <V> the concrete type of {@link ValueDomain} embedded in the
-	 *                analysis states
-	 */
-	public interface SemanticFunction<A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> extends
-			it.unive.lisa.util.datastructures.graph.FixpointGraph.SemanticFunction<Statement, Edge, CFG, A, H, V,
-					StatementStore<A, H, V>> {
-
+		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
 
 	/**
@@ -750,8 +702,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                           {@link Lattice#widening(Lattice)} call. Use
 	 *                           {@code 0} to <b>always</b> use
 	 *                           {@link Lattice#lub(Lattice)}
-	 * @param semantics      the {@link SemanticFunction} that will be used for
-	 *                           computing the abstract post-state of statements
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -762,14 +712,15 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
 					Map<Statement, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<Statement> ws,
-					int widenAfter,
-					SemanticFunction<A, H, V> semantics)
+					int widenAfter)
 					throws FixpointException {
-		return new CFGWithAnalysisResults<>(this, super.fixpoint(startingPoints, cg, ws, widenAfter, semantics));
+		return new CFGWithAnalysisResults<A, H, V>(this, super.fixpoint(startingPoints, cg, ws, widenAfter, 
+				(st, entryState, callGraph, expressions) -> st.semantics(entryState, callGraph, (StatementStore) expressions)));
 	}
 
 	@Override

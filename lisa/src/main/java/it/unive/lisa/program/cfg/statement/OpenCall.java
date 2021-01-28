@@ -1,11 +1,15 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -14,9 +18,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -119,24 +120,6 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	@Override
 	public final Identifier getMetaVariable() {
 		return new ValueIdentifier(getRuntimeTypes(), "open_call_ret_value@" + offset);
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		// TODO too coarse
-		AnalysisState<A, H, TypeEnvironment> poststate = entryState.top();
-
-		if (getStaticType().isVoidType())
-			poststate = poststate.smallStepSemantics(new Skip());
-		else
-			poststate = poststate.smallStepSemantics(getMetaVariable());
-
-		setRuntimeTypes(poststate.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return poststate;
 	}
 
 	@Override

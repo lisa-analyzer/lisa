@@ -1,20 +1,18 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.InferredTypes;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Node;
-import java.util.Objects;
 
 /**
  * A statement of the program to analyze.
@@ -106,40 +104,6 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 
 	@Override
 	public abstract String toString();
-
-	/**
-	 * Computes the runtime types for this statement, expressing how type
-	 * information is transformed by the execution of this statement. This
-	 * method is also responsible for recursively invoking the
-	 * {@link #typeInference(AnalysisState, CallGraph, StatementStore)} of each
-	 * nested {@link Expression}, saving the result of each call in
-	 * {@code expressions}. If this statement is an {@link Expression},
-	 * implementers of this method should call
-	 * {@link Expression#setRuntimeTypes(it.unive.lisa.util.collections.ExternalSet)}
-	 * with the computed set of {@link Type}s embedded in {@link InferredTypes}
-	 * as parameter, in order to register the computed runtime types in the
-	 * expression.
-	 * 
-	 * @param <A>         the type of {@link AbstractState}
-	 * @param <H>         the type of {@link HeapDomain} that is run during the
-	 *                        type inference
-	 * @param entryState  the entry state that represents the abstract values of
-	 *                        each program variable and memory location when the
-	 *                        execution reaches this statement
-	 * @param callGraph   the call graph of the program to analyze
-	 * @param expressions the cache where analysis states of intermediate
-	 *                        expressions must be stored
-	 * 
-	 * @return the {@link AnalysisState} representing the abstract result of the
-	 *             execution of this statement
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions)
-					throws SemanticException;
 
 	/**
 	 * Computes the semantics of the statement, expressing how semantic

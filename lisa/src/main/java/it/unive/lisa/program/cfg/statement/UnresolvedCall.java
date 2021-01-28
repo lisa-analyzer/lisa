@@ -1,20 +1,21 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call that happens inside the program to analyze. At this stage, the
@@ -233,25 +234,6 @@ public class UnresolvedCall extends Call {
 	@Override
 	public String toString() {
 		return "[unresolved]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		Call resolved;
-		try {
-			resolved = callGraph.resolve(this);
-		} catch (CallResolutionException e) {
-			throw new SemanticException("Unable to resolve call " + this, e);
-		}
-		AnalysisState<A, H,
-				TypeEnvironment> result = resolved.callTypeInference(entryState, callGraph, computedStates, params);
-		getMetaVariables().addAll(resolved.getMetaVariables());
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -54,35 +53,6 @@ public class Assignment extends BinaryExpression {
 	@Override
 	public final String toString() {
 		return getLeft() + " = " + getRight();
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> right = getRight().typeInference(entryState, callGraph, expressions);
-		AnalysisState<A, H, TypeEnvironment> left = getLeft().typeInference(right, callGraph, expressions);
-		expressions.put(getRight(), right);
-		expressions.put(getLeft(), left);
-
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		for (SymbolicExpression expr1 : left.getComputedExpressions())
-			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<A, H, TypeEnvironment> tmp = left.assign((Identifier) expr1, expr2);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
-			}
-
-		if (!getRight().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getRight().getMetaVariables());
-		if (!getLeft().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getLeft().getMetaVariables());
-
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
 	}
 
 	/**

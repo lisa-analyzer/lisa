@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -36,20 +35,6 @@ public class IMPAssert extends UnaryStatement {
 	@Override
 	public String toString() {
 		return "assert " + getExpression();
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> result = getExpression().typeInference(entryState, callGraph, expressions);
-		expressions.put(getExpression(), result);
-		if (!getExpression().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		if (!getExpression().getDynamicType().isBooleanType())
-			return result.bottom();
-		return result.smallStepSemantics(new Skip());
 	}
 
 	@Override

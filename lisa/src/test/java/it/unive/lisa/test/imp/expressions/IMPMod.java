@@ -17,12 +17,11 @@ import it.unive.lisa.type.NumericType;
 /**
  * An expression modeling the module operation ({@code %}). Both operands' types
  * must be instances of {@link NumericType}. The type of this expression is the
- * common numerical type of its operands, according to
- * {@link BinaryNumericalOperation#commonNumericalType(SymbolicExpression, SymbolicExpression)}.
+ * common numerical type of its operands, according to the type inference.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPMod extends BinaryNativeCall implements BinaryNumericalOperation {
+public class IMPMod extends BinaryNativeCall {
 
 	/**
 	 * Builds the module.
@@ -55,7 +54,7 @@ public class IMPMod extends BinaryNativeCall implements BinaryNumericalOperation
 			return entryState.bottom();
 
 		return rightState
-				.smallStepSemantics(new BinaryExpression(commonNumericalType(left, right), left, right,
+				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
 						BinaryOperator.NUMERIC_MOD));
 	}
 }

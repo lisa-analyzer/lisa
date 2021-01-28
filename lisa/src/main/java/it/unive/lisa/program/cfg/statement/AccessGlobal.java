@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
@@ -78,18 +77,6 @@ public class AccessGlobal extends Expression {
 	@Override
 	public String toString() {
 		return container.getName() + "::" + target.getName();
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		// unit globals are unique, we can directly access those
-		AnalysisState<A, H, TypeEnvironment> result = entryState
-				.smallStepSemantics(new HeapReference(getRuntimeTypes(), toString()));
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
 	}
 
 	@Override

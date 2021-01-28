@@ -201,6 +201,27 @@ public interface Type {
 	}
 
 	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link TypeTokenType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public default boolean isTypeTokenType() {
+		return this instanceof TypeTokenType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link TypeTokenType}, only if
+	 * {@link #isTypeTokenType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link TypeTokenType}, or {@code null}
+	 */
+	public default TypeTokenType asTypeTokenType() {
+		return isTypeTokenType() ? (TypeTokenType) this : null;
+	}
+
+	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
 	 * It returns {@code true} if so, and returns {@code false} otherwise.

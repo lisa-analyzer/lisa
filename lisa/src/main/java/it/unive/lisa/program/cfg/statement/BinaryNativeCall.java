@@ -1,17 +1,17 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
 
 /**
  * A {@link NativeCall} with a exactly two arguments.
@@ -90,27 +90,6 @@ public abstract class BinaryNativeCall extends NativeCall {
 	protected BinaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
 			Expression left, Expression right) {
 		super(cfg, sourceFile, line, col, constructName, staticType, left, right);
-	}
-
-	@Override
-	public final <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState,
-					CallGraph callGraph, AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		for (SymbolicExpression left : params[0])
-			for (SymbolicExpression right : params[1]) {
-				AnalysisState<A, H, TypeEnvironment> tmp = binarySemantics(entryState, callGraph, computedStates[0],
-						left, computedStates[1], right);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
-			}
-
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
 	}
 
 	@Override

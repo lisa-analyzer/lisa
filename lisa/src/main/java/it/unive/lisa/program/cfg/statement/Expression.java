@@ -94,7 +94,7 @@ public abstract class Expression extends Statement {
 	 * @param runtimeTypes the set of concrete types that this expression can
 	 *                         have at runtime
 	 */
-	protected final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
+	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
 		if (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes))
 			return;
 

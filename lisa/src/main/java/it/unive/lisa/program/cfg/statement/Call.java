@@ -1,21 +1,21 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
 
 /**
  * A call to another procedure. This concrete instance of this class determines
@@ -181,62 +181,6 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
 					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
-					throws SemanticException;
-
-	@Override
-	public final <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		@SuppressWarnings("unchecked")
-		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
-
-		@SuppressWarnings("unchecked")
-		AnalysisState<A, H, TypeEnvironment>[] currents = new AnalysisState[parameters.length];
-
-		for (int i = 0; i < computed.length; i++) {
-			currents[i] = parameters[i].typeInference(entryState, callGraph, expressions);
-			expressions.put(parameters[i], currents[i]);
-			computed[i] = currents[i].getComputedExpressions();
-		}
-
-		AnalysisState<A, H, TypeEnvironment> result = callSemantics(entryState, callGraph, currents, computed);
-		for (Expression param : parameters)
-			if (!param.getMetaVariables().isEmpty())
-				result = result.forgetIdentifiers(param.getMetaVariables());
-		return result;
-	}
-
-	/**
-	 * Infer the types of the call, after the types of all parameters have been
-	 * inferred. Meta variables from the parameters will be forgotten after this
-	 * call returns.
-	 * 
-	 * @param <A>            the type of {@link AbstractState}
-	 * @param <H>            the type of the {@link HeapDomain}
-	 * @param entryState     the entry state of this call
-	 * @param callGraph      the call graph of the program to analyze
-	 * @param computedStates the array of states chaining the parameters'
-	 *                           semantics evaluation starting from
-	 *                           {@code entryState}, namely
-	 *                           {@code computedState[i]} corresponds to the
-	 *                           state obtained by the evaluation of
-	 *                           {@code params[i]} in the state
-	 *                           {@code computedState[i-1]} ({@code params[0]}
-	 *                           is evaluated in {@code entryState})
-	 * @param params         the symbolic expressions representing the computed
-	 *                           values of the parameters of this call
-	 * 
-	 * @return the {@link AnalysisState} representing the abstract result of the
-	 *             execution of this call
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public abstract <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState,
-					CallGraph callGraph, AnalysisState<A, H, TypeEnvironment>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException;
 
