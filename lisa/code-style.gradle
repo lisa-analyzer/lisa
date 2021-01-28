@@ -55,6 +55,7 @@ spotless {
       		include '**/*.java'
       		exclude '**/build/generated/**'
       		exclude '**/build/generated-src/**'
+      		exclude '**/target/generated-sources/**'
     	}
   	}
   	antlr4 {
