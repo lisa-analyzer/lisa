@@ -32,4 +32,13 @@ public interface InferredValue<T extends InferredValue<T>>
 	default T variable(Identifier id) {
 		return bottom();
 	}
+
+	/**
+	 * Yields the execution state, that will be stored inside the
+	 * {@link InferenceSystem}, that represent the state after the semantics
+	 * computation that led to the creation of this inferred value.
+	 * 
+	 * @return the new execution state
+	 */
+	T executionState();
 }

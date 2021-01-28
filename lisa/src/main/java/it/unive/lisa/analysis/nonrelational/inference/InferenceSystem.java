@@ -23,8 +23,6 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 
 	private final T inferredValue;
 
-	private final T executionState;
-
 	/**
 	 * Builds an empty inference system.
 	 * 
@@ -34,28 +32,25 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	public InferenceSystem(T domain) {
 		super(domain);
 		inferredValue = domain.bottom();
-		executionState = domain.bottom();
 	}
 
 	private InferenceSystem(T domain, Map<Identifier, T> function) {
-		this(domain, function, domain.bottom(), domain.bottom());
+		this(domain, function, domain.bottom());
 	}
 
-	private InferenceSystem(T domain, Map<Identifier, T> function, T inferredValue, T executionState) {
+	private InferenceSystem(T domain, Map<Identifier, T> function, T inferredValue) {
 		super(domain, function);
 		this.inferredValue = inferredValue;
-		this.executionState = executionState;
 	}
 
 	/**
-	 * Yields the execution state (also called program counter), that gets
-	 * updated when traversing conditions through
-	 * {@link #assume(ValueExpression)}.
+	 * Yields the execution state (also called program counter), that might
+	 * change when evaluating an expression.
 	 * 
 	 * @return the execution state
 	 */
 	public T getExecutionState() {
-		return executionState;
+		return inferredValue.executionState();
 	}
 
 	/**
@@ -72,7 +67,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 
 	@Override
 	protected InferenceSystem<T> copy() {
-		return new InferenceSystem<>(lattice, mkNewFunction(function), inferredValue, executionState);
+		return new InferenceSystem<>(lattice, mkNewFunction(function), inferredValue);
 	}
 
 	@Override
@@ -80,24 +75,13 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		T v = lattice.variable(id);
 		if (!v.isBottom())
 			function.put(id, v);
-		return new InferenceSystem<>(lattice, function, eval, executionState);
+		return new InferenceSystem<>(lattice, function, eval);
 	}
 
 	@Override
 	public InferenceSystem<T> smallStepSemantics(ValueExpression expression) throws SemanticException {
 		// we update the inferred value
-		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this), executionState);
-	}
-
-	@Override
-	public InferenceSystem<T> assume(ValueExpression expression) throws SemanticException {
-		InferenceSystem<T> assumed = super.assume(expression);
-		if (assumed.isBottom())
-			return assumed;
-
-		// TODO should the inverredValue be set to lattice.eval()?
-		return new InferenceSystem<>(assumed.lattice, assumed.function, lattice.bottom(),
-				lattice.eval(expression, this));
+		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this));
 	}
 
 	@Override
@@ -115,8 +99,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		InferenceSystem<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
-		return new InferenceSystem<>(lub.lattice, lub.function, inferredValue.lub(other.inferredValue),
-				executionState.lub(other.executionState));
+		return new InferenceSystem<>(lub.lattice, lub.function, inferredValue.lub(other.inferredValue));
 	}
 
 	@Override
@@ -124,8 +107,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		InferenceSystem<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
-		return new InferenceSystem<>(widen.lattice, widen.function, inferredValue.widening(other.inferredValue),
-				executionState.widening(other.executionState));
+		return new InferenceSystem<>(widen.lattice, widen.function, inferredValue.widening(other.inferredValue));
 	}
 
 	@Override
@@ -133,6 +115,6 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		if (!super.lessOrEqualAux(other))
 			return false;
 
-		return inferredValue.lessOrEqual(other.inferredValue) && executionState.lessOrEqual(other.executionState);
+		return inferredValue.lessOrEqual(other.inferredValue);
 	}
 }
