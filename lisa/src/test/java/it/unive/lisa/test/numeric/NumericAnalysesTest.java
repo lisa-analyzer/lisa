@@ -13,15 +13,14 @@ import it.unive.lisa.analysis.impl.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.impl.numeric.Parity;
 import it.unive.lisa.analysis.impl.numeric.Sign;
-import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import org.junit.Test;
 
 public class NumericAnalysesTest {
@@ -33,8 +32,8 @@ public class NumericAnalysesTest {
 		System.out.println("Testing sign analysis...");
 		LiSA lisa = new LiSA();
 
-		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile(filePath);
+		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
@@ -43,7 +42,7 @@ public class NumericAnalysesTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 
@@ -61,8 +60,8 @@ public class NumericAnalysesTest {
 		System.out.println("Testing parity analysis...");
 		LiSA lisa = new LiSA();
 
-		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile(filePath);
+		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
@@ -71,7 +70,7 @@ public class NumericAnalysesTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 
@@ -89,8 +88,8 @@ public class NumericAnalysesTest {
 		System.out.println("Testing interval analysis...");
 		LiSA lisa = new LiSA();
 
-		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile(filePath);
+		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
 		lisa.setDumpAnalysis(true);
 		lisa.setJsonOutput(true);
@@ -99,7 +98,7 @@ public class NumericAnalysesTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 
@@ -117,8 +116,8 @@ public class NumericAnalysesTest {
 		System.out.println("Testing integer constant propagation...");
 		LiSA lisa = new LiSA();
 
-		Collection<CFG> cfgs = IMPFrontend.processFile(filePath);
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile(filePath);
+		lisa.setProgram(program);
 		lisa.setAbstractState(
 				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new IntegerConstantPropagation()));
 		lisa.setDumpAnalysis(true);
@@ -128,7 +127,7 @@ public class NumericAnalysesTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 

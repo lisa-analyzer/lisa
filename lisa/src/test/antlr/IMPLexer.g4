@@ -15,6 +15,10 @@ BOOLEAN
    : 'boolean'
    ;
 
+STRING
+   : 'string'
+   ;
+
 FLOAT
    : 'float'
    ;
@@ -51,6 +55,14 @@ EXTENDS
    ;
    // method body    
    
+DEFINE
+   : 'def'
+   ;
+
+FINAL
+   : 'final'
+   ;
+
 RETURN
    : 'return'
    ;
@@ -126,6 +138,10 @@ RBRACK
    ;
    // separators
    
+TILDE
+   : '~'
+   ;
+
 SEMI
    : ';'
    ;

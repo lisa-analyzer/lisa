@@ -7,21 +7,21 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.BinaryNativeCall;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.test.imp.types.StringType;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * An expression modeling the addition operation ({@code +}). If both operands'
  * dynamic type (according to {@link SymbolicExpression#getDynamicType()}) is a
- * {@link it.unive.lisa.cfg.type.StringType} (according to
+ * {@link it.unive.lisa.type.StringType} (according to
  * {@link Type#isStringType()}), then this operation translates to a string
  * concatenation of its operands, and its type is {@link StringType}. Otherwise,
  * both operands' types must be instances of {@link NumericType}, and the type

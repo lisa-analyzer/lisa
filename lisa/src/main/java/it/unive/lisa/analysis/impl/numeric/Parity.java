@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
-import it.unive.lisa.cfg.type.Type;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -94,11 +93,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalTypeConversion(Type type, Parity arg) {
-		return top();
-	}
-
-	@Override
 	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg) {
 		switch (operator) {
 		case NUMERIC_NEG:
@@ -166,11 +160,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTypeConversion(Type type, Parity right) {
 		return Satisfiability.UNKNOWN;
 	}
 

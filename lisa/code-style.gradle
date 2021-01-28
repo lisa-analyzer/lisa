@@ -22,6 +22,7 @@ checkstyleTest {
     
     // only included files will be checked
     include 'it/unive/lisa/test/imp/**/*.java'
+    exclude '**/*Test.java'
 }
 
 task checkstyleErrorMessage {
@@ -54,6 +55,7 @@ spotless {
       		include '**/*.java'
       		exclude '**/build/generated/**'
       		exclude '**/build/generated-src/**'
+      		exclude '**/target/generated-sources/**'
     	}
   	}
   	antlr4 {

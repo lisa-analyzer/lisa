@@ -6,23 +6,26 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in this graph
- * @param <E> the type of the edges in this graph
+ * @param <N> the type of {@link Node}s in this graph
+ * @param <E> the type of {@link Edge}s in this graph
+ * @param <G> the type of this graph
  */
-public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
+public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>> {
 
 	/**
 	 * The adjacency matrix of this graph, mapping nodes to the collection of
 	 * edges attached to it.
 	 */
-	protected final AdjacencyMatrix<N, E> adjacencyMatrix;
+	protected final AdjacencyMatrix<N, E, G> adjacencyMatrix;
 
 	/**
 	 * The nodes of this graph that are entrypoints, that is, that can be
@@ -46,7 +49,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
 	 *                            that will be part of this graph
 	 */
-	protected Graph(Collection<N> entrypoints, AdjacencyMatrix<N, E> adjacencyMatrix) {
+	protected Graph(Collection<N> entrypoints, AdjacencyMatrix<N, E, G> adjacencyMatrix) {
 		this.adjacencyMatrix = adjacencyMatrix;
 		this.entrypoints = entrypoints;
 	}
@@ -56,7 +59,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * 
 	 * @param other the original graph
 	 */
-	protected Graph(Graph<N, E> other) {
+	protected Graph(G other) {
 		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 	}
@@ -229,7 +232,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * 
 	 * @return the converted {@link DotGraph}
 	 */
-	protected abstract DotGraph<N, E> toDot(Function<N, String> labelGenerator);
+	protected abstract DotGraph<N, E, G> toDot(Function<N, String> labelGenerator);
 
 	@Override
 	public int hashCode() {
@@ -262,7 +265,7 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 * @return {@code true} if this graph and the given one are effectively
 	 *             equals
 	 */
-	public boolean isEqualTo(Graph<N, E> graph) {
+	public boolean isEqualTo(G graph) {
 		if (this == graph)
 			return true;
 		if (graph == null)
@@ -328,6 +331,47 @@ public abstract class Graph<N extends Node<N>, E extends Edge<N, E>> {
 	 *                                           outgoing non-simplifiable edge
 	 */
 	protected final <T extends N> void simplify(Class<T> target) {
-		adjacencyMatrix.simplify(target);
+		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
+				.collect(Collectors.toSet());
+		targets.forEach(this::preSimplify);
+		adjacencyMatrix.simplify(targets);
+	}
+
+	/**
+	 * Callback that is invoked on a node before simplifying it.
+	 * 
+	 * @param node the node about to be simplified
+	 */
+	protected void preSimplify(N node) {
+		// nothing to do, but subclasses might redefine
+	}
+
+	/**
+	 * Accepts the given {@link GraphVisitor}. This method first invokes
+	 * {@link GraphVisitor#visit(Object, Graph)} on this graph, and then
+	 * proceeds by first invoking
+	 * {@link GraphVisitor#visit(Object, Graph, Node)} on all the nodes in the
+	 * order they are returned by {@link #getNodes()}, and later invoking
+	 * {@link GraphVisitor#visit(Object, Graph, Edge)} on all the edges in the
+	 * order they are returned by {@link #getEdges()}. The visiting stops at the
+	 * first of such calls that return {@code false}.
+	 * 
+	 * @param <V>     the type of auxiliary tool that {@code visitor} can use
+	 * @param visitor the visitor that is visiting the {@link Graph} containing
+	 *                    this graph
+	 * @param tool    the auxiliary tool that {@code visitor} can use
+	 */
+	@SuppressWarnings("unchecked")
+	public <V> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
+		if (!visitor.visit(tool, (G) this))
+			return;
+
+		for (N node : getNodes())
+			if (!node.accept(visitor, tool))
+				return;
+
+		for (E edge : getEdges())
+			if (!edge.accept(visitor, tool))
+				return;
 	}
 }

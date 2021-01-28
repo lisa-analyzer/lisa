@@ -86,7 +86,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
 		for (Identifier id : ids)
-			result = forgetIdentifier(id);
+			result = result.forgetIdentifier(id);
 		return result;
 	}
 

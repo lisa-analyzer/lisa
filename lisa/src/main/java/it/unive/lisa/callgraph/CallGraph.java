@@ -8,12 +8,13 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.SemanticFunction;
-import it.unive.lisa.cfg.statement.CFGCall;
-import it.unive.lisa.cfg.statement.Call;
-import it.unive.lisa.cfg.statement.OpenCall;
-import it.unive.lisa.cfg.statement.UnresolvedCall;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFG.SemanticFunction;
+import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.program.cfg.statement.OpenCall;
+import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
@@ -29,29 +30,35 @@ import java.util.Collection;
 public interface CallGraph {
 
 	/**
-	 * Adds a new cfg to this call graph.
+	 * Builds the call graph of the given program.
 	 * 
-	 * @param cfg the cfg to add
+	 * @param program the program to analyze
+	 * 
+	 * @throws CallGraphConstructionException if an exception happens while
+	 *                                            building the call graph
 	 */
-	void addCFG(CFG cfg);
+	void build(Program program) throws CallGraphConstructionException;
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}. This method will return:
 	 * <ul>
 	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
-	 * {@link UnresolvedCall#getQualifiedName()} is found. The returned
+	 * {@link UnresolvedCall#getTargetName()} is found. The returned
 	 * {@link CFGCall} will be linked to all the possible runtime targets
-	 * matching {@link UnresolvedCall#getQualifiedName()};</li>
+	 * matching {@link UnresolvedCall#getTargetName()};</li>
 	 * <li>an {@link OpenCall}, if no {@link CFG} matching
-	 * {@link UnresolvedCall#getQualifiedName()} is found.</li>
+	 * {@link UnresolvedCall#getTargetName()} is found.</li>
 	 * </ul>
 	 * 
 	 * @param call the call to resolve
 	 * 
 	 * @return a collection of all the possible runtime targets
+	 * 
+	 * @throws CallResolutionException if this call graph is unable to resolve
+	 *                                     the given call
 	 */
-	Call resolve(UnresolvedCall call);
+	Call resolve(UnresolvedCall call) throws CallResolutionException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
@@ -99,8 +106,8 @@ public interface CallGraph {
 
 	/**
 	 * Clears all the data from the last fixpoint computation, effectively
-	 * re-initializing the call graph. The set of {@link CFG} under analysis
-	 * (added through {@link #addCFG(CFG)}) is not lost.
+	 * re-initializing the call graph. The call graph structure obtained throug
+	 * {@link #build(Program)} is not lost.
 	 */
 	void clear();
 

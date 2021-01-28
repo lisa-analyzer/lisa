@@ -1,8 +1,10 @@
 package it.unive.lisa.symbolic.types;
 
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * An internal implementation of the {@link NumericType} interface that can be
@@ -71,5 +73,10 @@ public class IntType implements NumericType {
 	@Override
 	public boolean isUnsigned() {
 		return false;
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

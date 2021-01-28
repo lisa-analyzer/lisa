@@ -10,9 +10,9 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
@@ -20,7 +20,13 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
@@ -47,9 +53,9 @@ public class LiSA {
 	private static final Logger log = LogManager.getLogger(LiSA.class);
 
 	/**
-	 * The collection of CFG instances that are to be analyzed
+	 * The program to analyze
 	 */
-	private final Collection<CFG> inputs;
+	private Program program;
 
 	/**
 	 * The collection of syntactic checks to execute
@@ -111,7 +117,6 @@ public class LiSA {
 	 * Builds a new LiSA instance.
 	 */
 	public LiSA() {
-		this.inputs = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		// since the warnings collection will be filled AFTER the execution of
 		// every concurrent bit has completed its execution, it is fine to use a
@@ -125,21 +130,13 @@ public class LiSA {
 	}
 
 	/**
-	 * Adds the given cfg to the ones under analysis.
+	 * Sets the program to analyze. Any previous value set through this method
+	 * is lost.
 	 * 
-	 * @param cfg the cfg to analyze
+	 * @param program the program to analyze
 	 */
-	public void addCFG(CFG cfg) {
-		inputs.add(cfg);
-	}
-
-	/**
-	 * Adds the given cfgs to the ones under analysis.
-	 * 
-	 * @param cfgs the cfgs to analyze
-	 */
-	public void addCFGs(Collection<CFG> cfgs) {
-		inputs.addAll(cfgs);
+	public void setProgram(Program program) {
+		this.program = program;
 	}
 
 	/**
@@ -311,7 +308,6 @@ public class LiSA {
 	private void printConfig() {
 		log.info("LiSA setup:");
 		log.info("  workdir: " + String.valueOf(workdir));
-		log.info("  " + inputs.size() + " CFGs to analyze");
 		log.info("  dump input cfgs: " + dumpCFGs);
 		log.info("  infer types: " + inferTypes);
 		log.info("  dump inferred types: " + dumpTypeInference);
@@ -334,15 +330,29 @@ public class LiSA {
 			A extends AbstractState<A, H, V>,
 			T extends AbstractState<T, H, TypeEnvironment>> void runAux()
 					throws AnalysisExecutionException {
+		// fill up the types cache by side effect on an external set
+		ExternalSet<Type> types = Caches.types().mkEmptySet();
+		program.getRegisteredTypes().forEach(types::add);
+		types = null;
+
 		FileManager.setWorkdir(workdir);
+		Collection<CFG> allCFGs = program.getAllCFGs();
+
+		TimerLogger.execAction(log, "Finalizing input program", () -> {
+			try {
+				program.validateAndFinalize();
+			} catch (ProgramValidationException e) {
+				throw new AnalysisExecutionException("Unable to finalize target program", e);
+			}
+		});
 
 		if (dumpCFGs)
-			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping input CFGs", "cfgs"))
+			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
 		if (!syntacticChecks.isEmpty()) {
-			SyntacticChecksExecutor.executeAll(tool, inputs, syntacticChecks);
+			SyntacticChecksExecutor.executeAll(tool, allCFGs, syntacticChecks);
 			warnings.addAll(tool.getWarnings());
 		} else
 			log.warn("Skipping syntactic checks execution since none have been provided");
@@ -356,7 +366,12 @@ public class LiSA {
 			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
 		}
 
-		inputs.forEach(callGraph::addCFG);
+		try {
+			callGraph.build(program);
+		} catch (CallGraphConstructionException e) {
+			log.fatal("Exception while building the call graph for the input program", e);
+			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
+		}
 
 		if (inferTypes) {
 			T tmp;
@@ -385,7 +400,7 @@ public class LiSA {
 					});
 
 			if (dumpTypeInference)
-				for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping type analysis", "cfgs")) {
+				for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping type analysis", "cfgs")) {
 					CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				}
@@ -411,14 +426,14 @@ public class LiSA {
 				});
 
 		if (dumpAnalysis)
-			for (CFG cfg : IterationLogger.iterate(log, inputs, "Dumping analysis results", "cfgs")) {
+			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
 				CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
 	}
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
-		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignature())) {
+		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
 			cfg.dump(file, st -> labelGenerator.apply(st));
 		} catch (IOException e) {
 			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),

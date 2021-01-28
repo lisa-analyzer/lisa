@@ -1,0 +1,26 @@
+class first {
+	field;
+	~first(x) {
+		this.field = x;
+	}
+	foo(i, j) {
+		return i + j;
+	}
+}
+
+class second extends first {
+	field2;
+	~second(x) {
+		this.field2 = x;
+	}
+}
+
+class third extends second {
+	field3;
+	~third(x) {
+		this.field2 = x;
+	}
+	foo(i, j) {
+		return i + j + 2;
+	}
+}

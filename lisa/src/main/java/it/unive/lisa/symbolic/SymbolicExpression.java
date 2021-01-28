@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 
 /**

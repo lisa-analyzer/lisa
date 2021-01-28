@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CFGDescriptor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -82,6 +82,7 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + descriptor.getFullSignature() + "': " + getTaggedMessage();
+		return getLocationWithBrackets() + " on '" + descriptor.getFullSignatureWithParNames() + "': "
+				+ getTaggedMessage();
 	}
 }

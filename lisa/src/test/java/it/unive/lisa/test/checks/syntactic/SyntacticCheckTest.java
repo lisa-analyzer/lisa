@@ -5,36 +5,25 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFGDescriptor;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.Variable;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import org.junit.Test;
 
 public class SyntacticCheckTest {
 
 	private static class VariableI implements SyntacticCheck {
-
-		@Override
-		public void visitStatement(CheckTool tool, Statement statement) {
-			if (statement instanceof Expression)
-				visitExpression(tool, (Expression) statement);
-		}
-
-		@Override
-		public void visitCFGDescriptor(CheckTool tool, CFGDescriptor descriptor) {
-		}
 
 		@Override
 		public void beforeExecution(CheckTool tool) {
@@ -45,9 +34,20 @@ public class SyntacticCheckTest {
 		}
 
 		@Override
-		public void visitExpression(CheckTool tool, Expression expression) {
-			if (expression instanceof Variable && ((Variable) expression).getName().equals("i"))
-				tool.warnOn(expression, "Found variable i");
+		public boolean visit(CheckTool tool, CFG graph, Statement node) {
+			if (node instanceof VariableRef && ((VariableRef) node).getName().equals("i"))
+				tool.warnOn(node, "Found variable i");
+			return true;
+		}
+
+		@Override
+		public boolean visit(CheckTool tool, CFG g) {
+			return true;
+		}
+
+		@Override
+		public boolean visit(CheckTool tool, CFG graph, Edge edge) {
+			return true;
 		}
 	}
 
@@ -57,14 +57,14 @@ public class SyntacticCheckTest {
 		LiSA lisa = new LiSA();
 		lisa.addSyntacticCheck(new VariableI());
 
-		Collection<CFG> cfgs = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp");
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp");
+		lisa.setProgram(program);
 		lisa.setWorkdir("test-outputs/syntactic");
 		lisa.setJsonOutput(true);
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 

@@ -1,47 +1,77 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.PointerType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.type.PointerType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.workset.FIFOWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A type representing an IMP class defined in an IMP program. ClassTypes are
- * instances of {@link PointerType}, have a name and a supertype. To ensure
- * uniqueness of ClassType objects, {@link #lookup(String, ClassType)} must be
- * used to retrieve existing instances (or automatically create one if no
- * matching instance exists).
+ * instances of {@link PointerType} and {@link UnitType}, and are identified by
+ * their name. To ensure uniqueness of ClassType objects,
+ * {@link #lookup(String, CompilationUnit)} must be used to retrieve existing
+ * instances (or automatically create one if no matching instance exists).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ClassType implements PointerType {
+public class ClassType implements PointerType, UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
 
 	/**
-	 * Yields a unique instance (either an existing one or a fresh one) of
-	 * {@link ClassType} representing a class with the given {@code name} and
-	 * the given {@code supertype}.
+	 * Clears the cache of {@link ClassType}s created up to now.
+	 */
+	public static void clearAll() {
+		types.clear();
+	}
+
+	/**
+	 * Yields all the {@link ClassType}s defined up to now.
 	 * 
-	 * @param name      the name of the class
-	 * @param supertype the supertype of the class, or {@code null} if the class
-	 *                      has no supertype.
+	 * @return the collection of all the class types
+	 */
+	public static Collection<ClassType> all() {
+		return types.values();
+	}
+
+	/**
+	 * Yields a unique instance (either an existing one or a fresh one) of
+	 * {@link ClassType} representing a class with the given {@code name},
+	 * representing the given {@code unit}.
+	 * 
+	 * @param name the name of the class
+	 * @param unit the unit underlying this type
 	 * 
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(String name, ClassType supertype) {
-		return types.computeIfAbsent(name, x -> new ClassType(name, supertype));
+	public static ClassType lookup(String name, CompilationUnit unit) {
+		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
 	}
 
 	private final String name;
 
-	private final ClassType supertype;
+	private final CompilationUnit unit;
 
-	private ClassType(String name, ClassType supertype) {
+	private ClassType(String name, CompilationUnit unit) {
+		Objects.requireNonNull(name, "The name of a class type cannot be null");
+		Objects.requireNonNull(unit, "The unit of a class type cannot be null");
 		this.name = name;
-		this.supertype = supertype;
+		this.unit = unit;
+	}
+
+	@Override
+	public CompilationUnit getUnit() {
+		return unit;
 	}
 
 	@Override
@@ -50,33 +80,41 @@ public class ClassType implements PointerType {
 	}
 
 	private boolean subclass(ClassType other) {
-		return this == other || (supertype != null && supertype.subclass(other));
+		return this == other || unit.isInstanceOf(other.unit);
 	}
 
 	@Override
 	public Type commonSupertype(Type other) {
+		if (other.isNullType())
+			return this;
+
+		if (!other.isUnitType())
+			return Untyped.INSTANCE;
+
 		if (canBeAssignedTo(other))
 			return other;
 
 		if (other.canBeAssignedTo(this))
 			return this;
 
-		if (other.isNullType())
-			return this;
-
-		if (other.isArrayType())
-			return Untyped.INSTANCE;
-
 		return scanForSupertypeOf((ClassType) other);
 	}
 
 	private Type scanForSupertypeOf(ClassType other) {
-		ClassType current = this;
-		while (current != null) {
+		WorkingSet<ClassType> ws = FIFOWorkingSet.mk();
+		Set<ClassType> seen = new HashSet<>();
+		ws.push(this);
+		ClassType current;
+		while (!ws.isEmpty()) {
+			current = ws.pop();
+			if (!seen.add(current))
+				continue;
+
 			if (other.canBeAssignedTo(current))
 				return current;
 
-			current = current.supertype;
+			// null since we do not want to create new types here
+			current.unit.getSuperUnits().forEach(u -> ws.push(lookup(u.getName(), null)));
 		}
 
 		return Untyped.INSTANCE;
@@ -92,7 +130,7 @@ public class ClassType implements PointerType {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((supertype == null) ? 0 : supertype.hashCode());
+		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
 		return result;
 	}
 
@@ -110,11 +148,19 @@ public class ClassType implements PointerType {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (supertype == null) {
-			if (other.supertype != null)
+		if (unit == null) {
+			if (other.unit != null)
 				return false;
-		} else if (!supertype.equals(other.supertype))
+		} else if (!unit.equals(other.unit))
 			return false;
 		return true;
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		Collection<Type> instances = new HashSet<>();
+		for (CompilationUnit in : unit.getInstances())
+			instances.add(lookup(in.getName(), null));
+		return instances;
 	}
 }

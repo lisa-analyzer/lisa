@@ -7,15 +7,16 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.NativeCall;
-import it.unive.lisa.cfg.statement.UnresolvedCall;
-import it.unive.lisa.cfg.statement.Variable;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NativeCall;
+import it.unive.lisa.program.cfg.statement.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
-import it.unive.lisa.test.imp.types.ClassType;
+import it.unive.lisa.test.imp.IMPFrontend;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
 import java.util.Collection;
 import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;
@@ -23,7 +24,7 @@ import org.apache.commons.lang3.ArrayUtils;
 /**
  * An expression modeling the object allocation and initialization operation
  * ({@code new className(...)}). The type of this expression is the
- * {@link ClassType} representing the created class. This expression corresponds
+ * {@link UnitType} representing the created class. This expression corresponds
  * to a {@link HeapAllocation} that is used as first parameter (i.e.,
  * {@code this}) for the {@link UnresolvedCall} targeting the invoked
  * constructor. All parameters of the constructor call are provided to the
@@ -57,12 +58,13 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
+				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created);
 	}
@@ -78,7 +80,8 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		Variable paramThis = new Variable(getCFG(), getSourceFile(), getLine(), getCol(), "this", getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
+				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
@@ -90,7 +93,7 @@ public class IMPNewObj extends NativeCall {
 			}
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		AnalysisState<A, H,
 				TypeEnvironment> typing = call.callTypeInference(entryState, callGraph, computedStates, fullParams);
 

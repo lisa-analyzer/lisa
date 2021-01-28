@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Expression;
 
 /**
  * A warning reported by LiSA on an expression.

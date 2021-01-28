@@ -1,13 +1,13 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.edge.FalseEdge;
-import it.unive.lisa.cfg.edge.TrueEdge;
-import it.unive.lisa.cfg.statement.Ret;
-import it.unive.lisa.cfg.statement.Return;
-import it.unive.lisa.cfg.statement.Statement;
-import it.unive.lisa.cfg.statement.Throw;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.FalseEdge;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.statement.Ret;
+import it.unive.lisa.program.cfg.statement.Return;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Throw;
 import java.io.Reader;
 import java.util.function.Function;
 import org.graphstream.graph.implementations.MultiGraph;
@@ -19,7 +19,7 @@ import org.graphstream.graph.implementations.MultiGraph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotCFG extends DotGraph<Statement, Edge> {
+public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 
 	private DotCFG() {
 		super(new CFGLegend().graph);

@@ -28,6 +28,7 @@ primitiveType
    : BOOLEAN
    | INT
    | FLOAT
+   | STRING
    ;
 /*
  * PARAMETER LIST
@@ -89,6 +90,7 @@ expression
    | arrayAccess
    | fieldAccess
    | methodCall
+   | assignment
    ;
 
 basicExpr
@@ -110,18 +112,18 @@ arrayCreatorRest
    : (LBRACK index RBRACK)+
    ;
 
+receiver
+   : THIS
+   | SUPER
+   | IDENTIFIER
+   ;
+
 arrayAccess
-   : IDENTIFIER (LBRACK index RBRACK)+
+   : receiver (LBRACK index RBRACK)+
    ;
 
 index
    : LITERAL_DECIMAL
-   | IDENTIFIER
-   ;
-
-receiver
-   : THIS
-   | SUPER
    | IDENTIFIER
    ;
 
@@ -138,7 +140,7 @@ methodCall
    
    
 statement
-   : assignment SEMI
+   : localDeclaration SEMI
    | ASSERT expression SEMI
    | IF condition = parExpr then = blockOrStatement (ELSE otherwise = blockOrStatement)?
    | loop
@@ -146,6 +148,10 @@ statement
    | THROW expression SEMI
    | skip = SEMI
    | command = expression SEMI
+   ;
+
+localDeclaration
+   : DEFINE IDENTIFIER ASSIGN expression
    ;
 
 assignment
@@ -170,7 +176,7 @@ whileLoop
    ;
 
 forDeclaration
-   : init = assignment? SEMI condition = expression SEMI post = assignment?
+   : (initDecl = localDeclaration | initExpr = expression)? SEMI condition = expression? SEMI post = expression?
    ;
 /*
  * BLOCK
@@ -199,11 +205,11 @@ fieldDeclaration
    ;
 
 constructorDeclaration
-   : name = IDENTIFIER pars = formals code = block
+   : TILDE name = IDENTIFIER pars = formals code = block
    ;
 
 methodDeclaration
-   : name = IDENTIFIER pars = formals code = block
+   : FINAL? name = IDENTIFIER pars = formals code = block
    ;
 /*
  * CLASS

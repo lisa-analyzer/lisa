@@ -1,15 +1,17 @@
 package it.unive.lisa.test.imp.types;
 
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.Type;
-import it.unive.lisa.cfg.type.Untyped;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * The signed 64-bit floating point {@link it.unive.lisa.cfg.type.NumericType}
- * of the IMP language. The only singleton instance of this class can be
- * retrieved trough field {@link #INSTANCE}. Instances of this class are equal
- * to all other classes that implement the
- * {@link it.unive.lisa.cfg.type.NumericType} interface and are 64 bits.
+ * The signed 64-bit floating point {@link it.unive.lisa.type.NumericType} of
+ * the IMP language. The only singleton instance of this class can be retrieved
+ * trough field {@link #INSTANCE}. Instances of this class are equal to all
+ * other classes that implement the {@link it.unive.lisa.type.NumericType}
+ * interface and are 64 bits.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -71,5 +73,10 @@ public class FloatType implements NumericType {
 	@Override
 	public int hashCode() {
 		return FloatType.class.getName().hashCode();
+	}
+
+	@Override
+	public Collection<Type> allInstances() {
+		return Collections.singleton(this);
 	}
 }

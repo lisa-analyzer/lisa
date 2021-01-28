@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.cfg.CFG;
+import it.unive.lisa.program.cfg.CFG;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -82,7 +82,7 @@ public class CFGWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignature() + "': "
+		return getLocationWithBrackets() + " on '" + cfg.getDescriptor().getFullSignatureWithParNames() + "': "
 				+ getTaggedMessage();
 	}
 }

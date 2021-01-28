@@ -24,10 +24,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in this matrix
- * @param <E> the type of the edges in this matrix
+ * @param <N> the type of the {@link Node}s in this matrix
+ * @param <E> the type of the {@link Edge}s in this matrix
+ * @param <G> the type of the {@link Graph}s this matrix can be used in
  */
-public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
+public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>>
 		implements Iterable<Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>>> {
 
 	/**
@@ -62,7 +63,7 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 	 * 
 	 * @param other the matrix to copy
 	 */
-	public AdjacencyMatrix(AdjacencyMatrix<N, E> other) {
+	public AdjacencyMatrix(AdjacencyMatrix<N, E, G> other) {
 		edgeFactory = other.edgeFactory;
 		matrix = new ConcurrentHashMap<>();
 		for (Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>> entry : other.matrix.entrySet())
@@ -177,24 +178,20 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 	}
 
 	/**
-	 * Simplifies this matrix, removing all nodes that are instances of
-	 * {@code <T>} and rewriting the edge set accordingly. This method will
-	 * throw an {@link UnsupportedOperationException} if one of the nodes being
+	 * Simplifies this matrix, removing all the given nodes and rewriting the
+	 * edge set accordingly. This method will throw an
+	 * {@link UnsupportedOperationException} if one of the nodes being
 	 * simplified has an outgoing edge that is not simplifiable, according to
 	 * {@link Edge#canBeSimplified()}.
 	 * 
-	 * @param <T>    the type of {@link Node} that needs to be simplified
-	 * @param target the class of the {@link Node} that needs to be simplified
+	 * @param targets the set of the {@link Node}s that needs to be simplified
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one node
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	@SuppressWarnings("unchecked")
-	public synchronized <T extends N> void simplify(Class<T> target) {
-		Set<T> targets = matrix.keySet().stream().filter(k -> target.isAssignableFrom(k.getClass())).map(k -> (T) k)
-				.collect(Collectors.toSet());
-		for (T t : targets) {
+	public synchronized void simplify(Set<N> targets) {
+		for (N t : targets) {
 			for (E ingoing : matrix.get(t).getLeft())
 				for (E outgoing : matrix.get(t).getRight()) {
 					if (!outgoing.canBeSimplified())
@@ -239,7 +236,7 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AdjacencyMatrix<?, ?> other = (AdjacencyMatrix<?, ?>) obj;
+		AdjacencyMatrix<?, ?, ?> other = (AdjacencyMatrix<?, ?, ?>) obj;
 		if (matrix == null) {
 			if (other.matrix != null)
 				return false;
@@ -257,7 +254,7 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 	 * @return {@code true} if this matrix and the given one are effectively
 	 *             equals
 	 */
-	public boolean isEqualTo(AdjacencyMatrix<N, E> other) {
+	public boolean isEqualTo(AdjacencyMatrix<N, E, G> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -270,8 +267,7 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 		return true;
 	}
 
-	private static <N extends Node<N>, E extends Edge<N, E>> boolean areEqual(
-			Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> first,
+	private boolean areEqual(Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> first,
 			Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> second) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<N> copy = new HashSet<>(second.keySet());
@@ -291,15 +287,13 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 		}
 
 		if (!copy.isEmpty())
-			// we also have to match all of the entrypoints in cfg.entrypoints
 			return false;
 
 		return true;
 	}
 
-	private static <N extends Node<N>, E extends Edge<N, E>> boolean areEqual(ExternalSet<E> first,
-			ExternalSet<E> second) {
-		// the following keeps track of the unmatched nodes in second
+	private boolean areEqual(ExternalSet<E> first, ExternalSet<E> second) {
+		// the following keeps track of the unmatched edges in second
 		Collection<E> copy = second.collect();
 		boolean found;
 		for (E e : first) {
@@ -315,7 +309,6 @@ public class AdjacencyMatrix<N extends Node<N>, E extends Edge<N, E>>
 		}
 
 		if (!copy.isEmpty())
-			// we also have to match all of the entrypoints in cfg.entrypoints
 			return false;
 
 		return true;

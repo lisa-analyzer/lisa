@@ -1,7 +1,9 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.util.collections.Utils;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations
@@ -95,6 +97,15 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 
 	@Override
 	public final String toString() {
-		return isTop() ? "TOP" : isBottom() ? "BOTTOM" : elements.toString();
+		if (isTop())
+			return "TOP";
+
+		if (isBottom())
+			return "BOTTOM";
+
+		Set<E> tmp = new TreeSet<>(
+				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+		tmp.addAll(elements);
+		return tmp.toString();
 	}
 }

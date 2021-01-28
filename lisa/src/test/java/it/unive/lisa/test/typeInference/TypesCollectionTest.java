@@ -5,15 +5,14 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
-import it.unive.lisa.cfg.CFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Collection;
 import org.junit.Test;
 
 public class TypesCollectionTest {
@@ -22,8 +21,8 @@ public class TypesCollectionTest {
 		System.out.println("Testing types collection...");
 		LiSA lisa = new LiSA();
 
-		Collection<CFG> cfgs = IMPFrontend.processFile("imp-testcases/type-inference/program.imp");
-		cfgs.forEach(lisa::addCFG);
+		Program program = IMPFrontend.processFile("imp-testcases/type-inference/program.imp");
+		lisa.setProgram(program);
 		lisa.setInferTypes(true);
 		lisa.setDumpTypeInference(true);
 		lisa.setJsonOutput(true);
@@ -31,7 +30,7 @@ public class TypesCollectionTest {
 		try {
 			lisa.run();
 		} catch (AnalysisException e) {
-			System.err.println(e);
+			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");
 		}
 

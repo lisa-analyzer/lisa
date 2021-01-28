@@ -1,10 +1,11 @@
 package it.unive.lisa.outputs.compare;
 
-import it.unive.lisa.cfg.edge.Edge;
-import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -173,6 +174,7 @@ public class JsonReportComparer {
 		if (!warnings.sameContent() || !files.sameContent())
 			return false;
 
+		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
 			File right = new File(secondFileRoot, pair.getRight());
@@ -187,16 +189,16 @@ public class JsonReportComparer {
 			if (left.getName().endsWith(".dot"))
 				if (!matchDotGraphs(left, right)) {
 					reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
-					return false;
+					diffFound = true;
 				}
 		}
 
-		return true;
+		return !diffFound;
 	}
 
 	private static boolean matchDotGraphs(File left, File right) throws IOException {
-		DotGraph<Statement, Edge> lDot = DotGraph.readDot(new FileReader(left));
-		DotGraph<Statement, Edge> rDot = DotGraph.readDot(new FileReader(right));
+		DotGraph<Statement, Edge, CFG> lDot = DotGraph.readDot(new FileReader(left));
+		DotGraph<Statement, Edge, CFG> rDot = DotGraph.readDot(new FileReader(right));
 		return lDot.equals(rDot);
 	}
 

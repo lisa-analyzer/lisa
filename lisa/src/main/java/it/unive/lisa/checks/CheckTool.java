@@ -1,14 +1,14 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFGDescriptor;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.Statement;
 import it.unive.lisa.checks.warnings.CFGDesccriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,13 +69,18 @@ public class CheckTool {
 	}
 
 	/**
-	 * Reports a new warning with the given message on the given statement.
+	 * Reports a new warning with the given message on the given statement. If
+	 * {@code statement} is an instance of {@link Expression}, then
+	 * {@link #warnOn(Expression, String)} is invoked.
 	 * 
 	 * @param statement the statement to warn on
 	 * @param message   the message of the warning
 	 */
 	public void warnOn(Statement statement, String message) {
-		warnings.add(new StatementWarning(statement, message));
+		if (statement instanceof Expression)
+			warnOn((Expression) statement, message);
+		else
+			warnings.add(new StatementWarning(statement, message));
 	}
 
 	/**

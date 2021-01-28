@@ -1,25 +1,25 @@
 class expressions {
 	assignment() {
-		i = 5;
-		x = "s";
+		def i = 5;
+		def x = "s";
 	}
 	
-	_throw() {
+	_throw(x, i) {
 		throw x;
 		throw i;
 	}
 
-	_return() {
+	_return(x, i) {
 		return i;
 		return x;
 	}
 
-	call() {
+	call(i) {
 		this.test(5);
 		this.test(i, 5);
 	}
 
-	nestedCall() {
+	nestedCall(i, x) {
 		this.test(5, this.test(i, 5));
 		this.test(x, this.test(i));
 		return this.test(i);

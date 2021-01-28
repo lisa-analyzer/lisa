@@ -1,8 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.cfg.type.BooleanType;
-import it.unive.lisa.cfg.type.NumericType;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 
 /**
  * A binary operator that can be applied to a pair of
@@ -121,58 +122,70 @@ public enum BinaryOperator implements Operator {
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator return the
-	 * concatenation of {@code s1} with {@code s2}. The neutral element is the
-	 * empty string. The return type of this operator is
-	 * {@link it.unive.lisa.cfg.type.StringType}.
+	 * {@link StringType}, this operator return the concatenation of {@code s1}
+	 * with {@code s2}. The neutral element is the empty string. The return type
+	 * of this operator is {@link StringType}.
 	 */
 	STRING_CONCAT("strcat"),
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator checks whether
-	 * {@code s1} contains {@code s2}. If {@code s2} is the empty string, then
-	 * true is returned. The return type of this operator is
-	 * {@link BooleanType}.
+	 * {@link StringType}, this operator checks whether {@code s1} contains
+	 * {@code s2}. If {@code s2} is the empty string, then true is returned. The
+	 * return type of this operator is {@link BooleanType}.
 	 */
 	STRING_CONTAINS("strcontains"),
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator checks whether
-	 * {@code s1} starts with {@code s2}, namely if {@code s2} is the prefix of
-	 * {@code s1}. The empty string is the prefix of any string, hence if
-	 * {@code s2} is the empty string, true is returned. The return type of this
-	 * operator is {@link BooleanType}.
+	 * {@link StringType}, this operator checks whether {@code s1} starts with
+	 * {@code s2}, namely if {@code s2} is the prefix of {@code s1}. The empty
+	 * string is the prefix of any string, hence if {@code s2} is the empty
+	 * string, true is returned. The return type of this operator is
+	 * {@link BooleanType}.
 	 */
 	STRING_STARTS_WITH("strstarts"),
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator checks whether
-	 * {@code s1} ends with {@code s2}, namely if {@code s2} is the suffix of
-	 * {@code s1}. The empty string is the suffix of any string, hence if
-	 * {@code s2} is the empty string, true is returned. The return type of this
-	 * operator is {@link BooleanType}.
+	 * {@link StringType}, this operator checks whether {@code s1} ends with
+	 * {@code s2}, namely if {@code s2} is the suffix of {@code s1}. The empty
+	 * string is the suffix of any string, hence if {@code s2} is the empty
+	 * string, true is returned. The return type of this operator is
+	 * {@link BooleanType}.
 	 */
 	STRING_ENDS_WITH("strends"),
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator return the
-	 * position of the first occurrence of {@code s1} in {@code s2}. If
-	 * {@code s1} does not contains {@code s2}, then -1 is returned. The return
-	 * type of this operator is a 32 bit signed {@link NumericType}.
+	 * {@link StringType}, this operator return the position of the first
+	 * occurrence of {@code s1} in {@code s2}. If {@code s1} does not contains
+	 * {@code s2}, then -1 is returned. The return type of this operator is a 32
+	 * bit signed {@link NumericType}.
 	 */
 	STRING_INDEX_OF("strindexof"),
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
-	 * {@link it.unive.lisa.cfg.type.StringType}, this operator checks if the
-	 * two strings are equals. The return type of this operator is
-	 * {@link it.unive.lisa.cfg.type.StringType}.
+	 * {@link StringType}, this operator checks if the two strings are equals.
+	 * The return type of this operator is {@link StringType}.
 	 */
-	STRING_EQUALS("strcmp");
+	STRING_EQUALS("strcmp"),
+
+	/**
+	 * Casts the type of the left-hand side of this expression to the type of
+	 * the right-hand side. The returned value is exactly the left-hand side,
+	 * but with its runtime types filtered to be instances of the right-hand
+	 * side type.
+	 */
+	TYPE_CAST("as"),
+
+	/**
+	 * Tests if the type of the left-hand side of this expression is the same
+	 * as, or a subtype of, the type of the right-hand side. The returned value
+	 * is a boolean of type {@link BooleanType} expressing this relation.
+	 */
+	TYPE_CHECK("is");
 
 	private final String representation;
 

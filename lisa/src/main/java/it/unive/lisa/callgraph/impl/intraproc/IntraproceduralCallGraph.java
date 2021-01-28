@@ -6,24 +6,36 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.cfg.CFG;
-import it.unive.lisa.cfg.CFG.SemanticFunction;
-import it.unive.lisa.cfg.Parameter;
-import it.unive.lisa.cfg.statement.CFGCall;
-import it.unive.lisa.cfg.statement.Call;
-import it.unive.lisa.cfg.statement.Expression;
-import it.unive.lisa.cfg.statement.OpenCall;
-import it.unive.lisa.cfg.statement.UnresolvedCall;
+import it.unive.lisa.callgraph.CallGraphConstructionException;
+import it.unive.lisa.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFG.SemanticFunction;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.OpenCall;
+import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -50,6 +62,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 	 */
 	private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?, ?>>> results;
 
+	private Program program;
+
 	/**
 	 * Builds the call graph.
 	 */
@@ -58,46 +72,60 @@ public class IntraproceduralCallGraph implements CallGraph {
 	}
 
 	@Override
-	public void addCFG(CFG cfg) {
-		results.put(cfg, Optional.empty());
+	public void build(Program program) throws CallGraphConstructionException {
+		this.program = program;
 	}
 
 	@Override
 	public void clear() {
-		for (CFG cfg : results.keySet())
-			results.put(cfg, Optional.empty());
+		results.clear();
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) {
-		Collection<CFG> targets = new ArrayList<>();
-		for (CFG cfg : results.keySet())
-			if (cfg.getDescriptor().getFullName().equals(call.getQualifiedName())
-					&& cfg.getDescriptor().getReturnType().canBeAssignedTo(call.getStaticType())
-					&& matchParametersTypes(cfg.getDescriptor().getArgs(), call.getParameters()))
-				targets.add(cfg);
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+		Collection<CodeMember> targets = new ArrayList<>();
+
+		if (call.isInstanceCall()) {
+			if (call.getParameters().length == 0)
+				throw new CallResolutionException(
+						"An instance call should have at least one parameter to be used as the receiver of the call");
+			Expression receiver = call.getParameters()[0];
+			for (Type recType : receiver.getRuntimeTypes()) {
+				if (!recType.isUnitType())
+					continue;
+
+				CompilationUnit unit = recType.asUnitType().getUnit();
+				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
+				for (CodeMember candidate : candidates)
+					if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
+						targets.add(candidate);
+			}
+		} else {
+			for (CodeMember cm : program.getAllCodeMembers())
+				if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
+						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
+					targets.add(cm);
+		}
 
 		Call resolved;
 		if (targets.isEmpty())
 			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getQualifiedName(), call.getStaticType(), call.getParameters());
-		else
+					call.getTargetName(), call.getStaticType(), call.getParameters());
+		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
+			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call.getCFG(), call.getSourceFile(),
+					call.getLine(), call.getCol(), call.getParameters());
+		else {
+			if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
+				throw new CallResolutionException(
+						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
+
 			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getQualifiedName(), targets, call.getParameters());
+					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
+					call.getParameters());
+		}
 
 		resolved.setOffset(call.getOffset());
 		return resolved;
-	}
-
-	private boolean matchParametersTypes(Parameter[] formals, Expression[] actuals) {
-		if (formals.length != actuals.length)
-			return false;
-
-		for (int i = 0; i < formals.length; i++)
-			if (!formals[i].getStaticType().canBeAssignedTo(actuals[i].getStaticType()))
-				return false;
-
-		return true;
 	}
 
 	@Override
@@ -105,9 +133,30 @@ public class IntraproceduralCallGraph implements CallGraph {
 			AnalysisState<A, H, V> entryState,
 			SemanticFunction<A, H, V> semantics)
 			throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(log, results.keySet(), "Computing fixpoint over the whole program",
+		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
-			results.put(cfg, Optional.of(cfg.fixpoint(entryState, this, semantics)));
+			try {
+				results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this, semantics)));
+			} catch (SemanticException e) {
+				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
+			}
+	}
+
+	private <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
+					throws SemanticException {
+		AnalysisState<A, H, V> prepared = entryState;
+		for (Parameter arg : cfg.getDescriptor().getArgs()) {
+			SymbolicExpression expr;
+			if (arg.getStaticType().isPointerType())
+				expr = new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
+			else
+				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
+			prepared = prepared.assign((Identifier) expr,
+					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
+		}
+		return prepared;
 	}
 
 	@Override

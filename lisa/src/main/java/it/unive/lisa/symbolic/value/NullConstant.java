@@ -1,6 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.cfg.type.NullType;
+import it.unive.lisa.type.NullType;
 
 /**
  * A {@link Constant} that represent the {@code null} value. There is only one

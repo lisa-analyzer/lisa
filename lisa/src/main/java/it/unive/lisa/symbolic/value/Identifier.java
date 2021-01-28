@@ -1,6 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 
 /**

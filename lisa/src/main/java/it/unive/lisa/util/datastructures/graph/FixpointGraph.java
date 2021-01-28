@@ -26,10 +26,15 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <N> the type of the nodes in this graph
- * @param <E> the type of the edges in this graph
+ * @param <N> the type of {@link Node}s in this graph
+ * @param <E> the type of {@link SemanticEdge}s in this graph
+ * @param <G> the type of this graph
  */
-public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N, E>> extends Graph<N, E> {
+public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
+		N extends Node<N, E, G>,
+		E extends SemanticEdge<N, E, G>>
+		extends Graph<G, N, E> {
+
 	private static final Logger log = LogManager.getLogger(FixpointGraph.class);
 
 	/**
@@ -54,7 +59,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
 	 *                            that will be part of this graph
 	 */
-	protected FixpointGraph(Collection<N> entrypoints, AdjacencyMatrix<N, E> adjacencyMatrix) {
+	protected FixpointGraph(Collection<N> entrypoints, AdjacencyMatrix<N, E, G> adjacencyMatrix) {
 		super(entrypoints, adjacencyMatrix);
 	}
 
@@ -63,7 +68,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * 
 	 * @param other the original graph
 	 */
-	protected FixpointGraph(FixpointGraph<N, E> other) {
+	protected FixpointGraph(G other) {
 		super(other);
 	}
 
@@ -73,8 +78,10 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
-	 * @param <N> the type of the nodes of the graph, where the semantic
+	 * @param <N> the type of the {@link Node}s of the graph, where the semantic
 	 *                computation will happen
+	 * @param <E> the type of {@link Edge}s in the target graph
+	 * @param <G> the type of the target {@link Graph}
 	 * @param <A> the type of {@link AbstractState} embedded in the analysis
 	 *                states
 	 * @param <H> the concrete type of {@link HeapDomain} embedded in the
@@ -85,7 +92,9 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 	 *                on internal nodes will be stored
 	 */
 	@FunctionalInterface
-	public interface SemanticFunction<N extends Node<N>,
+	public interface SemanticFunction<N extends Node<N, E, G>,
+			E extends SemanticEdge<N, E, G>,
+			G extends FixpointGraph<G, N, E>,
 			A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -169,7 +178,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 			V extends ValueDomain<V>,
 			F extends FunctionalLattice<F, N, AnalysisState<A, H, V>>> Map<N, AnalysisState<A, H, V>> fixpoint(
 					Map<N, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
-					SemanticFunction<N, A, H, V, F> semantics)
+					SemanticFunction<N, E, G, A, H, V, F> semantics)
 					throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);
@@ -211,6 +220,7 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 				try {
 					newIntermediate = (F) mkInternalStore(entrystate);
 					newApprox = semantics.compute(current, entrystate, cg, newIntermediate);
+					newApprox = cleanUpPostState(current, newApprox);
 				} catch (SemanticException e) {
 					log.error("Evaluation of the semantics of '" + current + "' in " + this
 							+ " led to an exception: " + e);
@@ -312,5 +322,31 @@ public abstract class FixpointGraph<N extends Node<N>, E extends SemanticEdge<N,
 				entrystate = entrystate.lub(s);
 
 		return entrystate;
+	}
+
+	/**
+	 * Cleans up the exit state of a node. This is an optional operation: the
+	 * default implementation of this method returns the given
+	 * {@code computedState}.
+	 * 
+	 * @param <A>           the type of {@link AbstractState}
+	 * @param <H>           the type of {@link HeapDomain} embedded in the
+	 *                          abstract state
+	 * @param <V>           the type of {@link ValueDomain} embedded in the
+	 *                          abstract state
+	 * @param node          the node where the computedState has been computed
+	 * @param computedState the computed computedState for the given node
+	 * 
+	 * @return a cleaned version of the computedState, according to the logic of
+	 *             the fixpoint graph
+	 * 
+	 * @throws SemanticException if an error happens while cleaning the state
+	 */
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> cleanUpPostState(N node,
+					AnalysisState<A, H, V> computedState)
+					throws SemanticException {
+		return computedState;
 	}
 }

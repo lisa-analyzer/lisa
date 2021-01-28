@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.FailedPredicateException;
 import org.antlr.v4.runtime.InputMismatchException;
 import org.antlr.v4.runtime.LexerNoViableAltException;
 import org.antlr.v4.runtime.NoViableAltException;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Vocabulary;
@@ -109,5 +110,49 @@ public class Antlr4Util {
 			expectedBuilder.append(tokenName(t, vocabulary)).append(" ");
 
 		return expectedBuilder.toString().trim();
+	}
+
+	/**
+	 * Extracts the line number from an antlr context.
+	 * 
+	 * @param ctx the context
+	 * 
+	 * @return the line number where the context appears
+	 */
+	static int getLine(ParserRuleContext ctx) {
+		return ctx.getStart().getLine();
+	}
+
+	/**
+	 * Extracts the column number from an antlr context.
+	 * 
+	 * @param ctx the context
+	 * 
+	 * @return the column number where the context appears
+	 */
+	static int getCol(ParserRuleContext ctx) {
+		return ctx.getStop().getCharPositionInLine();
+	}
+
+	/**
+	 * Extracts the line number from an antlr token.
+	 * 
+	 * @param tok the token
+	 * 
+	 * @return the line number where the token appears
+	 */
+	static int getLine(Token tok) {
+		return tok.getLine();
+	}
+
+	/**
+	 * Extracts the column number from an antlr token.
+	 * 
+	 * @param tok the token
+	 * 
+	 * @return the column number where the token appears
+	 */
+	static int getCol(Token tok) {
+		return tok.getCharPositionInLine();
 	}
 }

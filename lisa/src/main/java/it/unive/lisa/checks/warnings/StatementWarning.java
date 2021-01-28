@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A warning reported by LiSA on a statement.
@@ -80,7 +80,8 @@ public class StatementWarning extends WarningWithLocation {
 
 	@Override
 	public String toString() {
-		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignature() + "': "
+		return getLocationWithBrackets() + " on '" + statement.getCFG().getDescriptor().getFullSignatureWithParNames()
+				+ "': "
 				+ getTaggedMessage();
 	}
 }

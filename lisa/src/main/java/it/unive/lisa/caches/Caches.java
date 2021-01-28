@@ -1,6 +1,6 @@
 package it.unive.lisa.caches;
 
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.collections.ExternalSetCache;
 
@@ -13,6 +13,9 @@ import it.unive.lisa.util.collections.ExternalSetCache;
  */
 public class Caches {
 
+	/**
+	 * The cache of types
+	 */
 	private static final ExternalSetCache<Type> types = new ExternalSetCache<>();
 
 	/**

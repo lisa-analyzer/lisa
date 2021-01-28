@@ -1,9 +1,10 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.cfg.type.BooleanType;
-import it.unive.lisa.cfg.type.NumericType;
-import it.unive.lisa.cfg.type.StringType;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
+import it.unive.lisa.type.Type;
 
 /**
  * A unary operator that can be applied to a single {@link SymbolicExpression}.
@@ -31,7 +32,12 @@ public enum UnaryOperator implements Operator {
 	 * string. If the value represents the empty string, it returns 0. The
 	 * return type of this operator is a 32 bit unsigned {@link NumericType}.
 	 */
-	STRING_LENGTH("strlen");
+	STRING_LENGTH("strlen"),
+
+	/**
+	 * Yields the {@link Type} of an expression.
+	 */
+	TYPEOF("typeof");
 
 	private final String representation;
 

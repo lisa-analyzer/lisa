@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.cfg.type.Type;
+import it.unive.lisa.type.Type;
 
 /**
  * A constant value.
