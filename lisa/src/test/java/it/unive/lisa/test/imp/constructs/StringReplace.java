@@ -74,6 +74,14 @@ public class StringReplace extends NativeCFG {
 						CallGraph callGraph, AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
 						AnalysisState<A, H, V> middleState, SymbolicExpression middleExp,
 						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
+			// we allow untyped for the type inference phase
+			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
+				return entryState.bottom();
+			if (!middleExp.getDynamicType().isStringType() && !middleExp.getDynamicType().isUntyped())
+				return entryState.bottom();
+			if (!rightExp.getDynamicType().isStringType() && !rightExp.getDynamicType().isUntyped())
+				return entryState.bottom();
+
 			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
 					TernaryOperator.STRING_REPLACE));
 		}

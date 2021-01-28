@@ -71,6 +71,12 @@ public class StringEndsWith extends NativeCFG {
 				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(AnalysisState<A, H, V> entryState,
 						CallGraph callGraph, AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
 						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
+			// we allow untyped for the type inference phase
+			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
+				return entryState.bottom();
+			if (!rightExp.getDynamicType().isStringType() && !rightExp.getDynamicType().isUntyped())
+				return entryState.bottom();
+
 			return rightState.smallStepSemantics(
 					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_ENDS_WITH));
 		}

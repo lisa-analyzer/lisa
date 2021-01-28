@@ -68,6 +68,10 @@ public class StringLength extends NativeCFG {
 				V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(AnalysisState<A, H, V> entryState,
 						CallGraph callGraph, AnalysisState<A, H, V> exprState, SymbolicExpression expr)
 						throws SemanticException {
+			// we allow untyped for the type inference phase
+			if (!expr.getDynamicType().isStringType() && !expr.getDynamicType().isUntyped())
+				return entryState.bottom();
+
 			return exprState
 					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH));
 		}
