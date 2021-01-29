@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import it.unive.lisa.analysis.FunctionalLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -170,10 +171,10 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	@Override
 	public String representation() {
 		if (isTop())
-			return "TOP";
+			return Lattice.TOP_STRING;
 
 		if (isBottom())
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 
 		StringBuilder builder = new StringBuilder();
 		for (Entry<Identifier, T> entry : function.entrySet())

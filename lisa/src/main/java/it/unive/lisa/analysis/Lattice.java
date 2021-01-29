@@ -10,6 +10,9 @@ package it.unive.lisa.analysis;
  * @param <L> the concrete {@link Lattice} instance
  */
 public interface Lattice<L extends Lattice<L>> {
+	
+	public static final String TOP_STRING = "‾|‾";
+	public static final String BOTTOM_STRING = "_|_";
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.impl.types;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
@@ -42,7 +43,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	 * represents the top of the lattice.
 	 */
 	public InferredTypes() {
-		this(Caches.types().mkEmptySet(), true, false);
+		this(Caches.types().mkUniversalSet(), true, false);
 	}
 
 	private InferredTypes(Type type) {
@@ -96,6 +97,12 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	public String representation() {
+		if (isTop())
+			return Lattice.TOP_STRING;
+		
+		if (isBottom())
+			return Lattice.BOTTOM_STRING;
+		
 		return elements.toString();
 	}
 

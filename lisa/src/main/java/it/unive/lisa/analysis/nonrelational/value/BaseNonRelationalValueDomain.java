@@ -331,4 +331,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             equivalent to a TOP boolean value)
 	 */
 	protected abstract Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right);
+	
+	@Override
+	public final String toString() {
+		return representation();
+	}
 }

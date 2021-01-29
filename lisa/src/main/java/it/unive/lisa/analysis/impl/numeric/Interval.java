@@ -1,16 +1,18 @@
 package it.unive.lisa.analysis.impl.numeric;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The interval abstract domain, approximating integer values as the minimum
@@ -70,9 +72,9 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	public String representation() {
 		if (isTop())
-			return "TOP";
+			return Lattice.TOP_STRING;
 		else if (isBottom())
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 
 		return "[" + (lowIsMinusInfinity() ? "-Inf" : low) + ", " + (highIsPlusInfinity() ? "+Inf" : high) + "]";
 	}

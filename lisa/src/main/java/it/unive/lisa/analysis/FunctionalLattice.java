@@ -169,10 +169,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	@Override
 	public String toString() {
 		if (isTop())
-			return "TOP";
+			return Lattice.TOP_STRING;
 		
 		if (isBottom())
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 		
 		return function.toString();
 	}

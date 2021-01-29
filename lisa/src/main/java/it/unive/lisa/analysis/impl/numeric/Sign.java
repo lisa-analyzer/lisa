@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -62,7 +63,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	@Override
 	public String representation() {
 		if (equals(BOTTOM))
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 		else if (equals(ZERO))
 			return "0";
 		else if (equals(POS))
@@ -70,7 +71,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		else if (equals(NEG))
 			return "-";
 		else
-			return "TOP";
+			return Lattice.TOP_STRING;
 	}
 
 	@Override

@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -68,7 +69,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	public String representation() {
-		return isTop() ? "TOP" : isBottom() ? "BOTTOM" : value.toString();
+		return isTop() ? Lattice.TOP_STRING : isBottom() ? Lattice.BOTTOM_STRING : value.toString();
 	}
 
 	@Override

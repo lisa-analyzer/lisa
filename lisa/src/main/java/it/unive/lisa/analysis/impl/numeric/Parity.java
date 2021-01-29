@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -60,13 +61,13 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	@Override
 	public String representation() {
 		if (equals(BOTTOM))
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 		else if (equals(EVEN))
 			return "Even";
 		else if (equals(ODD))
 			return "Odd";
 		else
-			return "TOP";
+			return Lattice.TOP_STRING;
 	}
 
 	@Override
