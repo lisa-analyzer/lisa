@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.impl.types;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
@@ -99,10 +99,10 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	public String representation() {
 		if (isTop())
 			return Lattice.TOP_STRING;
-		
+
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
-		
+
 		return elements.toString();
 	}
 
@@ -247,7 +247,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 			if (operator == BinaryOperator.COMPARISON_EQ) {
 				if (left.elements.size() == 1 && left.elements.equals(right.elements))
-					// only one element, and it is the same 
+					// only one element, and it is the same
 					return Satisfiability.SATISFIED;
 				else if (!left.elements.intersects(right.elements))
 					// no common elements, they cannot be equal
@@ -260,7 +260,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					// no common elements, they cannot be equal
 					return Satisfiability.SATISFIED;
 				else if (left.elements.size() == 1 && left.elements.equals(right.elements))
-					// only one element, and it is the same 
+					// only one element, and it is the same
 					return Satisfiability.NOT_SATISFIED;
 				else
 					// we don't know really

@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps

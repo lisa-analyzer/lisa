@@ -170,10 +170,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	public String toString() {
 		if (isTop())
 			return Lattice.TOP_STRING;
-		
+
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
-		
+
 		return function.toString();
 	}
 

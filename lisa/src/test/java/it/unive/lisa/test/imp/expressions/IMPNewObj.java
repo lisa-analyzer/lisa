@@ -1,10 +1,5 @@
 package it.unive.lisa.test.imp.expressions;
 
-import java.util.Collection;
-import java.util.Collections;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -21,6 +16,9 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
+import java.util.Collection;
+import java.util.Collections;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation

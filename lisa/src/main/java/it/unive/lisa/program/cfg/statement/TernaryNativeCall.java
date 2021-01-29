@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -12,6 +10,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
 
 /**
  * A {@link NativeCall} with a exactly three arguments.

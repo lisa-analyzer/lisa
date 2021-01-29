@@ -71,7 +71,7 @@ public class NoOp extends Statement {
 	public final String toString() {
 		return "no-op";
 	}
-	
+
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,

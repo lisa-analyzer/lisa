@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -13,6 +11,7 @@ import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.Node;
+import java.util.Objects;
 
 /**
  * A statement of the program to analyze.

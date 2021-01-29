@@ -3,18 +3,6 @@ package it.unive.lisa;
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 import static it.unive.lisa.LiSAFactory.getInstance;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -45,6 +33,16 @@ import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities

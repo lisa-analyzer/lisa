@@ -1,7 +1,5 @@
 package it.unive.lisa.test.imp.expressions;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -15,6 +13,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.test.imp.types.ArrayType;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
 
 /**
  * An expression modeling the array allocation operation

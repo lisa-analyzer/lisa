@@ -1,9 +1,8 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.util.collections.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
-
-import it.unive.lisa.util.collections.ExternalSet;
 
 /**
  * The type of type tokens, used as reference to types in code.
@@ -14,10 +13,20 @@ public class TypeTokenType implements Type {
 
 	private final ExternalSet<Type> types;
 
+	/**
+	 * Builds the type token representing the given types.
+	 * 
+	 * @param types the types
+	 */
 	public TypeTokenType(ExternalSet<Type> types) {
 		this.types = types;
 	}
 
+	/**
+	 * Yields the {@link Type}s represented by this type token.
+	 * 
+	 * @return the types
+	 */
 	public ExternalSet<Type> getTypes() {
 		return types;
 	}

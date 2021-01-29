@@ -1,17 +1,16 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
