@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.Objects;
@@ -18,7 +19,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement extends CodeElement implements Node<Statement, Edge, CFG> {
+public abstract class Statement extends CodeElement implements Node<Statement, Edge, CFG>, ProgramPoint {
 
 	/**
 	 * The cfg containing this statement.
@@ -48,11 +49,7 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 		this.offset = -1;
 	}
 
-	/**
-	 * Yields the CFG that this statement belongs to.
-	 * 
-	 * @return the containing CFG
-	 */
+	@Override
 	public final CFG getCFG() {
 		return cfg;
 	}

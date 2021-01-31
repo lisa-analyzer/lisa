@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -79,12 +80,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalNullConstant() {
+	protected Interval evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Interval evalNonNullConstant(Constant constant) {
+	protected Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return new Interval(i, i);
@@ -94,7 +95,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg) {
+	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
 
 		switch (operator) {
 		case NUMERIC_NEG:
@@ -107,7 +108,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right) {
+	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_ADD:
 			return left.plus(right);
@@ -125,7 +126,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalTernaryExpression(TernaryOperator operator, Interval left, Interval middle, Interval right) {
+	protected Interval evalTernaryExpression(TernaryOperator operator, Interval left, Interval middle, Interval right, ProgramPoint pp) {
 		return top();
 	}
 
@@ -158,33 +159,33 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(Interval value) {
+	protected Satisfiability satisfiesAbstractValue(Interval value, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNullConstant() {
+	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Interval arg) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Interval left, Interval middle,
-			Interval right) {
+			Interval right, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

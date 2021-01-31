@@ -142,7 +142,7 @@ public class VariableRef extends Expression {
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		SymbolicExpression expr = getVariable();
-		return entryState.smallStepSemantics(expr);
+		return entryState.smallStepSemantics(expr, this);
 	}
 
 	@Override

@@ -1,13 +1,15 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Map;
+import java.util.Map.Entry;
+
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -64,17 +66,17 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assign(Identifier id, E value) {
+	public final M assign(Identifier id, E value, ProgramPoint pp) {
 		// the mkNewFunction will return an empty function if the
 		// given one is null
 		Map<Identifier, T> func = mkNewFunction(function);
-		T eval = lattice.eval(value, (M) this);
+		T eval = lattice.eval(value, (M) this, pp);
 		func.put(id, eval);
-		return assignAux(id, value, func, eval);
+		return assignAux(id, value, func, eval, pp);
 	}
 
 	/**
-	 * Auxiliary function of {@link #assign(Identifier, SymbolicExpression)}
+	 * Auxiliary function of {@link #assign(Identifier, SymbolicExpression, ProgramPoint)}
 	 * that is invoked after the evaluation of the expression.
 	 * 
 	 * @param id       the identifier that has been assigned
@@ -87,21 +89,21 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * @return a new instance of this environment containing the given function,
 	 *             obtained by assigning {@code id} to {@code eval}
 	 */
-	protected abstract M assignAux(Identifier id, E value, Map<Identifier, T> function, T eval);
+	protected abstract M assignAux(Identifier id, E value, Map<Identifier, T> function, T eval, ProgramPoint pp);
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assume(E expression) throws SemanticException {
-		if (lattice.satisfies(expression, (M) this) == Satisfiability.NOT_SATISFIED)
+	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
 			return bottom();
-		else if (lattice.satisfies(expression, (M) this) == Satisfiability.SATISFIED)
+		else if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
 			return (M) this;
 		else
-			return assumeAux(expression);
+			return assumeAux(expression, pp);
 	}
 
 	/**
-	 * Auxiliary version of {@link #assume(SymbolicExpression)} where the cases
+	 * Auxiliary version of {@link #assume(SymbolicExpression, ProgramPoint)} where the cases
 	 * where the expression is never satisfied
 	 * ({@code lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED})
 	 * and is always satisfied
@@ -114,7 +116,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected M assumeAux(E expression) throws SemanticException {
+	protected M assumeAux(E expression, ProgramPoint pp) throws SemanticException {
 		// TODO: a more precise filtering is needed when satisfiability of
 		// expression is unknown
 		// subclasses might add some logic
@@ -123,8 +125,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final Satisfiability satisfies(E expression) {
-		return lattice.satisfies(expression, (M) this);
+	public final Satisfiability satisfies(E expression, ProgramPoint pp) {
+		return lattice.satisfies(expression, (M) this, pp);
 	}
 
 	/**

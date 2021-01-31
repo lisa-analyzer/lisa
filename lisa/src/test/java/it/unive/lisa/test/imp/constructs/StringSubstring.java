@@ -12,6 +12,8 @@ import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -51,7 +53,14 @@ public class StringSubstring extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringSubstring extends TernaryNativeCall {
+	public static class IMPStringSubstring extends TernaryNativeCall implements PluggableStatement {
+		
+		private Statement original;
+
+		@Override
+		public void setOriginatingStatement(Statement st) {
+			original = st;
+		}
 
 		/**
 		 * Builds the substring.
@@ -86,7 +95,7 @@ public class StringSubstring extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
-					TernaryOperator.STRING_SUBSTRING));
+					TernaryOperator.STRING_SUBSTRING), original);
 		}
 	}
 }

@@ -65,6 +65,6 @@ public class IMPAdd extends BinaryNativeCall {
 			return entryState.bottom();
 
 		return rightState
-				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right, op));
+				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right, op), this);
 	}
 }

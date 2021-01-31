@@ -56,6 +56,6 @@ public class IMPMul extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
-						BinaryOperator.NUMERIC_MUL));
+						BinaryOperator.NUMERIC_MUL), this);
 	}
 }

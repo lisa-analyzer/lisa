@@ -1,12 +1,14 @@
 package it.unive.lisa.analysis;
 
+import java.util.List;
+
 import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.impl.numeric.Interval;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
-import java.util.List;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
@@ -29,12 +31,14 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 * that <b>must be applied in order</b>.
 	 * 
 	 * @param substitution the substitution to apply
+	 * @param pp           the program point that where this operation is being
+	 *                         evaluated
 	 * 
 	 * @return the value domain instance modified by the substitution
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public default D applySubstitution(List<HeapReplacement> substitution) throws SemanticException {
+	public default D applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp) throws SemanticException {
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
 		for (HeapReplacement r : substitution) {
@@ -42,7 +46,7 @@ public interface ValueDomain<D extends ValueDomain<D>>
 			for (Identifier source : r.getSources()) {
 				D partial = result;
 				for (Identifier target : r.getTargets())
-					partial = partial.assign(target, source);
+					partial = partial.assign(target, source, pp);
 				lub = lub.lub(partial);
 			}
 			result = lub.forgetIdentifiers(r.getIdsToForget());

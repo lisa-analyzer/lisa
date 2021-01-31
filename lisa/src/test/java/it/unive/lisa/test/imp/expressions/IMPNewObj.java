@@ -65,6 +65,6 @@ public class IMPNewObj extends NativeCall {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
-		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created);
+		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created, this);
 	}
 }

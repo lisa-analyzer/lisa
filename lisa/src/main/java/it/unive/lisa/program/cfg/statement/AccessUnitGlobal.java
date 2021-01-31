@@ -106,7 +106,7 @@ public class AccessUnitGlobal extends Expression {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H,
-					V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()));
+					V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()), this);
 			if (result == null)
 				result = tmp;
 			else

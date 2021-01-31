@@ -208,7 +208,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		if (getStaticType().isVoidType())
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return lub.smallStepSemantics(new Skip());
+			return lub.smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
@@ -217,7 +217,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : lub.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = lub.assign(meta, expr);
+			AnalysisState<A, H, V> tmp = lub.assign(meta, expr, this);
 			if (result == null)
 				result = tmp;
 			else

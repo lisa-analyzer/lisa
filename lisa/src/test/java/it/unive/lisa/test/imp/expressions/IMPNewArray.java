@@ -51,6 +51,6 @@ public class IMPNewArray extends NativeCall {
 		// (the semantics of this call does not need information about the
 		// intermediate analysis states)
 		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
-		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()));
+		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()), this);
 	}
 }

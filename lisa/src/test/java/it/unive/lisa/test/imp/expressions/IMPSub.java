@@ -57,6 +57,6 @@ public class IMPSub extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
-						BinaryOperator.NUMERIC_SUB));
+						BinaryOperator.NUMERIC_SUB), this);
 	}
 }

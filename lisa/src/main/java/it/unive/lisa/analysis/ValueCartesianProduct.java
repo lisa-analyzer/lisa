@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -31,23 +32,23 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> assign(Identifier id, ValueExpression expression) throws SemanticException {
-		T1 newLeft = left.assign(id, expression);
-		T2 newRight = right.assign(id, expression);
+	public ValueCartesianProduct<T1, T2> assign(Identifier id, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		T1 newLeft = left.assign(id, expression, pp);
+		T2 newRight = right.assign(id, expression, pp);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> smallStepSemantics(ValueExpression expression) throws SemanticException {
-		T1 newLeft = left.smallStepSemantics(expression);
-		T2 newRight = right.smallStepSemantics(expression);
+	public ValueCartesianProduct<T1, T2> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		T1 newLeft = left.smallStepSemantics(expression, pp);
+		T2 newRight = right.smallStepSemantics(expression, pp);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> assume(ValueExpression expression) throws SemanticException {
-		T1 newLeft = left.assume(expression);
-		T2 newRight = right.assume(expression);
+	public ValueCartesianProduct<T1, T2> assume(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		T1 newLeft = left.assume(expression, pp);
+		T2 newRight = right.assume(expression, pp);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);
 	}
 
@@ -59,8 +60,8 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression) throws SemanticException {
-		return left.satisfies(expression).and(right.satisfies(expression));
+	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		return left.satisfies(expression, pp).and(right.satisfies(expression, pp));
 	}
 
 	@Override

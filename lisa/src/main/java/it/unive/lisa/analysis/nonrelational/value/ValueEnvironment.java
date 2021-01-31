@@ -1,12 +1,14 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
 
 /**
  * An environment for a {@link NonRelationalValueDomain}, that maps
@@ -44,12 +46,12 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	protected ValueEnvironment<T> assignAux(Identifier id, ValueExpression value, Map<Identifier, T> function, T eval) {
+	protected ValueEnvironment<T> assignAux(Identifier id, ValueExpression value, Map<Identifier, T> function, T eval, ProgramPoint pp) {
 		return new ValueEnvironment<>(lattice, function);
 	}
 
 	@Override
-	public ValueEnvironment<T> smallStepSemantics(ValueExpression expression) throws SemanticException {
+	public ValueEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		// the environment does not change without an assignment
 		return this;
 	}

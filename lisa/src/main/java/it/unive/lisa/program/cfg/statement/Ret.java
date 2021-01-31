@@ -76,7 +76,7 @@ public class Ret extends Statement {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(new Skip());
+		return entryState.smallStepSemantics(new Skip(), this);
 	}
 
 	@Override

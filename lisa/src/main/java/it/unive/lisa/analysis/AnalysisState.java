@@ -1,12 +1,15 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
+
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -86,29 +89,31 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value) throws SemanticException {
-		A assigned = state.assign(id, value);
+	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
+			throws SemanticException {
+		A assigned = state.assign(id, value, pp);
 		if (id.isWeak())
 			assigned = state.lub(assigned);
 		return new AnalysisState<>(assigned, id);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
-		A s = state.smallStepSemantics(expression);
+	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		A s = state.smallStepSemantics(expression, pp);
 		Collection<SymbolicExpression> exprs = s.getHeapState().getRewrittenExpressions().stream()
 				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
 		return new AnalysisState<>(s, exprs);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> assume(SymbolicExpression expression) throws SemanticException {
-		return new AnalysisState<>(state.assume(expression), computedExpressions);
+	public AnalysisState<A, H, V> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		return new AnalysisState<>(state.assume(expression, pp), computedExpressions);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
-		return state.satisfies(expression);
+	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		return state.satisfies(expression, pp);
 	}
 
 	@Override

@@ -743,7 +743,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		Collection<Identifier> ids = new LinkedList<>();
 		for (VariableTableEntry entry : toRemove) {
 			SymbolicExpression v = entry.createReference(this).getVariable();
-			for (SymbolicExpression expr : computedState.smallStepSemantics(v).getComputedExpressions())
+			for (SymbolicExpression expr : computedState.smallStepSemantics(v, node).getComputedExpressions())
 				ids.add((Identifier) expr);
 		}
 
@@ -824,5 +824,20 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 					follow = followers.iterator().next();
 				ending.forEach(v -> v.setScopeEnd(follow));
 			}
+	}
+	
+	public ProgramPoint getGenericProgramPoint() {
+		return new ProgramPoint() {
+			
+			@Override
+			public CFG getCFG() {
+				return CFG.this;
+			}
+			
+			@Override
+			public String toString() {
+				return "generic program point in " + CFG.this.toString();
+			}
+		};
 	}
 }

@@ -13,6 +13,8 @@ import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -47,8 +49,15 @@ public class StringStartsWIth extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringStartsWith extends BinaryNativeCall {
+	public static class IMPStringStartsWith extends BinaryNativeCall implements PluggableStatement {
+		
+		private Statement original;
 
+		@Override
+		public void setOriginatingStatement(Statement st) {
+			original = st;
+		}
+		
 		/**
 		 * Builds the startsWith.
 		 * 
@@ -78,7 +87,7 @@ public class StringStartsWIth extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH));
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH), original);
 		}
 	}
 }

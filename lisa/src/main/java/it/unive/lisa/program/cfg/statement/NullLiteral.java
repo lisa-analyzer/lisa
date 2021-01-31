@@ -58,6 +58,6 @@ public class NullLiteral extends Literal {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(NullConstant.INSTANCE);
+		return entryState.smallStepSemantics(NullConstant.INSTANCE, this);
 	}
 }

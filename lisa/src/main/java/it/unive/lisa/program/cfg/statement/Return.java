@@ -73,7 +73,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 		AnalysisState<A, H, V> result = null;
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = exprResult.assign(meta, expr);
+			AnalysisState<A, H, V> tmp = exprResult.assign(meta, expr, this);
 			if (result == null)
 				result = tmp;
 			else

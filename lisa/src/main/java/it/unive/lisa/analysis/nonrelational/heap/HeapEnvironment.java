@@ -1,16 +1,18 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import it.unive.lisa.analysis.FunctionalLattice;
-import it.unive.lisa.analysis.HeapDomain;
-import it.unive.lisa.analysis.nonrelational.Environment;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import it.unive.lisa.analysis.FunctionalLattice;
+import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -78,12 +80,12 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> assignAux(Identifier id, SymbolicExpression value, Map<Identifier, T> function, T eval) {
+	public HeapEnvironment<T> assignAux(Identifier id, SymbolicExpression value, Map<Identifier, T> function, T eval, ProgramPoint pp) {
 		return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
 	}
 
 	@Override
-	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression) {
+	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) {
 		// environment does not change without an assignment
 		return new HeapEnvironment<>(lattice, function);
 	}

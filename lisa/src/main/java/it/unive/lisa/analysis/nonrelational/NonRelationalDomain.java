@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -36,7 +37,7 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}
 	 */
-	public T eval(E expression, F environment);
+	public T eval(E expression, F environment, ProgramPoint pp);
 
 	/**
 	 * Checks whether {@code expression} is satisfied in {@code environment},
@@ -54,7 +55,7 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 *             is satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	public Satisfiability satisfies(E expression, F environment);
+	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp);
 
 	/**
 	 * Yields a textual representation of the content of this domain's instance.

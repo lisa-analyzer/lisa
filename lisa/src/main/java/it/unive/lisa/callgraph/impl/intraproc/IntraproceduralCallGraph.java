@@ -1,5 +1,15 @@
 package it.unive.lisa.callgraph.impl.intraproc;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -29,14 +39,6 @@ import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In
@@ -111,8 +113,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getTargetName(), call.getStaticType(), call.getParameters());
 		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
-			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call.getCFG(), call.getSourceFile(),
-					call.getLine(), call.getCol(), call.getParameters());
+			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
 		else {
 			if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
 				throw new CallResolutionException(
@@ -152,7 +153,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			else
 				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
 			prepared = prepared.assign((Identifier) expr,
-					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
+					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())), cfg.getGenericProgramPoint());
 		}
 		return prepared;
 	}
@@ -175,7 +176,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"));
+		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"), call);
 	}
 
 }

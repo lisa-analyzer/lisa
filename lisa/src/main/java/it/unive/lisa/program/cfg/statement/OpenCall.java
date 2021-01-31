@@ -131,8 +131,8 @@ public class OpenCall extends Call implements MetaVariableCreator {
 		AnalysisState<A, H, V> poststate = entryState.top();
 
 		if (getStaticType().isVoidType())
-			return poststate.smallStepSemantics(new Skip());
+			return poststate.smallStepSemantics(new Skip(), this);
 		else
-			return poststate.smallStepSemantics(getMetaVariable());
+			return poststate.smallStepSemantics(getMetaVariable(), this);
 	}
 }

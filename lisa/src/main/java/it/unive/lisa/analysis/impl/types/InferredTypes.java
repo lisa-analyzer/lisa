@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.caches.Caches;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.types.BoolType;
@@ -107,17 +108,17 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalNullConstant() {
+	protected InferredTypes evalNullConstant(ProgramPoint pp) {
 		return new InferredTypes(Caches.types().mkSingletonSet(NullType.INSTANCE));
 	}
 
 	@Override
-	protected InferredTypes evalNonNullConstant(Constant constant) {
+	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		return new InferredTypes(Caches.types().mkSingletonSet(constant.getDynamicType()));
 	}
 
 	@Override
-	protected InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg) {
+	protected InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg, ProgramPoint pp) {
 		switch (operator) {
 		case LOGICAL_NOT:
 			if (arg.elements.noneMatch(Type::isBooleanType))
@@ -139,7 +140,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left, InferredTypes right) {
+	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left, InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
 		case COMPARISON_EQ:
 		case COMPARISON_NE:
@@ -197,7 +198,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	protected InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left, InferredTypes middle,
-			InferredTypes right) {
+			InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
 		case STRING_SUBSTRING:
 			if (left.elements.noneMatch(Type::isStringType) || middle.elements.noneMatch(Type::isNumericType)
@@ -215,28 +216,28 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(InferredTypes value) {
+	protected Satisfiability satisfiesAbstractValue(InferredTypes value, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNullConstant() {
+	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, InferredTypes arg) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, InferredTypes arg, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
-			InferredTypes right) {
+			InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
 		case COMPARISON_EQ:
 		case COMPARISON_NE:
@@ -267,7 +268,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					return Satisfiability.UNKNOWN;
 			}
 		case TYPE_CHECK:
-			if (evalBinaryExpression(BinaryOperator.TYPE_CAST, left, right).isBottom())
+			if (evalBinaryExpression(BinaryOperator.TYPE_CAST, left, right, pp).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
 			ExternalSet<Type> set = left.elements.filter(l -> right.elements.anyMatch(r -> l.canBeAssignedTo(r)));
@@ -286,7 +287,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, InferredTypes left,
-			InferredTypes middle, InferredTypes right) {
+			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.nonrelational.value;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -18,7 +19,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 /**
  * Base implementation for {@link NonRelationalValueDomain}s. This class extends
  * {@link BaseLattice} and implements
- * {@link NonRelationalValueDomain#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.FunctionalLattice)}
+ * {@link NonRelationalValueDomain#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.FunctionalLattice, ProgramPoint)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -29,15 +30,16 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		implements NonRelationalValueDomain<T> {
 
 	@Override
-	public final Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment) {
+	public final Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment,
+			ProgramPoint pp) {
 		if (expression instanceof Identifier)
-			return satisfiesAbstractValue(environment.getState((Identifier) expression));
+			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp);
 
 		if (expression instanceof NullConstant)
-			return satisfiesNullConstant();
+			return satisfiesNullConstant(pp);
 
 		if (expression instanceof Constant)
-			return satisfiesNonNullConstant((Constant) expression);
+			return satisfiesNonNullConstant((Constant) expression, pp);
 
 		if (expression instanceof Skip)
 			return Satisfiability.UNKNOWN;
@@ -49,12 +51,12 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			UnaryExpression unary = (UnaryExpression) expression;
 
 			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT)
-				return satisfies((ValueExpression) unary.getExpression(), environment).negate();
+				return satisfies((ValueExpression) unary.getExpression(), environment, pp).negate();
 			else {
-				T arg = eval((ValueExpression) unary.getExpression(), environment);
+				T arg = eval((ValueExpression) unary.getExpression(), environment, pp);
 				if (arg.isBottom())
 					return Satisfiability.BOTTOM;
-				return satisfiesUnaryExpression(unary.getOperator(), arg);
+				return satisfiesUnaryExpression(unary.getOperator(), arg, pp);
 			}
 		}
 
@@ -62,46 +64,46 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			BinaryExpression binary = (BinaryExpression) expression;
 
 			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
-				return satisfies((ValueExpression) binary.getLeft(), environment)
-						.and(satisfies((ValueExpression) binary.getRight(), environment));
+				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
+						.and(satisfies((ValueExpression) binary.getRight(), environment, pp));
 			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
-				return satisfies((ValueExpression) binary.getLeft(), environment)
-						.or(satisfies((ValueExpression) binary.getRight(), environment));
+				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
+						.or(satisfies((ValueExpression) binary.getRight(), environment, pp));
 			else {
-				T left = eval((ValueExpression) binary.getLeft(), environment);
-				T right = eval((ValueExpression) binary.getRight(), environment);
+				T left = eval((ValueExpression) binary.getLeft(), environment, pp);
+				T right = eval((ValueExpression) binary.getRight(), environment, pp);
 				if (left.isBottom() || right.isBottom())
 					return Satisfiability.BOTTOM;
-				return satisfiesBinaryExpression(binary.getOperator(), left, right);
+				return satisfiesBinaryExpression(binary.getOperator(), left, right, pp);
 			}
 		}
 
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 
-			T left = eval((ValueExpression) ternary.getLeft(), environment);
-			T middle = eval((ValueExpression) ternary.getMiddle(), environment);
-			T right = eval((ValueExpression) ternary.getRight(), environment);
+			T left = eval((ValueExpression) ternary.getLeft(), environment, pp);
+			T middle = eval((ValueExpression) ternary.getMiddle(), environment, pp);
+			T right = eval((ValueExpression) ternary.getRight(), environment, pp);
 
 			if (left.isBottom() || middle.isBottom() || right.isBottom())
 				return Satisfiability.BOTTOM;
 
-			return satisfiesTernaryExpression(ternary.getOperator(), left, middle, right);
+			return satisfiesTernaryExpression(ternary.getOperator(), left, middle, right, pp);
 		}
 
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public final T eval(ValueExpression expression, ValueEnvironment<T> environment) {
+	public final T eval(ValueExpression expression, ValueEnvironment<T> environment, ProgramPoint pp) {
 		if (expression instanceof Identifier)
 			return environment.getState((Identifier) expression);
 
 		if (expression instanceof NullConstant)
-			return evalNullConstant();
+			return evalNullConstant(pp);
 
 		if (expression instanceof Constant)
-			return evalNonNullConstant((Constant) expression);
+			return evalNonNullConstant((Constant) expression, pp);
 
 		if (expression instanceof Skip)
 			return bottom();
@@ -112,43 +114,43 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 
-			T arg = eval((ValueExpression) unary.getExpression(), environment);
+			T arg = eval((ValueExpression) unary.getExpression(), environment, pp);
 			if (arg.isTop() || arg.isBottom())
 				return arg;
 
-			return evalUnaryExpression(unary.getOperator(), arg);
+			return evalUnaryExpression(unary.getOperator(), arg, pp);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			T left = eval((ValueExpression) binary.getLeft(), environment);
+			T left = eval((ValueExpression) binary.getLeft(), environment, pp);
 			if (left.isTop() || left.isBottom())
 				return left;
 
-			T right = eval((ValueExpression) binary.getRight(), environment);
+			T right = eval((ValueExpression) binary.getRight(), environment, pp);
 			if (right.isTop() || right.isBottom())
 				return right;
 
-			return evalBinaryExpression(binary.getOperator(), left, right);
+			return evalBinaryExpression(binary.getOperator(), left, right, pp);
 		}
 
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 
-			T left = eval((ValueExpression) ternary.getLeft(), environment);
+			T left = eval((ValueExpression) ternary.getLeft(), environment, pp);
 			if (left.isTop() || left.isBottom())
 				return left;
 
-			T middle = eval((ValueExpression) ternary.getMiddle(), environment);
+			T middle = eval((ValueExpression) ternary.getMiddle(), environment, pp);
 			if (middle.isTop() || middle.isBottom())
 				return middle;
 
-			T right = eval((ValueExpression) ternary.getRight(), environment);
+			T right = eval((ValueExpression) ternary.getRight(), environment, pp);
 			if (right.isTop() || right.isBottom())
 				return right;
 
-			return evalTernaryExpression(ternary.getOperator(), left, middle, right);
+			return evalTernaryExpression(ternary.getOperator(), left, middle, right, pp);
 		}
 
 		return bottom();
@@ -159,7 +161,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the evaluation of the constant
 	 */
-	protected abstract T evalNullConstant();
+	protected abstract T evalNullConstant(ProgramPoint pp);
 
 	/**
 	 * Yields the evaluation of the given non-null constant.
@@ -168,7 +170,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the evaluation of the constant
 	 */
-	protected abstract T evalNonNullConstant(Constant constant);
+	protected abstract T evalNonNullConstant(Constant constant, ProgramPoint pp);
 
 	/**
 	 * Yields the evaluation of a {@link UnaryExpression} applying
@@ -182,7 +184,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the evaluation of the expression
 	 */
-	protected abstract T evalUnaryExpression(UnaryOperator operator, T arg);
+	protected abstract T evalUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp);
 
 	/**
 	 * Yields the evaluation of a {@link BinaryExpression} applying
@@ -198,7 +200,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the evaluation of the expression
 	 */
-	protected abstract T evalBinaryExpression(BinaryOperator operator, T left, T right);
+	protected abstract T evalBinaryExpression(BinaryOperator operator, T left, T right, ProgramPoint pp);
 
 	/**
 	 * Yields the evaluation of a {@link TernaryExpression} applying
@@ -217,7 +219,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the evaluation of the expression
 	 */
-	protected abstract T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right);
+	protected abstract T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of an abstract value of type {@code <T>}.
@@ -231,7 +233,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesAbstractValue(T value);
+	protected abstract Satisfiability satisfiesAbstractValue(T value, ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
@@ -244,7 +246,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesNullConstant();
+	protected abstract Satisfiability satisfiesNullConstant(ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of the given non-null constant on this abstract
@@ -259,7 +261,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesNonNullConstant(Constant constant);
+	protected abstract Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of a {@link UnaryExpression} applying
@@ -279,7 +281,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg);
+	protected abstract Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of a {@link BinaryExpression} applying
@@ -304,7 +306,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right);
+	protected abstract Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right,
+			ProgramPoint pp);
 
 	/**
 	 * Yields the satisfiability of a {@link TernaryExpression} applying
@@ -330,7 +333,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	protected abstract Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right);
+	protected abstract Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right,
+			ProgramPoint pp);
 
 	@Override
 	public final String toString() {

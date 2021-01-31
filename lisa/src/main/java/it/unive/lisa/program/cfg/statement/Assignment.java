@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -65,7 +66,7 @@ public class Assignment extends BinaryExpression {
 	 * <li>the semantic of the {@code left} is evaluated using {@code as_r},
 	 * returning a new analysis state {@code as_l = <state_l, expr_l>}</li>
 	 * <li>the final post-state is evaluated through
-	 * {@link AnalysisState#assign(Identifier, SymbolicExpression)}, using
+	 * {@link AnalysisState#assign(Identifier, SymbolicExpression, ProgramPoint)}, using
 	 * {@code expr_l} as {@code id} and {@code expr_r} as {@code value}</li>
 	 * </ol>
 	 * This means that all side effects from {@code right} are evaluated before
@@ -87,7 +88,7 @@ public class Assignment extends BinaryExpression {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2);
+				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this);
 				if (result == null)
 					result = tmp;
 				else

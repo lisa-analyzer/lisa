@@ -109,7 +109,7 @@ public class Literal extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()));
+		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()), this);
 	}
 
 	@Override

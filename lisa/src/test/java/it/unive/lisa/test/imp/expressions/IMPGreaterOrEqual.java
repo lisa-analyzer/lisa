@@ -58,6 +58,6 @@ public class IMPGreaterOrEqual extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_GE));
+						BinaryOperator.COMPARISON_GE), this);
 	}
 }
