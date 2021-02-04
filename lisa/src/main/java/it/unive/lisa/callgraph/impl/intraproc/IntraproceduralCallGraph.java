@@ -34,7 +34,7 @@ import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
@@ -146,15 +146,21 @@ public class IntraproceduralCallGraph implements CallGraph {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
 					throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
-		for (Parameter arg : cfg.getDescriptor().getArgs()) {
-			SymbolicExpression expr;
-			if (arg.getStaticType().isPointerType())
-				expr = new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
-			else
-				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
-			prepared = prepared.assign((Identifier) expr,
-					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())), cfg.getGenericProgramPoint());
-		}
+		for (Parameter arg : cfg.getDescriptor().getArgs())
+			if (arg.getStaticType().isPointerType()) {
+				prepared = prepared.smallStepSemantics(
+						new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName()),
+						cfg.getGenericProgramPoint());
+				for (SymbolicExpression expr : prepared.getComputedExpressions())
+					prepared = prepared.assign((HeapIdentifier) expr,
+							new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
+							cfg.getGenericProgramPoint());
+			} else {
+				ValueIdentifier id = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()),
+						arg.getName());
+				prepared = prepared.assign(id, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
+						cfg.getGenericProgramPoint());
+			}
 		return prepared;
 	}
 
