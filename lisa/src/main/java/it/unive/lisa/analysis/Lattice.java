@@ -14,7 +14,7 @@ public interface Lattice<L extends Lattice<L>> {
 	/**
 	 * A string constant that can be used to represent top values.
 	 */
-	public static final String TOP_STRING = "‾|‾";
+	public static final String TOP_STRING = "#TOP#";
 
 	/**
 	 * A string constant that can be used to represent bottom values.
