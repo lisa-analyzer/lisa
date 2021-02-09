@@ -51,7 +51,7 @@ public class StringReplace extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringReplace extends TernaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override

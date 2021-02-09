@@ -50,7 +50,7 @@ public class StringEquals extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringEquals extends BinaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override

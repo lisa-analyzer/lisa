@@ -41,6 +41,9 @@ public class NativeCFG implements CodeMember {
 	 *                       semantics of this native cfg; the class of the
 	 *                       construct must also be a subtype of
 	 *                       {@link PluggableStatement}
+	 * 
+	 * @throws IllegalArgumentException if the class of the construct does not
+	 *                                      implement {@link PluggableStatement}
 	 */
 	public NativeCFG(CFGDescriptor descriptor, Class<? extends NativeCall> construct) {
 		if (!PluggableStatement.class.isAssignableFrom(construct))

@@ -50,7 +50,7 @@ public class StringContains extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringContains extends BinaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override
@@ -87,7 +87,8 @@ public class StringContains extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_CONTAINS), original);
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_CONTAINS),
+					original);
 		}
 	}
 }

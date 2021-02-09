@@ -159,6 +159,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	/**
 	 * Yields the evaluation of the null constant {@link NullConstant}.
 	 * 
+	 * @param pp the program point that where this operation is being evaluated
+	 * 
 	 * @return the evaluation of the constant
 	 */
 	protected abstract T evalNullConstant(ProgramPoint pp);
@@ -167,6 +169,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the evaluation of the given non-null constant.
 	 * 
 	 * @param constant the constant to evaluate
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return the evaluation of the constant
 	 */
@@ -181,6 +185,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @param operator the operator applied by the expression
 	 * @param arg      the instance of this domain representing the abstract
 	 *                     value of the expresion's argument
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return the evaluation of the expression
 	 */
@@ -197,6 +203,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *                     value of the left-hand side argument
 	 * @param right    the instance of this domain representing the abstract
 	 *                     value of the right-hand side argument
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return the evaluation of the expression
 	 */
@@ -216,6 +224,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 *                     value of the middle argument
 	 * @param right    the instance of this domain representing the abstract
 	 *                     value of the right-hand side argument
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return the evaluation of the expression
 	 */
@@ -225,6 +235,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the satisfiability of an abstract value of type {@code <T>}.
 	 * 
 	 * @param value the abstract value whose satisfiability is to be evaluated
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -238,6 +250,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	/**
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
 	 * this abstract domain.
+	 * 
+	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -253,6 +267,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * domain.
 	 * 
 	 * @param constant the constant to satisfied
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the constant is satisfied by
 	 *             this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -273,6 +289,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @param operator the unary operator applied by the expression
 	 * @param arg      an instance of this abstract domain representing the
 	 *                     argument of the unary expression
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -298,6 +316,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @param right    an instance of this abstract domain representing the
 	 *                     argument of the right-hand side of the binary
 	 *                     expression
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -325,6 +345,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @param right    an instance of this abstract domain representing the
 	 *                     argument of the right-most side of the ternary
 	 *                     expression
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is

@@ -131,7 +131,8 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right, ProgramPoint pp) {
+	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right,
+			ProgramPoint pp) {
 		return TOP;
 	}
 
@@ -171,7 +172,8 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Parity left, Parity right,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

@@ -54,7 +54,7 @@ public class StringSubstring extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringSubstring extends TernaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override

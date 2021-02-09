@@ -825,15 +825,23 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 				ending.forEach(v -> v.setScopeEnd(follow));
 			}
 	}
-	
+
+	/**
+	 * Yields a generic {@link ProgramPoint} happening inside this cfg. A
+	 * generic program point can be used for semantic evaluations of
+	 * instrumented {@link Statement}s, that are not tied to any concrete
+	 * statement.
+	 * 
+	 * @return a generic program point happening in this cfg
+	 */
 	public ProgramPoint getGenericProgramPoint() {
 		return new ProgramPoint() {
-			
+
 			@Override
 			public CFG getCFG() {
 				return CFG.this;
 			}
-			
+
 			@Override
 			public String toString() {
 				return "unknown program point in " + CFG.this.getDescriptor().getSignature();

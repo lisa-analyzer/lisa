@@ -9,9 +9,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
- * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint)}. All implementers of
- * {@link HeapDomain} should inherit from this class for ensuring a consistent
- * behavior on the base cases, unless explicitly needed.
+ * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint)}. All
+ * implementers of {@link HeapDomain} should inherit from this class for
+ * ensuring a consistent behavior on the base cases, unless explicitly needed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

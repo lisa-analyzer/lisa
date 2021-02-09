@@ -140,7 +140,8 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left, InferredTypes right, ProgramPoint pp) {
+	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left, InferredTypes right,
+			ProgramPoint pp) {
 		switch (operator) {
 		case COMPARISON_EQ:
 		case COMPARISON_NE:

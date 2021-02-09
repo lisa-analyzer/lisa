@@ -48,7 +48,7 @@ public class StringLength extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringLength extends UnaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override
@@ -82,7 +82,8 @@ public class StringLength extends NativeCFG {
 				return entryState.bottom();
 
 			return exprState
-					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH), original);
+					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH),
+							original);
 		}
 
 	}

@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -74,7 +73,8 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	}
 
 	@Override
-	protected InferenceSystem<T> assignAux(Identifier id, ValueExpression value, Map<Identifier, T> function, T eval, ProgramPoint pp) {
+	protected InferenceSystem<T> assignAux(Identifier id, ValueExpression value, Map<Identifier, T> function, T eval,
+			ProgramPoint pp) {
 		T v = lattice.variable(id, pp);
 		if (!v.isBottom())
 			function.put(id, v);

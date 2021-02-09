@@ -126,7 +126,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalTernaryExpression(TernaryOperator operator, Interval left, Interval middle, Interval right, ProgramPoint pp) {
+	protected Interval evalTernaryExpression(TernaryOperator operator, Interval left, Interval middle, Interval right,
+			ProgramPoint pp) {
 		return top();
 	}
 
@@ -179,7 +180,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

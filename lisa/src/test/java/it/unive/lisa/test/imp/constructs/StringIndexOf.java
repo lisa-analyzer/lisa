@@ -49,7 +49,7 @@ public class StringIndexOf extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringIndexOf extends BinaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override
@@ -88,7 +88,8 @@ public class StringIndexOf extends NativeCFG {
 
 			return rightState
 					.smallStepSemantics(
-							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF), original);
+							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF),
+							original);
 		}
 	}
 }

@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.List;
-
 import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.impl.numeric.Interval;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import java.util.List;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate

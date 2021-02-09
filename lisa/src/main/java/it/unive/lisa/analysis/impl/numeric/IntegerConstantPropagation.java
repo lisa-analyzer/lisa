@@ -86,7 +86,8 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg, ProgramPoint pp) {
+	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
+			ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_NEG:
 			return new IntegerConstantPropagation(-value);
@@ -193,7 +194,8 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg, ProgramPoint pp) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

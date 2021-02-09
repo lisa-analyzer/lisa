@@ -32,14 +32,16 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> assign(Identifier id, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public ValueCartesianProduct<T1, T2> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		T1 newLeft = left.assign(id, expression, pp);
 		T2 newRight = right.assign(id, expression, pp);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public ValueCartesianProduct<T1, T2> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		T1 newLeft = left.smallStepSemantics(expression, pp);
 		T2 newRight = right.smallStepSemantics(expression, pp);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);

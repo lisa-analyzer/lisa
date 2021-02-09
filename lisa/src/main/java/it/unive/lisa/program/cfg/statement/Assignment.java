@@ -66,8 +66,9 @@ public class Assignment extends BinaryExpression {
 	 * <li>the semantic of the {@code left} is evaluated using {@code as_r},
 	 * returning a new analysis state {@code as_l = <state_l, expr_l>}</li>
 	 * <li>the final post-state is evaluated through
-	 * {@link AnalysisState#assign(Identifier, SymbolicExpression, ProgramPoint)}, using
-	 * {@code expr_l} as {@code id} and {@code expr_r} as {@code value}</li>
+	 * {@link AnalysisState#assign(Identifier, SymbolicExpression, ProgramPoint)},
+	 * using {@code expr_l} as {@code id} and {@code expr_r} as
+	 * {@code value}</li>
 	 * </ol>
 	 * This means that all side effects from {@code right} are evaluated before
 	 * the ones from {@code left}.<br>

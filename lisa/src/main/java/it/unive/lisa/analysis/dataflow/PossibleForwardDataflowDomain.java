@@ -1,16 +1,24 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
+/**
+ * A {@link DataflowDomain} for <b>forward</b> and <b>possible</b> dataflow
+ * analysis. Being possible means that this domain is an instance of
+ * {@link SetLattice}, i.e., is a set whose join operation is the set union.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <E> the type of {@link DataflowElement} contained in this domain
+ */
 public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleForwardDataflowDomain<E>, E>>
 		extends SetLattice<PossibleForwardDataflowDomain<E>, E>
 		implements DataflowDomain<PossibleForwardDataflowDomain<E>, E> {
@@ -19,6 +27,12 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	private final E domain;
 
+	/**
+	 * Builds an empty domain.
+	 * 
+	 * @param domain a singleton instance to be used during semantic operations
+	 *                   to perform <i>kill</i> and <i>gen</i> operations
+	 */
 	public PossibleForwardDataflowDomain(E domain) {
 		this(domain, new HashSet<>(), true);
 	}
@@ -46,7 +60,8 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	}
 
 	@Override
-	public PossibleForwardDataflowDomain<E> assume(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public PossibleForwardDataflowDomain<E> assume(ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		// TODO could be refined
 		return this;
 	}

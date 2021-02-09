@@ -168,7 +168,8 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right, ProgramPoint pp) {
+	protected Sign evalTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
+			ProgramPoint pp) {
 		return top();
 	}
 
@@ -238,7 +239,8 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right,
+			ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -281,7 +283,8 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right, ProgramPoint pp) {
+	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 }

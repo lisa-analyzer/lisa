@@ -33,6 +33,8 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * @param expression  the expression to evaluate
 	 * @param environment the environment containing the values of program
 	 *                        variables for the evaluation
+	 * @param pp          the program point that where this operation is being
+	 *                        evaluated
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}
@@ -47,6 +49,8 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * @param expression  the expression whose satisfiability is to be evaluated
 	 * @param environment the environment containing the values of program
 	 *                        variables for the satisfiability
+	 * @param pp          the program point that where this operation is being
+	 *                        evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if

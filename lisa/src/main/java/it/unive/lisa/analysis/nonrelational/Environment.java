@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -10,6 +7,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -76,8 +75,9 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	/**
-	 * Auxiliary function of {@link #assign(Identifier, SymbolicExpression, ProgramPoint)}
-	 * that is invoked after the evaluation of the expression.
+	 * Auxiliary function of
+	 * {@link #assign(Identifier, SymbolicExpression, ProgramPoint)} that is
+	 * invoked after the evaluation of the expression.
 	 * 
 	 * @param id       the identifier that has been assigned
 	 * @param value    the expression that has been evaluated and assigned
@@ -85,6 +85,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 *                     been assigned to {@code eval}
 	 * @param eval     the abstract value that is the result of the evaluation
 	 *                     of {@code value}
+	 * @param pp       the program point that where this operation is being
+	 *                     evaluated
 	 * 
 	 * @return a new instance of this environment containing the given function,
 	 *             obtained by assigning {@code id} to {@code eval}
@@ -103,14 +105,16 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	/**
-	 * Auxiliary version of {@link #assume(SymbolicExpression, ProgramPoint)} where the cases
-	 * where the expression is never satisfied
+	 * Auxiliary version of {@link #assume(SymbolicExpression, ProgramPoint)}
+	 * where the cases where the expression is never satisfied
 	 * ({@code lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED})
 	 * and is always satisfied
 	 * ({@code lattice.satisfies(expression, this) == Satisfiability.SATISFIED})
 	 * have already been handled. The given expression thus holds sometimes.
 	 * 
 	 * @param expression the expression to assume to hold.
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 

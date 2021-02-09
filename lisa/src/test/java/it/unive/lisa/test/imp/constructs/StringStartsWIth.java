@@ -50,14 +50,14 @@ public class StringStartsWIth extends NativeCFG {
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
 	public static class IMPStringStartsWith extends BinaryNativeCall implements PluggableStatement {
-		
+
 		private Statement original;
 
 		@Override
 		public void setOriginatingStatement(Statement st) {
 			original = st;
 		}
-		
+
 		/**
 		 * Builds the startsWith.
 		 * 
@@ -87,7 +87,8 @@ public class StringStartsWIth extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH), original);
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH),
+					original);
 		}
 	}
 }

@@ -7,8 +7,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A value that can be inferred by {@link InferenceSystem}s. This builds on top
- * of {@link NonRelationalDomain}, adding {@link #variable(Identifier, ProgramPoint)} to force
- * information stored into variables to predetermined data if needed.
+ * of {@link NonRelationalDomain}, adding
+ * {@link #variable(Identifier, ProgramPoint)} to force information stored into
+ * variables to predetermined data if needed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -27,6 +28,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * from the expression.
 	 * 
 	 * @param id The identifier representing the variable being assigned
+	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return the fixed abstraction of the variable
 	 */
