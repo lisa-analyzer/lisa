@@ -9,7 +9,8 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
+import it.unive.lisa.analysis.impl.types.InferredTypes;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
@@ -23,11 +24,14 @@ import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
 import java.io.Writer;
@@ -327,8 +331,7 @@ public class LiSA {
 	@SuppressWarnings("unchecked")
 	private <H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			A extends AbstractState<A, H, V>,
-			T extends AbstractState<T, H, TypeEnvironment>> void runAux()
+			A extends AbstractState<A, H, V>> void runAux()
 					throws AnalysisExecutionException {
 		// fill up the types cache by side effect on an external set
 		ExternalSet<Type> types = Caches.types().mkEmptySet();
@@ -374,36 +377,39 @@ public class LiSA {
 		}
 
 		if (inferTypes) {
-			T tmp;
+			SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
 			try {
-				// type inference is always executed with the simplest abstract
-				// state
+				HeapDomain<?> heap;
 				if (state != null)
-					tmp = (T) getInstance(SimpleAbstractState.class, state.getHeapState(),
-							new TypeEnvironment());
+					heap = state.getHeapState();
 				else
-					tmp = (T) getInstance(SimpleAbstractState.class,
-							getDefaultFor(HeapDomain.class), new TypeEnvironment());
+					heap = getDefaultFor(HeapDomain.class);
+				// type inference is executed with the simplest abstract state
+				typesState = getInstance(SimpleAbstractState.class, heap, new InferenceSystem<>(new InferredTypes()))
+						.top();
 			} catch (AnalysisSetupException e) {
 				throw new AnalysisExecutionException("Unable to itialize type inference", e);
 			}
 
-			T typesState = tmp.top();
 			TimerLogger.execAction(log, "Computing type information",
 					() -> {
 						try {
-							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()), Statement::typeInference);
+							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()));
 						} catch (FixpointException e) {
 							log.fatal("Exception during fixpoint computation", e);
 							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
 						}
 					});
 
-			if (dumpTypeInference)
-				for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping type analysis", "cfgs")) {
-					CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+			String message = dumpTypeInference ? "Dumping type analysis and propagating it to cfgs"
+					: "Propagating type information to cfgs";
+			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
+				CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+						InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
+				if (dumpTypeInference)
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
-				}
+				cfg.accept(new TypesPropagator<>(), result);
+			}
 
 			callGraph.clear();
 		} else
@@ -418,7 +424,7 @@ public class LiSA {
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						callGraph.fixpoint(new AnalysisState<>(state, new Skip()), Statement::semantics);
+						callGraph.fixpoint(new AnalysisState<>(state, new Skip()));
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -427,9 +433,36 @@ public class LiSA {
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
-				CFGWithAnalysisResults<?, ?, ?> result = callGraph.getAnalysisResultsOf(cfg);
+				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
+	}
+
+	private static class TypesPropagator<H extends HeapDomain<H>>
+			implements GraphVisitor<CFG, Statement, Edge, CFGWithAnalysisResults<
+					SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> {
+
+		@Override
+		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+				InferenceSystem<InferredTypes>> tool, CFG graph) {
+			return true;
+		}
+
+		@Override
+		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+				InferenceSystem<InferredTypes>> tool, CFG graph, Edge edge) {
+			return true;
+		}
+
+		@Override
+		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+				InferenceSystem<InferredTypes>> tool, CFG graph, Statement node) {
+			if (node instanceof Expression) {
+				((Expression) node).setRuntimeTypes(tool.getAnalysisStateAt(node).getState().getValueState()
+						.getInferredValue().getRuntimeTypes());
+			}
+			return true;
+		}
 	}
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {

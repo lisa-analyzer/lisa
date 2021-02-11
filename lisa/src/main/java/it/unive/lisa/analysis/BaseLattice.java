@@ -115,4 +115,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 	@Override
 	public abstract int hashCode();
+
+	@Override
+	public abstract String toString();
 }

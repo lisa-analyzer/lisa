@@ -318,9 +318,8 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 
 		// if at least one bit that is 0 in this is 1 in other, than this does
-		// not
-		// contain other
-		for (int i = otherbits.length; i >= 0; i--)
+		// not contain other
+		for (int i = otherbits.length - 1; i >= 0; i--)
 			if ((localbits[i] | otherbits[i]) != localbits[i])
 				return false;
 

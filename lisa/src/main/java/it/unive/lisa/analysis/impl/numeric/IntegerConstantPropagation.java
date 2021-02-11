@@ -1,9 +1,11 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -68,23 +70,24 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	public String representation() {
-		return isTop() ? "TOP" : isBottom() ? "BOTTOM" : value.toString();
+		return isTop() ? Lattice.TOP_STRING : isBottom() ? Lattice.BOTTOM_STRING : value.toString();
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalNullConstant() {
+	protected IntegerConstantPropagation evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalNonNullConstant(Constant constant) {
+	protected IntegerConstantPropagation evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer)
 			return new IntegerConstantPropagation((Integer) constant.getValue());
 		return top();
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg) {
+	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
+			ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_NEG:
 			return new IntegerConstantPropagation(-value);
@@ -97,7 +100,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	protected IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation right) {
+			IntegerConstantPropagation right, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_ADD:
 			return new IntegerConstantPropagation(left.value + right.value);
@@ -120,7 +123,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	protected IntegerConstantPropagation evalTernaryExpression(TernaryOperator operator,
 			IntegerConstantPropagation left,
-			IntegerConstantPropagation middle, IntegerConstantPropagation right) {
+			IntegerConstantPropagation middle, IntegerConstantPropagation right, ProgramPoint pp) {
 		return top();
 	}
 
@@ -176,28 +179,29 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(IntegerConstantPropagation value) {
+	protected Satisfiability satisfiesAbstractValue(IntegerConstantPropagation value, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNullConstant() {
+	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation right) {
+			IntegerConstantPropagation right, ProgramPoint pp) {
 
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
@@ -222,7 +226,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation middle, IntegerConstantPropagation right) {
+			IntegerConstantPropagation middle, IntegerConstantPropagation right, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 }

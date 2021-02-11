@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -186,50 +185,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call, it is the entry state if this call has no
-		// parameters
-		// (the semantics of this call does not need information about the
-		// intermediate analysis states)
-		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates.length == 0 ? entryState
-				: computedStates[computedStates.length - 1];
-
-		// this will contain only the information about the returned
-		// metavariable
-		AnalysisState<A, H, TypeEnvironment> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
-		// the lub will include the metavariable inside the state
-		AnalysisState<A, H, TypeEnvironment> lub = lastPostState.lub(returned).smallStepSemantics(new Skip());
-
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		if (getStaticType().isVoidType())
-			// no need to add the meta variable since nothing has been pushed on
-			// the stack
-			result = lub;
-		else {
-			Identifier meta = getMetaVariable();
-			for (SymbolicExpression expr : returned.getComputedExpressions())
-				getMetaVariables().add((Identifier) expr);
-			getMetaVariables().add(meta);
-
-			for (SymbolicExpression expr : lub.getComputedExpressions()) {
-				AnalysisState<A, H, TypeEnvironment> tmp = lub.assign(meta, expr);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
-			}
-		}
-
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
-	}
-
-	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
@@ -253,7 +208,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		if (getStaticType().isVoidType())
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return lub.smallStepSemantics(new Skip());
+			return lub.smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
@@ -262,7 +217,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : lub.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = lub.assign(meta, expr);
+			AnalysisState<A, H, V> tmp = lub.assign(meta, expr, this);
 			if (result == null)
 				result = tmp;
 			else

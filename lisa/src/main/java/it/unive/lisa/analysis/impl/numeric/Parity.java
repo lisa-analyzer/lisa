@@ -1,9 +1,11 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -60,22 +62,22 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	@Override
 	public String representation() {
 		if (equals(BOTTOM))
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 		else if (equals(EVEN))
 			return "Even";
 		else if (equals(ODD))
 			return "Odd";
 		else
-			return "TOP";
+			return Lattice.TOP_STRING;
 	}
 
 	@Override
-	protected Parity evalNullConstant() {
+	protected Parity evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Parity evalNonNullConstant(Constant constant) {
+	protected Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i % 2 == 0 ? EVEN : ODD;
@@ -93,7 +95,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg) {
+	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_NEG:
 			return arg;
@@ -103,7 +105,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right) {
+	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_ADD:
 		case NUMERIC_SUB:
@@ -129,7 +131,8 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right) {
+	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right,
+			ProgramPoint pp) {
 		return TOP;
 	}
 
@@ -149,33 +152,34 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(Parity value) {
+	protected Satisfiability satisfiesAbstractValue(Parity value, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNullConstant() {
+	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Parity arg) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Parity left, Parity right) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Parity left, Parity right,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Parity left, Parity middle,
-			Parity right) {
+			Parity right, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

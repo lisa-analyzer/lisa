@@ -5,8 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -53,20 +51,6 @@ public class IMPNewArray extends NativeCall {
 		// (the semantics of this call does not need information about the
 		// intermediate analysis states)
 		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
-		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()));
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call
-		// (the semantics of this call does not need information about the
-		// intermediate analysis states)
-		AnalysisState<A, H, TypeEnvironment> lastPostState = computedStates[computedStates.length - 1];
-		return lastPostState.smallStepSemantics(new HeapAllocation(Caches.types().mkSingletonSet(getStaticType())));
+		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()), this);
 	}
 }

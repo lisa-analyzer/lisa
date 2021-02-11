@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -97,30 +96,6 @@ public class AccessUnitGlobal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> rec = receiver.typeInference(entryState, callGraph, expressions);
-		expressions.put(receiver, rec);
-
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, TypeEnvironment> tmp = rec
-					.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()));
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
-		}
-
-		if (!receiver.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(receiver.getMetaVariables());
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
-	}
-
-	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
@@ -131,7 +106,7 @@ public class AccessUnitGlobal extends Expression {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H,
-					V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()));
+					V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()), this);
 			if (result == null)
 				result = tmp;
 			else

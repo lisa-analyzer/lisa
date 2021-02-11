@@ -10,7 +10,6 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFG.SemanticFunction;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.OpenCall;
@@ -64,8 +63,8 @@ public interface CallGraph {
 	 * Computes a fixpoint over the whole control flow graph, producing a
 	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
 	 * callgraph. Each result is computed with
-	 * {@link CFG#fixpoint(AnalysisState, CallGraph, SemanticFunction)} or one
-	 * of its overloads. Results of individual cfgs are then available through
+	 * {@link CFG#fixpoint(AnalysisState, CallGraph)} or one of its overloads.
+	 * Results of individual cfgs are then available through
 	 * {@link #getAnalysisResultsOf(CFG)}.
 	 * 
 	 * @param <A>        the type of {@link AbstractState} to compute
@@ -73,15 +72,12 @@ public interface CallGraph {
 	 * @param <V>        the type of {@link ValueDomain} to compute
 	 * @param entryState the entry state for the {@link CFG}s that are the
 	 *                       entrypoints of the computation
-	 * @param semantics  the {@link SemanticFunction} that will be used for
-	 *                       computing the abstract post-state of statements
 	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
 	<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
-			AnalysisState<A, H, V> entryState,
-			SemanticFunction<A, H, V> semantics)
+			AnalysisState<A, H, V> entryState)
 			throws FixpointException;
 
 	/**

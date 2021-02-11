@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
@@ -24,25 +25,29 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @param id         the identifier to assign the value to
 	 * @param expression the expression to assign
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return a copy of this domain, modified by the assignment
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assign(I id, E expression) throws SemanticException;
+	D assign(I id, E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, that has been modified accordingly to the
 	 * semantics of the given {@code expression}.
 	 * 
 	 * @param expression the expression whose semantics need to be computed
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return a copy of this domain, modified accordingly to the semantics of
 	 *             {@code expression}
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D smallStepSemantics(E expression) throws SemanticException;
+	D smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Yields a copy of this domain, modified by assuming that the given
@@ -51,12 +56,14 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * always return {@code this}.
 	 * 
 	 * @param expression the expression to assume to hold.
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assume(E expression) throws SemanticException;
+	D assume(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Forgets an {@link Identifier}. This means that all information regarding
@@ -95,6 +102,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * this domain, returning an instance of {@link Satisfiability}.
 	 * 
 	 * @param expression the expression whose satisfiability is to be evaluated
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} is the expression is satisfied
 	 *             by the values of this domain,
@@ -106,7 +115,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	Satisfiability satisfies(E expression) throws SemanticException;
+	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * The satisfiability of an expression.

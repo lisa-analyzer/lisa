@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -63,30 +62,6 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> typeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					StatementStore<A, H, TypeEnvironment> expressions) throws SemanticException {
-		AnalysisState<A, H,
-				TypeEnvironment> exprResult = getExpression().typeInference(entryState, callGraph, expressions);
-		expressions.put(getExpression(), exprResult);
-
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		Identifier meta = getMetaVariable();
-		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<A, H, TypeEnvironment> tmp = exprResult.assign(meta, expr);
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
-		}
-
-		if (!getExpression().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		return result;
-	}
-
-	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
@@ -98,7 +73,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 		AnalysisState<A, H, V> result = null;
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = exprResult.assign(meta, expr);
+			AnalysisState<A, H, V> tmp = exprResult.assign(meta, expr, this);
 			if (result == null)
 				result = tmp;
 			else

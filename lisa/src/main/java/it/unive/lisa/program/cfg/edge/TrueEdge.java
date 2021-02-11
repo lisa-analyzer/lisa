@@ -41,7 +41,7 @@ public class TrueEdge extends Edge {
 		Collection<SymbolicExpression> exprs = sourceState.getComputedExpressions();
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : exprs) {
-			AnalysisState<A, H, V> tmp = sourceState.assume(expr);
+			AnalysisState<A, H, V> tmp = sourceState.assume(expr, getSource());
 			if (result == null)
 				result = tmp;
 			else

@@ -49,6 +49,6 @@ public class IMPNotEqual extends BinaryNativeCall {
 					throws SemanticException {
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_NE));
+						BinaryOperator.COMPARISON_NE), this);
 	}
 }

@@ -12,6 +12,8 @@ import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -45,7 +47,14 @@ public class StringLength extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringLength extends UnaryNativeCall {
+	public static class IMPStringLength extends UnaryNativeCall implements PluggableStatement {
+
+		private Statement original;
+
+		@Override
+		public void setOriginatingStatement(Statement st) {
+			original = st;
+		}
 
 		/**
 		 * Builds the length.
@@ -73,7 +82,8 @@ public class StringLength extends NativeCFG {
 				return entryState.bottom();
 
 			return exprState
-					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH));
+					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH),
+							original);
 		}
 
 	}

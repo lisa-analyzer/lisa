@@ -97,10 +97,10 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	@Override
 	public final String toString() {
 		if (isTop())
-			return "TOP";
+			return Lattice.TOP_STRING;
 
 		if (isBottom())
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 
 		Set<E> tmp = new TreeSet<>(
 				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));

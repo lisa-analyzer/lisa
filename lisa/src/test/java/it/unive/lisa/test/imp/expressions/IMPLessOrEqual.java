@@ -58,6 +58,6 @@ public class IMPLessOrEqual extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_LE));
+						BinaryOperator.COMPARISON_LE), this);
 	}
 }

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -8,9 +9,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
- * cases of {@link #smallStepSemantics(SymbolicExpression)}. All implementers of
- * {@link HeapDomain} should inherit from this class for ensuring a consistent
- * behavior on the base cases, unless explicitly needed.
+ * cases of {@link #smallStepSemantics(SymbolicExpression, ProgramPoint)}. All
+ * implementers of {@link HeapDomain} should inherit from this class for
+ * ensuring a consistent behavior on the base cases, unless explicitly needed.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -25,13 +26,13 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final H smallStepSemantics(SymbolicExpression expression) throws SemanticException {
+	public final H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof HeapExpression)
 			return semanticsOf((HeapExpression) expression);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
-			H sem = smallStepSemantics(unary.getExpression());
+			H sem = smallStepSemantics(unary.getExpression(), pp);
 			H result = bottom();
 			for (ValueExpression expr : sem.getRewrittenExpressions())
 				result = result.lub(mk(sem, new UnaryExpression(expression.getTypes(), expr, unary.getOperator())));
@@ -40,8 +41,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
-			H sem1 = smallStepSemantics(binary.getLeft());
-			H sem2 = sem1.smallStepSemantics(binary.getRight());
+			H sem1 = smallStepSemantics(binary.getLeft(), pp);
+			H sem2 = sem1.smallStepSemantics(binary.getRight(), pp);
 			H result = bottom();
 			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
 				for (ValueExpression expr2 : sem2.getRewrittenExpressions())

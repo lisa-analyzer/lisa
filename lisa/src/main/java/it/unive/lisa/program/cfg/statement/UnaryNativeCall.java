@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -86,25 +85,6 @@ public abstract class UnaryNativeCall extends NativeCall {
 	protected UnaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
 			Expression parameter) {
 		super(cfg, sourceFile, line, col, constructName, staticType, parameter);
-	}
-
-	@Override
-	public final <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		AnalysisState<A, H, TypeEnvironment> result = null;
-		for (SymbolicExpression expr : params[0]) {
-			AnalysisState<A, H, TypeEnvironment> tmp = unarySemantics(entryState, callGraph, computedStates[0], expr);
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
-		}
-
-		setRuntimeTypes(result.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return result;
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFG.SemanticFunction;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
@@ -25,7 +24,7 @@ import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
@@ -112,8 +111,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
 					call.getTargetName(), call.getStaticType(), call.getParameters());
 		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
-			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call.getCFG(), call.getSourceFile(),
-					call.getLine(), call.getCol(), call.getParameters());
+			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
 		else {
 			if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
 				throw new CallResolutionException(
@@ -130,13 +128,12 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	public <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
-			AnalysisState<A, H, V> entryState,
-			SemanticFunction<A, H, V> semantics)
+			AnalysisState<A, H, V> entryState)
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
-				results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this, semantics)));
+				results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this)));
 			} catch (SemanticException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
@@ -147,15 +144,21 @@ public class IntraproceduralCallGraph implements CallGraph {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
 					throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
-		for (Parameter arg : cfg.getDescriptor().getArgs()) {
-			SymbolicExpression expr;
-			if (arg.getStaticType().isPointerType())
-				expr = new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
-			else
-				expr = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName());
-			prepared = prepared.assign((Identifier) expr,
-					new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())));
-		}
+		for (Parameter arg : cfg.getDescriptor().getArgs())
+			if (arg.getStaticType().isPointerType()) {
+				prepared = prepared.smallStepSemantics(
+						new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName()),
+						cfg.getGenericProgramPoint());
+				for (SymbolicExpression expr : prepared.getComputedExpressions())
+					prepared = prepared.assign((HeapIdentifier) expr,
+							new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
+							cfg.getGenericProgramPoint());
+			} else {
+				ValueIdentifier id = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()),
+						arg.getName());
+				prepared = prepared.assign(id, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
+						cfg.getGenericProgramPoint());
+			}
 		return prepared;
 	}
 
@@ -177,7 +180,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"));
+		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"), call);
 	}
 
 }

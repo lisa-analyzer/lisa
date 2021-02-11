@@ -1,9 +1,11 @@
 package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -62,7 +64,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	@Override
 	public String representation() {
 		if (equals(BOTTOM))
-			return "BOTTOM";
+			return Lattice.BOTTOM_STRING;
 		else if (equals(ZERO))
 			return "0";
 		else if (equals(POS))
@@ -70,16 +72,16 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		else if (equals(NEG))
 			return "-";
 		else
-			return "TOP";
+			return Lattice.TOP_STRING;
 	}
 
 	@Override
-	protected Sign evalNullConstant() {
+	protected Sign evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Sign evalNonNullConstant(Constant constant) {
+	protected Sign evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i == 0 ? ZERO : i > 0 ? POS : NEG;
@@ -107,7 +109,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalUnaryExpression(UnaryOperator operator, Sign arg) {
+	protected Sign evalUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_NEG:
 			if (arg.isPositive())
@@ -124,7 +126,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right) {
+	protected Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
 		switch (operator) {
 		case NUMERIC_ADD:
 			if (left.isZero())
@@ -166,7 +168,8 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right) {
+	protected Sign evalTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
+			ProgramPoint pp) {
 		return top();
 	}
 
@@ -216,27 +219,28 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(Sign value) {
+	protected Satisfiability satisfiesAbstractValue(Sign value, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNullConstant() {
+	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Sign arg) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right) {
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right,
+			ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -279,7 +283,8 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right) {
+	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
+			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 }

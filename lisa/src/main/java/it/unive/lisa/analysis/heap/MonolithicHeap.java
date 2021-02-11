@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.heap;
 
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -56,9 +57,10 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap assign(Identifier id, SymbolicExpression expression) throws SemanticException {
+	public MonolithicHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		// the only thing that we do is rewrite the expression if needed
-		return smallStepSemantics(expression);
+		return smallStepSemantics(expression, pp);
 	}
 
 	@Override
@@ -74,13 +76,13 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap assume(SymbolicExpression expression) throws SemanticException {
+	public MonolithicHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// the only thing that we do is rewrite the expression if needed
-		return smallStepSemantics(expression);
+		return smallStepSemantics(expression, pp);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
+	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}

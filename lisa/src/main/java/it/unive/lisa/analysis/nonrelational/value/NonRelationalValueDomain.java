@@ -1,6 +1,7 @@
-package it.unive.lisa.analysis.nonrelational;
+package it.unive.lisa.analysis.nonrelational.value;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 

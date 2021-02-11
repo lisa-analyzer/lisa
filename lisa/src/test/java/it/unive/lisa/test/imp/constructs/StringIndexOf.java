@@ -13,6 +13,8 @@ import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -46,7 +48,14 @@ public class StringIndexOf extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringIndexOf extends BinaryNativeCall {
+	public static class IMPStringIndexOf extends BinaryNativeCall implements PluggableStatement {
+
+		private Statement original;
+
+		@Override
+		public void setOriginatingStatement(Statement st) {
+			original = st;
+		}
 
 		/**
 		 * Builds the indexOf.
@@ -79,7 +88,8 @@ public class StringIndexOf extends NativeCFG {
 
 			return rightState
 					.smallStepSemantics(
-							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF));
+							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF),
+							original);
 		}
 	}
 }

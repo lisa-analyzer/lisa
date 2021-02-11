@@ -12,6 +12,16 @@ package it.unive.lisa.analysis;
 public interface Lattice<L extends Lattice<L>> {
 
 	/**
+	 * A string constant that can be used to represent top values.
+	 */
+	public static final String TOP_STRING = "#TOP#";
+
+	/**
+	 * A string constant that can be used to represent bottom values.
+	 */
+	public static final String BOTTOM_STRING = "_|_";
+
+	/**
 	 * Performs the least upper bound operation between this lattice element and
 	 * the given one. This operation is commutative.
 	 * 

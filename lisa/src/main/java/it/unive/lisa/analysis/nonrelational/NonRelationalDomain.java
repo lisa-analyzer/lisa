@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational;
 import it.unive.lisa.analysis.FunctionalLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -32,11 +33,13 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * @param expression  the expression to evaluate
 	 * @param environment the environment containing the values of program
 	 *                        variables for the evaluation
+	 * @param pp          the program point that where this operation is being
+	 *                        evaluated
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}
 	 */
-	public T eval(E expression, F environment);
+	public T eval(E expression, F environment, ProgramPoint pp);
 
 	/**
 	 * Checks whether {@code expression} is satisfied in {@code environment},
@@ -46,6 +49,8 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * @param expression  the expression whose satisfiability is to be evaluated
 	 * @param environment the environment containing the values of program
 	 *                        variables for the satisfiability
+	 * @param pp          the program point that where this operation is being
+	 *                        evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if
@@ -54,7 +59,7 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 *             is satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
 	 */
-	public Satisfiability satisfies(E expression, F environment);
+	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp);
 
 	/**
 	 * Yields a textual representation of the content of this domain's instance.

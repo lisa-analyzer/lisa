@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -57,54 +58,56 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> assign(Identifier id, SymbolicExpression expression) throws SemanticException {
-		H heap = heapState.assign(id, expression);
+	public SimpleAbstractState<H, V> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		H heap = heapState.assign(id, expression, pp);
 		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
-			value = value.applySubstitution(heap.getSubstitution());
+			value = value.applySubstitution(heap.getSubstitution(), pp);
 
 		for (ValueExpression expr : exprs)
-			value = value.assign(id, expr);
+			value = value.assign(id, expr, pp);
 		return new SimpleAbstractState<>(heap, value);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> smallStepSemantics(SymbolicExpression expression) throws SemanticException {
-		H heap = heapState.smallStepSemantics(expression);
+	public SimpleAbstractState<H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		H heap = heapState.smallStepSemantics(expression, pp);
 		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
-			value = value.applySubstitution(heap.getSubstitution());
+			value = value.applySubstitution(heap.getSubstitution(), pp);
 
 		for (ValueExpression expr : exprs)
-			value = value.smallStepSemantics(expr);
+			value = value.smallStepSemantics(expr, pp);
 		return new SimpleAbstractState<>(heap, value);
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> assume(SymbolicExpression expression) throws SemanticException {
-		H heap = heapState.assume(expression);
+	public SimpleAbstractState<H, V> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		H heap = heapState.assume(expression, pp);
 		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
-			value = value.applySubstitution(heap.getSubstitution());
+			value = value.applySubstitution(heap.getSubstitution(), pp);
 
 		for (ValueExpression expr : exprs)
-			value = value.assume(expr);
+			value = value.assume(expr, pp);
 		return new SimpleAbstractState<>(heap, value);
 	}
 
 	@Override
-	public Satisfiability satisfies(SymbolicExpression expression) throws SemanticException {
-		Collection<ValueExpression> rewritten = heapState.smallStepSemantics(expression).getRewrittenExpressions();
+	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		Collection<ValueExpression> rewritten = heapState.smallStepSemantics(expression, pp).getRewrittenExpressions();
 		Satisfiability result = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten)
-			result = result.lub(valueState.satisfies(expr));
-		return heapState.satisfies(expression).glb(result);
+			result = result.lub(valueState.satisfies(expr, pp));
+		return heapState.satisfies(expression, pp).glb(result);
 	}
 
 	@Override

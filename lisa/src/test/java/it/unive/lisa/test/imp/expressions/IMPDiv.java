@@ -17,12 +17,12 @@ import it.unive.lisa.type.NumericType;
 /**
  * An expression modeling the division operation ({@code /}). Both operands'
  * types must be instances of {@link NumericType}. The type of this expression
- * is the common numerical type of its operands, according to
- * {@link BinaryNumericalOperation#commonNumericalType(SymbolicExpression, SymbolicExpression)}.
+ * is the common numerical type of its operands, according to the type
+ * inference.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPDiv extends BinaryNativeCall implements BinaryNumericalOperation {
+public class IMPDiv extends BinaryNativeCall {
 
 	/**
 	 * Builds the division.
@@ -56,7 +56,7 @@ public class IMPDiv extends BinaryNativeCall implements BinaryNumericalOperation
 			return entryState.bottom();
 
 		return rightState
-				.smallStepSemantics(new BinaryExpression(commonNumericalType(left, right), left, right,
-						BinaryOperator.NUMERIC_DIV));
+				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
+						BinaryOperator.NUMERIC_DIV), this);
 	}
 }

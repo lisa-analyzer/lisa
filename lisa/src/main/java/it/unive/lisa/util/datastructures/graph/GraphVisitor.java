@@ -27,7 +27,9 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<N, E, G>,
 	 * @param tool  the auxiliary tool that this visitor can use
 	 * @param graph the graph being visited
 	 * 
-	 * @return whether or not the visiting should stop when this call returns
+	 * @return whether or not the visiting should continue when this call
+	 *             returns. If this method returns {@code false}, the visiting
+	 *             will be interrupted
 	 */
 	boolean visit(V tool, G graph);
 
@@ -38,7 +40,9 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<N, E, G>,
 	 * @param graph the graph where the visited node belongs
 	 * @param node  the node being visited
 	 * 
-	 * @return whether or not the visiting should stop when this call returns
+	 * @return whether or not the visiting should continue when this call
+	 *             returns. If this method returns {@code false}, the visiting
+	 *             will be interrupted
 	 */
 	boolean visit(V tool, G graph, N node);
 
@@ -49,7 +53,9 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<N, E, G>,
 	 * @param graph the graph where the visited edge belongs
 	 * @param edge  the edge being visited
 	 * 
-	 * @return whether or not the visiting should stop when this call returns
+	 * @return whether or not the visiting should continue when this call
+	 *             returns. If this method returns {@code false}, the visiting
+	 *             will be interrupted
 	 */
 	boolean visit(V tool, G graph, E edge);
 }

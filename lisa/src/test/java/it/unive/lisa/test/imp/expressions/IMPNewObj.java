@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -66,42 +65,6 @@ public class IMPNewObj extends NativeCall {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
-		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created);
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		// we still need to compute the call to ensure that the type information
-		// is propagated in the constructor
-		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
-
-		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
-				getStaticType());
-		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
-		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
-
-		for (int i = 0; i < fullParams.length; i++)
-			for (SymbolicExpression e : fullParams[i]) {
-				Type ref = fullExpressions[i].getStaticType();
-				if (!e.getDynamicType().isUntyped() && !e.getTypes().anyMatch(t -> t.canBeAssignedTo(ref)))
-					return entryState.bottom();
-			}
-
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
-				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
-		AnalysisState<A, H,
-				TypeEnvironment> typing = call.callTypeInference(entryState, callGraph, computedStates, fullParams);
-
-		// at this stage, the runtime types correspond to the singleton set
-		// containing only the static type. This is fine since we are creating
-		// exactly an instance of that type
-		setRuntimeTypes(getRuntimeTypes());
-
-		return typing.smallStepSemantics(created);
+		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created, this);
 	}
 }

@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.analysis.impl.types.TypeEnvironment;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -122,24 +121,6 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, TypeEnvironment>,
-			H extends HeapDomain<H>> AnalysisState<A, H, TypeEnvironment> callTypeInference(
-					AnalysisState<A, H, TypeEnvironment> entryState, CallGraph callGraph,
-					AnalysisState<A, H, TypeEnvironment>[] computedStates,
-					Collection<SymbolicExpression>[] params) throws SemanticException {
-		// TODO too coarse
-		AnalysisState<A, H, TypeEnvironment> poststate = entryState.top();
-
-		if (getStaticType().isVoidType())
-			poststate = poststate.smallStepSemantics(new Skip());
-		else
-			poststate = poststate.smallStepSemantics(getMetaVariable());
-
-		setRuntimeTypes(poststate.getState().getValueState().getLastComputedTypes().getRuntimeTypes());
-		return poststate;
-	}
-
-	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
@@ -150,8 +131,8 @@ public class OpenCall extends Call implements MetaVariableCreator {
 		AnalysisState<A, H, V> poststate = entryState.top();
 
 		if (getStaticType().isVoidType())
-			return poststate.smallStepSemantics(new Skip());
+			return poststate.smallStepSemantics(new Skip(), this);
 		else
-			return poststate.smallStepSemantics(getMetaVariable());
+			return poststate.smallStepSemantics(getMetaVariable(), this);
 	}
 }
