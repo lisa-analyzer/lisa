@@ -62,6 +62,14 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	public final int getOffset() {
 		return offset;
 	}
+	
+	public boolean stopsExecution() {
+		return false;
+	}
+	
+	public boolean throwsError() {
+		return false;
+	}
 
 	@Override
 	public int hashCode() {

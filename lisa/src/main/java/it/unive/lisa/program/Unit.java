@@ -355,7 +355,8 @@ public abstract class Unit extends CodeElement {
 	 * Validates this unit, ensuring its consistency. This ensures that no two
 	 * code members exist in this unit whose signatures matches one another,
 	 * according to {@link CFGDescriptor#matchesSignature(CFGDescriptor)}. This
-	 * avoids ambiguous call resolution.
+	 * avoids ambiguous call resolution. Moreover, this ensures that all
+	 * {@link CFG}s are valid, according to {@link CFG#validate()}.
 	 * 
 	 * @throws ProgramValidationException if the program has an invalid
 	 *                                        structure
@@ -367,5 +368,8 @@ public abstract class Unit extends CodeElement {
 				throw new ProgramValidationException(
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
 		}
+		
+		for (CFG cfg : getAllCFGs())
+			cfg.validate();
 	}
 }

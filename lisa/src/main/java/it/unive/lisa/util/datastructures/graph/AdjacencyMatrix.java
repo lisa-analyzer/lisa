@@ -190,27 +190,57 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	public synchronized void simplify(Set<N> targets) {
+	public synchronized void simplify(Set<N> targets, Collection<N> entrypoints) {
 		for (N t : targets) {
-			for (E ingoing : matrix.get(t).getLeft())
-				for (E outgoing : matrix.get(t).getRight()) {
-					if (!outgoing.canBeSimplified())
+			ExternalSet<E> ingoing = matrix.get(t).getLeft();
+			ExternalSet<E> outgoing = matrix.get(t).getRight();
+			boolean entry = entrypoints.contains(t);
+			
+			if (ingoing.isEmpty() && !outgoing.isEmpty()) 
+				// this is a source node
+				for (E out : outgoing) {
+					if (!out.canBeSimplified())
 						throw new UnsupportedOperationException(
-								"Cannot simplify an edge with class " + outgoing.getClass().getSimpleName());
+								"Cannot simplify an edge with class " + out.getClass().getSimpleName());
 
-					// replicate the edge from ingoing.source to outgoing.dest
-					E _new = ingoing.newInstance(ingoing.getSource(), outgoing.getDestination());
-
-					// swap the ingoing edge
-					matrix.get(ingoing.getSource()).getRight().remove(ingoing);
-					matrix.get(ingoing.getSource()).getRight().add(_new);
-
-					// swap the outgoing edge
-					matrix.get(outgoing.getDestination()).getLeft().remove(outgoing);
-					matrix.get(outgoing.getDestination()).getLeft().add(_new);
+					// remove the edge
+					matrix.get(out.getDestination()).getLeft().remove(out);
+					if (entry)
+						entrypoints.add(out.getDestination());
 				}
+			else if (!ingoing.isEmpty() && outgoing.isEmpty())
+				// this is an exit node
+				for (E in : ingoing) {
+					if (!in.canBeSimplified())
+						throw new UnsupportedOperationException(
+								"Cannot simplify an edge with class " + in.getClass().getSimpleName());
+
+					// remove the edge
+					matrix.get(in.getSource()).getRight().remove(in);
+				}
+			else 
+				// normal intermediate edge
+				for (E in : ingoing) 
+					for (E out : outgoing) {
+						if (!out.canBeSimplified())
+							throw new UnsupportedOperationException(
+									"Cannot simplify an edge with class " + out.getClass().getSimpleName());
+	
+						// replicate the edge from ingoing.source to outgoing.dest
+						E _new = in.newInstance(in.getSource(), out.getDestination());
+	
+						// swap the ingoing edge
+						matrix.get(in.getSource()).getRight().remove(in);
+						matrix.get(in.getSource()).getRight().add(_new);
+	
+						// swap the outgoing edge
+						matrix.get(out.getDestination()).getLeft().remove(out);
+						matrix.get(out.getDestination()).getLeft().add(_new);
+					}
 
 			// remove the simplified node
+			if (entry) 
+				entrypoints.remove(t);
 			matrix.remove(t);
 		}
 	}

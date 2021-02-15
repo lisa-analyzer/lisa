@@ -52,6 +52,11 @@ public class Ret extends Statement {
 	}
 
 	@Override
+	public boolean stopsExecution() {
+		return true;
+	}
+	
+	@Override
 	public int hashCode() {
 		return super.hashCode() ^ getClass().getName().hashCode();
 	}
