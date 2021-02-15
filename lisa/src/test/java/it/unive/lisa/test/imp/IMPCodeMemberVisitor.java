@@ -143,7 +143,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Pair<Statement, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 
-		if (cfg.getNormalExitpoints().isEmpty()) {
+		if (cfg.getAllExitpoints().isEmpty()) {
 			Ret ret = new Ret(cfg, file, descriptor.getLine(), descriptor.getCol());
 			if (cfg.getNodesCount() == 0) {
 				// empty method, so the ret is also the entrypoint
@@ -154,7 +154,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				// is ending the method
 				Collection<Statement> preExits = new LinkedList<>();
 				for (Statement st : matrix.getNodes())
-					if (!(st instanceof Throw) && matrix.followersOf(st).isEmpty())
+					if (!st.stopsExecution() && matrix.followersOf(st).isEmpty())
 						preExits.add(st);
 				matrix.addNode(ret);
 				for (Statement st : preExits)
