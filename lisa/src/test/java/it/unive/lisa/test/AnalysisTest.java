@@ -27,7 +27,19 @@ public abstract class AnalysisTest {
 	protected static final String ACTUAL_RESULTS_DIR = "test-outputs";
 
 	/**
-	 * Performs a test, running an analysis.
+	 * Performs a test, running an analysis. The test will fail if:
+	 * <ul>
+	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
+	 * thrown)</li>
+	 * <li>The previous working directory using for the test execution cannot be
+	 * deleted</li>
+	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
+	 * <li>One of the json reports (either the one generated during the test
+	 * execution or the one used as baseline) cannot be found or cannot be
+	 * opened</li>
+	 * <li>The two json reports are different</li>
+	 * <li>The external files mentioned in the reports are different</li>
+	 * </ul>
 	 * 
 	 * @param folder     the name of the sub-folder; this is used for searching
 	 *                       expected results and as a working directory for
