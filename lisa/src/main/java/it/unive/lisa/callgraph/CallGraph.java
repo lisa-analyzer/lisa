@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
+import it.unive.lisa.callgraph.impl.RTACallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.CFGCall;
@@ -25,7 +25,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-@DefaultImplementation(IntraproceduralCallGraph.class)
+@DefaultImplementation(RTACallGraph.class)
 public interface CallGraph {
 
 	/**
