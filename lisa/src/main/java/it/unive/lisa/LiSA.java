@@ -12,8 +12,10 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.callgraph.CallGraphConstructionException;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
@@ -62,6 +64,11 @@ public class LiSA {
 	private Program program;
 
 	/**
+	 * The call graph to build up an interprocedural analysis
+	 */
+	private CallGraph callGraph;
+
+	/**
 	 * The collection of syntactic checks to execute
 	 */
 	private final Collection<SyntacticCheck> syntacticChecks;
@@ -73,9 +80,9 @@ public class LiSA {
 	private final Collection<Warning> warnings;
 
 	/**
-	 * The callgraph to use during the analysis
+	 * The interprocedural analysis to use during the analysis
 	 */
-	private CallGraph callGraph;
+	private InterproceduralAnalysis interproceduralAnalysis;
 
 	/**
 	 * The abstract state to run during the analysis
@@ -160,8 +167,8 @@ public class LiSA {
 	 * @param <T>       the concrete type of the call graph
 	 * @param callGraph the callgraph to use
 	 */
-	public <T extends CallGraph> void setCallGraph(T callGraph) {
-		this.callGraph = callGraph;
+	public <T extends InterproceduralAnalysis> void setInterproceduralAnalysis(T callGraph) {
+		this.interproceduralAnalysis = callGraph;
 	}
 
 	/**
@@ -369,9 +376,18 @@ public class LiSA {
 			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
 		}
 
+		if (interproceduralAnalysis == null) {
+			try {
+				interproceduralAnalysis = getDefaultFor(InterproceduralAnalysis.class);
+			} catch (AnalysisSetupException e) {
+				throw new AnalysisExecutionException("Unable to create default call graph", e);
+			}
+			log.warn("No call graph set for this analysis, defaulting to " + interproceduralAnalysis.getClass().getSimpleName());
+		}
+
 		try {
-			callGraph.build(program);
-		} catch (CallGraphConstructionException e) {
+			interproceduralAnalysis.build(program, callGraph);
+		} catch (InterproceduralAnalysisException e) {
 			log.fatal("Exception while building the call graph for the input program", e);
 			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
 		}
@@ -394,7 +410,7 @@ public class LiSA {
 			TimerLogger.execAction(log, "Computing type information",
 					() -> {
 						try {
-							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()));
+							interproceduralAnalysis.fixpoint(new AnalysisState<>(typesState, new Skip()));
 						} catch (FixpointException e) {
 							log.fatal("Exception during fixpoint computation", e);
 							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -405,13 +421,13 @@ public class LiSA {
 					: "Propagating type information to cfgs";
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
 				CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
+						InferenceSystem<InferredTypes>> result = interproceduralAnalysis.getAnalysisResultsOf(cfg);
 				if (dumpTypeInference)
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				cfg.accept(new TypesPropagator<>(), result);
 			}
 
-			callGraph.clear();
+			interproceduralAnalysis.clear();
 		} else
 			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
@@ -424,7 +440,7 @@ public class LiSA {
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						callGraph.fixpoint(new AnalysisState<>(state, new Skip()));
+						interproceduralAnalysis.fixpoint(new AnalysisState<>(state, new Skip()));
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -433,7 +449,7 @@ public class LiSA {
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
-				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
+				CFGWithAnalysisResults<A, H, V> result = interproceduralAnalysis.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
 	}

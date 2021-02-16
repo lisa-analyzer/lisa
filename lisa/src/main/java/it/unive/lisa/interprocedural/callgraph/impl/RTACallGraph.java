@@ -1,4 +1,4 @@
-package it.unive.lisa.callgraph.impl;
+package it.unive.lisa.interprocedural.callgraph.impl;
 
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.type.Type;

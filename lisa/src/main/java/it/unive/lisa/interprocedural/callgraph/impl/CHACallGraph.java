@@ -1,18 +1,8 @@
-package it.unive.lisa.callgraph.impl;
+package it.unive.lisa.interprocedural.callgraph.impl;
 
-import it.unive.lisa.analysis.*;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.CFGCall;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.UnitType;
-import it.unive.lisa.util.datastructures.graph.FixpointException;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 /**

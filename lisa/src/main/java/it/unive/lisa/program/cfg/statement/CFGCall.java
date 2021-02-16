@@ -5,7 +5,8 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -188,8 +189,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
+			AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph, AnalysisState<A, H, V>[] computedStates,
+			Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the
 		// parameters of this call, it is the entry state if this call has no

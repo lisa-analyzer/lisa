@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
@@ -99,8 +99,8 @@ public class AccessUnitGlobal extends Expression {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-					CallGraph callGraph, StatementStore<A, H, V> expressions) throws SemanticException {
-		AnalysisState<A, H, V> rec = receiver.semantics(entryState, callGraph, expressions);
+                                                                       InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions) throws SemanticException {
+		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interproceduralAnalysis, expressions);
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = null;

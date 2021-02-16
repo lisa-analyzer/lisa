@@ -7,7 +7,8 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.util.workset.WorkingSet;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -120,7 +121,7 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 		 * @throws SemanticException if something goes wrong during the
 		 *                               computation
 		 */
-		AnalysisState<A, H, V> compute(N node, AnalysisState<A, H, V> entryState, CallGraph callGraph,
+		AnalysisState<A, H, V> compute(N node, AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
 				F expressions) throws SemanticException;
 	}
 
@@ -177,8 +178,8 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			F extends FunctionalLattice<F, N, AnalysisState<A, H, V>>> Map<N, AnalysisState<A, H, V>> fixpoint(
-					Map<N, AnalysisState<A, H, V>> startingPoints, CallGraph cg, WorkingSet<N> ws, int widenAfter,
-					SemanticFunction<N, E, G, A, H, V, F> semantics)
+			Map<N, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg, WorkingSet<N> ws, int widenAfter,
+			SemanticFunction<N, E, G, A, H, V, F> semantics)
 					throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);

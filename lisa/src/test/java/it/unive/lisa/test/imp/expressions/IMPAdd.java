@@ -5,7 +5,8 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -48,7 +49,7 @@ public class IMPAdd extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
 					AnalysisState<A, H, V> leftState,
 					SymbolicExpression left,
 					AnalysisState<A, H, V> rightState,

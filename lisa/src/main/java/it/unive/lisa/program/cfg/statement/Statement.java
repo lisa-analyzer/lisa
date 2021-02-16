@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -105,7 +105,7 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	 * Computes the semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #semantics(AnalysisState, CallGraph, StatementStore)} of each
+	 * {@link #semantics(AnalysisState, InterproceduralAnalysis, StatementStore)} of each
 	 * nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
@@ -115,10 +115,10 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	 * @param entryState  the entry state that represents the abstract values of
 	 *                        each program variable and memory location when the
 	 *                        execution reaches this statement
-	 * @param callGraph   the call graph of the program to analyze
+	 * @param interproceduralAnalysis   the call graph of the program to analyze
 	 * @param expressions the cache where analysis states of intermediate
 	 *                        expressions must be stored
-	 * 
+	 *
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this statement
 	 * 
@@ -127,6 +127,6 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+			AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions)
 					throws SemanticException;
 }

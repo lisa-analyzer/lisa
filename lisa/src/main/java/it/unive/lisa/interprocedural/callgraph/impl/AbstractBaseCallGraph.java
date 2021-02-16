@@ -1,4 +1,4 @@
-package it.unive.lisa.callgraph.impl;
+package it.unive.lisa.interprocedural.callgraph.impl;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -7,9 +7,9 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.callgraph.CallGraphConstructionException;
-import it.unive.lisa.callgraph.CallResolutionException;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
+import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
@@ -53,34 +53,16 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class AbstractBaseCallGraph implements CallGraph {
 
-    private static final Logger log = LogManager.getLogger(it.unive.lisa.callgraph.impl.AbstractBaseCallGraph.class);
-
-    /**
-     * The cash of the fixpoints' results. {@link Map#keySet()} will contain all
-     * the cfgs that have been added. If a key's values's
-     * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
-     * has not be computed yet.
-     */
-    private final Map<CFG, Optional<CFGWithAnalysisResults<?, ?, ?>>> results;
+    private static final Logger log = LogManager.getLogger(it.unive.lisa.interprocedural.callgraph.impl.AbstractBaseCallGraph.class);
 
     private Program program;
 
-    /**
-     * Builds the call graph.
-     */
-    public AbstractBaseCallGraph() {
-        this.results = new ConcurrentHashMap<>();
-    }
 
     @Override
     public final void build(Program program) throws CallGraphConstructionException {
         this.program = program;
     }
 
-    @Override
-    public final void clear() {
-        results.clear();
-    }
 
     @Override
     public final Call resolve(UnresolvedCall call) throws CallResolutionException {
@@ -137,62 +119,5 @@ public abstract class AbstractBaseCallGraph implements CallGraph {
      * @return the possible types of the given expression
      */
     protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver);
-
-    @Override
-    public final <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
-            AnalysisState<A, H, V> entryState)
-            throws FixpointException {
-        for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
-                "cfgs"))
-            try {
-                results.put(cfg, Optional.of(cfg.fixpoint(prepare(entryState, cfg), this)));
-            } catch (SemanticException e) {
-                throw new FixpointException("Error while creating the entrystate for " + cfg, e);
-            }
-    }
-
-    private <A extends AbstractState<A, H, V>,
-            H extends HeapDomain<H>,
-            V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
-            throws SemanticException {
-        AnalysisState<A, H, V> prepared = entryState;
-        for (Parameter arg : cfg.getDescriptor().getArgs())
-            if (arg.getStaticType().isPointerType()) {
-                prepared = prepared.smallStepSemantics(
-                        new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName()),
-                        cfg.getGenericProgramPoint());
-                for (SymbolicExpression expr : prepared.getComputedExpressions())
-                    prepared = prepared.assign((HeapIdentifier) expr,
-                            new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-                            cfg.getGenericProgramPoint());
-            } else {
-                ValueIdentifier id = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()),
-                        arg.getName());
-                prepared = prepared.assign(id, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-                        cfg.getGenericProgramPoint());
-            }
-        return prepared;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public final <A extends AbstractState<A, H, V>,
-            H extends HeapDomain<H>,
-            V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> getAnalysisResultsOf(
-            CFG cfg) {
-        return (CFGWithAnalysisResults<A, H, V>) results.get(cfg).orElse(null);
-    }
-
-    @Override
-    public final <A extends AbstractState<A, H, V>,
-            H extends HeapDomain<H>,
-            V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
-                                                                                 AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
-            throws SemanticException {
-        if (call.getStaticType().isVoidType())
-            return entryState.top();
-
-        return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"), call);
-    }
 
 }

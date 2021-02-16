@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.type.NullType;
@@ -56,7 +56,7 @@ public class NullLiteral extends Literal {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+            AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		return entryState.smallStepSemantics(NullConstant.INSTANCE, this);
 	}

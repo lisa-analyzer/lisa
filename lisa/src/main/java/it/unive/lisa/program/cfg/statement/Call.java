@@ -6,7 +6,8 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -128,7 +129,7 @@ public abstract class Call extends Expression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
@@ -158,7 +159,7 @@ public abstract class Call extends Expression {
 	 * @param <H>            the type of the {@link HeapDomain}
 	 * @param <V>            the type of the {@link ValueDomain}
 	 * @param entryState     the entry state of this call
-	 * @param callGraph      the call graph of the program to analyze
+	 * @param inteproceduralAnalysis      the interprocedural analysis of the program to analyze
 	 * @param computedStates the array of states chaining the parameters'
 	 *                           semantics evaluation starting from
 	 *                           {@code entryState}, namely
@@ -178,10 +179,10 @@ public abstract class Call extends Expression {
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState,
-					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
-					throws SemanticException;
+			AnalysisState<A, H, V> entryState,
+				InterproceduralAnalysis inteproceduralAnalysis , AnalysisState<A, H, V>[] computedStates,
+				Collection<SymbolicExpression>[] params)
+						throws SemanticException;
 
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
