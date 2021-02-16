@@ -56,12 +56,12 @@ public class Throw extends UnaryStatement {
 	public boolean stopsExecution() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean throwsError() {
 		return true;
 	}
-	
+
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,

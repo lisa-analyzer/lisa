@@ -62,11 +62,25 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	public final int getOffset() {
 		return offset;
 	}
-	
+
+	/**
+	 * Whether or not this statement stops the execution of the containing cfg,
+	 * either by throwing an error or returning a value. To distinguish
+	 * error-raising halting statements and normal ones, use
+	 * {@link #throwsError()}.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean stopsExecution() {
 		return false;
 	}
-	
+
+	/**
+	 * Whether or not this statement throws an error, halting the normal
+	 * execution of the containing cfg.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean throwsError() {
 		return false;
 	}

@@ -2,8 +2,6 @@ package it.unive.lisa.test.cfg;
 
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -27,6 +25,7 @@ import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
+import org.junit.Test;
 
 public class CFGSimplificationTest {
 
@@ -232,8 +231,10 @@ public class CFGSimplificationTest {
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
-		Assignment assign1 = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		Assignment assign2 = new Assignment(first, new VariableRef(first, "y"), new Literal(first, 50, Untyped.INSTANCE));
+		Assignment assign1 = new Assignment(first, new VariableRef(first, "x"),
+				new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, new VariableRef(first, "y"),
+				new Literal(first, 50, Untyped.INSTANCE));
 		NoOp end = new NoOp(first);
 		first.addNode(assign1, true);
 		first.addNode(assign2);
@@ -263,8 +264,10 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, new VariableRef(first, "b"),
 				new Literal(first, true, Untyped.INSTANCE));
-		Assignment assign2 = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		Assignment assign3 = new Assignment(first, new VariableRef(first, "y"), new Literal(first, 50, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, new VariableRef(first, "x"),
+				new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign3 = new Assignment(first, new VariableRef(first, "y"),
+				new Literal(first, 50, Untyped.INSTANCE));
 		NoOp end = new NoOp(first);
 		first.addNode(end);
 		first.addNode(assign1, true);

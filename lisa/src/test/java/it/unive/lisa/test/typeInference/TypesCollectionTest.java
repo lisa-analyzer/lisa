@@ -1,8 +1,7 @@
 package it.unive.lisa.test.typeInference;
 
-import org.junit.Test;
-
 import it.unive.lisa.test.AnalysisTest;
+import org.junit.Test;
 
 public class TypesCollectionTest extends AnalysisTest {
 	@Test

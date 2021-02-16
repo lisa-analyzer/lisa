@@ -368,7 +368,7 @@ public abstract class Unit extends CodeElement {
 				throw new ProgramValidationException(
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
 		}
-		
+
 		for (CFG cfg : getAllCFGs())
 			cfg.validate();
 	}

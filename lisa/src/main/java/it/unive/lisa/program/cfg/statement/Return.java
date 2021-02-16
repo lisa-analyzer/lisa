@@ -59,7 +59,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	public boolean stopsExecution() {
 		return true;
 	}
-	
+
 	@Override
 	public final Identifier getMetaVariable() {
 		return new ValueIdentifier(getExpression().getRuntimeTypes(),

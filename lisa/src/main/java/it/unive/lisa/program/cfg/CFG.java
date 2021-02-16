@@ -1,19 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -39,6 +25,18 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -870,6 +868,22 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		};
 	}
 
+	/**
+	 * Validates this cfg, ensuring that the code contained in it is well
+	 * formed. This method checks that:
+	 * <ul>
+	 * <li>each {@link Edge} is connected to {@link Statement}s contained in the
+	 * cfg</li>
+	 * <li>all {@link Statement}s with no ingoing edges are marked as
+	 * entrypoints of the cfg (i.e. no deadcode)</li>
+	 * <li>all {@link Statement}s that stop the execution (according to
+	 * {@link Statement#stopsExecution()}) do not have outgoing edges</li>
+	 * <li>all entrypoints are effectively part of this cfg</li>
+	 * </ul>
+	 * 
+	 * @throws ProgramValidationException if one of the aforementioned checks
+	 *                                        fail
+	 */
 	public void validate() throws ProgramValidationException {
 		Collection<Statement> nodes = adjacencyMatrix.getNodes();
 

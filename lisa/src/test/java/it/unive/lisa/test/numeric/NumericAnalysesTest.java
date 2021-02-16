@@ -2,8 +2,6 @@ package it.unive.lisa.test.numeric;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.HeapDomain;
@@ -12,6 +10,7 @@ import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.impl.numeric.Parity;
 import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.test.AnalysisTest;
+import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTest {
 
