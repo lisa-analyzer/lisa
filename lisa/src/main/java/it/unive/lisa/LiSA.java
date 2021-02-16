@@ -161,16 +161,26 @@ public class LiSA {
 	}
 
 	/**
-	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
+	 * Sets the {@link InterproceduralAnalysis} to use for the analysis. Any existing value is
 	 * overwritten.
 	 * 
 	 * @param <T>       the concrete type of the call graph
-	 * @param callGraph the callgraph to use
+	 * @param interproceduralAnalysis the interprocedural analysis to use
 	 */
-	public <T extends InterproceduralAnalysis> void setInterproceduralAnalysis(T callGraph) {
-		this.interproceduralAnalysis = callGraph;
+	public <T extends InterproceduralAnalysis> void setInterproceduralAnalysis(T interproceduralAnalysis) {
+		this.interproceduralAnalysis = interproceduralAnalysis;
 	}
 
+	/**
+	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
+	 * overwritten.
+	 *
+	 * @param <T>       the concrete type of the call graph
+	 * @param callGraph the callgraph to use
+	 */
+	public <T extends CallGraph> void setCallGraph(T callGraph) {
+		this.callGraph = callGraph;
+	}
 	/**
 	 * Sets the {@link AbstractState} to use for the analysis. Any existing
 	 * value is overwritten.
