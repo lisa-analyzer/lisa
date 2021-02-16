@@ -4,13 +4,19 @@ class expressions {
 		def x = "s";
 	}
 	
-	_throw(x, i) {
-		throw x;
+	_throw1(x, i) {
 		throw i;
 	}
 
-	_return(x, i) {
+	_throw2(x, i) {
+		throw x;
+	}
+
+	_return1(x, i) {
 		return i;
+	}
+	
+	_return2(x, i) {
 		return x;
 	}
 
@@ -19,11 +25,17 @@ class expressions {
 		this.test(i, 5);
 	}
 
-	nestedCall(i, x) {
+	nestedCall1(i, x) {
 		this.test(5, this.test(i, 5));
 		this.test(x, this.test(i));
-		return this.test(i);
-		throw this.test(i);
 		x = this.test(i);
+	}
+	
+	nestedCall2(i, x) {
+		return this.test(i);
+	}
+	
+	nestedCall3(i, x) {
+		throw this.test(i);
 	}
 }

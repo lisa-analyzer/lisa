@@ -334,7 +334,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
-		adjacencyMatrix.simplify(targets);
+		adjacencyMatrix.simplify(targets, entrypoints);
 	}
 
 	/**
