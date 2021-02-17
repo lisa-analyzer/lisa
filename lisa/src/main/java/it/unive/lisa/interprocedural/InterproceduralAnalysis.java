@@ -4,7 +4,6 @@ import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.*;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -18,8 +17,18 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 
 import java.util.Collection;
 
+/**
+ * @param <A>        the type of {@link AbstractState} contained into the
+ *                       analysis state
+ * @param <H>        the type of {@link HeapDomain} contained into the
+ *                       computed abstract state
+ * @param <V>        the type of {@link ValueDomain} contained into the
+ *                       computed abstract state
+ */
 @DefaultImplementation(ModularWorstCaseAnalysis.class)
-public interface InterproceduralAnalysis {
+public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
+        H extends HeapDomain<H>,
+        V extends ValueDomain<V>> {
 
 
     /**
@@ -40,39 +49,25 @@ public interface InterproceduralAnalysis {
      * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis)} or one of its overloads.
      * Results of individual cfgs are then available through
      * {@link #getAnalysisResultsOf(CFG)}.
-     *
-     * @param <A>        the type of {@link AbstractState} to compute
-     * @param <H>        the type of {@link HeapDomain} to compute
-     * @param <V>        the type of {@link ValueDomain} to compute
      * @param entryState the entry state for the {@link CFG}s that are the
      *                       entrypoints of the computation
      *
      * @throws FixpointException if something goes wrong while evaluating the
      *                               fixpoint
      */
-    <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
-            AnalysisState<A, H, V> entryState)
-            throws FixpointException;
+    void fixpoint(AnalysisState<A, H, V> entryState) throws FixpointException;
 
     /**
      * Yields the results of the given analysis, identified by its class, on the
      * given {@link CFG}. Results are provided as
      * {@link CFGWithAnalysisResults}.
-     *
-     * @param <A> the type of {@link AbstractState} contained into the analysis
-     *                state
-     * @param <H> the type of {@link HeapDomain} contained into the computed
-     *                abstract state
-     * @param <V> the type of {@link ValueDomain} contained into the computed
-     *                abstract state
+
      * @param cfg the cfg whose fixpoint results needs to be retrieved
      *
      * @return the result of the fixpoint computation of {@code valueDomain}
      *             over {@code cfg}
      */
-    <A extends AbstractState<A, H, V>,
-            H extends HeapDomain<H>,
-            V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> getAnalysisResultsOf(CFG cfg);
+    Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg);
 
     /**
      * Clears all the data from the last fixpoint computation, effectively
@@ -88,12 +83,6 @@ public interface InterproceduralAnalysis {
      * parameters. The abstract value of each parameter is computed on
      * {@code entryState}.
      *
-     * @param <A>        the type of {@link AbstractState} contained into the
-     *                       analysis state
-     * @param <H>        the type of {@link HeapDomain} contained into the
-     *                       computed abstract state
-     * @param <V>        the type of {@link ValueDomain} contained into the
-     *                       computed abstract state
      * @param call       the call to resolve and evaluate
      * @param entryState the abstract analysis state when the call is reached
      * @param parameters the expressions representing the actual parameters of
@@ -107,10 +96,7 @@ public interface InterproceduralAnalysis {
      *
      * @throws SemanticException if something goes wrong during the computation
      */
-    <A extends AbstractState<A, H, V>,
-            H extends HeapDomain<H>,
-            V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
-                                                                                 AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+    AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
             throws SemanticException;
 
     /**

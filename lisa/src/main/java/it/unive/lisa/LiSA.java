@@ -82,7 +82,7 @@ public class LiSA {
 	/**
 	 * The interprocedural analysis to use during the analysis
 	 */
-	private InterproceduralAnalysis interproceduralAnalysis;
+	private InterproceduralAnalysis<?, ?, ?> interproceduralAnalysis;
 
 	/**
 	 * The abstract state to run during the analysis
@@ -420,7 +420,7 @@ public class LiSA {
 			TimerLogger.execAction(log, "Computing type information",
 					() -> {
 						try {
-							interproceduralAnalysis.fixpoint(new AnalysisState<>(typesState, new Skip()));
+							interproceduralAnalysis.fixpoint(new AnalysisState(typesState, new Skip()));
 						} catch (FixpointException e) {
 							log.fatal("Exception during fixpoint computation", e);
 							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -430,11 +430,14 @@ public class LiSA {
 			String message = dumpTypeInference ? "Dumping type analysis and propagating it to cfgs"
 					: "Propagating type information to cfgs";
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
-				CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> result = interproceduralAnalysis.getAnalysisResultsOf(cfg);
-				if (dumpTypeInference)
-					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
-				cfg.accept(new TypesPropagator<>(), result);
+				for(Object result_raw : interproceduralAnalysis.getAnalysisResultsOf(cfg)) {
+					CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+							InferenceSystem<InferredTypes>> result = (CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+							InferenceSystem<InferredTypes>>) result_raw;
+					if (dumpTypeInference)
+						dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
+					cfg.accept(new TypesPropagator<>(), result);
+				}
 			}
 
 			interproceduralAnalysis.clear();
@@ -450,7 +453,7 @@ public class LiSA {
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						interproceduralAnalysis.fixpoint(new AnalysisState<>(state, new Skip()));
+						interproceduralAnalysis.fixpoint(new AnalysisState(state, new Skip()));
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -459,8 +462,8 @@ public class LiSA {
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
-				CFGWithAnalysisResults<A, H, V> result = interproceduralAnalysis.getAnalysisResultsOf(cfg);
-				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
+				for(Object result : interproceduralAnalysis.getAnalysisResultsOf(cfg))
+					dumpCFG("analysis___", (CFGWithAnalysisResults<A, H, V>) result, st -> ((CFGWithAnalysisResults<A, H, V>) result).getAnalysisStateAt(st).toString());
 			}
 	}
 
