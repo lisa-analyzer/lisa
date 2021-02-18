@@ -36,6 +36,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
      *
      * @param callgraph the callgraph used to resolve method calls
      *
+     * @param program the program
+     *
      * @throws InterproceduralAnalysisException if an exception happens while
      *                                            performing the interprocedural analysis
      */
