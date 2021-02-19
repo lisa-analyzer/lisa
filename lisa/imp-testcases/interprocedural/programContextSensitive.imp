@@ -1,0 +1,21 @@
+class A {
+    A() {
+     def i = 0;
+    }
+
+    foo() {
+        return 1;
+    }
+}
+
+class tests {
+
+	subtyping() {
+		def a = new A();
+   		def i = a.foo();
+    }
+
+    foo() {
+        return 1;
+    }
+}

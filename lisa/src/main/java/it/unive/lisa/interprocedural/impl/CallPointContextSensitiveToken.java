@@ -21,6 +21,11 @@ public class CallPointContextSensitiveToken extends ContextSensitiveToken {
         return new CallPointContextSensitiveToken(c);
     }
 
+    private static CallPointContextSensitiveToken singleton = new CallPointContextSensitiveToken(null);
+    public static CallPointContextSensitiveToken getSingleton() {
+        return singleton;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

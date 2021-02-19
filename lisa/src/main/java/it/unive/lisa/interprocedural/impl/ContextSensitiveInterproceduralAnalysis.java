@@ -100,7 +100,6 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
     public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
             throws SemanticException {
         ContextSensitiveToken newToken = token.pushCall(call);
-        //FIXME: go ahead here!
         CFG cfg = call.getCFG();
         AnalysisState<A, H, V> computedEntryState = entryState;
         CFGResults cfgresult = results.get(cfg);

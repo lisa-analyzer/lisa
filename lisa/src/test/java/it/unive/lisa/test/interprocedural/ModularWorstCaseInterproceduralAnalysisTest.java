@@ -34,6 +34,7 @@ public class ModularWorstCaseInterproceduralAnalysisTest {
         System.out.println("Testing modular worst case interprocedural analysis with CHA call graph...");
         LiSA lisa = new LiSA();
 
+        lisa.setInferTypes(true);
         Program program = IMPFrontend.processFile(filePath);
         lisa.setProgram(program);
         lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
