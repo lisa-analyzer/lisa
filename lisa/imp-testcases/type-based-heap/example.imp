@@ -1,0 +1,16 @@
+class example {
+	
+	f1;
+	f2;
+	
+	~example(x, y) {
+		this.f1 = x;
+		this.f2 = y;
+	}
+	
+	main() {
+		def obj = new example(1,2);
+		obj.f1 = 3;
+		obj.f2 = 4;
+	}
+}
