@@ -204,25 +204,25 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		// metavariable
 		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
 		// the lub will include the metavariable inside the state
-		AnalysisState<A, H, V> lub = lastPostState.lub(returned);
+		//AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
-		if (getStaticType().isVoidType())
+		if (getStaticType().isVoidType() ||
+				//FIXME: @Luca, the problem here is that we have an untyped that indeed it's a void, what should we do?
+				(returned.getComputedExpressions().size()==1 && returned.getComputedExpressions().iterator().next() instanceof Skip))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return lub.smallStepSemantics(new Skip(), this);
+			return returned.smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			getMetaVariables().add((Identifier) expr);
+			if(! (expr instanceof Skip)) //It might be the case it chose a target with void return type
+				getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 
-		AnalysisState<A, H, V> result = null;
-		for (SymbolicExpression expr : lub.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = lub.assign(meta, expr, this);
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
+		AnalysisState<A, H, V> result = returned.bottom();
+		for (SymbolicExpression expr : returned.getComputedExpressions()) {
+			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
+			result = result.lub(tmp);
 		}
 
 		return result;

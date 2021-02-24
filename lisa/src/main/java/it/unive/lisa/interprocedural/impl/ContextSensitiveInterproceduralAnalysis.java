@@ -100,30 +100,44 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
     public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
             throws SemanticException {
         ContextSensitiveToken newToken = token.pushCall(call);
-        CFG cfg = call.getCFG();
-        AnalysisState<A, H, V> computedEntryState = entryState;
-        CFGResults cfgresult = results.get(cfg);
-        if(cfgresult!=null) {
-            CFGWithAnalysisResults<A, H, V> analysisresult = cfgresult.getResult(newToken);
-            if(analysisresult!=null) {
-                AnalysisState<A, H, V> entry = analysisresult.getEntryState();
-                if(entryState.lessOrEqual(entry))
-                    return analysisresult.getExitState();
+        AnalysisState<A, H, V> exitState = entryState.bottom();
+
+        for(CFG cfg : call.getTargets()) {
+            AnalysisState<A, H, V> computedEntryState = entryState;
+            CFGResults cfgresult = results.get(cfg);
+            if (cfgresult != null) {
+                CFGWithAnalysisResults<A, H, V> analysisresult = cfgresult.getResult(newToken);
+                if (analysisresult != null) {
+                    AnalysisState<A, H, V> entry = analysisresult.getEntryState();
+                    if (entryState.lessOrEqual(entry))
+                        exitState = exitState.lub(analysisresult.getExitState());
+                    else
+                        try {
+                            CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
+                            exitState = exitState.lub(fixpointResult.getExitState());
+                        } catch (FixpointException | InterproceduralAnalysisException e) {
+                            throw new SemanticException("Exception during the interprocedural analysis", e);
+                        }
+                }
                 else
-                    computedEntryState = computedEntryState.lub(entry);
+                    try {
+                        CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
+                        exitState = exitState.lub(fixpointResult.getExitState());
+                    } catch (FixpointException | InterproceduralAnalysisException e) {
+                        throw new SemanticException("Exception during the interprocedural analysis", e);
+                    }
             }
         }
+        return exitState;
+    }
 
-        try {
-            CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-            CFGResults result = this.results.get(cfg);
-            if(result==null)
-                result = new CFGResults();
-            result.putResult(newToken, fixpointResult);
-            return fixpointResult.getExitState();
-        } catch (FixpointException| InterproceduralAnalysisException e) {
-            throw new SemanticException("Exception during the interprocedural analysis", e);
-        }
+    private CFGWithAnalysisResults<A, H, V> computeFixpoint(ContextSensitiveToken newToken, CFG cfg, AnalysisState<A, H, V> computedEntryState) throws FixpointException, InterproceduralAnalysisException, SemanticException {
+        CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
+        CFGResults result = this.results.get(cfg);
+        if (result == null)
+            result = new CFGResults();
+        result.putResult(newToken, fixpointResult);
+        return fixpointResult;
     }
 
 

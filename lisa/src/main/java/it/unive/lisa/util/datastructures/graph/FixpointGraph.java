@@ -221,7 +221,8 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 				try {
 					newIntermediate = (F) mkInternalStore(entrystate);
 					newApprox = semantics.compute(current, entrystate, cg, newIntermediate);
-					newApprox = cleanUpPostState(current, newApprox);
+					//FIXME the state should be cleaned through push/pop, not through a cleanup here!
+					//newApprox = cleanUpPostState(current, newApprox);
 				} catch (SemanticException e) {
 					log.error("Evaluation of the semantics of '" + current + "' in " + this
 							+ " led to an exception: " + e);
