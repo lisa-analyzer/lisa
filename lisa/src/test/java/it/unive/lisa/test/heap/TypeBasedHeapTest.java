@@ -12,8 +12,8 @@ import org.junit.Test;
 public class TypeBasedHeapTest extends AnalysisTest {
 
 	@Test
-	public void testSign() throws AnalysisSetupException {
-		perform("type-based-heap", "program.imp", false, false,
+	public void testTypeBasedHeap() throws AnalysisSetupException {
+		perform("heap/type-based-heap", "program.imp", false, false,
 				getDefaultFor(AbstractState.class, new TypeBasedHeap(), new Interval()));
 	}
 }
