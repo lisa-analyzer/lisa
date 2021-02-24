@@ -1,16 +1,15 @@
-class example {
-	
+class A {	
 	f1;
 	f2;
-	
-	~example(x, y) {
-		this.f1 = x;
-		this.f2 = y;
-	}
+}
+
+class B {
+	a;
+	b;
 	
 	main() {
-		def obj = new example(1,2);
-		obj.f1 = 3;
-		obj.f2 = 4;
+		def o1 = new A(1,2);
+		o1.f1 = 1;	
+		o1.f2 = o1.f1 + 2;	
 	}
 }

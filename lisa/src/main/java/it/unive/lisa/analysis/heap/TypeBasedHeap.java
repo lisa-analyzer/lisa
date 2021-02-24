@@ -12,6 +12,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -44,13 +46,13 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public TypeBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		// the only thing that we do is rewrite the expression if needed
+		// we just rewrite the expression if needed
 		return smallStepSemantics(expression, pp);
 	}
 
 	@Override
 	public TypeBasedHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		// the only thing that we do is rewrite the expression if needed
+		// we just rewrite the expression if needed
 		return smallStepSemantics(expression, pp);
 	}
 
@@ -98,14 +100,30 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	protected TypeBasedHeap semanticsOf(HeapExpression expression) {
 		HashSet<ValueExpression> ids = new HashSet<>();
-		for (Type type : expression.getTypes()) {
-			if (type.isPointerType()) {
-				ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
-				NAMES.add(type.toString());
+		
+		if (expression instanceof AccessChild) {
+			for (Type type : ((AccessChild) expression).getContainer().getTypes()) {
+				if (type.isPointerType()) {
+					ids.add(new HeapIdentifier(expression.getTypes(), type.toString(), true));
+					NAMES.add(type.toString());
+				}
 			}
+
+			return new TypeBasedHeap(ids);
 		}
 
-		return new TypeBasedHeap(ids);
+		if (expression instanceof HeapAllocation) {
+			for (Type type : expression.getTypes()) {
+				if (type.isPointerType()) {
+					ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
+					NAMES.add(type.toString());
+				}
+			}
+
+			return new TypeBasedHeap(ids);
+		}
+		
+		return this;
 	}
 
 	@Override
