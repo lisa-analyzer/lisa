@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
@@ -15,12 +8,25 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 
+/**
+ * A type-based heap implementation that abstracts heap locations depening on
+ * their types, i.e., all the heap locations with the same type are abstracted
+ * into a single unique identifier.
+ *
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap TOP = new TypeBasedHeap();
@@ -31,6 +37,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static HashSet<String> NAMES = new HashSet<String>();
 
+	/**
+	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
+	 * expression {@link Skip}.
+	 */
 	public TypeBasedHeap() {
 		this(new Skip());
 	}
@@ -100,7 +110,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	protected TypeBasedHeap semanticsOf(HeapExpression expression) {
 		HashSet<ValueExpression> ids = new HashSet<>();
-		
+
 		if (expression instanceof AccessChild) {
 			for (Type type : ((AccessChild) expression).getContainer().getTypes()) {
 				if (type.isPointerType()) {
@@ -112,7 +122,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			return new TypeBasedHeap(ids);
 		}
 
-		if (expression instanceof HeapAllocation) {
+		if (expression instanceof HeapAllocation || expression instanceof HeapReference) {
 			for (Type type : expression.getTypes()) {
 				if (type.isPointerType()) {
 					ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
@@ -122,8 +132,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(ids);
 		}
-		
-		return this;
+
+		return bottom();
 	}
 
 	@Override
