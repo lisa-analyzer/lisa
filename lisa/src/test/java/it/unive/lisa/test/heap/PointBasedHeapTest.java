@@ -10,6 +10,7 @@ import it.unive.lisa.test.AnalysisTest;
 import org.junit.Test;
 
 public class PointBasedHeapTest extends AnalysisTest {
+	
 	@Test
 	public void pointBasedHeapTest() throws AnalysisSetupException {
 		perform("heap/point-based-heap", "program.imp", false, false,

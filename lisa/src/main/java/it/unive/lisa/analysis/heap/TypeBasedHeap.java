@@ -21,7 +21,7 @@ import java.util.List;
 import org.apache.commons.collections.CollectionUtils;
 
 /**
- * A type-based heap implementation that abstracts heap locations depening on
+ * A type-based heap implementation that abstracts heap locations depending on
  * their types, i.e., all the heap locations with the same type are abstracted
  * into a single unique identifier.
  *
@@ -38,8 +38,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	private static HashSet<String> NAMES = new HashSet<String>();
 
 	/**
-	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
-	 * expression {@link Skip}.
+	 * Builds a new instance of TypeBasedHeap, with an unique rewritten expression {@link Skip}.
 	 */
 	public TypeBasedHeap() {
 		this(new Skip());

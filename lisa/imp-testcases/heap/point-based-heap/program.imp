@@ -7,4 +7,12 @@ class A {
 		o1.a = 1;	
 		o1.b = 2;	
 	}
+		
+	f1(o) {	
+		if (true) {
+			o = new A(0,0);
+		} else {
+			;
+		}
+	}
 }
