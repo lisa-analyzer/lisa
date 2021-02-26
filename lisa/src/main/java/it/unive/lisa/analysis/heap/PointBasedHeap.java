@@ -23,6 +23,14 @@ import java.util.List;
 import java.util.Map;
 import org.apache.commons.collections.CollectionUtils;
 
+/**
+ * A point-based heap implementation that abstracts heap locations depending on
+ * their allocation sites, namely the position of the code wehre heap locations
+ * are generated. All heap locations that are generated at the same allocation
+ * sites are abstracted into a single unique identifier.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapDomain<PointBasedHeap> {
 
 	private static final PointBasedHeap TOP = new PointBasedHeap();
@@ -31,7 +39,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 
 	private final Collection<ValueExpression> rewritten;
 
-	private final HashMap<Identifier, HashSet<ValueExpression>> allocationSites;
+	private final Map<Identifier, Collection<ValueExpression>> allocationSites;
 
 	/**
 	 * Builds a new instance of PointBasedHeap, with an unique rewritten
@@ -42,18 +50,13 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 	}
 
 	private PointBasedHeap(ValueExpression rewritten) {
-		this(Collections.singleton(rewritten));
-	}
-
-	private PointBasedHeap(Collection<ValueExpression> rewritten) {
-		this.rewritten = rewritten;
-		this.allocationSites = new HashMap<>();
+		this(Collections.singleton(rewritten), new HashMap<>());
 	}
 
 	private PointBasedHeap(Collection<ValueExpression> rewritten,
-			HashMap<Identifier, HashSet<ValueExpression>> allocationSites) {
+			Map<Identifier, Collection<ValueExpression>> allocationSites) {
 		this.rewritten = rewritten;
-		this.allocationSites = new HashMap<>(allocationSites);
+		this.allocationSites = allocationSites;
 	}
 
 	@Override
@@ -104,7 +107,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 			throws SemanticException {
 
 		if (expression instanceof HeapIdentifier) {
-			HashMap<Identifier, HashSet<ValueExpression>> sites = new HashMap<>(allocationSites);
+			HashMap<Identifier, Collection<ValueExpression>> sites = new HashMap<>(allocationSites);
 			HashSet<ValueExpression> v = new HashSet<>();
 			v.add((ValueExpression) expression);
 			sites.put(id, v);
@@ -134,7 +137,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 	@Override
 	public String representation() {
 		HashSet<ValueExpression> res = new HashSet<ValueExpression>();
-		for (HashSet<ValueExpression> s : allocationSites.values())
+		for (Collection<ValueExpression> s : allocationSites.values())
 			res.addAll(s);
 		return res.toString();
 	}
@@ -167,10 +170,10 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 	@SuppressWarnings("unchecked")
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		Collection<ValueExpression> rewritten = (CollectionUtils.union(this.rewritten, other.rewritten));
-		HashMap<Identifier,
-				HashSet<ValueExpression>> sites = new HashMap<Identifier, HashSet<ValueExpression>>(allocationSites);
+		Map<Identifier, Collection<
+				ValueExpression>> sites = new HashMap<Identifier, Collection<ValueExpression>>(allocationSites);
 
-		for (Map.Entry<Identifier, HashSet<ValueExpression>> e : other.allocationSites.entrySet())
+		for (Map.Entry<Identifier, Collection<ValueExpression>> e : other.allocationSites.entrySet())
 			if (sites.containsKey(e.getKey())) {
 				HashSet<ValueExpression> res = new HashSet<ValueExpression>(sites.get(e.getKey()));
 				res.addAll(e.getValue());
@@ -189,7 +192,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 	@Override
 	protected boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
 		if (other.allocationSites.keySet().containsAll(allocationSites.keySet())) {
-			for (Map.Entry<Identifier, HashSet<ValueExpression>> e : other.allocationSites.entrySet())
+			for (Map.Entry<Identifier, Collection<ValueExpression>> e : other.allocationSites.entrySet())
 				if (!e.getValue().containsAll(allocationSites.get(e.getKey())))
 					return false;
 			return true;
