@@ -38,7 +38,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	private static HashSet<String> NAMES = new HashSet<String>();
 
 	/**
-	 * Builds a new instance of TypeBasedHeap, with an unique rewritten expression {@link Skip}.
+	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
+	 * expression {@link Skip}.
 	 */
 	public TypeBasedHeap() {
 		this(new Skip());
