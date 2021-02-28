@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.heap;
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -85,6 +86,16 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public MonolithicHeap pushScope(CFGCall scope) throws SemanticException {
+		return top();
+	}
+
+	@Override
+	public MonolithicHeap popScope(CFGCall scope) throws SemanticException {
+		return top();
 	}
 
 	@Override

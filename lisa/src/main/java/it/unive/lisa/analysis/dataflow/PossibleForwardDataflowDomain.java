@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -123,4 +124,24 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	public Collection<E> getDataflowElements() {
 		return elements;
 	}
+
+
+	@Override
+	public PossibleForwardDataflowDomain<E> pushScope(CFGCall scope) throws SemanticException {
+		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		for(E element : this.elements)
+			result.elements.add(element.pushScope(scope));
+		return result;
+	}
+
+	@Override
+	public PossibleForwardDataflowDomain<E> popScope(CFGCall scope) throws SemanticException {
+		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		for(E element : this.elements)
+			result.elements.add(element.popScope(scope));
+		return result;
+	}
+
+
+
 }

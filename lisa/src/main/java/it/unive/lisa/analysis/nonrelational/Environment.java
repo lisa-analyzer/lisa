@@ -5,10 +5,16 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -153,6 +159,53 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	@Override
 	public final boolean isBottom() {
 		return lattice.isBottom() && function == null;
+	}
+
+	@Override
+	public M pushScope(CFGCall scope) throws SemanticException {
+		return this.liftIdentifiers(id -> new OutsideScopeIdentifier(id, scope));
+	}
+
+	@Override
+	public M popScope(CFGCall scope) throws SemanticException {
+		AtomicReference<SemanticException> e = new AtomicReference<>();
+		M result = this.liftIdentifiers(id -> {
+			if(! (id instanceof OutsideScopeIdentifier)) {
+				return null;
+			}
+			else {
+				CFGCall otherCall = ((OutsideScopeIdentifier) id).getScope();
+				if(! scope.equals(otherCall)) {
+					e.set(new SemanticException("Trying to pop out a different scope"));
+					return null;
+				}
+				else return ((OutsideScopeIdentifier) id).popScope();
+			}
+		});
+		if(e.get()!=null)
+			throw e.get();
+		else return result;
+	}
+
+	private M liftIdentifiers( Function<Identifier, Identifier> lifter) throws SemanticException {
+		if(this.isBottom())
+			return this.bottom();
+		if(this.isTop())
+			return this.top();
+		Map<Identifier, T> function = new HashMap<>();
+		M result = this.copy();
+		for(Identifier id : this.getKeys()) {
+			Identifier outsideScopeIdentifier = lifter.apply(id);
+			if(outsideScopeIdentifier!=null) {
+				T value = this.getState(id);
+				function.put(outsideScopeIdentifier, value);
+				//FIXME @Luca not sure this could be the intended use of assignAux, but I need an instance of M and not of Environment...
+				result = result.assignAux(outsideScopeIdentifier, null, function, value, null);
+			}
+			result = result.forgetIdentifier(id);
+		}
+		return result;
+
 	}
 
 	@Override

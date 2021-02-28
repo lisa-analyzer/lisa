@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -200,6 +199,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		AnalysisState<A, H,
 				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
 
+		lastPostState = lastPostState.pushScope(this);
+
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
@@ -208,23 +209,28 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		if (getStaticType().isVoidType() ||
 				//FIXME: @Luca, the problem here is that we have an untyped that indeed it's a void, what should we do?
+				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
 				(returned.getComputedExpressions().size()==1 && returned.getComputedExpressions().iterator().next() instanceof Skip))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return returned.smallStepSemantics(new Skip(), this);
+			return returned.popScope(this).smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			if(! (expr instanceof Skip)) //It might be the case it chose a target with void return type
+			//if(! (expr instanceof Skip)) //It might be the case it chose a target with void return type
 				getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = returned.bottom();
-		for (SymbolicExpression expr : returned.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
-			result = result.lub(tmp);
-		}
+		for (SymbolicExpression expr : returned.getComputedExpressions())
+			//if(! (expr instanceof Skip))
+			{
+				AnalysisState<A, H, V> tmp = returned.assign(meta.pushScope(this), expr, this);
+				result = result.lub(tmp.smallStepSemantics(meta, this));
+				//We need to perform this evaluation of the identifier not pushed with the scope since otherwise
+                //the value associated with the returned variable would be lost
+			}
 
-		return result;
+		return result.popScope(this);
 	}
 }

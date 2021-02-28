@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -23,7 +24,7 @@ import org.apache.commons.collections.CollectionUtils;
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		implements Lattice<AnalysisState<A, H, V>>,
+		extends BaseLattice<AnalysisState<A, H, V>> implements
 		SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 
 	/**
@@ -115,21 +116,31 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
+	public AnalysisState<A, H, V> pushScope(CFGCall scope) throws SemanticException {
+		return new AnalysisState<A, H, V>(state.pushScope(scope), this.computedExpressions);
+	}
+
+	@Override
+	public AnalysisState<A, H, V> popScope(CFGCall scope) throws SemanticException {
+		return new AnalysisState<A, H, V>(state.popScope(scope), this.computedExpressions);
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
-	public AnalysisState<A, H, V> lub(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V> lubAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.lub(other.state),
 				CollectionUtils.union(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public AnalysisState<A, H, V> widening(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V> wideningAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.widening(other.state),
 				CollectionUtils.union(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
-	public boolean lessOrEqual(AnalysisState<A, H, V> other) throws SemanticException {
+	public boolean lessOrEqualAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return state.lessOrEqual(other.state);
 	}
 
@@ -137,6 +148,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> top() {
 		return new AnalysisState<>(state.top(), new Skip());
 	}
+
 
 	@Override
 	public AnalysisState<A, H, V> bottom() {

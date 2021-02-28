@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.ExternalSet;
 
@@ -57,6 +58,15 @@ public abstract class Identifier extends ValueExpression {
 	 */
 	public boolean isWeak() {
 		return weak;
+	}
+
+	/**
+	 * Returns an identifier where the scope is moved one step out
+	 * @param scope the called method that pushes the scope one step out
+	 * @return the identifier where the scope has been moved one step out
+	 */
+	public OutsideScopeIdentifier pushScope(CFGCall scope) {
+		return new OutsideScopeIdentifier(this, scope);
 	}
 
 	@Override

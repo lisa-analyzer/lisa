@@ -86,14 +86,11 @@ public class Assignment extends BinaryExpression {
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = right.bottom();
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
 				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
+				result = result.lub(tmp);
 			}
 
 		if (!getRight().getMetaVariables().isEmpty())

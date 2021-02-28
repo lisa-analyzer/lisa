@@ -127,6 +127,13 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
                         throw new SemanticException("Exception during the interprocedural analysis", e);
                     }
             }
+            else
+                try {
+                    CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
+                    exitState = exitState.lub(fixpointResult.getExitState());
+                } catch (FixpointException | InterproceduralAnalysisException e) {
+                    throw new SemanticException("Exception during the interprocedural analysis", e);
+                }
         }
         return exitState;
     }
