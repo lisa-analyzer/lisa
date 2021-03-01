@@ -1,6 +1,8 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.symbolic.SymbolicExpression;
 
 import java.util.Objects;
 
@@ -10,7 +12,7 @@ import java.util.Objects;
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
 public class OutsideScopeIdentifier extends Identifier {
-    private CFGCall scope;
+    private Call scope;
     private Identifier id;
 
 
@@ -20,26 +22,10 @@ public class OutsideScopeIdentifier extends Identifier {
      * @param id the current identifier
      * @param scope the method call that caused the identifier to exit the scope
      */
-    public OutsideScopeIdentifier(Identifier id, CFGCall scope) {
-        super(id.getTypes(), scope.getQualifiedName()+":"+id.getName(), id.isWeak());
+    public OutsideScopeIdentifier(Identifier id, Call scope) {
+        super(id.getTypes(), scope.toString()+":"+id.getName(), id.isWeak());
         this.id = id;
         this.scope = scope;
-    }
-
-    /**
-     * Returns the identifier hidden in the current scope
-     * @return the inner identifier
-     */
-    public Identifier popScope() {
-        return id;
-    }
-
-    /**
-     * Returns the called method that hidden the identifier
-     * @return the hiding called method
-     */
-    public CFGCall getScope() {
-        return scope;
     }
 
     @Override
@@ -49,6 +35,20 @@ public class OutsideScopeIdentifier extends Identifier {
         if (!super.equals(o)) return false;
         OutsideScopeIdentifier that = (OutsideScopeIdentifier) o;
         return Objects.equals(scope, that.scope);
+    }
+
+    @Override
+    public SymbolicExpression pushScope(Call scope) {
+        return new OutsideScopeIdentifier(this, scope);
+    }
+
+    @Override
+    public Identifier popScope(Call scope) {
+        return this.id;
+    }
+
+    public Call getScope() {
+        return this.scope;
     }
 
     @Override

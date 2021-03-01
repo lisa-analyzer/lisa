@@ -2,7 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -68,14 +68,14 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> pushScope(CFGCall scope) throws SemanticException {
+	public ValueCartesianProduct<T1, T2> pushScope(Call scope) throws SemanticException {
 		T1 newLeft = left.pushScope(scope);
 		T2 newRight = right.pushScope(scope);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);
 	}
 
 	@Override
-	public ValueCartesianProduct<T1, T2> popScope(CFGCall scope) throws SemanticException {
+	public ValueCartesianProduct<T1, T2> popScope(Call scope) throws SemanticException {
 		T1 newLeft = left.popScope(scope);
 		T2 newRight = right.popScope(scope);
 		return new ValueCartesianProduct<T1, T2>(newLeft, newRight);

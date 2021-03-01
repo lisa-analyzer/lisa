@@ -136,18 +136,18 @@ public abstract class Call extends Expression {
 
 		@SuppressWarnings("unchecked")
 		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
-		AnalysisState<A, H, V> preState = entryState;
+		AnalysisState<A, H, V> preState = entryState.pushScope(this);
 		for (int i = 0; i < computed.length; i++) {
 			preState = paramStates[i] = parameters[i].semantics(preState, callGraph, expressions);
 			expressions.put(parameters[i], paramStates[i]);
 			computed[i] = paramStates[i].getComputedExpressions();
 		}
 
-		AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
+			 AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
-		return result;
+		return result.popScope(this);
 	}
 
 	/**

@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.heap;
 import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -89,12 +89,12 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap pushScope(CFGCall scope) throws SemanticException {
+	public MonolithicHeap pushScope(Call scope) throws SemanticException {
 		return top();
 	}
 
 	@Override
-	public MonolithicHeap popScope(CFGCall scope) throws SemanticException {
+	public MonolithicHeap popScope(Call scope) throws SemanticException {
 		return top();
 	}
 

@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -116,12 +116,12 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> pushScope(CFGCall scope) throws SemanticException {
+	public AnalysisState<A, H, V> pushScope(Call scope) throws SemanticException {
 		return new AnalysisState<A, H, V>(state.pushScope(scope), this.computedExpressions);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> popScope(CFGCall scope) throws SemanticException {
+	public AnalysisState<A, H, V> popScope(Call scope) throws SemanticException {
 		return new AnalysisState<A, H, V>(state.popScope(scope), this.computedExpressions);
 	}
 

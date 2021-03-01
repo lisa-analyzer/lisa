@@ -1,6 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
+import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
 /**
@@ -58,6 +61,16 @@ public class Constant extends ValueExpression {
 		} else if (!value.equals(other.value))
 			return false;
 		return true;
+	}
+
+	@Override
+	public SymbolicExpression pushScope(Call scope) {
+		return this;
+	}
+
+	@Override
+	public SymbolicExpression popScope(Call scope) throws SemanticException {
+		return this;
 	}
 
 	@Override

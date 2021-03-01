@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -60,8 +60,8 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 */
 	Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain);
 
-	E pushScope(CFGCall scope);
+	E pushScope(Call scope);
 
-	E popScope(CFGCall scope);
+	E popScope(Call scope);
 
 }

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
@@ -162,24 +163,27 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	public M pushScope(CFGCall scope) throws SemanticException {
+	public M pushScope(Call scope) throws SemanticException {
 		return this.liftIdentifiers(id -> new OutsideScopeIdentifier(id, scope));
 	}
 
 	@Override
-	public M popScope(CFGCall scope) throws SemanticException {
+	public M popScope(Call scope) throws SemanticException {
 		AtomicReference<SemanticException> e = new AtomicReference<>();
 		M result = this.liftIdentifiers(id -> {
 			if(! (id instanceof OutsideScopeIdentifier)) {
 				return null;
 			}
 			else {
-				CFGCall otherCall = ((OutsideScopeIdentifier) id).getScope();
-				if(! scope.equals(otherCall)) {
+				Call otherCall = ((OutsideScopeIdentifier) id).getScope();
+				if(! scope.equals(otherCall) &&
+						//We might have a call that is resolved and the other one not, so we consider the program point as well
+						scope.getLine()!=otherCall.getLine() && scope.getCol()!=otherCall.getCol()
+				) {
 					e.set(new SemanticException("Trying to pop out a different scope"));
 					return null;
 				}
-				else return ((OutsideScopeIdentifier) id).popScope();
+				else return ((OutsideScopeIdentifier) id).popScope(scope);
 			}
 		});
 		if(e.get()!=null)

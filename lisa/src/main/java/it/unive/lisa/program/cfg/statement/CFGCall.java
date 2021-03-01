@@ -199,8 +199,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		AnalysisState<A, H,
 				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
 
-		lastPostState = lastPostState.pushScope(this);
-
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
@@ -213,7 +211,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 				(returned.getComputedExpressions().size()==1 && returned.getComputedExpressions().iterator().next() instanceof Skip))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return returned.popScope(this).smallStepSemantics(new Skip(), this);
+			return returned.smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
@@ -231,6 +229,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
                 //the value associated with the returned variable would be lost
 			}
 
-		return result.popScope(this);
+		return result;
 	}
 }

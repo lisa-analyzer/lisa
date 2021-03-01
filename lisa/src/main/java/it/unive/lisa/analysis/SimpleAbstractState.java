@@ -4,7 +4,7 @@ import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -113,12 +113,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> pushScope(CFGCall scope) throws SemanticException {
+	public SimpleAbstractState<H, V> pushScope(Call scope) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.pushScope(scope), valueState.pushScope(scope));
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> popScope(CFGCall scope) throws SemanticException {
+	public SimpleAbstractState<H, V> popScope(Call scope) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.popScope(scope), valueState.popScope(scope));
 	}
 

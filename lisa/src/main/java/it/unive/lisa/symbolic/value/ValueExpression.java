@@ -1,7 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.type.Type;

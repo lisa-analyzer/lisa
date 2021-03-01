@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.InverseSetLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -92,7 +92,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	}
 
 	@Override
-	public DefiniteForwardDataflowDomain<E> pushScope(CFGCall scope) throws SemanticException {
+	public DefiniteForwardDataflowDomain<E> pushScope(Call scope) throws SemanticException {
 		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
 		for(E element : this.elements)
 			result.elements.add(element.pushScope(scope));
@@ -100,7 +100,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	}
 
 	@Override
-	public DefiniteForwardDataflowDomain<E> popScope(CFGCall scope) throws SemanticException {
+	public DefiniteForwardDataflowDomain<E> popScope(Call scope) throws SemanticException {
 		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
 		for(E element : this.elements)
 			result.elements.add(element.popScope(scope));
