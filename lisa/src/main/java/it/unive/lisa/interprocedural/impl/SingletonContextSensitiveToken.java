@@ -17,4 +17,8 @@ public class SingletonContextSensitiveToken extends ContextSensitiveToken {
     public ContextSensitiveToken pushCall(Call c) {
         return this;
     }
+
+    public static SingletonContextSensitiveToken getSingleton() {
+        return singleton;
+    }
 }

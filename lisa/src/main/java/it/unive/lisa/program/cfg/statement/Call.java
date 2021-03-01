@@ -15,6 +15,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -136,14 +137,21 @@ public abstract class Call extends Expression {
 
 		@SuppressWarnings("unchecked")
 		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
-		AnalysisState<A, H, V> preState = entryState.pushScope(this);
+		AnalysisState<A, H, V> preState = entryState;
 		for (int i = 0; i < computed.length; i++) {
 			preState = paramStates[i] = parameters[i].semantics(preState, callGraph, expressions);
 			expressions.put(parameters[i], paramStates[i]);
-			computed[i] = paramStates[i].getComputedExpressions();
+			//All expressions must be updated with the new scope
+			computed[i] = paramStates[i].pushScope(this).getComputedExpressions();
 		}
 
-			 AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
+		//We need to push the scope at the end of the evaluation of all parameters
+		if(computed.length>0)
+			paramStates[computed.length-1] = paramStates[computed.length-1].pushScope(this);
+		else entryState = entryState.pushScope(this);
+
+		AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
+
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());

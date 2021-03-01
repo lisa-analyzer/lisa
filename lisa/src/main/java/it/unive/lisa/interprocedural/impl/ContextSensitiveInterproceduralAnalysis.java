@@ -1,11 +1,16 @@
 package it.unive.lisa.interprocedural.impl;
 
 import it.unive.lisa.analysis.*;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -105,34 +110,26 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
         for(CFG cfg : call.getTargets()) {
             AnalysisState<A, H, V> computedEntryState = entryState;
             CFGResults cfgresult = results.get(cfg);
-            if (cfgresult != null) {
-                CFGWithAnalysisResults<A, H, V> analysisresult = cfgresult.getResult(newToken);
-                if (analysisresult != null) {
-                    AnalysisState<A, H, V> entry = analysisresult.getEntryState();
-                    if (entryState.lessOrEqual(entry))
-                        exitState = exitState.lub(analysisresult.getExitState());
-                    else
-                        try {
-                            CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
-                            exitState = exitState.lub(fixpointResult.getExitState());
-                        } catch (FixpointException | InterproceduralAnalysisException e) {
-                            throw new SemanticException("Exception during the interprocedural analysis", e);
-                        }
-                }
-                else
-                    try {
-                        CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
-                        exitState = exitState.lub(fixpointResult.getExitState());
-                    } catch (FixpointException | InterproceduralAnalysisException e) {
-                        throw new SemanticException("Exception during the interprocedural analysis", e);
-                    }
-            }
+            CFGWithAnalysisResults<A, H, V> analysisresult = cfgresult != null ? cfgresult.getResult(newToken) : null;
+            AnalysisState<A, H, V> entry = analysisresult!=null ? analysisresult.getEntryState() : null;
+            if (entry!=null && entryState.lessOrEqual(entry))
+                exitState = exitState.lub(analysisresult.getExitState());
             else
                 try {
+                    int i = 0;
+                    for(Collection<SymbolicExpression> par : parameters) {
+                        AnalysisState<A, H, V> temp = computedEntryState.bottom();
+                        Parameter parameter = cfg.getDescriptor().getArgs()[i];
+                        Identifier parid = new ValueIdentifier(Caches.types().mkSingletonSet(parameter.getStaticType()), parameter.getName());
+                        for(SymbolicExpression exp : par)
+                            temp = temp.lub(computedEntryState.assign(parid, exp, cfg.getGenericProgramPoint()));
+                        computedEntryState = temp;
+                        i++;
+                    }
                     CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
                     exitState = exitState.lub(fixpointResult.getExitState());
                 } catch (FixpointException | InterproceduralAnalysisException e) {
-                    throw new SemanticException("Exception during the interprocedural analysis", e);
+                     throw new SemanticException("Exception during the interprocedural analysis", e);
                 }
         }
         return exitState;

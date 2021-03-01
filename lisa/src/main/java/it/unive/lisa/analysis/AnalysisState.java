@@ -7,6 +7,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.stream.Collectors;
 import org.apache.commons.collections.CollectionUtils;
 
@@ -117,12 +118,26 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> pushScope(Call scope) throws SemanticException {
-		return new AnalysisState<A, H, V>(state.pushScope(scope), this.computedExpressions);
+		return new AnalysisState<A, H, V>(state.pushScope(scope), pushScopeOnAllExpressions(this.computedExpressions, scope));
+	}
+
+	private Collection<SymbolicExpression> pushScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions, Call scope) {
+		Collection<SymbolicExpression> result = new HashSet<>();
+		for (SymbolicExpression exp : computedExpressions)
+			result.add(exp.pushScope(scope));
+		return result;
 	}
 
 	@Override
 	public AnalysisState<A, H, V> popScope(Call scope) throws SemanticException {
-		return new AnalysisState<A, H, V>(state.popScope(scope), this.computedExpressions);
+		return new AnalysisState<A, H, V>(state.popScope(scope), popScopeOnAllExpressions(this.computedExpressions, scope));
+	}
+
+	private Collection<SymbolicExpression> popScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions, Call scope) throws SemanticException {
+		Collection<SymbolicExpression> result = new HashSet<>();
+		for (SymbolicExpression exp : computedExpressions)
+			result.add(exp.popScope(scope));
+		return result;
 	}
 
 	@Override

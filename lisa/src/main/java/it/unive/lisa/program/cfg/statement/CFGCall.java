@@ -224,7 +224,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 			//if(! (expr instanceof Skip))
 			{
 				AnalysisState<A, H, V> tmp = returned.assign(meta.pushScope(this), expr, this);
-				result = result.lub(tmp.smallStepSemantics(meta, this));
+				result = result.lub(tmp.smallStepSemantics(meta.pushScope(this), this));
 				//We need to perform this evaluation of the identifier not pushed with the scope since otherwise
                 //the value associated with the returned variable would be lost
 			}
