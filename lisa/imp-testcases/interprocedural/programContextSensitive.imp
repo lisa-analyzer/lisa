@@ -2,16 +2,48 @@ class A {
     A() {
      def i1 = 0;
     }
-
-    foo() {
+    getOne() {
         return 1;
+    }
+    getPositive(i) {
+        if(i<=0)
+            i = 1;
+        else i = 10;
+        return i;
+    }
+    identity(i) {
+        def i3 = 1;
+        return i;
     }
 }
 
 class tests {
 
-	subtyping() {
+	noContextSensitivity() {
 		def a = new A();
-   		def i2 = a.foo();
+   		def one = a.getOne();
+   		def positive1 = a.getPositive(one);
+   		def positive2 = a.getPositive(-1);
+    }
+
+    oneLevelContextSensitivity() {
+        def a = new A();
+        def one = 1;
+        def positive = a.identity(one);
+        def minusone = -1;
+        def negative = a.identity(minusone);
+        def top = this.helper(one, a);
+    }
+
+    twoLevelContextSensitivity() {
+        def a = new A();
+        def one = 1;
+        def positive = this.helper(one, a);
+        def minusone = -1;
+        def negative = this.helper(minusone, a);
+    }
+
+    helper(i, dispatcher) {
+        return dispatcher.identity(i);
     }
 }
