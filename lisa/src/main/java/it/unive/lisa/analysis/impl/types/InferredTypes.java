@@ -187,7 +187,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			set = right.elements.filter(r -> left.elements.anyMatch(l -> r.asTypeTokenType().getTypes().anyMatch(t -> l.canBeAssignedTo(t))));
 			if (set.isEmpty())
 				return bottom();
-			return new InferredTypes(set);
+			return new InferredTypes(set.multiTransform(t -> t.asTypeTokenType().getTypes()));
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();

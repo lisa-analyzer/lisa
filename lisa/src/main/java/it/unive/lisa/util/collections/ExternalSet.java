@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -252,6 +253,35 @@ public interface ExternalSet<T> extends Set<T> {
 		return result;
 	}
 
+	/**
+	 * Transforms this set into another set where each element is obtained by transforming elements of this set.
+	 * 
+	 * @param transformer the function that transforms single elements of this set
+	 * 
+	 * @return the transformed set
+	 */
+	public default ExternalSet<T> transform(Function<T, T> transformer) {
+		ExternalSet<T> result = getCache().mkEmptySet();
+		for (T t : this)
+			result.add(transformer.apply(t));
+		return result;
+	}
+	
+	/**
+	 * Transforms this set into another set where each element is obtained by transforming elements of this set.
+	 * Note that each element of this set can be transformed into multiple elements.
+	 * 
+	 * @param transformer the function that transforms single elements of this set
+	 * 
+	 * @return the transformed set
+	 */
+	public default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
+		ExternalSet<T> result = getCache().mkEmptySet();
+		for (T t : this)
+			result.addAll(transformer.apply(t));
+		return result;
+	}
+	
 	/**
 	 * Reduces this set to a single element. The result starts at {@code base},
 	 * and it is transformed by invoking {@code reducer} on the current result
