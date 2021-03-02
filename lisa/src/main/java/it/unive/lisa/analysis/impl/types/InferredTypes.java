@@ -184,10 +184,10 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		case TYPE_CAST:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
-			set = right.elements.filter(r -> left.elements.anyMatch(l -> l.canBeAssignedTo(r)));
+			set = right.elements.filter(r -> left.elements.anyMatch(l -> r.asTypeTokenType().getTypes().anyMatch(t -> l.canBeAssignedTo(t))));
 			if (set.isEmpty())
 				return bottom();
-			return new InferredTypes(BoolType.INSTANCE);
+			return new InferredTypes(set);
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
