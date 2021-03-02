@@ -141,60 +141,65 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left, InferredTypes right,
-			ProgramPoint pp) {
-		switch (operator) {
-		case COMPARISON_EQ:
-		case COMPARISON_NE:
-			return new InferredTypes(BoolType.INSTANCE);
-		case COMPARISON_GE:
-		case COMPARISON_GT:
-		case COMPARISON_LE:
-		case COMPARISON_LT:
-			if (left.elements.noneMatch(Type::isNumericType) || right.elements.noneMatch(Type::isNumericType))
+			ProgramPoint pp) {		switch (operator) {
+			case COMPARISON_EQ:
+			case COMPARISON_NE:
+				return new InferredTypes(BoolType.INSTANCE);
+			case COMPARISON_GE:
+			case COMPARISON_GT:
+			case COMPARISON_LE:
+			case COMPARISON_LT:
+				if (left.elements.noneMatch(Type::isNumericType) || right.elements.noneMatch(Type::isNumericType))
+					return bottom();
+				ExternalSet<Type> set = commonNumericalType(left.elements, right.elements);
+				if (set.isEmpty())
+					return bottom();
+				return new InferredTypes(BoolType.INSTANCE);
+			case LOGICAL_AND:
+			case LOGICAL_OR:
+				if (left.elements.noneMatch(Type::isBooleanType) || right.elements.noneMatch(Type::isBooleanType))
+					return bottom();
+				return new InferredTypes(BoolType.INSTANCE);
+			case NUMERIC_ADD:
+			case NUMERIC_DIV:
+			case NUMERIC_MOD:
+			case NUMERIC_MUL:
+			case NUMERIC_SUB:
+				if (left.elements.noneMatch(Type::isNumericType) || right.elements.noneMatch(Type::isNumericType))
+					return bottom();
+				set = commonNumericalType(left.elements, right.elements);
+				if (set.isEmpty())
+					return bottom();
+				return new InferredTypes(set);
+			case STRING_CONCAT:
+				if (left.elements.noneMatch(Type::isStringType) || right.elements.noneMatch(Type::isStringType))
+					return bottom();
+				return new InferredTypes(StringType.INSTANCE);
+			case STRING_INDEX_OF:
+				if (left.elements.noneMatch(Type::isStringType) || right.elements.noneMatch(Type::isStringType))
+					return bottom();
+				return new InferredTypes(IntType.INSTANCE);
+			case STRING_CONTAINS:
+			case STRING_ENDS_WITH:
+			case STRING_EQUALS:
+			case STRING_STARTS_WITH:
+				if (left.elements.noneMatch(Type::isStringType) || right.elements.noneMatch(Type::isStringType))
+					return bottom();
+				return new InferredTypes(BoolType.INSTANCE);
+			case TYPE_CAST:
+				if (right.elements.noneMatch(Type::isTypeTokenType))
+					return bottom();
+				set = right.elements.filter(r -> left.elements.anyMatch(l -> r.asTypeTokenType().getTypes().anyMatch(t -> l.canBeAssignedTo(t))));
+				if (set.isEmpty())
+					return bottom();
+				return new InferredTypes(set.multiTransform(t -> t.asTypeTokenType().getTypes()));
+			case TYPE_CHECK:
+				if (right.elements.noneMatch(Type::isTypeTokenType))
+					return bottom();
+				return new InferredTypes(BoolType.INSTANCE);
+			default:
 				return bottom();
-			ExternalSet<Type> set = commonNumericalType(left.elements, right.elements);
-			if (set.isEmpty())
-				return bottom();
-			return new InferredTypes(BoolType.INSTANCE);
-		case LOGICAL_AND:
-		case LOGICAL_OR:
-			if (left.elements.noneMatch(Type::isBooleanType) || right.elements.noneMatch(Type::isBooleanType))
-				return bottom();
-			return new InferredTypes(BoolType.INSTANCE);
-		case NUMERIC_ADD:
-		case NUMERIC_DIV:
-		case NUMERIC_MOD:
-		case NUMERIC_MUL:
-		case NUMERIC_SUB:
-			if (left.elements.noneMatch(Type::isNumericType) || right.elements.noneMatch(Type::isNumericType))
-				return bottom();
-			set = commonNumericalType(left.elements, right.elements);
-			if (set.isEmpty())
-				return bottom();
-			return new InferredTypes(set);
-		case STRING_CONCAT:
-		case STRING_CONTAINS:
-		case STRING_ENDS_WITH:
-		case STRING_EQUALS:
-		case STRING_INDEX_OF:
-		case STRING_STARTS_WITH:
-			if (left.elements.noneMatch(Type::isStringType) || right.elements.noneMatch(Type::isStringType))
-				return bottom();
-			return new InferredTypes(StringType.INSTANCE);
-		case TYPE_CAST:
-			if (right.elements.noneMatch(Type::isTypeTokenType))
-				return bottom();
-			set = right.elements.filter(r -> left.elements.anyMatch(l -> r.asTypeTokenType().getTypes().anyMatch(t -> l.canBeAssignedTo(t))));
-			if (set.isEmpty())
-				return bottom();
-			return new InferredTypes(set.multiTransform(t -> t.asTypeTokenType().getTypes()));
-		case TYPE_CHECK:
-			if (right.elements.noneMatch(Type::isTypeTokenType))
-				return bottom();
-			return new InferredTypes(BoolType.INSTANCE);
-		default:
-			return bottom();
-		}
+			}
 	}
 
 	@Override
