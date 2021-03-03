@@ -254,9 +254,11 @@ public interface ExternalSet<T> extends Set<T> {
 	}
 
 	/**
-	 * Transforms this set into another set where each element is obtained by transforming elements of this set.
+	 * Transforms this set into another set where each element is obtained by
+	 * transforming elements of this set.
 	 * 
-	 * @param transformer the function that transforms single elements of this set
+	 * @param transformer the function that transforms single elements of this
+	 *                        set
 	 * 
 	 * @return the transformed set
 	 */
@@ -266,12 +268,14 @@ public interface ExternalSet<T> extends Set<T> {
 			result.add(transformer.apply(t));
 		return result;
 	}
-	
+
 	/**
-	 * Transforms this set into another set where each element is obtained by transforming elements of this set.
-	 * Note that each element of this set can be transformed into multiple elements.
+	 * Transforms this set into another set where each element is obtained by
+	 * transforming elements of this set. Note that each element of this set can
+	 * be transformed into multiple elements.
 	 * 
-	 * @param transformer the function that transforms single elements of this set
+	 * @param transformer the function that transforms single elements of this
+	 *                        set
 	 * 
 	 * @return the transformed set
 	 */
@@ -281,7 +285,7 @@ public interface ExternalSet<T> extends Set<T> {
 			result.addAll(transformer.apply(t));
 		return result;
 	}
-	
+
 	/**
 	 * Reduces this set to a single element. The result starts at {@code base},
 	 * and it is transformed by invoking {@code reducer} on the current result

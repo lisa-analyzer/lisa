@@ -122,7 +122,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			return new TypeBasedHeap(ids);
 		}
 
-		if (expression instanceof HeapAllocation || expression instanceof HeapReference) {
+		if (expression instanceof HeapAllocation) {
 			for (Type type : expression.getTypes()) {
 				if (type.isPointerType()) {
 					ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
@@ -132,6 +132,9 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(ids);
 		}
+		
+		if (expression instanceof HeapReference)
+			return new TypeBasedHeap(rewritten);
 
 		return bottom();
 	}
