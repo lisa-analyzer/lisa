@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * A compilation unit of the program to analyze. A compilation unit is a
  * {@link Unit} that also defines instance members, that can be inherited by
@@ -569,17 +571,26 @@ public class CompilationUnit extends Unit {
 			if (matching.size() != 1 || matching.iterator().next() != cfg)
 				throw new ProgramValidationException(
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
-
-			for (CompilationUnit s : superUnits)
-				for (CodeMember over : s.getMatchingInstanceCodeMembers(cfg.getDescriptor(), true))
-					if (over.getDescriptor().isOverridable()) {
-						cfg.getDescriptor().overrides().addAll(over.getDescriptor().overrides());
-						cfg.getDescriptor().overrides().add(over);
-						cfg.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(cfg));
-					} else
-						throw new ProgramValidationException(
-								this + " overrides the non-overridable cfg " + over.getDescriptor().getSignature());
 		}
+
+		for (CompilationUnit s : superUnits)
+			for (CodeMember sup : s.getInstanceCodeMembers(true)) {
+				Collection<CodeMember> overriding = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
+				if (overriding.size() > 1)
+					throw new ProgramValidationException(
+							sup.getDescriptor().getSignature() + " is overriden multiple times in unit " + this + ": "
+									+ StringUtils.join(", ", overriding));
+				else if (!overriding.isEmpty())
+					if (!sup.getDescriptor().isOverridable()) {
+						throw new ProgramValidationException(
+								this + " overrides the non-overridable cfg " + sup.getDescriptor().getSignature());
+					} else {
+						CodeMember over = overriding.iterator().next();
+						over.getDescriptor().overrides().addAll(sup.getDescriptor().overrides());
+						over.getDescriptor().overrides().add(sup);
+						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
+					}
+			}
 
 		hierarchyComputed = true;
 	}
