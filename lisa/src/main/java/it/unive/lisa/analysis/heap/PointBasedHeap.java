@@ -1,5 +1,14 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.collections.CollectionUtils;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,7 +16,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
-import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -15,13 +23,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import org.apache.commons.collections.CollectionUtils;
+import it.unive.lisa.symbolic.value.ValueIdentifier;
 
 /**
  * A point-based heap implementation that abstracts heap locations depending on
@@ -61,20 +63,21 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 
 	@Override
 	public PointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		if (expression instanceof HeapExpression) {
 
-			if (expression instanceof AccessChild)
-				return new PointBasedHeap(allocationSites.get(((AccessChild) expression).getContainer()),
-						allocationSites);
-
-			if (expression instanceof HeapAllocation || expression instanceof HeapReference)
-				return new PointBasedHeap(
-						Collections.singleton(new HeapIdentifier(expression.getTypes(), pp.toString(), true)),
-						allocationSites);
-
-			return bottom();
+		if (expression instanceof AccessChild) {
+			PointBasedHeap container = smallStepSemantics((((AccessChild) expression).getContainer()), pp);
+			return new PointBasedHeap(container.getRewrittenExpressions(), allocationSites);
 		}
 
+		if (expression instanceof HeapAllocation) {
+			HeapIdentifier id = new HeapIdentifier(expression.getTypes(), pp.toString(), true);
+			return new PointBasedHeap(Collections.singleton(id), allocationSites);
+		}
+
+		if (expression instanceof HeapReference) 
+			// TODO: not sure about this (need to check)
+			return this;
+		
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			PointBasedHeap sem = smallStepSemantics(unary.getExpression(), pp);
@@ -96,6 +99,10 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 			return result;
 		}
 
+		if (expression instanceof ValueIdentifier)
+			if (allocationSites.containsKey(expression))
+				return new PointBasedHeap(allocationSites.get(expression), allocationSites);
+
 		if (expression instanceof ValueExpression)
 			return mk(this, (ValueExpression) expression);
 
@@ -111,7 +118,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 			HashSet<ValueExpression> v = new HashSet<>();
 			v.add((ValueExpression) expression);
 			sites.put(id, v);
-			return new PointBasedHeap(rewritten, sites);
+			return new PointBasedHeap(Collections.singleton((ValueExpression) expression), sites);
 		}
 
 		return smallStepSemantics(expression, pp);
@@ -125,7 +132,9 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 
 	@Override
 	public PointBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
-		return new PointBasedHeap(rewritten, allocationSites);
+		Map<Identifier, Collection<ValueExpression>> sites = new HashMap<Identifier, Collection<ValueExpression>>(allocationSites);
+		sites.remove(id);
+		return new PointBasedHeap(rewritten, sites);
 	}
 
 	@Override
@@ -171,7 +180,7 @@ public class PointBasedHeap extends BaseLattice<PointBasedHeap> implements HeapD
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		Collection<ValueExpression> rewritten = (CollectionUtils.union(this.rewritten, other.rewritten));
 		Map<Identifier, Collection<
-				ValueExpression>> sites = new HashMap<Identifier, Collection<ValueExpression>>(allocationSites);
+		ValueExpression>> sites = new HashMap<Identifier, Collection<ValueExpression>>(allocationSites);
 
 		for (Map.Entry<Identifier, Collection<ValueExpression>> e : other.allocationSites.entrySet())
 			if (sites.containsKey(e.getKey())) {
