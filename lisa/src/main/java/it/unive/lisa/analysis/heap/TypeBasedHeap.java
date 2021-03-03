@@ -132,7 +132,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(ids);
 		}
-		
+
 		if (expression instanceof HeapReference)
 			return new TypeBasedHeap(rewritten);
 
