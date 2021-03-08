@@ -183,7 +183,14 @@ public abstract class Environment<M extends Environment<M, E, T>,
 					e.set(new SemanticException("Trying to pop out a different scope"));
 					return null;
 				}
-				else return ((OutsideScopeIdentifier) id).popScope(scope);
+				else {
+					try {
+						return ((OutsideScopeIdentifier) id).popScope(scope);
+					} catch (SemanticException semanticException) {
+						e.set(semanticException);
+						return null;
+					}
+				}
 			}
 		});
 		if(e.get()!=null)

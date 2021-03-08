@@ -1,7 +1,10 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 import java.util.Objects;
@@ -43,8 +46,21 @@ public class OutsideScopeIdentifier extends Identifier {
     }
 
     @Override
-    public Identifier popScope(Call scope) {
-        return this.id;
+    public Identifier popScope(Call scope) throws SemanticException {
+        if(this.getScope().equals(scope))
+            return this.id;
+        CFGDescriptor descr1 = scope.getCFG().getDescriptor();
+        CFGDescriptor descr2 = this.getScope().getCFG().getDescriptor();
+        if(descr1.getFullName().equals(descr2.getFullName()))
+            if(descr1.getArgs().length==descr2.getArgs().length)
+                return this.id;//FIXME: this check should also consider the parameters
+        throw new SemanticException("Unable to pop different scopes");
+    }
+
+    private UnresolvedCall.ResolutionStrategy extractStrategy(Call scope) {
+        if(scope instanceof UnresolvedCall)
+            return ((UnresolvedCall) scope).getStrategy();
+        else return null;
     }
 
     public Call getScope() {
