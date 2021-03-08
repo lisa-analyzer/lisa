@@ -67,14 +67,14 @@ public class HieararchyComputationTest {
 
 	@Test
 	public void testSingle() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp", false);
 		prog.validateAndFinalize();
 		// we just check that no exception is thrown
 	}
 
 	@Test
 	public void testSimpleInheritance() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp", false);
 		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
@@ -93,19 +93,19 @@ public class HieararchyComputationTest {
 
 	@Test(expected = ProgramValidationException.class)
 	public void testFinalCfg() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp", false);
 		prog.validateAndFinalize();
 	}
 
 	@Test(expected = ProgramValidationException.class)
 	public void testTree() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
 		prog.validateAndFinalize();
 	}
 
 	@Test
 	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp", false);
 		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");
@@ -168,7 +168,7 @@ public class HieararchyComputationTest {
 
 	@Test
 	public void testSkipOne() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp");
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp", false);
 		prog.validateAndFinalize();
 
 		CompilationUnit first = findUnit(prog, "first");

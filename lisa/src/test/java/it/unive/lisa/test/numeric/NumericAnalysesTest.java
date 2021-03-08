@@ -32,7 +32,7 @@ public class NumericAnalysesTest {
 		System.out.println("Testing sign analysis...");
 		LiSA lisa = new LiSA();
 
-		Program program = IMPFrontend.processFile(filePath);
+		Program program = IMPFrontend.processFile(filePath, false);
 		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
 		lisa.setDumpAnalysis(true);
@@ -60,7 +60,7 @@ public class NumericAnalysesTest {
 		System.out.println("Testing parity analysis...");
 		LiSA lisa = new LiSA();
 
-		Program program = IMPFrontend.processFile(filePath);
+		Program program = IMPFrontend.processFile(filePath, false);
 		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
 		lisa.setDumpAnalysis(true);
@@ -88,7 +88,7 @@ public class NumericAnalysesTest {
 		System.out.println("Testing interval analysis...");
 		LiSA lisa = new LiSA();
 
-		Program program = IMPFrontend.processFile(filePath);
+		Program program = IMPFrontend.processFile(filePath, false);
 		lisa.setProgram(program);
 		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
 		lisa.setDumpAnalysis(true);
@@ -116,7 +116,7 @@ public class NumericAnalysesTest {
 		System.out.println("Testing integer constant propagation...");
 		LiSA lisa = new LiSA();
 
-		Program program = IMPFrontend.processFile(filePath);
+		Program program = IMPFrontend.processFile(filePath, false);
 		lisa.setProgram(program);
 		lisa.setAbstractState(
 				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new IntegerConstantPropagation()));

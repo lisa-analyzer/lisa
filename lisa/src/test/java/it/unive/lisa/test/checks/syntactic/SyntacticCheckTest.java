@@ -57,7 +57,7 @@ public class SyntacticCheckTest {
 		LiSA lisa = new LiSA();
 		lisa.addSyntacticCheck(new VariableI());
 
-		Program program = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp");
+		Program program = IMPFrontend.processFile("imp-testcases/syntactic/expressions.imp", false);
 		lisa.setProgram(program);
 		lisa.setWorkdir("test-outputs/syntactic");
 		lisa.setJsonOutput(true);

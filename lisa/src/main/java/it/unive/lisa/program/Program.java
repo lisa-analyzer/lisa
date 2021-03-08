@@ -1,11 +1,11 @@
 package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.type.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,6 +28,12 @@ public class Program extends Unit {
 	 */
 	private final Map<String, CompilationUnit> units;
 
+
+	/**
+	 * The entry points defined in this program.
+	 */
+	private final Collection<CFG> entrypoints;
+
 	/**
 	 * The collection of types registered in this program. This collection will
 	 * be erased during {@link #validateAndFinalize()}.
@@ -41,6 +47,7 @@ public class Program extends Unit {
 		super(null, -1, -1, PROGRAM_NAME);
 		units = new ConcurrentHashMap<>();
 		types = new ArrayList<>();
+		entrypoints = new HashSet<>();
 	}
 
 	/**
@@ -77,6 +84,29 @@ public class Program extends Unit {
 	 */
 	public final boolean addCompilationUnit(CompilationUnit unit) {
 		return units.putIfAbsent(unit.getName(), unit) == null;
+	}
+
+
+	/**
+	 * Adds a new {@link CFG} to the entry points of this program.
+	 *
+	 * @param method the code member to add
+	 *
+	 * @return {@code true} if the entry point was successfully added.
+	 * If this method returns {@code false}, the given code member is discarded.
+	 */
+	public final boolean addEntryPoint(CFG method) {
+		return entrypoints.add(method);
+	}
+
+	/**
+	 * Yields the collection of {@link CFG}s that are entry points in this
+	 * program.
+	 *
+	 * @return the collection of entry points
+	 */
+	public final Collection<CFG> getEntryPoints() {
+		return entrypoints;
 	}
 
 	/**

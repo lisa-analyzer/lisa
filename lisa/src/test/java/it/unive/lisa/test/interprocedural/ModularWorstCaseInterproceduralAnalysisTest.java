@@ -35,7 +35,7 @@ public class ModularWorstCaseInterproceduralAnalysisTest {
         LiSA lisa = new LiSA();
 
         lisa.setInferTypes(true);
-        Program program = IMPFrontend.processFile(filePath);
+        Program program = IMPFrontend.processFile(filePath, false);
         lisa.setProgram(program);
         lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
         lisa.setDumpAnalysis(true);
@@ -66,7 +66,7 @@ public class ModularWorstCaseInterproceduralAnalysisTest {
         System.out.println("Testing modular worst case interprocedural analysis with RTA call graph...");
         LiSA lisa = new LiSA();
 
-        Program program = IMPFrontend.processFile(filePath);
+        Program program = IMPFrontend.processFile(filePath, false);
         lisa.setProgram(program);
         lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
         lisa.setDumpAnalysis(true);

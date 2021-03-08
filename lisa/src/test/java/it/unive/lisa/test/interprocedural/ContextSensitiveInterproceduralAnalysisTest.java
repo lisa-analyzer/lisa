@@ -36,7 +36,7 @@ public class ContextSensitiveInterproceduralAnalysisTest {
         System.out.println("Testing context sensitive interprocedural analysis with RTA call graph...");
         LiSA lisa = new LiSA();
 
-        Program program = IMPFrontend.processFile(filePath);
+        Program program = IMPFrontend.processFile(filePath, false);
         lisa.setProgram(program);
         lisa.setInferTypes(true);
         lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));

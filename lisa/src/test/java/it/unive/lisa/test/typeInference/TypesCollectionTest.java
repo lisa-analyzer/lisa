@@ -21,7 +21,7 @@ public class TypesCollectionTest {
 		System.out.println("Testing types collection...");
 		LiSA lisa = new LiSA();
 
-		Program program = IMPFrontend.processFile("imp-testcases/type-inference/program.imp");
+		Program program = IMPFrontend.processFile("imp-testcases/type-inference/program.imp", false);
 		lisa.setProgram(program);
 		lisa.setInferTypes(true);
 		lisa.setDumpTypeInference(true);

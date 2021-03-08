@@ -80,7 +80,7 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
     public final void fixpoint(
             AnalysisState<A, H, V> entryState)
             throws FixpointException {
-        for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
+        for (CFG cfg : IterationLogger.iterate(log, program.getEntryPoints(), "Computing fixpoint over the whole program",
                 "cfgs"))
             try {
                 CFGResults value = new CFGResults();
@@ -136,6 +136,7 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
     }
 
     private CFGWithAnalysisResults<A, H, V> computeFixpoint(ContextSensitiveToken newToken, CFG cfg, AnalysisState<A, H, V> computedEntryState) throws FixpointException, InterproceduralAnalysisException, SemanticException {
+
         CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
         CFGResults result = this.results.get(cfg);
         if (result == null)

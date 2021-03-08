@@ -79,8 +79,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
-	public static Program processFile(String file) throws ParsingException {
-		return new IMPFrontend(file).work();
+	public static Program processFile(String file, boolean onlyMain) throws ParsingException {
+		return new IMPFrontend(file, onlyMain).work();
 	}
 
 	private final String file;
@@ -91,10 +91,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private CompilationUnit currentUnit;
 
-	private IMPFrontend(String file) {
+	private final boolean onlyMain;
+
+	private IMPFrontend(String file, boolean onlyMain) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
 		program = new Program();
+		this.onlyMain = onlyMain;
 	}
 
 	private Program work() throws ParsingException {
@@ -188,11 +191,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (CFG cfg : currentUnit.getInstanceCFGs(false))
+		for (CFG cfg : currentUnit.getInstanceCFGs(false)) {
 			if (currentUnit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
+			if(isEntryPoint(cfg))
+				program.addEntryPoint(cfg);
+		}
 
 		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
 			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
@@ -203,6 +209,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				throw new IMPSyntaxException("Duplicate global: " + global);
 
 		return currentUnit;
+	}
+
+	private boolean isEntryPoint(CFG cfg) {
+		if(! onlyMain) return true;
+		else return cfg.getDescriptor().getName().equals("main");
 	}
 
 	@Override
