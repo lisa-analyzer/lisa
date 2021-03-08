@@ -19,14 +19,8 @@ class A {
 
 class tests {
 
-	noContextSensitivity() {
-		def a = new A();
-   		def one = a.getOne();
-   		def positive1 = a.getPositive(one);
-   		def positive2 = a.getPositive(-1);
-    }
 
-    oneLevelContextSensitivity() {
+    main() {
         def a = new A();
         def one = 1;
         def positive = a.identity(one);
@@ -35,15 +29,8 @@ class tests {
         def top = this.helper(one, a);
     }
 
-    twoLevelContextSensitivity() {
-        def a = new A();
-        def one = 1;
-        def positive = this.helper(one, a);
-        def minusone = -1;
-        def negative = this.helper(minusone, a);
-    }
-
     helper(i, dispatcher) {
         return dispatcher.identity(i);
     }
+
 }
