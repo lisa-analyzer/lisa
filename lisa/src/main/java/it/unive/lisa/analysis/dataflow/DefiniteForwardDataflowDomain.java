@@ -47,12 +47,11 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		Set<E> updated = new HashSet<>();
+		DefiniteForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
+		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
 			updated.add(generated);
-		DefiniteForwardDataflowDomain<E> gen = new DefiniteForwardDataflowDomain<E>(domain, updated, false);
-
-		return gen.forgetIdentifiers(domain.kill(id, expression, pp, this));
+		return new DefiniteForwardDataflowDomain<E>(domain, updated, false);
 	}
 
 	@Override

@@ -46,12 +46,11 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	public PossibleForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		Set<E> updated = new HashSet<>();
+		PossibleForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
+		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
 			updated.add(generated);
-		PossibleForwardDataflowDomain<E> gen = new PossibleForwardDataflowDomain<E>(domain, updated, false);
-
-		return gen.forgetIdentifiers(domain.kill(id, expression, pp, this));
+		return new PossibleForwardDataflowDomain<E>(domain, updated, false);
 	}
 
 	@Override
