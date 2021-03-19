@@ -8,6 +8,11 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Map.Entry;
 
 /**
@@ -181,10 +186,10 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
 
-		StringBuilder builder = new StringBuilder();
+		SortedSet<String> res = new TreeSet<>();
 		for (Entry<Identifier, T> entry : function.entrySet())
-			builder.append(entry.getKey()).append(": ").append(entry.getValue().representation()).append("\n");
-
-		return builder.toString().trim();
+			res.add(entry.getKey() + ": " + entry.getValue().representation());
+		
+		return StringUtils.join(res, '\n');
 	}
 }
