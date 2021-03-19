@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A {@link DataflowDomain} for <b>forward</b> and <b>definite</b> dataflow
@@ -92,7 +94,9 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 
 	@Override
 	public String representation() {
-		return elements.toString();
+		SortedSet<String> res = new TreeSet<>();
+		elements.stream().map(e -> e.toString()).forEach(res::add);
+		return res.toString();
 	}
 
 	@Override
