@@ -36,8 +36,11 @@ import it.unive.lisa.test.imp.types.FloatType;
 import it.unive.lisa.test.imp.types.IntType;
 import it.unive.lisa.test.imp.types.StringType;
 import it.unive.lisa.type.Untyped;
+
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
@@ -70,17 +73,37 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
-	 * produced by compiling the ANTLR4 grammar, and yields the collection of
-	 * {@link CFG}s that corresponds to the methods parsed from that file.
+	 * produced by compiling the ANTLR4 grammar, and yields the {@link Program}
+	 * that corresponds to the one parsed from that file.
 	 * 
 	 * @param file the complete path (relative or absolute) of the file to parse
 	 * 
-	 * @return the collection of {@link CFG}s parsed from that file
+	 * @return the resulting {@link Program}
 	 * 
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
 	public static Program processFile(String file) throws ParsingException {
-		return new IMPFrontend(file).work();
+		return new IMPFrontend(file).work(null);
+	}
+
+	/**
+	 * Parses a piece of IMP code using the {@link IMPLexer} and the
+	 * {@link IMPParser} produced by compiling the ANTLR4 grammar, and yields
+	 * the {@link Program} that corresponds to the one parsed from the given
+	 * text.
+	 * 
+	 * @param text the IMP program to parse
+	 * 
+	 * @return the resulting {@link Program}
+	 * 
+	 * @throws ParsingException if this frontend is unable to parse the text
+	 */
+	public static Program processText(String text) throws ParsingException {
+		try (InputStream is = new ByteArrayInputStream(text.getBytes())) {
+			return new IMPFrontend("in-memory.imp").work(is);
+		} catch (IOException e) {
+			throw new ParsingException("Exception while parsing the input text", e);
+		}
 	}
 
 	private final String file;
@@ -97,14 +120,20 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		program = new Program();
 	}
 
-	private Program work() throws ParsingException {
+	private Program work(InputStream inputStream) throws ParsingException {
 		// first remove all cached types from previous executions
 		ClassType.clearAll();
 
-		log.info("Reading file... " + file);
-		try (InputStream stream = new FileInputStream(file)) {
-			// common antlr4 initialization
-			IMPLexer lexer = new IMPLexer(CharStreams.fromStream(stream, StandardCharsets.UTF_8));
+		try {
+			log.info("Reading file... " + file);
+			IMPLexer lexer;
+			if (inputStream == null)
+				try (InputStream stream = new FileInputStream(file)) {
+					lexer = new IMPLexer(CharStreams.fromStream(stream, StandardCharsets.UTF_8));
+				}
+			else
+				lexer = new IMPLexer(CharStreams.fromStream(inputStream, StandardCharsets.UTF_8));
+
 			IMPParser parser = new IMPParser(new CommonTokenStream(lexer));
 
 			// this is needed to get an exception on malformed input
@@ -138,6 +167,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		} catch (FileNotFoundException e) {
 			log.fatal(file + " does not exist", e);
 			throw new ParsingException("Target file '" + file + "' does not exist", e);
+		} catch (IOException e) {
+			log.fatal("Unable to open " + file, e);
+			throw new ParsingException("Unable to open " + file, e);
 		} catch (IMPSyntaxException e) {
 			log.fatal(file + " is not well-formed", e);
 			throw new ParsingException("Incorrect IMP file: " + file, e);

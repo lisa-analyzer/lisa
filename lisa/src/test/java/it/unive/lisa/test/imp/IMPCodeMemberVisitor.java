@@ -210,6 +210,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (!toRemove.isEmpty())
 			toRemove.forEach(visibleIds::remove);
 
+		if (first == null && last == null) {
+			// empty block: instrument it with a noop
+			NoOp instrumented = new NoOp(cfg, file, getLine(ctx), getCol(ctx));
+			first = last = instrumented;
+			matrix.addNode(instrumented);
+		}
+			
 		return Pair.of(first, last);
 	}
 
