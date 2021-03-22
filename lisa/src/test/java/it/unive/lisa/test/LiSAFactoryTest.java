@@ -2,6 +2,7 @@ package it.unive.lisa.test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.AnalysisSetupException;
@@ -93,7 +94,7 @@ public class LiSAFactoryTest {
 				+ " didn't have any effect on %s";
 		LiSAFactory.registerDefaultFor(target, newDefault);
 
-		assertEquals(String.format(message, "LiSAFactory.getDefaultFor(...)"), newDefault, removeEnvironment(target));
+		assertSame(String.format(message, "LiSAFactory.getDefaultFor(...)"), newDefault, removeEnvironment(target));
 
 		for (ConfigurableComponent<?> comp : LiSAFactory.configurableComponents())
 			if (comp.getComponent() == target)

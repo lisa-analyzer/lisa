@@ -24,7 +24,7 @@ public class TimerLoggerTest {
 		for (double d = 0; d < 3; d++) {
 			Integer result = TimerLogger.execFunction(logger, Level.INFO, TimeFormat.MILLIS, "Test function logging",
 					v -> function(v), d);
-			assertEquals(5 + (int) d, result.intValue());
+			assertEquals(5 + (long) d, result.intValue());
 		}
 	}
 

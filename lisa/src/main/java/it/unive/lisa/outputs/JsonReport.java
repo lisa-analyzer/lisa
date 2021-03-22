@@ -99,6 +99,7 @@ public class JsonReport {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((files == null) ? 0 : files.hashCode());
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
 		return result;
 	}
@@ -112,6 +113,11 @@ public class JsonReport {
 		if (getClass() != obj.getClass())
 			return false;
 		JsonReport other = (JsonReport) obj;
+		if (files == null) {
+			if (other.files != null)
+				return false;
+		} else if (!files.equals(other.files))
+			return false;
 		if (warnings == null) {
 			if (other.warnings != null)
 				return false;

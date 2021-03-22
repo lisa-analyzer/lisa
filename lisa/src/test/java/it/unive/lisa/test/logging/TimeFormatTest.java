@@ -154,11 +154,12 @@ public class TimeFormatTest {
 				}, l -> TimeFormat.UP_TO_HOURS.format(l));
 	}
 
+	private static final Random generator = new Random();
+
 	private void loopRunner(Function<Long, String> expectedGenerator, Function<Long, String> actualGenerator) {
-		Random generator = new Random();
 		LongStream
-				.iterate(1 + generator.nextInt(9),
-						l -> l = (1 + generator.nextInt(9)) * ((long) Math.pow(10, Math.log10(l))) + l)
+				.iterate(1L + generator.nextInt(9),
+						l -> (1L + generator.nextInt(9)) * ((long) Math.pow(10, Math.log10(l))) + l)
 				.limit((long) Math.log10(Long.MAX_VALUE))
 				.forEach(random -> assertEquals("Conversion failed for long value " + random,
 						expectedGenerator.apply(random),

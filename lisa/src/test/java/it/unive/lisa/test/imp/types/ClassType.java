@@ -97,10 +97,10 @@ public class ClassType implements PointerType, UnitType {
 		if (other.canBeAssignedTo(this))
 			return this;
 
-		return scanForSupertypeOf((ClassType) other);
+		return scanForSupertypeOf((UnitType) other);
 	}
 
-	private Type scanForSupertypeOf(ClassType other) {
+	private Type scanForSupertypeOf(UnitType other) {
 		WorkingSet<ClassType> ws = FIFOWorkingSet.mk();
 		Set<ClassType> seen = new HashSet<>();
 		ws.push(this);

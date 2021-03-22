@@ -83,7 +83,8 @@ public class FileManager {
 		File file = new File(workdir, name);
 
 		if (!file.getAbsoluteFile().getParentFile().exists())
-			file.getAbsoluteFile().getParentFile().mkdirs();
+			if (!file.getAbsoluteFile().getParentFile().mkdirs())
+				throw new IOException("Unable to create directory structure for " + file);
 
 		Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder());
 		if (bom)

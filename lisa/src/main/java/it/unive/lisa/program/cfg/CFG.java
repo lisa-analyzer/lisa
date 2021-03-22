@@ -766,7 +766,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 				ids.add((Identifier) expr);
 		}
 
-		if (ids != null && !ids.isEmpty())
+		if (!ids.isEmpty())
 			return computedState.forgetIdentifiers(ids);
 
 		return computedState;
