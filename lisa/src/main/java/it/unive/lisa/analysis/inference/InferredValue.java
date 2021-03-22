@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.nonrelational.inference;
+package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;

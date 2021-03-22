@@ -1,8 +1,8 @@
 package it.unive.lisa.caches;
 
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
-import it.unive.lisa.util.collections.ExternalSetCache;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 
 /**
  * A holder of {@link ExternalSetCache}s, to ensure that all

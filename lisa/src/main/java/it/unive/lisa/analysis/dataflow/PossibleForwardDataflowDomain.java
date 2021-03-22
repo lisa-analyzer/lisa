@@ -8,7 +8,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SetLattice;
+import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;

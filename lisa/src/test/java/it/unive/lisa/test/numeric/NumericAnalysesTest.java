@@ -4,7 +4,7 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.numeric.IntegerConstantPropagation;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.impl.numeric.Parity;

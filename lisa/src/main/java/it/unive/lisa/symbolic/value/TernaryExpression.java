@@ -2,7 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A bynary expression that applies a {@link TernaryExpression} to three

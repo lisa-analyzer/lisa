@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import it.unive.lisa.analysis.FunctionalLattice;
-import it.unive.lisa.analysis.HeapDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;

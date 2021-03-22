@@ -1,5 +1,6 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.combination;
 
+import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 

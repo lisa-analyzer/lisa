@@ -3,8 +3,8 @@ package it.unive.lisa.analysis.impl.types;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
+import it.unive.lisa.analysis.inference.BaseInferredValue;
+import it.unive.lisa.analysis.inference.InferredValue;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -21,7 +21,7 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the

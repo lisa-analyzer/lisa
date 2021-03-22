@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.InverseSetLattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;

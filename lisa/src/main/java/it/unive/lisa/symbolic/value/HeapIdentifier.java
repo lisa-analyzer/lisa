@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a synthetic program variable that represents a resolved

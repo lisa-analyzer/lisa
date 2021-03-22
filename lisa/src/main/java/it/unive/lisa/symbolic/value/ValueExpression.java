@@ -1,11 +1,11 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.analysis.HeapDomain;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A symbolic expression that represents an operation on the program's state.

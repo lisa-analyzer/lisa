@@ -1,5 +1,7 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.heap;
 
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
