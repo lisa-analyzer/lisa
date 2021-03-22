@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import it.unive.lisa.analysis.HeapSemanticOperation;
+import it.unive.lisa.analysis.heap.HeapSemanticOperation;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;

@@ -1,7 +1,11 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.DefaultImplementation;
-import it.unive.lisa.analysis.HeapSemanticOperation.HeapReplacement;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;

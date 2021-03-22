@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.heap;
 
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;

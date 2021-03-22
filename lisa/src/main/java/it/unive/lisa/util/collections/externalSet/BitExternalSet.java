@@ -1,4 +1,4 @@
-package it.unive.lisa.util.collections;
+package it.unive.lisa.util.collections.externalSet;
 
 import java.util.ArrayList;
 import java.util.Arrays;

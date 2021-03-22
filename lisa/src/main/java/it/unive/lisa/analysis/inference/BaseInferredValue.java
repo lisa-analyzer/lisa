@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.nonrelational.inference;
+package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -19,7 +19,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 /**
  * Base implementation for {@link InferredValue}s. This class extends
  * {@link BaseLattice} and implements
- * {@link InferredValue#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.FunctionalLattice, ProgramPoint)}
+ * {@link InferredValue#eval(it.unive.lisa.symbolic.SymbolicExpression, it.unive.lisa.analysis.lattices.FunctionalLattice, ProgramPoint)}
  * by taking care of the recursive computation of inner expressions evaluation.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

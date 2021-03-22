@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A reference to a memory location, identified by its name.

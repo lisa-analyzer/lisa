@@ -1,7 +1,9 @@
-package it.unive.lisa.analysis;
+package it.unive.lisa.analysis.heap;
 
 import it.unive.lisa.DefaultImplementation;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;

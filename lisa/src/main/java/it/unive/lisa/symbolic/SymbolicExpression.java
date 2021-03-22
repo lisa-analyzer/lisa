@@ -2,7 +2,7 @@ package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
