@@ -36,7 +36,7 @@ public class IMPNewArray extends NativeCall {
 	 * @param dimensions the dimensions of the array
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
-		super(cfg, sourceFile, line, col, "new[]", ArrayType.lookup(type, dimensions.length));
+		super(cfg, sourceFile, line, col, "new[]", ArrayType.lookup(type, dimensions.length), dimensions);
 	}
 
 	@Override
