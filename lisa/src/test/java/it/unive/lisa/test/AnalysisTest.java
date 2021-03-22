@@ -99,9 +99,9 @@ public abstract class AnalysisTest {
 
 		File expFile = Paths.get(expectedPath.toString(), "report.json").toFile();
 		File actFile = Paths.get(actualPath.toString(), "report.json").toFile();
-		try {
-			JsonReport expected = JsonReport.read(new FileReader(expFile));
-			JsonReport actual = JsonReport.read(new FileReader(actFile));
+		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
+			JsonReport expected = JsonReport.read(l);
+			JsonReport actual = JsonReport.read(r);
 			assertTrue("Results are different", compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);

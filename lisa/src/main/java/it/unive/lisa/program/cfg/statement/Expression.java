@@ -209,7 +209,7 @@ public abstract class Expression extends Statement {
 		if (parent == null)
 			return this;
 
-		if (parent instanceof Statement)
+		if (!(parent instanceof Expression))
 			return parent;
 
 		return ((Expression) parent).getRootStatement();

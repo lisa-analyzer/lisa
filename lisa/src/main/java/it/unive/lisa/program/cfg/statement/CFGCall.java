@@ -12,6 +12,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -123,7 +125,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 				break;
 		}
 
-		return result;
+		return result == null ? Untyped.INSTANCE : result;
 	}
 
 	/**

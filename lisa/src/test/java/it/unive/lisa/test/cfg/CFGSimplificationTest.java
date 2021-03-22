@@ -89,42 +89,42 @@ public class CFGSimplificationTest {
 		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
+	
+	private static class GT extends BinaryNativeCall {
+		protected GT(CFG cfg, Expression left, Expression right) {
+			super(cfg, "gt", left, right);
+		}
+
+		@Override
+		protected <A extends AbstractState<A, H, V>,
+				H extends HeapDomain<H>,
+				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+						AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> leftState,
+						SymbolicExpression left,
+						AnalysisState<A, H, V> rightState,
+						SymbolicExpression right) throws SemanticException {
+			return rightState;
+		}
+	}
+
+	private static class Print extends UnaryNativeCall {
+		protected Print(CFG cfg, Expression arg) {
+			super(cfg, "print", arg);
+		}
+
+		@Override
+		protected <A extends AbstractState<A, H, V>,
+				H extends HeapDomain<H>,
+				V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+						AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
+						SymbolicExpression expr)
+						throws SemanticException {
+			return entryState;
+		}
+	}
 
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
-		class GT extends BinaryNativeCall {
-			protected GT(CFG cfg, Expression left, Expression right) {
-				super(cfg, "gt", left, right);
-			}
-
-			@Override
-			protected <A extends AbstractState<A, H, V>,
-					H extends HeapDomain<H>,
-					V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-							AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> leftState,
-							SymbolicExpression left,
-							AnalysisState<A, H, V> rightState,
-							SymbolicExpression right) throws SemanticException {
-				return rightState;
-			}
-		}
-
-		class Print extends UnaryNativeCall {
-			protected Print(CFG cfg, Expression arg) {
-				super(cfg, "print", arg);
-			}
-
-			@Override
-			protected <A extends AbstractState<A, H, V>,
-					H extends HeapDomain<H>,
-					V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-							AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
-							SymbolicExpression expr)
-							throws SemanticException {
-				return entryState;
-			}
-		}
-
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));

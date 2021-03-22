@@ -386,6 +386,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			target = visitFieldAccess(ctx.fieldAccess());
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
+		else
+			throw new IMPSyntaxException("Target of the assignment at " + toCodeLocation(expression) + " is neither an identifier, a field access or an array access");
 
 		return new Assignment(cfg, file, getLine(ctx), getCol(ctx), target, expression);
 	}

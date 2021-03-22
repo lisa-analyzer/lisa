@@ -3,6 +3,13 @@ package it.unive.lisa.test.checks.syntactic;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.checks.CheckTool;
@@ -16,10 +23,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import org.junit.Test;
 
 public class SyntacticCheckTest {
 
@@ -70,10 +73,17 @@ public class SyntacticCheckTest {
 
 		File expFile = new File("imp-testcases/syntactic/report.json");
 		File actFile = new File("test-outputs/syntactic/report.json");
-		JsonReport expected = JsonReport.read(new FileReader(expFile));
-		JsonReport actual = JsonReport.read(new FileReader(actFile));
-
-		assertTrue("Results are different",
-				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
+		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
+			JsonReport expected = JsonReport.read(l);
+			JsonReport actual = JsonReport.read(r);
+			assertTrue("Results are different",
+					JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace(System.err);
+			fail("Unable to find report file");
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			fail("Unable to compare reports");
+		}
 	}
 }
