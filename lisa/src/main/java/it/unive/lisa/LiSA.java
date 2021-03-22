@@ -118,6 +118,11 @@ public class LiSA {
 	 * are placed).
 	 */
 	private String workdir;
+	
+	/**
+	 * The {@link FileManager} instance that will be used during analyses
+	 */
+	private FileManager fileManager;
 
 	/**
 	 * Builds a new LiSA instance.
@@ -289,6 +294,8 @@ public class LiSA {
 	public void run() throws AnalysisException {
 		printConfig();
 
+		this.fileManager = new FileManager(workdir);
+		
 		try {
 			TimerLogger.execAction(log, "Analysis time", this::runAux);
 		} catch (AnalysisExecutionException e) {
@@ -299,16 +306,14 @@ public class LiSA {
 
 		if (jsonOutput) {
 			log.info("Dumping reported warnings to 'report.json'");
-			JsonReport report = new JsonReport(warnings, FileManager.createdFiles());
-			try (Writer writer = FileManager.mkOutputFile("report.json")) {
+			JsonReport report = new JsonReport(warnings, fileManager.createdFiles());
+			try (Writer writer = fileManager.mkOutputFile("report.json")) {
 				report.dump(writer);
 				log.info("Report file dumped to report.json");
 			} catch (IOException e) {
 				log.error("Unable to dump report file", e);
 			}
 		}
-
-		FileManager.clearCreatedFiles();
 	}
 
 	private void printConfig() {
@@ -340,7 +345,6 @@ public class LiSA {
 		program.getRegisteredTypes().forEach(types::add);
 		types = null;
 
-		FileManager.setWorkdir(workdir);
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
 		TimerLogger.execAction(log, "Finalizing input program", () -> {
@@ -468,7 +472,7 @@ public class LiSA {
 	}
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
-		try (Writer file = FileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
+		try (Writer file = fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
 			cfg.dump(file, st -> labelGenerator.apply(st));
 		} catch (IOException e) {
 			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
