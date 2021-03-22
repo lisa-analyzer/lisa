@@ -69,7 +69,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	protected MonolithicHeap semanticsOf(HeapExpression expression) {
+	protected MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
 		// any expression accessing an area of the heap or instantiating a new
 		// one is modeled through the monolith
 		return new MonolithicHeap(new HeapIdentifier(expression.getTypes(), MONOLITH_NAME, true));

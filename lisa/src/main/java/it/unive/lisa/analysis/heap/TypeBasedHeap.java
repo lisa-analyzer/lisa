@@ -18,7 +18,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -29,13 +32,15 @@ import org.apache.commons.collections.CollectionUtils;
  */
 public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
+	private static final Logger log = LogManager.getLogger(TypeBasedHeap.class);
+
 	private static final TypeBasedHeap TOP = new TypeBasedHeap();
 
 	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
 
 	private final Collection<ValueExpression> rewritten;
 
-	private static HashSet<String> NAMES = new HashSet<String>();
+	private final Collection<String> names;
 
 	/**
 	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
@@ -46,11 +51,12 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	private TypeBasedHeap(ValueExpression rewritten) {
-		this(Collections.singleton(rewritten));
+		this(Collections.singleton(rewritten), new HashSet<>());
 	}
 
-	private TypeBasedHeap(Collection<ValueExpression> rewritten) {
+	private TypeBasedHeap(Collection<ValueExpression> rewritten, Collection<String> names) {
 		this.rewritten = rewritten;
+		this.names = names;
 	}
 
 	@Override
@@ -68,7 +74,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	public TypeBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
-		return new TypeBasedHeap(rewritten);
+		return new TypeBasedHeap(rewritten, names);
 	}
 
 	@Override
@@ -79,7 +85,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	public String representation() {
-		return NAMES.toString();
+		return names.toString();
 	}
 
 	@Override
@@ -104,45 +110,48 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	protected TypeBasedHeap mk(TypeBasedHeap reference, ValueExpression expression) {
-		return new TypeBasedHeap(expression);
+		return new TypeBasedHeap(Collections.singleton(expression), reference.names);
 	}
 
 	@Override
-	protected TypeBasedHeap semanticsOf(HeapExpression expression) {
-		HashSet<ValueExpression> ids = new HashSet<>();
+	protected TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
 
 		if (expression instanceof AccessChild) {
+			Set<ValueExpression> ids = new HashSet<>();
+			Set<String> names = new HashSet<>(this.names);
 			for (Type type : ((AccessChild) expression).getContainer().getTypes()) {
 				if (type.isPointerType()) {
 					ids.add(new HeapIdentifier(expression.getTypes(), type.toString(), true));
-					NAMES.add(type.toString());
-				}
+					names.add(type.toString());
+				} else
+					log.warn(expression.toString() + " has type " + type + " that is not a pointer type");
 			}
 
-			return new TypeBasedHeap(ids);
+			return new TypeBasedHeap(ids, names);
 		}
 
-		if (expression instanceof HeapAllocation) {
+		if (expression instanceof HeapAllocation || expression instanceof HeapReference) {
+			Set<ValueExpression> ids = new HashSet<>();
+			Set<String> names = new HashSet<>(this.names);
 			for (Type type : expression.getTypes()) {
 				if (type.isPointerType()) {
 					ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
-					NAMES.add(type.toString());
-				}
+					names.add(type.toString());
+				} else
+					log.warn(expression.toString() + " has type " + type + " that is not a pointer type");
 			}
 
-			return new TypeBasedHeap(ids);
+			return new TypeBasedHeap(ids, names);
 		}
 
-		if (expression instanceof HeapReference)
-			return new TypeBasedHeap(rewritten);
-
-		return bottom();
+		return top();
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
-		return new TypeBasedHeap(CollectionUtils.union(rewritten, other.rewritten));
+		return new TypeBasedHeap(CollectionUtils.union(rewritten, other.rewritten),
+				CollectionUtils.union(names, other.names));
 	}
 
 	@Override
@@ -152,13 +161,14 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	protected boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
-		return true;
+		return other.names.containsAll(names);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((names == null) ? 0 : names.hashCode());
 		result = prime * result + ((rewritten == null) ? 0 : rewritten.hashCode());
 		return result;
 	}
@@ -172,6 +182,11 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		if (getClass() != obj.getClass())
 			return false;
 		TypeBasedHeap other = (TypeBasedHeap) obj;
+		if (names == null) {
+			if (other.names != null)
+				return false;
+		} else if (!names.equals(other.names))
+			return false;
 		if (rewritten == null) {
 			if (other.rewritten != null)
 				return false;

@@ -28,7 +28,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	@SuppressWarnings("unchecked")
 	public final H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof HeapExpression)
-			return semanticsOf((HeapExpression) expression);
+			return semanticsOf((HeapExpression) expression, pp);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -76,7 +76,11 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * 
 	 * @param expression the expression to evaluate
 	 * 
+	 * @pp the program point that where this expression is being evaluated
+	 * 
 	 * @return a new instance of this domain
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract H semanticsOf(HeapExpression expression);
+	protected abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
 }
