@@ -78,6 +78,8 @@ public class LiSAConfiguration {
 	 * checks will be immediately executed after LiSA is started.
 	 * 
 	 * @param check the check to execute
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration addSyntacticCheck(SyntacticCheck check) {
 		syntacticChecks.add(check);
@@ -89,6 +91,8 @@ public class LiSAConfiguration {
 	 * checks will be immediately executed after LiSA is started.
 	 * 
 	 * @param checks the checks to execute
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration addSyntacticChecks(Collection<SyntacticCheck> checks) {
 		syntacticChecks.addAll(checks);
@@ -101,6 +105,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param <T>       the concrete type of the call graph
 	 * @param callGraph the callgraph to use
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public <T extends CallGraph> LiSAConfiguration setCallGraph(T callGraph) {
 		this.callGraph = callGraph;
@@ -112,6 +118,8 @@ public class LiSAConfiguration {
 	 * value is overwritten.
 	 * 
 	 * @param state the abstract state to use
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setAbstractState(AbstractState<?, ?, ?> state) {
 		this.state = state;
@@ -125,6 +133,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param inferTypes if {@code true}, type inference will be ran before the
 	 *                       semantic analysis
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setInferTypes(boolean inferTypes) {
 		this.inferTypes = inferTypes;
@@ -142,6 +152,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param dumpCFGs if {@code true}, a dot graph will be generated before
 	 *                     starting the analysis for each input cfg
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setDumpCFGs(boolean dumpCFGs) {
 		this.dumpCFGs = dumpCFGs;
@@ -164,6 +176,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param dumpTypeInference if {@code true}, a dot graph will be generated
 	 *                              after the type inference for each input cfg
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setDumpTypeInference(boolean dumpTypeInference) {
 		this.dumpTypeInference = dumpTypeInference;
@@ -183,6 +197,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param dumpAnalysis if {@code true}, a dot graph will be generated after
 	 *                         the semantic analysis for each input cfg
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setDumpAnalysis(boolean dumpAnalysis) {
 		this.dumpAnalysis = dumpAnalysis;
@@ -200,6 +216,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @param jsonOutput if {@code true}, a json report will be generated after
 	 *                       the analysis
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setJsonOutput(boolean jsonOutput) {
 		this.jsonOutput = jsonOutput;
@@ -213,6 +231,8 @@ public class LiSAConfiguration {
 	 * where it was executed from.
 	 * 
 	 * @param workdir the path (relative or absolute) to the working directory
+	 * 
+	 * @return the current (modified) configuration
 	 */
 	public LiSAConfiguration setWorkdir(String workdir) {
 		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
