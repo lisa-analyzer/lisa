@@ -13,7 +13,6 @@ import java.nio.file.Paths;
 
 import org.apache.commons.io.FileUtils;
 
-import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.outputs.JsonReport;
@@ -39,26 +38,22 @@ public abstract class AnalysisTestExecutor {
 	 * <li>The external files mentioned in the reports are different</li>
 	 * </ul>
 	 * 
-	 * @param folder     the name of the sub-folder; this is used for searching
-	 *                       expected results and as a working directory for
-	 *                       executing tests in the test execution folder
-	 * @param source     the name of the imp source file to be searched in the
-	 *                       given folder
-	 * @param inferTypes whether or not type inference should be run
-	 * @param dumpTypes  whether or not inferred type information should be
-	 *                       dumped
-	 * @param state      the abstract state for the analysis; if {@code null},
-	 *                       no analysis is executed, otherwise the results are
-	 *                       also dumped
+	 * @param folder        the name of the sub-folder; this is used for
+	 *                          searching expected results and as a working
+	 *                          directory for executing tests in the test
+	 *                          execution folder
+	 * @param source        the name of the imp source file to be searched in
+	 *                          the given folder
+	 * @param configuration the configuration of the analysis to run (note that
+	 *                          the workdir present into the configuration will
+	 *                          be ignored, as it will be overwritten by the
+	 *                          computed workdir)
 	 */
-	protected void perform(String folder, String source, boolean inferTypes, boolean dumpTypes,
-			AbstractState<?, ?, ?> state) {
+	protected void perform(String folder, String source, LiSAConfiguration configuration) {
 		System.out.println("Testing " + getCaller());
 		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, folder);
 		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, folder);
 		Path target = Paths.get(expectedPath.toString(), source);
-
-		LiSA lisa = new LiSA();
 
 		Program program = null;
 		try {
@@ -66,16 +61,6 @@ public abstract class AnalysisTestExecutor {
 		} catch (ParsingException e) {
 			e.printStackTrace(System.err);
 			fail("Exception while parsing '" + target + "': " + e.getMessage());
-		}
-
-		lisa.setProgram(program);
-		lisa.setInferTypes(inferTypes);
-		lisa.setDumpTypeInference(dumpTypes);
-		lisa.setJsonOutput(true);
-
-		if (state != null) {
-			lisa.setAbstractState(state);
-			lisa.setDumpAnalysis(true);
 		}
 
 		File workdir = actualPath.toFile();
@@ -88,10 +73,13 @@ public abstract class AnalysisTestExecutor {
 				fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
 			}
 		}
-		lisa.setWorkdir(workdir.toString());
+		configuration.setWorkdir(workdir.toString());
 
+		configuration.setJsonOutput(true);
+
+		LiSA lisa = new LiSA(configuration);
 		try {
-			lisa.run();
+			lisa.run(program);
 		} catch (AnalysisException e) {
 			e.printStackTrace(System.err);
 			fail("Analysis terminated with errors");

@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
+import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.numeric.IntegerConstantPropagation;
@@ -17,25 +18,30 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testSign() throws AnalysisSetupException {
-		perform("sign", "program.imp", false, false,
-				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
+		perform("sign", "program.imp", conf);
 	}
 
 	@Test
 	public void testParity() throws AnalysisSetupException {
-		perform("parity", "program.imp", false, false,
-				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity()));
+		perform("parity", "program.imp", conf);
 	}
 
 	@Test
 	public void testInterval() throws AnalysisSetupException {
-		perform("interval", "program.imp", false, false,
-				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
+		perform("interval", "program.imp", conf);
 	}
 
 	@Test
 	public void testIntegerConstantPropagation() throws AnalysisSetupException {
-		perform("int-const", "program.imp", false, false,
-				getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new IntegerConstantPropagation()));
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
+						new IntegerConstantPropagation()));
+		perform("int-const", "program.imp", conf);
 	}
 }

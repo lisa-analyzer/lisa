@@ -5,11 +5,9 @@ import static it.unive.lisa.LiSAFactory.getInstance;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
@@ -27,7 +25,6 @@ import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
-import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.IterationLogger;
@@ -59,252 +56,53 @@ public class LiSA {
 	private static final Logger log = LogManager.getLogger(LiSA.class);
 
 	/**
-	 * The program to analyze
-	 */
-	private Program program;
-
-	/**
-	 * The collection of syntactic checks to execute
-	 */
-	private final Collection<SyntacticCheck> syntacticChecks;
-
-	/**
 	 * The collection of warnings that will be filled with the results of all
 	 * the executed checks
 	 */
 	private final Collection<Warning> warnings;
 
 	/**
-	 * The callgraph to use during the analysis
-	 */
-	private CallGraph callGraph;
-
-	/**
-	 * The abstract state to run during the analysis
-	 */
-	private AbstractState<?, ?, ?> state;
-
-	/**
-	 * Whether or not type inference should be executed before the analysis
-	 */
-	private boolean inferTypes;
-
-	/**
-	 * Whether or not the input cfgs should be dumped to dot format. This is
-	 * useful for checking if the inputs that reach LiSA are well formed.
-	 */
-	private boolean dumpCFGs;
-
-	/**
-	 * Whether or not the result of type inference should be dumped to dot
-	 * format, if it is executed
-	 */
-	private boolean dumpTypeInference;
-
-	/**
-	 * Whether or not the result of the analysis should be dumped to dot format,
-	 * if it is executed
-	 */
-	private boolean dumpAnalysis;
-
-	/**
-	 * Whether or not the warning list should be dumped to a json file
-	 */
-	private boolean jsonOutput;
-
-	/**
-	 * The workdir that LiSA should use as root for all generated files (log
-	 * files excluded, use the logging configuration for controlling where those
-	 * are placed).
-	 */
-	private String workdir;
-	
-	/**
 	 * The {@link FileManager} instance that will be used during analyses
 	 */
-	private FileManager fileManager;
+	private final FileManager fileManager;
+
+	/**
+	 * The {@link LiSAConfiguration} containing the settings of the analysis to
+	 * run
+	 */
+	private final LiSAConfiguration conf;
 
 	/**
 	 * Builds a new LiSA instance.
 	 */
-	public LiSA() {
-		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+	public LiSA(LiSAConfiguration conf) {
 		// since the warnings collection will be filled AFTER the execution of
 		// every concurrent bit has completed its execution, it is fine to use a
 		// non thread-safe one
 		this.warnings = new ArrayList<>();
-		this.inferTypes = false;
-		this.dumpCFGs = false;
-		this.dumpTypeInference = false;
-		this.dumpAnalysis = false;
-		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
-	}
-
-	/**
-	 * Sets the program to analyze. Any previous value set through this method
-	 * is lost.
-	 * 
-	 * @param program the program to analyze
-	 */
-	public void setProgram(Program program) {
-		this.program = program;
-	}
-
-	/**
-	 * Adds the given syntactic check to the ones that will be executed. These
-	 * checks will be immediately executed after LiSA is started.
-	 * 
-	 * @param check the check to execute
-	 */
-	public void addSyntacticCheck(SyntacticCheck check) {
-		syntacticChecks.add(check);
-	}
-
-	/**
-	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
-	 * overwritten.
-	 * 
-	 * @param <T>       the concrete type of the call graph
-	 * @param callGraph the callgraph to use
-	 */
-	public <T extends CallGraph> void setCallGraph(T callGraph) {
-		this.callGraph = callGraph;
-	}
-
-	/**
-	 * Sets the {@link AbstractState} to use for the analysis. Any existing
-	 * value is overwritten.
-	 * 
-	 * @param state the abstract state to use
-	 */
-	public void setAbstractState(AbstractState<?, ?, ?> state) {
-		this.state = state;
-	}
-
-	/**
-	 * Sets whether or not runtime types should be inferred before executing the
-	 * semantic analysis. If type inference is not executed, the runtime types
-	 * of expressions will correspond to their static type.
-	 * 
-	 * @param inferTypes if {@code true}, type inference will be ran before the
-	 *                       semantic analysis
-	 */
-	public void setInferTypes(boolean inferTypes) {
-		this.inferTypes = inferTypes;
-	}
-
-	/**
-	 * Sets whether or not dot files, named {@code <cfg name>.dot}, should be
-	 * created and dumped in the working directory at the start of the
-	 * execution. These files will contain a dot graph representing the each
-	 * input {@link CFG}s' structure.<br>
-	 * <br>
-	 * To customize where the graphs should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param dumpCFGs if {@code true}, a dot graph will be generated before
-	 *                     starting the analysis for each input cfg
-	 */
-	public void setDumpCFGs(boolean dumpCFGs) {
-		this.dumpCFGs = dumpCFGs;
-	}
-
-	/**
-	 * Sets whether or not dot files, named {@code typing__<cfg name>.dot},
-	 * should be created and dumped in the working directory at the end of the
-	 * type inference. These files will contain a dot graph representing the
-	 * each input {@link CFG}s' structure, and whose nodes will contain a
-	 * textual representation of the results of the type inference on each
-	 * {@link Statement}.<br>
-	 * <br>
-	 * To decide whether or not the type inference should be executed, use
-	 * {@link #setInferTypes(boolean)}.<br>
-	 * <br>
-	 * To customize where the graphs should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param dumpTypeInference if {@code true}, a dot graph will be generated
-	 *                              after the type inference for each input cfg
-	 */
-	public void setDumpTypeInference(boolean dumpTypeInference) {
-		this.dumpTypeInference = dumpTypeInference;
-	}
-
-	/**
-	 * Sets whether or not dot files, named {@code analysis__<cfg name>.dot},
-	 * should be created and dumped in the working directory at the end of the
-	 * analysis. These files will contain a dot graph representing the each
-	 * input {@link CFG}s' structure, and whose nodes will contain a textual
-	 * representation of the results of the semantic analysis on each
-	 * {@link Statement}.<br>
-	 * <br>
-	 * To customize where the graphs should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param dumpAnalysis if {@code true}, a dot graph will be generated after
-	 *                         the semantic analysis for each input cfg
-	 */
-	public void setDumpAnalysis(boolean dumpAnalysis) {
-		this.dumpAnalysis = dumpAnalysis;
-	}
-
-	/**
-	 * Sets whether or not a json report file, named {@code report.json}, should
-	 * be created and dumped in the working directory at the end of the
-	 * analysis. This file will contain all the {@link Warning}s that have been
-	 * generated, as well as a list of produced files.<br>
-	 * <br>
-	 * To customize where the report should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param jsonOutput if {@code true}, a json report will be generated after
-	 *                       the analysis
-	 */
-	public void setJsonOutput(boolean jsonOutput) {
-		this.jsonOutput = jsonOutput;
-	}
-
-	/**
-	 * Sets the working directory for this instance of LiSA, that is, the
-	 * directory files will be created, if any. If files need to be created and
-	 * this method has not been invoked, LiSA will create them in the directory
-	 * where it was executed from.
-	 * 
-	 * @param workdir the path (relative or absolute) to the working directory
-	 */
-	public void setWorkdir(String workdir) {
-		this.workdir = Paths.get(workdir).toAbsolutePath().normalize().toString();
-	}
-
-	/**
-	 * Adds the given syntactic checks to the ones that will be executed. These
-	 * checks will be immediately executed after LiSA is started.
-	 * 
-	 * @param checks the checks to execute
-	 */
-	public void addSyntacticChecks(Collection<SyntacticCheck> checks) {
-		syntacticChecks.addAll(checks);
+		this.conf = conf;
+		this.fileManager = new FileManager(conf.getWorkdir());
 	}
 
 	/**
 	 * Runs LiSA, executing all the checks that have been added.
 	 * 
+	 * @param program the program to analyze
+	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
-	public void run() throws AnalysisException {
+	public void run(Program program) throws AnalysisException {
 		printConfig();
 
-		this.fileManager = new FileManager(workdir);
-		
 		try {
-			TimerLogger.execAction(log, "Analysis time", this::runAux);
+			TimerLogger.execAction(log, "Analysis time", () -> runAux(program));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
 
 		printStats();
 
-		if (jsonOutput) {
+		if (conf.isJsonOutput()) {
 			log.info("Dumping reported warnings to 'report.json'");
 			JsonReport report = new JsonReport(warnings, fileManager.createdFiles());
 			try (Writer writer = fileManager.mkOutputFile("report.json")) {
@@ -317,17 +115,7 @@ public class LiSA {
 	}
 
 	private void printConfig() {
-		log.info("LiSA setup:");
-		log.info("  workdir: " + String.valueOf(workdir));
-		log.info("  dump input cfgs: " + dumpCFGs);
-		log.info("  infer types: " + inferTypes);
-		log.info("  dump inferred types: " + dumpTypeInference);
-		log.info("  dump analysis results: " + dumpAnalysis);
-		log.info("  " + syntacticChecks.size() + " syntactic checks to execute"
-				+ (syntacticChecks.isEmpty() ? "" : ":"));
-		for (SyntacticCheck check : syntacticChecks)
-			log.info("      " + check.getClass().getSimpleName());
-		log.info("  dump json report: " + jsonOutput);
+		log.info(conf.toString());
 	}
 
 	private void printStats() {
@@ -338,7 +126,7 @@ public class LiSA {
 	@SuppressWarnings("unchecked")
 	private <H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			A extends AbstractState<A, H, V>> void runAux()
+			A extends AbstractState<A, H, V>> void runAux(Program program)
 					throws AnalysisExecutionException {
 		// fill up the types cache by side effect on an external set
 		ExternalSet<Type> types = Caches.types().mkEmptySet();
@@ -355,24 +143,24 @@ public class LiSA {
 			}
 		});
 
-		if (dumpCFGs)
+		if (conf.isDumpCFGs())
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
-		if (!syntacticChecks.isEmpty()) {
-			SyntacticChecksExecutor.executeAll(tool, allCFGs, syntacticChecks);
+		if (!conf.getSyntacticChecks().isEmpty()) {
+			SyntacticChecksExecutor.executeAll(tool, allCFGs, conf.getSyntacticChecks());
 			warnings.addAll(tool.getWarnings());
 		} else
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
-		if (callGraph == null) {
-			try {
-				callGraph = getDefaultFor(CallGraph.class);
-			} catch (AnalysisSetupException e) {
-				throw new AnalysisExecutionException("Unable to create default call graph", e);
-			}
-			log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
+		CallGraph callGraph;
+		try {
+			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
+			if (conf.getCallGraph() == null)
+				log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
+		} catch (AnalysisSetupException e) {
+			throw new AnalysisExecutionException("Unable to create default call graph", e);
 		}
 
 		try {
@@ -382,9 +170,10 @@ public class LiSA {
 			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
 		}
 
-		if (inferTypes) {
+		if (conf.isInferTypes()) {
 			SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
 			try {
+				AbstractState<?, ?, ?> state = conf.getState();
 				HeapDomain<?> heap;
 				if (state != null)
 					heap = state.getHeapState();
@@ -407,12 +196,12 @@ public class LiSA {
 						}
 					});
 
-			String message = dumpTypeInference ? "Dumping type analysis and propagating it to cfgs"
+			String message = conf.isDumpTypeInference() ? "Dumping type analysis and propagating it to cfgs"
 					: "Propagating type information to cfgs";
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
 				CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 						InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
-				if (dumpTypeInference)
+				if (conf.isDumpTypeInference())
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 				cfg.accept(new TypesPropagator<>(), result);
 			}
@@ -421,12 +210,12 @@ public class LiSA {
 		} else
 			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
-		if (state == null) {
+		if (conf.getState() == null) {
 			log.warn("Skipping analysis execution since no abstract sate has been provided");
 			return;
 		}
 
-		A state = (A) this.state.top();
+		A state = (A) conf.getState().top();
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
@@ -437,7 +226,7 @@ public class LiSA {
 					}
 				});
 
-		if (dumpAnalysis)
+		if (conf.isDumpAnalysis())
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
 				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
@@ -482,8 +271,8 @@ public class LiSA {
 
 	/**
 	 * Yields an unmodifiable view of the warnings that have been generated
-	 * during the analysis. Invoking this method before invoking {@link #run()}
-	 * will return an empty collection.
+	 * during the analysis. Invoking this method before invoking
+	 * {@link #run(Program)} will return an empty collection.
 	 * 
 	 * @return a view of the generated warnings
 	 */
