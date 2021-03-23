@@ -4,10 +4,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
-import it.unive.lisa.program.cfg.statement.Ret;
-import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.Throw;
 import java.io.Reader;
 import java.util.function.Function;
 import org.graphstream.graph.implementations.MultiGraph;
@@ -41,13 +38,11 @@ public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 		DotCFG graph = new DotCFG();
 
 		for (Statement node : source.getEntrypoints())
-			graph.addNode(node, true, node instanceof Return || node instanceof Ret || node instanceof Throw,
-					labelGenerator);
+			graph.addNode(node, true, node.stopsExecution(), labelGenerator);
 
 		for (Statement node : source.getNodes())
 			if (!source.getEntrypoints().contains(node))
-				graph.addNode(node, false, node instanceof Return || node instanceof Ret || node instanceof Throw,
-						labelGenerator);
+				graph.addNode(node, false, node.stopsExecution(), labelGenerator);
 
 		for (Statement src : source.getNodes())
 			for (Statement dest : source.followersOf(src)) {

@@ -11,15 +11,15 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.outputs.DotCFG;
+import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
-import it.unive.lisa.program.cfg.statement.Ret;
-import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.collections.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
@@ -27,11 +27,14 @@ import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,12 +100,28 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	/**
 	 * Yields the statements of this control flow graph that are normal
 	 * exitpoints, that is, that normally ends the execution of this cfg,
-	 * returning the control to the caller.
+	 * returning the control to the caller without throwing an error (i.e., all
+	 * such statements on which {@link Statement#stopsExecution()} holds but
+	 * {@link Statement#throwsError()} does not).
+	 * 
+	 * @return the normal exitpoints of this cfg.
+	 */
+	public final Collection<Statement> getNormalExitpoints() {
+		return adjacencyMatrix.getNodes().stream().filter(st -> st.stopsExecution() && !st.throwsError())
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Yields the statements of this control flow graph that are normal
+	 * exitpoints, that is, that normally ends the execution of this cfg,
+	 * returning the control to the caller, or throwing an error (i.e., all such
+	 * statements on which either {@link Statement#stopsExecution()} or
+	 * {@link Statement#throwsError()} hold).
 	 * 
 	 * @return the exitpoints of this cfg.
 	 */
-	public final Collection<Statement> getNormalExitpoints() {
-		return adjacencyMatrix.getNodes().stream().filter(st -> st instanceof Return || st instanceof Ret)
+	public final Collection<Statement> getAllExitpoints() {
+		return adjacencyMatrix.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
 				.collect(Collectors.toList());
 	}
 
@@ -851,5 +870,58 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 				return "unknown program point in " + CFG.this.getDescriptor().getSignature();
 			}
 		};
+	}
+
+	/**
+	 * Validates this cfg, ensuring that the code contained in it is well
+	 * formed. This method checks that:
+	 * <ul>
+	 * <li>each {@link Edge} is connected to {@link Statement}s contained in the
+	 * cfg</li>
+	 * <li>all {@link Statement}s with no ingoing edges are marked as
+	 * entrypoints of the cfg (i.e. no deadcode)</li>
+	 * <li>all {@link Statement}s that stop the execution (according to
+	 * {@link Statement#stopsExecution()}) do not have outgoing edges</li>
+	 * <li>all entrypoints are effectively part of this cfg</li>
+	 * </ul>
+	 * 
+	 * @throws ProgramValidationException if one of the aforementioned checks
+	 *                                        fail
+	 */
+	public void validate() throws ProgramValidationException {
+		Collection<Statement> nodes = adjacencyMatrix.getNodes();
+
+		// all edges should be connected to statements inside the cfg
+		for (Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> st : adjacencyMatrix) {
+			for (Edge in : st.getValue().getLeft())
+				validateEdge(nodes, in);
+
+			for (Edge out : st.getValue().getRight())
+				validateEdge(nodes, out);
+
+			// no deadcode
+			if (st.getValue().getLeft().isEmpty() && !entrypoints.contains(st.getKey()))
+				throw new ProgramValidationException(
+						this + " contains an unreachable node that is not marked as entrypoint: " + st.getKey());
+
+			// no outgoing edges in execution-terminating statements
+			if (st.getKey().stopsExecution() && !st.getValue().getRight().isEmpty())
+				throw new ProgramValidationException(
+						this + " contains an execution-stopping node that has followers: " + st.getKey());
+		}
+
+		// all entrypoints should be within the cfg
+		if (!nodes.containsAll(entrypoints))
+			throw new ProgramValidationException(this + " has entrypoints that are not part of the graph: "
+					+ new HashSet<>(entrypoints).retainAll(nodes));
+	}
+
+	private void validateEdge(Collection<Statement> nodes, Edge edge) throws ProgramValidationException {
+		if (!nodes.contains(edge.getSource()))
+			throw new ProgramValidationException(this + " contains an invalid edge: '" + edge
+					+ "' originates in a node that is not part of the graph");
+		else if (!nodes.contains(edge.getDestination()))
+			throw new ProgramValidationException(this + " contains an invalid edge: '" + edge
+					+ "' reaches a node that is not part of the graph");
 	}
 }

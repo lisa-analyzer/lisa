@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
@@ -29,7 +30,7 @@ import org.junit.Test;
 public class CFGSimplificationTest {
 
 	@Test
-	public void testSimpleSimplification() {
+	public void testSimpleSimplification() throws ProgramValidationException {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
@@ -50,12 +51,15 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
+		first.validate();
+		second.validate();
 		first.simplify();
+		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
 	@Test
-	public void testDoubleSimplification() {
+	public void testDoubleSimplification() throws ProgramValidationException {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
@@ -79,12 +83,15 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
+		first.validate();
+		second.validate();
 		first.simplify();
+		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
 	@Test
-	public void testConditionalSimplification() {
+	public void testConditionalSimplification() throws ProgramValidationException {
 		class GT extends BinaryNativeCall {
 			protected GT(CFG cfg, Expression left, Expression right) {
 				super(cfg, "gt", left, right);
@@ -157,18 +164,21 @@ public class CFGSimplificationTest {
 		second.addEdge(new FalseEdge(gt, ret));
 		second.addEdge(new SequentialEdge(print, ret));
 
+		first.validate();
+		second.validate();
 		first.simplify();
+		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
 	@Test
-	public void testSimplificationWithDuplicateStatements() {
+	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
 		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
-		Assignment ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		first.addNode(assign);
+		Return ret = new Return(first, new VariableRef(first, "x"));
+		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, noop));
@@ -176,14 +186,114 @@ public class CFGSimplificationTest {
 
 		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		ret = new Return(second, new VariableRef(first, "x"));
 
-		second.addNode(assign);
+		second.addNode(assign, true);
 		second.addNode(ret);
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
+		first.validate();
+		second.validate();
 		first.simplify();
+		first.validate();
+		assertTrue("Different CFGs", second.isEqualTo(first));
+	}
+
+	@Test
+	public void testSimplificationAtTheStart() throws ProgramValidationException {
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
+		NoOp start = new NoOp(first);
+		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		Return ret = new Return(first, new VariableRef(first, "x"));
+		first.addNode(start, true);
+		first.addNode(assign);
+		first.addNode(ret);
+		first.addEdge(new SequentialEdge(assign, ret));
+		first.addEdge(new SequentialEdge(start, assign));
+
+		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
+		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		ret = new Return(second, new VariableRef(first, "x"));
+
+		second.addNode(assign, true);
+		second.addNode(ret);
+
+		second.addEdge(new SequentialEdge(assign, ret));
+
+		first.validate();
+		second.validate();
+		first.simplify();
+		first.validate();
+		assertTrue("Different CFGs", second.isEqualTo(first));
+	}
+
+	@Test
+	public void testSimplificationAtTheEnd() throws ProgramValidationException {
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
+		Assignment assign1 = new Assignment(first, new VariableRef(first, "x"),
+				new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, new VariableRef(first, "y"),
+				new Literal(first, 50, Untyped.INSTANCE));
+		NoOp end = new NoOp(first);
+		first.addNode(assign1, true);
+		first.addNode(assign2);
+		first.addNode(end);
+		first.addEdge(new SequentialEdge(assign1, assign2));
+		first.addEdge(new SequentialEdge(assign2, end));
+
+		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
+		assign1 = new Assignment(second, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
+		assign2 = new Assignment(second, new VariableRef(first, "y"), new Literal(first, 50, Untyped.INSTANCE));
+
+		second.addNode(assign1, true);
+		second.addNode(assign2);
+
+		second.addEdge(new SequentialEdge(assign1, assign2));
+
+		first.validate();
+		second.validate();
+		first.simplify();
+		first.validate();
+		assertTrue("Different CFGs", second.isEqualTo(first));
+	}
+
+	@Test
+	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
+		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
+		Assignment assign1 = new Assignment(first, new VariableRef(first, "b"),
+				new Literal(first, true, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, new VariableRef(first, "x"),
+				new Literal(first, 5, Untyped.INSTANCE));
+		Assignment assign3 = new Assignment(first, new VariableRef(first, "y"),
+				new Literal(first, 50, Untyped.INSTANCE));
+		NoOp end = new NoOp(first);
+		first.addNode(end);
+		first.addNode(assign1, true);
+		first.addNode(assign2);
+		first.addNode(assign3);
+		first.addEdge(new TrueEdge(assign1, assign2));
+		first.addEdge(new FalseEdge(assign1, assign3));
+		first.addEdge(new SequentialEdge(assign2, end));
+		first.addEdge(new SequentialEdge(assign3, end));
+
+		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
+		assign1 = new Assignment(second, new VariableRef(first, "b"), new Literal(second, true, Untyped.INSTANCE));
+		assign2 = new Assignment(second, new VariableRef(first, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		assign3 = new Assignment(second, new VariableRef(first, "y"), new Literal(second, 50, Untyped.INSTANCE));
+		second.addNode(assign1, true);
+		second.addNode(assign2);
+		second.addNode(assign3);
+		second.addEdge(new TrueEdge(assign1, assign2));
+		second.addEdge(new FalseEdge(assign1, assign3));
+
+		first.validate();
+		second.validate();
+		first.simplify();
+		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 }

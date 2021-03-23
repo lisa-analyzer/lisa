@@ -315,7 +315,9 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 			if (result.containsKey(pred)) {
 				// this might not have been computed yet
 				E edge = adjacencyMatrix.getEdgeConnecting(pred, current);
-				states.add(edge.traverse(result.get(edge.getSource()).getLeft()));
+				AnalysisState<A, H, V> traversed = edge.traverse(result.get(pred).getLeft());
+				// we clean it from out-of-scope variables
+				states.add(cleanUpPostState(pred, traversed));
 			}
 
 		for (AnalysisState<A, H, V> s : states)
