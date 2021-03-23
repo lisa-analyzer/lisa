@@ -1,17 +1,17 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<x = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [int]<BR/>[inferred: [int], state: _|_] ]]<BR/>}} -&gt; [vid$x]>];
-	"node1" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$ret_value@test6: [int, string]<BR/>vid$x: [int, string]<BR/>vid$i: #TOP#<BR/>[inferred: [int, string], state: _|_] ]]<BR/>}} -&gt; [vid$ret_value@test6]>];
-	"node2" [shape="rect",color="gray",label=<==(%(i, 2), 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [int]<BR/>[inferred: #TOP#, state: _|_] ]]<BR/>}} -&gt; [vid$i % 2 == 0]>];
-	"node3" [shape="rect",color="gray",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$x: [int, string]<BR/>vid$i: #TOP#<BR/>[inferred: #TOP#, state: _|_] ]]<BR/>}} -&gt; [vid$i &gt; 5]>];
+	"node1" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$ret_value@test6: [int, string]<BR/>vid$x: [int, string]<BR/>[inferred: [int, string], state: _|_] ]]<BR/>}} -&gt; [vid$ret_value@test6]>];
+	"node2" [shape="rect",color="gray",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [int, string]<BR/>[inferred: #TOP#, state: _|_] ]]<BR/>}} -&gt; [vid$i &gt; 5]>];
+	"node3" [shape="rect",color="gray",label=<==(%(i, 2), 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [int]<BR/>[inferred: #TOP#, state: _|_] ]]<BR/>}} -&gt; [vid$i % 2 == 0]>];
 	"node4" [shape="rect",color="gray",label=<x = &quot;p&quot;<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [string]<BR/>[inferred: [string], state: _|_] ]]<BR/>}} -&gt; [vid$x]>];
 	"node5" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$i: #TOP#<BR/>vid$x: [string]<BR/>[inferred: #TOP#, state: _|_] ]]<BR/>}} -&gt; [vid$i]>];
+	"node0" -> "node3" [color="black"];
 	"node2" -> "node1" [color="red",style="dashed"];
-	"node2" -> "node3" [color="blue",style="dashed"];
+	"node2" -> "node4" [color="blue",style="dashed"];
 	"node3" -> "node1" [color="red",style="dashed"];
-	"node3" -> "node4" [color="blue",style="dashed"];
+	"node3" -> "node2" [color="blue",style="dashed"];
 	"node4" -> "node5" [color="black"];
-	"node5" -> "node3" [color="black"];
-	"node0" -> "node2" [color="black"];
+	"node5" -> "node2" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
