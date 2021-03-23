@@ -188,8 +188,9 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph, AnalysisState<A, H, V>[] computedStates,
-			Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+					AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the
 		// parameters of this call, it is the entry state if this call has no
@@ -203,31 +204,35 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		// metavariable
 		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
 		// the lub will include the metavariable inside the state
-		//AnalysisState<A, H, V> lub = lastPostState.lub(returned);
+		// AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
 		if (getStaticType().isVoidType() ||
-				//FIXME: @Luca, the problem here is that we have an untyped that indeed it's a void, what should we do?
+		// FIXME: @Luca, the problem here is that we have an untyped that indeed
+		// it's a void, what should we do?
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
-				(returned.getComputedExpressions().size()==1 && returned.getComputedExpressions().iterator().next() instanceof Skip))
+				(returned.getComputedExpressions().size() == 1
+						&& returned.getComputedExpressions().iterator().next() instanceof Skip))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
 			return returned.smallStepSemantics(new Skip(), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			//if(! (expr instanceof Skip)) //It might be the case it chose a target with void return type
-				getMetaVariables().add((Identifier) expr);
+			// if(! (expr instanceof Skip)) //It might be the case it chose a
+			// target with void return type
+			getMetaVariables().add((Identifier) expr);
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = returned.bottom();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			//if(! (expr instanceof Skip))
-			{
-				AnalysisState<A, H, V> tmp = returned.assign(meta.pushScope(this), expr, this);
-				result = result.lub(tmp.smallStepSemantics(meta.pushScope(this), this));
-				//We need to perform this evaluation of the identifier not pushed with the scope since otherwise
-                //the value associated with the returned variable would be lost
-			}
+		// if(! (expr instanceof Skip))
+		{
+			AnalysisState<A, H, V> tmp = returned.assign(meta.pushScope(this), expr, this);
+			result = result.lub(tmp.smallStepSemantics(meta.pushScope(this), this));
+			// We need to perform this evaluation of the identifier not pushed
+			// with the scope since otherwise
+			// the value associated with the returned variable would be lost
+		}
 
 		return result;
 	}

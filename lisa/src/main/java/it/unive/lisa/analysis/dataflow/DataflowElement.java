@@ -60,8 +60,22 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 */
 	Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain);
 
+	/**
+	 * Push a scope to the dataflow element.
+	 * 
+	 * @param scope the scope to be pushed
+	 * 
+	 * @return the element with the pushed scope
+	 */
 	E pushScope(Call scope);
 
+	/**
+	 * Pop a scope to the dataflow element.
+	 * 
+	 * @param scope the scope to be popped
+	 * 
+	 * @return the element with the popped scope
+	 */
 	E popScope(Call scope);
 
 }

@@ -94,7 +94,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> pushScope(Call scope) throws SemanticException {
 		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
-		for(E element : this.elements)
+		for (E element : this.elements)
 			result.elements.add(element.pushScope(scope));
 		return result;
 	}
@@ -102,7 +102,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> popScope(Call scope) throws SemanticException {
 		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
-		for(E element : this.elements)
+		for (E element : this.elements)
 			result.elements.add(element.popScope(scope));
 		return result;
 	}

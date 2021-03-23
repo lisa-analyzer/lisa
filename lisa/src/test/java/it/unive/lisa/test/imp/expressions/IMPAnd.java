@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;

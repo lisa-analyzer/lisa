@@ -1,10 +1,8 @@
 package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.type.Type;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -27,7 +25,6 @@ public class Program extends Unit {
 	 * {@link CompilationUnit#getName()}.
 	 */
 	private final Map<String, CompilationUnit> units;
-
 
 	/**
 	 * The entry points defined in this program.
@@ -86,14 +83,14 @@ public class Program extends Unit {
 		return units.putIfAbsent(unit.getName(), unit) == null;
 	}
 
-
 	/**
 	 * Adds a new {@link CFG} to the entry points of this program.
 	 *
 	 * @param method the code member to add
 	 *
-	 * @return {@code true} if the entry point was successfully added.
-	 * If this method returns {@code false}, the given code member is discarded.
+	 * @return {@code true} if the entry point was successfully added. If this
+	 *             method returns {@code false}, the given code member is
+	 *             discarded.
 	 */
 	public final boolean addEntryPoint(CFG method) {
 		return entrypoints.add(method);

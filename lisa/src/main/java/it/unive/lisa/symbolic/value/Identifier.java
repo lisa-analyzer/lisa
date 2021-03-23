@@ -61,8 +61,10 @@ public abstract class Identifier extends ValueExpression {
 	}
 
 	/**
-	 * Returns an identifier where the scope is moved one step out
+	 * Returns an identifier where the scope is moved one step out.
+	 * 
 	 * @param scope the called method that pushes the scope one step out
+	 * 
 	 * @return the identifier where the scope has been moved one step out
 	 */
 	public OutsideScopeIdentifier pushScope(CFGCall scope) {

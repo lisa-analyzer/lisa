@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -92,9 +91,9 @@ public abstract class UnaryNativeCall extends NativeCall {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> entryState,
-			InterproceduralAnalysis callGraph, AnalysisState<A, H, V>[] computedStates,
-			Collection<SymbolicExpression>[] params)
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis callGraph, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : params[0]) {
@@ -130,7 +129,8 @@ public abstract class UnaryNativeCall extends NativeCall {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph, AnalysisState<A, H, V> exprState,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+					AnalysisState<A, H, V> exprState,
 					SymbolicExpression expr)
 					throws SemanticException;
 }

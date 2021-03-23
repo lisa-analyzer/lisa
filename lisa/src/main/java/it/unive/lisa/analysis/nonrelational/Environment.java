@@ -5,12 +5,10 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -171,19 +169,17 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	public M popScope(Call scope) throws SemanticException {
 		AtomicReference<SemanticException> e = new AtomicReference<>();
 		M result = this.liftIdentifiers(id -> {
-			if(! (id instanceof OutsideScopeIdentifier)) {
+			if (!(id instanceof OutsideScopeIdentifier)) {
 				return null;
-			}
-			else {
+			} else {
 				Call otherCall = ((OutsideScopeIdentifier) id).getScope();
-				if(! scope.equals(otherCall) &&
-						//We might have a call that is resolved and the other one not, so we consider the program point as well
-						scope.getLine()!=otherCall.getLine() && scope.getCol()!=otherCall.getCol()
-				) {
+				if (!scope.equals(otherCall) &&
+				// We might have a call that is resolved and the other one not,
+				// so we consider the program point as well
+						scope.getLine() != otherCall.getLine() && scope.getCol() != otherCall.getCol()) {
 					e.set(new SemanticException("Trying to pop out a different scope"));
 					return null;
-				}
-				else {
+				} else {
 					try {
 						return ((OutsideScopeIdentifier) id).popScope(scope);
 					} catch (SemanticException semanticException) {
@@ -193,24 +189,27 @@ public abstract class Environment<M extends Environment<M, E, T>,
 				}
 			}
 		});
-		if(e.get()!=null)
+		if (e.get() != null)
 			throw e.get();
-		else return result;
+		else
+			return result;
 	}
 
-	private M liftIdentifiers( Function<Identifier, Identifier> lifter) throws SemanticException {
-		if(this.isBottom())
+	private M liftIdentifiers(Function<Identifier, Identifier> lifter) throws SemanticException {
+		if (this.isBottom())
 			return this.bottom();
-		if(this.isTop())
+		if (this.isTop())
 			return this.top();
 		Map<Identifier, T> function = new HashMap<>();
 		M result = this.copy();
-		for(Identifier id : this.getKeys()) {
+		for (Identifier id : this.getKeys()) {
 			Identifier outsideScopeIdentifier = lifter.apply(id);
-			if(outsideScopeIdentifier!=null) {
+			if (outsideScopeIdentifier != null) {
 				T value = this.getState(id);
 				function.put(outsideScopeIdentifier, value);
-				//FIXME @Luca not sure this could be the intended use of assignAux, but I need an instance of M and not of Environment...
+				// FIXME @Luca not sure this could be the intended use of
+				// assignAux, but I need an instance of M and not of
+				// Environment...
 				result = result.assignAux(outsideScopeIdentifier, null, function, value, null);
 			}
 			result = result.forgetIdentifier(id);

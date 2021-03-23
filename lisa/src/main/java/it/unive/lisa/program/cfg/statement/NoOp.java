@@ -76,7 +76,8 @@ public class NoOp extends Statement {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-            AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		return entryState.smallStepSemantics(new Skip(), this);
 	}

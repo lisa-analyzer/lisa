@@ -4,7 +4,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-
 import java.util.Collection;
 
 /**
@@ -120,23 +119,30 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
-	 * Push a new scope in the call stack caused by calling the method passed as parameter.
-	 * This causes the current local variables to be hidden by the method call.
+	 * Push a new scope in the call stack caused by calling the method passed as
+	 * parameter. This causes the current local variables to be hidden by the
+	 * method call.
 	 *
 	 * @param scope the called method
+	 * 
 	 * @return the abstract state where the local variables have been hidden
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-    D pushScope(Call scope) throws SemanticException;
+	D pushScope(Call scope) throws SemanticException;
 
 	/**
-	 * Pop the new scope from the call stack caused by calling the method passed as parameter.
-	 * This causes that the current local variables to be removed from the state, while the local
-	 * variables that were hidden by the call to the given method
+	 * Pop the new scope from the call stack caused by calling the method passed
+	 * as parameter. This causes that the current local variables to be removed
+	 * from the state, while the local variables that were hidden by the call to
+	 * the given method
 	 *
 	 * @param scope the called method we are exiting
-	 * @return the abstract state where the local variables have been removed, while the variables
-	 * 		hidden by the given call are visible again
+	 * 
+	 * @return the abstract state where the local variables have been removed,
+	 *             while the variables hidden by the given call are visible
+	 *             again
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D popScope(Call scope) throws SemanticException;

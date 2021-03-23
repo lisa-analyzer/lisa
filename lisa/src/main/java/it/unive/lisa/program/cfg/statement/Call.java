@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -15,7 +14,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
 
 /**
@@ -130,7 +128,8 @@ public abstract class Call extends Expression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		@SuppressWarnings("unchecked")
 		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
@@ -141,14 +140,16 @@ public abstract class Call extends Expression {
 		for (int i = 0; i < computed.length; i++) {
 			preState = paramStates[i] = parameters[i].semantics(preState, callGraph, expressions);
 			expressions.put(parameters[i], paramStates[i]);
-			//All expressions must be updated with the new scope
+			// All expressions must be updated with the new scope
 			computed[i] = paramStates[i].pushScope(this).getComputedExpressions();
 		}
 
-		//We need to push the scope at the end of the evaluation of all parameters
-		if(computed.length>0)
-			paramStates[computed.length-1] = paramStates[computed.length-1].pushScope(this);
-		else entryState = entryState.pushScope(this);
+		// We need to push the scope at the end of the evaluation of all
+		// parameters
+		if (computed.length > 0)
+			paramStates[computed.length - 1] = paramStates[computed.length - 1].pushScope(this);
+		else
+			entryState = entryState.pushScope(this);
 
 		AnalysisState<A, H, V> result = callSemantics(entryState, callGraph, paramStates, computed);
 
@@ -163,21 +164,24 @@ public abstract class Call extends Expression {
 	 * have been computed. Meta variables from the parameters will be forgotten
 	 * after this call returns.
 	 * 
-	 * @param <A>            the type of {@link AbstractState}
-	 * @param <H>            the type of the {@link HeapDomain}
-	 * @param <V>            the type of the {@link ValueDomain}
-	 * @param entryState     the entry state of this call
-	 * @param inteproceduralAnalysis      the interprocedural analysis of the program to analyze
-	 * @param computedStates the array of states chaining the parameters'
-	 *                           semantics evaluation starting from
-	 *                           {@code entryState}, namely
-	 *                           {@code computedState[i]} corresponds to the
-	 *                           state obtained by the evaluation of
-	 *                           {@code params[i]} in the state
-	 *                           {@code computedState[i-1]} ({@code params[0]}
-	 *                           is evaluated in {@code entryState})
-	 * @param params         the symbolic expressions representing the computed
-	 *                           values of the parameters of this call
+	 * @param <A>                    the type of {@link AbstractState}
+	 * @param <H>                    the type of the {@link HeapDomain}
+	 * @param <V>                    the type of the {@link ValueDomain}
+	 * @param entryState             the entry state of this call
+	 * @param inteproceduralAnalysis the interprocedural analysis of the program
+	 *                                   to analyze
+	 * @param computedStates         the array of states chaining the
+	 *                                   parameters' semantics evaluation
+	 *                                   starting from {@code entryState},
+	 *                                   namely {@code computedState[i]}
+	 *                                   corresponds to the state obtained by
+	 *                                   the evaluation of {@code params[i]} in
+	 *                                   the state {@code computedState[i-1]}
+	 *                                   ({@code params[0]} is evaluated in
+	 *                                   {@code entryState})
+	 * @param params                 the symbolic expressions representing the
+	 *                                   computed values of the parameters of
+	 *                                   this call
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this call
@@ -187,10 +191,10 @@ public abstract class Call extends Expression {
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> entryState,
-				InterproceduralAnalysis inteproceduralAnalysis , AnalysisState<A, H, V>[] computedStates,
-				Collection<SymbolicExpression>[] params)
-						throws SemanticException;
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis inteproceduralAnalysis, AnalysisState<A, H, V>[] computedStates,
+					Collection<SymbolicExpression>[] params)
+					throws SemanticException;
 
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {

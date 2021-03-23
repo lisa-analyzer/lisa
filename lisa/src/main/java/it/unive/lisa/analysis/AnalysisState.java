@@ -118,10 +118,12 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> pushScope(Call scope) throws SemanticException {
-		return new AnalysisState<A, H, V>(state.pushScope(scope), pushScopeOnAllExpressions(this.computedExpressions, scope));
+		return new AnalysisState<A, H, V>(state.pushScope(scope),
+				pushScopeOnAllExpressions(this.computedExpressions, scope));
 	}
 
-	private Collection<SymbolicExpression> pushScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions, Call scope) {
+	private Collection<SymbolicExpression> pushScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions,
+			Call scope) {
 		Collection<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
 			result.add(exp.pushScope(scope));
@@ -130,10 +132,12 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> popScope(Call scope) throws SemanticException {
-		return new AnalysisState<A, H, V>(state.popScope(scope), popScopeOnAllExpressions(this.computedExpressions, scope));
+		return new AnalysisState<A, H, V>(state.popScope(scope),
+				popScopeOnAllExpressions(this.computedExpressions, scope));
 	}
 
-	private Collection<SymbolicExpression> popScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions, Call scope) throws SemanticException {
+	private Collection<SymbolicExpression> popScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions,
+			Call scope) throws SemanticException {
 		Collection<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
 			result.add(exp.popScope(scope));
@@ -163,7 +167,6 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> top() {
 		return new AnalysisState<>(state.top(), new Skip());
 	}
-
 
 	@Override
 	public AnalysisState<A, H, V> bottom() {

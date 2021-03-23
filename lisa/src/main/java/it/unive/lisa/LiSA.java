@@ -12,14 +12,13 @@ import it.unive.lisa.analysis.ValueDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
@@ -161,10 +160,10 @@ public class LiSA {
 	}
 
 	/**
-	 * Sets the {@link InterproceduralAnalysis} to use for the analysis. Any existing value is
-	 * overwritten.
+	 * Sets the {@link InterproceduralAnalysis} to use for the analysis. Any
+	 * existing value is overwritten.
 	 * 
-	 * @param <T>       the concrete type of the call graph
+	 * @param <T>                     the concrete type of the call graph
 	 * @param interproceduralAnalysis the interprocedural analysis to use
 	 */
 	public <T extends InterproceduralAnalysis> void setInterproceduralAnalysis(T interproceduralAnalysis) {
@@ -181,6 +180,7 @@ public class LiSA {
 	public <T extends CallGraph> void setCallGraph(T callGraph) {
 		this.callGraph = callGraph;
 	}
+
 	/**
 	 * Sets the {@link AbstractState} to use for the analysis. Any existing
 	 * value is overwritten.
@@ -392,7 +392,8 @@ public class LiSA {
 			} catch (AnalysisSetupException e) {
 				throw new AnalysisExecutionException("Unable to create default call graph", e);
 			}
-			log.warn("No call graph set for this analysis, defaulting to " + interproceduralAnalysis.getClass().getSimpleName());
+			log.warn("No call graph set for this analysis, defaulting to "
+					+ interproceduralAnalysis.getClass().getSimpleName());
 		}
 
 		try {
@@ -430,10 +431,11 @@ public class LiSA {
 			String message = dumpTypeInference ? "Dumping type analysis and propagating it to cfgs"
 					: "Propagating type information to cfgs";
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
-				for(Object result_raw : interproceduralAnalysis.getAnalysisResultsOf(cfg)) {
+				for (Object result_raw : interproceduralAnalysis.getAnalysisResultsOf(cfg)) {
 					CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-							InferenceSystem<InferredTypes>> result = (CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-							InferenceSystem<InferredTypes>>) result_raw;
+							InferenceSystem<InferredTypes>> result = (CFGWithAnalysisResults<
+									SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+									InferenceSystem<InferredTypes>>) result_raw;
 					if (dumpTypeInference)
 						dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
 					cfg.accept(new TypesPropagator<>(), result);
@@ -462,8 +464,9 @@ public class LiSA {
 
 		if (dumpAnalysis)
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
-				for(Object result : interproceduralAnalysis.getAnalysisResultsOf(cfg))
-					dumpCFG("analysis___", (CFGWithAnalysisResults<A, H, V>) result, st -> ((CFGWithAnalysisResults<A, H, V>) result).getAnalysisStateAt(st).toString());
+				for (Object result : interproceduralAnalysis.getAnalysisResultsOf(cfg))
+					dumpCFG("analysis___", (CFGWithAnalysisResults<A, H, V>) result,
+							st -> ((CFGWithAnalysisResults<A, H, V>) result).getAnalysisStateAt(st).toString());
 			}
 	}
 

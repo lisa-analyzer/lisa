@@ -105,19 +105,21 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	 * Computes the semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #semantics(AnalysisState, InterproceduralAnalysis, StatementStore)} of each
-	 * nested {@link Expression}, saving the result of each call in
+	 * {@link #semantics(AnalysisState, InterproceduralAnalysis, StatementStore)}
+	 * of each nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
-	 * @param <A>         the type of {@link AbstractState}
-	 * @param <H>         the type of the {@link HeapDomain}
-	 * @param <V>         the type of the {@link ValueDomain}
-	 * @param entryState  the entry state that represents the abstract values of
-	 *                        each program variable and memory location when the
-	 *                        execution reaches this statement
-	 * @param interproceduralAnalysis   the call graph of the program to analyze
-	 * @param expressions the cache where analysis states of intermediate
-	 *                        expressions must be stored
+	 * @param <A>                     the type of {@link AbstractState}
+	 * @param <H>                     the type of the {@link HeapDomain}
+	 * @param <V>                     the type of the {@link ValueDomain}
+	 * @param entryState              the entry state that represents the
+	 *                                    abstract values of each program
+	 *                                    variable and memory location when the
+	 *                                    execution reaches this statement
+	 * @param interproceduralAnalysis the call graph of the program to analyze
+	 * @param expressions             the cache where analysis states of
+	 *                                    intermediate expressions must be
+	 *                                    stored
 	 *
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this statement
@@ -127,6 +129,7 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-			AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException;
 }

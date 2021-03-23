@@ -1,5 +1,9 @@
 package it.unive.lisa.test.interprocedural;
 
+import static it.unive.lisa.LiSAFactory.getDefaultFor;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import it.unive.lisa.AnalysisException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.LiSA;
@@ -14,80 +18,73 @@ import it.unive.lisa.outputs.compare.JsonReportComparer;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.test.imp.IMPFrontend;
 import it.unive.lisa.test.imp.ParsingException;
-import org.junit.Test;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-
-import static it.unive.lisa.LiSAFactory.getDefaultFor;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 public class ModularWorstCaseInterproceduralAnalysisTest {
 
-    private final String filePath = "imp-testcases/interprocedural/program.imp";
+	private final String filePath = "imp-testcases/interprocedural/program.imp";
 
+	@Test
+	public void testCHACallGraph() throws IOException, ParsingException, AnalysisSetupException {
+		System.out.println("Testing modular worst case interprocedural analysis with CHA call graph...");
+		LiSA lisa = new LiSA();
 
-    @Test
-    public void testCHACallGraph() throws IOException, ParsingException, AnalysisSetupException {
-        System.out.println("Testing modular worst case interprocedural analysis with CHA call graph...");
-        LiSA lisa = new LiSA();
+		lisa.setInferTypes(true);
+		Program program = IMPFrontend.processFile(filePath, false);
+		lisa.setProgram(program);
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
+		lisa.setDumpAnalysis(true);
+		lisa.setJsonOutput(true);
+		lisa.setInterproceduralAnalysis(new ModularWorstCaseAnalysis());
+		lisa.setCallGraph(new CHACallGraph());
+		lisa.setWorkdir("test-outputs/interprocedural/CHA");
 
-        lisa.setInferTypes(true);
-        Program program = IMPFrontend.processFile(filePath, false);
-        lisa.setProgram(program);
-        lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
-        lisa.setDumpAnalysis(true);
-        lisa.setJsonOutput(true);
-        lisa.setInterproceduralAnalysis(new ModularWorstCaseAnalysis());
-        lisa.setCallGraph(new CHACallGraph());
-        lisa.setWorkdir("test-outputs/interprocedural/CHA");
+		try {
+			lisa.run();
+		} catch (AnalysisException e) {
+			e.printStackTrace(System.err);
+			fail("Analysis terminated with errors");
+		}
 
-        try {
-            lisa.run();
-        } catch (AnalysisException e) {
-            e.printStackTrace(System.err);
-            fail("Analysis terminated with errors");
-        }
+		File actFile = new File("test-outputs/interprocedural/CHA/report.json");
+		File expFile = new File("imp-testcases/interprocedural/CHA/report.json");
+		JsonReport expected = JsonReport.read(new FileReader(expFile));
+		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
-        File actFile = new File("test-outputs/interprocedural/CHA/report.json");
-        File expFile = new File("imp-testcases/interprocedural/CHA/report.json");
-        JsonReport expected = JsonReport.read(new FileReader(expFile));
-        JsonReport actual = JsonReport.read(new FileReader(actFile));
+		assertTrue("Results are different",
+				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
+	}
 
-        assertTrue("Results are different",
-                JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-    }
+	@Test
+	public void testRTACallGraph() throws IOException, ParsingException, AnalysisSetupException {
+		System.out.println("Testing modular worst case interprocedural analysis with RTA call graph...");
+		LiSA lisa = new LiSA();
 
+		Program program = IMPFrontend.processFile(filePath, false);
+		lisa.setProgram(program);
+		lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
+		lisa.setDumpAnalysis(true);
+		lisa.setJsonOutput(true);
+		lisa.setInterproceduralAnalysis(new ModularWorstCaseAnalysis());
+		lisa.setCallGraph(new RTACallGraph());
+		lisa.setWorkdir("test-outputs/interprocedural/RTA");
 
-    @Test
-    public void testRTACallGraph() throws IOException, ParsingException, AnalysisSetupException {
-        System.out.println("Testing modular worst case interprocedural analysis with RTA call graph...");
-        LiSA lisa = new LiSA();
+		try {
+			lisa.run();
+		} catch (AnalysisException e) {
+			e.printStackTrace(System.err);
+			fail("Analysis terminated with errors");
+		}
 
-        Program program = IMPFrontend.processFile(filePath, false);
-        lisa.setProgram(program);
-        lisa.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()));
-        lisa.setDumpAnalysis(true);
-        lisa.setJsonOutput(true);
-        lisa.setInterproceduralAnalysis(new ModularWorstCaseAnalysis());
-        lisa.setCallGraph(new RTACallGraph());
-        lisa.setWorkdir("test-outputs/interprocedural/RTA");
+		File actFile = new File("test-outputs/interprocedural/RTA/report.json");
+		File expFile = new File("imp-testcases/interprocedural/RTA/report.json");
+		JsonReport expected = JsonReport.read(new FileReader(expFile));
+		JsonReport actual = JsonReport.read(new FileReader(actFile));
 
-        try {
-            lisa.run();
-        } catch (AnalysisException e) {
-            e.printStackTrace(System.err);
-            fail("Analysis terminated with errors");
-        }
-
-        File actFile = new File("test-outputs/interprocedural/RTA/report.json");
-        File expFile = new File("imp-testcases/interprocedural/RTA/report.json");
-        JsonReport expected = JsonReport.read(new FileReader(expFile));
-        JsonReport actual = JsonReport.read(new FileReader(actFile));
-
-        assertTrue("Results are different",
-                JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
-    }
+		assertTrue("Results are different",
+				JsonReportComparer.compare(expected, actual, expFile.getParentFile(), actFile.getParentFile()));
+	}
 }

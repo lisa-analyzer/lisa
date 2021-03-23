@@ -125,11 +125,10 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 		return elements;
 	}
 
-
 	@Override
 	public PossibleForwardDataflowDomain<E> pushScope(Call scope) throws SemanticException {
 		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
-		for(E element : this.elements)
+		for (E element : this.elements)
 			result.elements.add(element.pushScope(scope));
 		return result;
 	}
@@ -137,11 +136,9 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	public PossibleForwardDataflowDomain<E> popScope(Call scope) throws SemanticException {
 		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
-		for(E element : this.elements)
+		for (E element : this.elements)
 			result.elements.add(element.popScope(scope));
 		return result;
 	}
-
-
 
 }

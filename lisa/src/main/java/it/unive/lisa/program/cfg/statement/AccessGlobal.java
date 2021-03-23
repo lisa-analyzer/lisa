@@ -83,7 +83,8 @@ public class AccessGlobal extends Expression {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-                                                                       InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions) throws SemanticException {
+					InterproceduralAnalysis interproceduralAnalysis, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		// unit globals are unique, we can directly access those
 		return entryState.smallStepSemantics(new HeapReference(getRuntimeTypes(), toString()), this);
 	}

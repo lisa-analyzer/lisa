@@ -3,7 +3,6 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
-
 import java.util.Collection;
 import java.util.Map;
 
@@ -54,19 +53,24 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	/**
-	 * Yields the entry state
-	 * @throws SemanticException if the lub operator fails
+	 * Yields the entry state.
+	 * 
 	 * @return the entry state of the CFG
+	 * 
+	 * @throws SemanticException if the lub operator fails
 	 */
-	//FIXME: Luca, do we get the entry or exit statement when we ask the map? If exit, how do we get the entry state?
+	// FIXME: Luca, do we get the entry or exit statement when we ask the map?
+	// If exit, how do we get the entry state?
 	public final AnalysisState<A, H, V> getEntryState() throws SemanticException {
 		return lub(this.getEntrypoints());
 	}
 
 	/**
-	 * Yields the exit state
-	 * @throws SemanticException if the lub operator fails
+	 * Yields the exit state.
+	 * 
 	 * @return the entry state of the CFG
+	 * 
+	 * @throws SemanticException if the lub operator fails
 	 */
 	public final AnalysisState<A, H, V> getExitState() throws SemanticException {
 		return lub(this.getNormalExitpoints());
@@ -74,12 +78,10 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 
 	private AnalysisState<A, H, V> lub(Collection<Statement> statements) throws SemanticException {
 		AnalysisState<A, H, V> result = null;
-		for(Statement entry : statements)
+		for (Statement entry : statements)
 			result = result == null ? this.getAnalysisStateAt(entry) : result.lub(this.getAnalysisStateAt(entry));
 		return result;
 
 	}
-
-
 
 }

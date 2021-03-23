@@ -73,7 +73,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * produced by compiling the ANTLR4 grammar, and yields the collection of
 	 * {@link CFG}s that corresponds to the methods parsed from that file.
 	 * 
-	 * @param file the complete path (relative or absolute) of the file to parse
+	 * @param file     the complete path (relative or absolute) of the file to
+	 *                     parse
+	 * @param onlyMain true iff the only entry point is the main method
 	 * 
 	 * @return the collection of {@link CFG}s parsed from that file
 	 * 
@@ -196,7 +198,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
-			if(isEntryPoint(cfg))
+			if (isEntryPoint(cfg))
 				program.addEntryPoint(cfg);
 		}
 
@@ -212,8 +214,10 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	private boolean isEntryPoint(CFG cfg) {
-		if(! onlyMain) return true;
-		else return cfg.getDescriptor().getName().equals("main");
+		if (!onlyMain)
+			return true;
+		else
+			return cfg.getDescriptor().getName().equals("main");
 	}
 
 	@Override
@@ -256,8 +260,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
-		Parameter[] formals = new Parameter[ctx.formal().size()+1];
-		formals[0]  = new Parameter("this", ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
+		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
+		formals[0] = new Parameter("this", ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

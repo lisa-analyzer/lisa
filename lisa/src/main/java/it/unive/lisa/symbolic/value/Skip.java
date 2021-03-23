@@ -41,7 +41,6 @@ public class Skip extends ValueExpression {
 		return "skip";
 	}
 
-
 	@Override
 	public SymbolicExpression pushScope(Call scope) {
 		return this;

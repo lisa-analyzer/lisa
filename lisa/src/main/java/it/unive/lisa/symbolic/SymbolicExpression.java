@@ -53,28 +53,32 @@ public abstract class SymbolicExpression {
 		});
 	}
 
-
 	/**
-	 * Push a new scope in the call stack caused by calling the method passed as parameter.
-	 * This causes the current local variables to be hidden by the method call.
+	 * Push a new scope in the call stack caused by calling the method passed as
+	 * parameter. This causes the current local variables to be hidden by the
+	 * method call.
 	 *
 	 * @param scope the called method
+	 * 
 	 * @return the abstract state where the local variables have been hidden
 	 */
 	public abstract SymbolicExpression pushScope(Call scope);
 
 	/**
-	 * Pop the new scope from the call stack caused by calling the method passed as parameter.
-	 * This causes that the current local variables to be removed from the state, while the local
-	 * variables that were hidden by the call to the given method
+	 * Pop the new scope from the call stack caused by calling the method passed
+	 * as parameter. This causes that the current local variables to be removed
+	 * from the state, while the local variables that were hidden by the call to
+	 * the given method
 	 *
 	 * @param scope the called method we are exiting
-	 * @return the abstract state where the local variables have been removed, while the variables
-	 * 		hidden by the given call are visible again
+	 * 
+	 * @return the abstract state where the local variables have been removed,
+	 *             while the variables hidden by the given call are visible
+	 *             again
+	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public abstract SymbolicExpression popScope(Call scope) throws SemanticException;
-
 
 	@Override
 	public int hashCode() {

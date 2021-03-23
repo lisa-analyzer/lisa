@@ -315,7 +315,8 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis cg, WorkingSet<Statement> ws, int widenAfter)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis cg, WorkingSet<Statement> ws,
+					int widenAfter)
 					throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
@@ -415,7 +416,8 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, InterproceduralAnalysis cg, int widenAfter)
+					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState, InterproceduralAnalysis cg,
+					int widenAfter)
 					throws FixpointException {
 		return fixpoint(entrypoints, entryState, cg, FIFOWorkingSet.mk(), widenAfter);
 	}
@@ -661,7 +663,8 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Map<Statement, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg, WorkingSet<Statement> ws)
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg,
+					WorkingSet<Statement> ws)
 					throws FixpointException {
 		return fixpoint(startingPoints, cg, ws, DEFAULT_WIDENING_THRESHOLD);
 	}
@@ -714,7 +717,8 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Map<Statement, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg, WorkingSet<Statement> ws,
+					Map<Statement, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg,
+					WorkingSet<Statement> ws,
 					int widenAfter)
 					throws FixpointException {
 		return new CFGWithAnalysisResults<A, H, V>(this, super.fixpoint(startingPoints, cg, ws, widenAfter,

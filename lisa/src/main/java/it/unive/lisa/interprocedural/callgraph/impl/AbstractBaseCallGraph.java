@@ -1,39 +1,21 @@
 package it.unive.lisa.interprocedural.callgraph.impl;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.HeapDomain;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
-import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.FixpointException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,81 +25,83 @@ import org.apache.logging.log4j.Logger;
  * particular:
  * <ul>
  * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
- * target's signature. {@link AbstractBaseCallGraph#getPossibleTypesOfReceiver(Expression)}
- * provides the possible types of the receiver that might be reachable, and from where we
+ * target's signature.
+ * {@link AbstractBaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides
+ * the possible types of the receiver that might be reachable, and from where we
  * might get the method implementation to analyze</li>
  * <li>returns top when asked for the abstract result of a {@link CFGCall}</li>
  * </ul>
  *
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
+ *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
 public abstract class AbstractBaseCallGraph implements CallGraph {
 
-    private static final Logger log = LogManager.getLogger(it.unive.lisa.interprocedural.callgraph.impl.AbstractBaseCallGraph.class);
+	private static final Logger log = LogManager
+			.getLogger(it.unive.lisa.interprocedural.callgraph.impl.AbstractBaseCallGraph.class);
 
-    private Program program;
+	private Program program;
 
+	@Override
+	public final void build(Program program) throws CallGraphConstructionException {
+		this.program = program;
+	}
 
-    @Override
-    public final void build(Program program) throws CallGraphConstructionException {
-        this.program = program;
-    }
+	@Override
+	public final Call resolve(UnresolvedCall call) throws CallResolutionException {
+		Collection<CodeMember> targets = new ArrayList<>();
 
+		if (call.isInstanceCall()) {
+			if (call.getParameters().length == 0)
+				throw new CallResolutionException(
+						"An instance call should have at least one parameter to be used as the receiver of the call");
+			Expression receiver = call.getParameters()[0];
+			for (Type recType : getPossibleTypesOfReceiver(receiver)) {
+				if (!recType.isUnitType())
+					continue;
 
-    @Override
-    public final Call resolve(UnresolvedCall call) throws CallResolutionException {
-        Collection<CodeMember> targets = new ArrayList<>();
+				CompilationUnit unit = recType.asUnitType().getUnit();
+				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
+				for (CodeMember candidate : candidates)
+					if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
+						targets.add(candidate);
+			}
+		} else {
+			for (CodeMember cm : program.getAllCodeMembers())
+				if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
+						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
+					targets.add(cm);
+		}
 
-        if (call.isInstanceCall()) {
-            if (call.getParameters().length == 0)
-                throw new CallResolutionException(
-                        "An instance call should have at least one parameter to be used as the receiver of the call");
-            Expression receiver = call.getParameters()[0];
-            for (Type recType : getPossibleTypesOfReceiver(receiver)) {
-                if (!recType.isUnitType())
-                    continue;
+		Call resolved;
+		if (targets.isEmpty())
+			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+					call.getTargetName(), call.getStaticType(), call.getParameters());
+		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
+			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
+		else {
+			if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
+				throw new CallResolutionException(
+						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
 
-                CompilationUnit unit = recType.asUnitType().getUnit();
-                Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
-                for (CodeMember candidate : candidates)
-                    if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
-                        targets.add(candidate);
-            }
-        } else {
-            for (CodeMember cm : program.getAllCodeMembers())
-                if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
-                        && call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
-                    targets.add(cm);
-        }
+			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
+					call.getParameters());
+		}
 
-        Call resolved;
-        if (targets.isEmpty())
-            resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-                    call.getTargetName(), call.getStaticType(), call.getParameters());
-        else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
-            resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
-        else {
-            if (targets.stream().anyMatch(t -> t instanceof NativeCFG))
-                throw new CallResolutionException(
-                        "Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
+		resolved.setOffset(call.getOffset());
+		return resolved;
+	}
 
-            resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-                    call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
-                    call.getParameters());
-        }
-
-        resolved.setOffset(call.getOffset());
-        return resolved;
-    }
-
-    /**
-     *
-     * Returns all the possible types of the given expression, that is a receiver
-     * of a method call. How we choose this set varies from the call graph algorithm
-     * we decide to adopt (e.g., CHA, RTA, 0-CFA, ...)
-     * @param receiver an expression
-     * @return the possible types of the given expression
-     */
-    protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver);
+	/**
+	 * Returns all the possible types of the given expression, that is a
+	 * receiver of a method call. How we choose this set varies from the call
+	 * graph algorithm we decide to adopt (e.g., CHA, RTA, 0-CFA, ...)
+	 * 
+	 * @param receiver an expression
+	 * 
+	 * @return the possible types of the given expression
+	 */
+	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver);
 
 }

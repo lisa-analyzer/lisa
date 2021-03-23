@@ -27,13 +27,13 @@ public abstract class HeapExpression extends SymbolicExpression {
 		super(types);
 	}
 
-	//By default a heap expression does not change the scope.
+	// By default a heap expression does not change the scope.
 	@Override
 	public final SymbolicExpression pushScope(Call scope) {
 		return this;
 	}
 
-	//By default a heap expression does not change the scope.
+	// By default a heap expression does not change the scope.
 	@Override
 	public final SymbolicExpression popScope(Call scope) throws SemanticException {
 		return this;
