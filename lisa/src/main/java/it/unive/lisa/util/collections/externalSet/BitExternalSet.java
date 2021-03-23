@@ -26,7 +26,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 	 * 
 	 * @return the bitwise mask
 	 */
-	private static long bitmask(int n) {
+	static long bitmask(int n) {
 		// assuming that n will be stored in the right long (obtained with
 		// toNLongs(n)), we have to determine which bit of the long has to be
 		// turned to 1. To do that, we take the 1L (that is just the right-most
@@ -44,23 +44,23 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 	 * 
 	 * @return the index
 	 */
-	private static int bitvector_index(int n) {
+	static int bitvector_index(int n) {
 		// a long is 64 (2^6) bits, and can thus represent 64 elements.
 		// shifting n to the right by 6 determines the number of
 		// 64-bits chunks needed to represent that number.
 		return n >> 6;
 	}
 
-	private static void set(long[] bits, int n) {
+	static void set(long[] bits, int n) {
 		bits[bitvector_index(n)] |= bitmask(n);
 	}
 
-	private static void unset(long[] bits, int n) {
+	static void unset(long[] bits, int n) {
 		bits[bitvector_index(n)] &= ~bitmask(n);
 	}
 
-	private static boolean isset(long bitvector, int pos) {
-		return (bitvector & bitmask(pos)) != 0L;
+	static boolean isset(long[] bits, int n) {
+		return (bits[bitvector_index(n)] & bitmask(n)) != 0L;
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			System.arraycopy(localbits, 0, bits, 0, localbits.length);
 			set(bits, pos);
 			return true;
-		} else if (isset(localbits[bitvector], pos))
+		} else if (isset(localbits, pos))
 			return false;
 
 		set(localbits, pos);
@@ -218,7 +218,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			if (bitvector != 0L)
 				for (int i = 0; i < 64; i++)
 					// we iterate over all possible bits of the bitvector
-					if (isset(bitvector, i))
+					if (isset(localbits, 64 * pos + i))
 						count++;
 		}
 
@@ -554,7 +554,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 
 		int bitvector = bitvector_index(pos);
-		return bitvector < bits.length && isset(bits[bitvector], pos);
+		return bitvector < bits.length && isset(bits, pos);
 	}
 
 	@Override
