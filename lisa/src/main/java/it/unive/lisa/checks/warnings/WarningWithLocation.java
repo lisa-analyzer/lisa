@@ -1,5 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -34,7 +35,9 @@ public abstract class WarningWithLocation extends Warning {
 	 * Builds the warning.
 	 * 
 	 * @param sourceFile the source file where this warning is reported. If
-	 *                       unknown, use {@code null}
+	 *                       unknown, use {@code null} (note that the directory
+	 *                       separators in the path will be converted to
+	 *                       unix-style)
 	 * @param line       the line number where this warning is reported in the
 	 *                       source file. If unknown, use {@code -1}
 	 * @param col        the column where this warning is reported in the source
@@ -43,7 +46,7 @@ public abstract class WarningWithLocation extends Warning {
 	 */
 	public WarningWithLocation(String sourceFile, int line, int col, String message) {
 		super(message);
-		this.sourceFile = sourceFile;
+		this.sourceFile = FilenameUtils.separatorsToUnix(sourceFile);
 		this.line = line;
 		this.col = col;
 	}

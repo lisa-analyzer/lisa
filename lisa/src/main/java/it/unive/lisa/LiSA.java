@@ -74,6 +74,8 @@ public class LiSA {
 
 	/**
 	 * Builds a new LiSA instance.
+	 * 
+	 * @param conf the configuration of the analysis to run
 	 */
 	public LiSA(LiSAConfiguration conf) {
 		// since the warnings collection will be filled AFTER the execution of
