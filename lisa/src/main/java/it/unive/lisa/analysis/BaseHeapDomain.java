@@ -75,8 +75,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * of the given heap expression.
 	 * 
 	 * @param expression the expression to evaluate
-	 * 
-	 * @pp the program point that where this expression is being evaluated
+	 * @param pp         the program point that where this expression is being
+	 *                       evaluated
 	 * 
 	 * @return a new instance of this domain
 	 * 

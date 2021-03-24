@@ -3,9 +3,10 @@ class A {
 	b;
 	
 	f1() {
-		def o1 = new A(1,2);
-		o1.a = 1;	
-		o1.b = 2;	
+		def o1 = new A(1,2); 
+		o1.a = 1;
+		o1.b = 2;
+		o1.a  = o1.b + 1;
 	}
 		
 	f2() {	
@@ -15,6 +16,7 @@ class A {
 		} else {
 			o = new A(1,1);
 		}
+
 	}
 	
 	f3() {	
