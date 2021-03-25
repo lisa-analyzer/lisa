@@ -1,0 +1,44 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<xy = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$xy, 0)] ]]<BR/>}} -&gt; [vid$xy]>];
+	"node1" [shape="rect",color="gray",label=<n = *(7, 3)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$n, 7 * 3), (vid$xy, 0), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$n]>];
+	"node2" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$xy, 0)] ]]<BR/>}} -&gt; [vid$b]>];
+	"node3" [shape="rect",color="gray",label=<i = +(i, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$c, vid$xy + vid$y), (vid$i, vid$i + vid$c), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$i]>];
+	"node4" [shape="rect",color="gray",label=<z = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$xy, 0), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$z]>];
+	"node5" [shape="rect",color="gray",label=<&lt;(i, n)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$i, vid$xy + vid$y), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$i &lt; vid$n]>];
+	"node6" [shape="rect",color="gray",label=<i = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$i, vid$xy + vid$y), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$i]>];
+	"node7" [shape="rect",color="gray",label=<b = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$n, 7 * 3), (vid$xy, 1), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$b]>];
+	"node8" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [skip]>];
+	"node9" [shape="rect",color="gray",label=<a = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$a, vid$xy + vid$y), (vid$b, 0), (vid$n, 7 * 3), (vid$xy, 0), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$a]>];
+	"node10" [shape="rect",color="gray",label=<y = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$xy, 0), (vid$y, 0)] ]]<BR/>}} -&gt; [vid$y]>];
+	"node11" [shape="rect",color="gray",label=<c = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$c, vid$xy + vid$y), (vid$i, vid$xy + vid$y), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$c]>];
+	"node12" [shape="rect",color="gray",label=<xy = z<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$n, 7 * 3), (vid$xy, vid$z), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$xy]>];
+	"node13" [shape="rect",color="gray",label=<b = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$n, 7 * 3), (vid$xy, vid$z), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$b]>];
+	"node14" [shape="rect",color="gray",label=<==(xy, 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$a, vid$xy + vid$y), (vid$b, 0), (vid$n, 7 * 3), (vid$xy, 0), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$xy == 0]>];
+	"node15" [shape="rect",color="gray",label=<xy = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, 0), (vid$n, 7 * 3), (vid$xy, 1), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$xy]>];
+	"node16" [shape="rect",color="gray",label=<d = +(xy, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$b, vid$xy + vid$y), (vid$d, vid$xy + vid$y), (vid$i, vid$xy + vid$y), (vid$n, 7 * 3), (vid$y, 0), (vid$z, 0)] ]]<BR/>}} -&gt; [vid$d]>];
+	"node1" -> "node9" [color="black"];
+	"node0" -> "node2" [color="black"];
+	"node2" -> "node10" [color="black"];
+	"node3" -> "node8" [color="black"];
+	"node4" -> "node1" [color="black"];
+	"node5" -> "node11" [color="blue",style="dashed"];
+	"node5" -> "node16" [color="red",style="dashed"];
+	"node6" -> "node5" [color="black"];
+	"node7" -> "node6" [color="black"];
+	"node9" -> "node14" [color="black"];
+	"node10" -> "node4" [color="black"];
+	"node11" -> "node3" [color="black"];
+	"node12" -> "node13" [color="black"];
+	"node13" -> "node6" [color="black"];
+	"node14" -> "node12" [color="blue",style="dashed"];
+	"node14" -> "node15" [color="red",style="dashed"];
+	"node15" -> "node7" [color="black"];
+	"node16" -> "node8" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}
