@@ -3,6 +3,8 @@ package it.unive.lisa;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,6 +20,9 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.dataflow.DataflowElement;
+import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.inference.InferenceSystem;
 import it.unive.lisa.analysis.inference.InferredValue;
@@ -99,6 +104,8 @@ public class LiSAFactory {
 			return true;
 		else if (InferredValue.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
+		else if (DataflowElement.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
+			return true;
 		else
 			return false;
 	}
@@ -111,6 +118,22 @@ public class LiSAFactory {
 			return new ValueEnvironment((NonRelationalValueDomain<?>) param);
 		else if (InferredValue.class.isAssignableFrom(param.getClass()))
 			return new InferenceSystem((InferredValue<?>) param);
+		else if (DataflowElement.class.isAssignableFrom(param.getClass())) {
+			Class<? extends DataflowElement> elem = (Class<? extends DataflowElement>) param.getClass();
+			if (elem.getGenericInterfaces().length == 0)
+				return param;
+			
+			for (Type gi : elem.getGenericInterfaces())
+				if (gi instanceof ParameterizedType && ((ParameterizedType) gi).getRawType() == DataflowElement.class) {
+					Type domain = ((ParameterizedType) gi).getActualTypeArguments()[0];
+					if (((ParameterizedType) domain).getRawType() == PossibleForwardDataflowDomain.class)
+						return new PossibleForwardDataflowDomain((DataflowElement<?, ?>) param);
+					else if (((ParameterizedType) domain).getRawType() == DefiniteForwardDataflowDomain.class)
+						return new DefiniteForwardDataflowDomain((DataflowElement<?, ?>) param);
+					else 
+						return param;
+				}
+		}
 		return param;
 	}
 
