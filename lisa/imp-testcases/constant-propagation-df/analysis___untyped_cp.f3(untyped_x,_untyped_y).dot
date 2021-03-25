@@ -1,0 +1,27 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<i = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0)] ]]<BR/>}} -&gt; [vid$i]>];
+	"node1" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 1), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$i]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$max, 10)] ]]<BR/>}} -&gt; [skip]>];
+	"node3" [shape="rect",color="gray",label=<i = -(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$j, 1), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$i]>];
+	"node4" [shape="rect",color="gray",label=<j = i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 1), (vid$j, 1), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$j]>];
+	"node5" [shape="rect",color="gray",label=<&lt;(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$x &lt; vid$y]>];
+	"node6" [shape="rect",color="gray",label=<max = 10<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$j, 0), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$max]>];
+	"node7" [shape="rect",color="gray",label=<x = +(x, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$j, 1), (vid$max, 10)] ]]<BR/>}} -&gt; [vid$x]>];
+	"node8" [shape="rect",color="gray",label=<j = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$i, 0), (vid$j, 0)] ]]<BR/>}} -&gt; [vid$j]>];
+	"node0" -> "node8" [color="black"];
+	"node1" -> "node4" [color="black"];
+	"node3" -> "node7" [color="black"];
+	"node4" -> "node3" [color="black"];
+	"node5" -> "node1" [color="blue",style="dashed"];
+	"node5" -> "node2" [color="red",style="dashed"];
+	"node6" -> "node5" [color="black"];
+	"node7" -> "node5" [color="black"];
+	"node8" -> "node6" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}
