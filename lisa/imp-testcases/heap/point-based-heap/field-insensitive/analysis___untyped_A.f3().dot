@@ -1,18 +1,18 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<o = new(-1, -1)<BR/>{{<BR/>heap [[ [pp@18427] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
-	"node1" [shape="rect",color="gray",label=<o = new(1, 1)<BR/>{{<BR/>heap [[ [pp@-1634] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
-	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [pp@-1634, pp@77089] ]]<BR/>value [[ pp@-1634: [2, 3]<BR/>pp@77089: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [skip]>];
-	"node3" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [pp@-1634, pp@77089] ]]<BR/>value [[ pp@-1634: [2, 3]<BR/>pp@77089: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [pp@-1634, pp@77089]>];
-	"node4" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [pp@-1634, pp@77089] ]]<BR/>value [[ pp@-1634: [2, 2]<BR/>pp@77089: [2, 2]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [pp@-1634, pp@77089]>];
-	"node5" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [pp@18427] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [true]>];
-	"node6" [shape="rect",color="gray",label=<o = new(0, 0)<BR/>{{<BR/>heap [[ [pp@77089] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
-	"node1" -> "node4" [color="black"];
-	"node3" -> "node2" [color="black"];
-	"node4" -> "node3" [color="black"];
-	"node5" -> "node1" [color="red",style="dashed"];
-	"node5" -> "node6" [color="blue",style="dashed"];
-	"node0" -> "node5" [color="black"];
-	"node6" -> "node4" [color="black"];
+	"node0" [shape="rect",color="black",label=<o = new(-1, -1)<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node1" [shape="rect",color="gray",label=<o = new(0, 0)<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ hid$pp@-1: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [skip]>];
+	"node3" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [true]>];
+	"node4" [shape="rect",color="gray",label=<o = new(1, 1)<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node5" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ hid$pp@-1: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [hid$pp@-1]>];
+	"node6" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [hid$pp@-1] ]]<BR/>value [[ hid$pp@-1: [2, 2]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [hid$pp@-1]>];
+	"node0" -> "node3" [color="black"];
+	"node1" -> "node6" [color="black"];
+	"node3" -> "node1" [color="blue",style="dashed"];
+	"node3" -> "node4" [color="red",style="dashed"];
+	"node4" -> "node6" [color="black"];
+	"node5" -> "node2" [color="black"];
+	"node6" -> "node5" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

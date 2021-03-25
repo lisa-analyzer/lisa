@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.Collections;
@@ -16,15 +15,15 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A heap domain tracking sets of {@link HeapIdentifier}.
+ * A heap domain tracking sets of {@link AllocationSite}.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class HeapIdentifierSetLattice extends SetLattice<HeapIdentifierSetLattice, AllocationSiteHeapIdentifier>
-		implements Iterable<AllocationSiteHeapIdentifier>, NonRelationalHeapDomain<HeapIdentifierSetLattice> {
+public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
+		implements NonRelationalHeapDomain<AllocationSites> {
 
-	private static final HeapIdentifierSetLattice TOP = new HeapIdentifierSetLattice(new HashSet<>(), true);
-	private static final HeapIdentifierSetLattice BOTTOM = new HeapIdentifierSetLattice(new HashSet<>(), false);
+	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
+	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
 
 	private final boolean isTop;
 
@@ -32,11 +31,11 @@ public class HeapIdentifierSetLattice extends SetLattice<HeapIdentifierSetLattic
 	 * Builds an instance of HeapIdentiferSetLattice, corresponding to the top
 	 * element.
 	 */
-	public HeapIdentifierSetLattice() {
+	public AllocationSites() {
 		this(new HashSet<>(), true);
 	}
 
-	private HeapIdentifierSetLattice(Set<AllocationSiteHeapIdentifier> set, boolean isTop) {
+	private AllocationSites(Set<AllocationSite> set, boolean isTop) {
 		super(set);
 		this.isTop = isTop;
 	}
@@ -52,34 +51,34 @@ public class HeapIdentifierSetLattice extends SetLattice<HeapIdentifierSetLattic
 	}
 
 	@Override
-	public HeapIdentifierSetLattice top() {
+	public AllocationSites top() {
 		return TOP;
 	}
 
 	@Override
-	public HeapIdentifierSetLattice bottom() {
+	public AllocationSites bottom() {
 		return BOTTOM;
 	}
 
 	@Override
-	public HeapIdentifierSetLattice mk(Set<AllocationSiteHeapIdentifier> set) {
-		return new HeapIdentifierSetLattice(set, false);
+	public AllocationSites mk(Set<AllocationSite> set) {
+		return new AllocationSites(set, false);
 	}
 
 	@Override
-	public Iterator<AllocationSiteHeapIdentifier> iterator() {
+	public Iterator<AllocationSite> iterator() {
 		return this.elements.iterator();
 	}
 
 	@Override
-	public HeapIdentifierSetLattice eval(SymbolicExpression expression,
-			HeapEnvironment<HeapIdentifierSetLattice> environment, ProgramPoint pp) {
-		return new HeapIdentifierSetLattice(Collections.singleton((AllocationSiteHeapIdentifier) expression), false);
+	public AllocationSites eval(SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
+		return new AllocationSites(Collections.singleton((AllocationSite) expression), false);
 	}
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression,
-			HeapEnvironment<HeapIdentifierSetLattice> environment, ProgramPoint pp) {
+			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 

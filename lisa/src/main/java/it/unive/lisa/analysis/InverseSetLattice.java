@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.util.collections.Utils;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -22,7 +23,8 @@ import java.util.TreeSet;
  * @param <S> the concrete instance of {@link InverseSetLattice}
  * @param <E> the type of elements of the domain of this lattice
  */
-public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> extends BaseLattice<S> {
+public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> extends BaseLattice<S>
+		implements Iterable<E> {
 
 	/**
 	 * The set of elements contained in the lattice.
@@ -65,6 +67,11 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	}
 
 	@Override
+	public Iterator<E> iterator() {
+		return elements.iterator();
+	}
+
+	@Override
 	protected final boolean lessOrEqualAux(S other) throws SemanticException {
 		return elements.containsAll(other.elements);
 	}
@@ -75,6 +82,18 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 		int result = 1;
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
 		return result;
+	}
+
+	/**
+	 * Checks whether an element is contained in this set.
+	 * 
+	 * @param elem the element
+	 * 
+	 * @return {@code true} if the element is contained in this set,
+	 *             {@code false} otherwise.
+	 */
+	public boolean contains(E elem) {
+		return elements.contains(elem);
 	}
 
 	@Override

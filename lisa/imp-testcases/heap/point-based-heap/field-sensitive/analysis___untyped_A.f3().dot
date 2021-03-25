@@ -1,11 +1,11 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<o = new(-1, -1)<BR/>{{<BR/>heap [[ [pp@19404] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
-	"node1" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [pp@-1536, pp@86857] ]]<BR/>value [[ pp@-1536[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@86857[vid$a]: [2, 2] ]]<BR/>}} -&gt; [pp@-1536[vid$a], pp@86857[vid$a]]>];
-	"node2" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [pp@19404] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [true]>];
-	"node3" [shape="rect",color="gray",label=<o = new(0, 0)<BR/>{{<BR/>heap [[ [pp@86857] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [pp@-1536, pp@86857] ]]<BR/>value [[ pp@-1536[vid$b]: [3, 3]<BR/>pp@-1536[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@86857[vid$a]: [2, 2]<BR/>pp@86857[vid$b]: [3, 3] ]]<BR/>}} -&gt; [skip]>];
-	"node5" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [pp@-1536, pp@86857] ]]<BR/>value [[ pp@-1536[vid$b]: [3, 3]<BR/>pp@-1536[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@86857[vid$a]: [2, 2]<BR/>pp@86857[vid$b]: [3, 3] ]]<BR/>}} -&gt; [pp@-1536[vid$b], pp@86857[vid$b]]>];
-	"node6" [shape="rect",color="gray",label=<o = new(1, 1)<BR/>{{<BR/>heap [[ [pp@-1536] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node0" [shape="rect",color="black",label=<o = new(-1, -1)<BR/>{{<BR/>heap [[ [pp@1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node1" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [pp@2, pp@3] ]]<BR/>value [[ pp@3[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@2[vid$a]: [2, 2] ]]<BR/>}} -&gt; [pp@3[vid$a], pp@2[vid$a]]>];
+	"node2" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [pp@1] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [true]>];
+	"node3" [shape="rect",color="gray",label=<o = new(0, 0)<BR/>{{<BR/>heap [[ [pp@2] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [pp@2, pp@3] ]]<BR/>value [[ pp@3[vid$b]: [3, 3]<BR/>pp@3[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@2[vid$a]: [2, 2]<BR/>pp@2[vid$b]: [3, 3] ]]<BR/>}} -&gt; [skip]>];
+	"node5" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [pp@2, pp@3] ]]<BR/>value [[ pp@3[vid$b]: [3, 3]<BR/>pp@3[vid$a]: [2, 2]<BR/>vid$o: #TOP#<BR/>pp@2[vid$a]: [2, 2]<BR/>pp@2[vid$b]: [3, 3] ]]<BR/>}} -&gt; [pp@3[vid$b], pp@2[vid$b]]>];
+	"node6" [shape="rect",color="gray",label=<o = new(1, 1)<BR/>{{<BR/>heap [[ [pp@3] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
 	"node1" -> "node5" [color="black"];
 	"node2" -> "node3" [color="blue",style="dashed"];
 	"node2" -> "node6" [color="red",style="dashed"];
