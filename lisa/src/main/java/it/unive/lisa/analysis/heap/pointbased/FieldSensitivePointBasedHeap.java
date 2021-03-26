@@ -52,8 +52,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
-			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics((((AccessChild) expression).getChild()), pp);
-			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics((((AccessChild) expression).getContainer()),
+			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics((((AccessChild) expression).getContainer()), pp);
+			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics((((AccessChild) expression).getChild()),
 					pp);
 
 			Set<ValueExpression> result = new HashSet<>();
