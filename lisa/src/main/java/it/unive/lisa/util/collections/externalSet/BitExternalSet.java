@@ -137,6 +137,18 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 	public ExternalSetCache<T> getCache() {
 		return cache;
 	}
+	
+	private void expand(int targetLength) {
+		long[] localbits = bits;
+		bits = new long[targetLength];
+		System.arraycopy(localbits, 0, bits, 0, localbits.length);
+	}
+
+	private void shrink(int targetLength) {
+		long[] localbits = bits;
+		bits = new long[targetLength];
+		System.arraycopy(localbits, 0, bits, 0, targetLength);
+	}
 
 	@Override
 	public boolean add(T e) {
@@ -147,8 +159,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 		if (bitvector >= localbits.length) {
 			// the array is not long enough for the position
 			// of the element that we are adding
-			bits = new long[1 + bitvector];
-			System.arraycopy(localbits, 0, bits, 0, localbits.length);
+			expand(1 + bitvector);
 			set(bits, pos);
 			return true;
 		} else if (isset(localbits, pos))
@@ -174,10 +185,8 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			long[] localbits = this.bits, otherbits = o.bits;
 			int thislength = localbits.length, otherlength = otherbits.length;
 
-			if (thislength < otherlength) {
-				bits = new long[otherlength];
-				System.arraycopy(localbits, 0, bits, 0, localbits.length);
-			}
+			if (thislength < otherlength) 
+				expand(otherlength);
 
 			for (--otherlength; otherlength >= 0; otherlength--)
 				bits[otherlength] |= otherbits[otherlength];
@@ -241,11 +250,9 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 		while (length > 1 && localbits[length - 1] == 0L)
 			length--;
 
-		if (length != localbits.length) {
+		if (length != localbits.length) 
 			// if we decreased at least once, we can shrink the bits
-			bits = new long[length];
-			System.arraycopy(localbits, 0, bits, 0, length);
-		}
+			shrink(length);
 	}
 
 	@Override
