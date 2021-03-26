@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.impl.types;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,6 +24,7 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.Utils;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
@@ -68,7 +72,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	 * @return the set of types inside this instance
 	 */
 	public ExternalSet<Type> getRuntimeTypes() {
-		return (ExternalSet<Type>) elements;
+		return elements;
 	}
 
 	@Override
@@ -104,17 +108,20 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
 
-		return elements.toString();
+		Set<Type> tmp = new TreeSet<>(
+				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+		tmp.addAll(elements);
+		return tmp.toString();
 	}
 
 	@Override
 	protected InferredTypes evalNullConstant(ProgramPoint pp) {
-		return new InferredTypes(Caches.types().mkSingletonSet(NullType.INSTANCE));
+		return new InferredTypes(NullType.INSTANCE);
 	}
 
 	@Override
 	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new InferredTypes(Caches.types().mkSingletonSet(constant.getDynamicType()));
+		return new InferredTypes(constant.getDynamicType());
 	}
 
 	@Override
@@ -123,7 +130,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		case LOGICAL_NOT:
 			if (arg.elements.noneMatch(Type::isBooleanType))
 				return bottom();
-			return new InferredTypes(arg.elements.filter(Type::isBooleanType));
+			return new InferredTypes(BoolType.INSTANCE);
 		case NUMERIC_NEG:
 			if (arg.elements.noneMatch(Type::isNumericType))
 				return bottom();
@@ -133,9 +140,9 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				return bottom();
 			return new InferredTypes(IntType.INSTANCE);
 		case TYPEOF:
-			return new InferredTypes(new TypeTokenType(arg.elements));
+			return new InferredTypes(new TypeTokenType(arg.elements.copy()));
 		default:
-			return bottom();
+			return top();
 		}
 	}
 
@@ -190,17 +197,16 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		case TYPE_CAST:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
-			set = right.elements.filter(r -> left.elements
-					.anyMatch(l -> r.asTypeTokenType().getTypes().anyMatch(t -> l.canBeAssignedTo(t))));
+			set = cast(left.elements, right.elements);
 			if (set.isEmpty())
 				return bottom();
-			return new InferredTypes(set.multiTransform(t -> t.asTypeTokenType().getTypes()));
+			return new InferredTypes(set);
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
 			return new InferredTypes(BoolType.INSTANCE);
 		default:
-			return bottom();
+			return top();
 		}
 	}
 
@@ -219,7 +225,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				return bottom();
 			return new InferredTypes(StringType.INSTANCE);
 		default:
-			return bottom();
+			return top();
 		}
 	}
 
@@ -279,7 +285,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			if (evalBinaryExpression(BinaryOperator.TYPE_CAST, left, right, pp).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
-			ExternalSet<Type> set = left.elements.filter(l -> right.elements.anyMatch(r -> l.canBeAssignedTo(r)));
+			ExternalSet<Type> set = cast(left.elements, right.elements);
 			if (left.elements.equals(set))
 				// if all the types stayed in 'set' then the there is no
 				// execution that reach the expression with a type that cannot
@@ -346,6 +352,30 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	/**
+	 * Simulates a cast operation, where an expression with possible runtime
+	 * types {@code types} is being cast to one of the possible type tokens in
+	 * {@code tokens}. All types in {@code tokens} that are not
+	 * {@link TypeTokenType}s, according to {@link Type#isTypeTokenType()}, will
+	 * be ignored. The returned set contains a subset of the types in
+	 * {@code types}, keeping only the ones that can be assigned to one of the
+	 * types represented by one of the tokens in {@code tokens}.
+	 * 
+	 * @param types  the types of the expression being casted
+	 * @param tokens the tokens representing the operand of the cast
+	 * 
+	 * @return the set of possible types after the cast
+	 */
+	ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens) {
+		ExternalSet<Type> result = Caches.types().mkEmptySet();
+		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
+			for (Type t : types)
+				if (t.canBeAssignedTo(token))
+					result.add(t);
+
+		return result;
+	}
+
+	/**
 	 * Computes the {@link ExternalSet} of runtime {@link Type}s of a
 	 * {@link SymbolicExpression} over {@link NumericType} expressions. The
 	 * resulting set of types is computed as follows:
@@ -378,7 +408,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	 * 
 	 * @return the set of possible runtime types
 	 */
-	private ExternalSet<Type> commonNumericalType(ExternalSet<Type> left, ExternalSet<Type> right) {
+	ExternalSet<Type> commonNumericalType(ExternalSet<Type> left, ExternalSet<Type> right) {
 		if (left.noneMatch(Type::isNumericType) && right.noneMatch(Type::isNumericType))
 			// if none have numeric types in them,
 			// we cannot really compute the
