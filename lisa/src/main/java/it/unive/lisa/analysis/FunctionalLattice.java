@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +8,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
+
+import it.unive.lisa.util.collections.Utils;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -72,6 +76,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the set of keys
 	 */
 	public final Set<K> getKeys() {
+		if (function == null)
+			return Collections.emptySet();
 		return function.keySet();
 	}
 
@@ -174,7 +180,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
 
-		return function.toString();
+		Collection<String> res = new TreeSet<String>(
+				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+		for (K id : function.keySet())
+			res.add(function.get(id).toString());
+
+		return res.toString();
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,9 +43,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			HeapEnvironment<AllocationSites> allocationSites, ExternalSet<Long> usedIds) {
 		super(rewritten, allocationSites, usedIds);
 	}
+
+	@Override
+	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
+		return new FieldSensitivePointBasedHeap(original.getRewrittenExpressions(), original.heapEnv, original.usedIds);
+	}
 	
 	@Override
-	protected FieldSensitivePointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics((((AccessChild) expression).getChild()), pp);
 			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics((((AccessChild) expression).getContainer()),
@@ -64,6 +68,6 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			return new FieldSensitivePointBasedHeap(result, childState.heapEnv, childState.usedIds);
 		}
 
-		return (FieldSensitivePointBasedHeap) super.semanticsOf(expression, pp);
+		return super.semanticsOf(expression, pp);
 	}
 }
