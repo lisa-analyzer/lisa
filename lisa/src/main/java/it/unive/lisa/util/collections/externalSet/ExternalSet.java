@@ -3,8 +3,10 @@ package it.unive.lisa.util.collections.externalSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -34,7 +36,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @param other the other set
 	 */
-	public default void addAll(ExternalSet<T> other) {
+	default void addAll(ExternalSet<T> other) {
 		if (this == other)
 			return;
 		if (other == null)
@@ -53,7 +55,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the collected elements
 	 */
-	public default Collection<T> collect() {
+	default Collection<T> collect() {
 		List<T> list = new ArrayList<>();
 		for (T e : this)
 			list.add(e);
@@ -78,7 +80,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * @return {@code true} if and only if {@code other} is included into this
 	 *             set
 	 */
-	public default boolean contains(ExternalSet<T> other) {
+	default boolean contains(ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -100,7 +102,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return true if and only if this set intersects the other
 	 */
-	public default boolean intersects(ExternalSet<T> other) {
+	default boolean intersects(ExternalSet<T> other) {
 		if (this == other)
 			return true;
 		if (other == null)
@@ -123,7 +125,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the intersection of the two sets
 	 */
-	public default ExternalSet<T> intersection(ExternalSet<T> other) {
+	default ExternalSet<T> intersection(ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -148,7 +150,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * @return a set obtained from this by removing the elements in
 	 *             {@code other}
 	 */
-	public default ExternalSet<T> difference(ExternalSet<T> other) {
+	default ExternalSet<T> difference(ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -172,7 +174,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the union of this set and {@code other}
 	 */
-	public default ExternalSet<T> union(ExternalSet<T> other) {
+	default ExternalSet<T> union(ExternalSet<T> other) {
 		if (this == other)
 			return this;
 		if (other == null)
@@ -195,7 +197,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	public default boolean anyMatch(Predicate<T> predicate) {
+	default boolean anyMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return true;
@@ -211,7 +213,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	public default boolean noneMatch(Predicate<T> predicate) {
+	default boolean noneMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (predicate.test(t))
 				return false;
@@ -227,7 +229,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return {@code true} iff that condition holds, {@code false} otherwise
 	 */
-	public default boolean allMatch(Predicate<T> predicate) {
+	default boolean allMatch(Predicate<T> predicate) {
 		for (T t : this)
 			if (!predicate.test(t))
 				return false;
@@ -243,7 +245,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return a new external set filtered by {@code predicate}
 	 */
-	public default ExternalSet<T> filter(Predicate<T> predicate) {
+	default ExternalSet<T> filter(Predicate<T> predicate) {
 		ExternalSet<T> result = copy();
 		for (T t : this)
 			if (!predicate.test(t))
@@ -262,10 +264,43 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the reduced element
 	 */
-	public default T reduce(T base, BiFunction<T, T, T> reducer) {
+	default T reduce(T base, BiFunction<T, T, T> reducer) {
 		T result = base;
 		for (T t : this)
 			result = reducer.apply(result, t);
+		return result;
+	}
+
+	/**
+	 * Transforms this set into another set where each element is obtained by
+	 * transforming elements of this set.
+	 * 
+	 * @param transformer the function that transforms single elements of this
+	 *                        set
+	 * 
+	 * @return the transformed set
+	 */
+	default ExternalSet<T> transform(Function<T, T> transformer) {
+		ExternalSet<T> result = getCache().mkEmptySet();
+		for (T t : this)
+			result.add(transformer.apply(t));
+		return result;
+	}
+
+	/**
+	 * Transforms this set into another set where each element is obtained by
+	 * transforming elements of this set. Note that each element of this set can
+	 * be transformed into multiple elements.
+	 * 
+	 * @param transformer the function that transforms single elements of this
+	 *                        set
+	 * 
+	 * @return the transformed set
+	 */
+	default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
+		ExternalSet<T> result = getCache().mkEmptySet();
+		for (T t : this)
+			result.addAll(transformer.apply(t));
 		return result;
 	}
 
@@ -274,11 +309,11 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the first element
 	 * 
-	 * @throws IllegalStateException if this set is empty
+	 * @throws NoSuchElementException if this set is empty
 	 */
-	public default T first() {
+	default T first() {
 		if (isEmpty())
-			throw new IllegalStateException("Cannot get first element from an empty set");
+			throw new NoSuchElementException();
 		return iterator().next();
 	}
 }
