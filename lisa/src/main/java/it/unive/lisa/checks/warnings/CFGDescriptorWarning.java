@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class CFGDesccriptorWarning extends WarningWithLocation {
+public final class CFGDescriptorWarning extends WarningWithLocation {
 
 	/**
 	 * The descriptor where this warning was reported on
@@ -22,7 +22,7 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 	 * @param descriptor the descriptor where this warning was reported on
 	 * @param message    the message of this warning
 	 */
-	public CFGDesccriptorWarning(CFGDescriptor descriptor, String message) {
+	public CFGDescriptorWarning(CFGDescriptor descriptor, String message) {
 		super(descriptor.getSourceFile(), descriptor.getLine(), descriptor.getCol(), message);
 		this.descriptor = descriptor;
 	}
@@ -32,16 +32,16 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 	 * 
 	 * @return the column, or {@code -1}
 	 */
-	public final CFGDescriptor getDescriptor() {
+	public CFGDescriptor getDescriptor() {
 		return descriptor;
 	}
 
 	@Override
 	public int compareTo(Warning o) {
-		if (!(o instanceof CFGDesccriptorWarning))
+		if (!(o instanceof CFGDescriptorWarning))
 			return super.compareTo(o);
 
-		CFGDesccriptorWarning other = (CFGDesccriptorWarning) o;
+		CFGDescriptorWarning other = (CFGDescriptorWarning) o;
 		int cmp;
 
 		if ((cmp = StringUtils.compare(descriptor.toString(), other.descriptor.toString())) != 0)
@@ -66,7 +66,7 @@ public final class CFGDesccriptorWarning extends WarningWithLocation {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGDesccriptorWarning other = (CFGDesccriptorWarning) obj;
+		CFGDescriptorWarning other = (CFGDescriptorWarning) obj;
 		if (descriptor == null) {
 			if (other.descriptor != null)
 				return false;
