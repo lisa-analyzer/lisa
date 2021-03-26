@@ -3,9 +3,9 @@ package it.unive.lisa.util.collections.externalSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 /**
  * A cache for creating {@link ExternalSet}s of the elements contained in this
@@ -25,7 +25,7 @@ public class ExternalSetCache<T> {
 	/**
 	 * A map from the elements to their index
 	 */
-	private final ConcurrentMap<T, Integer> indexes = new ConcurrentHashMap<>(16);
+	private final Map<T, Integer> indexes = new HashMap<>(16);
 
 	/**
 	 * The next index available for new elements
@@ -87,7 +87,7 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}, or {@code -1}
 	 */
-	protected final int indexOf(T e) {
+	protected synchronized final int indexOf(T e) {
 		if (e == null)
 			return indexOfNull;
 
@@ -103,24 +103,21 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}
 	 */
-	protected final int indexOfOrAdd(T e) {
-		if (e == null)
-			synchronized (this) {
-				if (indexOfNull == -1) {
-					elements.add(null);
-					indexOfNull = nextIndex++;
-				}
-				return indexOfNull;
+	protected synchronized final int indexOfOrAdd(T e) {
+		if (e == null) {
+			if (indexOfNull == -1) {
+				elements.add(null);
+				indexOfNull = nextIndex++;
 			}
+			return indexOfNull;
+		}
 
 		Integer result = indexes.get(e);
 		if (result == null)
-			synchronized (this) {
-				return indexes.computeIfAbsent(e, el -> {
-					elements.add(e);
-					return nextIndex++;
-				});
-			}
+			return indexes.computeIfAbsent(e, el -> {
+				elements.add(e);
+				return nextIndex++;
+			});
 
 		return result;
 	}
