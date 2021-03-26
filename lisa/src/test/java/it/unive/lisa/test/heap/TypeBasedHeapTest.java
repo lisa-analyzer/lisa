@@ -13,7 +13,7 @@ public class TypeBasedHeapTest extends AnalysisTest {
 
 	@Test
 	public void testTypeBasedHeap() throws AnalysisSetupException {
-		perform("heap/type-based-heap", "program.imp", false, false,
+		perform("heap/type-based-heap", "program.imp", true, false,
 				getDefaultFor(AbstractState.class, new TypeBasedHeap(), new Interval()));
 	}
 }

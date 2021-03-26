@@ -84,7 +84,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		this.heapEnv = heapEnv;
 		this.usedIds = usedIds;
 	}
-	
+
 	protected PointBasedHeap from(PointBasedHeap original) {
 		return original;
 	}
@@ -115,7 +115,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				set.add(l);
 
 			Set<AllocationSite> s = new HashSet<>(set);
-			for (Entry<Identifier, AllocationSites> sites : heapEnv) 
+			for (Entry<Identifier, AllocationSites> sites : heapEnv)
 				for (AllocationSite l : set)
 					if (sites.getValue().contains(l))
 						s.remove(l);
@@ -141,10 +141,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	public String representation() {
 		if (isTop())
 			return Lattice.TOP_STRING;
-		
+
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
-		
+
 		Collection<String> res = new TreeSet<String>(
 				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
 		for (Identifier id : heapEnv.getKeys())
@@ -158,7 +158,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	public PointBasedHeap top() {
 		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.top(), idsCache.mkEmptySet()));
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return rewritten.isEmpty() && usedIds.isEmpty() && heapEnv.isTop();
@@ -168,7 +168,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	public PointBasedHeap bottom() {
 		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.bottom(), idsCache.mkEmptySet()));
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return rewritten.isEmpty() && usedIds.isEmpty() && heapEnv.isBottom();
@@ -240,19 +240,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
-			PointBasedHeap childState = smallStepSemantics((((AccessChild) expression).getChild()), pp);
-			PointBasedHeap containerState = childState.smallStepSemantics((((AccessChild) expression).getContainer()),
+			PointBasedHeap containerState = smallStepSemantics((((AccessChild) expression).getContainer()), pp);
+			PointBasedHeap childState = containerState.smallStepSemantics((((AccessChild) expression).getChild()),
 					pp);
 
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
-				AllocationSites expHids = containerState.heapEnv.getState((Identifier) exp);
+				AllocationSites expHids = childState.heapEnv.getState((Identifier) exp);
 				if (!(expHids.isBottom()))
 					for (AllocationSite hid : expHids)
 						result.add(new AllocationSite(expression.getTypes(), hid.getId()));
 			}
 
-			return from(new PointBasedHeap(result, containerState.heapEnv, usedIds));
+			return from(new PointBasedHeap(result, childState.heapEnv, usedIds));
 		}
 
 		if (expression instanceof HeapAllocation) {
