@@ -1,14 +1,18 @@
 package it.unive.lisa.analysis.dataflow.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
 
+/**
+ * An implementation of the reaching definition dataflow analysis.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ReachingDefinitions
 		implements DataflowElement<PossibleForwardDataflowDomain<ReachingDefinitions>, ReachingDefinitions> {
 
@@ -16,6 +20,9 @@ public class ReachingDefinitions
 
 	private final ProgramPoint programPoint;
 
+	/**
+	 * Builds an empty reaching definition object.
+	 */
 	public ReachingDefinitions() {
 		this(null, null);
 	}

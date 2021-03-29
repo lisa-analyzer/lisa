@@ -106,7 +106,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return top();
-		
+
 		switch (operator) {
 		case NUMERIC_ADD:
 		case NUMERIC_SUB:

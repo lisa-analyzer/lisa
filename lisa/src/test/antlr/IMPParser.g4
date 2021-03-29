@@ -5,335 +5,247 @@
  */
 parser grammar IMPParser;
 
- @header {
+@ header
+{
     package it.unive.lisa.test.antlr;
 }
 
- options {
- 	tokenVocab = IMPLexer;
- }
- /*
+options { tokenVocab = IMPLexer; }
+/*
  * GENERAL TOKENS
  */
- arraySqDeclaration
- :
- 	(
- 		LBRACK RBRACK
- 	)+
- ;
- /*
+
+
+arraySqDeclaration
+   : (LBRACK RBRACK)+
+   ;
+/*
  * TYPES
  */
- primitiveType
- :
- 	BOOLEAN
- 	| INT
- 	| FLOAT
- 	| STRING
- ;
- /*
+   
+   
+primitiveType
+   : BOOLEAN
+   | INT
+   | FLOAT
+   | STRING
+   ;
+/*
  * PARAMETER LIST
  */
- formals
- :
- 	LPAREN
- 	(
- 		formal
- 		(
- 			COMMA formal
- 		)*
- 	)? RPAREN
- ;
+   
+   
+formals
+   : LPAREN (formal (COMMA formal)*)? RPAREN
+   ;
 
- formal
- :
- 	name = IDENTIFIER
- ;
- /*
+formal
+   : name = IDENTIFIER
+   ;
+/*
  * LITERALS
  */
- literal
- :
- 	SUB? LITERAL_DECIMAL
- 	| SUB? LITERAL_FLOAT
- 	| LITERAL_STRING
- 	| LITERAL_BOOL
- 	| LITERAL_NULL
- ;
- /*
+   
+   
+literal
+   : SUB? LITERAL_DECIMAL
+   | SUB? LITERAL_FLOAT
+   | LITERAL_STRING
+   | LITERAL_BOOL
+   | LITERAL_NULL
+   ;
+/*
  * CALL PARAMETERS
  */
- arguments
- :
- 	LPAREN
- 	(
- 		arg
- 		(
- 			COMMA arg
- 		)*
- 	)? RPAREN
- ;
+   
+   
+arguments
+   : LPAREN (arg (COMMA arg)*)? RPAREN
+   ;
 
- arg
- :
- 	literal
- 	| IDENTIFIER
- 	| THIS
- 	| fieldAccess
- 	| arrayAccess
- 	| methodCall
- ;
- /*
+arg
+   : literal
+   | IDENTIFIER
+   | THIS
+   | fieldAccess
+   | arrayAccess
+   | methodCall
+   ;
+/*
  * EXPRESSIONS
  */
- expression
- :
- 	LPAREN paren = expression RPAREN
- 	| basicExpr
- 	| NOT nested = expression
- 	| left = expression
- 	(
- 		MUL
- 		| DIV
- 		| MOD
- 	) right = expression
- 	| left = expression
- 	(
- 		ADD
- 		| SUB
- 	) right = expression
- 	| left = expression
- 	(
- 		GT
- 		| GE
- 		| LT
- 		| LE
- 	) right = expression
- 	| left = expression
- 	(
- 		EQUAL
- 		| NOTEQUAL
- 	) right = expression
- 	| left = expression
- 	(
- 		AND
- 		| OR
- 	) right = expression
- 	| SUB nested = expression
- 	| NEW
- 	(
- 		newBasicArrayExpr
- 		| newReferenceType
- 	)
- 	| arrayAccess
- 	| fieldAccess
- 	| methodCall
- 	| assignment
- 	| stringExpr
- ;
+   
+   
+expression
+   : LPAREN paren = expression RPAREN
+   | basicExpr
+   | NOT nested = expression
+   | left = expression (MUL | DIV | MOD) right = expression
+   | left = expression (ADD | SUB) right = expression
+   | left = expression (GT | GE | LT | LE) right = expression
+   | left = expression (EQUAL | NOTEQUAL) right = expression
+   | left = expression (AND | OR) right = expression
+   | SUB nested = expression
+   | NEW (newBasicArrayExpr | newReferenceType)
+   | arrayAccess
+   | fieldAccess
+   | methodCall
+   | assignment
+   | stringExpr
+   ;
 
- basicExpr
- :
- 	THIS
- 	| SUPER
- 	| IDENTIFIER
- 	| literal
- ;
+basicExpr
+   : THIS
+   | SUPER
+   | IDENTIFIER
+   | literal
+   ;
 
- newBasicArrayExpr
- :
- 	primitiveType arrayCreatorRest
- ;
+newBasicArrayExpr
+   : primitiveType arrayCreatorRest
+   ;
 
- newReferenceType
- :
- 	IDENTIFIER
- 	(
- 		arguments
- 		| arrayCreatorRest
- 	)
- ;
+newReferenceType
+   : IDENTIFIER (arguments | arrayCreatorRest)
+   ;
 
- arrayCreatorRest
- :
- 	(
- 		LBRACK index RBRACK
- 	)+
- ;
+arrayCreatorRest
+   : (LBRACK index RBRACK)+
+   ;
 
- receiver
- :
- 	THIS
- 	| SUPER
- 	| IDENTIFIER
- ;
+receiver
+   : THIS
+   | SUPER
+   | IDENTIFIER
+   ;
 
- arrayAccess
- :
- 	receiver
- 	(
- 		LBRACK index RBRACK
- 	)+
- ;
+arrayAccess
+   : receiver (LBRACK index RBRACK)+
+   ;
 
- index
- :
- 	LITERAL_DECIMAL
- 	| IDENTIFIER
- ;
+index
+   : LITERAL_DECIMAL
+   | IDENTIFIER
+   ;
 
- fieldAccess
- :
- 	receiver DOT name = IDENTIFIER
- ;
+fieldAccess
+   : receiver DOT name = IDENTIFIER
+   ;
 
- methodCall
- :
- 	receiver DOT name = IDENTIFIER arguments
- ;
+methodCall
+   : receiver DOT name = IDENTIFIER arguments
+   ;
 
- stringExpr
- :
- 	unaryStringExpr
- 	| binaryStringExpr
- 	| ternaryStringExpr
- ;
+stringExpr
+   : unaryStringExpr
+   | binaryStringExpr
+   | ternaryStringExpr
+   ;
 
- unaryStringExpr
- :
- 	STRLEN LPAREN op = expression RPAREN
- ;
+unaryStringExpr
+   : STRLEN LPAREN op = expression RPAREN
+   ;
 
- binaryStringExpr
- :
- 	STRCAT LPAREN left = expression COMMA right = expression RPAREN
- 	| STRCONTAINS LPAREN left = expression COMMA right = expression RPAREN
- 	| STRENDS LPAREN left = expression COMMA right = expression RPAREN
- 	| STREQ LPAREN left = expression COMMA right = expression RPAREN
- 	| STRINDEXOF LPAREN left = expression COMMA right = expression RPAREN
- 	| STRSTARTS LPAREN left = expression COMMA right = expression RPAREN
- ;
+binaryStringExpr
+   : STRCAT LPAREN left = expression COMMA right = expression RPAREN
+   | STRCONTAINS LPAREN left = expression COMMA right = expression RPAREN
+   | STRENDS LPAREN left = expression COMMA right = expression RPAREN
+   | STREQ LPAREN left = expression COMMA right = expression RPAREN
+   | STRINDEXOF LPAREN left = expression COMMA right = expression RPAREN
+   | STRSTARTS LPAREN left = expression COMMA right = expression RPAREN
+   ;
 
- ternaryStringExpr
- :
- 	STRREPLACE LPAREN left = expression COMMA middle = expression COMMA right =
- 	expression RPAREN
- 	| STRSUB LPAREN left = expression COMMA middle = expression COMMA right =
- 	expression RPAREN
- ;
-
- /*
+ternaryStringExpr
+   : STRREPLACE LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
+   | STRSUB LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
+   ;
+/*
  * STATEMENT
  */
- statement
- :
- 	localDeclaration SEMI
- 	| ASSERT expression SEMI
- 	| IF condition = parExpr then = blockOrStatement
- 	(
- 		ELSE otherwise = blockOrStatement
- 	)?
- 	| loop
- 	| RETURN expression? SEMI
- 	| THROW expression SEMI
- 	| skip = SEMI
- 	| command = expression SEMI
- ;
+   
+   
+statement
+   : localDeclaration SEMI
+   | ASSERT expression SEMI
+   | IF condition = parExpr then = blockOrStatement (ELSE otherwise = blockOrStatement)?
+   | loop
+   | RETURN expression? SEMI
+   | THROW expression SEMI
+   | skip = SEMI
+   | command = expression SEMI
+   ;
 
- localDeclaration
- :
- 	DEFINE IDENTIFIER ASSIGN expression
- ;
+localDeclaration
+   : DEFINE IDENTIFIER ASSIGN expression
+   ;
 
- assignment
- :
- 	(
- 		IDENTIFIER
- 		| fieldAccess
- 		| arrayAccess
- 	) ASSIGN expression
- ;
+assignment
+   : (IDENTIFIER | fieldAccess | arrayAccess) ASSIGN expression
+   ;
 
- parExpr
- :
- 	LPAREN expression RPAREN
- ;
+parExpr
+   : LPAREN expression RPAREN
+   ;
 
- loop
- :
- 	forLoop
- 	| whileLoop
- ;
+loop
+   : forLoop
+   | whileLoop
+   ;
 
- forLoop
- :
- 	FOR LPAREN forDeclaration RPAREN blockOrStatement
- ;
+forLoop
+   : FOR LPAREN forDeclaration RPAREN blockOrStatement
+   ;
 
- whileLoop
- :
- 	WHILE parExpr blockOrStatement
- ;
+whileLoop
+   : WHILE parExpr blockOrStatement
+   ;
 
- forDeclaration
- :
- 	(
- 		initDecl = localDeclaration
- 		| initExpr = expression
- 	)? SEMI condition = expression? SEMI post = expression?
- ;
- /*
+forDeclaration
+   : (initDecl = localDeclaration | initExpr = expression)? SEMI condition = expression? SEMI post = expression?
+   ;
+/*
  * BLOCK
  */
- block
- :
- 	LBRACE blockOrStatement* RBRACE
- ;
+   
+   
+block
+   : LBRACE blockOrStatement* RBRACE
+   ;
 
- blockOrStatement
- :
- 	block
- 	| statement
- ;
- /*
+blockOrStatement
+   : block
+   | statement
+   ;
+/*
  * CLASS MEMBERS
  */
- memberDeclarations
- :
- 	(
- 		methodDeclaration
- 		| fieldDeclaration
- 		| constructorDeclaration
- 	)*
- ;
+   
+   
+memberDeclarations
+   : (methodDeclaration | fieldDeclaration | constructorDeclaration)*
+   ;
 
- fieldDeclaration
- :
- 	name = IDENTIFIER SEMI
- ;
+fieldDeclaration
+   : name = IDENTIFIER SEMI
+   ;
 
- constructorDeclaration
- :
- 	TILDE name = IDENTIFIER pars = formals code = block
- ;
+constructorDeclaration
+   : TILDE name = IDENTIFIER pars = formals code = block
+   ;
 
- methodDeclaration
- :
- 	FINAL? name = IDENTIFIER pars = formals code = block
- ;
- /*
+methodDeclaration
+   : FINAL? name = IDENTIFIER pars = formals code = block
+   ;
+/*
  * CLASS
  */
- unit
- :
- 	CLASS name = IDENTIFIER
- 	(
- 		EXTENDS superclass = IDENTIFIER
- 	)? LBRACE declarations = memberDeclarations RBRACE
- ;
+   
+   
+unit
+   : CLASS name = IDENTIFIER (EXTENDS superclass = IDENTIFIER)? LBRACE declarations = memberDeclarations RBRACE
+   ;
 
- file
- :
- 	unit*
- ;
+file
+   : unit*
+   ;
 

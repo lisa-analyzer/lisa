@@ -88,10 +88,10 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
 			ProgramPoint pp) {
-		
+
 		if (arg.isTop())
 			return top();
-		
+
 		switch (operator) {
 		case NUMERIC_NEG:
 			return new IntegerConstantPropagation(-value);
@@ -106,10 +106,10 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	protected IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
-		
+
 		if (left.isTop() || right.isTop())
 			return top();
-		
+
 		switch (operator) {
 		case NUMERIC_ADD:
 			return new IntegerConstantPropagation(left.value + right.value);

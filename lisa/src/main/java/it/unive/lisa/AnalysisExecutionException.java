@@ -3,8 +3,9 @@ package it.unive.lisa;
 /**
  * A generic {@link RuntimeException} that indicates that something has gone
  * wrong during the analysis. Instances of this exception will be catched at the
- * root of the analysis execution in {@link LiSA#run(it.unive.lisa.program.Program)}, and will be converted
- * to an {@link AnalysisException}.
+ * root of the analysis execution in
+ * {@link LiSA#run(it.unive.lisa.program.Program)}, and will be converted to an
+ * {@link AnalysisException}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

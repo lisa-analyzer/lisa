@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -15,6 +9,10 @@ import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a

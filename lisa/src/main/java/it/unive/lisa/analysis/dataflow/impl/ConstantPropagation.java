@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.dataflow.impl;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -13,17 +9,30 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ConstantPropagation implements DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
+/**
+ * An implementation of the constant propagation dataflow analysis, that focuses
+ * only on integers.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class ConstantPropagation
+		implements DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
 
 	private final Identifier id;
 	private final Integer v;
 
+	/**
+	 * Builds an empty constant propagation object.
+	 */
 	public ConstantPropagation() {
 		this(null, null);
 	}
 
-	public ConstantPropagation(Identifier id, Integer v) {
+	private ConstantPropagation(Identifier id, Integer v) {
 		this.id = id;
 		this.v = v;
 	}
@@ -46,10 +55,10 @@ public class ConstantPropagation implements DataflowElement<DefiniteForwardDataf
 		}
 
 		if (e instanceof Identifier) {
-			for (ConstantPropagation cp : domain.getDataflowElements()) 
+			for (ConstantPropagation cp : domain.getDataflowElements())
 				if (cp.getIdentifier().equals(e))
 					return cp.v;
-			
+
 			return null;
 		}
 
@@ -60,7 +69,7 @@ public class ConstantPropagation implements DataflowElement<DefiniteForwardDataf
 			if (i == null)
 				return i;
 
-			switch(unary.getOperator()) {
+			switch (unary.getOperator()) {
 			case NUMERIC_NEG:
 				return -i;
 			default:
@@ -76,13 +85,13 @@ public class ConstantPropagation implements DataflowElement<DefiniteForwardDataf
 			if (right == null || left == null)
 				return null;
 
-			switch(binary.getOperator()) {
+			switch (binary.getOperator()) {
 			case NUMERIC_ADD:
 				return left + right;
 			case NUMERIC_DIV:
 				return left == 0 ? null : (int) left / right;
 			case NUMERIC_MOD:
-				return right == 0 ? null: left % right;
+				return right == 0 ? null : left % right;
 			case NUMERIC_MUL:
 				return left * right;
 			case NUMERIC_SUB:
@@ -102,7 +111,7 @@ public class ConstantPropagation implements DataflowElement<DefiniteForwardDataf
 		Set<ConstantPropagation> gen = new HashSet<>();
 
 		Integer v = eval(expression, domain);
-		if (v != null) 
+		if (v != null)
 			gen.add(new ConstantPropagation(id, v));
 
 		return gen;
@@ -113,7 +122,7 @@ public class ConstantPropagation implements DataflowElement<DefiniteForwardDataf
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		Set<Identifier> set = new HashSet<>();
 		set.add(id);
-		return set; 
+		return set;
 	}
 
 	@Override

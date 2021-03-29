@@ -1,8 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.value.ValueDomain;
+import java.util.Collection;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A

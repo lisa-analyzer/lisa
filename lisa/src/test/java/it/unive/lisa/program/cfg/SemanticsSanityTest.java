@@ -2,21 +2,6 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -43,6 +28,19 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import org.junit.Before;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 public class SemanticsSanityTest {
 
@@ -57,7 +55,7 @@ public class SemanticsSanityTest {
 
 	@Before
 	public void setup() throws CallGraphConstructionException {
-		Program p =  new Program();
+		Program p = new Program();
 		unit = new CompilationUnit(null, -1, -1, "foo", false);
 		p.addCompilationUnit(unit);
 		cfg = new CFG(new CFGDescriptor(unit, false, "foo"));

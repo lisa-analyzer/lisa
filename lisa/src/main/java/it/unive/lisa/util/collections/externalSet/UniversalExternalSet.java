@@ -104,7 +104,7 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 	public ExternalSetCache<T> getCache() {
 		return cache;
 	}
-	
+
 	/**
 	 * Copying an {@link UniversalExternalSet} yields a {@link BitExternalSet}
 	 * representing a snapshot of the actual state of the cache.<br>
