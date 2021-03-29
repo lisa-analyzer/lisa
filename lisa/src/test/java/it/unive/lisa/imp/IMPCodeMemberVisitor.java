@@ -14,6 +14,15 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import it.unive.lisa.imp.constructs.StringConcat;
+import it.unive.lisa.imp.constructs.StringContains;
+import it.unive.lisa.imp.constructs.StringEndsWith;
+import it.unive.lisa.imp.constructs.StringEquals;
+import it.unive.lisa.imp.constructs.StringIndexOf;
+import it.unive.lisa.imp.constructs.StringLength;
+import it.unive.lisa.imp.constructs.StringReplace;
+import it.unive.lisa.imp.constructs.StringStartsWIth;
+import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAdd;
 import it.unive.lisa.imp.expressions.IMPAnd;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
@@ -57,6 +66,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.NullLiteral;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -69,6 +79,7 @@ import it.unive.lisa.test.antlr.IMPParser.ArrayAccessContext;
 import it.unive.lisa.test.antlr.IMPParser.ArrayCreatorRestContext;
 import it.unive.lisa.test.antlr.IMPParser.AssignmentContext;
 import it.unive.lisa.test.antlr.IMPParser.BasicExprContext;
+import it.unive.lisa.test.antlr.IMPParser.BinaryStringExprContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockOrStatementContext;
 import it.unive.lisa.test.antlr.IMPParser.ExpressionContext;
@@ -87,6 +98,9 @@ import it.unive.lisa.test.antlr.IMPParser.ParExprContext;
 import it.unive.lisa.test.antlr.IMPParser.PrimitiveTypeContext;
 import it.unive.lisa.test.antlr.IMPParser.ReceiverContext;
 import it.unive.lisa.test.antlr.IMPParser.StatementContext;
+import it.unive.lisa.test.antlr.IMPParser.StringExprContext;
+import it.unive.lisa.test.antlr.IMPParser.TernaryStringExprContext;
+import it.unive.lisa.test.antlr.IMPParser.UnaryStringExprContext;
 import it.unive.lisa.test.antlr.IMPParser.WhileLoopContext;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
@@ -218,7 +232,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			first = last = instrumented;
 			matrix.addNode(instrumented);
 		}
-			
+
 		return Pair.of(first, last);
 	}
 
@@ -389,7 +403,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
 		else
-			throw new IMPSyntaxException("Target of the assignment at " + toCodeLocation(expression) + " is neither an identifier, a field access or an array access");
+			throw new IMPSyntaxException("Target of the assignment at " + toCodeLocation(expression)
+					+ " is neither an identifier, a field access or an array access");
 
 		return new Assignment(cfg, file, getLine(ctx), getCol(ctx), target, expression);
 	}
@@ -501,8 +516,73 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitFieldAccess(ctx.fieldAccess());
 		else if (ctx.methodCall() != null)
 			return visitMethodCall(ctx.methodCall());
+		else if (ctx.stringExpr() != null)
+			return visitStringExpr(ctx.stringExpr());
 
 		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
+	}
+
+	@Override
+	public Expression visitStringExpr(StringExprContext ctx) {
+		Expression returned = null;
+		if (ctx.unaryStringExpr() != null)
+			returned = visitUnaryStringExpr(ctx.unaryStringExpr());
+		else if (ctx.binaryStringExpr() != null)
+			returned = visitBinaryStringExpr(ctx.binaryStringExpr());
+		else if (ctx.ternaryStringExpr() != null)
+			returned = visitTernaryStringExpr(ctx.ternaryStringExpr());
+		else
+			throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+		
+		if (returned instanceof PluggableStatement)
+			// These string operations are also native constructs
+			((PluggableStatement) returned).setOriginatingStatement(returned);
+		
+		return returned;
+	}
+
+	@Override
+	public Expression visitUnaryStringExpr(UnaryStringExprContext ctx) {
+		if (ctx.STRLEN() != null)
+			return new StringLength.IMPStringLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
+		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+	}
+
+	@Override
+	public Expression visitBinaryStringExpr(BinaryStringExprContext ctx) {
+		if (ctx.STRCAT() != null)
+			return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.right));
+		else if (ctx.STRCONTAINS() != null)
+			return new StringContains.IMPStringContains(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.right));
+		else if (ctx.STRENDS() != null)
+			return new StringEndsWith.IMPStringEndsWith(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.right));
+		else if (ctx.STREQ() != null)
+			return new StringEquals.IMPStringEquals(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.right));
+		else if (ctx.STRINDEXOF() != null)
+			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.right));
+		else if (ctx.STRSTARTS() != null)
+			return new StringStartsWIth.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
+					visitExpression(ctx.left), visitExpression(ctx.right));
+
+		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+	}
+
+	@Override
+	public Expression visitTernaryStringExpr(TernaryStringExprContext ctx) {
+		if (ctx.STRREPLACE() != null)
+			return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+					visitExpression(ctx.middle), visitExpression(ctx.right));
+		else if (ctx.STRSUB() != null)
+			return new StringSubstring.IMPStringSubstring(cfg, file, getLine(ctx), getCol(ctx),
+					visitExpression(ctx.left),
+					visitExpression(ctx.middle), visitExpression(ctx.right));
+
+		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
 	@Override
