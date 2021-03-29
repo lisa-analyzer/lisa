@@ -1,0 +1,20 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<!=(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: #TOP#<BR/>vid$b: #TOP# ]]<BR/>}} -&gt; [vid$a != vid$b]>];
+	"node1" [shape="rect",color="gray",label=<a = -(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: #TOP#<BR/>vid$b: #TOP# ]]<BR/>}} -&gt; [vid$a]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<return a<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: #TOP#<BR/>vid$b: #TOP#<BR/>vid$ret_value@gcd: #TOP# ]]<BR/>}} -&gt; [vid$ret_value@gcd]>];
+	"node3" [shape="rect",color="gray",label=<&gt;(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: #TOP#<BR/>vid$b: #TOP# ]]<BR/>}} -&gt; [vid$a &gt; vid$b]>];
+	"node4" [shape="rect",color="gray",label=<b = -(b, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: #TOP#<BR/>vid$b: #TOP# ]]<BR/>}} -&gt; [vid$b]>];
+	"node1" -> "node0" [color="black"];
+	"node0" -> "node2" [color="red",style="dashed"];
+	"node0" -> "node3" [color="blue",style="dashed"];
+	"node3" -> "node1" [color="blue",style="dashed"];
+	"node3" -> "node4" [color="red",style="dashed"];
+	"node4" -> "node0" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}
