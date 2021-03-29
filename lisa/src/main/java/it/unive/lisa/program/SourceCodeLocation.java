@@ -1,7 +1,9 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CodeLocation;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A location of an element in the source code represented by the path to the
@@ -41,7 +43,7 @@ public class SourceCodeLocation implements CodeLocation {
 	 *                       source file. If unknown, use {@code -1}
 	 */
 	public SourceCodeLocation(String sourceFile, int line, int col) {
-		this.sourceFile = sourceFile;
+		this.sourceFile = FilenameUtils.separatorsToUnix(sourceFile);
 		this.line = line;
 		this.col = col;
 	}
