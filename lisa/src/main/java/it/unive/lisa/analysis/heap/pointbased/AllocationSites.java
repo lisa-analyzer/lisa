@@ -1,18 +1,19 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.SetLattice;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.

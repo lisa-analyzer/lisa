@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.heap.pointbased;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A heap identifier that track also the numerical identifier of the

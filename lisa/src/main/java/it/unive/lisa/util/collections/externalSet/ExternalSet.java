@@ -305,39 +305,6 @@ public interface ExternalSet<T> extends Set<T> {
 	}
 
 	/**
-	 * Transforms this set into another set where each element is obtained by
-	 * transforming elements of this set.
-	 * 
-	 * @param transformer the function that transforms single elements of this
-	 *                        set
-	 * 
-	 * @return the transformed set
-	 */
-	default ExternalSet<T> transform(Function<T, T> transformer) {
-		ExternalSet<T> result = getCache().mkEmptySet();
-		for (T t : this)
-			result.add(transformer.apply(t));
-		return result;
-	}
-
-	/**
-	 * Transforms this set into another set where each element is obtained by
-	 * transforming elements of this set. Note that each element of this set can
-	 * be transformed into multiple elements.
-	 * 
-	 * @param transformer the function that transforms single elements of this
-	 *                        set
-	 * 
-	 * @return the transformed set
-	 */
-	default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
-		ExternalSet<T> result = getCache().mkEmptySet();
-		for (T t : this)
-			result.addAll(transformer.apply(t));
-		return result;
-	}
-
-	/**
 	 * Yields the first element inside this set.
 	 * 
 	 * @return the first element
