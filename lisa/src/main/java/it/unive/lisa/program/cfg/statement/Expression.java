@@ -29,7 +29,7 @@ public abstract class Expression extends Statement {
 	 * The set of runtime types of this expression, only computed if type
 	 * inference is executed.
 	 */
-	private final ExternalSet<Type> runtimeTypes;
+	private ExternalSet<Type> runtimeTypes;
 
 	/**
 	 * The statement (or expression) that contains this expression.
@@ -76,7 +76,6 @@ public abstract class Expression extends Statement {
 		Objects.requireNonNull(staticType, "The expression type of a CFG cannot be null");
 		this.staticType = staticType;
 		this.metaVariables = new HashSet<>();
-		this.runtimeTypes = Caches.types().mkEmptySet();
 	}
 
 	/**
@@ -95,12 +94,16 @@ public abstract class Expression extends Statement {
 	 *                         have at runtime
 	 */
 	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
-		if (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes))
+		if (runtimeTypes == null)
 			return;
-
-		this.runtimeTypes.clear();
-		if (runtimeTypes != null && !runtimeTypes.isEmpty())
-			this.runtimeTypes.addAll(runtimeTypes);
+		
+		if (this.runtimeTypes != null && (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes)))
+			return;
+		
+		if (this.runtimeTypes != null && runtimeTypes.isEmpty())
+			this.runtimeTypes.clear();
+		else
+			this.runtimeTypes = runtimeTypes.copy();
 	}
 
 	/**
@@ -111,7 +114,7 @@ public abstract class Expression extends Statement {
 	 * @return the set of runtime types
 	 */
 	public final ExternalSet<Type> getRuntimeTypes() {
-		if (runtimeTypes.isEmpty())
+		if (runtimeTypes == null)
 			return Caches.types().mkSet(staticType.allInstances());
 		return runtimeTypes;
 	}
@@ -125,7 +128,7 @@ public abstract class Expression extends Statement {
 	 */
 	public final Type getDynamicType() {
 		ExternalSet<Type> runtimes = getRuntimeTypes();
-		return runtimeTypes.reduce(runtimes.first(), (result, t) -> {
+		return getRuntimeTypes().reduce(runtimes.first(), (result, t) -> {
 			if (result.canBeAssignedTo(t))
 				return t;
 			if (t.canBeAssignedTo(result))

@@ -132,6 +132,13 @@ public class ExternalSetCache<T> {
 	protected final synchronized T get(int pos) {
 		return elements.get(pos);
 	}
+	
+	public final synchronized void clear() {
+		elements.clear();
+		indexes.clear();
+		indexOfNull = -1;
+		nextIndex = 0;
+	}
 
 	/**
 	 * Yields the total number of elements stored in this cache.
