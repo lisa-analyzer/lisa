@@ -4,15 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CFG;
@@ -27,6 +18,13 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Test;
 
 public class InferredTypesTest {
 

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
 public class ExternalSetTest {
@@ -44,7 +43,7 @@ public class ExternalSetTest {
 		assertTrue(copy.contains("foo"));
 		assertFalse(copy.contains(new Object()));
 	}
-	
+
 	@Test
 	public void testCopy() {
 		ExternalSetCache<Object> cache = new ExternalSetCache<Object>();
@@ -66,8 +65,8 @@ public class ExternalSetTest {
 		assertEquals(singleton.size(), 1);
 		assertTrue(singleton.contains("foo"));
 	}
-	
-	@Test 
+
+	@Test
 	public void testMkUniversal() {
 		ExternalSetCache<Object> cache = new ExternalSetCache<Object>();
 		ExternalSet<Object> universal = cache.mkUniversalSet();

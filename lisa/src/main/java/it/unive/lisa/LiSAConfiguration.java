@@ -1,17 +1,21 @@
 package it.unive.lisa;
 
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A holder for the configuration of a {@link LiSA} analysis.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class LiSAConfiguration {
 
 	/**
@@ -64,12 +68,22 @@ public class LiSAConfiguration {
 	 */
 	private String workdir;
 
+	/**
+	 * Builds a new configuration object, with default settings. By default:
+	 * <ul>
+	 * <li>no syntactic check is executed</li>
+	 * <li>no {@link AbstractState} is set for the analysis</li>
+	 * <li>no {@link CallGraph} is set for the analysis</li>
+	 * <li>the workdir is the one where LiSA was executed</li>
+	 * <li>the input program will not be dumped</li>
+	 * <li>no type inference will be run</li>
+	 * <li>the type inference will not be dumped</li>
+	 * <li>the results of the analysis will not be dumped</li>
+	 * <li>the json report will not be dumped</li>
+	 * </ul>
+	 */
 	public LiSAConfiguration() {
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		this.inferTypes = false;
-		this.dumpCFGs = false;
-		this.dumpTypeInference = false;
-		this.dumpAnalysis = false;
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
 	}
 
@@ -239,42 +253,91 @@ public class LiSAConfiguration {
 		return this;
 	}
 
+	/**
+	 * Yields the {@link CallGraph} for the analysis. Might be {@code null} if
+	 * none was set,
+	 * 
+	 * @return the call graph for the analysis
+	 */
 	public CallGraph getCallGraph() {
 		return callGraph;
 	}
 
+	/**
+	 * Yields the {@link AbstractState} for the analysis. Might be {@code null}
+	 * if none was set,
+	 * 
+	 * @return the abstract state for the analysis
+	 */
 	public AbstractState<?, ?, ?> getState() {
 		return state;
 	}
 
-	public void setState(AbstractState<?, ?, ?> state) {
-		this.state = state;
-	}
-
+	/**
+	 * Yields the collection of {@link SyntacticCheck}s that are to be executed
+	 * during the analysis.
+	 * 
+	 * @return the syntactic checks
+	 */
 	public Collection<SyntacticCheck> getSyntacticChecks() {
 		return syntacticChecks;
 	}
 
+	/**
+	 * Yields whether or not type inference should be run.
+	 * 
+	 * @return {@code true} if type inference should be run
+	 */
 	public boolean isInferTypes() {
 		return inferTypes;
 	}
 
+	/**
+	 * Yields whether or not the input program should be dumped in the form of
+	 * dot files representing single {@link CFG}s.
+	 * 
+	 * @return {@code true} if input program should be dumped
+	 */
 	public boolean isDumpCFGs() {
 		return dumpCFGs;
 	}
 
+	/**
+	 * Yields whether or not the results of type inference, if run, should be
+	 * dumped in the form of dot files representing results on single
+	 * {@link CFG}s.
+	 * 
+	 * @return {@code true} if type inference should be dumped
+	 */
 	public boolean isDumpTypeInference() {
 		return dumpTypeInference;
 	}
 
+	/**
+	 * Yields whether or not the results of analysis, if run, should be dumped
+	 * in the form of dot files representing results on single {@link CFG}s.
+	 * 
+	 * @return {@code true} if the analysis should be dumped
+	 */
 	public boolean isDumpAnalysis() {
 		return dumpAnalysis;
 	}
 
+	/**
+	 * Yields whether or not the results a json report file should be dumped at
+	 * the end of the analysis.
+	 * 
+	 * @return {@code true} if the report should be produced
+	 */
 	public boolean isJsonOutput() {
 		return jsonOutput;
 	}
 
+	/**
+	 * Yields the working directory where LiSA will dump all of its outputs.
+	 * 
+	 * @return the working directory
+	 */
 	public String getWorkdir() {
 		return workdir;
 	}

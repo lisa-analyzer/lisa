@@ -51,14 +51,35 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 		return n >> 6;
 	}
 
+	/**
+	 * Sets the bit used to represent the given integer inside the bitvector.
+	 * 
+	 * @param bits the bitvector
+	 * @param n    the integer value whose bit is to be set
+	 */
 	static void set(long[] bits, int n) {
 		bits[bitvector_index(n)] |= bitmask(n);
 	}
 
+	/**
+	 * Unsets the bit used to represent the given integer inside the bitvector.
+	 * 
+	 * @param bits the bitvector
+	 * @param n    the integer value whose bit is to be unset
+	 */
 	static void unset(long[] bits, int n) {
 		bits[bitvector_index(n)] &= ~bitmask(n);
 	}
 
+	/**
+	 * Checks if the bit used to represent the given integer inside the
+	 * bitvector is set.
+	 * 
+	 * @param bits the bitvector
+	 * @param n    the integer value to check
+	 * 
+	 * @return {@code true} iff the corresponding bit is set
+	 */
 	static boolean isset(long[] bits, int n) {
 		return (bits[bitvector_index(n)] & bitmask(n)) != 0L;
 	}
@@ -137,7 +158,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 	public ExternalSetCache<T> getCache() {
 		return cache;
 	}
-	
+
 	private void expand(int targetLength) {
 		long[] localbits = bits;
 		bits = new long[targetLength];
@@ -185,7 +206,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			long[] localbits = this.bits, otherbits = o.bits;
 			int thislength = localbits.length, otherlength = otherbits.length;
 
-			if (thislength < otherlength) 
+			if (thislength < otherlength)
 				expand(otherlength);
 
 			for (--otherlength; otherlength >= 0; otherlength--)
@@ -250,7 +271,7 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 		while (length > 1 && localbits[length - 1] == 0L)
 			length--;
 
-		if (length != localbits.length) 
+		if (length != localbits.length)
 			// if we decreased at least once, we can shrink the bits
 			shrink(length);
 	}

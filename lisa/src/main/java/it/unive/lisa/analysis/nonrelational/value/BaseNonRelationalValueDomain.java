@@ -56,7 +56,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 				T arg = eval((ValueExpression) unary.getExpression(), environment, pp);
 				if (arg.isBottom())
 					return Satisfiability.BOTTOM;
-				
+
 				return satisfiesUnaryExpression(unary.getOperator(), arg, pp);
 			}
 		}
@@ -78,7 +78,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 				T right = eval((ValueExpression) binary.getRight(), environment, pp);
 				if (right.isBottom())
 					return Satisfiability.BOTTOM;
-				
+
 				return satisfiesBinaryExpression(binary.getOperator(), left, right, pp);
 			}
 		}
@@ -93,7 +93,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			T middle = eval((ValueExpression) ternary.getMiddle(), environment, pp);
 			if (middle.isBottom())
 				return Satisfiability.BOTTOM;
-			
+
 			T right = eval((ValueExpression) ternary.getRight(), environment, pp);
 			if (right.isBottom())
 				return Satisfiability.BOTTOM;

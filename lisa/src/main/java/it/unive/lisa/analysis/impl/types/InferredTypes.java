@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.types;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,6 +23,8 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.Utils;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -43,16 +42,27 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	/**
 	 * Builds the inferred types. The object built through this constructor
-	 * represents the top of the lattice.
+	 * represents an empty set of types.
 	 */
 	public InferredTypes() {
 		this(Caches.types().mkEmptySet());
 	}
 
+	/**
+	 * Builds the inferred types, representing only the given {@link Type}.
+	 * 
+	 * @param type the type to be included in the set of inferred types
+	 */
 	InferredTypes(Type type) {
 		this(Caches.types().mkSingletonSet(type));
 	}
 
+	/**
+	 * Builds the inferred types, representing only the given set of
+	 * {@link Type}s.
+	 * 
+	 * @param types the types to be included in the set of inferred types
+	 */
 	InferredTypes(ExternalSet<Type> types) {
 		this.elements = types;
 	}
@@ -197,8 +207,8 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
 		case STRING_SUBSTRING:
-			if (left.elements.noneMatch(Type::isStringType) 
-					|| middle.elements.noneMatch(Type::isNumericType) 
+			if (left.elements.noneMatch(Type::isStringType)
+					|| middle.elements.noneMatch(Type::isNumericType)
 					|| middle.elements.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral())
 					|| right.elements.noneMatch(Type::isNumericType)
 					|| right.elements.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral()))
@@ -376,7 +386,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					result.add(t2);
 				else if (t2.isUntyped())
 					result.add(t1);
-				else 
+				else
 					result.add(t1.commonSupertype(t2));
 
 		return result;

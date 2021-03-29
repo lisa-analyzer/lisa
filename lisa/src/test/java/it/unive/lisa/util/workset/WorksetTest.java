@@ -8,11 +8,10 @@ import static org.junit.Assert.fail;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import org.junit.Test;
 
 public class WorksetTest {
-	
+
 	@SuppressWarnings("unchecked")
 	private static <T> void random(WorkingSet<T> ws, boolean lifo, T... elements) {
 		List<T> list = Arrays.asList(elements);
@@ -38,7 +37,7 @@ public class WorksetTest {
 				assertSame("peek() did not return the top-most element", elements[i], ws.peek());
 			else
 				assertSame("peek() did not return the bottom-most element", elements[0], ws.peek());
-			
+
 			try {
 				ws.toString();
 			} catch (Exception e) {
@@ -46,32 +45,32 @@ public class WorksetTest {
 				fail("toString() raised an exception while pushing elements");
 			}
 		}
-		
+
 		try {
 			ws.toString();
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			fail("toString() raised an exception at full size");
 		}
-		
+
 		int i = 0;
 		while (!ws.isEmpty()) {
 			T peeked = ws.peek();
 			T popped = ws.pop();
-			
+
 			assertSame("pop() did not return the same element of peek()", peeked, popped);
 			if (lifo)
 				assertSame("pop() did not return the top-most element", elements[elements.length - i - 1], popped);
 			else
 				assertSame("pop() did not return the bottom-most element", elements[i], popped);
-			
+
 			try {
 				ws.toString();
 			} catch (Exception e) {
 				e.printStackTrace(System.err);
 				fail("toString() raised an exception while popping elements");
 			}
-			
+
 			i++;
 		}
 	}

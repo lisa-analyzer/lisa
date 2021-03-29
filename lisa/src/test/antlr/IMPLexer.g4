@@ -86,18 +86,43 @@ NEW
 ASSERT
    : 'assert'
    ;
-   
    // =========================== STRING FUNCTIONS =========================== 
-STRCAT : 'strcat';   
-STRCONTAINS : 'strcon';   
-STRENDS : 'strends';   
-STREQ : 'streq';   
-STRINDEXOF : 'strindex';   
-STRLEN : 'strlen';   
-STRREPLACE : 'strrep';   
-STRSTARTS : 'strstarts';   
-STRSUB : 'strsub';     
    
+STRCAT
+   : 'strcat'
+   ;
+
+STRCONTAINS
+   : 'strcon'
+   ;
+
+STRENDS
+   : 'strends'
+   ;
+
+STREQ
+   : 'streq'
+   ;
+
+STRINDEXOF
+   : 'strindex'
+   ;
+
+STRLEN
+   : 'strlen'
+   ;
+
+STRREPLACE
+   : 'strrep'
+   ;
+
+STRSTARTS
+   : 'strstarts'
+   ;
+
+STRSUB
+   : 'strsub'
+   ;
    // =========================== LITERALS ===========================  
    
 LITERAL_DECIMAL

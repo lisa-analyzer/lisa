@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.dataflow.impl;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -12,18 +9,29 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.HashSet;
 
+/**
+ * An implementation of the available expressions dataflow analysis, that
+ * focuses only on the expressions that are stored into some variable.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class AvailableExpressions
 		implements DataflowElement<DefiniteForwardDataflowDomain<AvailableExpressions>, AvailableExpressions> {
 
 	private final Identifier id;
 	private final ValueExpression expression;
 
+	/**
+	 * Builds an empty available expressions object.
+	 */
 	public AvailableExpressions() {
 		this(null, null);
 	}
 
-	public AvailableExpressions(Identifier id, ValueExpression expression) {
+	private AvailableExpressions(Identifier id, ValueExpression expression) {
 		this.id = id;
 		this.expression = expression;
 	}

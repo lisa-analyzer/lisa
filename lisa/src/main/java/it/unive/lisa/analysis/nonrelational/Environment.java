@@ -8,12 +8,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
 import org.apache.commons.lang3.StringUtils;
-
-import java.util.Map.Entry;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -189,7 +187,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		SortedSet<String> res = new TreeSet<>();
 		for (Entry<Identifier, T> entry : function.entrySet())
 			res.add(entry.getKey() + ": " + entry.getValue().representation());
-		
+
 		return StringUtils.join(res, '\n');
 	}
 }

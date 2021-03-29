@@ -22,6 +22,13 @@ public class FileManager {
 
 	private final Collection<String> createdFiles = new TreeSet<>();
 
+	/**
+	 * Builds a new manager that will produce files in the given
+	 * {@code workdir}.
+	 * 
+	 * @param workdir the path to the directory where files will be created by
+	 *                    this manager
+	 */
 	public FileManager(String workdir) {
 		this.workdir = Paths.get(workdir).toFile();
 	}
