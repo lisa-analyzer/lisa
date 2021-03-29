@@ -51,11 +51,11 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		this(Caches.types().mkUniversalSet(), true, false);
 	}
 
-	private InferredTypes(Type type) {
+	InferredTypes(Type type) {
 		this(Caches.types().mkSingletonSet(type), false, false);
 	}
 
-	private InferredTypes(ExternalSet<Type> types) {
+	InferredTypes(ExternalSet<Type> types) {
 		this(types, false, false);
 	}
 
@@ -215,8 +215,11 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
 		case STRING_SUBSTRING:
-			if (left.elements.noneMatch(Type::isStringType) || middle.elements.noneMatch(Type::isNumericType)
-					|| right.elements.noneMatch(Type::isNumericType))
+			if (left.elements.noneMatch(Type::isStringType) 
+					|| middle.elements.noneMatch(Type::isNumericType) 
+					|| middle.elements.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral())
+					|| right.elements.noneMatch(Type::isNumericType)
+					|| right.elements.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral()))
 				return bottom();
 			return new InferredTypes(StringType.INSTANCE);
 		case STRING_REPLACE:
@@ -418,19 +421,13 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		for (Type t1 : left.filter(type -> type.isNumericType() || type.isUntyped()))
 			for (Type t2 : right.filter(type -> type.isNumericType() || type.isUntyped()))
 				if (t1.isUntyped() && t2.isUntyped())
-					// we do not really consider this case,
-					// it will fall back into the last corner case before return
-					continue;
+					result.add(t1);
 				else if (t1.isUntyped())
 					result.add(t2);
 				else if (t2.isUntyped())
 					result.add(t1);
-				else if (t1.canBeAssignedTo(t2))
-					result.add(t2);
-				else if (t2.canBeAssignedTo(t1))
-					result.add(t1);
-				else
-					return Caches.types().mkEmptySet();
+				else 
+					result.add(t1.commonSupertype(t2));
 
 		return result;
 	}

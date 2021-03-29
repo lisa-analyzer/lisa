@@ -51,13 +51,21 @@ public class FloatType implements NumericType {
 	}
 
 	@Override
+	public boolean isIntegral() {
+		return false;
+	}
+
+	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return other == this || other.isUntyped();
+		return other.isNumericType() || other.isUntyped();
 	}
 
 	@Override
 	public Type commonSupertype(Type other) {
-		return other == this ? this : Untyped.INSTANCE;
+		if (!other.isNumericType())
+			return Untyped.INSTANCE;
+
+		return this;
 	}
 
 	@Override
@@ -67,7 +75,8 @@ public class FloatType implements NumericType {
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof NumericType && ((NumericType) other).is64Bits();
+		return other instanceof NumericType && ((NumericType) other).is64Bits() && !((NumericType) other).isIntegral()
+				&& !((NumericType) other).isUnsigned();
 	}
 
 	@Override

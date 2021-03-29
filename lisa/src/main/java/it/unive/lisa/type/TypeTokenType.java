@@ -34,7 +34,7 @@ public class TypeTokenType implements Type {
 
 	@Override
 	public String toString() {
-		return types.toString();
+		return "token::" + types.toString();
 	}
 
 	@Override
