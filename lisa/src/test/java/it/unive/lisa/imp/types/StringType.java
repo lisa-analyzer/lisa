@@ -40,12 +40,12 @@ public class StringType implements it.unive.lisa.type.StringType {
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof it.unive.lisa.symbolic.types.StringType;
+		return other instanceof it.unive.lisa.type.StringType;
 	}
 
 	@Override
 	public int hashCode() {
-		return it.unive.lisa.symbolic.types.StringType.class.getName().hashCode();
+		return it.unive.lisa.type.StringType.class.getName().hashCode();
 	}
 
 	@Override

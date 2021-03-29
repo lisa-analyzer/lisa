@@ -1,4 +1,4 @@
-package it.unive.lisa.symbolic.types;
+package it.unive.lisa.analysis.impl.types;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
@@ -6,20 +6,11 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 
-/**
- * An internal implementation of the {@link NumericType} interface that can be
- * used by domains that need a concrete instance for integer values.
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- */
-public class IntType implements NumericType {
+public class FloatType implements NumericType {
 
-	/**
-	 * The singleton instance of this class.
-	 */
-	public static final IntType INSTANCE = new IntType();
+	public static final FloatType INSTANCE = new FloatType();
 
-	private IntType() {
+	private FloatType() {
 	}
 
 	@Override
@@ -36,26 +27,23 @@ public class IntType implements NumericType {
 		if (o.is64Bits())
 			return o;
 
-		if (!o.isIntegral())
-			return o;
-
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		return "int";
+		return "float";
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof NumericType && ((NumericType) other).is32Bits() && ((NumericType) other).isIntegral()
+		return other instanceof NumericType && ((NumericType) other).is32Bits() && !((NumericType) other).isIntegral()
 				&& !((NumericType) other).isUnsigned();
 	}
 
 	@Override
 	public int hashCode() {
-		return IntType.class.getName().hashCode();
+		return FloatType.class.getName().hashCode();
 	}
 
 	@Override
@@ -85,7 +73,7 @@ public class IntType implements NumericType {
 
 	@Override
 	public boolean isIntegral() {
-		return true;
+		return false;
 	}
 
 	@Override

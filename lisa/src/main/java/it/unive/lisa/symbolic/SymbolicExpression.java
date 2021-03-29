@@ -42,13 +42,7 @@ public abstract class SymbolicExpression {
 	 * @return the dynamic type of this expression
 	 */
 	public final Type getDynamicType() {
-		return types.reduce(types.first(), (result, t) -> {
-			if (result.canBeAssignedTo(t))
-				return t;
-			if (t.canBeAssignedTo(result))
-				return result;
-			return t.commonSupertype(result);
-		});
+		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
 
 	@Override
