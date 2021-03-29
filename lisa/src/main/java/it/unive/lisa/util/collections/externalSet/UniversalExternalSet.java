@@ -105,8 +105,14 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 		return cache;
 	}
 	
+	/**
+	 * Copying an {@link UniversalExternalSet} yields a {@link BitExternalSet}
+	 * representing a snapshot of the actual state of the cache.<br>
+	 * <br>
+	 * {@inheritDoc}
+	 */
 	@Override
 	public ExternalSet<T> copy() {
-		return cache.mkUniversalSet();
+		return new BitExternalSet<>(cache, this);
 	}
 }

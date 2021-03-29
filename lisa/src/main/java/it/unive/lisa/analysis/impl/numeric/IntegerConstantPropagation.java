@@ -88,11 +88,16 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
 			ProgramPoint pp) {
+		
+		if (arg.isTop())
+			return top();
+		
 		switch (operator) {
 		case NUMERIC_NEG:
 			return new IntegerConstantPropagation(-value);
 		case STRING_LENGTH:
-			return top();
+		case LOGICAL_NOT:
+		case TYPEOF:
 		default:
 			return top();
 		}
@@ -101,6 +106,10 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	protected IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
+		
+		if (left.isTop() || right.isTop())
+			return top();
+		
 		switch (operator) {
 		case NUMERIC_ADD:
 			return new IntegerConstantPropagation(left.value + right.value);
@@ -179,27 +188,6 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(IntegerConstantPropagation value, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
-			ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
 
@@ -222,11 +210,5 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 		default:
 			return Satisfiability.UNKNOWN;
 		}
-	}
-
-	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, IntegerConstantPropagation left,
-			IntegerConstantPropagation middle, IntegerConstantPropagation right, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
 	}
 }
