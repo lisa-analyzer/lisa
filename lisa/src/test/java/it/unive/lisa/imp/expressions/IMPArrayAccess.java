@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -33,7 +34,7 @@ public class IMPArrayAccess extends BinaryNativeCall {
 	 * @param location   the expression representing the accessed element
 	 */
 	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container, Expression location) {
-		super(cfg, sourceFile, line, col, "[]", container, location);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
 	}
 
 	@Override

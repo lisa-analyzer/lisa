@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Objects;
 
@@ -17,32 +18,28 @@ public abstract class BinaryExpression extends Expression {
 
 	/**
 	 * Builds the binary expression. The location where it happens is unknown
-	 * (i.e. no source file/line/column is available).
+	 * (e.g., no source file/line/column is available).
 	 * 
 	 * @param cfg   the cfg that this statement belongs to
 	 * @param left  the left hand-side of the expression
 	 * @param right the right hand-side of the expression
 	 */
 	protected BinaryExpression(CFG cfg, Expression left, Expression right) {
-		this(cfg, null, -1, -1, left, right);
+		this(cfg, null, left, right);
 	}
 
 	/**
 	 * Builds the binary expression, happening at the given location in the
 	 * program.
 	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this statement happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source
-	 *                       file. If unknown, use {@code -1}
-	 * @param left       the left hand-side of the expression
-	 * @param right      the right hand-side of the expression
+	 * @param cfg      the cfg that this statement belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     source file. If unknown, use {@code null}
+	 * @param left     the left hand-side of the expression
+	 * @param right    the right hand-side of the expression
 	 */
-	public BinaryExpression(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
-		super(cfg, sourceFile, line, col);
+	public BinaryExpression(CFG cfg, CodeLocation location, Expression left, Expression right) {
+		super(cfg, location);
 		Objects.requireNonNull(left, "The left-handside of a binary expression cannot be null");
 		Objects.requireNonNull(right, "The right-handside of a binary expression cannot be null");
 		this.left = left;

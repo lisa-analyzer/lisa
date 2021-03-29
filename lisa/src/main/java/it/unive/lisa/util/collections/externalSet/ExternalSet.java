@@ -255,23 +255,6 @@ public interface ExternalSet<T> extends Set<T> {
 	}
 
 	/**
-	 * Reduces this set to a single element. The result starts at {@code base},
-	 * and it is transformed by invoking {@code reducer} on the current result
-	 * and each element inside this set.
-	 * 
-	 * @param base    the initial value for building the result
-	 * @param reducer the function that combines two elements into a new result
-	 * 
-	 * @return the reduced element
-	 */
-	default T reduce(T base, BiFunction<T, T, T> reducer) {
-		T result = base;
-		for (T t : this)
-			result = reducer.apply(result, t);
-		return result;
-	}
-
-	/**
 	 * Transforms this set into another set where each element is obtained by
 	 * transforming elements of this set.
 	 * 
@@ -280,7 +263,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	default ExternalSet<T> transform(Function<T, T> transformer) {
+	public default ExternalSet<T> transform(Function<T, T> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.add(transformer.apply(t));
@@ -297,10 +280,27 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
+	public default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.addAll(transformer.apply(t));
+		return result;
+	}
+
+	/**
+	 * Reduces this set to a single element. The result starts at {@code base},
+	 * and it is transformed by invoking {@code reducer} on the current result
+	 * and each element inside this set.
+	 * 
+	 * @param base    the initial value for building the result
+	 * @param reducer the function that combines two elements into a new result
+	 * 
+	 * @return the reduced element
+	 */
+	default T reduce(T base, BiFunction<T, T, T> reducer) {
+		T result = base;
+		for (T t : this)
+			result = reducer.apply(result, t);
 		return result;
 	}
 

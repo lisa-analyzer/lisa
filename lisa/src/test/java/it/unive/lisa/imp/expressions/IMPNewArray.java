@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.types.ArrayType;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
@@ -36,7 +37,8 @@ public class IMPNewArray extends NativeCall {
 	 * @param dimensions the dimensions of the array
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
-		super(cfg, sourceFile, line, col, "new[]", ArrayType.lookup(type, dimensions.length), dimensions);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new[]", ArrayType.lookup(type, dimensions.length),
+				dimensions);
 	}
 
 	@Override

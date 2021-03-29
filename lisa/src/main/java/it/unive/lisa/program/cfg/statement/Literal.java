@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.type.Type;
@@ -36,7 +37,7 @@ public class Literal extends Expression {
 	 * @param staticType the type of this literal
 	 */
 	public Literal(CFG cfg, Object value, Type staticType) {
-		this(cfg, null, -1, -1, value, staticType);
+		this(cfg, null, value, staticType);
 	}
 
 	/**
@@ -44,17 +45,13 @@ public class Literal extends Expression {
 	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where the expression is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */
-	public Literal(CFG cfg, String sourceFile, int line, int col, Object value, Type staticType) {
-		super(cfg, sourceFile, line, col, staticType);
+	public Literal(CFG cfg, CodeLocation location, Object value, Type staticType) {
+		super(cfg, location, staticType);
 		Objects.requireNonNull(value, "The value of a literal cannot be null");
 		this.value = value;
 	}

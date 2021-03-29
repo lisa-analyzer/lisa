@@ -134,6 +134,16 @@ public class ExternalSetCache<T> {
 	}
 
 	/**
+	 * Cleans the cache, removing all elements.
+	 */
+	public final synchronized void clear() {
+		elements.clear();
+		indexes.clear();
+		indexOfNull = -1;
+		nextIndex = 0;
+	}
+
+	/**
 	 * Yields the total number of elements stored in this cache.
 	 * 
 	 * @return the number of elements

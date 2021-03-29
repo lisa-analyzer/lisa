@@ -21,7 +21,7 @@ public class StatementWarning extends WarningWithLocation {
 	 * @param message   the message of this warning
 	 */
 	public StatementWarning(Statement statement, String message) {
-		super(statement.getSourceFile(), statement.getLine(), statement.getCol(), message);
+		super(statement.getLocation(), message);
 		this.statement = statement;
 	}
 

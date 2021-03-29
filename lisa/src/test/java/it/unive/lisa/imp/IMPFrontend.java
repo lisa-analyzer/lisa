@@ -20,6 +20,7 @@ import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -122,6 +123,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private Program work(InputStream inputStream) throws ParsingException {
 		// first remove all cached types from previous executions
 		ClassType.clearAll();
+		ArrayType.clearAll();
 
 		try {
 			log.info("Reading file... " + file);
@@ -144,7 +146,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			Program p = visitFile(parser.file());
 
 			// add constructs
-			CompilationUnit str = new CompilationUnit(null, -1, -1, "string", true);
+			CompilationUnit str = new CompilationUnit(null, "string", true);
 			str.addInstanceConstruct(new StringContains(str));
 			str.addInstanceConstruct(new StringEndsWith(str));
 			str.addInstanceConstruct(new StringEquals(str));
@@ -188,7 +190,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Program visitFile(FileContext ctx) {
 		for (UnitContext unit : ctx.unit()) {
 			// we add all the units first, so that type resolution an work
-			CompilationUnit u = new CompilationUnit(file, getLine(ctx), getCol(ctx), unit.name.getText(), false);
+			CompilationUnit u = new CompilationUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+					unit.name.getText(), false);
 			program.addCompilationUnit(u);
 			ClassType.lookup(u.getName(), u);
 		}
@@ -238,7 +241,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
-		return new Global(file, getLine(ctx), getCol(ctx), ctx.name.getText(), Untyped.INSTANCE);
+		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
+				Untyped.INSTANCE);
 	}
 
 	@Override
@@ -256,14 +260,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
-		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit,
+		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
 				true, ctx.name.getText(), visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
 		return descriptor;
 	}
 
 	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
-		CFGDescriptor descriptor = new CFGDescriptor(file, getLine(ctx), getCol(ctx), currentUnit,
+		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
 				true, ctx.name.getText(), visitFormals(ctx.formals()));
 
 		if (ctx.FINAL() != null)
@@ -286,6 +292,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
-		return new Parameter(file, getLine(ctx), getCol(ctx), ctx.name.getText(), Untyped.INSTANCE);
+		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
+				Untyped.INSTANCE);
 	}
 }

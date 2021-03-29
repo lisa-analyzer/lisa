@@ -129,6 +129,7 @@ public class LiSA {
 			A extends AbstractState<A, H, V>> void runAux(Program program)
 					throws AnalysisExecutionException {
 		// fill up the types cache by side effect on an external set
+		Caches.types().clear();
 		ExternalSet<Type> types = Caches.types().mkEmptySet();
 		program.getRegisteredTypes().forEach(types::add);
 		types = null;

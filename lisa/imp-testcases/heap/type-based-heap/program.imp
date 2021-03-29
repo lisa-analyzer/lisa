@@ -1,0 +1,26 @@
+class A {	
+	a;
+	b;
+	
+	f1() {
+		def o = new A(1,2);
+		o.a = 1;	
+		o.b = 2;
+	}
+
+	f2() {
+		def o = new A(1,2);
+		o.a = 1;	
+		o.b = o.a + 1;	
+		
+		for (def i = 0; i < 10; i = i + 1) {
+			o.a = o.a + 1;
+		}
+	}
+	
+	f3() {
+		def o1 = new A(1,2);
+		o1.a = 1;	
+		o1.b = 1;	
+	}
+}

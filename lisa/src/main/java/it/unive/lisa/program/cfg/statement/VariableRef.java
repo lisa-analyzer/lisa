@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
@@ -38,7 +39,7 @@ public class VariableRef extends Expression {
 	 * @param name the name of this variable
 	 */
 	public VariableRef(CFG cfg, String name) {
-		this(cfg, null, -1, -1, name, Untyped.INSTANCE);
+		this(cfg, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -51,25 +52,21 @@ public class VariableRef extends Expression {
 	 * @param type the type of this variable
 	 */
 	public VariableRef(CFG cfg, String name, Type type) {
-		this(cfg, null, -1, -1, name, type);
+		this(cfg, null, name, type);
 	}
 
 	/**
 	 * Builds the variable reference, identified by its name, happening at the
 	 * given location in the program.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
-	 * @param name       the name of this variable
-	 * @param type       the type of this variable
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     source file. If unknown, use {@code null}
+	 * @param name     the name of this variable
+	 * @param type     the type of this variable
 	 */
-	public VariableRef(CFG cfg, String sourceFile, int line, int col, String name, Type type) {
-		super(cfg, sourceFile, line, col, type);
+	public VariableRef(CFG cfg, CodeLocation location, String name, Type type) {
+		super(cfg, location, type);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
 	}

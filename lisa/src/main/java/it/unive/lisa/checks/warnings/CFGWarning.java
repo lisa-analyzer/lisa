@@ -22,8 +22,7 @@ public class CFGWarning extends WarningWithLocation {
 	 * @param message the message of this warning
 	 */
 	public CFGWarning(CFG cfg, String message) {
-		super(cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(), cfg.getDescriptor().getCol(),
-				message);
+		super(cfg.getDescriptor().getLocation(), message);
 		this.cfg = cfg;
 	}
 

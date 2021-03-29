@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.type.NullType;
 
@@ -35,16 +36,12 @@ public class NullLiteral extends Literal {
 	 * Builds the null literal, happening at the given location in the program.
 	 * The type of a null literal is {@link NullType}.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     source file. If unknown, use {@code null}
 	 */
-	public NullLiteral(CFG cfg, String sourceFile, int line, int col) {
-		super(cfg, sourceFile, line, col, NULL_CONST, NullType.INSTANCE);
+	public NullLiteral(CFG cfg, CodeLocation location) {
+		super(cfg, location, NULL_CONST, NullType.INSTANCE);
 	}
 
 	@Override

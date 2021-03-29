@@ -75,6 +75,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the set of keys
 	 */
 	public final Set<K> getKeys() {
+		if (function == null)
+			return Collections.emptySet();
 		return function.keySet();
 	}
 

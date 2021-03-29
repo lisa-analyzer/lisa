@@ -2,6 +2,7 @@ package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Unit extends CodeElement {
+public abstract class Unit implements CodeElement {
 
 	/**
 	 * The name of the unit
@@ -43,17 +44,19 @@ public abstract class Unit extends CodeElement {
 	private final Map<String, NativeCFG> constructs;
 
 	/**
-	 * Builds a unit, defined at the given program point.
-	 * 
-	 * @param sourceFile the source file where the unit is defined
-	 * @param line       the line where the unit is defined within the source
-	 *                       file
-	 * @param col        the column where the unit is defined within the source
-	 *                       file
-	 * @param name       the name of the unit
+	 * The location in the source file of this unit
 	 */
-	protected Unit(String sourceFile, int line, int col, String name) {
-		super(sourceFile, line, col);
+	private final CodeLocation location;
+
+	/**
+	 * Builds a unit, defined at the given location.
+	 * 
+	 * @param location the location where the unit is define within the source
+	 *                     file
+	 * @param name     the name of the unit
+	 */
+	protected Unit(CodeLocation location, String name) {
+		this.location = location;
 		this.name = name;
 		this.globals = new ConcurrentHashMap<>();
 		this.cfgs = new ConcurrentHashMap<>();
@@ -371,5 +374,10 @@ public abstract class Unit extends CodeElement {
 
 		for (CFG cfg : getAllCFGs())
 			cfg.validate();
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
 	}
 }

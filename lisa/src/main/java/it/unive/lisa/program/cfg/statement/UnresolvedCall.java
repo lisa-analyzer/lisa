@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
@@ -144,7 +145,7 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, ResolutionStrategy strategy, boolean instanceCall, String targetName,
 			Expression... parameters) {
-		this(cfg, null, -1, -1, strategy, instanceCall, targetName, parameters);
+		this(cfg, null, strategy, instanceCall, targetName, parameters);
 	}
 
 	/**
@@ -153,12 +154,8 @@ public class UnresolvedCall extends Call {
 	 * {@code target}.
 	 * 
 	 * @param cfg          the cfg that this expression belongs to
-	 * @param sourceFile   the source file where this expression happens. If
-	 *                         unknown, use {@code null}
-	 * @param line         the line number where this expression happens in the
-	 *                         source file. If unknown, use {@code -1}
-	 * @param col          the column where this expression happens in the
-	 *                         source file. If unknown, use {@code -1}
+	 * @param location     the location where the expression is defined within
+	 *                         the source file. If unknown, use {@code null}
 	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
 	 *                         this call
 	 * @param instanceCall whether or not this is a call to an instance method
@@ -166,9 +163,9 @@ public class UnresolvedCall extends Call {
 	 * @param targetName   the name of the target of this call
 	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, String sourceFile, int line, int col, ResolutionStrategy strategy,
+	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
 			boolean instanceCall, String targetName, Expression... parameters) {
-		super(cfg, sourceFile, line, col, Untyped.INSTANCE, parameters);
+		super(cfg, location, Untyped.INSTANCE, parameters);
 		Objects.requireNonNull(targetName, "The target's name of an unresolved call cannot be null");
 		this.strategy = strategy;
 		this.targetName = targetName;

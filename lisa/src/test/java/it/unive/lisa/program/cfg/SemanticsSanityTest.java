@@ -20,6 +20,7 @@ import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -56,7 +57,7 @@ public class SemanticsSanityTest {
 	@Before
 	public void setup() throws CallGraphConstructionException {
 		Program p = new Program();
-		unit = new CompilationUnit(null, -1, -1, "foo", false);
+		unit = new CompilationUnit(null, "foo", false);
 		p.addCompilationUnit(unit);
 		cfg = new CFG(new CFGDescriptor(unit, false, "foo"));
 		cg = new IntraproceduralCallGraph();
@@ -64,7 +65,7 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				Collections.emptyList());
 		store = new StatementStore<>(as);
-		fake = new Expression(cfg, null, -1, -1) {
+		fake = new Expression(cfg, null) {
 
 			@Override
 			public int setOffset(int offset) {
@@ -118,6 +119,8 @@ public class SemanticsSanityTest {
 			return ResolutionStrategy.STATIC_TYPES;
 		if (param == Unit.class)
 			return unit;
+		if (param == CodeLocation.class)
+			return new SourceCodeLocation(null, 0, 0);
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}

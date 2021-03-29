@@ -1,6 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
 import it.unive.lisa.imp.types.BoolType;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
 
@@ -21,6 +22,6 @@ public class IMPTrueLiteral extends Literal {
 	 * @param col        the column where this literal is defined
 	 */
 	public IMPTrueLiteral(CFG cfg, String sourceFile, int line, int col) {
-		super(cfg, sourceFile, line, col, true, BoolType.INSTANCE);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), true, BoolType.INSTANCE);
 	}
 }

@@ -9,6 +9,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -71,7 +72,7 @@ public class StringContains extends NativeCFG {
 		 */
 		public IMPStringContains(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression right) {
-			super(cfg, sourceFile, line, col, "contains", BoolType.INSTANCE, left, right);
+			super(cfg, new SourceCodeLocation(sourceFile, line, col), "contains", BoolType.INSTANCE, left, right);
 		}
 
 		@Override

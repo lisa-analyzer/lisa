@@ -1,6 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
 import it.unive.lisa.imp.types.FloatType;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
 
@@ -22,6 +23,6 @@ public class IMPFloatLiteral extends Literal {
 	 * @param value      the constant value represented by this literal
 	 */
 	public IMPFloatLiteral(CFG cfg, String sourceFile, int line, int col, float value) {
-		super(cfg, sourceFile, line, col, value, FloatType.INSTANCE);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), value, FloatType.INSTANCE);
 	}
 }
