@@ -2,6 +2,8 @@ package it.unive.lisa.type;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
 
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -34,7 +36,10 @@ public class TypeTokenType implements Type {
 
 	@Override
 	public String toString() {
-		return "token::" + types.toString();
+		Set<String> sorted = new TreeSet<>();
+		for (Type t : types)
+			sorted.add(t.toString());
+		return "token::" + sorted;
 	}
 
 	@Override
