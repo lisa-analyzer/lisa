@@ -1,7 +1,7 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.util.collections.ExternalSet;
-import it.unive.lisa.util.collections.ExternalSetCache;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;

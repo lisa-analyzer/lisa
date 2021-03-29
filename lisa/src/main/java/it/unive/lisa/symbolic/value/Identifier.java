@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
@@ -73,6 +73,8 @@ public abstract class Identifier extends ValueExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (obj == null)
+			return false;
 		// we do not call super here since variables should be uniquely
 		// identified by their name, regardless of their type
 		if (getClass() != obj.getClass())

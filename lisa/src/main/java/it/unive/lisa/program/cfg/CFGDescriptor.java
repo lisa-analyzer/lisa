@@ -387,29 +387,31 @@ public class CFGDescriptor extends CodeElement {
 
 	/**
 	 * Checks if the signature defined by the given descriptor is matched by the
-	 * one this descriptor. For two signatures to match, it is required that:
+	 * one of this descriptor. If the signature match, this roughly means that
+	 * {@code this} signature can override {@code reference}. For two signatures
+	 * to match, it is required that:
 	 * <ul>
 	 * <li>both signatures have the same name</li>
 	 * <li>both signatures have the same number of arguments</li>
 	 * <li>for each argument, the static type of the matching signature (i.e.,
 	 * {@code this}) can be assigned to the static type of the matched signature
-	 * (i.e., {@code signature})</li>
+	 * (i.e., {@code reference})</li>
 	 * </ul>
 	 * 
-	 * @param signature the other signature
+	 * @param reference the other signature to be used as reference
 	 * 
 	 * @return {@code true} if the two signatures are compatible, {@code false}
 	 *             otherwise
 	 */
-	public boolean matchesSignature(CFGDescriptor signature) {
-		if (!name.equals(signature.name))
+	public boolean matchesSignature(CFGDescriptor reference) {
+		if (!name.equals(reference.name))
 			return false;
 
-		if (args.length != signature.args.length)
+		if (args.length != reference.args.length)
 			return false;
 
 		for (int i = 0; i < args.length; i++)
-			if (!args[i].getStaticType().canBeAssignedTo(signature.args[i].getStaticType()))
+			if (!args[i].getStaticType().canBeAssignedTo(reference.args[i].getStaticType()))
 				// TODO not sure if this is generic enough
 				return false;
 

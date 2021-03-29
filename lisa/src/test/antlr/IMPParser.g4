@@ -91,6 +91,7 @@ expression
    | fieldAccess
    | methodCall
    | assignment
+   | stringExpr
    ;
 
 basicExpr
@@ -133,6 +134,30 @@ fieldAccess
 
 methodCall
    : receiver DOT name = IDENTIFIER arguments
+   ;
+
+stringExpr
+   : unaryStringExpr
+   | binaryStringExpr
+   | ternaryStringExpr
+   ;
+
+unaryStringExpr
+   : STRLEN LPAREN op = expression RPAREN
+   ;
+
+binaryStringExpr
+   : STRCAT LPAREN left = expression COMMA right = expression RPAREN
+   | STRCONTAINS LPAREN left = expression COMMA right = expression RPAREN
+   | STRENDS LPAREN left = expression COMMA right = expression RPAREN
+   | STREQ LPAREN left = expression COMMA right = expression RPAREN
+   | STRINDEXOF LPAREN left = expression COMMA right = expression RPAREN
+   | STRSTARTS LPAREN left = expression COMMA right = expression RPAREN
+   ;
+
+ternaryStringExpr
+   : STRREPLACE LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
+   | STRSUB LPAREN left = expression COMMA middle = expression COMMA right = expression RPAREN
    ;
 /*
  * STATEMENT

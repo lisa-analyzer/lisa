@@ -168,12 +168,6 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
-			ProgramPoint pp) {
-		return top();
-	}
-
-	@Override
 	protected Sign lubAux(Sign other) throws SemanticException {
 		return TOP;
 	}
@@ -216,26 +210,6 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		if (isTop != other.isTop)
 			return false;
 		return isTop && other.isTop;
-	}
-
-	@Override
-	protected Satisfiability satisfiesAbstractValue(Sign value, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
 	}
 
 	@Override

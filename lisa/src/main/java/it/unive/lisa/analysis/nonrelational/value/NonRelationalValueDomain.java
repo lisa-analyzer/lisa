@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -16,5 +15,5 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <T> the concrete type of the domain
  */
 public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
-		extends Lattice<T>, NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
+		extends NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
 }

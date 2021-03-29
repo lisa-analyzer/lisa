@@ -1,6 +1,6 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.checks.warnings.CFGDesccriptorWarning;
+import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
@@ -65,7 +65,7 @@ public class CheckTool {
 	 * @param message    the message of the warning
 	 */
 	public void warnOn(CFGDescriptor descriptor, String message) {
-		warnings.add(new CFGDesccriptorWarning(descriptor, message));
+		warnings.add(new CFGDescriptorWarning(descriptor, message));
 	}
 
 	/**

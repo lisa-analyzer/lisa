@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SetLattice;
+import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A {@link DataflowDomain} for <b>forward</b> and <b>possible</b> dataflow
@@ -91,7 +93,9 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	@Override
 	public String representation() {
-		return elements.toString();
+		SortedSet<String> res = new TreeSet<>();
+		elements.stream().map(e -> e.toString()).forEach(res::add);
+		return res.toString();
 	}
 
 	@Override

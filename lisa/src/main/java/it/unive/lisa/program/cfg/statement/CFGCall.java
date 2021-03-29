@@ -2,9 +2,9 @@ package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -12,6 +12,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -123,7 +124,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 				break;
 		}
 
-		return result;
+		return result == null ? Untyped.INSTANCE : result;
 	}
 
 	/**
