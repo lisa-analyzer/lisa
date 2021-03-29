@@ -35,34 +35,26 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  */
 public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
-	private static final InferredTypes TOP = new InferredTypes();
+	private static final InferredTypes TOP = new InferredTypes(Caches.types().mkUniversalSet());
 
-	private static final InferredTypes BOTTOM = new InferredTypes(Caches.types().mkEmptySet(), false, true);
+	private static final InferredTypes BOTTOM = new InferredTypes(Caches.types().mkEmptySet());
 
 	private final ExternalSet<Type> elements;
-
-	private final boolean isTop, isBottom;
 
 	/**
 	 * Builds the inferred types. The object built through this constructor
 	 * represents the top of the lattice.
 	 */
 	public InferredTypes() {
-		this(Caches.types().mkUniversalSet(), true, false);
+		this(Caches.types().mkEmptySet());
 	}
 
 	InferredTypes(Type type) {
-		this(Caches.types().mkSingletonSet(type), false, false);
+		this(Caches.types().mkSingletonSet(type));
 	}
 
 	InferredTypes(ExternalSet<Type> types) {
-		this(types, false, false);
-	}
-
-	private InferredTypes(ExternalSet<Type> types, boolean isTop, boolean isBottom) {
 		this.elements = types;
-		this.isTop = isTop;
-		this.isBottom = isBottom;
 	}
 
 	/**
@@ -81,18 +73,8 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	public boolean isTop() {
-		return isTop;
-	}
-
-	@Override
 	public InferredTypes bottom() {
 		return BOTTOM;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return isBottom;
 	}
 
 	@Override
@@ -233,26 +215,6 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesAbstractValue(InferredTypes value, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, InferredTypes arg, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
 			InferredTypes right, ProgramPoint pp) {
 		switch (operator) {
@@ -303,12 +265,6 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, InferredTypes left,
-			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	protected InferredTypes lubAux(InferredTypes other) throws SemanticException {
 		return new InferredTypes(elements.union(other.elements));
 	}
@@ -328,8 +284,6 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
-		result = prime * result + (isBottom ? 1231 : 1237);
-		result = prime * result + (isTop ? 1231 : 1237);
 		return result;
 	}
 
@@ -346,10 +300,6 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			if (other.elements != null)
 				return false;
 		} else if (!elements.equals(other.elements))
-			return false;
-		if (isBottom != other.isBottom)
-			return false;
-		if (isTop != other.isTop)
 			return false;
 		return true;
 	}

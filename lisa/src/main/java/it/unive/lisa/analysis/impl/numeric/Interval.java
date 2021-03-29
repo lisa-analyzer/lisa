@@ -1,8 +1,11 @@
 package it.unive.lisa.analysis.impl.numeric;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -10,9 +13,6 @@ import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The interval abstract domain, approximating integer values as the minimum
@@ -96,7 +96,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
-
 		switch (operator) {
 		case NUMERIC_NEG:
 			return arg.mul(new Interval(-1, -1));
@@ -157,38 +156,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	protected boolean lessOrEqualAux(Interval other) throws SemanticException {
 		return geqLow(low, other.low) && leqHigh(high, other.high);
-	}
-
-	@Override
-	protected Satisfiability satisfiesAbstractValue(Interval value, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
-			ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Interval left, Interval middle,
-			Interval right, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
 	}
 
 	private boolean lowIsMinusInfinity() {
