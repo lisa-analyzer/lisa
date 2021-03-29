@@ -14,7 +14,7 @@ import it.unive.lisa.util.collections.ExternalSet;
  */
 public class AllocationSite extends HeapIdentifier {
 
-	private final long id;
+	private final String id;
 
 	/**
 	 * Builds the an allocation site from its numerical identifier.
@@ -22,7 +22,7 @@ public class AllocationSite extends HeapIdentifier {
 	 * @param types the runtime types of this allocation site
 	 * @param id    the identifier of this allocation site
 	 */
-	public AllocationSite(ExternalSet<Type> types, long id) {
+	public AllocationSite(ExternalSet<Type> types, String id) {
 		super(types, "pp@" + id, true);
 		this.id = id;
 	}
@@ -35,7 +35,7 @@ public class AllocationSite extends HeapIdentifier {
 	 * @param id    the identifier of this allocation site
 	 * @param field the field of this allocation site
 	 */
-	public AllocationSite(ExternalSet<Type> types, long id, SymbolicExpression field) {
+	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field) {
 		super(types, "pp@" + id + "[" + field + "]", true);
 		this.id = id;
 	}
@@ -45,7 +45,7 @@ public class AllocationSite extends HeapIdentifier {
 	 * 
 	 * @return the numerical identifier of this allocation site
 	 */
-	public long getId() {
+	public String getId() {
 		return id;
 	}
 }

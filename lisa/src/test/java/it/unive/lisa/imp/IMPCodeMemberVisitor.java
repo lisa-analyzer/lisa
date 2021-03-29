@@ -41,6 +41,7 @@ import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -158,7 +159,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		entrypoints.add(visited.getLeft());
 
 		if (cfg.getAllExitpoints().isEmpty()) {
-			Ret ret = new Ret(cfg, file, descriptor.getLine(), descriptor.getCol());
+			Ret ret = new Ret(cfg, descriptor.getLocation());
 			if (cfg.getNodesCount() == 0) {
 				// empty method, so the ret is also the entrypoint
 				matrix.addNode(ret);
@@ -195,7 +196,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
-		return new Parameter(file, getLine(ctx), getCol(ctx), ctx.name.getText(), Untyped.INSTANCE);
+		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
+				Untyped.INSTANCE);
 	}
 
 	@Override
@@ -216,7 +218,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		for (Entry<String, VariableRef> id : visibleIds.entrySet())
 			if (!backup.containsKey(id.getKey())) {
 				VariableRef ref = id.getValue();
-				descriptor.addVariable(new VariableTableEntry(ref.getSourceFile(), ref.getLine(), ref.getCol(),
+				descriptor.addVariable(new VariableTableEntry(ref.getLocation(),
 						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE));
 				toRemove.add(id.getKey());
 			}
@@ -226,7 +228,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		if (first == null && last == null) {
 			// empty block: instrument it with a noop
-			NoOp instrumented = new NoOp(cfg, file, getLine(ctx), getCol(ctx));
+			NoOp instrumented = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 			first = last = instrumented;
 			matrix.addNode(instrumented);
 		}
@@ -251,14 +253,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			st = new IMPAssert(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
 		else if (ctx.RETURN() != null)
 			if (ctx.expression() != null)
-				st = new Return(cfg, file, getLine(ctx), getCol(ctx),
+				st = new Return(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 						visitExpression(ctx.expression()));
 			else
-				st = new Ret(cfg, file, getLine(ctx), getCol(ctx));
+				st = new Ret(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.THROW() != null)
-			st = new Throw(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.expression()));
+			st = new Throw(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+					visitExpression(ctx.expression()));
 		else if (ctx.skip != null)
-			st = new NoOp(cfg, file, getLine(ctx), getCol(ctx));
+			st = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		else if (ctx.IF() != null)
 			return visitIf(ctx);
 		else if (ctx.loop() != null)
@@ -285,7 +288,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			matrix.addEdge(new FalseEdge(condition, otherwise.getLeft()));
 		}
 
-		Statement noop = new NoOp(cfg, file, condition.getLine(), condition.getCol());
+		Statement noop = new NoOp(cfg, condition.getLocation());
 		matrix.addNode(noop);
 		matrix.addEdge(new SequentialEdge(then.getRight(), noop));
 		if (otherwise != null)
@@ -308,13 +311,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		if (visibleIds.containsKey(ref.getName()))
 			throw new IMPSyntaxException(
-					"Duplicate variable '" + ref.getName() + "' declared at " + toCodeLocation(ref));
+					"Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
 
 		visibleIds.put(ref.getName(), ref);
 		// the variable table entry will be generated at the end of the
 		// containing block
 
-		return new Assignment(cfg, file, getLine(ctx), getCol(ctx), ref, expression);
+		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ref, expression);
 	}
 
 	@Override
@@ -334,7 +337,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		matrix.addEdge(new TrueEdge(condition, body.getLeft()));
 		matrix.addEdge(new SequentialEdge(body.getRight(), condition));
 
-		Statement noop = new NoOp(cfg, file, condition.getLine(), condition.getCol());
+		Statement noop = new NoOp(cfg, condition.getLocation());
 		matrix.addNode(noop);
 		matrix.addEdge(new FalseEdge(condition, noop));
 
@@ -383,7 +386,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		matrix.addEdge(new SequentialEdge(last, condition));
 
-		Statement noop = new NoOp(cfg, file, condition.getLine(), condition.getCol());
+		Statement noop = new NoOp(cfg, condition.getLocation());
 		matrix.addNode(noop);
 		matrix.addEdge(new FalseEdge(condition, noop));
 
@@ -401,30 +404,32 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else if (ctx.arrayAccess() != null)
 			target = visitArrayAccess(ctx.arrayAccess());
 		else
-			throw new IMPSyntaxException("Target of the assignment at " + toCodeLocation(expression)
+			throw new IMPSyntaxException("Target of the assignment at " + expression.getLocation()
 					+ " is neither an identifier, a field access or an array access");
 
-		return new Assignment(cfg, file, getLine(ctx), getCol(ctx), target, expression);
+		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
 	}
 
 	private VariableRef visitVar(TerminalNode identifier, boolean localReference) {
-		VariableRef ref = new VariableRef(cfg, file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol()),
+		VariableRef ref = new VariableRef(cfg,
+				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
 				identifier.getText(), Untyped.INSTANCE);
 		if (localReference && !visibleIds.containsKey(ref.getName()))
 			throw new IMPSyntaxException(
-					"Referencing undeclared variable '" + ref.getName() + "' at " + toCodeLocation(ref));
+					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
 		return ref;
 	}
 
-	private String toCodeLocation(Statement st) {
-		return st.getSourceFile() + ":" + st.getLine() + ":" + st.getCol();
-	}
+//	private String toCodeLocation(Statement st) {
+//		return st.getSourceFile() + ":" + st.getLine() + ":" + st.getCol();
+//	}
 
 	@Override
 	public AccessUnitGlobal visitFieldAccess(FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
-		Global id = new Global(file, getLine(ctx.name), getCol(ctx.name), ctx.name.getText(), Untyped.INSTANCE);
-		return new AccessUnitGlobal(cfg, file, getLine(ctx), getCol(ctx), receiver, id);
+		Global id = new Global(new SourceCodeLocation(file, getLine(ctx.name), getCol(ctx.name)), ctx.name.getText(),
+				Untyped.INSTANCE);
+		return new AccessUnitGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver, id);
 	}
 
 	@Override
@@ -649,7 +654,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(cfg, file, getLine(ctx), getCol(ctx), IMPFrontend.CALL_STRATEGY, true, name, args);
+		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				IMPFrontend.CALL_STRATEGY, true, name, args);
 	}
 
 	@Override
@@ -669,7 +675,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		if (ctx.LITERAL_NULL() != null)
-			return new NullLiteral(cfg, file, line, col);
+			return new NullLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_BOOL() != null)
 			if (ctx.LITERAL_BOOL().getText().equals("true"))
 				return new IMPTrueLiteral(cfg, file, line, col);

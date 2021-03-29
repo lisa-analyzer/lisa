@@ -865,6 +865,11 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 			public String toString() {
 				return "unknown program point in " + CFG.this.getDescriptor().getSignature();
 			}
+
+			@Override
+			public CodeLocation getLocation() {
+				return null;
+			}
 		};
 	}
 

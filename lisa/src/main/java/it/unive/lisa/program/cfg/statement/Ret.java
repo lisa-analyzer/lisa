@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -28,22 +29,18 @@ public class Ret extends Statement {
 	 * @param cfg the cfg that this statement belongs to
 	 */
 	public Ret(CFG cfg) {
-		this(cfg, null, -1, -1);
+		this(cfg, null);
 	}
 
 	/**
 	 * Builds the return, happening at the given location in the program.
 	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this statement happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param cfg      the cfg that this statement belongs to
+	 * @param location the location where the statement is defined within the
+	 *                     source file. If unknown, use {@code null}
 	 */
-	public Ret(CFG cfg, String sourceFile, int line, int col) {
-		super(cfg, sourceFile, line, col);
+	public Ret(CFG cfg, CodeLocation location) {
+		super(cfg, location);
 	}
 
 	@Override

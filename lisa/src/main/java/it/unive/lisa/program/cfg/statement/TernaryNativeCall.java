@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -57,33 +58,25 @@ public abstract class TernaryNativeCall extends NativeCall {
 	 * program. The static type of this call is {@link Untyped}.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
 	 * @param left          the first parameter of this call
 	 * @param middle        the second parameter of this call
 	 * @param right         the second parameter of this call
 	 */
-	protected TernaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName,
+	protected TernaryNativeCall(CFG cfg, CodeLocation location, String constructName,
 			Expression left, Expression middle, Expression right) {
-		super(cfg, sourceFile, line, col, constructName, left, middle, right);
+		super(cfg, location, constructName, left, middle, right);
 	}
 
 	/**
 	 * Builds the native call, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param constructName the name of the construct invoked by this native
 	 *                          call
 	 * @param staticType    the static type of this call
@@ -91,9 +84,9 @@ public abstract class TernaryNativeCall extends NativeCall {
 	 * @param middle        the second parameter of this call
 	 * @param right         the second parameter of this call
 	 */
-	protected TernaryNativeCall(CFG cfg, String sourceFile, int line, int col, String constructName, Type staticType,
+	protected TernaryNativeCall(CFG cfg, CodeLocation location, String constructName, Type staticType,
 			Expression left, Expression middle, Expression right) {
-		super(cfg, sourceFile, line, col, constructName, staticType, left, middle, right);
+		super(cfg, location, constructName, staticType, left, middle, right);
 	}
 
 	@Override

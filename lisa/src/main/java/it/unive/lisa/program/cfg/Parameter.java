@@ -13,7 +13,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Parameter extends CodeElement {
+public class Parameter implements CodeElement {
 
 	/**
 	 * The name of this parameter
@@ -25,6 +25,8 @@ public class Parameter extends CodeElement {
 	 */
 	private final Type staticType;
 
+	private final CodeLocation location;
+
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The
 	 * location where this parameter reference happens is unknown (i.e. no
@@ -34,7 +36,7 @@ public class Parameter extends CodeElement {
 	 * @param name the name of this parameter
 	 */
 	public Parameter(String name) {
-		this(null, -1, -1, name, Untyped.INSTANCE);
+		this(name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -46,27 +48,23 @@ public class Parameter extends CodeElement {
 	 * @param staticType the type of this parameter
 	 */
 	public Parameter(String name, Type staticType) {
-		this(null, -1, -1, name, staticType);
+		this(null, name, staticType);
 	}
 
 	/**
 	 * Builds the parameter reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param sourceFile the source file where this parameter happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this parameter happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this parameter happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where this parameter is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param name       the name of this parameter
 	 * @param staticType the type of this parameter. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public Parameter(String sourceFile, int line, int col, String name, Type staticType) {
-		super(sourceFile, line, col);
+	public Parameter(CodeLocation location, String name, Type staticType) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
+		this.location = location;
 		this.name = name;
 		this.staticType = staticType;
 	}
@@ -92,7 +90,8 @@ public class Parameter extends CodeElement {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
@@ -102,11 +101,16 @@ public class Parameter extends CodeElement {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		Parameter other = (Parameter) obj;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -123,5 +127,10 @@ public class Parameter extends CodeElement {
 	@Override
 	public String toString() {
 		return staticType + " " + name;
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
 	}
 }

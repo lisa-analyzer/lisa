@@ -1,6 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
 import it.unive.lisa.imp.types.IntType;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
 
@@ -22,6 +23,6 @@ public class IMPIntLiteral extends Literal {
 	 * @param value      the constant value represented by this literal
 	 */
 	public IMPIntLiteral(CFG cfg, String sourceFile, int line, int col, int value) {
-		super(cfg, sourceFile, line, col, value, IntType.INSTANCE);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), value, IntType.INSTANCE);
 	}
 }

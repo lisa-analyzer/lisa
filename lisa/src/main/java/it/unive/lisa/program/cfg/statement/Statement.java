@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.Node;
@@ -19,7 +19,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement extends CodeElement implements Node<Statement, Edge, CFG>, ProgramPoint {
+public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPoint, Comparable<Statement> {
 
 	/**
 	 * The cfg containing this statement.
@@ -31,21 +31,19 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 	 */
 	protected int offset;
 
+	private final CodeLocation location;
+
 	/**
 	 * Builds a statement happening at the given source location.
 	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this statement happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param cfg      the cfg that this statement belongs to
+	 * @param location the location where this statement is defined within the
+	 *                     source file. If unknown, use {@code null}
 	 */
-	protected Statement(CFG cfg, String sourceFile, int line, int col) {
-		super(sourceFile, line, col);
+	protected Statement(CFG cfg, CodeLocation location) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
 		this.cfg = cfg;
+		this.location = location;
 		this.offset = -1;
 	}
 
@@ -115,7 +113,11 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 			return false;
 		if (getClass() != st.getClass())
 			return false;
-		if (!super.equals(st)) // checking source code location
+		if (location == null) {
+			if (st.location == null)
+				return true;
+		} else if (!location.equals(st.location)) // checking source code
+													// location
 			return false;
 		return true;
 	}
@@ -151,4 +153,14 @@ public abstract class Statement extends CodeElement implements Node<Statement, E
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException;
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
+	}
+
+	@Override
+	public int compareTo(Statement o) {
+		return location.compareTo(o.location);
+	}
 }

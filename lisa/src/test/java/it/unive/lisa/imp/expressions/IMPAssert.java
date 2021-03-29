@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
@@ -29,7 +30,7 @@ public class IMPAssert extends UnaryStatement {
 	 * @param expression the expression being asserted
 	 */
 	public IMPAssert(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col, expression);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), expression);
 	}
 
 	@Override

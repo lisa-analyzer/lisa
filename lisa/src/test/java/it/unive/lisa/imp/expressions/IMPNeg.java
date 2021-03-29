@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
@@ -33,7 +34,7 @@ public class IMPNeg extends UnaryNativeCall {
 	 * @param expression the operand of this operation
 	 */
 	public IMPNeg(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col, "-", expression);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "-", expression);
 	}
 
 	@Override

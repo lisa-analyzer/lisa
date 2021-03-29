@@ -30,7 +30,7 @@ public class FixpointTest {
 
 	@Test
 	public void testEmptyCFG() {
-		CFG cfg = new CFG(new CFGDescriptor(new CompilationUnit(null, 0, 0, "foo", false), false, "foo"));
+		CFG cfg = new CFG(new CFGDescriptor(new CompilationUnit(null, "foo", false), false, "foo"));
 		try {
 			cfg.fixpoint(mkState(), mkCallGraph());
 		} catch (FixpointException e) {

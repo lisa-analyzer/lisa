@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -46,7 +47,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * @param parameters    the parameters of this call
 	 */
 	public CFGCall(CFG cfg, String qualifiedName, CFG target, Expression... parameters) {
-		this(cfg, null, -1, -1, qualifiedName, target, parameters);
+		this(cfg, null, qualifiedName, target, parameters);
 	}
 
 	/**
@@ -59,45 +60,37 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * @param parameters    the parameters of this call
 	 */
 	public CFGCall(CFG cfg, String qualifiedName, Collection<CFG> targets, Expression... parameters) {
-		this(cfg, null, -1, -1, qualifiedName, targets, parameters);
+		this(cfg, null, qualifiedName, targets, parameters);
 	}
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param target        the CFG that is targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public CFGCall(CFG cfg, String sourceFile, int line, int col, String qualifiedName, CFG target,
+	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, CFG target,
 			Expression... parameters) {
-		this(cfg, sourceFile, line, col, qualifiedName, Collections.singleton(target), parameters);
+		this(cfg, location, qualifiedName, Collections.singleton(target), parameters);
 	}
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where this expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public CFGCall(CFG cfg, String sourceFile, int line, int col, String qualifiedName, Collection<CFG> targets,
+	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, Collection<CFG> targets,
 			Expression... parameters) {
-		super(cfg, sourceFile, line, col, getCommonReturnType(targets), parameters);
+		super(cfg, location, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(qualifiedName, "The qualified name of the static target of a CFG call cannot be null");
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)

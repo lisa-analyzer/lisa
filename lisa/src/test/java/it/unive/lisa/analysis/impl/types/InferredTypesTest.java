@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.types.BoolType;
 import it.unive.lisa.symbolic.types.IntType;
@@ -66,6 +67,11 @@ public class InferredTypesTest {
 
 		@Override
 		public CFG getCFG() {
+			return null;
+		}
+
+		@Override
+		public CodeLocation getLocation() {
 			return null;
 		}
 	};

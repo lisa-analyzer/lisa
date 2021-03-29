@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import it.unive.lisa.analysis.BaseHeapDomain;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -22,12 +21,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -44,16 +40,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
-	private static final Logger log = LogManager.getLogger(PointBasedHeap.class);
-
-	protected static final ExternalSetCache<Long> idsCache = new ExternalSetCache<>();
-
 	private final Collection<ValueExpression> rewritten;
-
-	/**
-	 * The numerical identifiers already used by the point-based heap domain.
-	 */
-	protected final ExternalSet<Long> usedIds;
 
 	/**
 	 * An heap environment tracking which allocation sites are associated to
@@ -66,25 +53,29 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * unique rewritten expression {@link Skip}.
 	 */
 	public PointBasedHeap() {
-		this(Collections.singleton(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()),
-				idsCache.mkEmptySet());
+		this(Collections.singleton(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()));
 	}
 
 	/**
 	 * Builds a new instance of field-insensitive point-based heap from its
-	 * rewritten expressions, heap environment, and used numerical identifier.
+	 * rewritten expressions and heap environment.
 	 * 
 	 * @param rewritten the collection of rewritten expressions
 	 * @param heapEnv   the heap environment that this instance tracks
-	 * @param usedIds   the numerical identifiers used by this instance
 	 */
 	protected PointBasedHeap(Collection<ValueExpression> rewritten,
-			HeapEnvironment<AllocationSites> heapEnv, ExternalSet<Long> usedIds) {
+			HeapEnvironment<AllocationSites> heapEnv) {
 		this.rewritten = rewritten;
 		this.heapEnv = heapEnv;
-		this.usedIds = usedIds;
 	}
 
+	/**
+	 * Builds a point-based heap from a reference one.
+	 * 
+	 * @param original reference point-based heap
+	 * 
+	 * @return a point-based heap build from the original one
+	 */
 	protected PointBasedHeap from(PointBasedHeap original) {
 		return original;
 	}
@@ -95,7 +86,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		if (expression instanceof AllocationSite)
 			return from(new PointBasedHeap(Collections.singleton((AllocationSite) expression),
-					heapEnv.assign(id, expression, pp), usedIds));
+					heapEnv.assign(id, expression, pp)));
 
 		return smallStepSemantics(expression, pp);
 	}
@@ -108,27 +99,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
-		AllocationSites idValue = heapEnv.getState(id);
-		if (!idValue.isBottom() && !idValue.isTop()) {
-			Set<AllocationSite> set = new HashSet<>();
-			for (AllocationSite l : idValue)
-				set.add(l);
-
-			Set<AllocationSite> s = new HashSet<>(set);
-			for (Entry<Identifier, AllocationSites> sites : heapEnv)
-				for (AllocationSite l : set)
-					if (sites.getValue().contains(l))
-						s.remove(l);
-
-			ExternalSet<Long> copy = usedIds.copy();
-
-			for (AllocationSite l : s)
-				copy.remove(l.getId());
-
-			return from(new PointBasedHeap(rewritten, heapEnv.forgetIdentifier(id), copy));
-		}
-
-		return this;
+		return from(new PointBasedHeap(rewritten, heapEnv.forgetIdentifier(id)));
 	}
 
 	@Override
@@ -156,22 +127,22 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap top() {
-		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.top(), idsCache.mkEmptySet()));
+		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.top()));
 	}
 
 	@Override
 	public boolean isTop() {
-		return rewritten.isEmpty() && usedIds.isEmpty() && heapEnv.isTop();
+		return rewritten.isEmpty() && heapEnv.isTop();
 	}
 
 	@Override
 	public PointBasedHeap bottom() {
-		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.bottom(), idsCache.mkEmptySet()));
+		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.bottom()));
 	}
 
 	@Override
 	public boolean isBottom() {
-		return rewritten.isEmpty() && usedIds.isEmpty() && heapEnv.isBottom();
+		return rewritten.isEmpty() && heapEnv.isBottom();
 	}
 
 	@Override
@@ -186,14 +157,14 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
-		return from(new PointBasedHeap(Collections.singleton(expression), reference.heapEnv, reference.usedIds));
+		return from(new PointBasedHeap(Collections.singleton(expression), reference.heapEnv));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		return from(new PointBasedHeap(CollectionUtils.union(this.rewritten, other.rewritten),
-				heapEnv.lub(other.heapEnv), usedIds.union(other.usedIds)));
+				heapEnv.lub(other.heapEnv)));
 	}
 
 	@Override
@@ -252,31 +223,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						result.add(new AllocationSite(expression.getTypes(), hid.getId()));
 			}
 
-			return from(new PointBasedHeap(result, childState.heapEnv, usedIds));
+			return from(new PointBasedHeap(result, childState.heapEnv));
 		}
 
 		if (expression instanceof HeapAllocation) {
-			ExternalSet<Long> copy = usedIds.copy();
-
-			long l = -1;
-			for (; l < Long.MAX_VALUE; l++)
-				if (!copy.contains(l + 1))
-					break;
-
-			if (l == Long.MAX_VALUE) {
-				log.warn("Too many allocation sites. Top returned.");
-				return top();
-			}
-			copy.add(l);
-			HeapIdentifier id = new AllocationSite(expression.getTypes(), l);
-			return from(new PointBasedHeap(Collections.singleton(id), heapEnv, copy));
+			HeapIdentifier id = new AllocationSite(expression.getTypes(), pp.getLocation().getCodeLocation());
+			return from(new PointBasedHeap(Collections.singleton(id), heapEnv));
 		}
 
 		if (expression instanceof HeapReference) {
 			HeapReference heapRef = (HeapReference) expression;
 			for (Identifier id : heapEnv.getKeys())
 				if (id instanceof ValueIdentifier && heapRef.getName().equals(id.getName()))
-					return from(new PointBasedHeap(Collections.singleton(id), heapEnv, usedIds));
+					return from(new PointBasedHeap(Collections.singleton(id), heapEnv));
 		}
 
 		return top();

@@ -10,6 +10,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -41,25 +42,21 @@ public class AccessGlobal extends Expression {
 	 * @param target    the accessed global
 	 */
 	public AccessGlobal(CFG cfg, Unit container, Global target) {
-		this(cfg, null, -1, -1, container, target);
+		this(cfg, null, container, target);
 	}
 
 	/**
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
-	 * @param container  the unit containing the accessed global
-	 * @param target     the accessed global
+	 * @param cfg       the cfg that this expression belongs to
+	 * @param location  the location where the expression is defined within the
+	 *                      source file. If unknown, use {@code null}
+	 * @param container the unit containing the accessed global
+	 * @param target    the accessed global
 	 */
-	public AccessGlobal(CFG cfg, String sourceFile, int line, int col, Unit container, Global target) {
-		super(cfg, sourceFile, line, col, target.getStaticType());
+	public AccessGlobal(CFG cfg, CodeLocation location, Unit container, Global target) {
+		super(cfg, location, target.getStaticType());
 		this.container = container;
 		this.target = target;
 	}

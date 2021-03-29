@@ -14,7 +14,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VariableTableEntry extends CodeElement {
+public class VariableTableEntry implements CodeElement {
 
 	/**
 	 * The index of the variable
@@ -44,6 +44,11 @@ public class VariableTableEntry extends CodeElement {
 	private Statement scopeEnd;
 
 	/**
+	 * The location where this variable is defined.
+	 */
+	private CodeLocation location;
+
+	/**
 	 * Builds an untyped variable table entry, identified by its index. The
 	 * location where the variable is defined is unknown (i.e. no source
 	 * file/line/column is available) as well as its type (i.e. it is {#link
@@ -53,7 +58,7 @@ public class VariableTableEntry extends CodeElement {
 	 * @param name  the name of this variable
 	 */
 	public VariableTableEntry(int index, String name) {
-		this(null, -1, -1, index, null, null, name, Untyped.INSTANCE);
+		this(null, index, null, null, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -72,7 +77,7 @@ public class VariableTableEntry extends CodeElement {
 	 * @param name       the name of this variable
 	 */
 	public VariableTableEntry(int index, Statement scopeStart, Statement scopeEnd, String name) {
-		this(null, -1, -1, index, scopeStart, scopeEnd, name, Untyped.INSTANCE);
+		this(null, index, scopeStart, scopeEnd, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -91,19 +96,15 @@ public class VariableTableEntry extends CodeElement {
 	 * @param staticType the type of this variable
 	 */
 	public VariableTableEntry(int index, Statement scopeStart, Statement scopeEnd, String name, Type staticType) {
-		this(null, -1, -1, index, scopeStart, scopeEnd, name, staticType);
+		this(null, index, scopeStart, scopeEnd, name, staticType);
 	}
 
 	/**
 	 * Builds the variable table entry, identified by its index, representing a
 	 * variable defined at the given location in the program.
 	 * 
-	 * @param sourceFile the source file where this variable happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this variable happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this variable happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where the expression is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param index      the index of the variable entry
 	 * @param scopeStart the statement where this variable is first visible,
 	 *                       {@code null} means that this variable is visible
@@ -115,11 +116,11 @@ public class VariableTableEntry extends CodeElement {
 	 * @param staticType the type of this variable. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public VariableTableEntry(String sourceFile, int line, int col, int index, Statement scopeStart, Statement scopeEnd,
+	public VariableTableEntry(CodeLocation location, int index, Statement scopeStart, Statement scopeEnd,
 			String name, Type staticType) {
-		super(sourceFile, line, col);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		Objects.requireNonNull(staticType, "The type of a variable cannot be null");
+		this.location = location;
 		this.index = index;
 		this.name = name;
 		this.staticType = staticType;
@@ -218,8 +219,7 @@ public class VariableTableEntry extends CodeElement {
 	 * @return a reference to the variable depicted by this entry
 	 */
 	public VariableRef createReference(CFG cfg) {
-		return new VariableRef(cfg, cfg.getDescriptor().getSourceFile(), cfg.getDescriptor().getLine(),
-				cfg.getDescriptor().getCol(), name, staticType);
+		return new VariableRef(cfg, cfg.getDescriptor().getLocation(), name, staticType);
 	}
 
 	@Override
@@ -259,11 +259,22 @@ public class VariableTableEntry extends CodeElement {
 				return false;
 		} else if (!staticType.equals(other.staticType))
 			return false;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
 		return "[" + index + "] " + staticType + " " + name;
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -9,6 +9,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
@@ -68,7 +69,7 @@ public class StringLength extends NativeCFG {
 		 */
 		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
-			super(cfg, sourceFile, line, col, "len", IntType.INSTANCE, parameter);
+			super(cfg, new SourceCodeLocation(sourceFile, line, col), "len", IntType.INSTANCE, parameter);
 		}
 
 		@Override

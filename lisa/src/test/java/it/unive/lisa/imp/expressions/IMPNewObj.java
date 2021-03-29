@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
@@ -44,7 +45,7 @@ public class IMPNewObj extends NativeCall {
 	 * @param parameters the parameters of the constructor call
 	 */
 	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, Expression... parameters) {
-		super(cfg, sourceFile, line, col, "new", type, parameters);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new", type, parameters);
 	}
 
 	@Override
@@ -57,12 +58,12 @@ public class IMPNewObj extends NativeCall {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getSourceFile(), getLine(), getCol(), "this",
+		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
 				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
 		Collection<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, Collections.singleton(created));
 
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getSourceFile(), getLine(), getCol(),
+		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		return call.callSemantics(entryState, callGraph, computedStates, fullParams).smallStepSemantics(created, this);

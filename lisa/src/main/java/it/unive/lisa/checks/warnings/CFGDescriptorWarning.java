@@ -23,7 +23,7 @@ public final class CFGDescriptorWarning extends WarningWithLocation {
 	 * @param message    the message of this warning
 	 */
 	public CFGDescriptorWarning(CFGDescriptor descriptor, String message) {
-		super(descriptor.getSourceFile(), descriptor.getLine(), descriptor.getCol(), message);
+		super(descriptor.getLocation(), message);
 		this.descriptor = descriptor;
 	}
 

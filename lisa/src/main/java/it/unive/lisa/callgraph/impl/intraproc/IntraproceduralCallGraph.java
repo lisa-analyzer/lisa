@@ -108,7 +108,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 		Call resolved;
 		if (targets.isEmpty())
-			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+			resolved = new OpenCall(call.getCFG(), call.getLocation(),
 					call.getTargetName(), call.getStaticType(), call.getParameters());
 		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
 			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
@@ -117,7 +117,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 				throw new CallResolutionException(
 						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
 
-			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+			resolved = new CFGCall(call.getCFG(), call.getLocation(),
 					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
 					call.getParameters());
 		}

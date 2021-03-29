@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -35,17 +36,13 @@ public abstract class Call extends Expression {
 	 * Builds a call happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where the expression is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	protected Call(CFG cfg, String sourceFile, int line, int col, Type staticType, Expression... parameters) {
-		super(cfg, sourceFile, line, col, staticType);
+	protected Call(CFG cfg, CodeLocation location, Type staticType, Expression... parameters) {
+		super(cfg, location, staticType);
 		Objects.requireNonNull(parameters, "The array of parameters of a call cannot be null");
 		for (int i = 0; i < parameters.length; i++)
 			Objects.requireNonNull(parameters[i], "The " + i + "-th parameter of a call cannot be null");

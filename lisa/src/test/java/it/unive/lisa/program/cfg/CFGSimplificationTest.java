@@ -29,7 +29,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimpleSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
@@ -53,12 +53,14 @@ public class CFGSimplificationTest {
 		second.validate();
 		first.simplify();
 		first.validate();
+		System.err.println(second.getNodes());
+		System.err.println(first.getNodes());
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
 	@Test
 	public void testDoubleSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop1 = new NoOp(first);
@@ -123,7 +125,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		GT gt = new GT(first, new VariableRef(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
@@ -169,7 +171,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
 		NoOp noop = new NoOp(first);
@@ -198,7 +200,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheStart() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
 		NoOp start = new NoOp(first);
 		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
@@ -227,7 +229,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, new VariableRef(first, "x"),
 				new Literal(first, 5, Untyped.INSTANCE));
@@ -258,7 +260,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, -1, -1, "foo", false);
+		CompilationUnit unit = new CompilationUnit(null, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, new VariableRef(first, "b"),
 				new Literal(first, true, Untyped.INSTANCE));

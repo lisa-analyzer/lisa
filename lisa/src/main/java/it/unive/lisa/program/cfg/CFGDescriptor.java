@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGDescriptor extends CodeElement {
+public class CFGDescriptor implements CodeElement {
 
 	/**
 	 * The unit the cfg belongs to
@@ -60,6 +60,12 @@ public class CFGDescriptor extends CodeElement {
 	private final Collection<CodeMember> overrides;
 
 	/**
+	 * The location where the cfg descripted by this descriptor appear in the
+	 * source file
+	 */
+	private final CodeLocation location;
+
+	/**
 	 * Builds the descriptor for a method that is defined at an unknown location
 	 * (i.e. no source file/line/column is available) and with untyped return
 	 * type, that is its type is {@link Untyped#INSTANCE}.
@@ -72,7 +78,7 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args     the arguments of the CFG associated with this descriptor
 	 */
 	public CFGDescriptor(Unit unit, boolean instance, String name, Parameter... args) {
-		this(null, -1, -1, unit, instance, name, Untyped.INSTANCE, args);
+		this(null, unit, instance, name, Untyped.INSTANCE, args);
 	}
 
 	/**
@@ -90,44 +96,31 @@ public class CFGDescriptor extends CodeElement {
 	 *                       descriptor
 	 */
 	public CFGDescriptor(Unit unit, boolean instance, String name, Type returnType, Parameter... args) {
-		this(null, -1, -1, unit, instance, name, returnType, args);
+		this(null, unit, instance, name, returnType, args);
 	}
 
 	/**
 	 * Builds the descriptor with {@link Untyped} return type.
 	 * 
-	 * @param sourceFile the source file where the CFG associated with this
-	 *                       descriptor is defined. If unknown, use {@code null}
-	 * @param line       the line number where the CFG associated with this
-	 *                       descriptor is defined in the source file. If
-	 *                       unknown, use {@code -1}
-	 * @param col        the column where the CFG associated with this
-	 *                       descriptor is defined in the source file. If
-	 *                       unknown, use {@code -1}
-	 * @param unit       the {@link Unit} containing the cfg associated to this
-	 *                       descriptor
-	 * @param instance   whether or not the cfg associated to this descriptor is
-	 *                       an instance cfg
-	 * @param name       the name of the CFG associated with this descriptor
-	 * @param args       the arguments of the CFG associated with this
-	 *                       descriptor
+	 * @param location the location where the cfg associated is define within
+	 *                     the source file. If unknown use {@code null}
+	 * @param unit     the {@link Unit} containing the cfg associated to this
+	 *                     descriptor
+	 * @param instance whether or not the cfg associated to this descriptor is
+	 *                     an instance cfg
+	 * @param name     the name of the CFG associated with this descriptor
+	 * @param args     the arguments of the CFG associated with this descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, boolean instance, String name,
+	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Parameter... args) {
-		this(sourceFile, line, col, unit, instance, name, Untyped.INSTANCE, args);
+		this(location, unit, instance, name, Untyped.INSTANCE, args);
 	}
 
 	/**
 	 * Builds the descriptor.
 	 * 
-	 * @param sourceFile the source file where the CFG associated with this
-	 *                       descriptor is defined. If unknown, use {@code null}
-	 * @param line       the line number where the CFG associated with this
-	 *                       descriptor is defined in the source file. If
-	 *                       unknown, use {@code -1}
-	 * @param col        the column where the CFG associated with this
-	 *                       descriptor is defined in the source file. If
-	 *                       unknown, use {@code -1}
+	 * @param location   the location where the cfg associated is define within
+	 *                       the source file, if unknown use {@code null}
 	 * @param unit       the {@link Unit} containing the cfg associated to this
 	 *                       descriptor
 	 * @param instance   whether or not the cfg associated to this descriptor is
@@ -138,15 +131,15 @@ public class CFGDescriptor extends CodeElement {
 	 * @param args       the arguments of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(String sourceFile, int line, int col, Unit unit, boolean instance, String name,
+	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Type returnType, Parameter... args) {
-		super(sourceFile, line, col);
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
 		for (int i = 0; i < args.length; i++)
 			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
+		this.location = location;
 		this.unit = unit;
 		this.name = name;
 		this.args = args;
@@ -160,7 +153,7 @@ public class CFGDescriptor extends CodeElement {
 		this.variables = new LinkedList<>();
 		int i = 0;
 		for (Parameter arg : args)
-			addVariable(new VariableTableEntry(arg.getSourceFile(), arg.getLine(), arg.getCol(), i++, null, null,
+			addVariable(new VariableTableEntry(arg.getLocation(), i++, null, null,
 					arg.getName(), arg.getStaticType()));
 	}
 
@@ -381,8 +374,7 @@ public class CFGDescriptor extends CodeElement {
 
 	@Override
 	public String toString() {
-		return getFullSignature() + " [at '" + String.valueOf(getSourceFile()) + "':" + getLine() + ":" + getCol()
-				+ "]";
+		return getFullSignature() + " [at '" + location + "]";
 	}
 
 	/**
@@ -416,5 +408,11 @@ public class CFGDescriptor extends CodeElement {
 				return false;
 
 		return true;
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.types.BoolType;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
@@ -35,7 +36,7 @@ public class IMPNot extends UnaryNativeCall {
 	 * @param expression the operand of this operation
 	 */
 	public IMPNot(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col, "!", BoolType.INSTANCE, expression);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "!", BoolType.INSTANCE, expression);
 	}
 
 	@Override
