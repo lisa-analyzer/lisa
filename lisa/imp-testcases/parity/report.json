@@ -1,4 +1,4 @@
 {
   "warnings" : [ ],
-  "files" : [ "analysis___untyped_tutorial.constants().dot", "analysis___untyped_tutorial.div(untyped_i,_untyped_j).dot", "analysis___untyped_tutorial.gcd(untyped_a,_untyped_b).dot", "analysis___untyped_tutorial.intv_dec().dot", "analysis___untyped_tutorial.sign_parity_example().dot", "analysis___untyped_tutorial.ub_example(untyped_y,_untyped_z).dot" ]
+  "files" : [ "analysis___untyped_tutorial.constants(tutorial_this).dot", "analysis___untyped_tutorial.div(tutorial_this,_untyped_i,_untyped_j).dot", "analysis___untyped_tutorial.gcd(tutorial_this,_untyped_a,_untyped_b).dot", "analysis___untyped_tutorial.intv_dec(tutorial_this).dot", "analysis___untyped_tutorial.sign_parity_example(tutorial_this).dot", "analysis___untyped_tutorial.ub_example(tutorial_this,_untyped_y,_untyped_z).dot" ]
 }

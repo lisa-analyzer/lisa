@@ -1,4 +1,4 @@
 {
   "warnings" : [ ],
-  "files" : [ "analysis___untyped_cp.f0().dot", "analysis___untyped_cp.f1(untyped_x,_untyped_y).dot", "analysis___untyped_cp.f2().dot", "analysis___untyped_cp.f3(untyped_x,_untyped_y).dot", "analysis___untyped_cp.f4(untyped_x,_untyped_y).dot" ]
+  "files" : [ "analysis___untyped_cp.f0(cp_this).dot", "analysis___untyped_cp.f1(cp_this,_untyped_x,_untyped_y).dot", "analysis___untyped_cp.f2(cp_this).dot", "analysis___untyped_cp.f3(cp_this,_untyped_x,_untyped_y).dot", "analysis___untyped_cp.f4(cp_this,_untyped_x,_untyped_y).dot" ]
 }
