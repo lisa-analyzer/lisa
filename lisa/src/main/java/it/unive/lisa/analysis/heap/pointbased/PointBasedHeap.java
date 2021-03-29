@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -25,6 +16,13 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.collections.Utils;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap

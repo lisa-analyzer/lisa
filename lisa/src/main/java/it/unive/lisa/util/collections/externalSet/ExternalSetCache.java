@@ -132,7 +132,10 @@ public class ExternalSetCache<T> {
 	protected final synchronized T get(int pos) {
 		return elements.get(pos);
 	}
-	
+
+	/**
+	 * Cleans the cache, removing all elements.
+	 */
 	public final synchronized void clear() {
 		elements.clear();
 		indexes.clear();

@@ -89,10 +89,10 @@ public abstract class Expression extends Statement {
 	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
 		if (runtimeTypes == null)
 			return;
-		
+
 		if (this.runtimeTypes != null && (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes)))
 			return;
-		
+
 		if (this.runtimeTypes != null && runtimeTypes.isEmpty())
 			this.runtimeTypes.clear();
 		else
