@@ -248,12 +248,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					return from(new PointBasedHeap(hids, heapEnv));
 				}
 
-			// The heap reference refers to an identifier that is not tracked by this domain
-			return from(new PointBasedHeap(
-					Collections.singleton(new AllocationSite(heapRef.getTypes(), heapRef.getName())), heapEnv));
+			// The heap reference refers to an allocation site
+			// and then is searched on the heap environment, if present
+			for (AllocationSites sites : heapEnv.values())
+				for (AllocationSite site : sites)
+					if (site.getName().equals(heapRef.getName()))
+						return from(new PointBasedHeap(Collections.singleton(site), heapEnv)); 
+			
+			// The heap reference refers to a just rewritten symbolic expression
+			for (SymbolicExpression rew : getRewrittenExpressions())
+				if (rew instanceof HeapIdentifier && ((HeapIdentifier) rew).getName().equals(heapRef.getName()))
+					return from(new PointBasedHeap(Collections.singleton((HeapIdentifier) rew), heapEnv)); 
 		}
 
 		return top();
-
 	}
 }
