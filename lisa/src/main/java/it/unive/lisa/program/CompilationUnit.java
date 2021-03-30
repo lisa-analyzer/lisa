@@ -1,9 +1,5 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +7,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A compilation unit of the program to analyze. A compilation unit is a
@@ -67,18 +70,15 @@ public class CompilationUnit extends Unit {
 	/**
 	 * Builds a compilation unit, defined at the given program point.
 	 * 
-	 * @param sourceFile the source file where the unit is defined
-	 * @param line       the line where the unit is defined within the source
-	 *                       file
-	 * @param col        the column where the unit is defined within the source
-	 *                       file
-	 * @param name       the name of the unit
-	 * @param sealed     whether or not this unit is sealed, meaning that it
-	 *                       cannot be used as super unit of other compilation
-	 *                       units
+	 * @param location the location where the unit is define within the source
+	 *                     file
+	 * @param name     the name of the unit
+	 * @param sealed   whether or not this unit is sealed, meaning that it
+	 *                     cannot be used as super unit of other compilation
+	 *                     units
 	 */
-	public CompilationUnit(String sourceFile, int line, int col, String name, boolean sealed) {
-		super(sourceFile, line, col, name);
+	public CompilationUnit(CodeLocation location, String name, boolean sealed) {
+		super(location, name);
 		this.sealed = sealed;
 		superUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());

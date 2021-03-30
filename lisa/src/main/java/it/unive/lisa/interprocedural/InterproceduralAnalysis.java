@@ -1,7 +1,14 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+
 import it.unive.lisa.DefaultImplementation;
-import it.unive.lisa.analysis.*;
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
@@ -14,7 +21,6 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.Collection;
 
 /**
  * The definition of interprocedural analyses.

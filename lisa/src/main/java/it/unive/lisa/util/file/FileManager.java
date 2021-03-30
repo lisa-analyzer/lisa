@@ -18,34 +18,28 @@ import java.util.TreeSet;
  */
 public class FileManager {
 
-	private static File workdir;
+	private final File workdir;
 
-	private static final Collection<String> createdFiles = new TreeSet<>();
+	private final Collection<String> createdFiles = new TreeSet<>();
 
 	/**
-	 * Sets the working directory that will be used as root folder for the
-	 * creation of all files.
+	 * Builds a new manager that will produce files in the given
+	 * {@code workdir}.
 	 * 
-	 * @param workdir the working directory
+	 * @param workdir the path to the directory where files will be created by
+	 *                    this manager
 	 */
-	public static void setWorkdir(String workdir) {
-		FileManager.workdir = Paths.get(workdir).toFile();
-	}
-
-	/**
-	 * Clears the list of names of created files.
-	 */
-	public static void clearCreatedFiles() {
-		createdFiles.clear();
+	public FileManager(String workdir) {
+		this.workdir = Paths.get(workdir).toFile();
 	}
 
 	/**
 	 * Yields the collection of file names that have been created by this
-	 * manager from the last call to {@link #clearCreatedFiles()}.
+	 * manager.
 	 * 
 	 * @return the names of the created files
 	 */
-	public static Collection<String> createdFiles() {
+	public Collection<String> createdFiles() {
 		return createdFiles;
 	}
 
@@ -61,7 +55,7 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public static Writer mkOutputFile(String name) throws IOException {
+	public Writer mkOutputFile(String name) throws IOException {
 		return mkOutputFile(cleanupForDotFile(name), false);
 	}
 
@@ -79,11 +73,12 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public static Writer mkOutputFile(String name, boolean bom) throws IOException {
+	public Writer mkOutputFile(String name, boolean bom) throws IOException {
 		File file = new File(workdir, name);
 
 		if (!file.getAbsoluteFile().getParentFile().exists())
-			file.getAbsoluteFile().getParentFile().mkdirs();
+			if (!file.getAbsoluteFile().getParentFile().mkdirs())
+				throw new IOException("Unable to create directory structure for " + file);
 
 		Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder());
 		if (bom)
@@ -108,7 +103,7 @@ public class FileManager {
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public static Writer mkDotFile(String name) throws IOException {
+	public Writer mkDotFile(String name) throws IOException {
 		return mkOutputFile(cleanupForDotFile(name) + ".dot", false);
 	}
 

@@ -111,6 +111,17 @@ class example {
 		// - another method call
 		
 		// all expressions can also be grouped between parenthesis!
+		
+		// string operations directly supported (i.e., not in the form of receiver.method(params))
+		strlen("x"); // length of a string
+		strcat("x", "y"); // string concatenation
+		streq("x", "y"); // check if the strings are equal
+		strcon("x", "y"); // check if the second string is contained into the first one
+		strstarts("x", "y"); // check if the first string starts with the second one
+		strends("x", "y"); // check if the first string ends with the second one
+		strindex("x", "y"); // yield the index of the first occourrence of the second string into the first one
+		strrep("x", "y", "z"); // replace all occurrences of the second string inside the first one with the third string
+		strsub("x", 0, 1); // yield the substring of the string, from the first integer (inclusive) to the second one (exclusive)
 	}
 	
 	// methods can be final to avoid overriding by subclasses

@@ -2,7 +2,7 @@ package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression that accesses a memory location that is a <i>child</i> of

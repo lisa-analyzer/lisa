@@ -1,8 +1,11 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.util.collections.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
+import java.util.TreeSet;
+
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * The type of type tokens, used as reference to types in code.
@@ -33,7 +36,10 @@ public class TypeTokenType implements Type {
 
 	@Override
 	public String toString() {
-		return types.toString();
+		Set<String> sorted = new TreeSet<>();
+		for (Type t : types)
+			sorted.add(t.toString());
+		return "token::" + sorted;
 	}
 
 	@Override

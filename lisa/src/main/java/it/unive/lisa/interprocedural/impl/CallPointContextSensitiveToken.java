@@ -1,7 +1,8 @@
 package it.unive.lisa.interprocedural.impl;
 
-import it.unive.lisa.program.cfg.statement.Call;
 import java.util.Objects;
+
+import it.unive.lisa.program.cfg.statement.Call;
 
 /**
  * A context sensitive token representing a call point.

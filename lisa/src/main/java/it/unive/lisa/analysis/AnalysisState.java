@@ -1,15 +1,19 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections.CollectionUtils;
+
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is

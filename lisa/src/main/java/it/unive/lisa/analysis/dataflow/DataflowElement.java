@@ -1,10 +1,12 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 
 /**
  * An element of the dataflow domain, that is associated to an
@@ -75,7 +77,9 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @param scope the scope to be popped
 	 * 
 	 * @return the element with the popped scope
+	 * 
+	 * @throws SemanticException if the scope cannot be popped
 	 */
-	E popScope(Call scope);
+	E popScope(Call scope) throws SemanticException;
 
 }

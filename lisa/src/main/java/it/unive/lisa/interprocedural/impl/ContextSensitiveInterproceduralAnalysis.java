@@ -1,6 +1,20 @@
 package it.unive.lisa.interprocedural.impl;
 
-import it.unive.lisa.analysis.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.logging.IterationLogger;
@@ -11,13 +25,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive inteprocedural analysis.
@@ -100,9 +107,7 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public final Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(
-			CFG cfg) {
+	public final Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
 		if (results.get(cfg) != null)
 			return results.get(cfg).getAll();
 		else

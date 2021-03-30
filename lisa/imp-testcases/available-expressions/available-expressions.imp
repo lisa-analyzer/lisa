@@ -1,0 +1,91 @@
+class ae {
+
+	f0() {
+		def x = 0;
+		def y = 0;
+		def z = x * y;
+		def d = 5 + 7;
+		def w = x + y;
+
+		return;
+	}
+
+	f1() {
+		def b = 0;
+		def c = 0;
+		def y = 0;
+		def z = 0;
+		def a = b + c;
+		def x = y - z;
+		b = x + y;
+		x = a + b;
+		return;
+	}
+
+	f2() {
+		def b = 0;
+		def c = 0;
+		def f = 0;
+		def e = 0;
+		
+		def a = b + c;
+		def d = e + f;
+		f = a + c;
+		
+		if (true) {
+			def g = a + c;
+		} else {
+			while (true) { 
+				b = a + d;
+				def h = c + f;
+			}
+		}
+		
+		def j = a + b + c + d;
+		return j;
+	}
+
+
+	f3() {
+		def a = 0;
+		def b = 0;
+		def x = a + b;
+		def y = a * b;
+		
+		while (y > a) {
+			a = a + 1;
+			x = a + b;
+		}	
+		
+		return;
+	}
+	
+	f4() {
+		def xy = 0;
+		def b = 0;
+		def y = 0;
+		def z = 0;
+		def n = 7 * 3;
+		def a = xy + y;
+		
+		if (xy == 0) { 
+			xy = z;
+			b = xy + y;
+		} else {
+			xy = 1;
+			b = xy + y;
+		}
+		
+		def i =  xy + y;
+		
+		if (i < n) {
+			def c = xy + y;
+			i = i + c;
+		} else {
+			def d = xy + y;
+		}
+		
+		return;
+	}
+
+}

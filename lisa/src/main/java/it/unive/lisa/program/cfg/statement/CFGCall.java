@@ -1,22 +1,26 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
+import it.unive.lisa.type.Untyped;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -45,7 +49,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * @param parameters    the parameters of this call
 	 */
 	public CFGCall(CFG cfg, String qualifiedName, CFG target, Expression... parameters) {
-		this(cfg, null, -1, -1, qualifiedName, target, parameters);
+		this(cfg, null, qualifiedName, target, parameters);
 	}
 
 	/**
@@ -58,45 +62,37 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * @param parameters    the parameters of this call
 	 */
 	public CFGCall(CFG cfg, String qualifiedName, Collection<CFG> targets, Expression... parameters) {
-		this(cfg, null, -1, -1, qualifiedName, targets, parameters);
+		this(cfg, null, qualifiedName, targets, parameters);
 	}
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param target        the CFG that is targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public CFGCall(CFG cfg, String sourceFile, int line, int col, String qualifiedName, CFG target,
+	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, CFG target,
 			Expression... parameters) {
-		this(cfg, sourceFile, line, col, qualifiedName, Collections.singleton(target), parameters);
+		this(cfg, location, qualifiedName, Collections.singleton(target), parameters);
 	}
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param sourceFile    the source file where this expression happens. If
-	 *                          unknown, use {@code null}
-	 * @param line          the line number where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
-	 * @param col           the column where this expression happens in the
-	 *                          source file. If unknown, use {@code -1}
+	 * @param location      the location where this expression is defined within
+	 *                          the source file. If unknown, use {@code null}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public CFGCall(CFG cfg, String sourceFile, int line, int col, String qualifiedName, Collection<CFG> targets,
+	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, Collection<CFG> targets,
 			Expression... parameters) {
-		super(cfg, sourceFile, line, col, getCommonReturnType(targets), parameters);
+		super(cfg, location, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(qualifiedName, "The qualified name of the static target of a CFG call cannot be null");
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)
@@ -123,7 +119,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 				break;
 		}
 
-		return result;
+		return result == null ? Untyped.INSTANCE : result;
 	}
 
 	/**
@@ -188,7 +184,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
@@ -202,13 +198,11 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = callGraph.getAbstractResultOf(this, lastPostState, params);
+		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, lastPostState, params);
 		// the lub will include the metavariable inside the state
 		// AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
 		if (getStaticType().isVoidType() ||
-		// FIXME: @Luca, the problem here is that we have an untyped that indeed
-		// it's a void, what should we do?
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
 				(returned.getComputedExpressions().size() == 1
 						&& returned.getComputedExpressions().iterator().next() instanceof Skip))
@@ -227,7 +221,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		for (SymbolicExpression expr : returned.getComputedExpressions())
 		// if(! (expr instanceof Skip))
 		{
-			AnalysisState<A, H, V> tmp = returned.assign(meta.pushScope(this), expr, this);
+			AnalysisState<A, H, V> tmp = returned.assign((Identifier) meta.pushScope(this), expr, this);
 			result = result.lub(tmp.smallStepSemantics(meta.pushScope(this), this));
 			// We need to perform this evaluation of the identifier not pushed
 			// with the scope since otherwise

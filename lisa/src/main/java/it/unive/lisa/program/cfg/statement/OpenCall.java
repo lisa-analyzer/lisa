@@ -1,21 +1,24 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -39,7 +42,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	 * @param parameters the parameters of this call
 	 */
 	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
-		this(cfg, null, -1, -1, targetName, Untyped.INSTANCE, parameters);
+		this(cfg, targetName, Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -52,26 +55,22 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	 * @param staticType the static type of this call
 	 */
 	public OpenCall(CFG cfg, String targetName, Type staticType, Expression... parameters) {
-		this(cfg, null, -1, -1, targetName, staticType, parameters);
+		this(cfg, null, targetName, staticType, parameters);
 	}
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where the expression is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, String sourceFile, int line, int col, String targetName, Type staticType,
+	public OpenCall(CFG cfg, CodeLocation location, String targetName, Type staticType,
 			Expression... parameters) {
-		super(cfg, sourceFile, line, col, staticType, parameters);
+		super(cfg, location, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of an open call cannot be null");
 		this.targetName = targetName;
 	}
@@ -124,7 +123,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
@@ -134,6 +133,6 @@ public class OpenCall extends Call implements MetaVariableCreator {
 		if (getStaticType().isVoidType())
 			return poststate.smallStepSemantics(new Skip(), this);
 		else
-			return poststate.smallStepSemantics(getMetaVariable(), this);
+			return poststate.smallStepSemantics(getMetaVariable().pushScope(this), this);
 	}
 }

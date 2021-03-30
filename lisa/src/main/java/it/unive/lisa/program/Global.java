@@ -1,8 +1,10 @@
 package it.unive.lisa.program;
 
+import java.util.Objects;
+
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Objects;
 
 /**
  * A global variable, scoped by its container. Instances of this class can refer
@@ -10,7 +12,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Global extends CodeElement {
+public class Global implements CodeElement {
 
 	/**
 	 * The name of this parameter
@@ -22,6 +24,8 @@ public class Global extends CodeElement {
 	 */
 	private final Type staticType;
 
+	private final CodeLocation location;
+
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The
 	 * location where this parameter reference happens is unknown (i.e. no
@@ -31,7 +35,7 @@ public class Global extends CodeElement {
 	 * @param name the name of this parameter
 	 */
 	public Global(String name) {
-		this(null, -1, -1, name, Untyped.INSTANCE);
+		this(name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -43,27 +47,23 @@ public class Global extends CodeElement {
 	 * @param staticType the type of this parameter
 	 */
 	public Global(String name, Type staticType) {
-		this(null, -1, -1, name, staticType);
+		this(null, name, staticType);
 	}
 
 	/**
 	 * Builds the parameter reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param sourceFile the source file where this parameter happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this parameter happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this parameter happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where this parameter is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param name       the name of this parameter
 	 * @param staticType the type of this parameter. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
-	public Global(String sourceFile, int line, int col, String name, Type staticType) {
-		super(sourceFile, line, col);
+	public Global(CodeLocation location, String name, Type staticType) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
+		this.location = location;
 		this.name = name;
 		this.staticType = staticType;
 	}
@@ -120,5 +120,10 @@ public class Global extends CodeElement {
 	@Override
 	public String toString() {
 		return staticType + " " + name;
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
 	}
 }

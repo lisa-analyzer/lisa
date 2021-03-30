@@ -2,13 +2,11 @@ package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 
 /**
@@ -106,6 +104,9 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
+		if (left.isTop() || right.isTop())
+			return top();
+
 		switch (operator) {
 		case NUMERIC_ADD:
 		case NUMERIC_SUB:
@@ -131,12 +132,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalTernaryExpression(TernaryOperator operator, Parity left, Parity middle, Parity right,
-			ProgramPoint pp) {
-		return TOP;
-	}
-
-	@Override
 	protected Parity lubAux(Parity other) throws SemanticException {
 		return TOP;
 	}
@@ -149,38 +144,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	@Override
 	protected boolean lessOrEqualAux(Parity other) throws SemanticException {
 		return false;
-	}
-
-	@Override
-	protected Satisfiability satisfiesAbstractValue(Parity value, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Parity left, Parity right,
-			ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Parity left, Parity middle,
-			Parity right, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
 	}
 
 	@Override

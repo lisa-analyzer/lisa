@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
@@ -44,13 +44,7 @@ public abstract class SymbolicExpression {
 	 * @return the dynamic type of this expression
 	 */
 	public final Type getDynamicType() {
-		return types.reduce(types.first(), (result, t) -> {
-			if (result.canBeAssignedTo(t))
-				return t;
-			if (t.canBeAssignedTo(result))
-				return result;
-			return t.commonSupertype(result);
-		});
+		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
 
 	/**

@@ -1,10 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Collection;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the

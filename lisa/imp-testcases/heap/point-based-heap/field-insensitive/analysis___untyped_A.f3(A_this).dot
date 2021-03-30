@@ -1,0 +1,23 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<o = new(-1, -1)<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node1" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 3]<BR/>hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16]>];
+	"node2" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [true]>];
+	"node3" [shape="rect",color="gray",label=<o = new(0, 0)<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node4" [shape="rect",color="gray",label=<o = new(1, 1)<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ vid$o: #TOP# ]]<BR/>}} -&gt; [vid$o]>];
+	"node5" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 2]<BR/>hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 2]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16]>];
+	"node6" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 3]<BR/>hid$pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 3]<BR/>vid$o: #TOP# ]]<BR/>}} -&gt; [skip]>];
+	"node1" -> "node6" [color="black"];
+	"node2" -> "node3" [color="blue",style="dashed"];
+	"node2" -> "node4" [color="red",style="dashed"];
+	"node3" -> "node5" [color="black"];
+	"node4" -> "node5" [color="black"];
+	"node5" -> "node1" [color="black"];
+	"node0" -> "node2" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}

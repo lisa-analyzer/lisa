@@ -1,13 +1,14 @@
 package it.unive.lisa.program.cfg.edge;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import java.util.Collection;
 
 /**
  * An edge connecting two statements, that is traversed when the condition

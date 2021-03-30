@@ -1,10 +1,13 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Map;
+
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -30,25 +33,47 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	private final Map<Statement, AnalysisState<A, H, V>> results;
 
 	/**
+	 * The map storing the entry state of each entry point
+	 */
+	private final Map<Statement, AnalysisState<A, H, V>> entryStates;
+
+	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg     the original control flow graph
 	 * @param results the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<A, H, V>> results) {
+	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<A, H, V>> entryStates,
+			Map<Statement, AnalysisState<A, H, V>> results) {
 		super(cfg);
 		this.results = results;
+		this.entryStates = entryStates;
 	}
 
 	/**
-	 * Yields the computed result at a given statement.
+	 * Yields the computed result before a given statement (entry state).
+	 *
+	 * @param st the statement
+	 *
+	 * @return the result computed before the given statement
+	 * 
+	 * @throws SemanticException if the lub operator fails
+	 */
+	public final AnalysisState<A, H, V> getAnalysisStateBefore(Statement st) throws SemanticException {
+		if (getEntrypoints().contains(st))
+			return entryStates.get(st);
+		return lub(predecessorsOf(st), false);
+	}
+
+	/**
+	 * Yields the computed result at a given statement (exit state).
 	 *
 	 * @param st the statement
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public final AnalysisState<A, H, V> getAnalysisStateAt(Statement st) {
+	public final AnalysisState<A, H, V> getAnalysisStateAfter(Statement st) {
 		return results.get(st);
 	}
 
@@ -59,10 +84,8 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	// FIXME: Luca, do we get the entry or exit statement when we ask the map?
-	// If exit, how do we get the entry state?
 	public final AnalysisState<A, H, V> getEntryState() throws SemanticException {
-		return lub(this.getEntrypoints());
+		return lub(this.getEntrypoints(), true);
 	}
 
 	/**
@@ -73,13 +96,16 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * @throws SemanticException if the lub operator fails
 	 */
 	public final AnalysisState<A, H, V> getExitState() throws SemanticException {
-		return lub(this.getNormalExitpoints());
+		return lub(this.getNormalExitpoints(), false);
 	}
 
-	private AnalysisState<A, H, V> lub(Collection<Statement> statements) throws SemanticException {
+	private AnalysisState<A, H, V> lub(Collection<Statement> statements, boolean entry) throws SemanticException {
 		AnalysisState<A, H, V> result = null;
-		for (Statement entry : statements)
-			result = result == null ? this.getAnalysisStateAt(entry) : result.lub(this.getAnalysisStateAt(entry));
+		for (Statement st : statements)
+			if (result == null)
+				result = entry ? getAnalysisStateBefore(st) : getAnalysisStateBefore(st);
+			else
+				result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateBefore(st));
 		return result;
 
 	}

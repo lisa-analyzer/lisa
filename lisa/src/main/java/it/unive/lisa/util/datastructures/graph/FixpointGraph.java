@@ -1,14 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.FunctionalLattice;
-import it.unive.lisa.analysis.HeapDomain;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.util.workset.WorkingSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,9 +7,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.util.workset.WorkingSet;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}, over which a fixpoint
@@ -107,12 +109,13 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 		 * {@code expressions}. If the computation needs information regarding
 		 * the other {@link FixpointGraph}s, {@code callGraph} can be queried.
 		 * 
-		 * @param node        the node whose semantics needs to be evaluated
-		 * @param entryState  the entry state for the computation
-		 * @param callGraph   the call graph that can be used to obtain semantic
-		 *                        information on other graphs
-		 * @param expressions the store where semantics results of inner
-		 *                        expressions must be stored
+		 * @param node            the node whose semantics needs to be evaluated
+		 * @param entryState      the entry state for the computation
+		 * @param interprocedural the interprocedural analysis that can be used
+		 *                            to obtain semantic information on other
+		 *                            graphs
+		 * @param expressions     the store where semantics results of inner
+		 *                            expressions must be stored
 		 * 
 		 * @return the abstract analysis state after the execution of the given
 		 *             node
@@ -120,7 +123,8 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 		 * @throws SemanticException if something goes wrong during the
 		 *                               computation
 		 */
-		AnalysisState<A, H, V> compute(N node, AnalysisState<A, H, V> entryState, InterproceduralAnalysis callGraph,
+		AnalysisState<A, H, V> compute(N node, AnalysisState<A, H, V> entryState,
+				InterproceduralAnalysis<A, H, V> interprocedural,
 				F expressions) throws SemanticException;
 	}
 
@@ -139,30 +143,31 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 	 * all invoked graphs, while {@code ws} is used as working set for the nodes
 	 * to process.
 	 * 
-	 * @param <A>            the type of {@link AbstractState}
-	 * @param <H>            the type of {@link HeapDomain} contained into the
-	 *                           computed abstract state
-	 * @param <V>            the type of {@link ValueDomain} contained into the
-	 *                           computed abstract state
-	 * @param <F>            the type of {@link FunctionalLattice} that will
-	 *                           hold analysis states computed on intermediate
-	 *                           nodes
-	 * @param startingPoints a map between {@link Node}s that to use as a
-	 *                           starting point of the computation (that must be
-	 *                           nodes of this graph) and the entry states to
-	 *                           apply on it
-	 * @param cg             the callgraph that can be queried when a call
-	 *                           towards an other graph is encountered
-	 * @param ws             the {@link WorkingSet} instance to use for this
-	 *                           computation
-	 * @param widenAfter     the number of times after which the
-	 *                           {@link Lattice#lub(Lattice)} invocation gets
-	 *                           replaced by the
-	 *                           {@link Lattice#widening(Lattice)} call. Use
-	 *                           {@code 0} to <b>always</b> use
-	 *                           {@link Lattice#lub(Lattice)}
-	 * @param semantics      the {@link SemanticFunction} that will be used for
-	 *                           computing the abstract post-state of nodes
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param <H>             the type of {@link HeapDomain} contained into the
+	 *                            computed abstract state
+	 * @param <V>             the type of {@link ValueDomain} contained into the
+	 *                            computed abstract state
+	 * @param <F>             the type of {@link FunctionalLattice} that will
+	 *                            hold analysis states computed on intermediate
+	 *                            nodes
+	 * @param startingPoints  a map between {@link Node}s that to use as a
+	 *                            starting point of the computation (that must
+	 *                            be nodes of this graph) and the entry states
+	 *                            to apply on it
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other graph is
+	 *                            encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param widenAfter      the number of times after which the
+	 *                            {@link Lattice#lub(Lattice)} invocation gets
+	 *                            replaced by the
+	 *                            {@link Lattice#widening(Lattice)} call. Use
+	 *                            {@code 0} to <b>always</b> use
+	 *                            {@link Lattice#lub(Lattice)}
+	 * @param semantics       the {@link SemanticFunction} that will be used for
+	 *                            computing the abstract post-state of nodes
 	 * 
 	 * @return a map that stores for each {@link Node} the result of the
 	 *             fixpoint computation
@@ -177,9 +182,8 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			F extends FunctionalLattice<F, N, AnalysisState<A, H, V>>> Map<N, AnalysisState<A, H, V>> fixpoint(
-					Map<N, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis cg, WorkingSet<N> ws,
-					int widenAfter,
-					SemanticFunction<N, E, G, A, H, V, F> semantics)
+					Map<N, AnalysisState<A, H, V>> startingPoints, InterproceduralAnalysis<A, H, V> interprocedural,
+					WorkingSet<N> ws, int widenAfter, SemanticFunction<N, E, G, A, H, V, F> semantics)
 					throws FixpointException {
 		int size = adjacencyMatrix.getNodes().size();
 		Map<N, AtomicInteger> lubs = new HashMap<>(size);
@@ -220,10 +224,7 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 
 				try {
 					newIntermediate = (F) mkInternalStore(entrystate);
-					newApprox = semantics.compute(current, entrystate, cg, newIntermediate);
-					// FIXME the state should be cleaned through push/pop, not
-					// through a cleanup here!
-					// newApprox = cleanUpPostState(current, newApprox);
+					newApprox = semantics.compute(current, entrystate, interprocedural, newIntermediate);
 				} catch (SemanticException e) {
 					log.error("Evaluation of the semantics of '" + current + "' in " + this
 							+ " led to an exception: " + e);

@@ -2,12 +2,13 @@ package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -30,7 +31,7 @@ public class Assignment extends BinaryExpression {
 	 * @param expression the expression to assign to {@code target}
 	 */
 	public Assignment(CFG cfg, Expression target, Expression expression) {
-		this(cfg, null, -1, -1, target, expression);
+		this(cfg, null, target, expression);
 	}
 
 	/**
@@ -38,17 +39,13 @@ public class Assignment extends BinaryExpression {
 	 * happening at the given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this statement happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where this statement is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
-	public Assignment(CFG cfg, String sourceFile, int line, int col, Expression target, Expression expression) {
-		super(cfg, sourceFile, line, col, target, expression);
+	public Assignment(CFG cfg, CodeLocation location, Expression target, Expression expression) {
+		super(cfg, location, target, expression);
 	}
 
 	@Override
@@ -79,11 +76,11 @@ public class Assignment extends BinaryExpression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> right = getRight().semantics(entryState, interproceduralAnalysis, expressions);
-		AnalysisState<A, H, V> left = getLeft().semantics(right, interproceduralAnalysis, expressions);
+		AnalysisState<A, H, V> right = getRight().semantics(entryState, interprocedural, expressions);
+		AnalysisState<A, H, V> left = getLeft().semantics(right, interprocedural, expressions);
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 

@@ -2,12 +2,13 @@ package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -27,7 +28,7 @@ public class Throw extends UnaryStatement {
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, Expression expression) {
-		this(cfg, null, -1, -1, expression);
+		this(cfg, null, expression);
 	}
 
 	/**
@@ -35,16 +36,12 @@ public class Throw extends UnaryStatement {
 	 * given location in the program.
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
-	 * @param sourceFile the source file where this statement happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this statement happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this statement happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where the expression is defined within the
+	 *                       source file. If unknown, use {@code null}
 	 * @param expression the expression to raise as error
 	 */
-	public Throw(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, sourceFile, line, col, expression);
+	public Throw(CFG cfg, CodeLocation location, Expression expression) {
+		super(cfg, location, expression);
 	}
 
 	@Override
@@ -66,10 +63,10 @@ public class Throw extends UnaryStatement {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = getExpression().semantics(entryState, interproceduralAnalysis, expressions);
+		AnalysisState<A, H, V> result = getExpression().semantics(entryState, interprocedural, expressions);
 		expressions.put(getExpression(), result);
 		if (!getExpression().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());

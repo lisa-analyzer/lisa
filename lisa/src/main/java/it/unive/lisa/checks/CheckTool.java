@@ -1,6 +1,10 @@
 package it.unive.lisa.checks;
 
-import it.unive.lisa.checks.warnings.CFGDesccriptorWarning;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
+import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
@@ -9,9 +13,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An auxiliary tool that can be used by checks during their execution. It
@@ -65,7 +66,7 @@ public class CheckTool {
 	 * @param message    the message of the warning
 	 */
 	public void warnOn(CFGDescriptor descriptor, String message) {
-		warnings.add(new CFGDesccriptorWarning(descriptor, message));
+		warnings.add(new CFGDescriptorWarning(descriptor, message));
 	}
 
 	/**

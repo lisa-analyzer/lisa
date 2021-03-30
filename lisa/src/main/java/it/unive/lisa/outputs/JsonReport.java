@@ -1,8 +1,5 @@
 package it.unive.lisa.outputs;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import it.unive.lisa.checks.warnings.Warning;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -10,6 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import it.unive.lisa.checks.warnings.Warning;
 
 /**
  * A report of an executed analysis that can be dumped in json format, and that
@@ -99,6 +101,7 @@ public class JsonReport {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((files == null) ? 0 : files.hashCode());
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
 		return result;
 	}
@@ -112,6 +115,11 @@ public class JsonReport {
 		if (getClass() != obj.getClass())
 			return false;
 		JsonReport other = (JsonReport) obj;
+		if (files == null) {
+			if (other.files != null)
+				return false;
+		} else if (!files.equals(other.files))
+			return false;
 		if (warnings == null) {
 			if (other.warnings != null)
 				return false;

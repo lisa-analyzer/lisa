@@ -1,14 +1,17 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+
 import it.unive.lisa.DefaultParameters;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the

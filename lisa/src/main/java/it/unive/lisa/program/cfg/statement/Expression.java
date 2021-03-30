@@ -1,16 +1,18 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.ExternalSet;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression that is part of a statement of the program.
@@ -28,7 +30,7 @@ public abstract class Expression extends Statement {
 	 * The set of runtime types of this expression, only computed if type
 	 * inference is executed.
 	 */
-	private final ExternalSet<Type> runtimeTypes;
+	private ExternalSet<Type> runtimeTypes;
 
 	/**
 	 * The statement (or expression) that contains this expression.
@@ -46,36 +48,27 @@ public abstract class Expression extends Statement {
 	 * Builds an untyped expression happening at the given source location, that
 	 * is its type is {@link Untyped#INSTANCE}.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     source file. If unknown, use {@code null}
 	 */
-	protected Expression(CFG cfg, String sourceFile, int line, int col) {
-		this(cfg, sourceFile, line, col, Untyped.INSTANCE);
+	protected Expression(CFG cfg, CodeLocation location) {
+		this(cfg, location, Untyped.INSTANCE);
 	}
 
 	/**
 	 * Builds a typed expression happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
+	 * @param location   the location where this expression is defined within
+	 *                       the source file. If unknown, use {@code null}
 	 * @param staticType the static type of this expression
 	 */
-	protected Expression(CFG cfg, String sourceFile, int line, int col, Type staticType) {
-		super(cfg, sourceFile, line, col);
+	protected Expression(CFG cfg, CodeLocation location, Type staticType) {
+		super(cfg, location);
 		Objects.requireNonNull(staticType, "The expression type of a CFG cannot be null");
 		this.staticType = staticType;
 		this.metaVariables = new HashSet<>();
-		this.runtimeTypes = Caches.types().mkEmptySet();
 	}
 
 	/**
@@ -94,12 +87,16 @@ public abstract class Expression extends Statement {
 	 *                         have at runtime
 	 */
 	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
-		if (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes))
+		if (runtimeTypes == null)
 			return;
 
-		this.runtimeTypes.clear();
-		if (runtimeTypes != null && !runtimeTypes.isEmpty())
-			this.runtimeTypes.addAll(runtimeTypes);
+		if (this.runtimeTypes != null && (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes)))
+			return;
+
+		if (this.runtimeTypes != null && runtimeTypes.isEmpty())
+			this.runtimeTypes.clear();
+		else
+			this.runtimeTypes = runtimeTypes.copy();
 	}
 
 	/**
@@ -110,7 +107,7 @@ public abstract class Expression extends Statement {
 	 * @return the set of runtime types
 	 */
 	public final ExternalSet<Type> getRuntimeTypes() {
-		if (runtimeTypes.isEmpty())
+		if (runtimeTypes == null)
 			return Caches.types().mkSet(staticType.allInstances());
 		return runtimeTypes;
 	}
@@ -124,7 +121,7 @@ public abstract class Expression extends Statement {
 	 */
 	public final Type getDynamicType() {
 		ExternalSet<Type> runtimes = getRuntimeTypes();
-		return runtimeTypes.reduce(runtimes.first(), (result, t) -> {
+		return getRuntimeTypes().reduce(runtimes.first(), (result, t) -> {
 			if (result.canBeAssignedTo(t))
 				return t;
 			if (t.canBeAssignedTo(result))
@@ -208,7 +205,7 @@ public abstract class Expression extends Statement {
 		if (parent == null)
 			return this;
 
-		if (parent instanceof Statement)
+		if (!(parent instanceof Expression))
 			return parent;
 
 		return ((Expression) parent).getRootStatement();

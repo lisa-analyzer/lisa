@@ -1,0 +1,33 @@
+class A {	
+	a;
+	b;
+	
+	f1() {
+		def o1 = new A(1,2); 
+		o1.a = 1;
+		o1.b = 2;
+		o1.a  = o1.b + 1;
+	}
+		
+	f2() {	
+		def o = new A(-1,-1);
+		if (true) {
+			o = new A(0,0);
+		} else {
+			o = new A(1,1);
+		}
+
+	}
+	
+	f3() {	
+		def o = new A(-1,-1);
+		if (true) {
+			o = new A(0,0);
+		} else {
+			o = new A(1,1);
+		}
+			
+		o.a = 2;
+		o.b = 3;
+	}
+}

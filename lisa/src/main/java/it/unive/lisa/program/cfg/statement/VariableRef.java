@@ -1,13 +1,16 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.HeapDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.ValueDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
@@ -15,7 +18,6 @@ import it.unive.lisa.symbolic.value.ValueIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -38,7 +40,7 @@ public class VariableRef extends Expression {
 	 * @param name the name of this variable
 	 */
 	public VariableRef(CFG cfg, String name) {
-		this(cfg, null, -1, -1, name, Untyped.INSTANCE);
+		this(cfg, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -51,25 +53,21 @@ public class VariableRef extends Expression {
 	 * @param type the type of this variable
 	 */
 	public VariableRef(CFG cfg, String name, Type type) {
-		this(cfg, null, -1, -1, name, type);
+		this(cfg, null, name, type);
 	}
 
 	/**
 	 * Builds the variable reference, identified by its name, happening at the
 	 * given location in the program.
 	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param sourceFile the source file where this expression happens. If
-	 *                       unknown, use {@code null}
-	 * @param line       the line number where this expression happens in the
-	 *                       source file. If unknown, use {@code -1}
-	 * @param col        the column where this expression happens in the source
-	 *                       file. If unknown, use {@code -1}
-	 * @param name       the name of this variable
-	 * @param type       the type of this variable
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     source file. If unknown, use {@code null}
+	 * @param name     the name of this variable
+	 * @param type     the type of this variable
 	 */
-	public VariableRef(CFG cfg, String sourceFile, int line, int col, String name, Type type) {
-		super(cfg, sourceFile, line, col, type);
+	public VariableRef(CFG cfg, CodeLocation location, String name, Type type) {
+		super(cfg, location, type);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
 	}
@@ -139,7 +137,7 @@ public class VariableRef extends Expression {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis interproceduralAnalysis,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		SymbolicExpression expr = getVariable();

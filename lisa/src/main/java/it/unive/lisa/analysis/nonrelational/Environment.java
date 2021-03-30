@@ -1,19 +1,24 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import it.unive.lisa.analysis.FunctionalLattice;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -127,8 +132,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 */
 	protected M assumeAux(E expression, ProgramPoint pp) throws SemanticException {
 		// TODO: a more precise filtering is needed when satisfiability of
-		// expression is unknown
-		// subclasses might add some logic
+		// expression is unknown subclasses might add some logic
 		return copy();
 	}
 
@@ -176,7 +180,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 				if (!scope.equals(otherCall) &&
 				// We might have a call that is resolved and the other one not,
 				// so we consider the program point as well
-						scope.getLine() != otherCall.getLine() && scope.getCol() != otherCall.getCol()) {
+						!scope.getLocation().equals(otherCall.getLocation())) {
 					e.set(new SemanticException("Trying to pop out a different scope"));
 					return null;
 				} else {
@@ -207,16 +211,15 @@ public abstract class Environment<M extends Environment<M, E, T>,
 			if (outsideScopeIdentifier != null) {
 				T value = this.getState(id);
 				function.put(outsideScopeIdentifier, value);
-				// FIXME @Luca not sure this could be the intended use of
-				// assignAux, but I need an instance of M and not of
-				// Environment...
-				result = result.assignAux(outsideScopeIdentifier, null, function, value, null);
+				result = mk(lattice, function);
 			}
 			result = result.forgetIdentifier(id);
 		}
 		return result;
 
 	}
+	
+	protected abstract M mk(T lattice, Map<Identifier, T> function); 
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -244,10 +247,10 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
 
-		StringBuilder builder = new StringBuilder();
+		SortedSet<String> res = new TreeSet<>();
 		for (Entry<Identifier, T> entry : function.entrySet())
-			builder.append(entry.getKey()).append(": ").append(entry.getValue().representation()).append("\n");
+			res.add(entry.getKey() + ": " + entry.getValue().representation());
 
-		return builder.toString().trim();
+		return StringUtils.join(res, '\n');
 	}
 }

@@ -1,5 +1,9 @@
 package it.unive.lisa.interprocedural.callgraph.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -14,11 +18,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In
@@ -36,9 +35,6 @@ import org.apache.logging.log4j.Logger;
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
 public abstract class AbstractBaseCallGraph implements CallGraph {
-
-	private static final Logger log = LogManager
-			.getLogger(it.unive.lisa.interprocedural.callgraph.impl.AbstractBaseCallGraph.class);
 
 	private Program program;
 
@@ -75,7 +71,7 @@ public abstract class AbstractBaseCallGraph implements CallGraph {
 
 		Call resolved;
 		if (targets.isEmpty())
-			resolved = new OpenCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
+			resolved = new OpenCall(call.getCFG(), call.getLocation(),
 					call.getTargetName(), call.getStaticType(), call.getParameters());
 		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
 			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
@@ -84,8 +80,8 @@ public abstract class AbstractBaseCallGraph implements CallGraph {
 				throw new CallResolutionException(
 						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
 
-			resolved = new CFGCall(call.getCFG(), call.getSourceFile(), call.getLine(), call.getCol(),
-					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
+			resolved = new CFGCall(call.getCFG(), call.getLocation(), call.getTargetName(),
+					targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
 					call.getParameters());
 		}
 

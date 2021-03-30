@@ -1,8 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
@@ -60,17 +59,6 @@ public abstract class Identifier extends ValueExpression {
 		return weak;
 	}
 
-	/**
-	 * Returns an identifier where the scope is moved one step out.
-	 * 
-	 * @param scope the called method that pushes the scope one step out
-	 * 
-	 * @return the identifier where the scope has been moved one step out
-	 */
-	public OutsideScopeIdentifier pushScope(CFGCall scope) {
-		return new OutsideScopeIdentifier(this, scope);
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -85,6 +73,8 @@ public abstract class Identifier extends ValueExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
+		if (obj == null)
+			return false;
 		// we do not call super here since variables should be uniquely
 		// identified by their name, regardless of their type
 		if (getClass() != obj.getClass())
