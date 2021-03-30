@@ -67,9 +67,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 						for (AllocationSite hid : expHids)
 							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
 								result.add(new AllocationSite(expression.getTypes(), hid.getId(), childRewritten));
-				} else if (exp instanceof HeapIdentifier){
-					result.add((HeapIdentifier) exp);
-				}
+				} else if (exp instanceof AllocationSite) {
+					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
+						result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId(), childRewritten));				}
 			}
 
 			return new FieldSensitivePointBasedHeap(result, childState.heapEnv);
