@@ -239,8 +239,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 			for (Identifier id : heapEnv.getKeys())
 				if (id instanceof ValueIdentifier && heapRef.getName().equals(id.getName())) {
-					// The heap reference refers to a value identifier that is tracked
-					// by the point based domain: 					
+					// The heap reference refers to a value identifier that is
+					// tracked
+					// by the point based domain:
 					Collection<ValueExpression> hids = new HashSet<>();
 					for (AllocationSite site : heapEnv.getState(id))
 						hids.add(site);
@@ -253,12 +254,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			for (AllocationSites sites : heapEnv.values())
 				for (AllocationSite site : sites)
 					if (site.getName().equals(heapRef.getName()))
-						return from(new PointBasedHeap(Collections.singleton(site), heapEnv)); 
-			
+						return from(new PointBasedHeap(Collections.singleton(site), heapEnv));
+
 			// The heap reference refers to a just rewritten symbolic expression
 			for (SymbolicExpression rew : getRewrittenExpressions())
 				if (rew instanceof HeapIdentifier && ((HeapIdentifier) rew).getName().equals(heapRef.getName()))
-					return from(new PointBasedHeap(Collections.singleton((HeapIdentifier) rew), heapEnv)); 
+					return from(new PointBasedHeap(Collections.singleton((HeapIdentifier) rew), heapEnv));
 		}
 
 		return top();

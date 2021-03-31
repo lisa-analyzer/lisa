@@ -176,9 +176,19 @@ public enum BinaryOperator implements Operator {
 	 * Casts the type of the left-hand side of this expression to the type of
 	 * the right-hand side. The returned value is exactly the left-hand side,
 	 * but with its runtime types filtered to be instances of the right-hand
-	 * side type.
+	 * side type. Indeed, this operation on types is a narrowing operator,
+	 * namely the destination type is smaller than the source type.
 	 */
-	TYPE_CAST("as"),
+	TYPE_CAST("cast-as"),
+
+	/**
+	 * Converts the type of the left-hand side of this expression to the type of
+	 * the right-hand side. The returned value is exactly the right-hand side,
+	 * if the left-hand side type an be converted to the right-hand side one.
+	 * Indeed, this operation on types is a widening operator, namely the
+	 * destination type is greater than the source type.
+	 */
+	TYPE_CONV("conv-as"),
 
 	/**
 	 * Tests if the type of the left-hand side of this expression is the same

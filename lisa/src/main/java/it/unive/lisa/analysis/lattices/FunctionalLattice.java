@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,10 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -190,7 +189,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return Collections.emptyIterator();
 		return function.entrySet().iterator();
 	}
-	
+
 	/**
 	 * Yields the values of this functional lattice.
 	 * 
@@ -201,7 +200,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return Collections.emptySet();
 		return function.values();
 	}
-	
+
 	/**
 	 * Yields the keys of this functional lattice.
 	 * 

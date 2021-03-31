@@ -6,11 +6,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -69,7 +67,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 								result.add(new AllocationSite(expression.getTypes(), hid.getId(), childRewritten));
 				} else if (exp instanceof AllocationSite) {
 					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
-						result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId(), childRewritten));				}
+						result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId(),
+								childRewritten));
+				}
 			}
 
 			return new FieldSensitivePointBasedHeap(result, childState.heapEnv);
