@@ -125,7 +125,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			UnaryExpression unary = (UnaryExpression) expression;
 
 			T arg = eval((ValueExpression) unary.getExpression(), environment, pp);
-			if (arg.isTop() || arg.isBottom())
+			if (arg.isBottom())
 				return arg;
 
 			return evalUnaryExpression(unary.getOperator(), arg, pp);
@@ -135,11 +135,11 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			BinaryExpression binary = (BinaryExpression) expression;
 
 			T left = eval((ValueExpression) binary.getLeft(), environment, pp);
-			if (left.isTop() || left.isBottom())
+			if (left.isBottom())
 				return left;
 
 			T right = eval((ValueExpression) binary.getRight(), environment, pp);
-			if (right.isTop() || right.isBottom())
+			if (right.isBottom())
 				return right;
 
 			return evalBinaryExpression(binary.getOperator(), left, right, pp);
@@ -149,11 +149,11 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			TernaryExpression ternary = (TernaryExpression) expression;
 
 			T left = eval((ValueExpression) ternary.getLeft(), environment, pp);
-			if (left.isTop() || left.isBottom())
+			if (left.isBottom())
 				return left;
 
 			T middle = eval((ValueExpression) ternary.getMiddle(), environment, pp);
-			if (middle.isTop() || middle.isBottom())
+			if (middle.isBottom())
 				return middle;
 
 			T right = eval((ValueExpression) ternary.getRight(), environment, pp);
