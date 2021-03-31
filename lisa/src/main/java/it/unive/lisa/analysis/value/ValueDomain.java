@@ -10,14 +10,14 @@ import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import java.util.List;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
  * on values, and not on memory locations. A value domain can handle instances
  * of {@link ValueExpression}s, and manage identifiers that are
- * {@link ValueIdentifier}s.
+ * {@link Variable}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 

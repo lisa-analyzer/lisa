@@ -84,4 +84,9 @@ public class ReachingDefinitions
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.singleton(id);
 	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
 }

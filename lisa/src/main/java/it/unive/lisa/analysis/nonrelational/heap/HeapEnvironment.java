@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -51,10 +52,6 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		substitution = Collections.emptyList();
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function) {
-		this(domain, function, Collections.emptyList(), Collections.emptyList());
-	}
-
 	private HeapEnvironment(T domain, Map<Identifier, T> function, Collection<ValueExpression> rewritten,
 			List<HeapReplacement> substitution) {
 		super(domain, function);
@@ -85,9 +82,10 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) {
+	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// environment does not change without an assignment
-		return new HeapEnvironment<>(lattice, function);
+		T eval = lattice.eval(expression, this, pp);
+		return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
 	}
 
 	@Override

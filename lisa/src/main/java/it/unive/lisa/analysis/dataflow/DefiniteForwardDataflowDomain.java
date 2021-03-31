@@ -33,8 +33,8 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	/**
 	 * Builds an empty domain.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations
-	 *                   to perform <i>kill</i> and <i>gen</i> operations
+	 * @param domain a singleton instance to be used during semantic operations to
+	 *               perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public DefiniteForwardDataflowDomain(E domain) {
 		this(domain, new HashSet<>(), true);
@@ -49,6 +49,10 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		// If id cannot be tracked by the underlying
+		// lattice, return this
+		if (!domain.tracksIdentifiers(id))
+			return this;
 		DefiniteForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))

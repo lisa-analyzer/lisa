@@ -44,16 +44,16 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	}
 
 	/**
-	 * Utility for creating a concrete instance of {@link InverseSetLattice}
-	 * given a set. This decouples the instance of set used during computation
-	 * of the elements to put in the lattice from the actual type of set
-	 * underlying the lattice.
+	 * Utility for creating a concrete instance of {@link InverseSetLattice} given a
+	 * set. This decouples the instance of set used during computation of the
+	 * elements to put in the lattice from the actual type of set underlying the
+	 * lattice.
 	 * 
 	 * @param set the set containing the elements that must be included in the
-	 *                lattice instance
+	 *            lattice instance
 	 * 
-	 * @return a new concrete instance of {@link InverseSetLattice} containing
-	 *             the elements of the given set
+	 * @return a new concrete instance of {@link InverseSetLattice} containing the
+	 *         elements of the given set
 	 */
 	protected abstract S mk(Set<E> set);
 
@@ -92,11 +92,15 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	 * 
 	 * @param elem the element
 	 * 
-	 * @return {@code true} if the element is contained in this set,
-	 *             {@code false} otherwise.
+	 * @return {@code true} if the element is contained in this set, {@code false}
+	 *         otherwise.
 	 */
 	public boolean contains(E elem) {
 		return elements.contains(elem);
+	}
+
+	public Set<E> elements() {
+		return elements;
 	}
 
 	@Override

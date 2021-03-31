@@ -1,17 +1,18 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -27,7 +28,7 @@ import java.util.Set;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  * 
  * @see <a href=
- *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
+ *      "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
  */
 public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
@@ -38,29 +39,29 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		super();
 	}
 
-	private FieldSensitivePointBasedHeap(Collection<ValueExpression> rewritten,
-			HeapEnvironment<AllocationSites> allocationSites) {
-		super(rewritten, allocationSites);
+	private FieldSensitivePointBasedHeap(Set<AllocationSite> elements, Collection<ValueExpression> rewritten) {
+		super(elements, rewritten);
 	}
 
 	@Override
 	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
-		return new FieldSensitivePointBasedHeap(original.getRewrittenExpressions(), original.heapEnv);
+		return new FieldSensitivePointBasedHeap(original.elements(), original.getRewrittenExpressions());
 	}
 
 	@Override
-	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public PointBasedHeap eval(SymbolicExpression expression, HeapEnvironment<PointBasedHeap> environment,
+			ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
-			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics(
-					(((AccessChild) expression).getContainer()), pp);
-			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics(
-					(((AccessChild) expression).getChild()),
-					pp);
-
+			AccessChild access = (AccessChild) expression;
+			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) eval(access.getContainer(),
+					environment, pp);
+			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState
+					.eval(access.getChild(), environment, pp);
+			
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
-				if (exp instanceof ValueIdentifier) {
-					AllocationSites expHids = childState.heapEnv.getState((Identifier) exp);
+				if (exp instanceof Variable) {
+					PointBasedHeap expHids = environment.getState((Identifier) exp);
 					if (!(expHids.isBottom()))
 						for (AllocationSite hid : expHids)
 							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
@@ -69,12 +70,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
 						result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId(),
 								childRewritten));
+				} else if (exp instanceof HeapLocation) {
+					result.add((HeapLocation) exp);
 				}
 			}
 
-			return new FieldSensitivePointBasedHeap(result, childState.heapEnv);
+			return new FieldSensitivePointBasedHeap(elements, result);
 		}
 
-		return super.semanticsOf(expression, pp);
+		return super.eval(expression, environment, pp);
 	}
 }

@@ -125,4 +125,9 @@ public class AvailableExpressions
 			return false;
 		return true;
 	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,12 +13,10 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -31,8 +31,8 @@ public class VariableRef extends Expression {
 	private final String name;
 
 	/**
-	 * Builds the untyped variable reference, identified by its name. The
-	 * location where this variable reference happens is unknown (i.e. no source
+	 * Builds the untyped variable reference, identified by its name. The location
+	 * where this variable reference happens is unknown (i.e. no source
 	 * file/line/column is available) and its type is {@link Untyped#INSTANCE}.
 	 * 
 	 * @param cfg  the cfg that this expression belongs to
@@ -43,9 +43,9 @@ public class VariableRef extends Expression {
 	}
 
 	/**
-	 * Builds a typed variable reference, identified by its name and its type.
-	 * The location where this variable reference happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds a typed variable reference, identified by its name and its type. The
+	 * location where this variable reference happens is unknown (i.e. no source
+	 * file/line/column is available).
 	 * 
 	 * @param cfg  the cfg that this expression belongs to
 	 * @param name the name of this variable
@@ -56,12 +56,12 @@ public class VariableRef extends Expression {
 	}
 
 	/**
-	 * Builds the variable reference, identified by its name, happening at the
-	 * given location in the program.
+	 * Builds the variable reference, identified by its name, happening at the given
+	 * location in the program.
 	 * 
 	 * @param cfg      the cfg that this expression belongs to
 	 * @param location the location where the expression is defined within the
-	 *                     source file. If unknown, use {@code null}
+	 *                 source file. If unknown, use {@code null}
 	 * @param name     the name of this variable
 	 * @param type     the type of this variable
 	 */
@@ -116,28 +116,18 @@ public class VariableRef extends Expression {
 	}
 
 	/**
-	 * Yields a {@link SymbolicExpression} representing the referenced variable.
+	 * Yields a {@link Variable} representing the referenced variable.
 	 * 
 	 * @return the expression representing the variable
 	 */
-	public SymbolicExpression getVariable() {
-		SymbolicExpression expr;
-		if (getStaticType().isPointerType())
-			// the smallStepSemantics will take care of converting that
-			// reference to a variable identifier
-			// setting also the identifier as computed expression
-			expr = new HeapReference(getRuntimeTypes(), getName());
-		else
-			expr = new ValueIdentifier(getRuntimeTypes(), getName());
-		return expr;
+	public Variable getVariable() {
+		return new Variable(getRuntimeTypes(), getName());
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
-					throws SemanticException {
+	public <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+			throws SemanticException {
 		SymbolicExpression expr = getVariable();
 		return entryState.smallStepSemantics(expr, this);
 	}

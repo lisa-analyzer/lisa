@@ -1,5 +1,16 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -7,22 +18,12 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.Utils;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -44,8 +45,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	private final Collection<String> names;
 
 	/**
-	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
-	 * expression {@link Skip}.
+	 * Builds a new instance of TypeBasedHeap, with an unique rewritten expression
+	 * {@link Skip}.
 	 */
 	public TypeBasedHeap() {
 		this(new Skip());
@@ -119,11 +120,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	protected TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
-
 		if (expression instanceof AccessChild) {
-			TypeBasedHeap containerState = smallStepSemantics((((AccessChild) expression).getContainer()), pp);
-			TypeBasedHeap childState = containerState.smallStepSemantics((((AccessChild) expression).getChild()),
-					pp);
+			AccessChild access = (AccessChild) expression;
+			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
+			TypeBasedHeap childState = containerState.smallStepSemantics(access.getChild(), pp);
 
 			Set<ValueExpression> ids = new HashSet<>();
 			Set<String> names = new HashSet<>(childState.names);
@@ -131,25 +131,23 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			for (SymbolicExpression o : containerState.getRewrittenExpressions())
 				for (Type type : o.getTypes()) {
 					if (type.isPointerType()) {
-						ids.add(new HeapIdentifier(expression.getTypes(), type.toString(), true));
+						ids.add(new HeapLocation(access.getTypes(), type.toString(), true));
 						names.add(type.toString());
 					} else
-						log.warn(expression.toString() + " has type " + type + " that is not a pointer type");
+						log.warn(access.toString() + " has type " + type + " that is not a pointer type");
 				}
 
 			return new TypeBasedHeap(ids, names);
 		}
 
-		if (expression instanceof HeapAllocation || expression instanceof HeapReference) {
+		if (expression instanceof HeapAllocation) {
 			Set<ValueExpression> ids = new HashSet<>();
 			Set<String> names = new HashSet<>(this.names);
-			for (Type type : expression.getTypes()) {
+			for (Type type : expression.getTypes())
 				if (type.isPointerType()) {
-					ids.add(new HeapIdentifier(Caches.types().mkSingletonSet(type), type.toString(), true));
+					ids.add(new HeapLocation(Caches.types().mkSingletonSet(type), type.toString(), true));
 					names.add(type.toString());
-				} else
-					log.warn(expression.toString() + " has type " + type + " that is not a pointer type");
-			}
+				}
 
 			return new TypeBasedHeap(ids, names);
 		}

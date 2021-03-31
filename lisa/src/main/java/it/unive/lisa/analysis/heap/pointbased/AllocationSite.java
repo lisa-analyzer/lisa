@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -12,7 +12,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class AllocationSite extends HeapIdentifier {
+public class AllocationSite extends HeapLocation {
 
 	private final String id;
 

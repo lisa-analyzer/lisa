@@ -9,17 +9,17 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapIdentifier extends Identifier {
+public class HeapLocation extends Identifier {
 
 	/**
-	 * Builds the identifier.
+	 * Builds the heap location.
 	 * 
 	 * @param types the runtime types of this expression
-	 * @param name  the name of the identifier
+	 * @param name  the name of the location
 	 * @param weak  whether or not this identifier is weak, meaning that it
 	 *                  should only receive weak assignments
 	 */
-	public HeapIdentifier(ExternalSet<Type> types, String name, boolean weak) {
+	public HeapLocation(ExternalSet<Type> types, String name, boolean weak) {
 		super(types, name, weak);
 	}
 

@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -105,9 +105,9 @@ public class LiSAFactoryTest {
 		// by getting top(), we know that whatever variable we ask for, we will
 		// be getting the top instance of the inner lattice
 		if (def instanceof ValueEnvironment<?>)
-			def = ((ValueEnvironment<?>) def).top().getState(new ValueIdentifier(Caches.types().mkEmptySet(), "foo"));
+			def = ((ValueEnvironment<?>) def).top().getState(new Variable(Caches.types().mkEmptySet(), "foo"));
 		else if (def instanceof HeapEnvironment<?>)
-			def = ((HeapEnvironment<?>) def).top().getState(new ValueIdentifier(Caches.types().mkEmptySet(), "foo"));
+			def = ((HeapEnvironment<?>) def).top().getState(new Variable(Caches.types().mkEmptySet(), "foo"));
 
 		return def.getClass();
 	}

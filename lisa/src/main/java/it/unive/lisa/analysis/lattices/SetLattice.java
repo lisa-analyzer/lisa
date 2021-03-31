@@ -1,13 +1,14 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.collections.Utils;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.collections.Utils;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations
@@ -59,7 +60,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	protected abstract S mk(Set<E> set);
 
 	@Override
-	protected final S lubAux(S other) throws SemanticException {
+	protected S lubAux(S other) throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
 		lub.addAll(other.elements);
 		return mk(lub);
@@ -71,7 +72,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	}
 
 	@Override
-	protected final boolean lessOrEqualAux(S other) throws SemanticException {
+	protected boolean lessOrEqualAux(S other) throws SemanticException {
 		return other.elements.containsAll(elements);
 	}
 
@@ -85,6 +86,10 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	 */
 	public boolean contains(E elem) {
 		return elements.contains(elem);
+	}
+	
+	public Set<E> elements() {
+		return elements;
 	}
 
 	@Override

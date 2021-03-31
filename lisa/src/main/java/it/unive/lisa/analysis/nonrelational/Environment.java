@@ -68,7 +68,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assign(Identifier id, E value, ProgramPoint pp) {
+	public final M assign(Identifier id, E value, ProgramPoint pp) throws SemanticException {
 		// If id cannot be tracked by the underlying
 		// lattice, return this
 		if (!lattice.tracksIdentifiers(id))
@@ -137,7 +137,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final Satisfiability satisfies(E expression, ProgramPoint pp) {
+	public final Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 

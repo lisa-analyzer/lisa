@@ -11,7 +11,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
@@ -114,7 +114,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier(getRuntimeTypes(), "open_call_ret_value@" + offset);
+		return new Variable(getRuntimeTypes(), "open_call_ret_value@" + offset);
 	}
 
 	@Override

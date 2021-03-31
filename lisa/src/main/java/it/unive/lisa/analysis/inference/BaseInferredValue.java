@@ -32,7 +32,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp) {
 		if (expression instanceof Identifier)
-			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp);
+			return satisfiesAbstractValue(evalIdentifier((Identifier) expression, environment), pp);
 
 		if (expression instanceof NullConstant)
 			return satisfiesNullConstant(pp);
@@ -44,7 +44,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return Satisfiability.UNKNOWN;
 
 		if (expression instanceof PushAny)
-			return Satisfiability.UNKNOWN;
+			return satisfiesPushAny((PushAny) expression);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -106,7 +106,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final T eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp) {
 		if (expression instanceof Identifier)
-			return environment.getState((Identifier) expression);
+			return evalIdentifier((Identifier) expression, environment);
 
 		if (expression instanceof NullConstant)
 			return evalNullConstant(pp);
@@ -118,7 +118,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return bottom();
 
 		if (expression instanceof PushAny)
-			return top();
+			return evalPushAny((PushAny) expression);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -162,6 +162,14 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return evalTernaryExpression(ternary.getOperator(), left, middle, right, pp);
 		}
 
+		return top();
+	}
+
+	protected T evalIdentifier(Identifier id, InferenceSystem<T> environment) {
+		return environment.getState(id);
+	}
+
+	protected T evalPushAny(PushAny pushAny) {
 		return top();
 	}
 
@@ -264,6 +272,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             equivalent to a TOP boolean value)
 	 */
 	protected Satisfiability satisfiesAbstractValue(T value, ProgramPoint pp) {
+		return Satisfiability.UNKNOWN;
+	}
+
+	protected Satisfiability satisfiesPushAny(PushAny pushAny) {
 		return Satisfiability.UNKNOWN;
 	}
 

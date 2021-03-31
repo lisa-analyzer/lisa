@@ -21,9 +21,8 @@ import java.util.TreeSet;
  * 
  * @param <E> the type of {@link DataflowElement} contained in this domain
  */
-public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleForwardDataflowDomain<E>, E>>
-		extends SetLattice<PossibleForwardDataflowDomain<E>, E>
-		implements DataflowDomain<PossibleForwardDataflowDomain<E>, E> {
+public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleForwardDataflowDomain<E>, E>> extends
+		SetLattice<PossibleForwardDataflowDomain<E>, E> implements DataflowDomain<PossibleForwardDataflowDomain<E>, E> {
 
 	private final boolean isTop;
 
@@ -32,8 +31,8 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	/**
 	 * Builds an empty domain.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations
-	 *                   to perform <i>kill</i> and <i>gen</i> operations
+	 * @param domain a singleton instance to be used during semantic operations to
+	 *               perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public PossibleForwardDataflowDomain(E domain) {
 		this(domain, new HashSet<>(), true);
@@ -48,6 +47,10 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	public PossibleForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		// If id cannot be tracked by the underlying
+		// lattice, return this
+		if (!domain.tracksIdentifiers(id))
+			return this;
 		PossibleForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))

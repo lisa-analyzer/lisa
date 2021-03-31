@@ -79,14 +79,14 @@ public class Assignment extends BinaryExpression {
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V> right = getRight().semantics(entryState, callGraph, expressions);
-		AnalysisState<A, H, V> left = getLeft().semantics(right, callGraph, expressions);
+		AnalysisState<A, H, V> left = getLeft().semantics(right, callGraph, expressions); 
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this);
+				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this); 
 				if (result == null)
 					result = tmp;
 				else

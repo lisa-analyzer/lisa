@@ -5,8 +5,8 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
- * (as an instance of {@link ValueIdentifier}), or a resolved memory location
- * (as an instance of {@link HeapIdentifier}).
+ * (as an instance of {@link Variable}), or a resolved memory location
+ * (as an instance of {@link HeapLocation}).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

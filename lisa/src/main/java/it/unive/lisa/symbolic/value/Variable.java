@@ -8,15 +8,15 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ValueIdentifier extends Identifier {
+public class Variable extends Identifier {
 
 	/**
-	 * Builds the identifier.
+	 * Builds the variable.
 	 * 
 	 * @param types the runtime types of this expression
-	 * @param name  the name of the identifier
+	 * @param name  the name of the variable
 	 */
-	public ValueIdentifier(ExternalSet<Type> types, String name) {
+	public Variable(ExternalSet<Type> types, String name) {
 		super(types, name, false);
 	}
 
