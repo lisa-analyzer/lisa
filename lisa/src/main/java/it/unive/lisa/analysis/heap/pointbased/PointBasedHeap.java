@@ -222,7 +222,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						for (AllocationSite hid : expHids)
 							result.add(new AllocationSite(expression.getTypes(), hid.getId()));
 				} else if (exp instanceof HeapIdentifier) {
-					result.add((HeapIdentifier) exp);
+					result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId()));
 				}
 			}
 
