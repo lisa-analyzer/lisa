@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.Collections;
@@ -95,5 +96,10 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return true;
 	}
 }

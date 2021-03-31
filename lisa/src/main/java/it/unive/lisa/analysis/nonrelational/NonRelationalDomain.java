@@ -62,6 +62,17 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp);
 
 	/**
+	 * Yields {@code true} if the domain tracks information on the identifier
+	 * {@code id}, {@code false} otherwise.
+	 * 
+	 * @param id the identifier
+	 * 
+	 * @return {@code true} if the domain tracks information on the identifier
+	 *             {@code id}, {@code false} otherwise.
+	 */
+	public boolean tracksIdentifiers(Identifier id);
+
+	/**
 	 * Yields a textual representation of the content of this domain's instance.
 	 * 
 	 * @return the textual representation

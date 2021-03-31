@@ -69,6 +69,11 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public final M assign(Identifier id, E value, ProgramPoint pp) {
+		// If id cannot be tracked by the underlying
+		// lattice, return this
+		if (!lattice.tracksIdentifiers(id))
+			return (M) this;
+
 		// the mkNewFunction will return an empty function if the
 		// given one is null
 		Map<Identifier, T> func = mkNewFunction(function);

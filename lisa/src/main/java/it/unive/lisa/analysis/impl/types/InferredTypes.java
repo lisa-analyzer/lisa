@@ -14,6 +14,7 @@ import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.type.NullType;
@@ -422,5 +423,11 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					result.add(t1.commonSupertype(t2));
 
 		return result;
+	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		// Type analysis tracks information on any identifier
+		return true;
 	}
 }

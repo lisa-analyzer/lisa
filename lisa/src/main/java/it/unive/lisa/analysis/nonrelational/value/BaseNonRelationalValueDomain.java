@@ -166,6 +166,13 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		return bottom();
 	}
 
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		// As default, base non relational values domains
+		// tracks only non-pointer identifier
+		return !id.getDynamicType().isPointerType();
+	}
+
 	/**
 	 * Yields the evaluation of the null constant {@link NullConstant}.
 	 * 
