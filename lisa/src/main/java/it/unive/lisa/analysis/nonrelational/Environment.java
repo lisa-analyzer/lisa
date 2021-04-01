@@ -78,6 +78,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		// given one is null
 		Map<Identifier, T> func = mkNewFunction(function);
 		T eval = lattice.eval(value, (M) this, pp);
+		if (id.isWeak())
+			eval = eval.lub(getState(id));
 		func.put(id, eval);
 		return assignAux(id, value, func, eval, pp);
 	}

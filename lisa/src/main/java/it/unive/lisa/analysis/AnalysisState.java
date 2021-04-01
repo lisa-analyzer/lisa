@@ -91,10 +91,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	@Override
 	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
-		A assigned = state.assign(id, value, pp);
-		if (id.isWeak())
-			assigned = state.lub(assigned);
-		return new AnalysisState<>(assigned, id);
+		return new AnalysisState<>(state.assign(id, value, pp), id);
 	}
 
 	@Override

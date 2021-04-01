@@ -95,7 +95,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return lattice.top();
 		if (function.containsKey(key))
 			return function.get(key);
-		return lattice.bottom();
+		return lattice.top();
 	}
 
 	@Override
