@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.heap.pointbased;
+package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import java.util.Collection;
 import java.util.Collections;

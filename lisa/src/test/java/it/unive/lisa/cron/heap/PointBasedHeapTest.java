@@ -6,8 +6,8 @@ import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.heap.pointbased.FieldSensitivePointBasedHeap;
-import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
+import it.unive.lisa.analysis.impl.heap.pointbased.FieldSensitivePointBasedHeap;
+import it.unive.lisa.analysis.impl.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import org.junit.Test;
 

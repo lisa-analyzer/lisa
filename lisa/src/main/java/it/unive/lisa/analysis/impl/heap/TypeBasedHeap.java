@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.heap;
+package it.unive.lisa.analysis.impl.heap;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.heap.HeapSemanticOperation;
+import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;

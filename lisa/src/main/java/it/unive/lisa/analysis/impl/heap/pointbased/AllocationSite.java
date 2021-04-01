@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.heap.pointbased;
+package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
