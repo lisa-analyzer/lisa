@@ -446,4 +446,10 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		// Type analysis tracks information on any identifier
 		return true;
 	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		// Type analysis can process any expression
+		return true;
+	}
 }

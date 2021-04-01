@@ -71,7 +71,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	public final M assign(Identifier id, E value, ProgramPoint pp) throws SemanticException {
 		// If id cannot be tracked by the underlying
 		// lattice, return this
-		if (!lattice.tracksIdentifiers(id))
+		if (!lattice.canProcess(value) || !lattice.tracksIdentifiers(id))
 			return (M) this;
 
 		// the mkNewFunction will return an empty function if the

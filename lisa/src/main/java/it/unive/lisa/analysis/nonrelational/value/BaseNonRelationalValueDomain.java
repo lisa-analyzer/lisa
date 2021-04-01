@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.nonrelational.value;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -171,6 +172,11 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		// As default, base non relational values domains
 		// tracks only non-pointer identifier
 		return !id.getDynamicType().isPointerType();
+	}
+	
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return !expression.getDynamicType().isPointerType();
 	}
 
 	/**
