@@ -10,6 +10,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -52,11 +53,11 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
+			AccessChild access = (AccessChild) expression;
 			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics(
-					(((AccessChild) expression).getContainer()), pp);
+					access.getContainer(), pp);
 			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics(
-					(((AccessChild) expression).getChild()),
-					pp);
+					access.getChild(),	pp);
 
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
@@ -65,11 +66,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 					if (!(expHids.isBottom()))
 						for (AllocationSite hid : expHids)
 							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
-								result.add(new AllocationSite(expression.getTypes(), hid.getId(), childRewritten));
+								result.add(new AllocationSite(access.getTypes(), hid.getId(), childRewritten));
 				} else if (exp instanceof AllocationSite) {
 					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
-						result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId(),
+						result.add(new AllocationSite(access.getTypes(), ((AllocationSite) exp).getId(),
 								childRewritten));
+				} else if (exp instanceof HeapLocation) {
+					result.add((ValueExpression) exp);
 				}
 			}
 

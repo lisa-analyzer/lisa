@@ -224,6 +224,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							result.add(new AllocationSite(expression.getTypes(), hid.getId()));
 				} else if (exp instanceof AllocationSite) {
 					result.add(new AllocationSite(expression.getTypes(), ((AllocationSite) exp).getId()));
+				} else if (exp instanceof HeapLocation) {
+					result.add((ValueExpression) exp);
 				}
 			}
 
