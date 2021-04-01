@@ -94,6 +94,10 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	public Collection<ValueExpression> getRewrittenExpressions() {
 		return Collections.emptySet();
 	}
+	
+	public void add(AllocationSite site) {
+		this.elements.add(site);
+	}
 
 	@Override
 	public List<HeapReplacement> getSubstitution() {

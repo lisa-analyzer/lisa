@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,7 +43,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	private FieldSensitivePointBasedHeap(Collection<ValueExpression> rewritten,
 			HeapEnvironment<AllocationSites> allocationSites) {
-		super(rewritten, allocationSites);
+		super(rewritten, allocationSites, Collections.emptyList());
 	}
 
 	@Override

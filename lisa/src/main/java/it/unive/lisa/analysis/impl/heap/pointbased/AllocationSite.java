@@ -23,7 +23,12 @@ public class AllocationSite extends HeapLocation {
 	 * @param id    the identifier of this allocation site
 	 */
 	public AllocationSite(ExternalSet<Type> types, String id) {
-		super(types, "pp@" + id, true);
+		super(types, "pp@" + id, false);
+		this.id = id;
+	}
+	
+	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak) {
+		super(types, "pp@" + id, isWeak);
 		this.id = id;
 	}
 
@@ -36,10 +41,10 @@ public class AllocationSite extends HeapLocation {
 	 * @param field the field of this allocation site
 	 */
 	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field) {
-		super(types, "pp@" + id + "[" + field + "]", true);
+		super(types, "pp@" + id + "[" + field + "]", false);
 		this.id = id;
 	}
-
+	
 	/**
 	 * Returns the numerical identifier of this allocation site.
 	 * 
@@ -47,5 +52,10 @@ public class AllocationSite extends HeapLocation {
 	 */
 	public String getId() {
 		return id;
+	}
+	
+	@Override
+	public String toString() {
+		return getName() + "["  + (isWeak() ? "w"  : "s") + "]";
 	}
 }
