@@ -6,8 +6,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -102,6 +104,23 @@ implements NonRelationalHeapDomain<AllocationSites> {
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
+	}
+
+	@Override
+	protected AllocationSites lubAux(AllocationSites other) throws SemanticException {
+		Set<AllocationSite> lub = new HashSet<>();	
+		lub.addAll(elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
+		lub.addAll(other.elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
+
+		lub.addAll(elements.stream().filter(t1 -> !t1.isWeak() && 
+				(!other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak()).collect(Collectors.toSet()).isEmpty() 
+						|| other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet()).isEmpty())).collect(Collectors.toSet()));
+
+		lub.addAll(other.elements.stream().filter(t1 -> !t1.isWeak() && 
+				(!elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak()).collect(Collectors.toSet()).isEmpty()
+						|| elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet()).isEmpty())).collect(Collectors.toSet()));
+
+		return new AllocationSites(lub, false);
 	}
 
 	@Override

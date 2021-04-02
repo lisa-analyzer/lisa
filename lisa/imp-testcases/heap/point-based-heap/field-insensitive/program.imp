@@ -30,4 +30,13 @@ class A {
 		o.a = 2;
 		o.b = 3;
 	}
+	
+	f4() {
+		def o = new int[6];
+		def i = 0;
+		while (true) {
+			o.a = 0;
+			i = i + 1;
+		}
+	}
 }

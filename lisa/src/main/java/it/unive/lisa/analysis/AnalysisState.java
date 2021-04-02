@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -25,8 +26,8 @@ import org.apache.commons.collections.CollectionUtils;
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		implements Lattice<AnalysisState<A, H, V>>,
-		SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
+implements Lattice<AnalysisState<A, H, V>>,
+SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -114,17 +115,15 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> lub(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.lub(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> widening(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.widening(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
@@ -188,6 +187,21 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 		} else if (!state.equals(other.state))
 			return false;
 		return true;
+	}
+
+	private Collection<SymbolicExpression> lubRewrittenExpressions(Collection<SymbolicExpression> r1,Collection<SymbolicExpression> r2) throws SemanticException {
+		Collection<SymbolicExpression> rewritten = new HashSet<>();
+		rewritten.addAll(r1.stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
+		rewritten.addAll(r1.stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
+
+		for (Identifier id1 : r1.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast).collect(Collectors.toSet()))
+			for (Identifier id2 : r2.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast).collect(Collectors.toSet()))
+				if (id1.equals(id2))
+					rewritten.add(id1.lub(id2));
+				else if (!r1.contains(id2))
+					rewritten.add(id2);
+		
+		return rewritten;
 	}
 
 	@Override
