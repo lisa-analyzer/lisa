@@ -173,7 +173,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		// tracks only non-pointer identifier
 		return !id.getDynamicType().isPointerType();
 	}
-	
+
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();

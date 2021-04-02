@@ -238,7 +238,7 @@ public class UnresolvedCall extends Call {
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
 					Collection<SymbolicExpression>[] params)
 					throws SemanticException {
-		Call resolved; 
+		Call resolved;
 		try {
 			resolved = callGraph.resolve(this);
 		} catch (CallResolutionException e) {

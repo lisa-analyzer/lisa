@@ -5,8 +5,8 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
- * (as an instance of {@link Variable}), or a resolved memory location
- * (as an instance of {@link HeapLocation}).
+ * (as an instance of {@link Variable}), or a resolved memory location (as an
+ * instance of {@link HeapLocation}).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -62,7 +62,9 @@ public abstract class Identifier extends ValueExpression {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		// we do not call super here since variables should be uniquely
+		// identified by their name, regardless of their type
+		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -71,8 +73,10 @@ public abstract class Identifier extends ValueExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
+		// we do not call super here since variables should be uniquely
+		// identified by their name, regardless of their type
 		if (getClass() != obj.getClass())
 			return false;
 		Identifier other = (Identifier) obj;

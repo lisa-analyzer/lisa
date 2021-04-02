@@ -41,8 +41,11 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
+	@SuppressWarnings("unchecked")
 	public default D applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp) throws SemanticException {
-		@SuppressWarnings("unchecked")
+		if (isTop() || isBottom())
+			return (D) this;
+
 		D result = (D) this;
 		for (HeapReplacement r : substitution) {
 			D lub = bottom();

@@ -35,9 +35,9 @@ public class AccessUnitGlobal extends Expression {
 	private final Global target;
 
 	/**
-	 * Builds the global access. The location where this access happens is unknown
-	 * (e.g., no source file/line/column is available) and its type is the one of
-	 * the accessed global.
+	 * Builds the global access. The location where this access happens is
+	 * unknown (e.g., no source file/line/column is available) and its type is
+	 * the one of the accessed global.
 	 * 
 	 * @param cfg      the cfg that this expression belongs to
 	 * @param receiver the expression that determines the accessed instance
@@ -48,12 +48,12 @@ public class AccessUnitGlobal extends Expression {
 	}
 
 	/**
-	 * Builds the global access, happening at the given location in the program. The
-	 * type of this expression is the one of the accessed global.
+	 * Builds the global access, happening at the given location in the program.
+	 * The type of this expression is the one of the accessed global.
 	 * 
 	 * @param cfg      the cfg that this expression belongs to
 	 * @param location the location where the expression is defined within the
-	 *                 source file, if unknown use {@code null}
+	 *                     source file, if unknown use {@code null}
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
@@ -80,9 +80,11 @@ public class AccessUnitGlobal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-			AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
-			throws SemanticException {
+	public <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, callGraph, expressions);
 		expressions.put(receiver, rec);
 

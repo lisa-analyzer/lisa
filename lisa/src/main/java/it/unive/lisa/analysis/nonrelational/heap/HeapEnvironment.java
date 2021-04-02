@@ -55,14 +55,14 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	/**
 	 * Builds an empty environment from a given mapping.
 	 * 
-	 * @param domain  singleton instance to be used during semantic operations
-	 *                   to retrieve top and bottom values
+	 * @param domain   singleton instance to be used during semantic operations
+	 *                     to retrieve top and bottom values
 	 * @param function the initial mapping of this heap environment
 	 */
 	public HeapEnvironment(T domain, Map<Identifier, T> function) {
 		this(domain, function, Collections.emptyList(), Collections.emptyList());
 	}
-	
+
 	private HeapEnvironment(T domain, Map<Identifier, T> function, Collection<ValueExpression> rewritten,
 			List<HeapReplacement> substitution) {
 		super(domain, function);
@@ -93,7 +93,8 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		// environment does not change without an assignment
 		T eval = lattice.eval(expression, this, pp);
 		return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());

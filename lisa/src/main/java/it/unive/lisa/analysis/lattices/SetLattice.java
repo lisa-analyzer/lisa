@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.collections.Utils;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations
@@ -87,7 +86,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	public boolean contains(E elem) {
 		return elements.contains(elem);
 	}
-	
+
 	public Set<E> elements() {
 		return elements;
 	}

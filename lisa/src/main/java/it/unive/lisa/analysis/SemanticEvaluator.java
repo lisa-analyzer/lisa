@@ -18,14 +18,18 @@ public interface SemanticEvaluator {
 	 * @param id the identifier
 	 * 
 	 * @return {@code true} if the domain tracks information on the identifier
-	 *         {@code id}, {@code false} otherwise
+	 *             {@code id}, {@code false} otherwise
 	 */
 	public boolean tracksIdentifiers(Identifier id);
-	
+
 	/**
-	 * Yields {@code true} if the domain can process {@code expression}, {@code false} otherwise. 
+	 * Yields {@code true} if the domain can process {@code expression},
+	 * {@code false} otherwise.
+	 * 
 	 * @param expression the expression
-	 * @return {@code true} if the domain can process {@code expression}, {@code false} otherwise. 
+	 * 
+	 * @return {@code true} if the domain can process {@code expression},
+	 *             {@code false} otherwise.
 	 */
 	public boolean canProcess(SymbolicExpression expression);
 }

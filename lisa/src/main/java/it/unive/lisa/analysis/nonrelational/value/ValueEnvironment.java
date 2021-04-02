@@ -1,12 +1,14 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -55,6 +57,32 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 			throws SemanticException {
 		// the environment does not change without an assignment
 		return this;
+	}
+
+	@Override
+	public ValueEnvironment<T> applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp)
+			throws SemanticException {
+		if (isTop() || isBottom())
+			return this;
+
+		ValueEnvironment<T> result = this;
+		for (HeapReplacement r : substitution) {
+			ValueEnvironment<T> lub = bottom();
+			for (Identifier source : r.getSources()) {
+				ValueEnvironment<T> partial = result;
+				for (Identifier target : r.getTargets()) {
+					if (partial.getKeys().contains(source)) {
+						Map<Identifier, T> func = mkNewFunction(partial.function);
+						func.put(target, func.get(source));
+						partial = new ValueEnvironment<T>(lattice, func);
+					}
+				}
+				lub = lub.lub(partial);
+			}
+			result = lub.forgetIdentifiers(r.getIdsToForget());
+		}
+
+		return result;
 	}
 
 	@Override

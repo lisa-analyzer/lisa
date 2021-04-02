@@ -31,8 +31,8 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	/**
 	 * Builds an empty domain.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations to
-	 *               perform <i>kill</i> and <i>gen</i> operations
+	 * @param domain a singleton instance to be used during semantic operations
+	 *                   to perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public PossibleForwardDataflowDomain(E domain) {
 		this(domain, new HashSet<>(), true);

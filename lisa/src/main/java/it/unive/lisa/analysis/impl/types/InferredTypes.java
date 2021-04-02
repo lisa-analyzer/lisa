@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.types;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -29,6 +26,8 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.Utils;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -109,7 +108,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		tmp.addAll(elements);
 		return tmp.toString();
 	}
-	
+
 	@Override
 	protected InferredTypes evalIdentifier(Identifier id, InferenceSystem<InferredTypes> environment) {
 		InferredTypes eval = super.evalIdentifier(id, environment);
@@ -117,7 +116,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			return eval;
 		return new InferredTypes(id.getTypes());
 	}
-	
+
 	@Override
 	protected InferredTypes evalPushAny(PushAny pushAny) {
 		return new InferredTypes(pushAny.getTypes());

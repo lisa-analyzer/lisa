@@ -110,10 +110,10 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	private boolean is(int n) {
 		if (low == null || high == null)
 			return false;
-		
+
 		return low == n && high == n;
 	}
-	
+
 	@Override
 	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
 		switch (operator) {
@@ -128,21 +128,21 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		case NUMERIC_MUL:
 			if (left.is(0) || right.is(0))
 				return new Interval(0, 0);
-			
+
 			if (left.isTop() || right.isTop())
 				return top();
-			
+
 			return left.mul(right);
 		case NUMERIC_DIV:
 			if (right.is(0))
 				return bottom();
-						
+
 			if (left.is(0))
 				return new Interval(0, 0);
-			
+
 			if (left.isTop() || right.isTop())
 				return top();
-			
+
 			return left.div(right);
 		case NUMERIC_MOD:
 			return top();

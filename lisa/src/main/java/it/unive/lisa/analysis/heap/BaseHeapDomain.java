@@ -88,9 +88,11 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	/**
 	 * Creates a new instance of this domain containing the same abstract
-	 * information of reference, but setting as rewritten expression the given one.
+	 * information of reference, but setting as rewritten expression the given
+	 * one.
 	 * 
-	 * @param reference  the domain whose abstract information needs to be copied
+	 * @param reference  the domain whose abstract information needs to be
+	 *                       copied
 	 * @param expression the expression to set as the rewritten one
 	 * 
 	 * @return a new instance of this domain
@@ -98,12 +100,12 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	protected abstract H mk(H reference, ValueExpression expression);
 
 	/**
-	 * Yields a new instance of this domain, built by evaluating the semantics of
-	 * the given heap expression.
+	 * Yields a new instance of this domain, built by evaluating the semantics
+	 * of the given heap expression.
 	 * 
 	 * @param expression the expression to evaluate
 	 * @param pp         the program point that where this expression is being
-	 *                   evaluated
+	 *                       evaluated
 	 * 
 	 * @return a new instance of this domain
 	 * 

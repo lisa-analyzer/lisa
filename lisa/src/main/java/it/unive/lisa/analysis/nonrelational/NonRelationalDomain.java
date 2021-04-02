@@ -1,9 +1,9 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticEvaluator;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -21,23 +21,26 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <T> the concrete type of the domain
  * @param <E> the type of expressions that this domain can evaluate
  * @param <F> the type of functional lattice that is used in conjuntion with
- *            this domain
+ *                this domain
  */
-public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E extends SymbolicExpression, F extends FunctionalLattice<F, Identifier, T>>
+public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
+		E extends SymbolicExpression,
+		F extends FunctionalLattice<F, Identifier, T>>
 		extends Lattice<T>, SemanticEvaluator {
 
 	/**
-	 * Evaluates a {@link SymbolicExpression}, assuming that the values of program
-	 * variables are the ones stored in {@code environment}.
+	 * Evaluates a {@link SymbolicExpression}, assuming that the values of
+	 * program variables are the ones stored in {@code environment}.
 	 * 
 	 * @param expression  the expression to evaluate
-	 * @param environment the environment containing the values of program variables
-	 *                    for the evaluation
+	 * @param environment the environment containing the values of program
+	 *                        variables for the evaluation
 	 * @param pp          the program point that where this operation is being
-	 *                    evaluated
+	 *                        evaluated
 	 * 
-	 * @return an new instance of this domain, representing the abstract result of
-	 *         {@code expression} when evaluated on {@code environment}
+	 * @return an new instance of this domain, representing the abstract result
+	 *             of {@code expression} when evaluated on {@code environment}
+	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public T eval(E expression, F environment, ProgramPoint pp) throws SemanticException;
@@ -48,17 +51,18 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>, E e
 	 * {@code environment} and returning an instance of {@link Satisfiability}.
 	 * 
 	 * @param expression  the expression whose satisfiability is to be evaluated
-	 * @param environment the environment containing the values of program variables
-	 *                    for the satisfiability
+	 * @param environment the environment containing the values of program
+	 *                        variables for the satisfiability
 	 * @param pp          the program point that where this operation is being
-	 *                    evaluated
+	 *                        evaluated
 	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied by
-	 *         the environment, {@link Satisfiability#NOT_SATISFIED} if it is not
-	 *         satisfied, or {@link Satisfiability#UNKNOWN} if it is either
-	 *         impossible to determine if it satisfied, or if it is satisfied by
-	 *         some values and not by some others (this is equivalent to a TOP
-	 *         boolean value)
+	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
+	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if
+	 *             it is not satisfied, or {@link Satisfiability#UNKNOWN} if it
+	 *             is either impossible to determine if it satisfied, or if it
+	 *             is satisfied by some values and not by some others (this is
+	 *             equivalent to a TOP boolean value)
+	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;

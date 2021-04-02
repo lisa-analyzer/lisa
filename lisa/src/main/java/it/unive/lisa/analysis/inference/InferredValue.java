@@ -19,13 +19,13 @@ public interface InferredValue<T extends InferredValue<T>>
 		extends NonRelationalDomain<T, ValueExpression, InferenceSystem<T>> {
 
 	/**
-	 * Yields a fixed abstraction of the given variable. The abstraction does not
-	 * depend on the abstract values that get assigned to the variable, but is
-	 * instead fixed among all possible execution paths. If this method does not
-	 * return the bottom element (as the default implementation does), then
+	 * Yields a fixed abstraction of the given variable. The abstraction does
+	 * not depend on the abstract values that get assigned to the variable, but
+	 * is instead fixed among all possible execution paths. If this method does
+	 * not return the bottom element (as the default implementation does), then
 	 * {@link InferenceSystem#assign(Identifier, it.unive.lisa.symbolic.SymbolicExpression, ProgramPoint)}
-	 * will store that abstract element instead of the one computed starting from
-	 * the expression.
+	 * will store that abstract element instead of the one computed starting
+	 * from the expression.
 	 * 
 	 * @param id The identifier representing the variable being assigned
 	 * @param pp the program point that where this operation is being evaluated

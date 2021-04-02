@@ -26,7 +26,7 @@ public class AllocationSite extends HeapLocation {
 		super(types, "pp@" + id, false);
 		this.id = id;
 	}
-	
+
 	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak) {
 		super(types, "pp@" + id, isWeak);
 		this.id = id;
@@ -44,7 +44,7 @@ public class AllocationSite extends HeapLocation {
 		super(types, "pp@" + id + "[" + field + "]", false);
 		this.id = id;
 	}
-	
+
 	/**
 	 * Returns the numerical identifier of this allocation site.
 	 * 
@@ -53,9 +53,37 @@ public class AllocationSite extends HeapLocation {
 	public String getId() {
 		return id;
 	}
-	
+
 	@Override
 	public String toString() {
-		return getName() + "["  + (isWeak() ? "w"  : "s") + "]";
+		return getName() + "[" + (isWeak() ? "w" : "s") + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + (isWeak() ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		AllocationSite other = (AllocationSite) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (isWeak() != other.isWeak())
+			return false;
+		return true;
 	}
 }

@@ -33,8 +33,8 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	/**
 	 * Builds an empty domain.
 	 * 
-	 * @param domain a singleton instance to be used during semantic operations to
-	 *               perform <i>kill</i> and <i>gen</i> operations
+	 * @param domain a singleton instance to be used during semantic operations
+	 *                   to perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public DefiniteForwardDataflowDomain(E domain) {
 		this(domain, new HashSet<>(), true);

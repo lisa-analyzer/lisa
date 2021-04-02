@@ -2,18 +2,6 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import static java.util.Collections.singleton;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -29,6 +17,16 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.Utils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -45,7 +43,7 @@ import it.unive.lisa.util.collections.Utils;
  */
 public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
-	private final List<HeapReplacement> substitions;
+	private final List<HeapReplacement> substitutions;
 
 	private final Collection<ValueExpression> rewritten;
 
@@ -60,7 +58,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * unique rewritten expression {@link Skip}.
 	 */
 	public PointBasedHeap() {
-		this(singleton(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()), Collections.emptyList());
+		this(singleton(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()),
+				Collections.emptyList());
 	}
 
 	/**
@@ -74,7 +73,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> substitions) {
 		this.rewritten = rewritten;
 		this.heapEnv = heapEnv;
-		this.substitions = substitions;
+		this.substitutions = substitions;
 	}
 
 	/**
@@ -88,8 +87,6 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return original;
 	}
 
-
-
 	@Override
 	public PointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
@@ -97,7 +94,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (expression instanceof AllocationSite) {
 			HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, expression, pp);
 			return from(new PointBasedHeap(singleton((AllocationSite) expression),
-					clean(heap, substitions), substitions));
+					clean(heap, substitutions), substitutions));
 		}
 		return smallStepSemantics(expression, pp);
 	}
@@ -110,7 +107,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
-		return from(new PointBasedHeap(rewritten, heapEnv.forgetIdentifier(id), substitions));
+		return from(new PointBasedHeap(rewritten, heapEnv.forgetIdentifier(id), substitutions));
 	}
 
 	@Override
@@ -163,19 +160,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public List<HeapReplacement> getSubstitution() {
-		return substitions;
+		return substitutions;
 	}
 
 	@Override
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
-		return from(new PointBasedHeap(singleton(expression), reference.heapEnv, reference.substitions));
+		return from(new PointBasedHeap(singleton(expression), reference.heapEnv, reference.substitutions));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
-		ArrayList<HeapReplacement> newSubstitions = new ArrayList<>(substitions);
-		newSubstitions.addAll(other.substitions);
+		ArrayList<HeapReplacement> newSubstitions = new ArrayList<>(substitutions);
+		newSubstitions.addAll(other.substitutions);
 		return from(new PointBasedHeap(CollectionUtils.union(this.rewritten, other.rewritten),
 				heapEnv.lub(other.heapEnv), newSubstitions));
 	}
@@ -196,6 +193,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		int result = 1;
 		result = prime * result + ((heapEnv == null) ? 0 : heapEnv.hashCode());
 		result = prime * result + ((rewritten == null) ? 0 : rewritten.hashCode());
+		result = prime * result + ((substitutions == null) ? 0 : substitutions.hashCode());
 		return result;
 	}
 
@@ -218,40 +216,48 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				return false;
 		} else if (!rewritten.equals(other.rewritten))
 			return false;
+		if (substitutions == null) {
+			if (other.substitutions != null)
+				return false;
+		} else if (!substitutions.equals(other.substitutions))
+			return false;
 		return true;
 	}
 
-	private AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap,AllocationSite id) {
+	private AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
 		for (AllocationSites set : heap.values())
 			for (AllocationSite site : set)
-				if (site.getId().equals(id.getId())) 
+				if (site.getId().equals(id.getId()))
 					return site;
 		return null;
 	}
 
-	protected HeapEnvironment<AllocationSites> clean(HeapEnvironment<AllocationSites> heap, List<HeapReplacement> substitution) {
-		if (heap.isTop() || heap.isBottom() || substitution  == null || substitution.isEmpty())
+	protected HeapEnvironment<AllocationSites> clean(HeapEnvironment<AllocationSites> heap,
+			List<HeapReplacement> substitution) {
+		if (heap.isTop() || heap.isBottom() || substitution == null || substitution.isEmpty())
 			return heap;
 
 		Map<Identifier, AllocationSites> map = new HashMap<>();
 
 		for (Identifier k : heap.getKeys()) {
 			Set<AllocationSite> newSites = new HashSet<>();
-			for (AllocationSite l : heap.getState(k)) 
+			for (AllocationSite l : heap.getState(k))
 				if (substitution.stream().noneMatch(t -> t.getSources().contains(l)))
 					newSites.add(l);
 				else
-					for (HeapReplacement replacement : substitution) 
-						if (replacement.getSources().contains(l)) 
+					for (HeapReplacement replacement : substitution)
+						if (replacement.getSources().contains(l))
 							for (Identifier target : replacement.getTargets())
 								newSites.add((AllocationSite) target);
 
 			map.put(k, new AllocationSites().mk(newSites));
 		}
 
-		HeapEnvironment<AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
+		HeapEnvironment<
+				AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
 		return heapEnvironment;
 	}
+
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
@@ -259,25 +265,27 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			PointBasedHeap childState = containerState.smallStepSemantics((((AccessChild) expression).getChild()),
 					pp);
 
-			List<HeapReplacement> substitution = childState.substitions;
+			List<HeapReplacement> substitution = childState.substitutions;
 
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
 				if (exp instanceof Variable && !childState.heapEnv.getState((Variable) exp).isBottom()) {
-					AllocationSites expHids = childState.heapEnv.getState((Identifier) exp);
-					for (AllocationSite hid : expHids)  {
+					AllocationSites expHids = childState.heapEnv.getState((Variable) exp);
+					for (AllocationSite hid : expHids) {
 						AllocationSite previousAllocated = alreadyAllocated(childState.heapEnv, hid);
 						if (previousAllocated == null) {
 							result.add(new AllocationSite(expression.getTypes(), hid.getId()));
-						} else if (previousAllocated.isWeak()) {
-							result.add(new AllocationSite(expression.getTypes(), hid.getId(), true));
 						} else {
+							AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(), true);
+							AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId());
 							HeapReplacement replacement = new HeapReplacement();
-							AllocationSite newAllocationSite = new AllocationSite(expression.getTypes(), hid.getId(), true);
-							replacement.addSource(previousAllocated);
-							replacement.addTarget(newAllocationSite);
+							replacement.addSource(strong);
+							replacement.addTarget(weak);
 							substitution.add(replacement);
-							result.add(newAllocationSite);
+							if (previousAllocated.isWeak())
+								result.add(weak);
+							else
+								result.add(strong);
 						}
 					}
 
@@ -297,7 +305,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			AllocationSite oldAllocation = alreadyAllocated(heapEnv, id);
 			List<HeapReplacement> substitution = new ArrayList<>();
 			if (oldAllocation != null) {
-				id = new AllocationSite(id.getTypes(), id.getName(), true);	
+				id = new AllocationSite(id.getTypes(), id.getName(), true);
 				for (Identifier key : heapEnv.keys()) {
 					for (AllocationSite site : heapEnv.getState(key))
 						if (site.getName().equals(id.getName())) {
@@ -305,7 +313,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							replacement.addSource(site);
 							replacement.addTarget(id);
 							substitution.add(replacement);
-						} 
+						}
 				}
 			}
 
