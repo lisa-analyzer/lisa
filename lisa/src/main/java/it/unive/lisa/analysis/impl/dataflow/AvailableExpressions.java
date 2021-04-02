@@ -3,15 +3,15 @@ package it.unive.lisa.analysis.impl.dataflow;
 import java.util.Collection;
 import java.util.HashSet;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -131,25 +131,17 @@ public class AvailableExpressions
 	}
 
 	@Override
-	public AvailableExpressions pushScope(Call scope) {
+	public AvailableExpressions pushScope(ScopeToken scope) throws SemanticException {
 		return new AvailableExpressions((Identifier) id.pushScope(scope),
 				(ValueExpression) expression.pushScope(scope));
 	}
 
 	@Override
-	public AvailableExpressions popScope(Call scope) throws SemanticException {
-		if (!(id instanceof OutsideScopeIdentifier))
+	public AvailableExpressions popScope(ScopeToken scope) throws SemanticException {
+		if (!(id instanceof OutOfScopeIdentifier))
 			return this;
 
-		OutsideScopeIdentifier id = (OutsideScopeIdentifier) this.id;
-		Call otherCall = id.getScope();
-		if (!scope.equals(otherCall) &&
-		// We might have a call that is resolved and the other one not,
-		// so we consider the program point as well
-				!scope.getLocation().equals(otherCall.getLocation()))
-			throw new SemanticException("Trying to pop out a different scope");
-		else
-			return new AvailableExpressions((Identifier) id.popScope(scope),
-					(ValueExpression) expression.popScope(scope));
+		return new AvailableExpressions(((OutOfScopeIdentifier) id).popScope(scope),
+				(ValueExpression) expression.popScope(scope));
 	}
 }

@@ -10,11 +10,11 @@ import java.util.TreeSet;
 import org.apache.commons.collections.CollectionUtils;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
@@ -244,7 +244,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public PointBasedHeap pushScope(Call scope) throws SemanticException {
+	public PointBasedHeap pushScope(ScopeToken scope) throws SemanticException {
 		Collection<ValueExpression> rew = new HashSet<>();
 		for (ValueExpression ve : rewritten)
 			rew.add((ValueExpression) ve.pushScope(scope));
@@ -252,7 +252,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public PointBasedHeap popScope(Call scope) throws SemanticException {
+	public PointBasedHeap popScope(ScopeToken scope) throws SemanticException {
 		Collection<ValueExpression> rew = new HashSet<>();
 		for (ValueExpression ve : rewritten)
 			rew.add((ValueExpression) ve.popScope(scope));

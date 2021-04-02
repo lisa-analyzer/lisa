@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -95,22 +95,6 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	}
 
 	@Override
-	public DefiniteForwardDataflowDomain<E> pushScope(Call scope) throws SemanticException {
-		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
-		for (E element : this.elements)
-			result.elements.add(element.pushScope(scope));
-		return result;
-	}
-
-	@Override
-	public DefiniteForwardDataflowDomain<E> popScope(Call scope) throws SemanticException {
-		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
-		for (E element : this.elements)
-			result.elements.add(element.popScope(scope));
-		return result;
-	}
-
-	@Override
 	public String representation() {
 		SortedSet<String> res = new TreeSet<>();
 		elements.stream().map(e -> e.toString()).forEach(res::add);
@@ -145,5 +129,25 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public Collection<E> getDataflowElements() {
 		return elements;
+	}
+
+	@Override
+	public DefiniteForwardDataflowDomain<E> pushScope(ScopeToken scope) throws SemanticException {
+		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
+		E pushed;
+		for (E element : this.elements)
+			if ((pushed = element.pushScope(scope)) != null)
+				result.elements.add(pushed);
+		return result;
+	}
+
+	@Override
+	public DefiniteForwardDataflowDomain<E> popScope(ScopeToken scope) throws SemanticException {
+		DefiniteForwardDataflowDomain<E> result = new DefiniteForwardDataflowDomain<>(this.domain);
+		E popped;
+		for (E element : this.elements)
+			if ((popped = element.popScope(scope)) != null)
+				result.elements.add(popped);
+		return result;
 	}
 }

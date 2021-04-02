@@ -10,7 +10,6 @@ import org.apache.commons.collections.CollectionUtils;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -121,31 +120,23 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> pushScope(Call scope) throws SemanticException {
+	public AnalysisState<A, H, V> pushScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<A, H, V>(state.pushScope(scope),
-				pushScopeOnAllExpressions(this.computedExpressions, scope));
+				onAllExpressions(this.computedExpressions, scope, true));
 	}
 
-	private Collection<SymbolicExpression> pushScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions,
-			Call scope) {
+	private Collection<SymbolicExpression> onAllExpressions(Collection<SymbolicExpression> computedExpressions,
+			ScopeToken scope, boolean push) throws SemanticException {
 		Collection<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
-			result.add(exp.pushScope(scope));
+			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
 		return result;
 	}
 
 	@Override
-	public AnalysisState<A, H, V> popScope(Call scope) throws SemanticException {
+	public AnalysisState<A, H, V> popScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<A, H, V>(state.popScope(scope),
-				popScopeOnAllExpressions(this.computedExpressions, scope));
-	}
-
-	private Collection<SymbolicExpression> popScopeOnAllExpressions(Collection<SymbolicExpression> computedExpressions,
-			Call scope) throws SemanticException {
-		Collection<SymbolicExpression> result = new HashSet<>();
-		for (SymbolicExpression exp : computedExpressions)
-			result.add(exp.popScope(scope));
-		return result;
+				onAllExpressions(this.computedExpressions, scope, false));
 	}
 
 	@Override

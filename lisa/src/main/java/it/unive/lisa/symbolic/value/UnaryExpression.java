@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -57,13 +57,13 @@ public class UnaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(Call scope) {
-		return new UnaryExpression(this.getTypes(), this.expression.pushScope(scope), this.operator);
+	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+		return new UnaryExpression(this.getTypes(), this.expression.pushScope(token), this.operator);
 	}
 
 	@Override
-	public SymbolicExpression popScope(Call scope) throws SemanticException {
-		return new UnaryExpression(this.getTypes(), this.expression.popScope(scope), this.operator);
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		return new UnaryExpression(this.getTypes(), this.expression.popScope(token), this.operator);
 	}
 
 	@Override

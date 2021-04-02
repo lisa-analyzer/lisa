@@ -3,7 +3,6 @@ package it.unive.lisa.analysis;
 import java.util.Collection;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
@@ -120,33 +119,34 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
-	 * Push a new scope in the call stack caused by calling the method passed as
-	 * parameter. This causes the current local variables to be hidden by the
-	 * method call.
+	 * Pushes a new scope, identified by the give token, in the domain. This
+	 * causes information about all variables not associated with a scope (and
+	 * thus visible) to be mapped to the given scope and hidden away, until the
+	 * scope is popped with {@link #popScope(ScopeToken)}.
 	 *
-	 * @param scope the called method
+	 * @param token the token identifying the scope to push
 	 * 
-	 * @return the abstract state where the local variables have been hidden
+	 * @return a copy of this domain where the local variables have been hidden
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D pushScope(Call scope) throws SemanticException;
+	D pushScope(ScopeToken token) throws SemanticException;
 
 	/**
-	 * Pop the new scope from the call stack caused by calling the method passed
-	 * as parameter. This causes that the current local variables to be removed
-	 * from the state, while the local variables that were hidden by the call to
-	 * the given method
+	 * Pops the scope identified by the given token from the domain. This causes
+	 * all the visible variables (i.e. that are not mapped to a scope) to be
+	 * removed from the domain, while the local variables that were associated
+	 * to the given scope token (and thus hidden) will become visible again.
 	 *
-	 * @param scope the called method we are exiting
+	 * @param token the token of the scope to be restored
 	 * 
-	 * @return the abstract state where the local variables have been removed,
-	 *             while the variables hidden by the given call are visible
-	 *             again
+	 * @return a copy of this domain where the local variables have been
+	 *             removed, while the variables mapped to the given scope are
+	 *             visible again
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D popScope(Call scope) throws SemanticException;
+	D popScope(ScopeToken token) throws SemanticException;
 
 	/**
 	 * The satisfiability of an expression.

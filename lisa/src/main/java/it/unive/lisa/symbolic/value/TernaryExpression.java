@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -91,15 +91,15 @@ public class TernaryExpression extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(Call scope) {
-		return new TernaryExpression(this.getTypes(), this.left.pushScope(scope), this.middle.pushScope(scope),
-				this.right.pushScope(scope), this.operator);
+	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+		return new TernaryExpression(this.getTypes(), this.left.pushScope(token), this.middle.pushScope(token),
+				this.right.pushScope(token), this.operator);
 	}
 
 	@Override
-	public SymbolicExpression popScope(Call scope) throws SemanticException {
-		return new TernaryExpression(this.getTypes(), this.left.popScope(scope), this.middle.popScope(scope),
-				this.right.popScope(scope), this.operator);
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		return new TernaryExpression(this.getTypes(), this.left.popScope(token), this.middle.popScope(token),
+				this.right.popScope(token), this.operator);
 	}
 
 	@Override

@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -131,18 +131,22 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	}
 
 	@Override
-	public PossibleForwardDataflowDomain<E> pushScope(Call scope) throws SemanticException {
+	public PossibleForwardDataflowDomain<E> pushScope(ScopeToken scope) throws SemanticException {
 		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		E pushed;
 		for (E element : this.elements)
-			result.elements.add(element.pushScope(scope));
+			if ((pushed = element.pushScope(scope)) != null)
+				result.elements.add(pushed);
 		return result;
 	}
 
 	@Override
-	public PossibleForwardDataflowDomain<E> popScope(Call scope) throws SemanticException {
+	public PossibleForwardDataflowDomain<E> popScope(ScopeToken scope) throws SemanticException {
 		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		E popped;
 		for (E element : this.elements)
-			result.elements.add(element.popScope(scope));
+			if ((popped = element.popScope(scope)) != null)
+				result.elements.add(popped);
 		return result;
 	}
 

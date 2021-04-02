@@ -11,14 +11,14 @@ import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -165,36 +165,26 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	public M pushScope(Call scope) throws SemanticException {
-		return this.liftIdentifiers(id -> new OutsideScopeIdentifier(id, scope));
+	public M pushScope(ScopeToken scope) throws SemanticException {
+		return this.liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
 	}
 
 	@Override
-	public M popScope(Call scope) throws SemanticException {
+	public M popScope(ScopeToken scope) throws SemanticException {
 		AtomicReference<SemanticException> e = new AtomicReference<>();
 		M result = this.liftIdentifiers(id -> {
-			if (!(id instanceof OutsideScopeIdentifier)) {
+			if (!(id instanceof OutOfScopeIdentifier))
 				return null;
-			} else {
-				Call otherCall = ((OutsideScopeIdentifier) id).getScope();
-				if (!scope.equals(otherCall) &&
-				// We might have a call that is resolved and the other one not,
-				// so we consider the program point as well
-						!scope.getLocation().equals(otherCall.getLocation())) {
-					e.set(new SemanticException("Trying to pop out a different scope"));
+			else
+				try {
+					return ((OutOfScopeIdentifier) id).popScope(scope);
+				} catch (SemanticException semanticException) {
+					e.set(semanticException);
 					return null;
-				} else {
-					try {
-						return ((OutsideScopeIdentifier) id).popScope(scope);
-					} catch (SemanticException semanticException) {
-						e.set(semanticException);
-						return null;
-					}
 				}
-			}
 		});
 		if (e.get() != null)
-			throw e.get();
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", e.get());
 		else
 			return result;
 	}
@@ -218,8 +208,8 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		return result;
 
 	}
-	
-	protected abstract M mk(T lattice, Map<Identifier, T> function); 
+
+	protected abstract M mk(T lattice, Map<Identifier, T> function);
 
 	@Override
 	@SuppressWarnings("unchecked")

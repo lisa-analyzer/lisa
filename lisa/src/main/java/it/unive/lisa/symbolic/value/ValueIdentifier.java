@@ -1,7 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -24,12 +24,12 @@ public class ValueIdentifier extends Identifier {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(Call scope) {
-		return new OutsideScopeIdentifier(this, scope);
+	public SymbolicExpression pushScope(ScopeToken token) {
+		return new OutOfScopeIdentifier(this, token);
 	}
 
 	@Override
-	public SymbolicExpression popScope(Call scope) throws SemanticException {
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		throw new SemanticException("Cannot pop the scope of a non-scoped value identifier");
 	}
 

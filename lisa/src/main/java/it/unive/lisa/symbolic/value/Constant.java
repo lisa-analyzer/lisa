@@ -1,8 +1,8 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 
@@ -64,12 +64,12 @@ public class Constant extends ValueExpression {
 	}
 
 	@Override
-	public SymbolicExpression pushScope(Call scope) {
+	public SymbolicExpression pushScope(ScopeToken token) {
 		return this;
 	}
 
 	@Override
-	public SymbolicExpression popScope(Call scope) throws SemanticException {
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return this;
 	}
 

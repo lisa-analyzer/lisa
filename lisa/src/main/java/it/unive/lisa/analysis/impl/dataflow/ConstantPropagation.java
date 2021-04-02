@@ -4,16 +4,16 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -161,23 +161,15 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public ConstantPropagation pushScope(Call scope) {
+	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
 		return new ConstantPropagation((Identifier) id.pushScope(scope), v);
 	}
 
 	@Override
-	public ConstantPropagation popScope(Call scope) throws SemanticException {
-		if (!(id instanceof OutsideScopeIdentifier))
+	public ConstantPropagation popScope(ScopeToken scope) throws SemanticException {
+		if (!(id instanceof OutOfScopeIdentifier))
 			return this;
 
-		OutsideScopeIdentifier id = (OutsideScopeIdentifier) this.id;
-		Call otherCall = id.getScope();
-		if (!scope.equals(otherCall) &&
-		// We might have a call that is resolved and the other one not,
-		// so we consider the program point as well
-				!scope.getLocation().equals(otherCall.getLocation()))
-			throw new SemanticException("Trying to pop out a different scope");
-		else
-			return new ConstantPropagation((Identifier) id.popScope(scope), v);
+		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), v);
 	}
 }

@@ -3,13 +3,13 @@ package it.unive.lisa.analysis.impl.dataflow;
 import java.util.Collection;
 import java.util.Collections;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutsideScopeIdentifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
@@ -90,23 +90,15 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public ReachingDefinitions pushScope(Call scope) {
+	public ReachingDefinitions pushScope(ScopeToken scope) throws SemanticException {
 		return new ReachingDefinitions((Identifier) variable.pushScope(scope), programPoint);
 	}
 
 	@Override
-	public ReachingDefinitions popScope(Call scope) throws SemanticException {
-		if (!(variable instanceof OutsideScopeIdentifier))
-			return this;
-
-		OutsideScopeIdentifier id = (OutsideScopeIdentifier) variable;
-		Call otherCall = id.getScope();
-		if (!scope.equals(otherCall) &&
-		// We might have a call that is resolved and the other one not,
-		// so we consider the program point as well
-				!scope.getLocation().equals(otherCall.getLocation()))
-			throw new SemanticException("Trying to pop out a different scope");
-		else
-			return new ReachingDefinitions((Identifier) id.popScope(scope), programPoint);
+	public ReachingDefinitions popScope(ScopeToken scope) throws SemanticException {
+		if (!(variable instanceof OutOfScopeIdentifier))
+			return null;
+		
+		return new ReachingDefinitions(((OutOfScopeIdentifier) variable).popScope(scope), programPoint);
 	}
 }

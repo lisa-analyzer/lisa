@@ -6,10 +6,10 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
@@ -91,12 +91,12 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap pushScope(Call scope) throws SemanticException {
+	public MonolithicHeap pushScope(ScopeToken scope) throws SemanticException {
 		return top();
 	}
 
 	@Override
-	public MonolithicHeap popScope(Call scope) throws SemanticException {
+	public MonolithicHeap popScope(ScopeToken scope) throws SemanticException {
 		return top();
 	}
 

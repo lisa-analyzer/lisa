@@ -1,9 +1,9 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
@@ -29,13 +29,13 @@ public abstract class HeapExpression extends SymbolicExpression {
 
 	// By default a heap expression does not change the scope.
 	@Override
-	public final SymbolicExpression pushScope(Call scope) {
+	public final SymbolicExpression pushScope(ScopeToken token) {
 		return this;
 	}
 
 	// By default a heap expression does not change the scope.
 	@Override
-	public final SymbolicExpression popScope(Call scope) throws SemanticException {
+	public final SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return this;
 	}
 }

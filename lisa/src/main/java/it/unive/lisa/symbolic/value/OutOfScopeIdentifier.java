@@ -2,9 +2,8 @@ package it.unive.lisa.symbolic.value;
 
 import java.util.Objects;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
@@ -13,8 +12,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public class OutsideScopeIdentifier extends Identifier {
-	private Call scope;
+public class OutOfScopeIdentifier extends Identifier {
+	private ScopeToken scope;
 	private Identifier id;
 
 	/**
@@ -23,7 +22,7 @@ public class OutsideScopeIdentifier extends Identifier {
 	 * @param id    the current identifier
 	 * @param scope the method call that caused the identifier to exit the scope
 	 */
-	public OutsideScopeIdentifier(Identifier id, Call scope) {
+	public OutOfScopeIdentifier(Identifier id, ScopeToken scope) {
 		super(id.getTypes(), scope.toString() + ":" + id.getName(), id.isWeak());
 		this.id = id;
 		this.scope = scope;
@@ -37,24 +36,20 @@ public class OutsideScopeIdentifier extends Identifier {
 			return false;
 		if (!super.equals(o))
 			return false;
-		OutsideScopeIdentifier that = (OutsideScopeIdentifier) o;
+		OutOfScopeIdentifier that = (OutOfScopeIdentifier) o;
 		return Objects.equals(scope, that.scope);
 	}
 
 	@Override
-	public SymbolicExpression pushScope(Call scope) {
-		return new OutsideScopeIdentifier(this, scope);
+	public SymbolicExpression pushScope(ScopeToken token) {
+		return new OutOfScopeIdentifier(this, token);
 	}
 
 	@Override
-	public Identifier popScope(Call scope) throws SemanticException {
-		if (this.getScope().equals(scope))
+	public Identifier popScope(ScopeToken token) throws SemanticException {
+		if (getScope().equals(token))
 			return this.id;
-		CFGDescriptor descr1 = scope.getCFG().getDescriptor();
-		CFGDescriptor descr2 = this.getScope().getCFG().getDescriptor();
-		if (descr1.matchesSignature(descr2) && descr2.matchesSignature(descr1))
-			return this.id;
-		throw new SemanticException("Unable to pop different scopes");
+		throw new SemanticException("Unable to pop scope '" + token + "' from '" + getScope() + "'");
 	}
 
 	/**
@@ -62,7 +57,7 @@ public class OutsideScopeIdentifier extends Identifier {
 	 * 
 	 * @return the scope of the identifier
 	 */
-	public Call getScope() {
+	public ScopeToken getScope() {
 		return this.scope;
 	}
 

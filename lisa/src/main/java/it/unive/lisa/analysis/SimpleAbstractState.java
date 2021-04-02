@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -116,12 +115,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> pushScope(Call scope) throws SemanticException {
+	public SimpleAbstractState<H, V> pushScope(ScopeToken scope) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.pushScope(scope), valueState.pushScope(scope));
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> popScope(Call scope) throws SemanticException {
+	public SimpleAbstractState<H, V> popScope(ScopeToken scope) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.popScope(scope), valueState.popScope(scope));
 	}
 
