@@ -20,6 +20,8 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An interprocedural analysis based on a call graph.
@@ -67,21 +69,21 @@ abstract public class CallGraphBasedInterproceduralAnalysis<A extends AbstractSt
 	protected final AnalysisState<A, H, V> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V> entryState, CFG cfg)
 			throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
-		for (Parameter arg : cfg.getDescriptor().getArgs())
+
+		for (Parameter arg : cfg.getDescriptor().getArgs()) {
+			ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
 			if (arg.getStaticType().isPointerType()) {
-				prepared = prepared.smallStepSemantics(
-						new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName()),
+				prepared = prepared.smallStepSemantics(new HeapReference(all, arg.getName()),
 						cfg.getGenericProgramPoint());
 				for (SymbolicExpression expr : prepared.getComputedExpressions())
 					prepared = prepared.assign((HeapIdentifier) expr,
-							new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-							cfg.getGenericProgramPoint());
+							new PushAny(all), cfg.getGenericProgramPoint());
 			} else {
-				ValueIdentifier id = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()),
-						arg.getName());
-				prepared = prepared.assign(id, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-						cfg.getGenericProgramPoint());
+				ValueIdentifier id = new ValueIdentifier(all, arg.getName());
+				prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
 			}
+		}
+
 		return prepared;
 	}
 }

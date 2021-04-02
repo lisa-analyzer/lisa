@@ -138,20 +138,15 @@ public abstract class Call extends Expression {
 		for (int i = 0; i < computed.length; i++) {
 			preState = paramStates[i] = parameters[i].semantics(preState, interprocedural, expressions);
 			expressions.put(parameters[i], paramStates[i]);
-			// All expressions must be updated with the new scope
-			computed[i] = paramStates[i].pushScope(this).getComputedExpressions();
-			paramStates[i] = paramStates[i].pushScope(this);
+			computed[i] = paramStates[i].getComputedExpressions();
 		}
-
-		if (parameters.length == 0)
-			entryState = entryState.pushScope(this);
 
 		AnalysisState<A, H, V> result = callSemantics(entryState, interprocedural, paramStates, computed);
 
 		for (Expression param : parameters)
 			if (!param.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(param.getMetaVariables());
-		return result.popScope(this);
+		return result;
 	}
 
 	/**

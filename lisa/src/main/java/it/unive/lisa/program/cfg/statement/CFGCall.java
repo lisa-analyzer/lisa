@@ -221,8 +221,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		for (SymbolicExpression expr : returned.getComputedExpressions())
 		// if(! (expr instanceof Skip))
 		{
-			AnalysisState<A, H, V> tmp = returned.assign((Identifier) meta.pushScope(this), expr, this);
-			result = result.lub(tmp.smallStepSemantics(meta.pushScope(this), this));
+			AnalysisState<A, H, V> tmp = returned.assign((Identifier) meta, expr, this);
+			result = result.lub(tmp.smallStepSemantics(meta, this));
 			// We need to perform this evaluation of the identifier not pushed
 			// with the scope since otherwise
 			// the value associated with the returned variable would be lost

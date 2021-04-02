@@ -131,18 +131,25 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
 			else
 				try {
 					int i = 0;
+					computedEntryState = computedEntryState.pushScope(call);
 					for (Collection<SymbolicExpression> par : parameters) {
 						AnalysisState<A, H, V> temp = computedEntryState.bottom();
 						Parameter parameter = cfg.getDescriptor().getArgs()[i];
-						Identifier parid = new ValueIdentifier(Caches.types().mkSingletonSet(parameter.getStaticType()),
+						Identifier parid = new ValueIdentifier(
+								Caches.types().mkSet(parameter.getStaticType().allInstances()),
 								parameter.getName());
 						for (SymbolicExpression exp : par)
-							temp = temp.lub(computedEntryState.assign(parid, exp, cfg.getGenericProgramPoint()));
+							temp = temp.lub(computedEntryState.assign(parid, exp.pushScope(call), cfg.getGenericProgramPoint()));
 						computedEntryState = temp;
 						i++;
 					}
 					CFGWithAnalysisResults<A, H, V> fixpointResult = computeFixpoint(newToken, cfg, computedEntryState);
 					exitState = exitState.lub(fixpointResult.getExitState());
+					AnalysisState<A, H, V> tmp = exitState.bottom();
+					Identifier meta = (Identifier) call.getMetaVariable().pushScope(call);
+					for (SymbolicExpression ret : exitState.getComputedExpressions())
+						tmp = tmp.lub(exitState.assign(meta, ret, call));
+					exitState = tmp.popScope(call);
 				} catch (FixpointException | InterproceduralAnalysisException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}

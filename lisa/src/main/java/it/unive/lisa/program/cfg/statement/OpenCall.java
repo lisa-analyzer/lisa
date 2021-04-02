@@ -133,6 +133,6 @@ public class OpenCall extends Call implements MetaVariableCreator {
 		if (getStaticType().isVoidType())
 			return poststate.smallStepSemantics(new Skip(), this);
 		else
-			return poststate.smallStepSemantics(getMetaVariable().pushScope(this), this);
+			return poststate.smallStepSemantics(getMetaVariable(), this);
 	}
 }
