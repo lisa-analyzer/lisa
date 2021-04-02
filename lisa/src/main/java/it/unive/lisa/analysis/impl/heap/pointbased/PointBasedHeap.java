@@ -1,6 +1,17 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import static java.util.Collections.singleton;
+import static org.apache.commons.collections.CollectionUtils.union;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,16 +28,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.Utils;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -36,7 +37,7 @@ import org.apache.commons.collections.CollectionUtils;
  * heap identifier. The implementation follows X. Rival and K. Yi, "Introduction
  * to Static Analysis An Abstract Interpretation Perspective", Section 8.3.4
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unive.itØ">Vincenzo Arceri</a>
  * 
  * @see <a href=
  *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
@@ -168,15 +169,16 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return from(new PointBasedHeap(singleton(expression), reference.heapEnv, reference.substitutions));
 	}
 
-	@Override
 	@SuppressWarnings("unchecked")
+	@Override
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		ArrayList<HeapReplacement> newSubstitions = new ArrayList<>(substitutions);
 		newSubstitions.addAll(other.substitutions);
-		return from(new PointBasedHeap(CollectionUtils.union(this.rewritten, other.rewritten),
+	
+		return from(new PointBasedHeap(union(rewritten, other.rewritten),
 				heapEnv.lub(other.heapEnv), newSubstitions));
 	}
-
+	
 	@Override
 	protected PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
 		return lubAux(other);

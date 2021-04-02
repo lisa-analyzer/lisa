@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -28,4 +29,32 @@ public class HeapLocation extends Identifier {
 		return "hid$" + getName();
 	}
 
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isWeak() ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		HeapLocation other = (HeapLocation) obj;
+		if (isWeak() != other.isWeak())
+			return false;
+		return true;
+	}
+
+	@Override
+	public Identifier lub(Identifier other) throws SemanticException {
+		if (!getName().equals(other.getName()))
+			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this + "' and '" + other + "'");
+		return isWeak() ? this : other;
+	}
 }

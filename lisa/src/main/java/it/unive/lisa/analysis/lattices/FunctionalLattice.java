@@ -21,7 +21,7 @@ import java.util.Set;
  * @param <V> the concrete {@link Lattice} type of the values of this function
  */
 public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K, V extends Lattice<V>>
-		extends BaseLattice<F> implements Iterable<Map.Entry<K, V>> {
+extends BaseLattice<F> implements Iterable<Map.Entry<K, V>> {
 
 	/**
 	 * The function implemented by this lattice.
@@ -115,16 +115,20 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
 		result.function = mkNewFunction(null);
-		Set<K> keys = new HashSet<>(function.keySet());
-		keys.addAll(other.function.keySet());
-		for (K key : keys)
+		Set<K> keys = functionalLiftKeys(other);
+		for (K key : keys) 
 			try {
 				result.function.put(key, lift.lift(getState(key), other.getState(key)));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
-
 		return result;
+	}
+
+	protected Set<K> functionalLiftKeys(F other) {
+		Set<K> keys = new HashSet<>(function.keySet());
+		keys.addAll(other.function.keySet());
+		return keys;
 	}
 
 	@Override

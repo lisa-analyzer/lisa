@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -56,8 +57,8 @@ public abstract class Identifier extends ValueExpression {
 	 * @return {@code true} if this identifier is weak, {@code false} otherwise
 	 */
 	public boolean isWeak() {
-		return weak;
-	}
+		return weak;	}
+
 
 	@Override
 	public int hashCode() {
@@ -86,5 +87,11 @@ public abstract class Identifier extends ValueExpression {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	public Identifier lub(Identifier other) throws SemanticException {
+		if (!equals(other))
+			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this + "' and '" + other + "'");
+		return this;
 	}
 }

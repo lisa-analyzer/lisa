@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -9,12 +16,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -22,7 +23,7 @@ import java.util.Set;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
-		implements NonRelationalHeapDomain<AllocationSites> {
+implements NonRelationalHeapDomain<AllocationSites> {
 
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
