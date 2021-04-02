@@ -52,6 +52,17 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		substitution = Collections.emptyList();
 	}
 
+	/**
+	 * Builds an empty environment from a given mapping.
+	 * 
+	 * @param domain  singleton instance to be used during semantic operations
+	 *                   to retrieve top and bottom values
+	 * @param function the initial mapping of this heap environment
+	 */
+	public HeapEnvironment(T domain, Map<Identifier, T> function) {
+		this(domain, function, Collections.emptyList(), Collections.emptyList());
+	}
+	
 	private HeapEnvironment(T domain, Map<Identifier, T> function, Collection<ValueExpression> rewritten,
 			List<HeapReplacement> substitution) {
 		super(domain, function);

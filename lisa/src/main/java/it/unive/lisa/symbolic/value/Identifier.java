@@ -64,7 +64,6 @@ public abstract class Identifier extends ValueExpression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + (weak ? 1231 : 1237);
 		return result;
 	}
 
@@ -81,8 +80,6 @@ public abstract class Identifier extends ValueExpression {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (weak != other.weak)
 			return false;
 		return true;
 	}
