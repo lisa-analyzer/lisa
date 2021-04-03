@@ -31,7 +31,7 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
  */
 public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> extends CallGraphBasedInterproceduralAnalysis<A, H, V> {
+		V extends ValueDomain<V>> extends CallGraphBasedAnalysis<A, H, V> {
 
 	private static final Logger log = LogManager
 			.getLogger(it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis.class);

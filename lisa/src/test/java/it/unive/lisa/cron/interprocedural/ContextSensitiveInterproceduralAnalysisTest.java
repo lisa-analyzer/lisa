@@ -12,7 +12,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.CallPointContextSensitiveToken;
-import it.unive.lisa.interprocedural.impl.ContextSensitiveInterproceduralAnalysis;
+import it.unive.lisa.interprocedural.impl.ContextSensitiveAnalysis;
 
 @SuppressWarnings("rawtypes")
 public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExecutor {
@@ -23,7 +23,7 @@ public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExe
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(
-						new ContextSensitiveInterproceduralAnalysis(CallPointContextSensitiveToken.getSingleton()))
+						new ContextSensitiveAnalysis(CallPointContextSensitiveToken.getSingleton()))
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive1", "programContextSensitive1.imp", conf);
 	}
@@ -34,7 +34,7 @@ public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExe
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(
-						new ContextSensitiveInterproceduralAnalysis(CallPointContextSensitiveToken.getSingleton()))
+						new ContextSensitiveAnalysis(CallPointContextSensitiveToken.getSingleton()))
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive2", "programContextSensitive2.imp", conf);
 	}
@@ -45,7 +45,7 @@ public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExe
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(
-						new ContextSensitiveInterproceduralAnalysis(CallPointContextSensitiveToken.getSingleton()))
+						new ContextSensitiveAnalysis(CallPointContextSensitiveToken.getSingleton()))
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive3", "programContextSensitive3.imp", conf);
 	}

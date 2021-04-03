@@ -35,14 +35,14 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
  * @param <H> the heap domain
  * @param <V> the value domain
  */
-public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, H, V>,
+public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> extends CallGraphBasedInterproceduralAnalysis<A, H, V> {
+		V extends ValueDomain<V>> extends CallGraphBasedAnalysis<A, H, V> {
 
-	private static final Logger log = LogManager.getLogger(ContextSensitiveInterproceduralAnalysis.class);
+	private static final Logger log = LogManager.getLogger(ContextSensitiveAnalysis.class);
 
 	/**
-	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all
+	 * The cache of the fixpoints' results. {@link Map#keySet()} will contain all
 	 * the cfgs that have been added. If a key's values's
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
@@ -81,7 +81,7 @@ public class ContextSensitiveInterproceduralAnalysis<A extends AbstractState<A, 
 	 * @param token an instance of the tokens to be used to partition w.r.t.
 	 *                  context sensitivity
 	 */
-	public ContextSensitiveInterproceduralAnalysis(ContextSensitiveToken token) {
+	public ContextSensitiveAnalysis(ContextSensitiveToken token) {
 		this.token = token.empty();
 		this.results = new ConcurrentHashMap<>();
 	}

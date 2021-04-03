@@ -8,6 +8,9 @@ import it.unive.lisa.program.cfg.statement.Call;
  * A context sensitive token representing a call point.
  */
 public class CallPointContextSensitiveToken extends ContextSensitiveToken {
+	
+	private static final CallPointContextSensitiveToken singleton = new CallPointContextSensitiveToken(null);
+
 	private final Call callPoint;
 
 	private CallPointContextSensitiveToken(Call callPoint) {
@@ -24,7 +27,6 @@ public class CallPointContextSensitiveToken extends ContextSensitiveToken {
 		return new CallPointContextSensitiveToken(c);
 	}
 
-	private static CallPointContextSensitiveToken singleton = new CallPointContextSensitiveToken(null);
 
 	/**
 	 * Return an empty token.

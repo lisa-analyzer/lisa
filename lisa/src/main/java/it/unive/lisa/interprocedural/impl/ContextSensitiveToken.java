@@ -5,14 +5,14 @@ import it.unive.lisa.program.cfg.statement.Call;
 /**
  * A context sensitive token for interprocedural analysis.
  */
-abstract public class ContextSensitiveToken {
+public abstract class ContextSensitiveToken {
 
 	/**
 	 * A token without any context sensititivity.
 	 * 
 	 * @return an empty context sensitive token
 	 */
-	abstract public ContextSensitiveToken empty();
+	public abstract ContextSensitiveToken empty();
 
 	/**
 	 * Creates a context sensitive token with the given call on the top of the
@@ -22,5 +22,5 @@ abstract public class ContextSensitiveToken {
 	 * 
 	 * @return a token with the given call on the top of the call stack
 	 */
-	abstract public ContextSensitiveToken pushCall(Call c);
+	public abstract ContextSensitiveToken pushCall(Call c);
 }

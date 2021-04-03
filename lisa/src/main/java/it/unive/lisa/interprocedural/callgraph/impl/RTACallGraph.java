@@ -15,7 +15,7 @@ import it.unive.lisa.type.Type;
  *
  * @author <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public final class RTACallGraph extends AbstractBaseCallGraph {
+public final class RTACallGraph extends BaseCallGraph {
 
 	@Override
 	protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver) {

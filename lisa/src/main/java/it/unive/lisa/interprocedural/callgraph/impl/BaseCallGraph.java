@@ -25,7 +25,7 @@ import it.unive.lisa.type.Type;
  * <ul>
  * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
  * target's signature.
- * {@link AbstractBaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides
+ * {@link BaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides
  * the possible types of the receiver that might be reachable, and from where we
  * might get the method implementation to analyze</li>
  * <li>returns top when asked for the abstract result of a {@link CFGCall}</li>
@@ -34,7 +34,7 @@ import it.unive.lisa.type.Type;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class AbstractBaseCallGraph implements CallGraph {
+public abstract class BaseCallGraph implements CallGraph {
 
 	private Program program;
 

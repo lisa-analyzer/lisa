@@ -30,7 +30,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * @param <H> The heap domain
  * @param <V> The value domain
  */
-abstract public class CallGraphBasedInterproceduralAnalysis<A extends AbstractState<A, H, V>,
+public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> implements InterproceduralAnalysis<A, H, V> {
 
