@@ -54,7 +54,8 @@ public class HeapLocation extends Identifier {
 	@Override
 	public Identifier lub(Identifier other) throws SemanticException {
 		if (!getName().equals(other.getName()))
-			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this + "' and '" + other + "'");
+			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
+					+ "' and '" + other + "'");
 		return isWeak() ? this : other;
 	}
 }

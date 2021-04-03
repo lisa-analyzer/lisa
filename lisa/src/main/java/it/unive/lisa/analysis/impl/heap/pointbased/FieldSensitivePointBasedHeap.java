@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -17,6 +10,12 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -75,8 +74,10 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 					if (!(expHids.isBottom()))
 						for (AllocationSite hid : expHids)
 							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions()) {
-								AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(), childRewritten, true);
-								AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId(), childRewritten);				
+								AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(),
+										childRewritten, true);
+								AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId(),
+										childRewritten);
 								if (hid.isWeak()) {
 									HeapReplacement replacement = new HeapReplacement();
 									replacement.addSource(strong);

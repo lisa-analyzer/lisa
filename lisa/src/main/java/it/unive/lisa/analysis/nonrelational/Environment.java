@@ -1,16 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -19,6 +8,15 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -204,11 +202,12 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 		return StringUtils.join(res, '\n');
 	}
-	
+
 	@Override
 	protected Set<Identifier> functionalLiftKeys(M other) {
 		Set<Identifier> keys = new HashSet<>();
-		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, function.keySet(), other.function.keySet());
+		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, function.keySet(),
+				other.function.keySet());
 		builder.compute(Comparator.comparing(Identifier::getName));
 		keys.addAll(builder.getOnlyFirst());
 		keys.addAll(builder.getOnlySecond());
