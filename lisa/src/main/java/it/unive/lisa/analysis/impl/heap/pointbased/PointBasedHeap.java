@@ -306,7 +306,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			AllocationSite id = new AllocationSite(expression.getTypes(), pp.getLocation().getCodeLocation());
 			AllocationSite oldAllocation = alreadyAllocated(heapEnv, id);
 			List<HeapReplacement> substitution = new ArrayList<>();
-			if (oldAllocation != null) {
+			if (oldAllocation != null && !oldAllocation.isWeak()) {
 				id = new AllocationSite(id.getTypes(), id.getName(), true);
 				for (Identifier key : heapEnv.keys()) {
 					for (AllocationSite site : heapEnv.getState(key))

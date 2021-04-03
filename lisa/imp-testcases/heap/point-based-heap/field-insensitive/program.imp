@@ -39,4 +39,14 @@ class A {
 			i = i + 1;
 		}
 	}
+		
+	f5() {
+		def i = 0;
+		def o = new int[6];
+		while(true) {
+			o = new int[6];
+			o[0] = 0;
+			i = i + 1;
+		}
+	}
 }
