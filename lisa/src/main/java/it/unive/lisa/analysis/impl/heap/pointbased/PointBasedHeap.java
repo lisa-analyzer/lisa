@@ -43,8 +43,14 @@ import java.util.TreeSet;
  */
 public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
+	/**
+	 * The list of heap replacement
+	 */
 	private final List<HeapReplacement> substitutions;
 
+	/**
+	 * The collection of rewritten expression
+	 */
 	private final Collection<ValueExpression> rewritten;
 
 	/**
@@ -229,8 +235,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	private AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
 		for (AllocationSites set : heap.values())
 			for (AllocationSite site : set)
-				if (site.getId().equals(id.getId()))
+				if (site.getName().equals(id.getName()))
 					return site;
+
 		return null;
 	}
 
@@ -272,40 +279,39 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
-			PointBasedHeap containerState = smallStepSemantics((((AccessChild) expression).getContainer()), pp);
-			PointBasedHeap childState = containerState.smallStepSemantics((((AccessChild) expression).getChild()),
-					pp);
+			AccessChild access = (AccessChild) expression;
+			PointBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
+			PointBasedHeap childState = containerState.smallStepSemantics(access.getChild(), pp);
 
 			List<HeapReplacement> substitution = new ArrayList<>(childState.substitutions);
 
 			Set<ValueExpression> result = new HashSet<>();
-			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
-				if (exp instanceof Variable && !childState.heapEnv.getState((Variable) exp).isBottom()) {
-					AllocationSites expHids = childState.heapEnv.getState((Variable) exp);
+			for (SymbolicExpression containerExp : containerState.getRewrittenExpressions()) {
+				AllocationSites expHids = childState.heapEnv.getState((Variable) containerExp);
+				if (containerExp instanceof Variable && !expHids.isBottom()) {
 					for (AllocationSite hid : expHids) {
-						AllocationSite previousAllocated = alreadyAllocated(childState.heapEnv, hid);
-						if (previousAllocated == null) {
-							result.add(new AllocationSite(expression.getTypes(), hid.getId()));
-						} else {
-							AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(), true);
-							AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId());
+						AllocationSite previousLocation = alreadyAllocated(childState.heapEnv, hid);
+						if (previousLocation == null)
+							result.add(new AllocationSite(access.getTypes(), hid.getId()));
+						else {
+							AllocationSite weak = new AllocationSite(access.getTypes(), hid.getId(), true);
+							AllocationSite strong = new AllocationSite(access.getTypes(), hid.getId());
 							HeapReplacement replacement = new HeapReplacement();
 							replacement.addSource(strong);
 							replacement.addTarget(weak);
 							substitution.add(replacement);
-							if (previousAllocated.isWeak())
+							if (previousLocation.isWeak())
 								result.add(weak);
 							else
 								result.add(strong);
 						}
 					}
 
-				} else if (exp instanceof AllocationSite) {
-					AllocationSite site = (AllocationSite) exp;
-					result.add(new AllocationSite(expression.getTypes(), site.getId(), site.isWeak()));
-				} else if (exp instanceof HeapLocation) {
-					result.add((ValueExpression) exp);
-				}
+				} else if (containerExp instanceof AllocationSite) {
+					AllocationSite site = (AllocationSite) containerExp;
+					result.add(new AllocationSite(access.getTypes(), site.getId(), site.isWeak()));
+				} else if (containerExp instanceof HeapLocation)
+					result.add((ValueExpression) containerExp);
 			}
 
 			return from(new PointBasedHeap(result, applySubstitutions(childState.heapEnv, substitution), substitution));
@@ -313,12 +319,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		if (expression instanceof HeapAllocation) {
 			AllocationSite id = new AllocationSite(expression.getTypes(), pp.getLocation().getCodeLocation());
-			AllocationSite oldAllocation = alreadyAllocated(heapEnv, id);
+			AllocationSite previousLocation = alreadyAllocated(heapEnv, id);
 			List<HeapReplacement> substitution = new ArrayList<>();
-			if (oldAllocation != null && !oldAllocation.isWeak()) {
+			if (previousLocation != null && !previousLocation.isWeak()) {
 				id = new AllocationSite(id.getTypes(), id.getId(), true);
 				HeapReplacement replacement = new HeapReplacement();
-				replacement.addSource(oldAllocation);
+				replacement.addSource(previousLocation);
 				replacement.addTarget(id);
 				substitution.add(replacement);
 			}

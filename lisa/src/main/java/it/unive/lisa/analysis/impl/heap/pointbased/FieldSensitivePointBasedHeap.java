@@ -68,15 +68,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			List<HeapReplacement> substitution = new ArrayList<>(childState.getSubstitution());
 			Set<ValueExpression> result = new HashSet<>();
-			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
-				if (exp instanceof Variable) {
-					AllocationSites expHids = childState.heapEnv.getState((Identifier) exp);
+			for (SymbolicExpression containerExp : containerState.getRewrittenExpressions())
+				if (containerExp instanceof Variable) {
+					AllocationSites expHids = childState.heapEnv.getState((Identifier) containerExp);
 					if (!(expHids.isBottom()))
 						for (AllocationSite hid : expHids)
 							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions()) {
-								AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(),
+								AllocationSite weak = new AllocationSite(access.getTypes(), hid.getId(),
 										childRewritten, true);
-								AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId(),
+								AllocationSite strong = new AllocationSite(access.getTypes(), hid.getId(),
 										childRewritten);
 								if (hid.isWeak()) {
 									HeapReplacement replacement = new HeapReplacement();
@@ -87,15 +87,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 								} else
 									result.add(strong);
 							}
-				} else if (exp instanceof AllocationSite) {
+				} else if (containerExp instanceof AllocationSite) {
 					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
-						result.add(new AllocationSite(access.getTypes(), ((AllocationSite) exp).getId(),
+						result.add(new AllocationSite(access.getTypes(), ((AllocationSite) containerExp).getId(),
 								childRewritten));
-				} else if (exp instanceof HeapLocation) {
-					result.add((ValueExpression) exp);
-				}
-			}
-			return new FieldSensitivePointBasedHeap(result, childState.heapEnv, substitution);
+				} else if (containerExp instanceof HeapLocation)
+					result.add((ValueExpression) containerExp);
+
+			return new FieldSensitivePointBasedHeap(result, applySubstitutions(childState.heapEnv, substitution),
+					substitution);
 		}
 
 		return super.semanticsOf(expression, pp);
