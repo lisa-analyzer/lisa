@@ -174,11 +174,11 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		ArrayList<HeapReplacement> newSubstitions = new ArrayList<>(substitutions);
 		newSubstitions.addAll(other.substitutions);
-	
+
 		return from(new PointBasedHeap(union(rewritten, other.rewritten),
 				heapEnv.lub(other.heapEnv), newSubstitions));
 	}
-	
+
 	@Override
 	protected PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
 		return lubAux(other);
@@ -256,7 +256,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		HeapEnvironment<
-				AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
+		AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
 		return heapEnvironment;
 	}
 
@@ -308,15 +308,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			List<HeapReplacement> substitution = new ArrayList<>();
 			if (oldAllocation != null && !oldAllocation.isWeak()) {
 				id = new AllocationSite(id.getTypes(), id.getName(), true);
-				for (Identifier key : heapEnv.keys()) {
-					for (AllocationSite site : heapEnv.getState(key))
-						if (site.getName().equals(id.getName())) {
-							HeapReplacement replacement = new HeapReplacement();
-							replacement.addSource(site);
-							replacement.addTarget(id);
-							substitution.add(replacement);
-						}
-				}
+				HeapReplacement replacement = new HeapReplacement();
+				replacement.addSource(oldAllocation);
+				replacement.addTarget(id);
+				substitution.add(replacement);
 			}
 
 			return from(new PointBasedHeap(singleton(id), clean(heapEnv, substitution), substitution));
