@@ -226,7 +226,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return true;
 	}
 
-	private AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
+	protected AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
 		for (AllocationSites set : heap.values())
 			for (AllocationSite site : set)
 				if (site.getId().equals(id.getId()))
@@ -267,7 +267,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			PointBasedHeap childState = containerState.smallStepSemantics((((AccessChild) expression).getChild()),
 					pp);
 
-			List<HeapReplacement> substitution = childState.substitutions;
+			List<HeapReplacement> substitution = new ArrayList<>(childState.substitutions);
 
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
@@ -307,7 +307,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			AllocationSite oldAllocation = alreadyAllocated(heapEnv, id);
 			List<HeapReplacement> substitution = new ArrayList<>();
 			if (oldAllocation != null && !oldAllocation.isWeak()) {
-				id = new AllocationSite(id.getTypes(), id.getName(), true);
+				id = new AllocationSite(id.getTypes(), id.getId(), true);
 				HeapReplacement replacement = new HeapReplacement();
 				replacement.addSource(oldAllocation);
 				replacement.addTarget(id);

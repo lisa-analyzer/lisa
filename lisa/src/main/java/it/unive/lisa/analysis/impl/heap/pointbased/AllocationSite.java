@@ -44,6 +44,11 @@ public class AllocationSite extends HeapLocation {
 		super(types, "pp@" + id + "[" + field + "]", false);
 		this.id = id;
 	}
+	
+	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak) {
+		super(types, "pp@" + id + "[" + field + "]", isWeak);
+		this.id = id;
+	}
 
 	/**
 	 * Returns the numerical identifier of this allocation site.

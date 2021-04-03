@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -10,10 +17,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -42,7 +45,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	private FieldSensitivePointBasedHeap(Collection<ValueExpression> rewritten,
 			HeapEnvironment<AllocationSites> allocationSites) {
-		super(rewritten, allocationSites, Collections.emptyList());
+		this(rewritten, allocationSites, Collections.emptyList());
+	}
+
+	private FieldSensitivePointBasedHeap(Collection<ValueExpression> rewritten,
+			HeapEnvironment<AllocationSites> allocationSites, List<HeapReplacement> substitutions) {
+		super(rewritten, allocationSites, substitutions);
 	}
 
 	@Override
@@ -59,14 +67,25 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics(
 					access.getChild(), pp);
 
+			List<HeapReplacement> substitution = new ArrayList<>(childState.getSubstitution());
 			Set<ValueExpression> result = new HashSet<>();
 			for (SymbolicExpression exp : containerState.getRewrittenExpressions()) {
 				if (exp instanceof Variable) {
 					AllocationSites expHids = childState.heapEnv.getState((Identifier) exp);
 					if (!(expHids.isBottom()))
 						for (AllocationSite hid : expHids)
-							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
-								result.add(new AllocationSite(access.getTypes(), hid.getId(), childRewritten));
+							for (SymbolicExpression childRewritten : childState.getRewrittenExpressions()) {
+								AllocationSite weak = new AllocationSite(expression.getTypes(), hid.getId(), childRewritten, true);
+								AllocationSite strong = new AllocationSite(expression.getTypes(), hid.getId(), childRewritten);				
+								if (hid.isWeak()) {
+									HeapReplacement replacement = new HeapReplacement();
+									replacement.addSource(strong);
+									replacement.addTarget(weak);
+									substitution.add(replacement);
+									result.add(weak);
+								} else
+									result.add(strong);
+							}
 				} else if (exp instanceof AllocationSite) {
 					for (SymbolicExpression childRewritten : childState.getRewrittenExpressions())
 						result.add(new AllocationSite(access.getTypes(), ((AllocationSite) exp).getId(),
@@ -75,8 +94,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 					result.add((ValueExpression) exp);
 				}
 			}
-
-			return new FieldSensitivePointBasedHeap(result, childState.heapEnv);
+			return new FieldSensitivePointBasedHeap(result, childState.heapEnv, substitution);
 		}
 
 		return super.semanticsOf(expression, pp);
