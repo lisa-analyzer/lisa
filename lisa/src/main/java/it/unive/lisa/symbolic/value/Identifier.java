@@ -57,8 +57,8 @@ public abstract class Identifier extends ValueExpression {
 	 * @return {@code true} if this identifier is weak, {@code false} otherwise
 	 */
 	public boolean isWeak() {
-		return weak;	}
-
+		return weak;
+	}
 
 	@Override
 	public int hashCode() {
@@ -89,9 +89,19 @@ public abstract class Identifier extends ValueExpression {
 		return true;
 	}
 
+	/**
+	 * Yields the least upper bounds between two identifiers.
+	 * 
+	 * @param other the other identifier
+	 * 
+	 * @return the least upper bounds between two identifiers.
+	 * 
+	 * @throws SemanticException if this and other are not equal.
+	 */
 	public Identifier lub(Identifier other) throws SemanticException {
 		if (!equals(other))
-			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this + "' and '" + other + "'");
+			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
+					+ "' and '" + other + "'");
 		return this;
 	}
 }

@@ -87,6 +87,11 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 		return elements.contains(elem);
 	}
 
+	/**
+	 * Yields the set of elements contained in this lattice element.
+	 * 
+	 * @return the set of elements contained in this lattice element.
+	 */
 	public Set<E> elements() {
 		return elements;
 	}

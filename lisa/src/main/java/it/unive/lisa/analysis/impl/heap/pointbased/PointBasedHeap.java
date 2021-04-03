@@ -3,16 +3,6 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 import static java.util.Collections.singleton;
 import static org.apache.commons.collections.CollectionUtils.union;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -28,6 +18,15 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.Utils;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -67,14 +66,15 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap from its
 	 * rewritten expressions and heap environment.
 	 * 
-	 * @param rewritten the collection of rewritten expressions
-	 * @param heapEnv   the heap environment that this instance tracks
+	 * @param rewritten     the collection of rewritten expressions
+	 * @param heapEnv       the heap environment that this instance tracks
+	 * @param substitutions the list of heap replacement
 	 */
 	protected PointBasedHeap(Collection<ValueExpression> rewritten,
-			HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> substitions) {
+			HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> substitutions) {
 		this.rewritten = rewritten;
 		this.heapEnv = heapEnv;
-		this.substitutions = substitions;
+		this.substitutions = substitutions;
 	}
 
 	/**
@@ -95,7 +95,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (expression instanceof AllocationSite) {
 			HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, expression, pp);
 			return from(new PointBasedHeap(singleton((AllocationSite) expression),
-					clean(heap, substitutions), substitutions));
+					applySubstitutions(heap, substitutions), substitutions));
 		}
 		return smallStepSemantics(expression, pp);
 	}
@@ -226,7 +226,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return true;
 	}
 
-	protected AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
+	private AllocationSite alreadyAllocated(HeapEnvironment<AllocationSites> heap, AllocationSite id) {
 		for (AllocationSites set : heap.values())
 			for (AllocationSite site : set)
 				if (site.getId().equals(id.getId()))
@@ -234,7 +234,16 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return null;
 	}
 
-	protected HeapEnvironment<AllocationSites> clean(HeapEnvironment<AllocationSites> heap,
+	/**
+	 * Applies a substitution of identifiers substitutions in a given heap
+	 * environment.
+	 * 
+	 * @param heap         the heap environment where to apply the substitutions
+	 * @param substitution the substitution to apply
+	 * 
+	 * @return the heap environment modified by the substitution
+	 */
+	protected HeapEnvironment<AllocationSites> applySubstitutions(HeapEnvironment<AllocationSites> heap,
 			List<HeapReplacement> substitution) {
 		if (heap.isTop() || heap.isBottom() || substitution == null || substitution.isEmpty())
 			return heap;
@@ -256,7 +265,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		HeapEnvironment<
-		AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
+				AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
 		return heapEnvironment;
 	}
 
@@ -299,7 +308,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				}
 			}
 
-			return from(new PointBasedHeap(result, clean(childState.heapEnv, substitution), substitution));
+			return from(new PointBasedHeap(result, applySubstitutions(childState.heapEnv, substitution), substitution));
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -314,7 +323,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				substitution.add(replacement);
 			}
 
-			return from(new PointBasedHeap(singleton(id), clean(heapEnv, substitution), substitution));
+			return from(new PointBasedHeap(singleton(id), applySubstitutions(heapEnv, substitution), substitution));
 		}
 
 		return top();

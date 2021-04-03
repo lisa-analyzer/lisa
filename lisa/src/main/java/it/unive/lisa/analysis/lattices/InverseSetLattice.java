@@ -99,6 +99,11 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 		return elements.contains(elem);
 	}
 
+	/**
+	 * Yields the set of elements contained in this lattice element.
+	 * 
+	 * @return the set of elements contained in this lattice element.
+	 */
 	public Set<E> elements() {
 		return elements;
 	}

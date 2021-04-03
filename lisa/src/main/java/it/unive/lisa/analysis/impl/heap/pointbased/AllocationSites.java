@@ -1,13 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
@@ -18,6 +10,13 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -25,7 +24,7 @@ import it.unive.lisa.symbolic.value.Variable;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
-implements NonRelationalHeapDomain<AllocationSites> {
+		implements NonRelationalHeapDomain<AllocationSites> {
 
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
@@ -97,10 +96,6 @@ implements NonRelationalHeapDomain<AllocationSites> {
 		return Collections.emptySet();
 	}
 
-	public void add(AllocationSite site) {
-		this.elements.add(site);
-	}
-
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
@@ -108,17 +103,23 @@ implements NonRelationalHeapDomain<AllocationSites> {
 
 	@Override
 	protected AllocationSites lubAux(AllocationSites other) throws SemanticException {
-		Set<AllocationSite> lub = new HashSet<>();	
+		Set<AllocationSite> lub = new HashSet<>();
 		lub.addAll(elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
 		lub.addAll(other.elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
 
-		lub.addAll(elements.stream().filter(t1 -> !t1.isWeak() && 
-				(!other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak()).collect(Collectors.toSet()).isEmpty() 
-						|| other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet()).isEmpty())).collect(Collectors.toSet()));
+		lub.addAll(elements.stream().filter(t1 -> !t1.isWeak() &&
+				(!other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak())
+						.collect(Collectors.toSet()).isEmpty()
+						|| other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()))
+								.collect(Collectors.toSet()).isEmpty()))
+				.collect(Collectors.toSet()));
 
-		lub.addAll(other.elements.stream().filter(t1 -> !t1.isWeak() && 
-				(!elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak()).collect(Collectors.toSet()).isEmpty()
-						|| elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet()).isEmpty())).collect(Collectors.toSet()));
+		lub.addAll(other.elements.stream().filter(t1 -> !t1.isWeak() &&
+				(!elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak())
+						.collect(Collectors.toSet()).isEmpty()
+						|| elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet())
+								.isEmpty()))
+				.collect(Collectors.toSet()));
 
 		return new AllocationSites(lub, false);
 	}
