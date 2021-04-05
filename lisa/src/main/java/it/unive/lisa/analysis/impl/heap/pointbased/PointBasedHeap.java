@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -173,7 +174,15 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
-		return from(new PointBasedHeap(singleton(expression), reference.heapEnv, reference.substitutions));
+		Collection<ValueExpression> rewritten = null;
+		
+		if (expression instanceof Identifier) 
+			for (HeapReplacement r : reference.substitutions) 
+				if (r.getSources().contains(expression))
+					rewritten = r.getTargets().stream().map(id -> (ValueExpression) id).collect(Collectors.toSet());			
+		
+		rewritten = rewritten == null ? singleton(expression) : rewritten;
+		return from(new PointBasedHeap(rewritten, reference.heapEnv, reference.substitutions));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -341,7 +350,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				replacement.addSource(previousLocation);
 				replacement.addTarget(id);
 				substitution.add(replacement);
-			}
+			} else if (previousLocation != null && previousLocation.isWeak())
+				id = previousLocation;
 
 			return from(new PointBasedHeap(singleton(id), applySubstitutions(heapEnv, substitution), substitution));
 		}
