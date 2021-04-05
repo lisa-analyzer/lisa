@@ -103,6 +103,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return from(new PointBasedHeap(singleton((AllocationSite) expression),
 					applySubstitutions(heap, substitutions), substitutions));
 		}
+		
 		return smallStepSemantics(expression, pp);
 	}
 
@@ -310,7 +311,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 				} else if (containerExp instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) containerExp;
-					result.add(new AllocationSite(access.getTypes(), site.getId(), site.isWeak()));
+					
+					AllocationSite weak = new AllocationSite(access.getTypes(), site.getId(), true);
+					AllocationSite strong = new AllocationSite(access.getTypes(), site.getId());
+					HeapReplacement replacement = new HeapReplacement();
+					replacement.addSource(strong);
+					replacement.addTarget(weak);
+					substitution.add(replacement);
+					if (site.isWeak())
+						result.add(weak);
+					else
+						result.add(strong);
+					
+					result.add(site);
 				} else if (containerExp instanceof HeapLocation)
 					result.add((ValueExpression) containerExp);
 			}
