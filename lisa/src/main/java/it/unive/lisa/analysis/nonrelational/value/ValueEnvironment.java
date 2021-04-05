@@ -24,7 +24,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  *                whose instances are mapped in this environment
  */
 public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
-		extends Environment<ValueEnvironment<T>, ValueExpression, T> implements ValueDomain<ValueEnvironment<T>> {
+extends Environment<ValueEnvironment<T>, ValueExpression, T> implements ValueDomain<ValueEnvironment<T>> {
 
 	/**
 	 * Builds an empty environment.
