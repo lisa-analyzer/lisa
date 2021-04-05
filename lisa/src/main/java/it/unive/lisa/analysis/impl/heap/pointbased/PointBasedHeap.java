@@ -104,7 +104,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return from(new PointBasedHeap(singleton((AllocationSite) expression),
 					applySubstitutions(heap, substitutions), substitutions));
 		}
-		
+
 		return smallStepSemantics(expression, pp);
 	}
 
@@ -175,12 +175,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
 		Collection<ValueExpression> rewritten = null;
-		
+
 		if (expression instanceof Identifier) 
 			for (HeapReplacement r : reference.substitutions) 
 				if (r.getSources().contains(expression))
 					rewritten = r.getTargets().stream().map(id -> (ValueExpression) id).collect(Collectors.toSet());			
-		
+
 		rewritten = rewritten == null ? singleton(expression) : rewritten;
 		return from(new PointBasedHeap(rewritten, reference.heapEnv, reference.substitutions));
 	}
@@ -320,7 +320,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 				} else if (containerExp instanceof AllocationSite) {
 					AllocationSite site = (AllocationSite) containerExp;
-					
+
 					AllocationSite weak = new AllocationSite(access.getTypes(), site.getId(), true);
 					AllocationSite strong = new AllocationSite(access.getTypes(), site.getId());
 					HeapReplacement replacement = new HeapReplacement();
@@ -331,7 +331,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						result.add(weak);
 					else
 						result.add(strong);
-					
+
 					result.add(site);
 				} else if (containerExp instanceof HeapLocation)
 					result.add((ValueExpression) containerExp);
@@ -343,15 +343,29 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (expression instanceof HeapAllocation) {
 			AllocationSite id = new AllocationSite(expression.getTypes(), pp.getLocation().getCodeLocation());
 			AllocationSite previousLocation = alreadyAllocated(heapEnv, id);
-			List<HeapReplacement> substitution = new ArrayList<>();
-			if (previousLocation != null && !previousLocation.isWeak()) {
-				id = new AllocationSite(id.getTypes(), id.getId(), true);
-				HeapReplacement replacement = new HeapReplacement();
-				replacement.addSource(previousLocation);
-				replacement.addTarget(id);
-				substitution.add(replacement);
-			} else if (previousLocation != null && previousLocation.isWeak())
-				id = previousLocation;
+			List<HeapReplacement> substitution = new ArrayList<>(substitutions);
+
+			if (previousLocation != null) {
+				if (!previousLocation.isWeak()) {
+					id = new AllocationSite(id.getTypes(), id.getId(), true);
+					HeapReplacement replacement = new HeapReplacement();
+					replacement.addSource(previousLocation);
+					replacement.addTarget(id);
+					substitution.add(replacement);
+				} else {
+					id = previousLocation;
+				}
+			} else {
+				// Check if the allocation site, at that point, has not been already allocated
+				// but must be rewritten
+				Set<ValueExpression> result = null;
+				for (HeapReplacement r : substitution) 
+					if (r.getSources().contains(id))
+						result = r.getTargets().stream().map(e -> (ValueExpression) e).collect(Collectors.toSet());
+
+				result = result == null ? singleton(id) : result;
+				return from(new PointBasedHeap(result, applySubstitutions(heapEnv, substitution), substitution));
+			}
 
 			return from(new PointBasedHeap(singleton(id), applySubstitutions(heapEnv, substitution), substitution));
 		}
