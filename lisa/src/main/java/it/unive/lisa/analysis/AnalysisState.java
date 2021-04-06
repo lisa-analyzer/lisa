@@ -196,7 +196,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 			Collection<SymbolicExpression> r2) throws SemanticException {
 		Collection<SymbolicExpression> rewritten = new HashSet<>();
 		rewritten.addAll(r1.stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
-		rewritten.addAll(r1.stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
+		rewritten.addAll(r2.stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
 
 		for (Identifier id1 : r1.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
 				.collect(Collectors.toSet()))
