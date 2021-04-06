@@ -353,7 +353,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					replacement.addTarget(id);
 					substitution.add(replacement);
 				} else {
-					id = previousLocation;
+					id = new AllocationSite(expression.getTypes(), previousLocation.getId(), previousLocation.isWeak());
 				}
 			} else {
 				// Check if the allocation site, at that point, has not been already allocated
@@ -363,7 +363,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					if (r.getSources().contains(id))
 						result = r.getTargets().stream().map(e -> (ValueExpression) e).collect(Collectors.toSet());
 
-				result = result == null ? singleton(id) : result;
+				if (result == null)
+					result = singleton(id);
+				else
+					result = result.stream().map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId())).collect(Collectors.toSet());
 				return from(new PointBasedHeap(result, applySubstitutions(heapEnv, substitution), substitution));
 			}
 

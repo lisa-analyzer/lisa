@@ -131,6 +131,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
-		return expression instanceof AllocationSite;
+		return expression.getDynamicType().isPointerType() || expression.getDynamicType().isUntyped();
 	}
 }
