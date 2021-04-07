@@ -32,7 +32,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp) {
 		if (expression instanceof Identifier)
-			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp);
+			return satisfiesAbstractValue(evalIdentifier((Identifier) expression, environment), pp);
 
 		if (expression instanceof NullConstant)
 			return satisfiesNullConstant(pp);
@@ -44,7 +44,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return Satisfiability.UNKNOWN;
 
 		if (expression instanceof PushAny)
-			return Satisfiability.UNKNOWN;
+			return satisfiesPushAny((PushAny) expression);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -106,7 +106,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final T eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp) {
 		if (expression instanceof Identifier)
-			return environment.getState((Identifier) expression);
+			return evalIdentifier((Identifier) expression, environment);
 
 		if (expression instanceof NullConstant)
 			return evalNullConstant(pp);
@@ -118,7 +118,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return bottom();
 
 		if (expression instanceof PushAny)
-			return top();
+			return evalPushAny((PushAny) expression);
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -162,6 +162,29 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return evalTernaryExpression(ternary.getOperator(), left, middle, right, pp);
 		}
 
+		return top();
+	}
+
+	/**
+	 * Yields the evaluation of an identifier in a given environment.
+	 * 
+	 * @param id          the identifier to be evaluated
+	 * @param environment the environment where the identifier must be evaluated
+	 * 
+	 * @return the evaluation of the identifier
+	 */
+	protected T evalIdentifier(Identifier id, InferenceSystem<T> environment) {
+		return environment.getState(id);
+	}
+
+	/**
+	 * Yields the evaluation of a push-any expression.
+	 * 
+	 * @param pushAny the push-any expression to be evaluated
+	 * 
+	 * @return the evaluation of the push-any expression
+	 */
+	protected T evalPushAny(PushAny pushAny) {
 		return top();
 	}
 
@@ -264,6 +287,22 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             equivalent to a TOP boolean value)
 	 */
 	protected Satisfiability satisfiesAbstractValue(T value, ProgramPoint pp) {
+		return Satisfiability.UNKNOWN;
+	}
+
+	/**
+	 * Yields the satisfiability of the push any expression.
+	 * 
+	 * @param pushAny the push any expression to satisfy
+	 * 
+	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
+	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
+	 *             not satisfied, or {@link Satisfiability#UNKNOWN} if it is
+	 *             either impossible to determine if it satisfied, or if it is
+	 *             satisfied by some values and not by some others (this is
+	 *             equivalent to a TOP boolean value)
+	 */
+	protected Satisfiability satisfiesPushAny(PushAny pushAny) {
 		return Satisfiability.UNKNOWN;
 	}
 

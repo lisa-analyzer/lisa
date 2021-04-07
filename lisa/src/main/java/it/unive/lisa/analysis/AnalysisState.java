@@ -8,8 +8,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.stream.Collectors;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -91,10 +91,11 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	@Override
 	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
-		A assigned = state.assign(id, value, pp);
-		if (id.isWeak())
-			assigned = state.lub(assigned);
-		return new AnalysisState<>(assigned, id);
+		A s = state.assign(id, value, pp);
+		Collection<SymbolicExpression> exprs = s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions()
+				.stream()
+				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
+		return new AnalysisState<A, H, V>(s, exprs);
 	}
 
 	@Override
@@ -117,17 +118,15 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> lub(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.lub(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> widening(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.widening(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
 	}
 
 	@Override
@@ -191,6 +190,24 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 		} else if (!state.equals(other.state))
 			return false;
 		return true;
+	}
+
+	private Collection<SymbolicExpression> lubRewrittenExpressions(Collection<SymbolicExpression> r1,
+			Collection<SymbolicExpression> r2) throws SemanticException {
+		Collection<SymbolicExpression> rewritten = new HashSet<>();
+		rewritten.addAll(r1.stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
+		rewritten.addAll(r2.stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
+
+		for (Identifier id1 : r1.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
+				.collect(Collectors.toSet()))
+			for (Identifier id2 : r2.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
+					.collect(Collectors.toSet()))
+				if (id1.equals(id2))
+					rewritten.add(id1.lub(id2));
+				else if (!r1.contains(id2))
+					rewritten.add(id2);
+
+		return rewritten;
 	}
 
 	@Override

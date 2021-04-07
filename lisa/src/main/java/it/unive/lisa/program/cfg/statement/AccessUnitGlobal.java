@@ -14,8 +14,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
@@ -80,30 +79,19 @@ public class AccessUnitGlobal extends Expression {
 		return receiver + "::" + target.getName();
 	}
 
-	private SymbolicExpression getVariable() {
-		SymbolicExpression expr;
-		if (target.getStaticType().isPointerType())
-			// the smallStepSemantics will take care of converting that
-			// reference to a variable identifier
-			// setting also the identifier as computed expression
-			expr = new HeapReference(getRuntimeTypes(), target.getName());
-		else
-			expr = new ValueIdentifier(getRuntimeTypes(), target.getName());
-		return expr;
-	}
-
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-					CallGraph callGraph, StatementStore<A, H, V> expressions) throws SemanticException {
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
+					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					throws SemanticException {
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, callGraph, expressions);
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = null;
+		Variable v = new Variable(getRuntimeTypes(), target.getName());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H,
-					V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, getVariable()), this);
+			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, v), this);
 			if (result == null)
 				result = tmp;
 			else

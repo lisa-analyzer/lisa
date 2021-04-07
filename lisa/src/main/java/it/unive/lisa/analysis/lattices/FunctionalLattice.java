@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,16 +115,29 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
 		result.function = mkNewFunction(null);
-		Set<K> keys = new HashSet<>(function.keySet());
-		keys.addAll(other.function.keySet());
+		Set<K> keys = functionalLiftKeys(other);
 		for (K key : keys)
 			try {
 				result.function.put(key, lift.lift(getState(key), other.getState(key)));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
-
 		return result;
+	}
+
+	/**
+	 * Yields the union of the keys of this and other.
+	 * 
+	 * @param other the other functional lattice
+	 * 
+	 * @return the union of the keys of this and other
+	 * 
+	 * @throws SemanticException if something goes wrong while lifting the keys
+	 */
+	protected Set<K> functionalLiftKeys(F other) throws SemanticException {
+		Set<K> keys = new HashSet<>(function.keySet());
+		keys.addAll(other.function.keySet());
+		return keys;
 	}
 
 	@Override
@@ -187,5 +201,27 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		if (function == null)
 			return Collections.emptyIterator();
 		return function.entrySet().iterator();
+	}
+
+	/**
+	 * Yields the values of this functional lattice.
+	 * 
+	 * @return the values of this functional lattice
+	 */
+	public Collection<V> values() {
+		if (function == null)
+			return Collections.emptySet();
+		return function.values();
+	}
+
+	/**
+	 * Yields the keys of this functional lattice.
+	 * 
+	 * @return the keys of this functional lattice
+	 */
+	public Set<K> keys() {
+		if (function == null)
+			return Collections.emptySet();
+		return function.keySet();
 	}
 }

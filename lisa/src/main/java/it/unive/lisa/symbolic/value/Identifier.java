@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
- * (as an instance of {@link ValueIdentifier}), or a resolved memory location
- * (as an instance of {@link HeapIdentifier}).
+ * (as an instance of {@link Variable}), or a resolved memory location (as an
+ * instance of {@link HeapLocation}).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -86,5 +87,21 @@ public abstract class Identifier extends ValueExpression {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	/**
+	 * Yields the least upper bounds between two identifiers.
+	 * 
+	 * @param other the other identifier
+	 * 
+	 * @return the least upper bounds between two identifiers.
+	 * 
+	 * @throws SemanticException if this and other are not equal.
+	 */
+	public Identifier lub(Identifier other) throws SemanticException {
+		if (!equals(other))
+			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
+					+ "' and '" + other + "'");
+		return this;
 	}
 }

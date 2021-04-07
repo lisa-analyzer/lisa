@@ -1,15 +1,15 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<x = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$x, 0)] ]]<BR/>}} -&gt; [vid$x]>];
-	"node1" [shape="rect",color="gray",label=<z = *(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$x, 0), (vid$y, 0), (vid$z, vid$x * vid$y)] ]]<BR/>}} -&gt; [vid$z]>];
-	"node2" [shape="rect",color="gray",label=<d = +(5, 7)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$d, 5 + 7), (vid$x, 0), (vid$y, 0), (vid$z, vid$x * vid$y)] ]]<BR/>}} -&gt; [vid$d]>];
-	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$d, 5 + 7), (vid$w, vid$x + vid$y), (vid$x, 0), (vid$y, 0), (vid$z, vid$x * vid$y)] ]]<BR/>}} -&gt; [skip]>];
-	"node4" [shape="rect",color="gray",label=<y = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$x, 0), (vid$y, 0)] ]]<BR/>}} -&gt; [vid$y]>];
-	"node5" [shape="rect",color="gray",label=<w = +(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(vid$d, 5 + 7), (vid$w, vid$x + vid$y), (vid$x, 0), (vid$y, 0), (vid$z, vid$x * vid$y)] ]]<BR/>}} -&gt; [vid$w]>];
-	"node1" -> "node2" [color="black"];
-	"node2" -> "node5" [color="black"];
-	"node4" -> "node1" [color="black"];
-	"node5" -> "node3" [color="black"];
-	"node0" -> "node4" [color="black"];
+	"node0" [shape="rect",color="black",label=<x = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(x, 0)] ]]<BR/>}} -&gt; [x]>];
+	"node1" [shape="rect",color="gray",label=<y = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(x, 0), (y, 0)] ]]<BR/>}} -&gt; [y]>];
+	"node2" [shape="rect",color="gray",label=<d = +(5, 7)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(d, 5 + 7), (x, 0), (y, 0), (z, x * y)] ]]<BR/>}} -&gt; [d]>];
+	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(d, 5 + 7), (w, x + y), (x, 0), (y, 0), (z, x * y)] ]]<BR/>}} -&gt; [skip]>];
+	"node4" [shape="rect",color="gray",label=<w = +(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(d, 5 + 7), (w, x + y), (x, 0), (y, 0), (z, x * y)] ]]<BR/>}} -&gt; [w]>];
+	"node5" [shape="rect",color="gray",label=<z = *(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(x, 0), (y, 0), (z, x * y)] ]]<BR/>}} -&gt; [z]>];
+	"node1" -> "node5" [color="black"];
+	"node2" -> "node4" [color="black"];
+	"node4" -> "node3" [color="black"];
+	"node5" -> "node2" [color="black"];
+	"node0" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

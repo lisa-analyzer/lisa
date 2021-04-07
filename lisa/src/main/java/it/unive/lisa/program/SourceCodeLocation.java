@@ -54,12 +54,12 @@ public class SourceCodeLocation implements CodeLocation {
 
 	/**
 	 * Yields the source file name where this code element happens. This method
-	 * returns {@code null} if the source file is unknown.
+	 * returns the string {@code "null"} if the source file is unknown.
 	 * 
 	 * @return the source file, or {@code null}
 	 */
 	public final String getSourceFile() {
-		return sourceFile;
+		return String.valueOf(sourceFile);
 	}
 
 	/**

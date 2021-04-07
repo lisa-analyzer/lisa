@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -72,7 +72,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	protected MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
 		// any expression accessing an area of the heap or instantiating a new
 		// one is modeled through the monolith
-		return new MonolithicHeap(new HeapIdentifier(expression.getTypes(), MONOLITH_NAME, true));
+		return new MonolithicHeap(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
 	}
 
 	@Override

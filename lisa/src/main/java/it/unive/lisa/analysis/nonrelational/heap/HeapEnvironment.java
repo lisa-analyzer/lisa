@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -51,7 +52,14 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		substitution = Collections.emptyList();
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function) {
+	/**
+	 * Builds an empty environment from a given mapping.
+	 * 
+	 * @param domain   singleton instance to be used during semantic operations
+	 *                     to retrieve top and bottom values
+	 * @param function the initial mapping of this heap environment
+	 */
+	public HeapEnvironment(T domain, Map<Identifier, T> function) {
 		this(domain, function, Collections.emptyList(), Collections.emptyList());
 	}
 
@@ -85,20 +93,34 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) {
+	public HeapEnvironment<T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		T eval = lattice.eval(expression, this, pp);
+		if (lattice.satisfies(expression, this, pp) == Satisfiability.NOT_SATISFIED)
+			return bottom();
+		else if (lattice.satisfies(expression, this, pp) == Satisfiability.SATISFIED)
+			return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
+		else
+			// TODO this could be improved
+			return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
+	}
+
+	@Override
+	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		// environment does not change without an assignment
-		return new HeapEnvironment<>(lattice, function);
+		T eval = lattice.eval(expression, this, pp);
+		return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
 	}
 
 	@Override
 	public HeapEnvironment<T> top() {
 		return isTop() ? this
-				: new HeapEnvironment<T>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
 	public HeapEnvironment<T> bottom() {
 		return isBottom() ? this
-				: new HeapEnvironment<T>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
 	}
 }

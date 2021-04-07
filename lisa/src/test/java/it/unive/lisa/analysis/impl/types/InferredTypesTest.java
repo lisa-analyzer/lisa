@@ -254,7 +254,7 @@ public class InferredTypesTest {
 			}
 	}
 
-	private void binaryTramsformSecond(BinaryOperator op, java.util.function.BinaryOperator<InferredTypes> expected,
+	private void binaryTransformSecond(BinaryOperator op, java.util.function.BinaryOperator<InferredTypes> expected,
 			java.util.function.UnaryOperator<InferredTypes> transformer)
 			throws SemanticException {
 		for (Entry<String, InferredTypes> first : combos.entrySet())
@@ -312,13 +312,21 @@ public class InferredTypesTest {
 		binaryTransform(BinaryOperator.NUMERIC_MOD, commonNumbers,
 				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
 
-		binaryTramsformSecond(BinaryOperator.TYPE_CAST, (l, r) -> {
+		binaryTransformSecond(BinaryOperator.TYPE_CAST, (l, r) -> {
 			ExternalSet<Type> set = domain.cast(l.getRuntimeTypes(), r.getRuntimeTypes());
 			if (set.isEmpty())
 				return domain.bottom();
 			return new InferredTypes(set);
 		}, it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
-		binaryTramsformSecond(BinaryOperator.TYPE_CHECK, (l, r) -> bool,
+
+		binaryTransformSecond(BinaryOperator.TYPE_CONV, (l, r) -> {
+			ExternalSet<Type> set = domain.convert(l.getRuntimeTypes(), r.getRuntimeTypes());
+			if (set.isEmpty())
+				return domain.bottom();
+			return new InferredTypes(set);
+		}, it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
+
+		binaryTransformSecond(BinaryOperator.TYPE_CHECK, (l, r) -> bool,
 				it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
 	}
 

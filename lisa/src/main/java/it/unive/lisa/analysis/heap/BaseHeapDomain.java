@@ -6,6 +6,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -35,6 +36,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 			H sem = smallStepSemantics(unary.getExpression(), pp);
+			if (sem.isBottom())
+				return sem;
 			H result = bottom();
 			for (ValueExpression expr : sem.getRewrittenExpressions())
 				result = result.lub(mk(sem, new UnaryExpression(expression.getTypes(), expr, unary.getOperator())));
@@ -44,12 +47,36 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 			H sem1 = smallStepSemantics(binary.getLeft(), pp);
+			if (sem1.isBottom())
+				return sem1;
 			H sem2 = sem1.smallStepSemantics(binary.getRight(), pp);
+			if (sem2.isBottom())
+				return sem2;
 			H result = bottom();
 			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
 				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
 					result = result.lub(
 							mk(sem2, new BinaryExpression(expression.getTypes(), expr1, expr2, binary.getOperator())));
+			return result;
+		}
+
+		if (expression instanceof TernaryExpression) {
+			TernaryExpression ternary = (TernaryExpression) expression;
+			H sem1 = smallStepSemantics(ternary.getLeft(), pp);
+			if (sem1.isBottom())
+				return sem1;
+			H sem2 = sem1.smallStepSemantics(ternary.getMiddle(), pp);
+			if (sem2.isBottom())
+				return sem2;
+			H sem3 = sem2.smallStepSemantics(ternary.getRight(), pp);
+			if (sem3.isBottom())
+				return sem3;
+			H result = bottom();
+			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
+				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
+					for (ValueExpression expr3 : sem3.getRewrittenExpressions())
+						result = result.lub(mk(sem3, new TernaryExpression(expression.getTypes(), expr1, expr2, expr3,
+								ternary.getOperator())));
 			return result;
 		}
 

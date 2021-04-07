@@ -155,4 +155,14 @@ public class ConstantPropagation
 			return false;
 		return true;
 	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return !expression.getDynamicType().isPointerType();
+	}
 }

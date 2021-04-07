@@ -59,7 +59,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	protected abstract S mk(Set<E> set);
 
 	@Override
-	protected final S lubAux(S other) throws SemanticException {
+	protected S lubAux(S other) throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
 		lub.addAll(other.elements);
 		return mk(lub);
@@ -71,7 +71,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	}
 
 	@Override
-	protected final boolean lessOrEqualAux(S other) throws SemanticException {
+	protected boolean lessOrEqualAux(S other) throws SemanticException {
 		return other.elements.containsAll(elements);
 	}
 
@@ -85,6 +85,15 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	 */
 	public boolean contains(E elem) {
 		return elements.contains(elem);
+	}
+
+	/**
+	 * Yields the set of elements contained in this lattice element.
+	 * 
+	 * @return the set of elements contained in this lattice element.
+	 */
+	public Set<E> elements() {
+		return elements;
 	}
 
 	@Override

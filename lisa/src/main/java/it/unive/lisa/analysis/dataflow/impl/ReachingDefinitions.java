@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.dataflow.impl;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -83,5 +84,15 @@ public class ReachingDefinitions
 	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.singleton(id);
+	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return !expression.getDynamicType().isPointerType();
 	}
 }

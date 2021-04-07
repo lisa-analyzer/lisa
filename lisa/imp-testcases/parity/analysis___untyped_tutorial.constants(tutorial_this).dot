@@ -1,14 +1,14 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<c = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$c: Odd ]]<BR/>}} -&gt; [vid$c]>];
-	"node1" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: #TOP#<BR/>vid$c: Odd ]]<BR/>}} -&gt; [vid$b &lt; 10]>];
-	"node2" [shape="rect",color="gray",label=<b = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: #TOP#<BR/>vid$c: Odd ]]<BR/>}} -&gt; [vid$b]>];
-	"node3" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: Even<BR/>vid$c: Odd ]]<BR/>}} -&gt; [vid$b]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<return b<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$b: #TOP#<BR/>vid$c: Odd<BR/>vid$ret_value@constants: #TOP# ]]<BR/>}} -&gt; [vid$ret_value@constants]>];
-	"node0" -> "node3" [color="black"];
-	"node1" -> "node2" [color="blue",style="dashed"];
-	"node1" -> "node4" [color="red",style="dashed"];
-	"node2" -> "node1" [color="black"];
-	"node3" -> "node1" [color="black"];
+	"node0" [shape="rect",color="black",label=<c = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ c: Odd ]]<BR/>}} -&gt; [c]>];
+	"node1" [shape="rect",color="gray",label=<b = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: #TOP#<BR/>c: Odd ]]<BR/>}} -&gt; [b]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<return b<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: #TOP#<BR/>c: Odd<BR/>ret_value@constants: #TOP# ]]<BR/>}} -&gt; [ret_value@constants]>];
+	"node3" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: #TOP#<BR/>c: Odd ]]<BR/>}} -&gt; [b &lt; 10]>];
+	"node4" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: Even<BR/>c: Odd ]]<BR/>}} -&gt; [b]>];
+	"node1" -> "node3" [color="black"];
+	"node0" -> "node4" [color="black"];
+	"node3" -> "node1" [color="blue",style="dashed"];
+	"node3" -> "node2" [color="red",style="dashed"];
+	"node4" -> "node3" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

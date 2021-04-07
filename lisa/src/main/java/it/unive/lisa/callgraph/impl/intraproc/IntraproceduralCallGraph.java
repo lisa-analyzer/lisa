@@ -23,10 +23,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import java.util.ArrayList;
@@ -108,8 +106,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 		Call resolved;
 		if (targets.isEmpty())
-			resolved = new OpenCall(call.getCFG(), call.getLocation(),
-					call.getTargetName(), call.getStaticType(), call.getParameters());
+			resolved = new OpenCall(call.getCFG(), call.getLocation(), call.getTargetName(), call.getStaticType(),
+					call.getParameters());
 		else if (targets.size() == 1 && targets.iterator().next() instanceof NativeCFG)
 			resolved = ((NativeCFG) targets.iterator().next()).rewrite(call, call.getParameters());
 		else {
@@ -117,9 +115,8 @@ public class IntraproceduralCallGraph implements CallGraph {
 				throw new CallResolutionException(
 						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
 
-			resolved = new CFGCall(call.getCFG(), call.getLocation(),
-					call.getTargetName(), targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
-					call.getParameters());
+			resolved = new CFGCall(call.getCFG(), call.getLocation(), call.getTargetName(),
+					targets.stream().map(t -> (CFG) t).collect(Collectors.toList()), call.getParameters());
 		}
 
 		resolved.setOffset(call.getOffset());
@@ -128,8 +125,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	@Override
 	public <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void fixpoint(
-			AnalysisState<A, H, V> entryState)
-			throws FixpointException {
+			AnalysisState<A, H, V> entryState) throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
@@ -141,24 +137,15 @@ public class IntraproceduralCallGraph implements CallGraph {
 
 	private <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(AnalysisState<A, H, V> entryState, CFG cfg)
-					throws SemanticException {
+			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(
+					AnalysisState<A, H, V> entryState, CFG cfg) throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
-		for (Parameter arg : cfg.getDescriptor().getArgs())
-			if (arg.getStaticType().isPointerType()) {
-				prepared = prepared.smallStepSemantics(
-						new HeapReference(Caches.types().mkSingletonSet(arg.getStaticType()), arg.getName()),
-						cfg.getGenericProgramPoint());
-				for (SymbolicExpression expr : prepared.getComputedExpressions())
-					prepared = prepared.assign((HeapIdentifier) expr,
-							new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-							cfg.getGenericProgramPoint());
-			} else {
-				ValueIdentifier id = new ValueIdentifier(Caches.types().mkSingletonSet(arg.getStaticType()),
-						arg.getName());
-				prepared = prepared.assign(id, new PushAny(Caches.types().mkSingletonSet(arg.getStaticType())),
-						cfg.getGenericProgramPoint());
-			}
+		for (Parameter arg : cfg.getDescriptor().getArgs()) {
+			Collection<Type> all = arg.getStaticType().allInstances();
+			Variable id = new Variable(Caches.types().mkSet(all), arg.getName());
+			prepared = prepared.assign(id, new PushAny(Caches.types().mkSet(all)),
+					cfg.getGenericProgramPoint());
+		}
 		return prepared;
 	}
 
@@ -174,13 +161,13 @@ public class IntraproceduralCallGraph implements CallGraph {
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
-					AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(
+					CFGCall call, AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
 					throws SemanticException {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"), call);
+		return entryState.top().smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value"), call);
 	}
 
 }

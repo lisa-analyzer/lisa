@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.inference.BaseInferredValue;
+import it.unive.lisa.analysis.inference.InferenceSystem;
 import it.unive.lisa.analysis.inference.InferredValue;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -14,6 +15,8 @@ import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.type.NullType;
@@ -107,6 +110,19 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
+	protected InferredTypes evalIdentifier(Identifier id, InferenceSystem<InferredTypes> environment) {
+		InferredTypes eval = super.evalIdentifier(id, environment);
+		if (!eval.isTop() && !eval.isBottom())
+			return eval;
+		return new InferredTypes(id.getTypes());
+	}
+
+	@Override
+	protected InferredTypes evalPushAny(PushAny pushAny) {
+		return new InferredTypes(pushAny.getTypes());
+	}
+
+	@Override
 	protected InferredTypes evalNullConstant(ProgramPoint pp) {
 		return new InferredTypes(NullType.INSTANCE);
 	}
@@ -193,6 +209,14 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			if (set.isEmpty())
 				return bottom();
 			return new InferredTypes(set);
+		case TYPE_CONV:
+			if (right.elements.noneMatch(Type::isTypeTokenType))
+				return bottom();
+			set = convert(left.elements, right.elements);
+			if (set.isEmpty())
+				return bottom();
+			return new InferredTypes(set);
+
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
@@ -339,6 +363,30 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	/**
+	 * Simulates a conversion operation, where an expression with possible
+	 * runtime types {@code types} is being converted to one of the possible
+	 * type tokens in {@code tokens}. All types in {@code tokens} that are not
+	 * {@link TypeTokenType}s, according to {@link Type#isTypeTokenType()}, will
+	 * be ignored. The returned set contains a subset of the types in
+	 * {@code tokens}, keeping only the ones such that there exists at least one
+	 * type in {@code types} that can be assigned to it.
+	 * 
+	 * @param types  the types of the expression being converted
+	 * @param tokens the tokens representing the operand of the type conversion
+	 * 
+	 * @return the set of possible types after the type conversion
+	 */
+	ExternalSet<Type> convert(ExternalSet<Type> types, ExternalSet<Type> tokens) {
+		ExternalSet<Type> result = Caches.types().mkEmptySet();
+		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
+			for (Type t : types)
+				if (t.canBeAssignedTo(token))
+					result.add(token);
+
+		return result;
+	}
+
+	/**
 	 * Computes the {@link ExternalSet} of runtime {@link Type}s of a
 	 * {@link SymbolicExpression} over {@link NumericType} expressions. The
 	 * resulting set of types is computed as follows:
@@ -390,5 +438,17 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					result.add(t1.commonSupertype(t2));
 
 		return result;
+	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		// Type analysis tracks information on any identifier
+		return true;
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		// Type analysis can process any expression
+		return true;
 	}
 }

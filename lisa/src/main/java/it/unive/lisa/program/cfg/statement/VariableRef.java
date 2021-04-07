@@ -11,8 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -116,20 +115,12 @@ public class VariableRef extends Expression {
 	}
 
 	/**
-	 * Yields a {@link SymbolicExpression} representing the referenced variable.
+	 * Yields a {@link Variable} representing the referenced variable.
 	 * 
 	 * @return the expression representing the variable
 	 */
-	public SymbolicExpression getVariable() {
-		SymbolicExpression expr;
-		if (getStaticType().isPointerType())
-			// the smallStepSemantics will take care of converting that
-			// reference to a variable identifier
-			// setting also the identifier as computed expression
-			expr = new HeapReference(getRuntimeTypes(), getName());
-		else
-			expr = new ValueIdentifier(getRuntimeTypes(), getName());
-		return expr;
+	public Variable getVariable() {
+		return new Variable(getRuntimeTypes(), getName());
 	}
 
 	@Override
