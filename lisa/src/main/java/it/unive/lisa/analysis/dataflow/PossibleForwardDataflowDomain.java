@@ -47,7 +47,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	public PossibleForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		// if id cannot be tracked by the underlying lattice, 
+		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
 		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
 			return this;

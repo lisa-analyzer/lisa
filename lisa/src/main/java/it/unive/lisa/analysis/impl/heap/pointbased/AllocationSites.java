@@ -1,15 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
@@ -19,6 +9,15 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A heap domain tracking sets of {@link AllocationSite}.
@@ -107,7 +106,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	protected AllocationSites lubAux(AllocationSites other) throws SemanticException {
 		Map<String, AllocationSite> lub = new HashMap<>();
 
-		// all weak identifiers are part of the lub 
+		// all weak identifiers are part of the lub
 		elements.stream().filter(AllocationSite::isWeak).forEach(e -> lub.put(e.getName(), e));
 		// common ones will be overwritten
 		other.elements.stream().filter(AllocationSite::isWeak).forEach(e -> lub.put(e.getName(), e));
@@ -115,12 +114,12 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		// strong identifiers are only added if we did not consider a
 		// weak identifier with the same name
 		elements.stream().filter(Predicate.not(AllocationSite::isWeak))
-						.filter(e -> !lub.containsKey(e.getName()))
-						.forEach(e -> lub.put(e.getName(), e));
-		
+				.filter(e -> !lub.containsKey(e.getName()))
+				.forEach(e -> lub.put(e.getName(), e));
+
 		other.elements.stream().filter(Predicate.not(AllocationSite::isWeak))
-						.filter(e -> !lub.containsKey(e.getName()))
-						.forEach(e -> lub.put(e.getName(), e));
+				.filter(e -> !lub.containsKey(e.getName()))
+				.forEach(e -> lub.put(e.getName(), e));
 
 		return new AllocationSites(new HashSet<>(lub.values()), false);
 	}

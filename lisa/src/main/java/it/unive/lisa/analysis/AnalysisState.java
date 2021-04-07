@@ -1,16 +1,15 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.stream.Collectors;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -93,7 +92,8 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
-		Collection<SymbolicExpression> exprs = s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions().stream()
+		Collection<SymbolicExpression> exprs = s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions()
+				.stream()
 				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
 		return new AnalysisState<A, H, V>(s, exprs);
 	}
