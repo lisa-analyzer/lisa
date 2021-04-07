@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -37,7 +38,7 @@ import java.util.stream.Collectors;
  * heap identifier. The implementation follows X. Rival and K. Yi, "Introduction
  * to Static Analysis An Abstract Interpretation Perspective", Section 8.3.4
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.itØ">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  * 
  * @see <a href=
  *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
@@ -176,10 +177,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
 		Collection<ValueExpression> rewritten = null;
 
-		if (expression instanceof Identifier) 
-			for (HeapReplacement r : reference.substitutions) 
+		if (expression instanceof Identifier)
+			for (HeapReplacement r : reference.substitutions)
 				if (r.getSources().contains(expression))
-					rewritten = r.getTargets().stream().map(id -> (ValueExpression) id).collect(Collectors.toSet());			
+					rewritten = r.getTargets().stream().map(id -> (ValueExpression) id).collect(Collectors.toSet());
 
 		rewritten = rewritten == null ? singleton(expression) : rewritten;
 		return from(new PointBasedHeap(rewritten, reference.heapEnv, reference.substitutions));
@@ -267,9 +268,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		Map<Identifier, AllocationSites> map = new HashMap<>();
 
-		for (Identifier k : heap.getKeys()) {
+		for (Entry<Identifier, AllocationSites> entry : heap) {
 			Set<AllocationSite> newSites = new HashSet<>();
-			for (AllocationSite l : heap.getState(k))
+			for (AllocationSite l : entry.getValue())
 				if (substitution.stream().noneMatch(t -> t.getSources().contains(l)))
 					newSites.add(l);
 				else
@@ -278,12 +279,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							for (Identifier target : replacement.getTargets())
 								newSites.add((AllocationSite) target);
 
-			map.put(k, new AllocationSites().mk(newSites));
+			map.put(entry.getKey(), new AllocationSites().mk(newSites));
 		}
 
-		HeapEnvironment<
-		AllocationSites> heapEnvironment = new HeapEnvironment<AllocationSites>(new AllocationSites(), map);
-		return heapEnvironment;
+		return new HeapEnvironment<>(new AllocationSites(), map);
 	}
 
 	@Override
@@ -356,17 +355,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					id = new AllocationSite(expression.getTypes(), previousLocation.getId(), previousLocation.isWeak());
 				}
 			} else {
-				// Check if the allocation site, at that point, has not been already allocated
-				// but must be rewritten
+				// Check if the allocation site, at that point, has not been
+				// already allocated but must be rewritten
 				Set<ValueExpression> result = null;
-				for (HeapReplacement r : substitution) 
+				for (HeapReplacement r : substitution)
 					if (r.getSources().contains(id))
 						result = r.getTargets().stream().map(e -> (ValueExpression) e).collect(Collectors.toSet());
 
 				if (result == null)
 					result = singleton(id);
 				else
-					result = result.stream().map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId())).collect(Collectors.toSet());
+					result = result.stream()
+							.map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId()))
+							.collect(Collectors.toSet());
 				return from(new PointBasedHeap(result, applySubstitutions(heapEnv, substitution), substitution));
 			}
 

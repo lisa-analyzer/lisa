@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -8,11 +14,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -91,6 +92,18 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 			ProgramPoint pp) {
 		return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
 	}
+	
+	@Override
+	public HeapEnvironment<T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		T eval = lattice.eval(expression, this, pp);
+		if (lattice.satisfies(expression, this, pp) == Satisfiability.NOT_SATISFIED)
+			return bottom();
+		else if (lattice.satisfies(expression, this, pp) == Satisfiability.SATISFIED)
+			return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
+		else
+			// TODO this could be improved
+			return new HeapEnvironment<>(lattice, function, eval.getRewrittenExpressions(), eval.getSubstitution());
+	}
 
 	@Override
 	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
@@ -103,12 +116,12 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public HeapEnvironment<T> top() {
 		return isTop() ? this
-				: new HeapEnvironment<T>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
 	}
 
 	@Override
 	public HeapEnvironment<T> bottom() {
 		return isBottom() ? this
-				: new HeapEnvironment<T>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
 	}
 }

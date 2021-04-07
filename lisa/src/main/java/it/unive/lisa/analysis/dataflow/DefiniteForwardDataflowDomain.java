@@ -49,9 +49,9 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		// If id cannot be tracked by the underlying
-		// lattice, return this
-		if (!domain.tracksIdentifiers(id))
+		// if id cannot be tracked by the underlying lattice,
+		// or if the expression cannot be processed, return this
+		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
 			return this;
 		DefiniteForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
 		Set<E> updated = new HashSet<>(killed.elements);

@@ -22,6 +22,6 @@ public class Variable extends Identifier {
 
 	@Override
 	public String toString() {
-		return "vid$" + getName();
+		return getName();
 	}
 }

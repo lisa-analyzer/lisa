@@ -137,8 +137,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 */
 	protected M assumeAux(E expression, ProgramPoint pp) throws SemanticException {
 		// TODO: a more precise filtering is needed when satisfiability of
-		// expression is unknown
-		// subclasses might add some logic
+		// expression is unknown - subclasses might add some logic
 		return copy();
 	}
 
@@ -204,7 +203,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	protected Set<Identifier> functionalLiftKeys(M other) {
+	protected Set<Identifier> functionalLiftKeys(M other) throws SemanticException {
 		Set<Identifier> keys = new HashSet<>();
 		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, function.keySet(),
 				other.function.keySet());
@@ -215,8 +214,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 			try {
 				keys.add(pair.getLeft().lub(pair.getRight()));
 			} catch (SemanticException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				throw new SemanticException("Unable to lub " + pair.getLeft() + " and " + pair.getRight(), e);
 			}
 		return keys;
 	}

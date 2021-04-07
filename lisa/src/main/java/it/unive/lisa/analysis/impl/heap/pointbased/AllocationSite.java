@@ -79,9 +79,4 @@ public class AllocationSite extends HeapLocation {
 	public String getId() {
 		return id;
 	}
-
-	@Override
-	public String toString() {
-		return getName() + "[" + (isWeak() ? "w" : "s") + "]";
-	}
 }

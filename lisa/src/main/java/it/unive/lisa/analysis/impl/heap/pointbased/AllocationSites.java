@@ -2,11 +2,13 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -65,7 +67,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public AllocationSites mk(Set<AllocationSite> set) {
+	protected AllocationSites mk(Set<AllocationSite> set) {
 		return new AllocationSites(set, false);
 	}
 
@@ -103,25 +105,24 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 
 	@Override
 	protected AllocationSites lubAux(AllocationSites other) throws SemanticException {
-		Set<AllocationSite> lub = new HashSet<>();
-		lub.addAll(elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
-		lub.addAll(other.elements.stream().filter(t -> t.isWeak()).collect(Collectors.toSet()));
+		Map<String, AllocationSite> lub = new HashMap<>();
 
-		lub.addAll(elements.stream().filter(t1 -> !t1.isWeak() &&
-				(!other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak())
-						.collect(Collectors.toSet()).isEmpty()
-						|| other.elements.stream().filter(t2 -> t2.getId().equals(t1.getId()))
-								.collect(Collectors.toSet()).isEmpty()))
-				.collect(Collectors.toSet()));
+		// all weak identifiers are part of the lub 
+		elements.stream().filter(AllocationSite::isWeak).forEach(e -> lub.put(e.getName(), e));
+		// common ones will be overwritten
+		other.elements.stream().filter(AllocationSite::isWeak).forEach(e -> lub.put(e.getName(), e));
 
-		lub.addAll(other.elements.stream().filter(t1 -> !t1.isWeak() &&
-				(!elements.stream().filter(t2 -> t2.getId().equals(t1.getId()) && !t2.isWeak())
-						.collect(Collectors.toSet()).isEmpty()
-						|| elements.stream().filter(t2 -> t2.getId().equals(t1.getId())).collect(Collectors.toSet())
-								.isEmpty()))
-				.collect(Collectors.toSet()));
+		// strong identifiers are only added if we did not consider a
+		// weak identifier with the same name
+		elements.stream().filter(Predicate.not(AllocationSite::isWeak))
+						.filter(e -> !lub.containsKey(e.getName()))
+						.forEach(e -> lub.put(e.getName(), e));
+		
+		other.elements.stream().filter(Predicate.not(AllocationSite::isWeak))
+						.filter(e -> !lub.containsKey(e.getName()))
+						.forEach(e -> lub.put(e.getName(), e));
 
-		return new AllocationSites(lub, false);
+		return new AllocationSites(new HashSet<>(lub.values()), false);
 	}
 
 	@Override

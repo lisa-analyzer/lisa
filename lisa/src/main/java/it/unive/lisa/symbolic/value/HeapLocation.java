@@ -26,7 +26,7 @@ public class HeapLocation extends Identifier {
 
 	@Override
 	public String toString() {
-		return "hid$" + getName();
+		return "heap[" + (isWeak() ? "w" : "s") + "]:" + getName();
 	}
 
 	@Override

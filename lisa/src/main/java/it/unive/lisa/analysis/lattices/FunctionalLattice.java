@@ -131,8 +131,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param other the other functional lattice
 	 * 
 	 * @return the union of the keys of this and other
+	 * 
+	 * @throws SemanticException if something goes wrong while lifting the keys
 	 */
-	protected Set<K> functionalLiftKeys(F other) {
+	protected Set<K> functionalLiftKeys(F other) throws SemanticException {
 		Set<K> keys = new HashSet<>(function.keySet());
 		keys.addAll(other.function.keySet());
 		return keys;
