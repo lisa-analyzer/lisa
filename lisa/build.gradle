@@ -83,7 +83,7 @@ ext {
 }
 
 group = 'it.unive'
-version = '0.1a3'
+version = '0.1a4'
 
 apply from: 'dependencies.gradle'
 apply from: 'java.gradle'
