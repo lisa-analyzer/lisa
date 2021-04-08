@@ -28,7 +28,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <T> the concrete type of this domain
  */
 public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDomain<T>> extends BaseLattice<T>
-		implements NonRelationalValueDomain<T> {
+implements NonRelationalValueDomain<T> {
 
 	@Override
 	public final Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment,
@@ -134,7 +134,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
-
+			
 			T left = eval((ValueExpression) binary.getLeft(), environment, pp);
 			if (left.isBottom())
 				return left;
@@ -142,6 +142,12 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			T right = eval((ValueExpression) binary.getRight(), environment, pp);
 			if (right.isBottom())
 				return right;
+			
+			if (binary.getOperator() == BinaryOperator.TYPE_CAST)
+				return evalTypeCast(binary, left, right);
+			
+			if (binary.getOperator() == BinaryOperator.TYPE_CONV)
+				return evalTypeConv(binary, left, right);
 
 			return evalBinaryExpression(binary.getOperator(), left, right, pp);
 		}
@@ -177,6 +183,30 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();
+	}
+	
+	/**
+	 * Yields the evaluation of a type conversion expression.
+	 * 
+	 * @param conv the type conversion expression
+	 * @param left the left expression, namely the expression to be converted
+	 * @param right the right expression, namely the types to which left should be converted
+	 * @return the evaluation of the type conversion expression
+	 */
+	protected T evalTypeConv(BinaryExpression conv, T left, T right) {
+		return conv.getTypes().isEmpty() ? bottom() : left;
+	}
+	
+	/**
+	 * Yields the evaluation of a type cast expression.
+	 * 
+	 * @param cast the type csated expression
+	 * @param left the left expression, namely the expression to be casted
+	 * @param right the right expression, namely the types to which left should be casted
+	 * @return the evaluation of the type cast expression
+	 */
+	protected T evalTypeCast(BinaryExpression cast, T left, T right) {
+		return cast.getTypes().isEmpty() ? bottom() : left;
 	}
 
 	/**
