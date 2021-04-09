@@ -67,8 +67,31 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 */
 	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
 
+	/**
+	 * Yields the environment {@code environment} on which the expression
+	 * {@code expression} is assumed to hold by this domain.
+	 * 
+	 * @param environment the environment
+	 * @param expression  the expression to be assumed
+	 * @param pp          the program point where {@code expression} occurs.
+	 * 
+	 * @return the environment {@code environment} where {@code expression} is
+	 *             assumed to hold
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
 
+	/**
+	 * Performs the greatest lower bound operation between this domain element
+	 * and {@code other}.
+	 * 
+	 * @param other the other domain element
+	 * 
+	 * @return the greatest lowe bound between {@code this} and {@code other}
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public T glb(T other) throws SemanticException;
 
 	/**

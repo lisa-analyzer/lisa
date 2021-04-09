@@ -20,7 +20,8 @@ public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
 		extends NonRelationalDomain<T, ValueExpression, ValueEnvironment<T>> {
 
 	@Override
-	public default ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public default ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
+			ProgramPoint pp) throws SemanticException {
 		return environment;
 	}
 
@@ -37,6 +38,26 @@ public interface NonRelationalValueDomain<T extends NonRelationalValueDomain<T>>
 		return glbAux(other);
 	}
 
+	/**
+	 * Performs the greatest lower bound operation between this domain element
+	 * and {@code other}, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not comparable (according to
+	 * {@link NonRelationalValueDomain#lessOrEqual(NonRelationalValueDomain)})</li>
+	 * </ul>
+	 * The default implementation returns
+	 * {@link NonRelationalValueDomain#bottom()}
+	 * 
+	 * @param other the other domain element
+	 * 
+	 * @return the greatest lower bound between this domain element and other
+	 */
 	public default T glbAux(T other) {
 		return bottom();
 	}

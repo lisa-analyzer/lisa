@@ -119,6 +119,17 @@ public abstract class Environment<M extends Environment<M, E, T>,
 			return glb(lattice.assume((M) this, expression, pp));
 	}
 
+	/**
+	 * Performs the greatest lower bound between this environment and
+	 * {@code other}.
+	 * 
+	 * @param other the other environment
+	 * 
+	 * @return the greatest lower bound between this environment and
+	 *             {@code other}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	@SuppressWarnings("unchecked")
 	public M glb(M other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
@@ -128,7 +139,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
 			return (M) other;
 
-		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return glbFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
@@ -193,7 +204,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	protected Set<Identifier> functionalLiftKeys(M other) throws SemanticException {
+	protected Set<Identifier> lubKeys(M other) throws SemanticException {
 		Set<Identifier> keys = new HashSet<>();
 		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, function.keySet(),
 				other.function.keySet());

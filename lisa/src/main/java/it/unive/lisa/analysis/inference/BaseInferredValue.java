@@ -434,7 +434,8 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	}
 
 	@Override
-	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		return environment;
 	}
 
@@ -451,6 +452,25 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 		return glbAux(other);
 	}
 
+	/**
+	 * Performs the greatest lower bound operation between this inferred value
+	 * and {@code other}, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not comparable (according to
+	 * {@link BaseInferredValue#lessOrEqual(BaseInferredValue)})</li>
+	 * </ul>
+	 * The default implementation returns {@link BaseInferredValue#bottom()}
+	 * 
+	 * @param other the other inferred value
+	 * 
+	 * @return the greatest lower bound between this and other
+	 */
 	protected T glbAux(T other) {
 		return bottom();
 	}
