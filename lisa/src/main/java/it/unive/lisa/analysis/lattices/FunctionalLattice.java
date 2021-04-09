@@ -16,6 +16,8 @@ import java.util.Set;
  * A generic functional abstract domain that performs the functional lifting of
  * the lattice on the elements of the co-domain.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @param <F> the concrete {@link FunctionalLattice} type
  * @param <K> the concrete type of the keys of this function
  * @param <V> the concrete {@link Lattice} type of the values of this function
@@ -108,7 +110,26 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return lubFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
+	/**
+	 * Interface for the lift of lattice elements.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 *
+	 * @param <V> {@link Lattice} type of the values
+	 */
 	protected interface FunctionalLift<V extends Lattice<V>> {
+
+		/**
+		 * Yields the lift of {@code first} and {@code second}.
+		 * 
+		 * @param first  the first element
+		 * @param second the second element
+		 * 
+		 * @return the lift of {@code first} and {@code second}
+		 * 
+		 * @throws SemanticException if something goes wrong while lifting the
+		 *                               values
+		 */
 		V lift(V first, V second) throws SemanticException;
 	}
 
@@ -116,31 +137,6 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		F result = bottom();
 		result.function = mkNewFunction(null);
 		Set<K> keys = lubKeys(other);
-		for (K key : keys)
-			try {
-				result.function.put(key, lift.lift(getState(key), other.getState(key)));
-			} catch (SemanticException e) {
-				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
-			}
-		return result;
-	}
-
-	/**
-	 * Performs the functional lift of this and other environments just on the
-	 * common keys.
-	 * 
-	 * @param other the other environment
-	 * @param lift
-	 * 
-	 * @return the functional lift of this and other environments just on the
-	 *             common keys
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	protected final F glbFunctionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
-		F result = bottom();
-		result.function = mkNewFunction(null);
-		Set<K> keys = glbKeys(other);
 		for (K key : keys)
 			try {
 				result.function.put(key, lift.lift(getState(key), other.getState(key)));
@@ -162,21 +158,6 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	protected Set<K> lubKeys(F other) throws SemanticException {
 		Set<K> keys = new HashSet<>(function.keySet());
 		keys.addAll(other.function.keySet());
-		return keys;
-	}
-
-	/**
-	 * Yields the intersection of the keys of this and other.
-	 * 
-	 * @param other the other functional lattice
-	 * 
-	 * @return the intersection of the keys of this and other
-	 * 
-	 * @throws SemanticException if something goes wrong while lifting the keys
-	 */
-	private Set<K> glbKeys(F other) throws SemanticException {
-		Set<K> keys = new HashSet<>(function.keySet());
-		keys.retainAll(other.function.keySet());
 		return keys;
 	}
 

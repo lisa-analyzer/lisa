@@ -142,6 +142,25 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		return glbFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
+	private final M glbFunctionalLift(M other, FunctionalLift<T> lift) throws SemanticException {
+		M result = bottom();
+		result.function = mkNewFunction(null);
+		Set<Identifier> keys = glbKeys(other);
+		for (Identifier key : keys)
+			try {
+				result.function.put(key, lift.lift(getState(key), other.getState(key)));
+			} catch (SemanticException e) {
+				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
+			}
+		return result;
+	}
+
+	private Set<Identifier> glbKeys(M other) throws SemanticException {
+		Set<Identifier> keys = new HashSet<>(function.keySet());
+		keys.retainAll(other.function.keySet());
+		return keys;
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public final Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {

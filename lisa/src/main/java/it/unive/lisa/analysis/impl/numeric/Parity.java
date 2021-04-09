@@ -179,7 +179,8 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public ValueEnvironment<Parity> assume(ValueEnvironment<Parity> environment, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public ValueEnvironment<Parity> assume(ValueEnvironment<Parity> environment, ValueExpression expression,
+			ProgramPoint pp) throws SemanticException {
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
@@ -194,9 +195,11 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 					environment = environment.assign((Identifier) right, left, pp);
 				return environment;
 			case LOGICAL_AND:
-				return assume(environment, (ValueExpression) left, pp).glb(assume(environment, (ValueExpression) right, pp));
+				return assume(environment, (ValueExpression) left, pp)
+						.glb(assume(environment, (ValueExpression) right, pp));
 			case LOGICAL_OR:
-				return assume(environment, (ValueExpression) left, pp).lub(assume(environment,(ValueExpression) right, pp));
+				return assume(environment, (ValueExpression) left, pp)
+						.lub(assume(environment, (ValueExpression) right, pp));
 			default:
 				break;
 			}
