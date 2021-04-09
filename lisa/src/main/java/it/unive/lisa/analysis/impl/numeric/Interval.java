@@ -4,11 +4,14 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -423,5 +426,21 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		} else if (!low.equals(other.low))
 			return false;
 		return true;
+	}
+
+	@Override
+	protected ValueEnvironment<Interval> assumeBinaryExpression(
+			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
+			ValueExpression right, ProgramPoint pp) throws SemanticException {
+		switch (operator) {
+		case COMPARISON_EQ:
+			if (left instanceof Identifier)
+				environment = environment.assign((Identifier) left, right, pp);
+			else if (right instanceof Identifier)
+				environment = environment.assign((Identifier) right, left, pp);
+			return environment;
+		default:
+			return environment;
+		}
 	}
 }

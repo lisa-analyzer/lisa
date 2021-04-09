@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -217,33 +216,18 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	public ValueEnvironment<IntegerConstantPropagation> assume(ValueEnvironment<IntegerConstantPropagation> environment,
-			ValueExpression expression, ProgramPoint pp)
-			throws SemanticException {
-
-		if (expression instanceof BinaryExpression) {
-			BinaryExpression binary = (BinaryExpression) expression;
-			ValueExpression left = (ValueExpression) binary.getLeft();
-			ValueExpression right = (ValueExpression) binary.getRight();
-
-			switch (binary.getOperator()) {
-			case COMPARISON_EQ:
-				if (left instanceof Identifier)
-					environment = environment.assign((Identifier) left, right, pp);
-				else if (right instanceof Identifier)
-					environment = environment.assign((Identifier) right, left, pp);
-				return environment;
-			case LOGICAL_AND:
-				return assume(environment, (ValueExpression) left, pp)
-						.glb(assume(environment, (ValueExpression) right, pp));
-			case LOGICAL_OR:
-				return assume(environment, (ValueExpression) left, pp)
-						.lub(assume(environment, (ValueExpression) right, pp));
-			default:
-				break;
-			}
+	protected ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
+			ValueEnvironment<IntegerConstantPropagation> environment, BinaryOperator operator, ValueExpression left,
+			ValueExpression right, ProgramPoint pp) throws SemanticException {
+		switch (operator) {
+		case COMPARISON_EQ:
+			if (left instanceof Identifier)
+				environment = environment.assign((Identifier) left, right, pp);
+			else if (right instanceof Identifier)
+				environment = environment.assign((Identifier) right, left, pp);
+			return environment;
+		default:
+			return environment;
 		}
-
-		return environment;
 	}
 }

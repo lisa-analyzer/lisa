@@ -5,11 +5,14 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * The basic Sign abstract domain, tracking zero, strictly positive and strictly
@@ -260,5 +263,21 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
 			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	protected ValueEnvironment<Sign> assumeBinaryExpression(
+			ValueEnvironment<Sign> environment, BinaryOperator operator, ValueExpression left,
+			ValueExpression right, ProgramPoint pp) throws SemanticException {
+		switch (operator) {
+		case COMPARISON_EQ:
+			if (left instanceof Identifier)
+				environment = environment.assign((Identifier) left, right, pp);
+			else if (right instanceof Identifier)
+				environment = environment.assign((Identifier) right, left, pp);
+			return environment;
+		default:
+			return environment;
+		}
 	}
 }

@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.nonrelational.value;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -405,5 +406,130 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	@Override
 	public final String toString() {
 		return representation();
+	}
+
+	@Override
+	public final ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
+			ProgramPoint pp)
+			throws SemanticException {
+
+		if (expression instanceof Identifier)
+			return environment;
+
+		if (expression instanceof NullConstant)
+			return environment;
+
+		if (expression instanceof Constant)
+			return environment;
+
+		if (expression instanceof Skip)
+			return environment;
+
+		if (expression instanceof PushAny)
+			return environment;
+
+		if (expression instanceof UnaryExpression) {
+			UnaryExpression unary = (UnaryExpression) expression;
+			return assumeUnaryExpression(environment, unary.getOperator(), (ValueExpression) unary.getExpression(), pp);
+		}
+
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression binary = (BinaryExpression) expression;
+
+			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
+				return assume(environment, (ValueExpression) binary.getLeft(), pp)
+						.glb(assume(environment, (ValueExpression) binary.getRight(), pp));
+			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
+				return assume(environment, (ValueExpression) binary.getLeft(), pp)
+						.lub(assume(environment, (ValueExpression) binary.getRight(), pp));
+
+			else
+				return assumeBinaryExpression(environment, binary.getOperator(), (ValueExpression) binary.getLeft(),
+						(ValueExpression) binary.getRight(), pp);
+		}
+
+		if (expression instanceof TernaryExpression) {
+			TernaryExpression ternary = (TernaryExpression) expression;
+
+			return assumeTernaryExpression(environment, ternary.getOperator(), (ValueExpression) ternary.getLeft(),
+					(ValueExpression) ternary.getMiddle(), (ValueExpression) ternary.getRight(), pp);
+		}
+		return environment;
+	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that a ternary
+	 * expression with operator {@code operator}, left argument {@code left},
+	 * middle argument {@code middle},and right argument {@code right} holds.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param operator    the operator of the ternary expression
+	 * @param left        the left-hand side argument of the ternary expression
+	 * @param middle      the middle-hand side argument of the ternary
+	 *                        expression
+	 * @param right       the right-hand side argument of the ternary expression
+	 * @param pp          the program point where the ternary expression occurs
+	 * 
+	 * @return the environment {@code environment} assuming that a ternary
+	 *             expression with operator {@code operator}, left argument
+	 *             {@code left}, middle argument {@code middle},and right
+	 *             argument {@code right} holds
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	protected ValueEnvironment<T> assumeTernaryExpression(ValueEnvironment<T> environment,
+			TernaryOperator operator, ValueExpression left, ValueExpression middle, ValueExpression right,
+			ProgramPoint pp) throws SemanticException {
+		return environment;
+	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that a binary
+	 * expression with operator {@code operator}, left argument {@code left},
+	 * and right argument {@code right} holds. The binary expression with binary
+	 * operator {@link BinaryOperator#LOGICAL_AND} and
+	 * {@link BinaryOperator#LOGICAL_OR} are already handled by
+	 * {@link BaseNonRelationalValueDomain#assume}.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param operator    the operator of the binary expression
+	 * @param left        the left-hand side argument of the binary expression
+	 * @param right       the right-hand side argument of the binary expression
+	 * @param pp          the program point where the binary expression occurs
+	 * 
+	 * @return the environment {@code environment} assuming that a binary
+	 *             expression with operator {@code operator}, left argument
+	 *             {@code left}, and right argument {@code right} holds
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	protected ValueEnvironment<T> assumeBinaryExpression(ValueEnvironment<T> environment,
+			BinaryOperator operator, ValueExpression left, ValueExpression right, ProgramPoint pp)
+			throws SemanticException {
+		return environment;
+	}
+
+	/**
+	 * Yields the environment {@code environment} assuming that an unary
+	 * expression with operator {@code operator} and argument {@code expression}
+	 * holds.
+	 * 
+	 * @param environment the environment on which the expression must be
+	 *                        assumed
+	 * @param operator    the operator of the unary expression
+	 * @param expression  the argument of the unary expression
+	 * @param pp          the program point where the unary expression occurs
+	 * 
+	 * @return the environment {@code environment} assuming that an unary
+	 *             expression with operator {@code operator} and argument
+	 *             {@code expression} holds.
+	 * 
+	 * @throws SemanticException if something goes wrong during the assumption
+	 */
+	protected ValueEnvironment<T> assumeUnaryExpression(ValueEnvironment<T> environment,
+			UnaryOperator operator, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		return environment;
 	}
 }
