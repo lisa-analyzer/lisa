@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -430,5 +431,27 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final String toString() {
 		return representation();
+	}
+
+	@Override
+	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		return environment;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final T glb(T other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (T) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
+			return (T) other;
+
+		return glbAux(other);
+	}
+
+	protected T glbAux(T other) {
+		return bottom();
 	}
 }

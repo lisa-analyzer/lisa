@@ -422,6 +422,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return false;
 		} else if (!low.equals(other.low))
 			return false;
-		return isTop && other.isTop;
+		return true;
 	}
 }

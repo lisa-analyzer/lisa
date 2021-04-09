@@ -116,29 +116,19 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		else if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
 			return (M) this;
 		else
-			return assumeAux(expression, pp);
+			return glb(lattice.assume((M) this, expression, pp));
 	}
 
-	/**
-	 * Auxiliary version of {@link #assume(SymbolicExpression, ProgramPoint)}
-	 * where the cases where the expression is never satisfied
-	 * ({@code lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED})
-	 * and is always satisfied
-	 * ({@code lattice.satisfies(expression, this) == Satisfiability.SATISFIED})
-	 * have already been handled. The given expression thus holds sometimes.
-	 * 
-	 * @param expression the expression to assume to hold.
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
-	 * 
-	 * @return the (optionally) modified copy of this domain
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	protected M assumeAux(E expression, ProgramPoint pp) throws SemanticException {
-		// TODO: a more precise filtering is needed when satisfiability of
-		// expression is unknown - subclasses might add some logic
-		return copy();
+	@SuppressWarnings("unchecked")
+	public M glb(M other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (M) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
+			return (M) other;
+
+		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override

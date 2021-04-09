@@ -108,11 +108,11 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return functionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
-	private interface FunctionalLift<V extends Lattice<V>> {
+	protected interface FunctionalLift<V extends Lattice<V>> {
 		V lift(V first, V second) throws SemanticException;
 	}
 
-	private final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
+	protected final F functionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
 		F result = bottom();
 		result.function = mkNewFunction(null);
 		Set<K> keys = functionalLiftKeys(other);

@@ -67,6 +67,10 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 */
 	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
 
+	public F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
+
+	public T glb(T other) throws SemanticException;
+
 	/**
 	 * Yields a textual representation of the content of this domain's instance.
 	 * 

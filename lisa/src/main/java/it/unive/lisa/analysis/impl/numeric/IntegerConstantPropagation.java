@@ -5,11 +5,15 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * The basic integer constant propagation abstract domain, tracking if a certain
@@ -184,7 +188,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 				return false;
 		} else if (!value.equals(other.value))
 			return false;
-		return isTop && other.isTop;
+		return true;
 	}
 
 	@Override
@@ -210,5 +214,33 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 		default:
 			return Satisfiability.UNKNOWN;
 		}
+	}
+
+	@Override
+	public ValueEnvironment<IntegerConstantPropagation> assume(ValueEnvironment<IntegerConstantPropagation> environment, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
+
+		if (expression instanceof BinaryExpression) {
+			BinaryExpression binary = (BinaryExpression) expression;
+			ValueExpression left = (ValueExpression) binary.getLeft();
+			ValueExpression right = (ValueExpression) binary.getRight();
+
+			switch (binary.getOperator()) {
+			case COMPARISON_EQ:
+				if (left instanceof Identifier)
+					environment = environment.assign((Identifier) left, right, pp);
+				else if (right instanceof Identifier)
+					environment = environment.assign((Identifier) right, left, pp);
+				return environment;
+			case LOGICAL_AND:
+				return assume(environment,(ValueExpression) left, pp).glb(assume(environment, (ValueExpression) right, pp));
+			case LOGICAL_OR:
+				return assume(environment, (ValueExpression) left, pp).lub(assume(environment, (ValueExpression) right, pp));
+			default:
+				break;
+			}
+		}
+
+		return environment;
 	}
 }
