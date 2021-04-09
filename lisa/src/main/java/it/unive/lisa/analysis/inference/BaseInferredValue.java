@@ -463,9 +463,9 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * <li>{@code this} and {@code other} are not the same object (according
 	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * <li>{@code this} and {@code other} are not comparable (according to
-	 * {@link BaseInferredValue#lessOrEqual(BaseInferredValue)})</li>
+	 * {@link BaseLattice#lessOrEqual(BaseLattice)})</li>
 	 * </ul>
-	 * The default implementation returns {@link BaseInferredValue#bottom()}
+	 * The default implementation returns {@link BaseLattice#bottom()}
 	 * 
 	 * @param other the other inferred value
 	 * 

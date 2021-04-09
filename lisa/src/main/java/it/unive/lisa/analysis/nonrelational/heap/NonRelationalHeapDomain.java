@@ -50,10 +50,9 @@ public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 	 * <li>{@code this} and {@code other} are not the same object (according
 	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * <li>{@code this} and {@code other} are not comparable (according to
-	 * {@link NonRelationalHeapDomain#lessOrEqual(NonRelationalHeapDomain)})</li>
+	 * {@link Lattice#lessOrEqual(Lattice)})</li>
 	 * </ul>
-	 * The default implementation returns
-	 * {@link NonRelationalHeapDomain#bottom()}
+	 * The default implementation returns {@link Lattice#bottom()}
 	 * 
 	 * @param other the other domain element
 	 * 
