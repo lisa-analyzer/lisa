@@ -102,12 +102,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	@Override
 	public F lubAux(F other) throws SemanticException {
-		return lubFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		return functionalLift(other, (f1, f2) -> lubKeys(f1, f2), (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
 	public F wideningAux(F other) throws SemanticException {
-		return lubFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		return functionalLift(other, (f1, f2) -> lubKeys(f1, f2), (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	/**
@@ -120,10 +120,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	protected interface FunctionalLift<V extends Lattice<V>> {
 
 		/**
-		 * Yields the lift of {@code first} and {@code second}.
+		 * Yields the lift of {@code first} and {@code second} lattice element.
 		 * 
-		 * @param first  the first element
-		 * @param second the second element
+		 * @param first  the first lattice element
+		 * @param second the second lattice element
 		 * 
 		 * @return the lift of {@code first} and {@code second}
 		 * 
@@ -133,13 +133,49 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		V lift(V first, V second) throws SemanticException;
 	}
 
-	private final F lubFunctionalLift(F other, FunctionalLift<V> lift) throws SemanticException {
+	/**
+	 * Interface for the left of key sets.
+	 * 
+	 * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+	 *
+	 * @param <K> the key type
+	 */
+	protected interface KeyFunctionalLift<K> {
+
+		/**
+		 * Yields the lift of {@code first} and {@code second} key sets.
+		 * 
+		 * @param first  the first key set
+		 * @param second the second key set
+		 * 
+		 * @return the left of {@code first} and {@code second} key sets
+		 * 
+		 * @throws SemanticException if something goes wrong while lifting the
+		 *                               key sets
+		 */
+		Set<K> keyLift(Set<K> first, Set<K> second) throws SemanticException;
+	}
+
+	/**
+	 * Yields the functional lift between {@code this} and {@code other}.
+	 * 
+	 * @param other       the other functional lattice
+	 * @param keyLifter   the key lifter
+	 * @param valueLifter the value lifter
+	 * 
+	 * @return the intersection between {@code k1} and {@code k2}
+	 * 
+	 * @throws SemanticException if something goes wrong while lifting the
+	 *                               lattice elements
+	 */
+	protected final F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
+			throws SemanticException {
 		F result = bottom();
 		result.function = mkNewFunction(null);
-		Set<K> keys = lubKeys(other);
+		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
-				result.function.put(key, lift.lift(getState(key), other.getState(key)));
+				result.function.put(key, valueLifter.lift(getState(key), other.getState(key)));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
@@ -147,17 +183,35 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * Yields the union of the keys of this and other.
+	 * Yields the union of the keys between {@code k1} and {@code k2}.
 	 * 
-	 * @param other the other functional lattice
+	 * @param k1 the first key set
+	 * @param k2 the second key set
 	 * 
-	 * @return the union of the keys of this and other
+	 * @return the union between {@code k1} and {@code k2}
 	 * 
 	 * @throws SemanticException if something goes wrong while lifting the keys
 	 */
-	protected Set<K> lubKeys(F other) throws SemanticException {
-		Set<K> keys = new HashSet<>(function.keySet());
-		keys.addAll(other.function.keySet());
+	protected Set<K> lubKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+		Set<K> keys = new HashSet<>(k1);
+		keys.addAll(k2);
+		return keys;
+	}
+
+	/**
+	 * Yields the intersection of the keys between {@code k1} and {@code k2}.
+	 * 
+	 * @param k1 the first key set
+	 * @param k2 the second key set
+	 * 
+	 * @return the intersection between {@code k1} and {@code k2}
+	 * 
+	 * @throws SemanticException if something goes wrong while lifting the key
+	 *                               sets
+	 */
+	protected Set<K> glbKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+		Set<K> keys = new HashSet<>(k1);
+		keys.retainAll(k2);
 		return keys;
 	}
 

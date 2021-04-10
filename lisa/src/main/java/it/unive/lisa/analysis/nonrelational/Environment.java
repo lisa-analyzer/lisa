@@ -139,26 +139,7 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
 			return (M) other;
 
-		return glbFunctionalLift(other, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
-	}
-
-	private final M glbFunctionalLift(M other, FunctionalLift<T> lift) throws SemanticException {
-		M result = bottom();
-		result.function = mkNewFunction(null);
-		Set<Identifier> keys = glbKeys(other);
-		for (Identifier key : keys)
-			try {
-				result.function.put(key, lift.lift(getState(key), other.getState(key)));
-			} catch (SemanticException e) {
-				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
-			}
-		return result;
-	}
-
-	private Set<Identifier> glbKeys(M other) throws SemanticException {
-		Set<Identifier> keys = new HashSet<>(function.keySet());
-		keys.retainAll(other.function.keySet());
-		return keys;
+		return functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
@@ -223,10 +204,10 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	protected Set<Identifier> lubKeys(M other) throws SemanticException {
+	protected Set<Identifier> lubKeys(Set<Identifier> k1, Set<Identifier> k2) throws SemanticException {
 		Set<Identifier> keys = new HashSet<>();
-		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, function.keySet(),
-				other.function.keySet());
+		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1,
+				k2);
 		builder.compute(Comparator.comparing(Identifier::getName));
 		keys.addAll(builder.getOnlyFirst());
 		keys.addAll(builder.getOnlySecond());
