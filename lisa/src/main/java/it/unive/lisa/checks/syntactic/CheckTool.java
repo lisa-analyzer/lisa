@@ -36,6 +36,8 @@ public class CheckTool {
 
 	/**
 	 * Build the tool, shallow-copying the set of warnings from the given one.
+	 * 
+	 * @param other the original tool to copy
 	 */
 	protected CheckTool(CheckTool other) {
 		this();

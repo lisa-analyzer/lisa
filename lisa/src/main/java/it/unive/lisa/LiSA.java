@@ -174,7 +174,8 @@ public class LiSA {
 
 			tool = new CheckToolWithAnalysisResults<>(tool, results);
 			if (!conf.getSemanticChecks().isEmpty())
-				ChecksExecutor.executeAll((CheckToolWithAnalysisResults<A, H, V>) tool, program, conf.getSemanticChecks());
+				ChecksExecutor.executeAll((CheckToolWithAnalysisResults<A, H, V>) tool, program,
+						conf.getSemanticChecks());
 			else
 				log.warn("Skipping semantic checks execution since none have been provided");
 		} else

@@ -20,9 +20,9 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * The check is parametric to the type {@code T} of the tool that will be used
  * during the inspection.
  * 
- * @param <T> the type of tool used during the inspection
- * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the type of tool used during the inspection
  */
 public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 
