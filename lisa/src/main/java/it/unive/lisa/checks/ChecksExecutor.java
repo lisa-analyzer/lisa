@@ -1,20 +1,21 @@
-package it.unive.lisa.checks.syntactic;
+package it.unive.lisa.checks;
 
-import it.unive.lisa.checks.CheckTool;
-import it.unive.lisa.logging.IterationLogger;
-import it.unive.lisa.program.cfg.CFG;
 import java.util.Collection;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import it.unive.lisa.logging.IterationLogger;
+import it.unive.lisa.program.cfg.CFG;
+
 /**
- * Utility class that handles the execution of {@link SyntacticCheck}s.
+ * Utility class that handles the execution of {@link Check}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SyntacticChecksExecutor {
+public class ChecksExecutor {
 
-	private static final Logger log = LogManager.getLogger(SyntacticChecksExecutor.class);
+	private static final Logger log = LogManager.getLogger(ChecksExecutor.class);
 
 	/**
 	 * Executes all the given checks on the given inputs cfgs.
@@ -23,7 +24,8 @@ public class SyntacticChecksExecutor {
 	 * @param inputs the cfgs to analyze
 	 * @param checks the checks to execute
 	 */
-	public static void executeAll(CheckTool tool, Collection<CFG> inputs, Collection<SyntacticCheck> checks) {
+	public static <C extends Check<T>, T> void executeAll(T tool, Collection<CFG> inputs,
+			Collection<C> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
 		for (CFG cfg : IterationLogger.iterate(log, inputs, "Analyzing CFGs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));

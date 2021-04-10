@@ -2,7 +2,6 @@ package it.unive.lisa.checks.syntactic;
 
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
-import it.unive.lisa.checks.CheckTool;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;

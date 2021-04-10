@@ -14,8 +14,9 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
-import it.unive.lisa.checks.CheckTool;
-import it.unive.lisa.checks.syntactic.SyntacticChecksExecutor;
+import it.unive.lisa.checks.ChecksExecutor;
+import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
+import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
@@ -37,6 +38,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,10 +152,9 @@ public class LiSA {
 				dumpCFG("", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
-		if (!conf.getSyntacticChecks().isEmpty()) {
-			SyntacticChecksExecutor.executeAll(tool, allCFGs, conf.getSyntacticChecks());
-			warnings.addAll(tool.getWarnings());
-		} else
+		if (!conf.getSyntacticChecks().isEmpty()) 
+			ChecksExecutor.executeAll(tool, allCFGs, conf.getSyntacticChecks());
+		else
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
 		CallGraph callGraph;
@@ -232,6 +234,18 @@ public class LiSA {
 				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
+		
+		Map<CFG, CFGWithAnalysisResults<A, H, V>> results = new IdentityHashMap<>(allCFGs.size());
+		for (CFG cfg : allCFGs) 
+			results.put(cfg, callGraph.getAnalysisResultsOf(cfg));
+		
+		CheckToolWithAnalysisResults<A, H, V> tool2 = new CheckToolWithAnalysisResults<>(tool, results);
+		if (!conf.getSemanticChecks().isEmpty()) 
+			ChecksExecutor.executeAll(tool2, allCFGs, conf.getSemanticChecks());
+		else
+			log.warn("Skipping semantic checks execution since none have been provided");
+		
+		warnings.addAll(tool2.getWarnings());
 	}
 
 	private static class TypesPropagator<H extends HeapDomain<H>>
