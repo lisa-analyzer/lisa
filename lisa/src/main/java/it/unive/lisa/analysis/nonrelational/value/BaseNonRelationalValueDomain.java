@@ -202,7 +202,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	/**
 	 * Yields the evaluation of a type cast expression.
 	 * 
-	 * @param cast  the type csated expression
+	 * @param cast  the type casted expression
 	 * @param left  the left expression, namely the expression to be casted
 	 * @param right the right expression, namely the types to which left should
 	 *                  be casted
@@ -258,7 +258,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the evaluation of a {@link BinaryExpression} applying
 	 * {@code operator} to two expressions whose abstract value are {@code left}
 	 * and {@code right}, respectively. It is guaranteed that both {@code left}
-	 * and {@code right} are not {@link #bottom()}.
+	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
+	 * neither {@link BinaryOperator#TYPE_CAST} nor
+	 * {@link BinaryOperator#TYPE_CONV}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract
