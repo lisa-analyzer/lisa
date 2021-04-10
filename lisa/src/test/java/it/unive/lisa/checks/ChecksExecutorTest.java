@@ -1,7 +1,9 @@
-package it.unive.lisa.checks.syntactic;
+package it.unive.lisa.checks;
 
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.checks.syntactic.CheckTool;
+import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -13,7 +15,7 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.io.IOException;
 import org.junit.Test;
 
-public class SyntacticCheckTest extends AnalysisTestExecutor {
+public class ChecksExecutorTest extends AnalysisTestExecutor {
 
 	private static class VariableI implements SyntacticCheck {
 

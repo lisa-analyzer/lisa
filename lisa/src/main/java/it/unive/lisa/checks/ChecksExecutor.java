@@ -38,20 +38,26 @@ public class ChecksExecutor {
 		for (CFG cfg : iterate(log, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 		
-		for (CompilationUnit unit : iterate(log, program.getUnits(), "Analyzing compilation units...", "Units")) {
-			for (Global global : unit.getGlobals())
-				checks.forEach(c -> c.visitGlobal(tool, program, global, false));
-			
-			for (Global global : unit.getInstanceGlobals(false))
-				checks.forEach(c -> c.visitGlobal(tool, program, global, true));
-			
-			for (CFG cfg : unit.getCFGs())
-				checks.forEach(c -> cfg.accept(c, tool));
-			
-			for (CFG cfg : unit.getInstanceCFGs(false))
-				checks.forEach(c -> cfg.accept(c, tool));
-		}
+		for (CompilationUnit unit : iterate(log, program.getUnits(), "Analyzing compilation units...", "Units"))
+			checks.forEach(c -> visitUnit(tool, unit, c));
 
 		checks.forEach(c -> c.afterExecution(tool));
+	}
+	
+	private static <C extends Check<T>, T> void visitUnit(T tool, CompilationUnit unit, C c) {
+		if (!c.visitCompilationUnit(tool, unit))
+			return;
+		
+		for (Global global : unit.getGlobals())
+			c.visitGlobal(tool, unit, global, false);
+		
+		for (Global global : unit.getInstanceGlobals(false))
+			c.visitGlobal(tool, unit, global, true);
+		
+		for (CFG cfg : unit.getCFGs())
+			cfg.accept(c, tool);
+		
+		for (CFG cfg : unit.getInstanceCFGs(false))
+			cfg.accept(c, tool);
 	}
 }

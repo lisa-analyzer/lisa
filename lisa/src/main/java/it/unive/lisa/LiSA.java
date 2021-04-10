@@ -131,28 +131,16 @@ public class LiSA {
 			V extends ValueDomain<V>,
 			A extends AbstractState<A, H, V>> void runAux(Program program)
 					throws AnalysisExecutionException {
-		// fill up the types cache by side effect on an external set
-		Caches.types().clear();
-		ExternalSet<Type> types = Caches.types().mkEmptySet();
-		program.getRegisteredTypes().forEach(types::add);
-		types = null;
+		finalizeProgram(program);
 
 		Collection<CFG> allCFGs = program.getAllCFGs();
-
-		TimerLogger.execAction(log, "Finalizing input program", () -> {
-			try {
-				program.validateAndFinalize();
-			} catch (ProgramValidationException e) {
-				throw new AnalysisExecutionException("Unable to finalize target program", e);
-			}
-		});
 
 		if (conf.isDumpCFGs())
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG("", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
-		if (!conf.getSyntacticChecks().isEmpty()) 
+		if (!conf.getSyntacticChecks().isEmpty())
 			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
 		else
 			log.warn("Skipping syntactic checks execution since none have been provided");
@@ -173,51 +161,31 @@ public class LiSA {
 			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
 		}
 
-		if (conf.isInferTypes()) {
-			SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
-			try {
-				AbstractState<?, ?, ?> state = conf.getState();
-				HeapDomain<?> heap;
-				if (state != null)
-					heap = state.getHeapState();
-				else
-					heap = getDefaultFor(HeapDomain.class);
-				// type inference is executed with the simplest abstract state
-				typesState = getInstance(SimpleAbstractState.class, heap, new InferenceSystem<>(new InferredTypes()))
-						.top();
-			} catch (AnalysisSetupException e) {
-				throw new AnalysisExecutionException("Unable to itialize type inference", e);
-			}
-
-			TimerLogger.execAction(log, "Computing type information",
-					() -> {
-						try {
-							callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()));
-						} catch (FixpointException e) {
-							log.fatal("Exception during fixpoint computation", e);
-							throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-						}
-					});
-
-			String message = conf.isDumpTypeInference() ? "Dumping type analysis and propagating it to cfgs"
-					: "Propagating type information to cfgs";
-			for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
-				CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
-				if (conf.isDumpTypeInference())
-					dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
-				cfg.accept(new TypesPropagator<>(), result);
-			}
-
-			callGraph.clear();
-		} else
+		if (conf.isInferTypes())
+			inferTypes(allCFGs, callGraph);
+		else
 			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
-		if (conf.getState() == null) {
-			log.warn("Skipping analysis execution since no abstract sate has been provided");
-			return;
-		}
+		if (conf.getState() != null) {
+			analyze(allCFGs, callGraph);
+			Map<CFG, CFGWithAnalysisResults<A, H, V>> results = new IdentityHashMap<>(allCFGs.size());
+			for (CFG cfg : allCFGs)
+				results.put(cfg, callGraph.getAnalysisResultsOf(cfg));
 
+			tool = new CheckToolWithAnalysisResults<>(tool, results);
+			if (!conf.getSemanticChecks().isEmpty())
+				ChecksExecutor.executeAll((CheckToolWithAnalysisResults<A, H, V>) tool, program, conf.getSemanticChecks());
+			else
+				log.warn("Skipping semantic checks execution since none have been provided");
+		} else
+			log.warn("Skipping analysis execution since no abstract sate has been provided");
+
+		warnings.addAll(tool.getWarnings());
+	}
+
+	@SuppressWarnings("unchecked")
+	private <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void analyze(
+			Collection<CFG> allCFGs, CallGraph callGraph) {
 		A state = (A) conf.getState().top();
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
@@ -234,18 +202,46 @@ public class LiSA {
 				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
 				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
 			}
-		
-		Map<CFG, CFGWithAnalysisResults<A, H, V>> results = new IdentityHashMap<>(allCFGs.size());
-		for (CFG cfg : allCFGs) 
-			results.put(cfg, callGraph.getAnalysisResultsOf(cfg));
-		
-		CheckToolWithAnalysisResults<A, H, V> tool2 = new CheckToolWithAnalysisResults<>(tool, results);
-		if (!conf.getSemanticChecks().isEmpty()) 
-			ChecksExecutor.executeAll(tool2, program, conf.getSemanticChecks());
-		else
-			log.warn("Skipping semantic checks execution since none have been provided");
-		
-		warnings.addAll(tool2.getWarnings());
+	}
+
+	@SuppressWarnings("unchecked")
+	private <H extends HeapDomain<H>> void inferTypes(Collection<CFG> allCFGs, CallGraph callGraph) {
+		SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
+		try {
+			AbstractState<?, ?, ?> state = conf.getState();
+			HeapDomain<?> heap;
+			if (state != null)
+				heap = state.getHeapState();
+			else
+				heap = getDefaultFor(HeapDomain.class);
+			// type inference is executed with the simplest abstract state
+			typesState = getInstance(SimpleAbstractState.class, heap, new InferenceSystem<>(new InferredTypes()))
+					.top();
+		} catch (AnalysisSetupException e) {
+			throw new AnalysisExecutionException("Unable to itialize type inference", e);
+		}
+
+		TimerLogger.execAction(log, "Computing type information",
+				() -> {
+					try {
+						callGraph.fixpoint(new AnalysisState<>(typesState, new Skip()));
+					} catch (FixpointException e) {
+						log.fatal("Exception during fixpoint computation", e);
+						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+					}
+				});
+
+		String message = conf.isDumpTypeInference() ? "Dumping type analysis and propagating it to cfgs"
+				: "Propagating type information to cfgs";
+		for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
+			CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+					InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
+			if (conf.isDumpTypeInference())
+				dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
+			cfg.accept(new TypesPropagator<>(), result);
+		}
+
+		callGraph.clear();
 	}
 
 	private static class TypesPropagator<H extends HeapDomain<H>>
@@ -273,6 +269,22 @@ public class LiSA {
 			}
 			return true;
 		}
+	}
+
+	private void finalizeProgram(Program program) {
+		// fill up the types cache by side effect on an external set
+		Caches.types().clear();
+		ExternalSet<Type> types = Caches.types().mkEmptySet();
+		program.getRegisteredTypes().forEach(types::add);
+		types = null;
+
+		TimerLogger.execAction(log, "Finalizing input program", () -> {
+			try {
+				program.validateAndFinalize();
+			} catch (ProgramValidationException e) {
+				throw new AnalysisExecutionException("Unable to finalize target program", e);
+			}
+		});
 	}
 
 	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
