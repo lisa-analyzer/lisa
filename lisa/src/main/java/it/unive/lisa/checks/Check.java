@@ -1,5 +1,8 @@
 package it.unive.lisa.checks;
 
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -40,4 +43,27 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 *                 execution
 	 */
 	void afterExecution(T tool);
+
+	/**
+	 * Visits the given compilation unit.
+	 * 
+	 * @param tool the auxiliary tool that this visitor can use
+	 * @param unit the compilation unit being visited
+	 * 
+	 * @return whether or not the visiting should continue when this call
+	 *             returns. If this method returns {@code false}, all members of
+	 *             the compilation unit will not be visited.
+	 */
+	boolean visitCompilationUnit(T tool, CompilationUnit unit);
+
+	/**
+	 * Visits the given global.
+	 * 
+	 * @param tool     the auxiliary tool that this visitor can use
+	 * @param unit     the unit where the global belongs
+	 * @param global   the global being visited
+	 * @param instance whether or not the global is an instance member of the
+	 *                     compilation unit
+	 */
+	void visitGlobal(T tool, Unit unit, Global global, boolean instance);
 }

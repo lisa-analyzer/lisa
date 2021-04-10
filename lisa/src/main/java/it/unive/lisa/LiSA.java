@@ -153,7 +153,7 @@ public class LiSA {
 
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty()) 
-			ChecksExecutor.executeAll(tool, allCFGs, conf.getSyntacticChecks());
+			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
 		else
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
@@ -241,7 +241,7 @@ public class LiSA {
 		
 		CheckToolWithAnalysisResults<A, H, V> tool2 = new CheckToolWithAnalysisResults<>(tool, results);
 		if (!conf.getSemanticChecks().isEmpty()) 
-			ChecksExecutor.executeAll(tool2, allCFGs, conf.getSemanticChecks());
+			ChecksExecutor.executeAll(tool2, program, conf.getSemanticChecks());
 		else
 			log.warn("Skipping semantic checks execution since none have been provided");
 		
