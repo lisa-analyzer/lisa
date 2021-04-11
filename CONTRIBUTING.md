@@ -18,7 +18,7 @@ Contributions to LiSA are always welcome! Thank you for taking time to make LiSA
 
 + Make sure people know the motivation of your work and can track its history even after you completed it: create an [issue][issues] describing what you are doing.
 	+ Use the appropriate issue template, and be sure to fill every section as accurately as possible.
-+ Create a _topic branch_ for you to work on.
++ After forking this repository, create a _topic branch_ for you to work on.
 	+ You should base your branch on the `master` branch.
 	+ Name branch after issues: naming a branch `yourusername/#issuenbr-issue-topic` enables anyone to understand who is working on what in that branch.
 	+ Try to keep different issues separated in different branch.
@@ -39,8 +39,9 @@ Contributions to LiSA are always welcome! Thank you for taking time to make LiSA
 
 ## Useful links ##
 
-+ [GitHub docs](https://help.github.com/)
-+ [GitHub pull request docs](https://help.github.com/articles/creating-a-pull-request/)
++ [GitHub docs](https://docs.github.com/)
++ [GitHub fork docs](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-forks)
++ [GitHub pull request docs](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
 + [LiSA issues][issues]
 
 [issues]:https://github.com/UniVE-SSV/lisa/issues 
