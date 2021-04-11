@@ -166,6 +166,14 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	public final E getEdgeConnecting(N source, N destination) {
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
+	
+	public final Collection<E> getIngoingEdges(N node) {
+		return adjacencyMatrix.getIngoingEdges(node);
+	}
+	
+	public final Collection<E> getOutgoingEdges(N node) {
+		return adjacencyMatrix.getOutgoingEdges(node);
+	}
 
 	/**
 	 * Yields the collection of the nodes that are followers of the given one,

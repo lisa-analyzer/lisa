@@ -1,8 +1,7 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,8 +10,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
+import it.unive.lisa.util.workset.LIFOWorkingSet;
+import it.unive.lisa.util.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and
@@ -130,6 +136,14 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 				return e;
 
 		return null;
+	}
+
+	public final Collection<E> getIngoingEdges(N node) {
+		return matrix.get(node).getLeft();
+	}
+
+	public final Collection<E> getOutgoingEdges(N node) {
+		return matrix.get(node).getRight();
 	}
 
 	/**
@@ -250,6 +264,26 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		}
 	}
 
+	public boolean containsNode(N node, boolean weakEquality) {
+		if (!weakEquality)
+			return matrix.containsKey(node);
+
+		for (N n : matrix.keySet())
+			if (n == node || n.equals(node) || n.isEqualTo(node))
+				return true;
+
+		return false;
+	}
+
+	public boolean containsEdge(E edge, boolean weakEquality) {
+		for (Pair<ExternalSet<E>, ExternalSet<E>> pair : matrix.values())
+			for (E e : pair.getRight())
+				if (e == edge || e.equals(edge) || (weakEquality && e.isEqualTo(edge)))
+					return true;
+
+		return false;
+	}
+
 	@Override
 	public Iterator<Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>>> iterator() {
 		return matrix.entrySet().iterator();
@@ -360,5 +394,57 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			res.append("\n]\n");
 		}
 		return res.toString();
+	}
+
+	public void removeFrom(N root) {
+		if (!containsNode(root, true))
+			return;
+
+		Set<N> add = new HashSet<>(), remove = new HashSet<>(), check = new HashSet<>();
+
+		if (containsNode(root, false))
+			add.add(root);
+		else {
+			for (N n : matrix.keySet())
+				if (n.isEqualTo(root))
+					add.add(n);
+		}
+
+		do {
+			// add the ones that were computed at last iteration
+			remove.addAll(add);
+
+			// find new successors
+			check.clear();
+			for (N node : add)
+				matrix.get(node).getRight().stream().map(e -> e.getDestination()).forEach(check::add);
+
+			// compute the ones that need to be added
+			add.clear();
+			check.stream().filter(n -> !remove.contains(n)).forEach(add::add);
+		} while (!add.isEmpty());
+
+		simplify(remove, Collections.emptyList());
+	}
+
+	public Collection<N> getRoots() {
+		return matrix.entrySet().stream().filter(e -> e.getValue().getLeft().isEmpty()).map(Entry::getKey)
+				.collect(Collectors.toList());
+	}
+
+	public int distance(N from, N to) {
+		int distance = -1;
+		WorkingSet<Pair<N, Integer>> ws = VisitOnceWorkingSet.mk(LIFOWorkingSet.mk());
+		ws.push(Pair.of(from, 0));
+		while (!ws.isEmpty()) {
+			Pair<N, Integer> current = ws.pop();
+			if (current.getLeft() != to)
+				for (N dest : followersOf(current.getLeft()))
+					ws.push(Pair.of(dest, current.getRight() + 1));
+			else if (distance == -1 || current.getRight() < distance)
+				distance = current.getRight();
+		}
+		
+		return distance;
 	}
 }
