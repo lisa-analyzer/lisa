@@ -12,6 +12,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -53,6 +54,8 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 */
 	private final CFGDescriptor descriptor;
 
+	private final Collection<ControlFlowStructure> cfStructs;
+
 	/**
 	 * Builds the control flow graph.
 	 * 
@@ -61,6 +64,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public CFG(CFGDescriptor descriptor) {
 		super();
 		this.descriptor = descriptor;
+		this.cfStructs = new LinkedList<>();
 	}
 
 	/**
@@ -76,6 +80,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 			AdjacencyMatrix<Statement, Edge, CFG> adjacencyMatrix) {
 		super(entrypoints, adjacencyMatrix);
 		this.descriptor = descriptor;
+		this.cfStructs = new LinkedList<>();
 	}
 
 	/**
@@ -86,6 +91,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	protected CFG(CFG other) {
 		super(other.entrypoints, other.adjacencyMatrix);
 		this.descriptor = other.descriptor;
+		this.cfStructs = other.cfStructs;
 	}
 
 	/**
@@ -123,6 +129,18 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final Collection<Statement> getAllExitpoints() {
 		return adjacencyMatrix.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
 				.collect(Collectors.toList());
+	}
+
+	public final void addControlFlowStructure(ControlFlowStructure cf) {
+		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
+			throw new IllegalArgumentException(
+					"Cannot have more than one conditional structure happening on the same condition: "
+							+ cf.getCondition());
+		cfStructs.add(cf);
+	}
+
+	public Collection<ControlFlowStructure> getControlFlowStructures() {
+		return cfStructs;
 	}
 
 	@Override
