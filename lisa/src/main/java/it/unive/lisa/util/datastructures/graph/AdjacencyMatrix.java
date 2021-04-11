@@ -63,6 +63,15 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	}
 
 	/**
+	 * Builds a new matrix, using the given edge factory.
+	 */
+	public AdjacencyMatrix(ExternalSetCache<E> edgeFactory) {
+		this.edgeFactory = edgeFactory;
+		matrix = new ConcurrentHashMap<>();
+		nextOffset = 0;
+	}
+
+	/**
 	 * Copies the given matrix by keeping the same edge
 	 * {@link ExternalSetCache}, shallow-copying the {@link Node}s and
 	 * deep-copying the values.
@@ -77,14 +86,19 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		nextOffset = other.nextOffset;
 	}
 
+	public ExternalSetCache<E> getEdgeFactory() {
+		return edgeFactory;
+	}
+
 	/**
-	 * Adds the given node to the set of nodes.
+	 * Adds the given node to the set of nodes. Note that, if the given node is
+	 * already present in the matrix, all existing edges are kept.
 	 * 
 	 * @param node the node to add
 	 */
 	public void addNode(N node) {
-		matrix.put(node, Pair.of(edgeFactory.mkEmptySet(), edgeFactory.mkEmptySet()));
-		nextOffset = node.setOffset(nextOffset) + 1;
+		if (matrix.putIfAbsent(node, Pair.of(edgeFactory.mkEmptySet(), edgeFactory.mkEmptySet())) == null)
+			nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
 	/**
@@ -154,6 +168,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	public final Collection<E> getEdges() {
 		return matrix.values().stream()
 				.flatMap(c -> Stream.concat(c.getLeft().collect().stream(), c.getRight().collect().stream()))
+				.distinct()
 				.collect(Collectors.toSet());
 	}
 
@@ -444,7 +459,15 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			else if (distance == -1 || current.getRight() < distance)
 				distance = current.getRight();
 		}
-		
+
 		return distance;
+	}
+
+	public void mergeWith(AdjacencyMatrix<N, E, G> other) {
+		for (N node : other.getNodes())
+			addNode(node);
+		
+		for (E edge : other.getEdges())
+			addEdge(edge);
 	}
 }

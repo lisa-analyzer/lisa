@@ -3,6 +3,17 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Triple;
+
 import it.unive.lisa.imp.constructs.StringConcat;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -46,6 +57,9 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -96,15 +110,6 @@ import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -119,6 +124,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	private final AdjacencyMatrix<Statement, Edge, CFG> matrix;
 
 	private final Collection<Statement> entrypoints;
+
+	private final Collection<ControlFlowStructure> cfs;
 
 	private final Map<String, VariableRef> visibleIds;
 
@@ -138,6 +145,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		this.descriptor = descriptor;
 		matrix = new AdjacencyMatrix<>();
 		entrypoints = new HashSet<>();
+		cfs = new LinkedList<>();
 		// side effects on entrypoints and matrix will affect the cfg
 		cfg = new CFG(descriptor, entrypoints, matrix);
 
@@ -155,9 +163,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 * @return the {@link CFG} built from the block
 	 */
 	CFG visitCodeMember(BlockContext ctx) {
-		Pair<Statement, Statement> visited = visitBlock(ctx);
+		Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
-
+		matrix.mergeWith(visited.getMiddle());
+		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
+		
 		if (cfg.getAllExitpoints().isEmpty()) {
 			Ret ret = new Ret(cfg, descriptor.getLocation());
 			if (cfg.getNodesCount() == 0) {
@@ -201,16 +211,19 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitBlock(BlockContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, VariableRef> backup = new HashMap<>(visibleIds);
-
+		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			Pair<Statement, Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
+			Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>,
+					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
+			block.mergeWith(st.getMiddle());
 			if (first == null)
 				first = st.getLeft();
 			if (last != null)
-				matrix.addEdge(new SequentialEdge(last, st.getLeft()));
+				block.addEdge(new SequentialEdge(last, st.getLeft()));
 			last = st.getRight();
 		}
 
@@ -230,14 +243,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			// empty block: instrument it with a noop
 			NoOp instrumented = new NoOp(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 			first = last = instrumented;
-			matrix.addNode(instrumented);
+			block.addNode(instrumented);
 		}
 
-		return Pair.of(first, last);
+		return Triple.of(first, block, last);
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitBlockOrStatement(BlockOrStatementContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlockOrStatement(
+			BlockOrStatementContext ctx) {
 		if (ctx.statement() != null)
 			return visitStatement(ctx.statement());
 		else
@@ -245,7 +259,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitStatement(StatementContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitStatement(StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
 			st = visitLocalDeclaration(ctx.localDeclaration());
@@ -271,32 +285,40 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
 
-		matrix.addNode(st);
-		return Pair.of(st, st);
+		AdjacencyMatrix<Statement, Edge, CFG> adj = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		adj.addNode(st);
+		return Triple.of(st, adj, st);
 	}
 
-	private Pair<Statement, Statement> visitIf(StatementContext ctx) {
+	private Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitIf(StatementContext ctx) {
+		AdjacencyMatrix<Statement, Edge, CFG> ite = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		
 		Statement condition = visitParExpr(ctx.parExpr());
-		matrix.addNode(condition);
+		ite.addNode(condition);
 
-		Pair<Statement, Statement> then = visitBlockOrStatement(ctx.then);
-		matrix.addEdge(new TrueEdge(condition, then.getLeft()));
+		Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> then = visitBlockOrStatement(ctx.then);
+		ite.mergeWith(then.getMiddle());
+		ite.addEdge(new TrueEdge(condition, then.getLeft()));
 
-		Pair<Statement, Statement> otherwise = null;
+		Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> otherwise = null;
 		if (ctx.otherwise != null) {
 			otherwise = visitBlockOrStatement(ctx.otherwise);
-			matrix.addEdge(new FalseEdge(condition, otherwise.getLeft()));
+			ite.mergeWith(otherwise.getMiddle());
+			ite.addEdge(new FalseEdge(condition, otherwise.getLeft()));
 		}
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
-		matrix.addNode(noop);
-		matrix.addEdge(new SequentialEdge(then.getRight(), noop));
+		ite.addNode(noop);
+		ite.addEdge(new SequentialEdge(then.getRight(), noop));
 		if (otherwise != null)
-			matrix.addEdge(new SequentialEdge(otherwise.getRight(), noop));
+			ite.addEdge(new SequentialEdge(otherwise.getRight(), noop));
 		else
-			matrix.addEdge(new FalseEdge(condition, noop));
+			ite.addEdge(new FalseEdge(condition, noop));
 
-		return Pair.of(condition, noop);
+		cfs.add(new IfThenElse(condition, noop, then.getMiddle(),
+				otherwise == null ? new AdjacencyMatrix<>(matrix.getEdgeFactory()) : otherwise.getMiddle()));
+
+		return Triple.of(condition, ite, noop);
 	}
 
 	@Override
@@ -321,7 +343,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitLoop(LoopContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitLoop(LoopContext ctx) {
 		if (ctx.whileLoop() != null)
 			return visitWhileLoop(ctx.whileLoop());
 		else
@@ -329,23 +351,29 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitWhileLoop(WhileLoopContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitWhileLoop(WhileLoopContext ctx) {
+		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>(matrix.getEdgeFactory());
 		Statement condition = visitParExpr(ctx.parExpr());
-		matrix.addNode(condition);
+		loop.addNode(condition);
 
-		Pair<Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		matrix.addEdge(new TrueEdge(condition, body.getLeft()));
-		matrix.addEdge(new SequentialEdge(body.getRight(), condition));
+		Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>,
+				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+		loop.mergeWith(body.getMiddle());
+		loop.addEdge(new TrueEdge(condition, body.getLeft()));
+		loop.addEdge(new SequentialEdge(body.getRight(), condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
-		matrix.addNode(noop);
-		matrix.addEdge(new FalseEdge(condition, noop));
+		loop.addNode(noop);
+		loop.addEdge(new FalseEdge(condition, noop));
 
-		return Pair.of(condition, noop);
+		cfs.add(new Loop(condition, noop, body.getMiddle()));
+
+		return Triple.of(condition, loop, noop);
 	}
 
 	@Override
-	public Pair<Statement, Statement> visitForLoop(ForLoopContext ctx) {
+	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitForLoop(ForLoopContext ctx) {
+		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>(matrix.getEdgeFactory());
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
 		ExpressionContext cond = ctx.forDeclaration().condition;
@@ -354,11 +382,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Statement first = null, last = null;
 		if (initDecl != null) {
 			Statement init = visitLocalDeclaration(initDecl);
-			matrix.addNode(init);
+			loop.addNode(init);
 			first = init;
 		} else if (initExpr != null) {
 			Statement init = visitExpression(initExpr);
-			matrix.addNode(init);
+			loop.addNode(init);
 			first = init;
 		}
 
@@ -367,30 +395,41 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			condition = visitExpression(cond);
 		else
 			condition = new IMPTrueLiteral(cfg, file, getLine(ctx), getCol(ctx));
-		matrix.addNode(condition);
+		loop.addNode(condition);
 		if (first == null)
 			first = condition;
 		else
-			matrix.addEdge(new SequentialEdge(first, condition));
+			loop.addEdge(new SequentialEdge(first, condition));
 
-		Pair<Statement, Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		matrix.addEdge(new TrueEdge(condition, body.getLeft()));
+		Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>,
+				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+		loop.mergeWith(body.getMiddle());
+		loop.addEdge(new TrueEdge(condition, body.getLeft()));
 		last = body.getRight();
 
 		if (post != null) {
 			Statement inc = visitExpression(post);
-			matrix.addNode(inc);
-			matrix.addEdge(new SequentialEdge(body.getRight(), inc));
+			loop.addNode(inc);
+			loop.addEdge(new SequentialEdge(body.getRight(), inc));
 			last = inc;
 		}
 
-		matrix.addEdge(new SequentialEdge(last, condition));
+		loop.addEdge(new SequentialEdge(last, condition));
 
 		Statement noop = new NoOp(cfg, condition.getLocation());
-		matrix.addNode(noop);
-		matrix.addEdge(new FalseEdge(condition, noop));
+		loop.addNode(noop);
+		loop.addEdge(new FalseEdge(condition, noop));
 
-		return Pair.of(first, noop);
+		if (post == null)
+			cfs.add(new Loop(condition, noop, body.getMiddle()));
+		else {
+			AdjacencyMatrix<Statement, Edge, CFG> tmp = new AdjacencyMatrix<>(body.getMiddle());
+			tmp.addNode(last);
+			loop.addEdge(new SequentialEdge(body.getRight(), last));
+			cfs.add(new Loop(condition, noop, tmp));
+		}
+
+		return Triple.of(first, loop, noop);
 	}
 
 	@Override
@@ -419,10 +458,6 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
 		return ref;
 	}
-
-//	private String toCodeLocation(Statement st) {
-//		return st.getSourceFile() + ":" + st.getLine() + ":" + st.getCol();
-//	}
 
 	@Override
 	public AccessUnitGlobal visitFieldAccess(FieldAccessContext ctx) {
