@@ -25,6 +25,8 @@ public abstract class ControlFlowStructure {
 	}
 	
 	public abstract boolean contains(Statement st);
+	
+	public abstract void simplify();
 
 	@Override
 	public int hashCode() {
@@ -53,6 +55,27 @@ public abstract class ControlFlowStructure {
 			if (other.firstFollower != null)
 				return false;
 		} else if (!firstFollower.equals(other.firstFollower))
+			return false;
+		return true;
+	}
+	
+	public boolean isEqualTo(ControlFlowStructure obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ControlFlowStructure other = (ControlFlowStructure) obj;
+		if (condition == null) {
+			if (other.condition != null)
+				return false;
+		} else if (!condition.isEqualTo(other.condition))
+			return false;
+		if (firstFollower == null) {
+			if (other.firstFollower != null)
+				return false;
+		} else if (!firstFollower.isEqualTo(other.firstFollower))
 			return false;
 		return true;
 	}

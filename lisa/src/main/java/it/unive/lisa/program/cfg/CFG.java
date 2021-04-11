@@ -1,5 +1,20 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -13,6 +28,8 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -26,18 +43,6 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -169,6 +174,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 */
 	public void simplify() {
 		super.simplify(NoOp.class);
+		cfStructs.forEach(ControlFlowStructure::simplify);
 	}
 
 	/**
@@ -797,6 +803,38 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 
 	@Override
 	protected void preSimplify(Statement node) {
+		shiftVariableScopes(node);
+		shiftControlFlowStructuresEnd(node);
+	}
+
+	private void shiftControlFlowStructuresEnd(Statement node) {
+		Collection<Statement> followers = followersOf(node);
+		Collection<ControlFlowStructure> toRemove = new ArrayList<>();
+		Collection<ControlFlowStructure> toAdd = new ArrayList<>();
+		for (ControlFlowStructure struct : cfStructs)
+			if (struct.getFirstFollower() == node) {
+				toRemove.add(struct);
+				if (followers.size() > 1)
+					log.warn(node + " is the first follower of a control flow structure, it is being"
+							+ " simplified but has multiple followers: the conditional structure will be lost");
+				else if (followers.isEmpty())
+					if (struct instanceof IfThenElse)
+						toAdd.add(new IfThenElse(struct.getCondition(), null,
+								((IfThenElse) struct).getTrueBranch(), ((IfThenElse) struct).getFalseBranch()));
+					else
+						toAdd.add(new Loop(struct.getCondition(), null, ((Loop) struct).getBody()));
+				else if (struct instanceof IfThenElse)
+					toAdd.add(new IfThenElse(struct.getCondition(), followers.iterator().next(),
+							((IfThenElse) struct).getTrueBranch(), ((IfThenElse) struct).getFalseBranch()));
+				else
+					toAdd.add(new Loop(struct.getCondition(), followers.iterator().next(), ((Loop) struct).getBody()));
+			}
+
+		toRemove.forEach(cfStructs::remove);
+		toAdd.forEach(cfStructs::add);
+	}
+
+	private void shiftVariableScopes(Statement node) {
 		Collection<
 				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
 						.collect(Collectors.toList());

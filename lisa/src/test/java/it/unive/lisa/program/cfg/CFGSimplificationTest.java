@@ -2,6 +2,8 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -10,6 +12,9 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
@@ -19,11 +24,12 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Return;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
-import org.junit.Test;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 
 public class CFGSimplificationTest {
 
@@ -39,7 +45,7 @@ public class CFGSimplificationTest {
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
-
+		
 		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		ret = new Return(second, new VariableRef(second, "x"));
@@ -53,8 +59,6 @@ public class CFGSimplificationTest {
 		second.validate();
 		first.simplify();
 		first.validate();
-		System.err.println(second.getNodes());
-		System.err.println(first.getNodes());
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -145,6 +149,12 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(print, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
+		
+		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		tbranch.addNode(print);
+		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		tbranch.addNode(noop1);
+		first.addControlFlowStructure(new IfThenElse(gt, noop2, tbranch, fbranch));
 
 		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
@@ -156,17 +166,25 @@ public class CFGSimplificationTest {
 		second.addNode(gt);
 		second.addNode(print);
 		second.addNode(ret);
-
+		
 		second.addEdge(new SequentialEdge(assign, gt));
 		second.addEdge(new TrueEdge(gt, print));
 		second.addEdge(new FalseEdge(gt, ret));
 		second.addEdge(new SequentialEdge(print, ret));
+		
+		tbranch = new AdjacencyMatrix<>();
+		tbranch.addNode(print);
+		fbranch = new AdjacencyMatrix<>();
+		second.addControlFlowStructure(new IfThenElse(gt, ret, tbranch, fbranch));
 
 		first.validate();
 		second.validate();
 		first.simplify();
 		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
+		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
+		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
+		assertTrue("Simplification did not update control flow structures", exp.isEqualTo(act));
 	}
 
 	@Test
@@ -277,21 +295,36 @@ public class CFGSimplificationTest {
 		first.addEdge(new FalseEdge(assign1, assign3));
 		first.addEdge(new SequentialEdge(assign2, end));
 		first.addEdge(new SequentialEdge(assign3, end));
+		
+		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		tbranch.addNode(assign2);
+		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		fbranch.addNode(assign3);
+		first.addControlFlowStructure(new IfThenElse(assign1, end, tbranch, fbranch));
 
 		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
-		assign1 = new Assignment(second, new VariableRef(first, "b"), new Literal(second, true, Untyped.INSTANCE));
-		assign2 = new Assignment(second, new VariableRef(first, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		assign3 = new Assignment(second, new VariableRef(first, "y"), new Literal(second, 50, Untyped.INSTANCE));
+		assign1 = new Assignment(second, new VariableRef(second, "b"), new Literal(second, true, Untyped.INSTANCE));
+		assign2 = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
+		assign3 = new Assignment(second, new VariableRef(second, "y"), new Literal(second, 50, Untyped.INSTANCE));
 		second.addNode(assign1, true);
 		second.addNode(assign2);
 		second.addNode(assign3);
 		second.addEdge(new TrueEdge(assign1, assign2));
 		second.addEdge(new FalseEdge(assign1, assign3));
 
+		tbranch = new AdjacencyMatrix<>();
+		tbranch.addNode(assign2);
+		fbranch = new AdjacencyMatrix<>();
+		fbranch.addNode(assign3);
+		second.addControlFlowStructure(new IfThenElse(assign1, null, tbranch, fbranch));
+		
 		first.validate();
 		second.validate();
 		first.simplify();
 		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
+		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
+		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
+		assertTrue("Simplification did not update control flow structures", exp.isEqualTo(act));
 	}
 }
