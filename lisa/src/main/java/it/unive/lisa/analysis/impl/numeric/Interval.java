@@ -168,6 +168,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
+	public Interval glbAux(Interval other) {
+		Integer newLow = lowIsMinusInfinity() ? other.low : other.lowIsMinusInfinity() ? low : Math.max(low, other.low);
+		Integer newHigh = highIsPlusInfinity() ? other.high
+				: other.highIsPlusInfinity() ? high : Math.min(high, other.high);
+		return new Interval(newLow, newHigh);
+	}
+
+	@Override
 	protected Interval wideningAux(Interval other) throws SemanticException {
 		Integer newLow, newHigh;
 		if (other.highIsPlusInfinity() || (!highIsPlusInfinity() && other.high > high))
