@@ -276,6 +276,51 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			else if (right instanceof Identifier)
 				environment = environment.assign((Identifier) right, left, pp);
 			return environment;
+		case COMPARISON_GE:
+			if (left instanceof Identifier) {
+				Sign rightSign = eval(right, environment, pp);
+				if (rightSign.isPositive())
+					environment = environment.assign((Identifier) left, right, pp);
+			} else if (right instanceof Identifier) {
+				Sign leftSign = eval(left, environment, pp);
+				if (leftSign.isNegative())
+					environment = environment.assign((Identifier) right, left, pp);
+			}
+			return environment;
+		case COMPARISON_LE:
+			if (left instanceof Identifier) {
+				Sign rightSign = eval(right, environment, pp);
+				if (rightSign.isNegative())
+					environment = environment.assign((Identifier) left, right, pp);
+			} else if (right instanceof Identifier) {
+				Sign leftSign = eval(left, environment, pp);
+				if (leftSign.isPositive())
+					environment = environment.assign((Identifier) right, left, pp);
+			}
+			return environment;
+
+		case COMPARISON_LT:
+			if (left instanceof Identifier) {
+				Sign rightSign = eval(right, environment, pp);
+				if (rightSign.isNegative() || rightSign.isZero()) // x < 0/-
+					environment = environment.assign((Identifier) left, new Constant(right.getDynamicType(), -1), pp);
+			} else if (right instanceof Identifier) {
+				Sign leftSign = eval(left, environment, pp);
+				if (leftSign.isPositive() || leftSign.isZero()) // 0/+ < x
+					environment = environment.assign((Identifier) right, new Constant(left.getDynamicType(), 1), pp);
+			}
+			return environment;
+		case COMPARISON_GT:
+			if (left instanceof Identifier) {
+				Sign rightSign = eval(right, environment, pp);
+				if (rightSign.isPositive() || rightSign.isZero()) // x > +/0
+					environment = environment.assign((Identifier) left, new Constant(right.getDynamicType(), 1), pp);
+			} else if (right instanceof Identifier) {
+				Sign leftSign = eval(left, environment, pp);
+				if (leftSign.isNegative() || leftSign.isZero()) // -/0 > x
+					environment = environment.assign((Identifier) right, new Constant(left.getDynamicType(), -1), pp);
+			}
+			return environment;
 		default:
 			return environment;
 		}
