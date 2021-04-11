@@ -299,4 +299,13 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return Collections.emptySet();
 		return function.keySet();
 	}
+
+	/**
+	 * Yields the map associated with this functional lattice element.
+	 * 
+	 * @return the map associated with this functional lattice element.
+	 */
+	public Map<K, V> getMap() {
+		return function;
+	}
 }
