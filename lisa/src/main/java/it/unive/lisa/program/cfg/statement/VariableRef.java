@@ -10,6 +10,7 @@ import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -29,8 +30,6 @@ public class VariableRef extends Expression {
 	 * The name of this variable
 	 */
 	private final String name;
-
-	private Annotations annotations;
 
 	/**
 	 * Builds the untyped variable reference, identified by its name. The
@@ -91,7 +90,6 @@ public class VariableRef extends Expression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -105,11 +103,6 @@ public class VariableRef extends Expression {
 		if (!super.isEqualTo(st))
 			return false;
 		VariableRef other = (VariableRef) st;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
-			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -148,20 +141,15 @@ public class VariableRef extends Expression {
 	}
 
 	/**
-	 * Yields the annotations of this variable.
+	 * Yields the annotations of this variable, retrieved from the variable
+	 * table of the cfg this variable belongs to.
 	 * 
-	 * @return the annotations of this variable
+	 * @return the annotations of this variable.
 	 */
 	public Annotations getAnnotations() {
-		return annotations;
-	}
-
-	/**
-	 * Sets the annotations of this variable.
-	 * 
-	 * @param annotations the annotations to be set
-	 */
-	public void setAnnotations(Annotations annotations) {
-		this.annotations = annotations;
+		for (VariableTableEntry entry : getCFG().getDescriptor().getVariables())
+			if (entry.getName().equals(getName()) && entry.getLocation().equals(getLocation()))
+				return entry.getAnnotations();
+		return new Annotations();
 	}
 }
