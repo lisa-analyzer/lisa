@@ -442,8 +442,13 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		simplify(remove, Collections.emptyList());
 	}
 
-	public Collection<N> getRoots() {
+	public Collection<N> getEntries() {
 		return matrix.entrySet().stream().filter(e -> e.getValue().getLeft().isEmpty()).map(Entry::getKey)
+				.collect(Collectors.toList());
+	}
+
+	public Collection<N> getExits() {
+		return matrix.entrySet().stream().filter(e -> e.getValue().getRight().isEmpty()).map(Entry::getKey)
 				.collect(Collectors.toList());
 	}
 
@@ -466,7 +471,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	public void mergeWith(AdjacencyMatrix<N, E, G> other) {
 		for (N node : other.getNodes())
 			addNode(node);
-		
+
 		for (E edge : other.getEdges())
 			addEdge(edge);
 	}

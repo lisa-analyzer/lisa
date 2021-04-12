@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -59,6 +61,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 */
 	private final CFGDescriptor descriptor;
 
+	/**
+	 * The control flow structures of this cfg
+	 */
 	private final Collection<ControlFlowStructure> cfStructs;
 
 	/**
@@ -980,5 +985,81 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException(this + " contains an invalid edge: '" + edge
 					+ "' reaches a node that is not part of the graph");
+	}
+
+	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {
+		if (!(pp instanceof Statement))
+			// synthetic pp
+			return Collections.emptyList();
+
+		Statement st = (Statement) pp;
+		Collection<ControlFlowStructure> res = new LinkedList<>();
+		for (ControlFlowStructure cf : cfStructs)
+			if (cf.contains(st))
+				res.add(cf);
+
+		return res;
+	}
+
+	public boolean isGuarded(ProgramPoint pp) {
+		return !getControlFlowsContaining(pp).isEmpty();
+	}
+
+	public boolean isInsideLoop(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().anyMatch(Loop.class::isInstance);
+	}
+
+	public Collection<Statement> getGuards(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().map(ControlFlowStructure::getCondition)
+				.collect(Collectors.toList());
+	}
+
+	public Collection<Statement> getLoopGuards(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().filter(Loop.class::isInstance)
+				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
+	}
+
+	public Collection<Statement> getNonLoopGuards(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().filter(Predicate.not(Loop.class::isInstance))
+				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
+	}
+
+	private Statement getRecent(ProgramPoint pp, Predicate<ControlFlowStructure> filter) {
+		if (!(pp instanceof Statement))
+			// synthetic pp
+			return null;
+
+		Statement st = (Statement) pp;
+		Collection<ControlFlowStructure> cfs = getControlFlowsContaining(pp);
+		Statement recent = null;
+		int min = Integer.MAX_VALUE, m;
+		for (ControlFlowStructure cf : cfs)
+			if (!filter.test(cf))
+				continue;
+			else if (recent == null) {
+				recent = cf.getCondition();
+				min = cf.distance(st);
+			} else if ((m = cf.distance(st)) < min || min == -1) {
+				recent = cf.getCondition();
+				min = m;
+			}
+
+		if (min == -1)
+			throw new IllegalStateException("Conditional flow structures containing " + pp
+					+ " could not evaluate the distance from the root of the structure to the statement itself");
+
+		return recent;
+	}
+
+	public Statement getMostRecentGuard(ProgramPoint pp) {
+		return getRecent(pp, cf -> true);
+	}
+
+	public Statement getMostRecentLoopGuard(ProgramPoint pp) {
+		return getRecent(pp, Loop.class::isInstance);
+	}
+
+	public Statement getMostRecentNonLoopGuard(ProgramPoint pp) {
+		return getRecent(pp, Predicate.not(Loop.class::isInstance));
 	}
 }

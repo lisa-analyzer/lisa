@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.FalseEdge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
@@ -30,12 +33,12 @@ public class IfThenElse extends ControlFlowStructure {
 	public AdjacencyMatrix<Statement, Edge, CFG> getFalseBranch() {
 		return falseBranch;
 	}
-	
+
 	@Override
 	public boolean contains(Statement st) {
 		return trueBranch.containsNode(st, true) || falseBranch.containsNode(st, true);
 	}
-	
+
 	@Override
 	public int distance(Statement st) {
 		return Math.min(distanceAux(trueBranch, st), distanceAux(falseBranch, st));
@@ -43,10 +46,39 @@ public class IfThenElse extends ControlFlowStructure {
 
 	@Override
 	public void simplify() {
-		Set<Statement> targets = trueBranch.getNodes().stream().filter(NoOp.class::isInstance).collect(Collectors.toSet());
+		Set<Statement> targets = trueBranch.getNodes().stream().filter(NoOp.class::isInstance)
+				.collect(Collectors.toSet());
 		trueBranch.simplify(targets, Collections.emptySet());
 		targets = falseBranch.getNodes().stream().filter(NoOp.class::isInstance).collect(Collectors.toSet());
 		falseBranch.simplify(targets, Collections.emptySet());
+	}
+
+	@Override
+	public AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
+		AdjacencyMatrix<Statement, Edge, CFG> complete = new AdjacencyMatrix<>(trueBranch);
+		if (falseBranch != null && !falseBranch.getNodes().isEmpty())
+			complete.mergeWith(falseBranch);
+
+		complete.addNode(getCondition());
+		if (getFirstFollower() != null)
+			complete.addNode(getFirstFollower());
+
+		complete.addEdge(new TrueEdge(getCondition(), trueBranch.getEntries().iterator().next()));
+		if (falseBranch != null && !falseBranch.getNodes().isEmpty())
+			complete.addEdge(new FalseEdge(getCondition(), falseBranch.getEntries().iterator().next()));
+		else if (getFirstFollower() != null)
+			complete.addEdge(new FalseEdge(getCondition(), getFirstFollower()));
+
+		if (getFirstFollower() != null) {
+			for (Statement exit : trueBranch.getExits())
+				complete.addEdge(new SequentialEdge(exit, getFirstFollower()));
+
+			if (falseBranch != null && !falseBranch.getNodes().isEmpty())
+				for (Statement exit : falseBranch.getExits())
+					complete.addEdge(new SequentialEdge(exit, getFirstFollower()));
+		}
+
+		return complete;
 	}
 
 	@Override
@@ -79,7 +111,7 @@ public class IfThenElse extends ControlFlowStructure {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public boolean isEqualTo(ControlFlowStructure obj) {
 		if (this == obj)

@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.FalseEdge;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
@@ -14,9 +16,17 @@ public class Loop extends ControlFlowStructure {
 
 	private final AdjacencyMatrix<Statement, Edge, CFG> body;
 
+	private final boolean trueBranch;
+
 	public Loop(Statement condition, Statement firstFollower, AdjacencyMatrix<Statement, Edge, CFG> body) {
+		this(condition, firstFollower, body, true);
+	}
+
+	public Loop(Statement condition, Statement firstFollower, AdjacencyMatrix<Statement, Edge, CFG> body,
+			boolean trueBranch) {
 		super(condition, firstFollower);
 		this.body = body;
+		this.trueBranch = trueBranch;
 	}
 
 	public AdjacencyMatrix<Statement, Edge, CFG> getBody() {
@@ -40,10 +50,30 @@ public class Loop extends ControlFlowStructure {
 	}
 
 	@Override
+	public AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
+		AdjacencyMatrix<Statement, Edge, CFG> complete = new AdjacencyMatrix<>(body);
+		complete.addNode(getCondition());
+		if (getFirstFollower() != null)
+			complete.addNode(getFirstFollower());
+		
+		if (trueBranch) {
+			complete.addEdge(new TrueEdge(getCondition(), body.getEntries().iterator().next()));
+			if (getFirstFollower() != null && !body.getNodes().isEmpty())
+				complete.addEdge(new FalseEdge(getCondition(), getFirstFollower()));
+		} else {
+			complete.addEdge(new FalseEdge(getCondition(), body.getEntries().iterator().next()));
+			if (getFirstFollower() != null && !body.getNodes().isEmpty())
+				complete.addEdge(new TrueEdge(getCondition(), getFirstFollower()));
+		}
+		return complete;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((body == null) ? 0 : body.hashCode());
+		result = prime * result + (trueBranch ? 1231 : 1237);
 		return result;
 	}
 
@@ -61,6 +91,8 @@ public class Loop extends ControlFlowStructure {
 				return false;
 		} else if (!body.equals(other.body))
 			return false;
+		if (trueBranch != other.trueBranch)
+			return false;
 		return true;
 	}
 
@@ -77,6 +109,8 @@ public class Loop extends ControlFlowStructure {
 			if (other.body != null)
 				return false;
 		} else if (!body.isEqualTo(other.body))
+			return false;
+		if (trueBranch != other.trueBranch)
 			return false;
 		return true;
 	}

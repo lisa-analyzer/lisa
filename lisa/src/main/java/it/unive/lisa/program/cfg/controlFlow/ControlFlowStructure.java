@@ -27,6 +27,8 @@ public abstract class ControlFlowStructure {
 	public abstract boolean contains(Statement st);
 	
 	public abstract void simplify();
+	
+	public abstract AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure();
 
 	@Override
 	public int hashCode() {
@@ -87,7 +89,7 @@ public abstract class ControlFlowStructure {
 	
 	protected static int distanceAux(AdjacencyMatrix<Statement, Edge, CFG> body, Statement st) {
 		int min = -1, m;
-		for (Statement root : body.getRoots())
+		for (Statement root : body.getEntries())
 			if ((m = body.distance(root, st)) < min || min == -1)
 				min = m;
 		// we add 1 to consider the edge from the condition to the root
