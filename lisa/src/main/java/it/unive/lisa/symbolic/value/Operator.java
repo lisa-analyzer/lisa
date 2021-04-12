@@ -16,4 +16,13 @@ public interface Operator {
 	 * @return the string representation
 	 */
 	String getStringRepresentation();
+
+	/**
+	 * Yields the opposite operator of this operator (e.g., <= to >, < -> >=).
+	 * 
+	 * @return the opposite operator of this operator
+	 */
+	default Operator opposite() {
+		return this;
+	}
 }

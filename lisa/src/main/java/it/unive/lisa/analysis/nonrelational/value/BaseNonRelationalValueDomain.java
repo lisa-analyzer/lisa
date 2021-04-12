@@ -430,6 +430,15 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
+
+			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT) {
+				ValueExpression rewritten = unary.removeNegations();
+				// It is possible that the expression cannot be rewritten (e.g.,
+				// ! true)
+				// hence we recursively call assume iff something changed
+				if (rewritten != unary)
+					return assume(environment, rewritten, pp);
+			}
 			return assumeUnaryExpression(environment, unary.getOperator(), (ValueExpression) unary.getExpression(), pp);
 		}
 

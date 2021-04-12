@@ -110,23 +110,24 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	protected IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
 
-		if (left.isTop() || right.isTop())
-			return top();
-
 		switch (operator) {
 		case NUMERIC_ADD:
-			return new IntegerConstantPropagation(left.value + right.value);
+			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value + right.value);
 		case NUMERIC_DIV:
-			if (left.value % right.value != 0)
+			if (!left.isTop() && left.value == 0)
+				return new IntegerConstantPropagation(0);
+			else if (!right.isTop() && right.value == 0)
+				return bottom();
+			else if (left.isTop() || right.isTop() || left.value % right.value != 0)
 				return top();
 			else
 				return new IntegerConstantPropagation(left.value / right.value);
 		case NUMERIC_MOD:
-			return new IntegerConstantPropagation(left.value % right.value);
+			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value % right.value);
 		case NUMERIC_MUL:
-			return new IntegerConstantPropagation(left.value * right.value);
+			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value * right.value);
 		case NUMERIC_SUB:
-			return new IntegerConstantPropagation(left.value - right.value);
+			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value - right.value);
 		default:
 			return top();
 		}
