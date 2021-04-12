@@ -18,7 +18,11 @@ public interface Operator {
 	String getStringRepresentation();
 
 	/**
-	 * Yields the opposite operator of this operator (e.g., <= to >, < -> >=).
+	 * Yields the opposite operator of this operator (e.g.,
+	 * {@link BinaryOperator#COMPARISON_LE} to
+	 * {@link BinaryOperator#COMPARISON_GT},
+	 * {@link BinaryOperator#COMPARISON_LT} to
+	 * {@link BinaryOperator#COMPARISON_GE}).
 	 * 
 	 * @return the opposite operator of this operator
 	 */
