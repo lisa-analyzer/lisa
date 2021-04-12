@@ -1,5 +1,6 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -24,6 +25,8 @@ public class Global implements CodeElement {
 	private final Type staticType;
 
 	private final CodeLocation location;
+
+	private Annotations annotations;
 
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The
@@ -91,6 +94,7 @@ public class Global implements CodeElement {
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -113,6 +117,11 @@ public class Global implements CodeElement {
 				return false;
 		} else if (!staticType.equals(other.staticType))
 			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		return true;
 	}
 
@@ -124,5 +133,23 @@ public class Global implements CodeElement {
 	@Override
 	public CodeLocation getLocation() {
 		return location;
+	}
+
+	/**
+	 * Yields the annotations of this global element.
+	 * 
+	 * @return the annotations of this global element
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this global element.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }

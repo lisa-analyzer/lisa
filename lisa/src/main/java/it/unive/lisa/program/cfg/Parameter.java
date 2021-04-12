@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
@@ -26,6 +27,8 @@ public class Parameter implements CodeElement {
 	private final Type staticType;
 
 	private final CodeLocation location;
+
+	private Annotations annotations;
 
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The
@@ -91,6 +94,7 @@ public class Parameter implements CodeElement {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
@@ -121,6 +125,11 @@ public class Parameter implements CodeElement {
 				return false;
 		} else if (!staticType.equals(other.staticType))
 			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		return true;
 	}
 
@@ -132,5 +141,23 @@ public class Parameter implements CodeElement {
 	@Override
 	public CodeLocation getLocation() {
 		return location;
+	}
+
+	/**
+	 * Yields the annotations of this parameter.
+	 * 
+	 * @return the annotations of this parameter
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this parameter.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }

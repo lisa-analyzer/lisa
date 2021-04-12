@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -28,6 +29,8 @@ public class VariableRef extends Expression {
 	 * The name of this variable
 	 */
 	private final String name;
+
+	private Annotations annotations;
 
 	/**
 	 * Builds the untyped variable reference, identified by its name. The
@@ -88,6 +91,7 @@ public class VariableRef extends Expression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
 	}
@@ -101,6 +105,11 @@ public class VariableRef extends Expression {
 		if (!super.isEqualTo(st))
 			return false;
 		VariableRef other = (VariableRef) st;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -136,5 +145,23 @@ public class VariableRef extends Expression {
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
+	}
+
+	/**
+	 * Yields the annotations of this variable.
+	 * 
+	 * @return the annotations of this variable
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this variable.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }

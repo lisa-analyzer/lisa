@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Arrays;
@@ -59,8 +60,10 @@ public class CFGDescriptor implements CodeElement {
 
 	private final Collection<CodeMember> overrides;
 
+	private Annotations annotations;
+
 	/**
-	 * The location where the cfg descripted by this descriptor appear in the
+	 * The location where the cfg described by this descriptor appear in the
 	 * source file
 	 */
 	private final CodeLocation location;
@@ -333,6 +336,7 @@ public class CFGDescriptor implements CodeElement {
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
 		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -368,6 +372,11 @@ public class CFGDescriptor implements CodeElement {
 			if (other.variables != null)
 				return false;
 		} else if (!variables.equals(other.variables))
+			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
 			return false;
 		return true;
 	}
@@ -414,5 +423,23 @@ public class CFGDescriptor implements CodeElement {
 	public CodeLocation getLocation() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * Yields the annotations of this descriptor.
+	 * 
+	 * @return the annotations of this descriptor
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this descriptor.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }

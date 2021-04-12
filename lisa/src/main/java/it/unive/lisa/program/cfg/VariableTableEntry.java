@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
@@ -47,6 +48,8 @@ public class VariableTableEntry implements CodeElement {
 	 * The location where this variable is defined.
 	 */
 	private CodeLocation location;
+
+	private Annotations annotations;
 
 	/**
 	 * Builds an untyped variable table entry, identified by its index. The
@@ -227,6 +230,7 @@ public class VariableTableEntry implements CodeElement {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + index;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((scopeStart == null) ? 0 : scopeStart.hashCode());
 		result = prime * result + ((scopeEnd == null) ? 0 : scopeEnd.hashCode());
@@ -264,6 +268,11 @@ public class VariableTableEntry implements CodeElement {
 				return false;
 		} else if (!location.equals(other.location))
 			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		return true;
 	}
 
@@ -274,7 +283,24 @@ public class VariableTableEntry implements CodeElement {
 
 	@Override
 	public CodeLocation getLocation() {
-		// TODO Auto-generated method stub
-		return null;
+		return location;
+	}
+
+	/**
+	 * Yields the annotations of this variable.
+	 * 
+	 * @return the annotations of this variable
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this variable.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }

@@ -1,5 +1,6 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -65,6 +66,8 @@ public class CompilationUnit extends Unit {
 	 */
 	private boolean hierarchyComputed;
 
+	private Annotations annotations;
+
 	/**
 	 * Builds a compilation unit, defined at the given program point.
 	 * 
@@ -84,6 +87,7 @@ public class CompilationUnit extends Unit {
 		instanceCfgs = new ConcurrentHashMap<>();
 		instanceConstructs = new ConcurrentHashMap<>();
 		hierarchyComputed = false;
+		annotations = new Annotations();
 	}
 
 	/**
@@ -590,5 +594,23 @@ public class CompilationUnit extends Unit {
 			}
 
 		hierarchyComputed = true;
+	}
+
+	/**
+	 * Yields the annotations of this compilation unit.
+	 * 
+	 * @return the annotations of this compilation unit
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Sets the annotations of this compilation unit.
+	 * 
+	 * @param annotations the annotations to be set
+	 */
+	public void setAnnotations(Annotations annotations) {
+		this.annotations = annotations;
 	}
 }
