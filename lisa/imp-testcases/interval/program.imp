@@ -49,4 +49,13 @@ class tutorial {
 			
 		return x;
 	}
+	
+	glb(x,y) { 
+		if (x == 5)
+			x = x + 1;
+		else
+			x = 6;
+		
+		return x;
+	}
 }

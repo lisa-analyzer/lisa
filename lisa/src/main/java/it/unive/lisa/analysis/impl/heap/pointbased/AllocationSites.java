@@ -133,4 +133,23 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	public boolean canProcess(SymbolicExpression expression) {
 		return expression.getDynamicType().isPointerType() || expression.getDynamicType().isUntyped();
 	}
+
+	@Override
+	public HeapEnvironment<AllocationSites> assume(HeapEnvironment<AllocationSites> environment,
+			SymbolicExpression expression,
+			ProgramPoint pp) throws SemanticException {
+		return environment;
+	}
+
+	@Override
+	public AllocationSites glb(AllocationSites other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual(this))
+			return other;
+
+		return bottom();
+	}
 }

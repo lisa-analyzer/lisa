@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -466,5 +467,47 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final String toString() {
 		return representation();
+	}
+
+	@Override
+	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		return environment;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final T glb(T other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (T) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
+			return (T) other;
+
+		return glbAux(other);
+	}
+
+	/**
+	 * Performs the greatest lower bound operation between this inferred value
+	 * and {@code other}, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not comparable (according to
+	 * {@link BaseLattice#lessOrEqual(BaseLattice)})</li>
+	 * </ul>
+	 * The default implementation returns {@link BaseLattice#bottom()}
+	 * 
+	 * @param other the other inferred value
+	 * 
+	 * @return the greatest lower bound between this and other
+	 */
+	protected T glbAux(T other) {
+		return bottom();
 	}
 }

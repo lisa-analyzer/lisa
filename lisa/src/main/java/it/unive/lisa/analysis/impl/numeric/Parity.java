@@ -4,10 +4,13 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * The Parity abstract domain, tracking if a numeric value is even or odd,
@@ -172,5 +175,21 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		if (isTop != other.isTop)
 			return false;
 		return isTop && other.isTop;
+	}
+
+	@Override
+	protected ValueEnvironment<Parity> assumeBinaryExpression(
+			ValueEnvironment<Parity> environment, BinaryOperator operator, ValueExpression left,
+			ValueExpression right, ProgramPoint pp) throws SemanticException {
+		switch (operator) {
+		case COMPARISON_EQ:
+			if (left instanceof Identifier)
+				environment = environment.assign((Identifier) left, right, pp);
+			else if (right instanceof Identifier)
+				environment = environment.assign((Identifier) right, left, pp);
+			return environment;
+		default:
+			return environment;
+		}
 	}
 }
