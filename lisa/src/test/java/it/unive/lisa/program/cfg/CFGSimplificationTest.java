@@ -53,8 +53,6 @@ public class CFGSimplificationTest {
 		second.validate();
 		first.simplify();
 		first.validate();
-		System.err.println(second.getNodes());
-		System.err.println(first.getNodes());
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 

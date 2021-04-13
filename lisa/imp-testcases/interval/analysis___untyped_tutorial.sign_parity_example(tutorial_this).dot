@@ -1,14 +1,14 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<i = 2<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, 2] ]]<BR/>}} -&gt; [i]>];
-	"node1" [shape="rect",color="gray",label=<&lt;(i, max)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, +Inf]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [i &lt; max]>];
-	"node2" [shape="rect",color="gray",label=<max = 10<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, 2]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [max]>];
-	"node3" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, +Inf]<BR/>max: [10, 10]<BR/>ret_value@sign_parity_example: [2, +Inf] ]]<BR/>}} -&gt; [ret_value@sign_parity_example]>];
-	"node4" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [3, +Inf]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [i]>];
-	"node1" -> "node3" [color="red",style="dashed"];
-	"node1" -> "node4" [color="blue",style="dashed"];
-	"node2" -> "node1" [color="black"];
-	"node4" -> "node1" [color="black"];
-	"node0" -> "node2" [color="black"];
+	"node1" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [10, +Inf]<BR/>max: [10, 10]<BR/>ret_value@sign_parity_example: [10, +Inf] ]]<BR/>}} -&gt; [ret_value@sign_parity_example]>];
+	"node2" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [3, 10]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [i]>];
+	"node3" [shape="rect",color="gray",label=<max = 10<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, 2]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [max]>];
+	"node4" [shape="rect",color="gray",label=<&lt;(i, max)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [2, +Inf]<BR/>max: [10, 10] ]]<BR/>}} -&gt; [i &lt; max]>];
+	"node0" -> "node3" [color="black"];
+	"node2" -> "node4" [color="black"];
+	"node3" -> "node4" [color="black"];
+	"node4" -> "node1" [color="red",style="dashed"];
+	"node4" -> "node2" [color="blue",style="dashed"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

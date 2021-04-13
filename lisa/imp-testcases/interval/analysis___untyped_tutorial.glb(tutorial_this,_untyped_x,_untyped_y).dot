@@ -1,12 +1,12 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<i = 1000<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [1000, 1000] ]]<BR/>}} -&gt; [i]>];
-	"node1" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, 0]<BR/>ret_value@intv_dec: [-Inf, 0] ]]<BR/>}} -&gt; [ret_value@intv_dec]>];
-	"node2" [shape="rect",color="gray",label=<&gt;(i, 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, 1000] ]]<BR/>}} -&gt; [i &gt; 0]>];
-	"node3" [shape="rect",color="gray",label=<i = -(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, 999] ]]<BR/>}} -&gt; [i]>];
-	"node2" -> "node1" [color="red",style="dashed"];
-	"node2" -> "node3" [color="blue",style="dashed"];
-	"node3" -> "node2" [color="black"];
-	"node0" -> "node2" [color="black"];
+	"node0" [shape="rect",color="black",label=<==(x, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ x: #TOP#<BR/>y: #TOP# ]]<BR/>}} -&gt; [x == 5]>];
+	"node1" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ret_value@glb: [6, 6]<BR/>x: [6, 6]<BR/>y: #TOP# ]]<BR/>}} -&gt; [ret_value@glb]>];
+	"node2" [shape="rect",color="gray",label=<x = 6<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ x: [6, 6]<BR/>y: #TOP# ]]<BR/>}} -&gt; [x]>];
+	"node3" [shape="rect",color="gray",label=<x = +(x, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ x: [6, 6]<BR/>y: #TOP# ]]<BR/>}} -&gt; [x]>];
+	"node0" -> "node2" [color="red",style="dashed"];
+	"node0" -> "node3" [color="blue",style="dashed"];
+	"node2" -> "node1" [color="black"];
+	"node3" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
