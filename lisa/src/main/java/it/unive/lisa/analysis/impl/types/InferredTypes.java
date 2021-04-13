@@ -13,6 +13,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.types.BoolType;
 import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.types.StringType;
+import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -203,20 +204,9 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				return bottom();
 			return new InferredTypes(BoolType.INSTANCE);
 		case TYPE_CAST:
-			if (right.elements.noneMatch(Type::isTypeTokenType))
-				return bottom();
-			set = cast(left.elements, right.elements);
-			if (set.isEmpty())
-				return bottom();
-			return new InferredTypes(set);
+			return evalTypeCast(null, left, right);
 		case TYPE_CONV:
-			if (right.elements.noneMatch(Type::isTypeTokenType))
-				return bottom();
-			set = convert(left.elements, right.elements);
-			if (set.isEmpty())
-				return bottom();
-			return new InferredTypes(set);
-
+			return evalTypeConv(null, left, right);
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return bottom();
@@ -438,6 +428,26 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					result.add(t1.commonSupertype(t2));
 
 		return result;
+	}
+
+	@Override
+	protected InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right) {
+		if (right.elements.noneMatch(Type::isTypeTokenType))
+			return bottom();
+		ExternalSet<Type> set = cast(left.elements, right.elements);
+		if (set.isEmpty())
+			return bottom();
+		return new InferredTypes(set);
+	}
+
+	@Override
+	protected InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right) {
+		if (right.elements.noneMatch(Type::isTypeTokenType))
+			return bottom();
+		ExternalSet<Type> set = convert(left.elements, right.elements);
+		if (set.isEmpty())
+			return bottom();
+		return new InferredTypes(set);
 	}
 
 	@Override

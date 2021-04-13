@@ -25,4 +25,15 @@ public abstract class ValueExpression extends SymbolicExpression {
 		super(types);
 	}
 
+	/**
+	 * Yields the same value expression removing any negation, namely the
+	 * {@link UnaryOperator#LOGICAL_NOT} operator, preserving its semantics, if
+	 * possible.
+	 * 
+	 * @return the same value expression removing any negation, preserving its
+	 *             semantics
+	 */
+	public ValueExpression removeNegations() {
+		return this;
+	}
 }

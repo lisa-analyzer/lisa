@@ -17,4 +17,5 @@ import it.unive.lisa.symbolic.value.Identifier;
  */
 public interface NonRelationalHeapDomain<T extends NonRelationalHeapDomain<T>>
 		extends NonRelationalDomain<T, SymbolicExpression, HeapEnvironment<T>>, HeapSemanticOperation {
+
 }
