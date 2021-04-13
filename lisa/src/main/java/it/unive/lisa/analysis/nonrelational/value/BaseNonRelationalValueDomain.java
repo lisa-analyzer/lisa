@@ -144,6 +144,12 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			if (right.isBottom())
 				return right;
 
+			if (binary.getOperator() == BinaryOperator.TYPE_CAST)
+				return evalTypeCast(binary, left, right);
+
+			if (binary.getOperator() == BinaryOperator.TYPE_CONV)
+				return evalTypeConv(binary, left, right);
+
 			return evalBinaryExpression(binary.getOperator(), left, right, pp);
 		}
 
@@ -178,6 +184,34 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();
+	}
+
+	/**
+	 * Yields the evaluation of a type conversion expression.
+	 * 
+	 * @param conv  the type conversion expression
+	 * @param left  the left expression, namely the expression to be converted
+	 * @param right the right expression, namely the types to which left should
+	 *                  be converted
+	 * 
+	 * @return the evaluation of the type conversion expression
+	 */
+	protected T evalTypeConv(BinaryExpression conv, T left, T right) {
+		return conv.getTypes().isEmpty() ? bottom() : left;
+	}
+
+	/**
+	 * Yields the evaluation of a type cast expression.
+	 * 
+	 * @param cast  the type casted expression
+	 * @param left  the left expression, namely the expression to be casted
+	 * @param right the right expression, namely the types to which left should
+	 *                  be casted
+	 * 
+	 * @return the evaluation of the type cast expression
+	 */
+	protected T evalTypeCast(BinaryExpression cast, T left, T right) {
+		return cast.getTypes().isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -225,7 +259,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the evaluation of a {@link BinaryExpression} applying
 	 * {@code operator} to two expressions whose abstract value are {@code left}
 	 * and {@code right}, respectively. It is guaranteed that both {@code left}
-	 * and {@code right} are not {@link #bottom()}.
+	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
+	 * neither {@link BinaryOperator#TYPE_CAST} nor
+	 * {@link BinaryOperator#TYPE_CONV}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract
