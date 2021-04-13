@@ -2,6 +2,7 @@ package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.cfg.CFG;
@@ -22,6 +23,11 @@ public class LiSAConfiguration {
 	 * The collection of syntactic checks to execute
 	 */
 	private final Collection<SyntacticCheck> syntacticChecks;
+
+	/**
+	 * The collection of semantic checks to execute
+	 */
+	private final Collection<SemanticCheck> semanticChecks;
 
 	/**
 	 * The callgraph to use during the analysis
@@ -84,6 +90,7 @@ public class LiSAConfiguration {
 	 */
 	public LiSAConfiguration() {
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		this.semanticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
 	}
 
@@ -110,6 +117,32 @@ public class LiSAConfiguration {
 	 */
 	public LiSAConfiguration addSyntacticChecks(Collection<SyntacticCheck> checks) {
 		syntacticChecks.addAll(checks);
+		return this;
+	}
+
+	/**
+	 * Adds the given semantic check to the ones that will be executed. These
+	 * checks will be executed after the fixpoint iteration has been completed.
+	 * 
+	 * @param check the check to execute
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration addSemanticCheck(SemanticCheck check) {
+		semanticChecks.add(check);
+		return this;
+	}
+
+	/**
+	 * Adds the given semantic checks to the ones that will be executed. These
+	 * checks will be executed after the fixpoint iteration has been completed.
+	 * 
+	 * @param checks the checks to execute
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration addSemanticChecks(Collection<SemanticCheck> checks) {
+		semanticChecks.addAll(checks);
 		return this;
 	}
 
@@ -284,6 +317,16 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Yields the collection of {@link SemanticCheck}s that are to be executed
+	 * during the analysis.
+	 * 
+	 * @return the semantic checks
+	 */
+	public Collection<SemanticCheck> getSemanticChecks() {
+		return semanticChecks;
+	}
+
+	/**
 	 * Yields whether or not type inference should be run.
 	 * 
 	 * @return {@code true} if type inference should be run
@@ -354,6 +397,7 @@ public class LiSAConfiguration {
 		result = prime * result + (jsonOutput ? 1231 : 1237);
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
+		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
 		return result;
 	}
@@ -392,6 +436,11 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!syntacticChecks.equals(other.syntacticChecks))
 			return false;
+		if (semanticChecks == null) {
+			if (other.semanticChecks != null)
+				return false;
+		} else if (!semanticChecks.equals(other.semanticChecks))
+			return false;
 		if (workdir == null) {
 			if (other.workdir != null)
 				return false;
@@ -412,6 +461,10 @@ public class LiSAConfiguration {
 				"\n  " + syntacticChecks.size() + " syntactic checks to execute"
 				+ (syntacticChecks.isEmpty() ? "" : ":");
 		for (SyntacticCheck check : syntacticChecks)
+			res += "\n      " + check.getClass().getSimpleName();
+		res += "\n  " + semanticChecks.size() + " semantic checks to execute"
+				+ (semanticChecks.isEmpty() ? "" : ":");
+		for (SemanticCheck check : semanticChecks)
 			res += "\n      " + check.getClass().getSimpleName();
 		return res;
 	}

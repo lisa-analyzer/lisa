@@ -412,7 +412,6 @@ public class CFGDescriptor implements CodeElement {
 
 	@Override
 	public CodeLocation getLocation() {
-		// TODO Auto-generated method stub
-		return null;
+		return location;
 	}
 }

@@ -1,4 +1,4 @@
-package it.unive.lisa.checks;
+package it.unive.lisa.checks.syntactic;
 
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
@@ -32,6 +32,16 @@ public class CheckTool {
 	 */
 	public CheckTool() {
 		warnings = Collections.newSetFromMap(new ConcurrentHashMap<>());
+	}
+
+	/**
+	 * Build the tool, shallow-copying the set of warnings from the given one.
+	 * 
+	 * @param other the original tool to copy
+	 */
+	protected CheckTool(CheckTool other) {
+		this();
+		warnings.addAll(other.warnings);
 	}
 
 	/**
