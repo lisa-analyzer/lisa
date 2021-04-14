@@ -29,6 +29,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
@@ -67,6 +68,12 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	private final Collection<ControlFlowStructure> cfStructs;
 
 	/**
+	 * Whether or not an attempt at extracting control flow structures from the
+	 * cfg has already been performed
+	 */
+	private boolean cfsExtracted;
+
+	/**
 	 * Builds the control flow graph.
 	 * 
 	 * @param descriptor the descriptor of this cfg
@@ -75,6 +82,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		super();
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
+		this.cfsExtracted = false;
 	}
 
 	/**
@@ -91,6 +99,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		super(entrypoints, adjacencyMatrix);
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
+		this.cfsExtracted = false;
 	}
 
 	/**
@@ -102,6 +111,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		super(other.entrypoints, other.adjacencyMatrix);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
+		this.cfsExtracted = other.cfsExtracted;
 	}
 
 	/**
@@ -988,6 +998,11 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	}
 
 	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {
+		if (cfStructs.isEmpty() && !cfsExtracted) {
+			new ControlFlowExtractor(this).extract().forEach(cfStructs::add);
+			cfsExtracted = true;
+		}
+
 		if (!(pp instanceof Statement))
 			// synthetic pp
 			return Collections.emptyList();

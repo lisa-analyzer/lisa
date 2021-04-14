@@ -1,0 +1,411 @@
+package it.unive.lisa.program.cfg;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.junit.Test;
+
+import it.unive.lisa.imp.expressions.IMPIntLiteral;
+import it.unive.lisa.imp.expressions.IMPNotEqual;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.controlFlow.Loop;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.FalseEdge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Return;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+
+public class ConditionalsExtractionTest {
+
+	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation(null, -1, -1), "Testing",
+			false);
+
+	@SafeVarargs
+	private static <T> Collection<T> collect(T... objs) {
+		ArrayList<T> res = new ArrayList<>(objs.length);
+		for (T o : objs)
+			res.add(o);
+		return res;
+	}
+
+	private static void checkMatrix(String label, AdjacencyMatrix<Statement, Edge, CFG> matrix,
+			Collection<Statement> nodes, Collection<Edge> edges) {
+		AdjacencyMatrix<Statement, Edge, CFG> expected = new AdjacencyMatrix<>();
+		nodes.forEach(expected::addNode);
+		edges.forEach(expected::addEdge);
+
+		Collection<Statement> missingNodes = new HashSet<>(), extraNodes = new HashSet<>();
+		for (Statement st : nodes)
+			if (!matrix.containsNode(st, false))
+				missingNodes.add(st);
+		for (Statement st : matrix.getNodes())
+			if (!expected.containsNode(st, false))
+				extraNodes.add(st);
+
+		Collection<Edge> missingEdges = new HashSet<>(), extraEdges = new HashSet<>();
+		for (Edge e : edges)
+			if (!matrix.containsEdge(e, false))
+				missingEdges.add(e);
+		for (Edge e : matrix.getEdges())
+			if (!expected.containsEdge(e, false))
+				extraEdges.add(e);
+
+		if (!missingNodes.isEmpty())
+			System.err.println("The following nodes are missing in " + label + ": " + missingNodes);
+		if (!missingEdges.isEmpty())
+			System.err.println("The following nodes are missing in " + label + ": " + missingEdges);
+		if (!extraNodes.isEmpty())
+			System.err.println("The following nodes are spurious in " + label + ": " + extraNodes);
+		if (!extraEdges.isEmpty())
+			System.err.println("The following nodes are spurious in " + label + ": " + extraEdges);
+
+		assertTrue("Set of nodes and/or edges does not match the expected results",
+				missingNodes.isEmpty() && missingEdges.isEmpty() && extraNodes.isEmpty() && extraEdges.isEmpty());
+		assertTrue("The two matrices are different", expected.isEqualTo(matrix));
+	}
+
+	private void assertIf(Statement condition, Statement follower, Collection<Statement> tnodes,
+			Collection<Edge> tedges, Collection<Statement> fnodes,
+			Collection<Edge> fedges, IfThenElse ith) {
+		assertEquals("Wrong condition: " + ith.getCondition(), condition, ith.getCondition());
+		assertEquals("Wrong follower: " + ith.getFirstFollower(), follower, ith.getFirstFollower());
+		checkMatrix("true branch", ith.getTrueBranch(), tnodes, tedges);
+		checkMatrix("false branch", ith.getFalseBranch(), fnodes, fedges);
+	}
+
+	private void assertLoop(Statement condition, Statement follower, Collection<Statement> nodes,
+			Collection<Edge> edges, Loop loop) {
+		assertEquals("Wrong condition: " + loop.getCondition(), condition, loop.getCondition());
+		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
+		checkMatrix("loop body", loop.getBody(), nodes, edges);
+	}
+
+	@Test
+	public void testSimpleIf() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "simpleIf"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 5);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		cfg.addEdge(new FalseEdge(condition, a2));
+		cfg.addEdge(new SequentialEdge(a1, ret));
+		cfg.addEdge(new SequentialEdge(a2, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+
+		assertIf(condition, ret, collect(a1), Collections.emptyList(), collect(a2), Collections.emptyList(),
+				(IfThenElse) struct);
+	}
+
+	@Test
+	public void testEmptyIf() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "emptyIf"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 5);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, ret));
+		cfg.addEdge(new FalseEdge(condition, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+
+		assertIf(condition, ret, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
+				Collections.emptyList(), (IfThenElse) struct);
+	}
+
+	@Test
+	public void testIfWithEmptyBranch() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "emptyBranch"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 5);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		cfg.addEdge(new FalseEdge(condition, ret));
+		SequentialEdge edge = new SequentialEdge(a1, a2);
+		cfg.addEdge(edge);
+		cfg.addEdge(new SequentialEdge(a2, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+
+		assertIf(condition, ret, collect(a1, a2), collect(edge), Collections.emptyList(), Collections.emptyList(),
+				(IfThenElse) struct);
+	}
+
+	@Test
+	public void testAsymmetricIf() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "asymmetricIf"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 10);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Assignment a3 = new Assignment(cfg, new VariableRef(cfg, "x"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(a3);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		cfg.addEdge(new FalseEdge(condition, a2));
+		SequentialEdge edge = new SequentialEdge(a1, a3);
+		cfg.addEdge(edge);
+		cfg.addEdge(new SequentialEdge(a2, ret));
+		cfg.addEdge(new SequentialEdge(a3, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+
+		assertIf(condition, ret, collect(a1, a3), collect(edge), collect(a2), Collections.emptyList(),
+				(IfThenElse) struct);
+	}
+
+	@Test
+	public void testBigAsymmetricIf() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "bigAsymmetricIf"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 15);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Assignment a3 = new Assignment(cfg, new VariableRef(cfg, "x"), constant);
+		Assignment a4 = new Assignment(cfg, new VariableRef(cfg, "y"), constant);
+		Assignment a5 = new Assignment(cfg, new VariableRef(cfg, "z"), constant);
+		Assignment a6 = new Assignment(cfg, new VariableRef(cfg, "w"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(a3);
+		cfg.addNode(a4);
+		cfg.addNode(a5);
+		cfg.addNode(a6);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		SequentialEdge e1 = new SequentialEdge(a1, a2);
+		cfg.addEdge(e1);
+		SequentialEdge e2 = new SequentialEdge(a2, a3);
+		cfg.addEdge(e2);
+		SequentialEdge e3 = new SequentialEdge(a3, a4);
+		cfg.addEdge(e3);
+		cfg.addEdge(new SequentialEdge(a4, a6));
+		cfg.addEdge(new FalseEdge(condition, a5));
+		cfg.addEdge(new SequentialEdge(a5, a6));
+		cfg.addEdge(new SequentialEdge(a6, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
+
+		assertIf(condition, a6, collect(a1, a2, a3, a4), collect(e1, e2, e3), collect(a5), Collections.emptyList(),
+				(IfThenElse) struct);
+	}
+
+	@Test
+	public void testSimpleLoop() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "simpleLoop"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 5);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		cfg.addEdge(new SequentialEdge(a1, condition));
+		cfg.addEdge(new FalseEdge(condition, a2));
+		cfg.addEdge(new SequentialEdge(a2, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+
+		assertLoop(condition, a2, collect(a1), Collections.emptyList(), (Loop) struct);
+	}
+
+	@Test
+	public void testEmptyLoop() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "emptyLoop"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 5);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, condition));
+		cfg.addEdge(new FalseEdge(condition, a2));
+		cfg.addEdge(new SequentialEdge(a2, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+
+		assertLoop(condition, a2, Collections.emptyList(), Collections.emptyList(), (Loop) struct);
+	}
+
+	@Test
+	public void testLongLoop() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "longLoop"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 15);
+		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment a1 = new Assignment(cfg, new VariableRef(cfg, "l"), constant);
+		Assignment a2 = new Assignment(cfg, new VariableRef(cfg, "r"), constant);
+		Assignment a3 = new Assignment(cfg, new VariableRef(cfg, "x"), constant);
+		Assignment a4 = new Assignment(cfg, new VariableRef(cfg, "y"), constant);
+		Assignment a5 = new Assignment(cfg, new VariableRef(cfg, "z"), constant);
+		Assignment a6 = new Assignment(cfg, new VariableRef(cfg, "w"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(a3);
+		cfg.addNode(a4);
+		cfg.addNode(a5);
+		cfg.addNode(a6);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		SequentialEdge e1 = new SequentialEdge(a1, a2);
+		SequentialEdge e2 = new SequentialEdge(a2, a3);
+		SequentialEdge e3 = new SequentialEdge(a3, a4);
+		SequentialEdge e4 = new SequentialEdge(a4, a5);
+		cfg.addEdge(e1);
+		cfg.addEdge(e2);
+		cfg.addEdge(e3);
+		cfg.addEdge(e4);
+		cfg.addEdge(new SequentialEdge(a5, condition));
+		cfg.addEdge(new FalseEdge(condition, a6));
+		cfg.addEdge(new SequentialEdge(a6, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 1, extracted.size());
+
+		ControlFlowStructure struct = extracted.iterator().next();
+		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
+
+		assertLoop(condition, a6, collect(a1, a2, a3, a4, a5), collect(e1, e2, e3, e4), (Loop) struct);
+	}
+
+	@Test
+	public void testNestedConditionals() {
+		CFG cfg = new CFG(new CFGDescriptor(unit, false, "nested"));
+		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 10);
+		IMPIntLiteral constant1 = new IMPIntLiteral(cfg, null, -1, -1, 100);
+		IMPNotEqual loop_condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
+		Assignment loop_a1 = new Assignment(cfg, new VariableRef(cfg, "loop_a1"), constant);
+		Assignment loop_a2 = new Assignment(cfg, new VariableRef(cfg, "loop_a2"), constant);
+		IMPNotEqual if_condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant1);
+		Assignment if_a1 = new Assignment(cfg, new VariableRef(cfg, "if_a1"), constant);
+		Assignment if_a2 = new Assignment(cfg, new VariableRef(cfg, "if_a2"), constant);
+		Assignment if_a3 = new Assignment(cfg, new VariableRef(cfg, "if_a3"), constant);
+		Return ret = new Return(cfg, new VariableRef(cfg, "x"));
+
+		cfg.addNode(loop_condition, true);
+		cfg.addNode(loop_a1);
+		cfg.addNode(loop_a2);
+		cfg.addNode(if_condition);
+		cfg.addNode(if_a1);
+		cfg.addNode(if_a2);
+		cfg.addNode(if_a3);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(loop_condition, loop_a1));
+		SequentialEdge loop_e1 = new SequentialEdge(loop_a1, if_condition);
+		cfg.addEdge(loop_e1);
+		TrueEdge loop_e2 = new TrueEdge(if_condition, if_a1);
+		cfg.addEdge(loop_e2);
+		SequentialEdge if_edge = new SequentialEdge(if_a1, if_a3);
+		cfg.addEdge(if_edge);
+		SequentialEdge loop_e3 = new SequentialEdge(if_a3, loop_a2);
+		cfg.addEdge(loop_e3);
+		FalseEdge loop_e4 = new FalseEdge(if_condition, if_a2);
+		cfg.addEdge(loop_e4);
+		SequentialEdge loop_e5 = new SequentialEdge(if_a2, loop_a2);
+		cfg.addEdge(loop_e5);
+		cfg.addEdge(new SequentialEdge(loop_a2, loop_condition));
+		cfg.addEdge(new FalseEdge(loop_condition, ret));
+
+		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
+		assertEquals("Incorrect number of structures: " + extracted.size(), 2, extracted.size());
+
+		Iterator<ControlFlowStructure> it = extracted.iterator();
+		ControlFlowStructure first = it.next();
+		ControlFlowStructure second = it.next();
+
+		Loop loop = null;
+		IfThenElse ith = null;
+		if (first instanceof IfThenElse && second instanceof Loop) {
+			ith = (IfThenElse) first;
+			loop = (Loop) second;
+		} else if (second instanceof IfThenElse && first instanceof Loop) {
+			ith = (IfThenElse) second;
+			loop = (Loop) first;
+		} else
+			fail("Wrong conditional structures: excpected one loop and one if-then-else, but got a "
+					+ first.getClass().getSimpleName() + " and a " + second.getClass().getSimpleName());
+
+		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_edge), collect(if_a2),
+				Collections.emptyList(), ith);
+		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2),
+				collect(if_edge, loop_e1, loop_e2, loop_e3, loop_e4, loop_e5), loop);
+	}
+}
