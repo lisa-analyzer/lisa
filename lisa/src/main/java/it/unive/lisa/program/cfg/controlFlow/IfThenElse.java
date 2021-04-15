@@ -1,20 +1,34 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import java.util.Collection;
+import java.util.HashSet;
 
+/**
+ * A {@link ControlFlowStructure} representing a if-then-else.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class IfThenElse extends ControlFlowStructure {
 
 	private final Collection<Statement> trueBranch;
 
 	private final Collection<Statement> falseBranch;
 
+	/**
+	 * Builds the if-then-else.
+	 * 
+	 * @param cfgMatrix     the matrix of the cfg containing this if-then-else
+	 * @param condition     the condition of the if-then-else
+	 * @param firstFollower the first statement after the if-then-else exits one
+	 *                          of the branches
+	 * @param trueBranch    the statements in the true branch
+	 * @param falseBranch   the statements in the false branch
+	 */
 	public IfThenElse(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition, Statement firstFollower,
 			Collection<Statement> trueBranch, Collection<Statement> falseBranch) {
 		super(cfgMatrix, condition, firstFollower);
@@ -29,10 +43,22 @@ public class IfThenElse extends ControlFlowStructure {
 		return all;
 	}
 
+	/**
+	 * Yields the {@link Statement}s contained in the true branch of this
+	 * if-then-else.
+	 * 
+	 * @return the true branch of the if-then-else
+	 */
 	public Collection<Statement> getTrueBranch() {
 		return trueBranch;
 	}
 
+	/**
+	 * Yields the {@link Statement}s contained in the false branch of this
+	 * if-then-else.
+	 * 
+	 * @return the false branch of the if-then-else
+	 */
 	public Collection<Statement> getFalseBranch() {
 		return falseBranch;
 	}

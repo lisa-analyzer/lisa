@@ -1,13 +1,5 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
@@ -20,34 +12,58 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 
+/**
+ * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
+ * {@link Dominators} to extract {@link Loop}s, and a graph visiting heuristics
+ * to find {@link IfThenElse}s.<br>
+ * <br>
+ * Extracting control flows should be a last-resort: if the cfg contains
+ * arbitrary jumps (like {@code goto, break, continue, ...}) the aforementioned
+ * algorithms will fail to properly infer some of the structures. It is always
+ * preferable to have frontends define each structure relying on source code
+ * information.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ControlFlowExtractor {
 
 	private final CFG target;
 
 	private final Collection<ControlFlowStructure> extracted;
 
-	private boolean done;
-
+	/**
+	 * Builds the extractor.
+	 * 
+	 * @param target the cfg whose control flows structures are to be extracted
+	 */
 	public ControlFlowExtractor(CFG target) {
 		this.target = target;
 		this.extracted = new ArrayList<>();
-		this.done = false;
 	}
 
+	/**
+	 * Runs the algorithms for extracting {@link ControlFlowStructure}s.
+	 * 
+	 * @return the collection of extracted structures
+	 */
 	public Collection<ControlFlowStructure> extract() {
-		if (done)
-			return extracted;
+		extracted.clear();
 
 		Map<Statement, ControlFlowStructure> result = new HashMap<>();
 
 		LinkedList<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
 
-		if (conditionals.isEmpty()) {
-			done = true;
+		if (conditionals.isEmpty())
 			return extracted;
-		}
 
 		// first, we find the loops using back-edges:
 		// https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf
@@ -64,7 +80,6 @@ public class ControlFlowExtractor {
 				new IfReconstructor(conditional, result).build();
 
 		extracted.addAll(result.values());
-		done = true;
 		return extracted;
 	}
 
@@ -103,7 +118,7 @@ public class ControlFlowExtractor {
 
 			Edge exit = findExitEdge(body);
 			computed.put(conditional, new Loop(target.getAdjacencyMatrix(),
-					conditional, exit.getDestination(), body.getNodes(), exit instanceof TrueEdge));
+					conditional, exit.getDestination(), body.getNodes()));
 		}
 
 		private Edge findExitEdge(AdjacencyMatrix<Statement, Edge, CFG> body) {

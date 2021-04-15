@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -66,7 +65,12 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
 	}
-	
+
+	/**
+	 * Yields the adjacency matrix backing this graph.
+	 * 
+	 * @return the matrix
+	 */
 	public AdjacencyMatrix<N, E, G> getAdjacencyMatrix() {
 		return adjacencyMatrix;
 	}
@@ -174,10 +178,24 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
 
+	/**
+	 * Yields the ingoing edges to the given node.
+	 * 
+	 * @param node the node
+	 * 
+	 * @return the collection of ingoing edges
+	 */
 	public final Collection<E> getIngoingEdges(N node) {
 		return adjacencyMatrix.getIngoingEdges(node);
 	}
 
+	/**
+	 * Yields the outgoing edges from the given node.
+	 * 
+	 * @param node the node
+	 * 
+	 * @return the collection of outgoing edges
+	 */
 	public final Collection<E> getOutgoingEdges(N node) {
 		return adjacencyMatrix.getOutgoingEdges(node);
 	}
@@ -349,6 +367,8 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                          refers to a single simplified edge, and is in
 	 *                          the form
 	 *                          {@code <<ingoing removed, outgoing removed>, added>}
+	 * 
+	 * @return the set of nodes that have been simplified
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one node
 	 *                                           being simplified with an

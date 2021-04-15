@@ -3,18 +3,6 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Triple;
-
 import it.unive.lisa.imp.constructs.StringConcat;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -111,6 +99,16 @@ import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -168,7 +166,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		entrypoints.add(visited.getLeft());
 		matrix.mergeWith(visited.getMiddle());
 		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
-		
+
 		if (cfg.getAllExitpoints().isEmpty()) {
 			Ret ret = new Ret(cfg, descriptor.getLocation());
 			if (cfg.getNodesCount() == 0) {
@@ -215,7 +213,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, VariableRef> backup = new HashMap<>(visibleIds);
 		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>(matrix.getEdgeFactory());
-		
+
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
 			Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>,
@@ -293,7 +291,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitIf(StatementContext ctx) {
 		AdjacencyMatrix<Statement, Edge, CFG> ite = new AdjacencyMatrix<>(matrix.getEdgeFactory());
-		
+
 		Statement condition = visitParExpr(ctx.parExpr());
 		ite.addNode(condition);
 

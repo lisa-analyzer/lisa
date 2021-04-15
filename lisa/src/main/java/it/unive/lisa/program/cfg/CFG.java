@@ -1,21 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -30,6 +14,7 @@ import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -44,6 +29,20 @@ import it.unive.lisa.util.datastructures.graph.FixpointException;
 import it.unive.lisa.util.datastructures.graph.FixpointGraph;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 import it.unive.lisa.util.workset.WorkingSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -149,6 +148,15 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Adds the given {@link ControlFlowStructure} to the ones contained in this
+	 * cfg.
+	 * 
+	 * @param cf the control flow structure to add
+	 * 
+	 * @throws IllegalArgumentException if a control flow structure for the same
+	 *                                      condition already exists
+	 */
 	public final void addControlFlowStructure(ControlFlowStructure cf) {
 		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
 			throw new IllegalArgumentException(
@@ -157,7 +165,23 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		cfStructs.add(cf);
 	}
 
+	/**
+	 * Yields the collection of {@link ControlFlowStructure}s contained in this
+	 * cfg.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @return the collection, either provided by frontends or extracted, of the
+	 *             control flow structures of this method
+	 */
 	public Collection<ControlFlowStructure> getControlFlowStructures() {
+		if (cfStructs.isEmpty() && !cfsExtracted) {
+			new ControlFlowExtractor(this).extract().forEach(cfStructs::add);
+			cfsExtracted = true;
+		}
+
 		return cfStructs;
 	}
 
@@ -952,10 +976,10 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 * Validates this cfg, ensuring that the code contained in it is well
 	 * formed. This method checks that:
 	 * <ul>
-	 * <li>each {@link Edge} is connected to {@link Statement}s contained in the
-	 * cfg</li>
-	 * <li>all {@link Statement}s with no ingoing edges are marked as
-	 * entrypoints of the cfg (i.e. no deadcode)</li>
+	 * <li>the underlying adjacency matrix is valid, through
+	 * {@link AdjacencyMatrix#validate(Collection)}</li>
+	 * <li>all {@link ControlFlowStructure}s of this cfg contains node
+	 * effectively in the cfg</li>
 	 * <li>all {@link Statement}s that stop the execution (according to
 	 * {@link Statement#stopsExecution()}) do not have outgoing edges</li>
 	 * <li>all entrypoints are effectively part of this cfg</li>
@@ -1011,26 +1035,108 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		return res;
 	}
 
+	/**
+	 * Yields {@code true} if and only if the given program point is inside the
+	 * body of a {@link ControlFlowStructure}, regardless of its type.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return {@code true} if {@code pp} is inside a control flow structure
+	 */
 	public boolean isGuarded(ProgramPoint pp) {
 		return !getControlFlowsContaining(pp).isEmpty();
 	}
 
+	/**
+	 * Yields {@code true} if and only if the given program point is inside the
+	 * body of a {@link Loop}.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return {@code true} if {@code pp} is inside a loop
+	 */
 	public boolean isInsideLoop(ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().anyMatch(Loop.class::isInstance);
 	}
 
+	/**
+	 * Yields {@code true} if and only if the given program point is inside one
+	 * of the branches of an {@link IfThenElse}.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return {@code true} if {@code pp} is inside an if-then-else
+	 */
+	public boolean isInsideIfThenElse(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().anyMatch(IfThenElse.class::isInstance);
+	}
+
+	/**
+	 * Yields the guard of all the {@link ControlFlowStructure}s, regardless of
+	 * their type, containing the given program point. If the program point is
+	 * not part of the body of a control structure, this method returns an empty
+	 * collection.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the collection of the guards of all structures containing
+	 *             {@code pp}
+	 */
 	public Collection<Statement> getGuards(ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().map(ControlFlowStructure::getCondition)
 				.collect(Collectors.toList());
 	}
 
+	/**
+	 * Yields the guard of all {@link Loop}s containing the given program point.
+	 * If the program point is not part of the body of a loop, this method
+	 * returns an empty collection.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the collection of the guards of all loops containing {@code pp}
+	 */
 	public Collection<Statement> getLoopGuards(ProgramPoint pp) {
 		return getControlFlowsContaining(pp).stream().filter(Loop.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
 
-	public Collection<Statement> getNonLoopGuards(ProgramPoint pp) {
-		return getControlFlowsContaining(pp).stream().filter(Predicate.not(Loop.class::isInstance))
+	/**
+	 * Yields the guard of all the {@link IfThenElse} containing the given
+	 * program point. If the program point is not part of a branch of an
+	 * if-then-else, this method returns an empty collection.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the collection of the guards of all if-then-elses containing
+	 *             {@code pp}
+	 */
+	public Collection<Statement> getIfThenElseGuards(ProgramPoint pp) {
+		return getControlFlowsContaining(pp).stream().filter(IfThenElse.class::isInstance)
 				.map(ControlFlowStructure::getCondition).collect(Collectors.toList());
 	}
 
@@ -1061,15 +1167,55 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		return recent;
 	}
 
+	/**
+	 * Yields the guard of the most recent {@link ControlFlowStructure},
+	 * regardless of its type, containing the given program point. If the
+	 * program point is not part of the body of a control structure, this method
+	 * returns {@code null}.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the most recent if-then-else guard, or {@code null}
+	 */
 	public Statement getMostRecentGuard(ProgramPoint pp) {
 		return getRecent(pp, cf -> true);
 	}
 
+	/**
+	 * Yields the guard of the most recent {@link Loop} containing the given
+	 * program point. If the program point is not part of the body of a loop,
+	 * this method returns {@code null}.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the most recent loop guard, or {@code null}
+	 */
 	public Statement getMostRecentLoopGuard(ProgramPoint pp) {
 		return getRecent(pp, Loop.class::isInstance);
 	}
 
-	public Statement getMostRecentNonLoopGuard(ProgramPoint pp) {
-		return getRecent(pp, Predicate.not(Loop.class::isInstance));
+	/**
+	 * Yields the guard of the most recent {@link IfThenElse} containing the
+	 * given program point. If the program point is not part of a branch of an
+	 * if-then-else, this method returns {@code null}.<br>
+	 * <br>
+	 * Note that if no control flow structures have been provided by frontends,
+	 * and no attempt at extracting them has been made yet, invoking this method
+	 * will cause a {@link ControlFlowExtractor} to try to extract them.
+	 * 
+	 * @param pp the program point
+	 * 
+	 * @return the most recent if-then-else guard, or {@code null}
+	 */
+	public Statement getMostRecentIfThenElseGuard(ProgramPoint pp) {
+		return getRecent(pp, IfThenElse.class::isInstance);
 	}
 }

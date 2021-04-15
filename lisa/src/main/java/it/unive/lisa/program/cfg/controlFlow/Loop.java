@@ -1,30 +1,34 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import java.util.Collection;
+import java.util.HashSet;
 
+/**
+ * A {@link ControlFlowStructure} representing a loop.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class Loop extends ControlFlowStructure {
 
 	private final Collection<Statement> body;
 
-	private final boolean trueBranch;
-
+	/**
+	 * Builds the loop.
+	 * 
+	 * @param cfgMatrix     the matrix of the cfg containing this loop
+	 * @param condition     the condition of the loop
+	 * @param firstFollower the first statement after the loop exits
+	 * @param body          the statements in the loop body
+	 */
 	public Loop(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition, Statement firstFollower,
 			Collection<Statement> body) {
-		this(cfgMatrix, condition, firstFollower, body, true);
-	}
-
-	public Loop(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition, Statement firstFollower,
-			Collection<Statement> body, boolean trueBranch) {
 		super(cfgMatrix, condition, firstFollower);
 		this.body = body;
-		this.trueBranch = trueBranch;
 	}
 
 	@Override
@@ -32,6 +36,11 @@ public class Loop extends ControlFlowStructure {
 		return new HashSet<>(getBody());
 	}
 
+	/**
+	 * Yields the {@link Statement}s contained in the body of this loop.
+	 * 
+	 * @return the body of the loop
+	 */
 	public Collection<Statement> getBody() {
 		return body;
 	}
@@ -51,7 +60,6 @@ public class Loop extends ControlFlowStructure {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((body == null) ? 0 : body.hashCode());
-		result = prime * result + (trueBranch ? 1231 : 1237);
 		return result;
 	}
 
@@ -69,8 +77,6 @@ public class Loop extends ControlFlowStructure {
 				return false;
 		} else if (!body.equals(other.body))
 			return false;
-		if (trueBranch != other.trueBranch)
-			return false;
 		return true;
 	}
 
@@ -87,8 +93,6 @@ public class Loop extends ControlFlowStructure {
 			if (other.body != null)
 				return false;
 		} else if (!areEqual(body, other.body))
-			return false;
-		if (trueBranch != other.trueBranch)
 			return false;
 		return true;
 	}
