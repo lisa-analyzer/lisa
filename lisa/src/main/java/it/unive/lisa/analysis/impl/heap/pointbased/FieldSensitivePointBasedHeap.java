@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.ValueExpressionSet;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -42,12 +42,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		super();
 	}
 
-	private FieldSensitivePointBasedHeap(ValueExpressionSet rewritten,
+	private FieldSensitivePointBasedHeap(ExpressionSet<ValueExpression> rewritten,
 			HeapEnvironment<AllocationSites> allocationSites) {
 		this(rewritten, allocationSites, Collections.emptyList());
 	}
 
-	private FieldSensitivePointBasedHeap(ValueExpressionSet rewritten,
+	private FieldSensitivePointBasedHeap(ExpressionSet<ValueExpression> rewritten,
 			HeapEnvironment<AllocationSites> allocationSites, List<HeapReplacement> substitutions) {
 		super(rewritten, allocationSites, substitutions);
 	}
@@ -94,7 +94,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				} else if (containerExp instanceof HeapLocation)
 					result.add((ValueExpression) containerExp);
 
-			return new FieldSensitivePointBasedHeap(new ValueExpressionSet(result),
+			return new FieldSensitivePointBasedHeap(new ExpressionSet<ValueExpression>(result),
 					applySubstitutions(childState.heapEnv, substitution),
 					substitution);
 		}

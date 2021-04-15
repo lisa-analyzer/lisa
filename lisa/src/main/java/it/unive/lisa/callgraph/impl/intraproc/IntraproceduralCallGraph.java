@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.SymbolicExpressionSet;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.callgraph.CallGraph;
@@ -23,6 +23,7 @@ import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -162,7 +163,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(
-					CFGCall call, AnalysisState<A, H, V> entryState, SymbolicExpressionSet[] parameters)
+					CFGCall call, AnalysisState<A, H, V> entryState, ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();

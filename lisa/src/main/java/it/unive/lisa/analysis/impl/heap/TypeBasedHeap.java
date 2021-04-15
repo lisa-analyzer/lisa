@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.impl.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
-import it.unive.lisa.analysis.lattices.ValueExpressionSet;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -36,7 +36,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
 
-	private final ValueExpressionSet rewritten;
+	private final ExpressionSet<ValueExpression> rewritten;
 
 	private final Collection<String> names;
 
@@ -49,10 +49,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	private TypeBasedHeap(ValueExpression rewritten) {
-		this(new ValueExpressionSet(rewritten), new HashSet<>());
+		this(new ExpressionSet<ValueExpression>(rewritten), new HashSet<>());
 	}
 
-	private TypeBasedHeap(ValueExpressionSet rewritten, Collection<String> names) {
+	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Collection<String> names) {
 		this.rewritten = rewritten;
 		this.names = names;
 	}
@@ -100,7 +100,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public ValueExpressionSet getRewrittenExpressions() {
+	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -111,7 +111,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	protected TypeBasedHeap mk(TypeBasedHeap reference, ValueExpression expression) {
-		return new TypeBasedHeap(new ValueExpressionSet(expression), reference.names);
+		return new TypeBasedHeap(new ExpressionSet<ValueExpression>(expression), reference.names);
 	}
 
 	@Override
@@ -132,7 +132,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					}
 				}
 
-			return new TypeBasedHeap(new ValueExpressionSet(ids), names);
+			return new TypeBasedHeap(new ExpressionSet<ValueExpression>(ids), names);
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -144,7 +144,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					names.add(type.toString());
 				}
 
-			return new TypeBasedHeap(new ValueExpressionSet(ids), names);
+			return new TypeBasedHeap(new ExpressionSet<ValueExpression>(ids), names);
 		}
 
 		return top();

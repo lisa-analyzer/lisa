@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.impl.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
-import it.unive.lisa.analysis.lattices.ValueExpressionSet;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
@@ -27,7 +27,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private final ValueExpressionSet rewritten;
+	private final ExpressionSet<ValueExpression> rewritten;
 
 	/**
 	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on
@@ -38,15 +38,15 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	private MonolithicHeap(ValueExpression rewritten) {
-		this(new ValueExpressionSet(rewritten));
+		this(new ExpressionSet<ValueExpression>(rewritten));
 	}
 
-	private MonolithicHeap(ValueExpressionSet rewritten) {
+	private MonolithicHeap(ExpressionSet<ValueExpression> rewritten) {
 		this.rewritten = rewritten;
 	}
 
 	@Override
-	public ValueExpressionSet getRewrittenExpressions() {
+	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
 		return rewritten;
 	}
 

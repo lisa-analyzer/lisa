@@ -5,12 +5,13 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.SymbolicExpressionSet;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
@@ -126,7 +127,8 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		SymbolicExpressionSet[] computed = new SymbolicExpressionSet[parameters.length];
+		@SuppressWarnings("unchecked")
+		ExpressionSet<SymbolicExpression>[] computed = new ExpressionSet[parameters.length];
 
 		@SuppressWarnings("unchecked")
 		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
@@ -175,7 +177,7 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
 					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					SymbolicExpressionSet[] params)
+					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException;
 
 	@Override
