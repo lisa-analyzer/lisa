@@ -1,6 +1,6 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
+import it.unive.lisa.analysis.lattices.ValueExpressionSet;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -36,7 +36,7 @@ public interface HeapSemanticOperation {
 	 * 
 	 * @return the rewritten expression, or the original one
 	 */
-	ValueExpressionSetLattice getRewrittenExpressions();
+	ValueExpressionSet getRewrittenExpressions();
 
 	/**
 	 * Yields the substitution, in the form of a list of

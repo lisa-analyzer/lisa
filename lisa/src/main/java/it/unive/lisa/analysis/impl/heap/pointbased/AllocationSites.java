@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
+import it.unive.lisa.analysis.lattices.ValueExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -92,8 +92,8 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public ValueExpressionSetLattice getRewrittenExpressions() {
-		return new ValueExpressionSetLattice();
+	public ValueExpressionSet getRewrittenExpressions() {
+		return new ValueExpressionSet();
 	}
 
 	@Override

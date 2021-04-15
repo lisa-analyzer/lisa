@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSetLattice;
+import it.unive.lisa.analysis.lattices.SymbolicExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.IMPFrontend;
@@ -51,7 +51,7 @@ public class IMPNewObj extends NativeCall {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					ExpressionSetLattice[] params)
+					SymbolicExpressionSet[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
@@ -59,7 +59,7 @@ public class IMPNewObj extends NativeCall {
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
 				getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
-		ExpressionSetLattice[] fullParams = ArrayUtils.insert(0, params, new ExpressionSetLattice(created));
+		SymbolicExpressionSet[] fullParams = ArrayUtils.insert(0, params, new SymbolicExpressionSet(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);

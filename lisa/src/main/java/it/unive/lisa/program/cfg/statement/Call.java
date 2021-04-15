@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSetLattice;
+import it.unive.lisa.analysis.lattices.SymbolicExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
@@ -126,7 +126,7 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
 					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		ExpressionSetLattice[] computed = new ExpressionSetLattice[parameters.length];
+		SymbolicExpressionSet[] computed = new SymbolicExpressionSet[parameters.length];
 
 		@SuppressWarnings("unchecked")
 		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
@@ -175,7 +175,7 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
 					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					ExpressionSetLattice[] params)
+					SymbolicExpressionSet[] params)
 					throws SemanticException;
 
 	@Override
