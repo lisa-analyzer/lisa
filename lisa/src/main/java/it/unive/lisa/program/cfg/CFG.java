@@ -1,6 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,7 +30,6 @@ import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
-import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -188,7 +186,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                                           non-sequential edge.
 	 */
 	public void simplify() {
-		super.simplify(NoOp.class);
+		super.simplify(NoOp.class, new LinkedList<>(), new HashMap<>());
 		cfStructs.forEach(ControlFlowStructure::simplify);
 	}
 
@@ -824,29 +822,35 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 
 	private void shiftControlFlowStructuresEnd(Statement node) {
 		Collection<Statement> followers = followersOf(node);
-		Collection<ControlFlowStructure> toRemove = new ArrayList<>();
-		Collection<ControlFlowStructure> toAdd = new ArrayList<>();
-		for (ControlFlowStructure struct : cfStructs)
-			if (struct.getFirstFollower() == node) {
-				toRemove.add(struct);
-				if (followers.size() > 1)
-					log.warn(node + " is the first follower of a control flow structure, it is being"
-							+ " simplified but has multiple followers: the conditional structure will be lost");
-				else if (followers.isEmpty())
-					if (struct instanceof IfThenElse)
-						toAdd.add(new IfThenElse(struct.getCondition(), null,
-								((IfThenElse) struct).getTrueBranch(), ((IfThenElse) struct).getFalseBranch()));
-					else
-						toAdd.add(new Loop(struct.getCondition(), null, ((Loop) struct).getBody()));
-				else if (struct instanceof IfThenElse)
-					toAdd.add(new IfThenElse(struct.getCondition(), followers.iterator().next(),
-							((IfThenElse) struct).getTrueBranch(), ((IfThenElse) struct).getFalseBranch()));
-				else
-					toAdd.add(new Loop(struct.getCondition(), followers.iterator().next(), ((Loop) struct).getBody()));
-			}
 
-		toRemove.forEach(cfStructs::remove);
-		toAdd.forEach(cfStructs::add);
+		Statement candidate;
+		for (ControlFlowStructure cfs : cfStructs)
+			if (node == cfs.getFirstFollower())
+				if (followers.isEmpty())
+					cfs.setFirstFollower(null);
+				else if (followers.size() == 1)
+					if (!((candidate = followers.iterator().next()) instanceof NoOp))
+						cfs.setFirstFollower(candidate);
+					else
+						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
+				else {
+					log.warn(node + " is the first follower of a control flow structure, it is being"
+							+ " simplified but has multiple followers: the first follower of the conditional structure will be lost");
+					cfs.setFirstFollower(null);
+				}
+	}
+
+	private Statement firstNonNoOpDeterministicFollower(Statement st) {
+		Statement current = st;
+		while (current instanceof NoOp) {
+			Collection<Statement> followers = followersOf(current);
+			if (followers.isEmpty() || followers.size() > 1)
+				// we reached the end or we have more than one follower
+				return null;
+			current = followers.iterator().next();
+		}
+
+		return current;
 	}
 
 	private void shiftVariableScopes(Statement node) {
@@ -961,40 +965,31 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                                        fail
 	 */
 	public void validate() throws ProgramValidationException {
-		Collection<Statement> nodes = adjacencyMatrix.getNodes();
+		try {
+			adjacencyMatrix.validate(entrypoints);
+		} catch (ProgramValidationException e) {
+			throw new ProgramValidationException("The matrix behind " + this + " is invalid", e);
+		}
 
-		// all edges should be connected to statements inside the cfg
-		for (Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> st : adjacencyMatrix) {
-			for (Edge in : st.getValue().getLeft())
-				validateEdge(nodes, in);
+		for (ControlFlowStructure struct : cfStructs) {
+			for (Statement st : struct.allStatements())
+				// we tolerate null values only if its the follower
+				if ((st == null && struct.getFirstFollower() != null)
+						|| (st != null && !adjacencyMatrix.containsNode(st, false)))
+					throw new ProgramValidationException(this + " has a conditional structure (" + struct
+							+ ") that contains a node not in the graph: " + st);
+		}
 
-			for (Edge out : st.getValue().getRight())
-				validateEdge(nodes, out);
-
-			// no deadcode
-			if (st.getValue().getLeft().isEmpty() && !entrypoints.contains(st.getKey()))
-				throw new ProgramValidationException(
-						this + " contains an unreachable node that is not marked as entrypoint: " + st.getKey());
-
+		for (Entry<Statement, Pair<ExternalSet<Edge>, ExternalSet<Edge>>> st : adjacencyMatrix)
 			// no outgoing edges in execution-terminating statements
 			if (st.getKey().stopsExecution() && !st.getValue().getRight().isEmpty())
 				throw new ProgramValidationException(
 						this + " contains an execution-stopping node that has followers: " + st.getKey());
-		}
 
 		// all entrypoints should be within the cfg
-		if (!nodes.containsAll(entrypoints))
+		if (!adjacencyMatrix.getNodes().containsAll(entrypoints))
 			throw new ProgramValidationException(this + " has entrypoints that are not part of the graph: "
-					+ new HashSet<>(entrypoints).retainAll(nodes));
-	}
-
-	private void validateEdge(Collection<Statement> nodes, Edge edge) throws ProgramValidationException {
-		if (!nodes.contains(edge.getSource()))
-			throw new ProgramValidationException(this + " contains an invalid edge: '" + edge
-					+ "' originates in a node that is not part of the graph");
-		else if (!nodes.contains(edge.getDestination()))
-			throw new ProgramValidationException(this + " contains an invalid edge: '" + edge
-					+ "' reaches a node that is not part of the graph");
+					+ new HashSet<>(entrypoints).retainAll(adjacencyMatrix.getNodes()));
 	}
 
 	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {

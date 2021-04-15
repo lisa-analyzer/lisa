@@ -20,7 +20,6 @@ import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
-import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
@@ -28,7 +27,6 @@ import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 
 public class ConditionalsExtractionTest {
 
@@ -43,56 +41,34 @@ public class ConditionalsExtractionTest {
 		return res;
 	}
 
-	private static void checkMatrix(String label, AdjacencyMatrix<Statement, Edge, CFG> matrix,
-			Collection<Statement> nodes, Collection<Edge> edges) {
-		AdjacencyMatrix<Statement, Edge, CFG> expected = new AdjacencyMatrix<>();
-		nodes.forEach(expected::addNode);
-		edges.forEach(expected::addEdge);
+	private static void checkMatrix(String label, Collection<Statement> nodes,
+			Collection<Statement> expected) {
 
-		Collection<Statement> missingNodes = new HashSet<>(), extraNodes = new HashSet<>();
-		for (Statement st : nodes)
-			if (!matrix.containsNode(st, false))
-				missingNodes.add(st);
-		for (Statement st : matrix.getNodes())
-			if (!expected.containsNode(st, false))
-				extraNodes.add(st);
-
-		Collection<Edge> missingEdges = new HashSet<>(), extraEdges = new HashSet<>();
-		for (Edge e : edges)
-			if (!matrix.containsEdge(e, false))
-				missingEdges.add(e);
-		for (Edge e : matrix.getEdges())
-			if (!expected.containsEdge(e, false))
-				extraEdges.add(e);
+		Collection<Statement> missingNodes = new HashSet<>(expected), extraNodes = new HashSet<>(nodes);
+		missingNodes.removeAll(nodes);
+		extraNodes.removeAll(expected);
 
 		if (!missingNodes.isEmpty())
 			System.err.println("The following nodes are missing in " + label + ": " + missingNodes);
-		if (!missingEdges.isEmpty())
-			System.err.println("The following nodes are missing in " + label + ": " + missingEdges);
 		if (!extraNodes.isEmpty())
 			System.err.println("The following nodes are spurious in " + label + ": " + extraNodes);
-		if (!extraEdges.isEmpty())
-			System.err.println("The following nodes are spurious in " + label + ": " + extraEdges);
 
-		assertTrue("Set of nodes and/or edges does not match the expected results",
-				missingNodes.isEmpty() && missingEdges.isEmpty() && extraNodes.isEmpty() && extraEdges.isEmpty());
-		assertTrue("The two matrices are different", expected.isEqualTo(matrix));
+		assertTrue("Set of nodes does not match the expected results",
+				missingNodes.isEmpty() && extraNodes.isEmpty());
 	}
 
 	private void assertIf(Statement condition, Statement follower, Collection<Statement> tnodes,
-			Collection<Edge> tedges, Collection<Statement> fnodes,
-			Collection<Edge> fedges, IfThenElse ith) {
+			Collection<Statement> fnodes, IfThenElse ith) {
 		assertEquals("Wrong condition: " + ith.getCondition(), condition, ith.getCondition());
 		assertEquals("Wrong follower: " + ith.getFirstFollower(), follower, ith.getFirstFollower());
-		checkMatrix("true branch", ith.getTrueBranch(), tnodes, tedges);
-		checkMatrix("false branch", ith.getFalseBranch(), fnodes, fedges);
+		checkMatrix("true branch", ith.getTrueBranch(), tnodes);
+		checkMatrix("false branch", ith.getFalseBranch(), fnodes);
 	}
 
-	private void assertLoop(Statement condition, Statement follower, Collection<Statement> nodes,
-			Collection<Edge> edges, Loop loop) {
+	private void assertLoop(Statement condition, Statement follower, Collection<Statement> nodes, Loop loop) {
 		assertEquals("Wrong condition: " + loop.getCondition(), condition, loop.getCondition());
 		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
-		checkMatrix("loop body", loop.getBody(), nodes, edges);
+		checkMatrix("loop body", loop.getBody(), nodes);
 	}
 
 	@Test
@@ -119,8 +95,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
 
-		assertIf(condition, ret, collect(a1), Collections.emptyList(), collect(a2), Collections.emptyList(),
-				(IfThenElse) struct);
+		assertIf(condition, ret, collect(a1), collect(a2), (IfThenElse) struct);
 	}
 
 	@Test
@@ -141,8 +116,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
 
-		assertIf(condition, ret, Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
-				Collections.emptyList(), (IfThenElse) struct);
+		assertIf(condition, ret, Collections.emptyList(), Collections.emptyList(), (IfThenElse) struct);
 	}
 
 	@Test
@@ -160,8 +134,7 @@ public class ConditionalsExtractionTest {
 
 		cfg.addEdge(new TrueEdge(condition, a1));
 		cfg.addEdge(new FalseEdge(condition, ret));
-		SequentialEdge edge = new SequentialEdge(a1, a2);
-		cfg.addEdge(edge);
+		cfg.addEdge(new SequentialEdge(a1, a2));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 
 		Collection<ControlFlowStructure> extracted = new ControlFlowExtractor(cfg).extract();
@@ -170,8 +143,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
 
-		assertIf(condition, ret, collect(a1, a2), collect(edge), Collections.emptyList(), Collections.emptyList(),
-				(IfThenElse) struct);
+		assertIf(condition, ret, collect(a1, a2), Collections.emptyList(), (IfThenElse) struct);
 	}
 
 	@Test
@@ -191,8 +163,7 @@ public class ConditionalsExtractionTest {
 
 		cfg.addEdge(new TrueEdge(condition, a1));
 		cfg.addEdge(new FalseEdge(condition, a2));
-		SequentialEdge edge = new SequentialEdge(a1, a3);
-		cfg.addEdge(edge);
+		cfg.addEdge(new SequentialEdge(a1, a3));
 		cfg.addEdge(new SequentialEdge(a2, ret));
 		cfg.addEdge(new SequentialEdge(a3, ret));
 
@@ -202,8 +173,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
 
-		assertIf(condition, ret, collect(a1, a3), collect(edge), collect(a2), Collections.emptyList(),
-				(IfThenElse) struct);
+		assertIf(condition, ret, collect(a1, a3), collect(a2), (IfThenElse) struct);
 	}
 
 	@Test
@@ -228,12 +198,9 @@ public class ConditionalsExtractionTest {
 		cfg.addNode(ret);
 
 		cfg.addEdge(new TrueEdge(condition, a1));
-		SequentialEdge e1 = new SequentialEdge(a1, a2);
-		cfg.addEdge(e1);
-		SequentialEdge e2 = new SequentialEdge(a2, a3);
-		cfg.addEdge(e2);
-		SequentialEdge e3 = new SequentialEdge(a3, a4);
-		cfg.addEdge(e3);
+		cfg.addEdge(new SequentialEdge(a1, a2));
+		cfg.addEdge(new SequentialEdge(a2, a3));
+		cfg.addEdge(new SequentialEdge(a3, a4));
 		cfg.addEdge(new SequentialEdge(a4, a6));
 		cfg.addEdge(new FalseEdge(condition, a5));
 		cfg.addEdge(new SequentialEdge(a5, a6));
@@ -245,8 +212,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent an if-then-else", struct instanceof IfThenElse);
 
-		assertIf(condition, a6, collect(a1, a2, a3, a4), collect(e1, e2, e3), collect(a5), Collections.emptyList(),
-				(IfThenElse) struct);
+		assertIf(condition, a6, collect(a1, a2, a3, a4), collect(a5), (IfThenElse) struct);
 	}
 
 	@Test
@@ -273,7 +239,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
 
-		assertLoop(condition, a2, collect(a1), Collections.emptyList(), (Loop) struct);
+		assertLoop(condition, a2, collect(a1), (Loop) struct);
 	}
 
 	@Test
@@ -299,7 +265,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
 
-		assertLoop(condition, a2, Collections.emptyList(), Collections.emptyList(), (Loop) struct);
+		assertLoop(condition, a2, Collections.emptyList(), (Loop) struct);
 	}
 
 	@Test
@@ -324,14 +290,10 @@ public class ConditionalsExtractionTest {
 		cfg.addNode(ret);
 
 		cfg.addEdge(new TrueEdge(condition, a1));
-		SequentialEdge e1 = new SequentialEdge(a1, a2);
-		SequentialEdge e2 = new SequentialEdge(a2, a3);
-		SequentialEdge e3 = new SequentialEdge(a3, a4);
-		SequentialEdge e4 = new SequentialEdge(a4, a5);
-		cfg.addEdge(e1);
-		cfg.addEdge(e2);
-		cfg.addEdge(e3);
-		cfg.addEdge(e4);
+		cfg.addEdge(new SequentialEdge(a1, a2));
+		cfg.addEdge(new SequentialEdge(a2, a3));
+		cfg.addEdge(new SequentialEdge(a3, a4));
+		cfg.addEdge(new SequentialEdge(a4, a5));
 		cfg.addEdge(new SequentialEdge(a5, condition));
 		cfg.addEdge(new FalseEdge(condition, a6));
 		cfg.addEdge(new SequentialEdge(a6, ret));
@@ -342,7 +304,7 @@ public class ConditionalsExtractionTest {
 		ControlFlowStructure struct = extracted.iterator().next();
 		assertTrue(struct + " does not represent a loop", struct instanceof Loop);
 
-		assertLoop(condition, a6, collect(a1, a2, a3, a4, a5), collect(e1, e2, e3, e4), (Loop) struct);
+		assertLoop(condition, a6, collect(a1, a2, a3, a4, a5), (Loop) struct);
 	}
 
 	@Test
@@ -369,18 +331,12 @@ public class ConditionalsExtractionTest {
 		cfg.addNode(ret);
 
 		cfg.addEdge(new TrueEdge(loop_condition, loop_a1));
-		SequentialEdge loop_e1 = new SequentialEdge(loop_a1, if_condition);
-		cfg.addEdge(loop_e1);
-		TrueEdge loop_e2 = new TrueEdge(if_condition, if_a1);
-		cfg.addEdge(loop_e2);
-		SequentialEdge if_edge = new SequentialEdge(if_a1, if_a3);
-		cfg.addEdge(if_edge);
-		SequentialEdge loop_e3 = new SequentialEdge(if_a3, loop_a2);
-		cfg.addEdge(loop_e3);
-		FalseEdge loop_e4 = new FalseEdge(if_condition, if_a2);
-		cfg.addEdge(loop_e4);
-		SequentialEdge loop_e5 = new SequentialEdge(if_a2, loop_a2);
-		cfg.addEdge(loop_e5);
+		cfg.addEdge(new SequentialEdge(loop_a1, if_condition));
+		cfg.addEdge(new TrueEdge(if_condition, if_a1));
+		cfg.addEdge(new SequentialEdge(if_a1, if_a3));
+		cfg.addEdge(new SequentialEdge(if_a3, loop_a2));
+		cfg.addEdge(new FalseEdge(if_condition, if_a2));
+		cfg.addEdge(new SequentialEdge(if_a2, loop_a2));
 		cfg.addEdge(new SequentialEdge(loop_a2, loop_condition));
 		cfg.addEdge(new FalseEdge(loop_condition, ret));
 
@@ -403,9 +359,7 @@ public class ConditionalsExtractionTest {
 			fail("Wrong conditional structures: excpected one loop and one if-then-else, but got a "
 					+ first.getClass().getSimpleName() + " and a " + second.getClass().getSimpleName());
 
-		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_edge), collect(if_a2),
-				Collections.emptyList(), ith);
-		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2),
-				collect(if_edge, loop_e1, loop_e2, loop_e3, loop_e4, loop_e5), loop);
+		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_a2), ith);
+		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2), loop);
 	}
 }

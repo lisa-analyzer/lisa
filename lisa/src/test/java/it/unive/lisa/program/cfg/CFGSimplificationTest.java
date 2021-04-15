@@ -45,7 +45,7 @@ public class CFGSimplificationTest {
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
-		
+
 		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
 		ret = new Return(second, new VariableRef(second, "x"));
@@ -149,12 +149,13 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(print, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
-		
+
 		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(print);
 		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(noop1);
-		first.addControlFlowStructure(new IfThenElse(gt, noop2, tbranch, fbranch));
+		first.addControlFlowStructure(
+				new IfThenElse(first.getAdjacencyMatrix(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
 
 		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
 		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
@@ -166,16 +167,17 @@ public class CFGSimplificationTest {
 		second.addNode(gt);
 		second.addNode(print);
 		second.addNode(ret);
-		
+
 		second.addEdge(new SequentialEdge(assign, gt));
 		second.addEdge(new TrueEdge(gt, print));
 		second.addEdge(new FalseEdge(gt, ret));
 		second.addEdge(new SequentialEdge(print, ret));
-		
+
 		tbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(print);
 		fbranch = new AdjacencyMatrix<>();
-		second.addControlFlowStructure(new IfThenElse(gt, ret, tbranch, fbranch));
+		second.addControlFlowStructure(
+				new IfThenElse(second.getAdjacencyMatrix(), gt, ret, tbranch.getNodes(), fbranch.getNodes()));
 
 		first.validate();
 		second.validate();
@@ -295,12 +297,13 @@ public class CFGSimplificationTest {
 		first.addEdge(new FalseEdge(assign1, assign3));
 		first.addEdge(new SequentialEdge(assign2, end));
 		first.addEdge(new SequentialEdge(assign3, end));
-		
+
 		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(assign2);
 		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
 		fbranch.addNode(assign3);
-		first.addControlFlowStructure(new IfThenElse(assign1, end, tbranch, fbranch));
+		first.addControlFlowStructure(
+				new IfThenElse(first.getAdjacencyMatrix(), assign1, end, tbranch.getNodes(), fbranch.getNodes()));
 
 		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
 		assign1 = new Assignment(second, new VariableRef(second, "b"), new Literal(second, true, Untyped.INSTANCE));
@@ -316,8 +319,9 @@ public class CFGSimplificationTest {
 		tbranch.addNode(assign2);
 		fbranch = new AdjacencyMatrix<>();
 		fbranch.addNode(assign3);
-		second.addControlFlowStructure(new IfThenElse(assign1, null, tbranch, fbranch));
-		
+		second.addControlFlowStructure(
+				new IfThenElse(second.getAdjacencyMatrix(), assign1, null, tbranch.getNodes(), fbranch.getNodes()));
+
 		first.validate();
 		second.validate();
 		first.simplify();

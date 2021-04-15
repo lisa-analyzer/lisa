@@ -2,8 +2,10 @@ package it.unive.lisa.util.datastructures.graph;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.workset.LIFOWorkingSet;
@@ -101,6 +104,10 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
+	public void removeNode(N node) {
+		matrix.remove(node);
+	}
+
 	/**
 	 * Yields the collection of nodes of this matrix.
 	 * 
@@ -128,6 +135,14 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 
 		matrix.get(e.getSource()).getRight().add(e);
 		matrix.get(e.getDestination()).getLeft().add(e);
+	}
+
+	public void removeEdge(E e) {
+		if (!matrix.containsKey(e.getSource()) || !matrix.containsKey(e.getDestination()))
+			return;
+
+		matrix.get(e.getSource()).getRight().remove(e);
+		matrix.get(e.getDestination()).getLeft().remove(e);
 	}
 
 	/**
@@ -213,30 +228,44 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * simplified has an outgoing edge that is not simplifiable, according to
 	 * {@link Edge#canBeSimplified()}.
 	 * 
-	 * @param targets     the set of the {@link Node}s that needs to be
-	 *                        simplified
-	 * @param entrypoints the collection of {@link Node}s that are considered as
-	 *                        entrypoints of the graph built over this adjacency
-	 *                        matrix
+	 * @param targets       the set of the {@link Node}s that needs to be
+	 *                          simplified
+	 * @param entrypoints   the collection of {@link Node}s that are considered
+	 *                          as entrypoints of the graph built over this
+	 *                          adjacency matrix
+	 * @param removedEdges  the collections of edges that got removed during the
+	 *                          simplification, filled by this method (the
+	 *                          collection will be cleared before simplifying)
+	 * @param replacedEdges the map of edges that got replaced during the
+	 *                          simplification, filled by this method (the map
+	 *                          will be cleared before simplifying); each entry
+	 *                          refers to a single simplified edge, and is in
+	 *                          the form
+	 *                          {@code <<ingoing removed, outgoing removed>, added>}
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one node
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	public synchronized void simplify(Set<N> targets, Collection<N> entrypoints) {
+	public synchronized void simplify(Set<N> targets, Collection<N> entrypoints, Collection<E> removedEdges,
+			Map<Pair<E, E>, E> replacedEdges) {
+		removedEdges.clear();
+		replacedEdges.clear();
+
 		for (N t : targets) {
 			ExternalSet<E> ingoing = matrix.get(t).getLeft();
 			ExternalSet<E> outgoing = matrix.get(t).getRight();
 			boolean entry = entrypoints.contains(t);
 
 			if (ingoing.isEmpty() && !outgoing.isEmpty())
-				// this is a source node
+				// this is a entry node
 				for (E out : outgoing) {
 					if (!out.canBeSimplified())
 						throw new UnsupportedOperationException(
 								"Cannot simplify an edge with class " + out.getClass().getSimpleName());
 
 					// remove the edge
+					removedEdges.add(out);
 					matrix.get(out.getDestination()).getLeft().remove(out);
 					if (entry)
 						entrypoints.add(out.getDestination());
@@ -249,6 +278,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 								"Cannot simplify an edge with class " + in.getClass().getSimpleName());
 
 					// remove the edge
+					removedEdges.add(in);
 					matrix.get(in.getSource()).getRight().remove(in);
 				}
 			else
@@ -262,6 +292,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 						// replicate the edge from ingoing.source to
 						// outgoing.dest
 						E _new = in.newInstance(in.getSource(), out.getDestination());
+						replacedEdges.put(Pair.of(in, out), _new);
 
 						// swap the ingoing edge
 						matrix.get(in.getSource()).getRight().remove(in);
@@ -439,7 +470,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			check.stream().filter(n -> !remove.contains(n)).forEach(add::add);
 		} while (!add.isEmpty());
 
-		simplify(remove, Collections.emptyList());
+		// we do not care about the output values
+		simplify(remove, Collections.emptyList(), new LinkedList<>(), new HashMap<>());
 	}
 
 	public Collection<N> getEntries() {
@@ -474,5 +506,32 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 
 		for (E edge : other.getEdges())
 			addEdge(edge);
+	}
+
+	public void validate(Collection<N> entrypoints) throws ProgramValidationException {
+		Collection<N> nodes = getNodes();
+
+		// all edges should be connected to statements inside the matrix
+		for (Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>> st : matrix.entrySet()) {
+			for (E in : st.getValue().getLeft())
+				validateEdge(nodes, in);
+
+			for (E out : st.getValue().getRight())
+				validateEdge(nodes, out);
+
+			// no deadcode
+			if (st.getValue().getLeft().isEmpty() && !entrypoints.contains(st.getKey()))
+				throw new ProgramValidationException(
+						"Unreachable node that is not marked as entrypoint: " + st.getKey());
+		}
+	}
+
+	private void validateEdge(Collection<N> nodes, E edge) throws ProgramValidationException {
+		if (!nodes.contains(edge.getSource()))
+			throw new ProgramValidationException("Invalid edge: '" + edge
+					+ "' originates in a node that is not part of the graph");
+		else if (!nodes.contains(edge.getDestination()))
+			throw new ProgramValidationException("Invalid edge: '" + edge
+					+ "' reaches a node that is not part of the graph");
 	}
 }

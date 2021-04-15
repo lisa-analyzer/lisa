@@ -6,9 +6,12 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.
@@ -62,6 +65,10 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	protected Graph(G other) {
 		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
 		this.entrypoints = new ArrayList<>(other.entrypoints);
+	}
+	
+	public AdjacencyMatrix<N, E, G> getAdjacencyMatrix() {
+		return adjacencyMatrix;
 	}
 
 	/**
@@ -166,11 +173,11 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	public final E getEdgeConnecting(N source, N destination) {
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
-	
+
 	public final Collection<E> getIngoingEdges(N node) {
 		return adjacencyMatrix.getIngoingEdges(node);
 	}
-	
+
 	public final Collection<E> getOutgoingEdges(N node) {
 		return adjacencyMatrix.getOutgoingEdges(node);
 	}
@@ -331,18 +338,29 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * the nodes being simplified has an outgoing edge that is not simplifiable,
 	 * according to {@link Edge#canBeSimplified()}.
 	 *
-	 * @param <T>    the type of {@link Node} that needs to be simplified
-	 * @param target the class of the {@link Node} that needs to be simplified
+	 * @param target        the class of the {@link Node} that needs to be
+	 *                          simplified
+	 * @param removedEdges  the collections of edges that got removed during the
+	 *                          simplification, filled by this method (the
+	 *                          collection will be cleared before simplifying)
+	 * @param replacedEdges the map of edges that got replaced during the
+	 *                          simplification, filled by this method (the map
+	 *                          will be cleared before simplifying); each entry
+	 *                          refers to a single simplified edge, and is in
+	 *                          the form
+	 *                          {@code <<ingoing removed, outgoing removed>, added>}
 	 * 
 	 * @throws UnsupportedOperationException if there exists at least one node
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	protected final <T extends N> void simplify(Class<T> target) {
+	protected final Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
+			Map<Pair<E, E>, E> replacedEdges) {
 		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());
 		targets.forEach(this::preSimplify);
-		adjacencyMatrix.simplify(targets, entrypoints);
+		adjacencyMatrix.simplify(targets, entrypoints, removedEdges, replacedEdges);
+		return targets;
 	}
 
 	/**

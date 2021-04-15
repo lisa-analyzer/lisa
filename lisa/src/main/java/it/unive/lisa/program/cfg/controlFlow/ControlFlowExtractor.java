@@ -102,7 +102,8 @@ public class ControlFlowExtractor {
 			}
 
 			Edge exit = findExitEdge(body);
-			computed.put(conditional, new Loop(conditional, exit.getDestination(), body, exit instanceof TrueEdge));
+			computed.put(conditional, new Loop(target.getAdjacencyMatrix(),
+					conditional, exit.getDestination(), body.getNodes(), exit instanceof TrueEdge));
 		}
 
 		private Edge findExitEdge(AdjacencyMatrix<Statement, Edge, CFG> body) {
@@ -259,7 +260,8 @@ public class ControlFlowExtractor {
 						&& (trueOuts == null || trueOuts.isEmpty()) && (falseOuts == null || falseOuts.isEmpty()))
 					// we reached the end of both branches: this is just a
 					// conditional that goes on until the end of cfg
-					return store(new IfThenElse(conditional, null, trueBranch, falseBranch));
+					return store(new IfThenElse(target.getAdjacencyMatrix(), conditional, null, trueBranch.getNodes(),
+							falseBranch.getNodes()));
 
 				first = false;
 			}
@@ -269,19 +271,22 @@ public class ControlFlowExtractor {
 			if (falseBranch.containsNode(trueNext, false)) {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
-				return new IfThenElse(conditional, trueNext, trueBranch, falseBranch);
+				return new IfThenElse(target.getAdjacencyMatrix(), conditional, trueNext, trueBranch.getNodes(),
+						falseBranch.getNodes());
 			}
 
 			if (trueBranch.containsNode(falseNext, false)) {
 				// need to cut the extra part from the false branch
 				trueBranch.removeFrom(falseNext);
-				return new IfThenElse(conditional, falseNext, trueBranch, falseBranch);
+				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),
+						falseBranch.getNodes());
 			}
 
 			if (trueNext.equals(falseNext))
 				// this only holds for the symmetric if - same number of
 				// statements in both branches
-				return new IfThenElse(conditional, falseNext, trueBranch, falseBranch);
+				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),
+						falseBranch.getNodes());
 
 			return null;
 		}

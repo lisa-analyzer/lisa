@@ -4,6 +4,7 @@ import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -315,8 +316,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			ite.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new IfThenElse(condition, noop, then.getMiddle(),
-				otherwise == null ? new AdjacencyMatrix<>(matrix.getEdgeFactory()) : otherwise.getMiddle()));
+		cfs.add(new IfThenElse(matrix, condition, noop, then.getMiddle().getNodes(),
+				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
 
 		return Triple.of(condition, ite, noop);
 	}
@@ -366,7 +367,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new Loop(condition, noop, body.getMiddle()));
+		cfs.add(new Loop(matrix, condition, noop, body.getMiddle().getNodes()));
 
 		return Triple.of(condition, loop, noop);
 	}
@@ -421,12 +422,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		loop.addEdge(new FalseEdge(condition, noop));
 
 		if (post == null)
-			cfs.add(new Loop(condition, noop, body.getMiddle()));
+			cfs.add(new Loop(matrix, condition, noop, body.getMiddle().getNodes()));
 		else {
 			AdjacencyMatrix<Statement, Edge, CFG> tmp = new AdjacencyMatrix<>(body.getMiddle());
 			tmp.addNode(last);
 			loop.addEdge(new SequentialEdge(body.getRight(), last));
-			cfs.add(new Loop(condition, noop, tmp));
+			cfs.add(new Loop(matrix, condition, noop, tmp.getNodes()));
 		}
 
 		return Triple.of(first, loop, noop);
