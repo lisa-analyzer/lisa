@@ -1,5 +1,6 @@
 package it.unive.lisa.program.annotations;
 
+import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -72,5 +73,18 @@ public class Annotations implements Iterable<Annotation> {
 	@Override
 	public String toString() {
 		return annotations == null ? "[]" : "[" + StringUtils.join(annotations, ", ") + "]";
+	}
+
+	/**
+	 * Returns {@code true} if {@code matcher} matches at least one of this
+	 * annotations, {@code false} otherwise.
+	 * 
+	 * @param m the annotation matcher
+	 * 
+	 * @return {@code true} if {@code matcher} matches at least one of this
+	 *             annotations, {@code false} otherwise
+	 */
+	public final boolean contains(AnnotationMatcher m) {
+		return annotations.stream().anyMatch(ann -> m.matches(ann));
 	}
 }
