@@ -4,11 +4,16 @@ import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -161,6 +166,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	protected Interval lubAux(Interval other) throws SemanticException {
 		Integer newLow = lowIsMinusInfinity() || other.lowIsMinusInfinity() ? null : Math.min(low, other.low);
 		Integer newHigh = highIsPlusInfinity() || other.highIsPlusInfinity() ? null : Math.max(high, other.high);
+		return new Interval(newLow, newHigh);
+	}
+
+	@Override
+	public Interval glbAux(Interval other) {
+		Integer newLow = lowIsMinusInfinity() ? other.low : other.lowIsMinusInfinity() ? low : Math.max(low, other.low);
+		Integer newHigh = highIsPlusInfinity() ? other.high
+				: other.highIsPlusInfinity() ? high : Math.min(high, other.high);
 		return new Interval(newLow, newHigh);
 	}
 
@@ -422,6 +435,94 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return false;
 		} else if (!low.equals(other.low))
 			return false;
-		return isTop && other.isTop;
+		return true;
+	}
+
+	@Override
+	protected ValueEnvironment<Interval> assumeBinaryExpression(
+			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
+			ValueExpression right, ProgramPoint pp) throws SemanticException {
+		switch (operator) {
+		case COMPARISON_EQ:
+			if (left instanceof Identifier)
+				environment = environment.assign((Identifier) left, right, pp);
+			else if (right instanceof Identifier)
+				environment = environment.assign((Identifier) right, left, pp);
+			return environment;
+		case COMPARISON_GE:
+			if (left instanceof Identifier) {
+				Interval rightEval = eval(right, environment, pp);
+				if (rightEval.lowIsMinusInfinity())
+					return environment;
+
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval bound = new Interval(rightEval.low, null);
+				map.put((Identifier) left, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else if (right instanceof Identifier) {
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval leftEval = eval(left, environment, pp);
+				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low);
+				map.put((Identifier) right, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else
+				return environment;
+		case COMPARISON_GT:
+			if (left instanceof Identifier) {
+				Interval rightEval = eval(right, environment, pp);
+				if (rightEval.lowIsMinusInfinity())
+					return environment;
+
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval bound = new Interval(rightEval.low + 1, null);
+				map.put((Identifier) left, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else if (right instanceof Identifier) {
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval leftEval = eval(left, environment, pp);
+				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low - 1);
+				map.put((Identifier) right, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else
+				return environment;
+		case COMPARISON_LE:
+			if (left instanceof Identifier) {
+				Interval rightEval = eval(right, environment, pp);
+				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low);
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				map.put((Identifier) left, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else if (right instanceof Identifier) {
+				Interval leftEval = eval(left, environment, pp);
+				if (leftEval.lowIsMinusInfinity())
+					return environment;
+
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval bound = new Interval(leftEval.low, null);
+				map.put((Identifier) right, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else
+				return environment;
+		case COMPARISON_LT:
+			if (left instanceof Identifier) {
+				Interval rightEval = eval(right, environment, pp);
+				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low - 1);
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				map.put((Identifier) left, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else if (right instanceof Identifier) {
+				Interval leftEval = eval(left, environment, pp);
+				if (leftEval.lowIsMinusInfinity())
+					return environment;
+
+				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
+				Interval bound = new Interval(leftEval.low + 1, null);
+				map.put((Identifier) right, bound);
+				return new ValueEnvironment<Interval>(bottom(), map);
+			} else
+				return environment;
+		default:
+			return environment;
+		}
 	}
 }

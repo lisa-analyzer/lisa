@@ -35,7 +35,14 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		super(domain);
 	}
 
-	private ValueEnvironment(T domain, Map<Identifier, T> function) {
+	/**
+	 * Builds an environment from a given map.
+	 * 
+	 * @param domain   a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the starting map
+	 */
+	public ValueEnvironment(T domain, Map<Identifier, T> function) {
 		super(domain, function);
 	}
 

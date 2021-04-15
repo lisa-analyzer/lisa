@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -141,6 +142,12 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			if (right.isBottom())
 				return right;
 
+			if (binary.getOperator() == BinaryOperator.TYPE_CAST)
+				return evalTypeCast(binary, left, right);
+
+			if (binary.getOperator() == BinaryOperator.TYPE_CONV)
+				return evalTypeConv(binary, left, right);
+
 			return evalBinaryExpression(binary.getOperator(), left, right, pp);
 		}
 
@@ -233,7 +240,9 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the evaluation of a {@link BinaryExpression} applying
 	 * {@code operator} to two expressions whose abstract value are {@code left}
 	 * and {@code right}, respectively. It is guaranteed that both {@code left}
-	 * and {@code right} are not {@link #bottom()}.
+	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
+	 * neither {@link BinaryOperator#TYPE_CAST} nor
+	 * {@link BinaryOperator#TYPE_CONV}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract
@@ -247,6 +256,34 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 */
 	protected T evalBinaryExpression(BinaryOperator operator, T left, T right, ProgramPoint pp) {
 		return top();
+	}
+
+	/**
+	 * Yields the evaluation of a type conversion expression.
+	 * 
+	 * @param conv  the type conversion expression
+	 * @param left  the left expression, namely the expression to be converted
+	 * @param right the right expression, namely the types to which left should
+	 *                  be converted
+	 * 
+	 * @return the evaluation of the type conversion expression
+	 */
+	protected T evalTypeConv(BinaryExpression conv, T left, T right) {
+		return conv.getTypes().isEmpty() ? bottom() : left;
+	}
+
+	/**
+	 * Yields the evaluation of a type cast expression.
+	 * 
+	 * @param cast  the type casted expression
+	 * @param left  the left expression, namely the expression to be casted
+	 * @param right the right expression, namely the types to which left should
+	 *                  be casted
+	 * 
+	 * @return the evaluation of the type cast expression
+	 */
+	protected T evalTypeCast(BinaryExpression cast, T left, T right) {
+		return cast.getTypes().isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -430,5 +467,47 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final String toString() {
 		return representation();
+	}
+
+	@Override
+	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		return environment;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public final T glb(T other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (T) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
+			return (T) other;
+
+		return glbAux(other);
+	}
+
+	/**
+	 * Performs the greatest lower bound operation between this inferred value
+	 * and {@code other}, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * <li>{@code this} and {@code other} are not comparable (according to
+	 * {@link BaseLattice#lessOrEqual(BaseLattice)})</li>
+	 * </ul>
+	 * The default implementation returns {@link BaseLattice#bottom()}
+	 * 
+	 * @param other the other inferred value
+	 * 
+	 * @return the greatest lower bound between this and other
+	 */
+	protected T glbAux(T other) {
+		return bottom();
 	}
 }

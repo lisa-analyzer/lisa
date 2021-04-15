@@ -59,7 +59,12 @@ public enum BinaryOperator implements Operator {
 	 * both {@code b1} and {@code b2} are evaluated The return type of this
 	 * operator is {@link BooleanType}.
 	 */
-	LOGICAL_OR("||"),
+	LOGICAL_OR("||") {
+		@Override
+		public BinaryOperator opposite() {
+			return LOGICAL_AND;
+		}
+	},
 
 	/**
 	 * Given two Boolean values {@code b1} and {@code b2} of type
@@ -68,7 +73,12 @@ public enum BinaryOperator implements Operator {
 	 * both {@code b1} and {@code b2} are evaluated The return type of this
 	 * operator is {@link BooleanType}.
 	 */
-	LOGICAL_AND("&&"),
+	LOGICAL_AND("&&") {
+		@Override
+		public BinaryOperator opposite() {
+			return LOGICAL_OR;
+		}
+	},
 
 	/**
 	 * Given two values, check whether they have different values or different
@@ -77,7 +87,12 @@ public enum BinaryOperator implements Operator {
 	 * {@link BinaryOperator#COMPARISON_EQ}. The return type of this operator is
 	 * {@link BooleanType}.
 	 */
-	COMPARISON_NE("!="),
+	COMPARISON_NE("!=") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_EQ;
+		}
+	},
 
 	/**
 	 * Given two values, check whether they have same values and same type. If
@@ -85,7 +100,12 @@ public enum BinaryOperator implements Operator {
 	 * the logical negation of {@link BinaryOperator#COMPARISON_NE}. The return
 	 * type of this operator is {@link BooleanType}.
 	 */
-	COMPARISON_EQ("=="),
+	COMPARISON_EQ("==") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_NE;
+		}
+	},
 
 	/**
 	 * Given two numeric values {@code n1} and {@code n2} of type
@@ -94,7 +114,12 @@ public enum BinaryOperator implements Operator {
 	 * value is returned, false otherwise. The return type of this operator is
 	 * {@link BooleanType}.
 	 */
-	COMPARISON_GE(">="),
+	COMPARISON_GE(">=") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_LT;
+		}
+	},
 
 	/**
 	 * Given two numeric values {@code n1} and {@code n2}, this operator checks
@@ -102,7 +127,12 @@ public enum BinaryOperator implements Operator {
 	 * {@code n2}. If so, true value is returned, false otherwise. The return
 	 * type of this operator is {@link BooleanType}.
 	 */
-	COMPARISON_GT(">"),
+	COMPARISON_GT(">") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_LE;
+		}
+	},
 
 	/**
 	 * Given two numeric values {@code n1} and {@code n2}, this operator checks
@@ -110,7 +140,12 @@ public enum BinaryOperator implements Operator {
 	 * with {@code n2}. If so, true value is returned, false otherwise. The
 	 * return type of this operator is {@link BooleanType}.
 	 */
-	COMPARISON_LE("<="),
+	COMPARISON_LE("<=") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_GT;
+		}
+	},
 
 	/**
 	 * Given two numeric values {@code n1} and {@code n2}, this operator checks
@@ -118,7 +153,12 @@ public enum BinaryOperator implements Operator {
 	 * {@code n2}. If so, true value is returned, false otherwise. The return
 	 * type of this operator is {@link BooleanType}.
 	 */
-	COMPARISON_LT("<"),
+	COMPARISON_LT("<") {
+		@Override
+		public BinaryOperator opposite() {
+			return COMPARISON_GE;
+		}
+	},
 
 	/**
 	 * Given two string values {@code s1} and {@code s2} of type
