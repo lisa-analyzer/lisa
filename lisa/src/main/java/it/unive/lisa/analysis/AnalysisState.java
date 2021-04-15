@@ -1,14 +1,14 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSetLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -37,7 +37,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * The last expressions that have been computed, representing side-effect
 	 * free expressions that are pending evaluation
 	 */
-	private final Collection<SymbolicExpression> computedExpressions;
+	private final ExpressionSetLattice computedExpressions;
 
 	/**
 	 * Builds a new state.
@@ -47,7 +47,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * @param computedExpression the expression that has been computed
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression) {
-		this(state, Collections.singleton(computedExpression));
+		this(state, new ExpressionSetLattice(computedExpression));
 	}
 
 	/**
@@ -57,7 +57,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 */
-	public AnalysisState(A state, Collection<SymbolicExpression> computedExpressions) {
+	public AnalysisState(A state, ExpressionSetLattice computedExpressions) {
 		this.state = state;
 		this.computedExpressions = computedExpressions;
 	}
@@ -84,7 +84,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * 
 	 * @return the last computed expression
 	 */
-	public Collection<SymbolicExpression> getComputedExpressions() {
+	public ExpressionSetLattice getComputedExpressions() {
 		return computedExpressions;
 	}
 
@@ -92,9 +92,10 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
-		Collection<SymbolicExpression> exprs = s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions()
-				.stream()
-				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
+		ExpressionSetLattice exprs = new ExpressionSetLattice(
+				s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions()
+						.stream()
+						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 		return new AnalysisState<A, H, V>(s, exprs);
 	}
 
@@ -102,8 +103,8 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
-		Collection<SymbolicExpression> exprs = s.getHeapState().getRewrittenExpressions().stream()
-				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
+		ExpressionSetLattice exprs = new ExpressionSetLattice(s.getHeapState().getRewrittenExpressions().stream()
+				.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 		return new AnalysisState<>(s, exprs);
 	}
 
@@ -192,22 +193,23 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 		return true;
 	}
 
-	private Collection<SymbolicExpression> lubRewrittenExpressions(Collection<SymbolicExpression> r1,
-			Collection<SymbolicExpression> r2) throws SemanticException {
-		Collection<SymbolicExpression> rewritten = new HashSet<>();
-		rewritten.addAll(r1.stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
-		rewritten.addAll(r2.stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
+	private ExpressionSetLattice lubRewrittenExpressions(ExpressionSetLattice r1,
+			ExpressionSetLattice r2) throws SemanticException {
+		Set<SymbolicExpression> rewritten = new HashSet<>();
+		rewritten.addAll(r1.elements().stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
+		rewritten.addAll(r2.elements().stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
 
-		for (Identifier id1 : r1.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
+		for (Identifier id1 : r1.elements().stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
 				.collect(Collectors.toSet()))
-			for (Identifier id2 : r2.stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
+			for (Identifier id2 : r2.elements().stream().filter(t -> t instanceof Identifier)
+					.map(Identifier.class::cast)
 					.collect(Collectors.toSet()))
 				if (id1.equals(id2))
 					rewritten.add(id1.lub(id2));
 				else if (!r1.contains(id2))
 					rewritten.add(id2);
 
-		return rewritten;
+		return new ExpressionSetLattice(rewritten);
 	}
 
 	@Override

@@ -4,12 +4,12 @@ import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
+import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -63,7 +63,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	public SimpleAbstractState<H, V> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		H heap = heapState.assign(id, expression, pp);
-		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ValueExpressionSetLattice exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -78,7 +78,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	public SimpleAbstractState<H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		H heap = heapState.smallStepSemantics(expression, pp);
-		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ValueExpressionSetLattice exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -92,7 +92,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	@Override
 	public SimpleAbstractState<H, V> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		H heap = heapState.assume(expression, pp);
-		Collection<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ValueExpressionSetLattice exprs = heap.getRewrittenExpressions();
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -105,7 +105,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		Collection<ValueExpression> rewritten = heapState.smallStepSemantics(expression, pp).getRewrittenExpressions();
+		ValueExpressionSetLattice rewritten = heapState.smallStepSemantics(expression, pp).getRewrittenExpressions();
 		Satisfiability result = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten)
 			result = result.lub(valueState.satisfies(expr, pp));

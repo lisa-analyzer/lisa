@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.impl.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
@@ -9,10 +10,8 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -28,7 +27,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private final Collection<ValueExpression> rewritten;
+	private final ValueExpressionSetLattice rewritten;
 
 	/**
 	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on
@@ -39,15 +38,15 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	private MonolithicHeap(ValueExpression rewritten) {
-		this(Collections.singleton(rewritten));
+		this(new ValueExpressionSetLattice(rewritten));
 	}
 
-	private MonolithicHeap(Collection<ValueExpression> rewritten) {
+	private MonolithicHeap(ValueExpressionSetLattice rewritten) {
 		this.rewritten = rewritten;
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
+	public ValueExpressionSetLattice getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -93,9 +92,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
-		return new MonolithicHeap(CollectionUtils.union(rewritten, other.rewritten));
+		return new MonolithicHeap(rewritten.lub(other.rewritten));
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import static java.util.Collections.singleton;
-import static org.apache.commons.collections.CollectionUtils.union;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -53,7 +53,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	/**
 	 * The collection of rewritten expression
 	 */
-	private final Collection<ValueExpression> rewritten;
+	private final ValueExpressionSetLattice rewritten;
 
 	/**
 	 * An heap environment tracking which allocation sites are associated to
@@ -66,7 +66,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * unique rewritten expression {@link Skip}.
 	 */
 	public PointBasedHeap() {
-		this(singleton(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()),
+		this(new ValueExpressionSetLattice(new Skip()), new HeapEnvironment<AllocationSites>(new AllocationSites()),
 				Collections.emptyList());
 	}
 
@@ -78,7 +78,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * @param heapEnv       the heap environment that this instance tracks
 	 * @param substitutions the list of heap replacement
 	 */
-	protected PointBasedHeap(Collection<ValueExpression> rewritten,
+	protected PointBasedHeap(ValueExpressionSetLattice rewritten,
 			HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> substitutions) {
 		this.rewritten = rewritten;
 		this.heapEnv = heapEnv;
@@ -102,7 +102,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		if (expression instanceof AllocationSite) {
 			HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, expression, pp);
-			return from(new PointBasedHeap(singleton((AllocationSite) expression),
+			return from(new PointBasedHeap(new ValueExpressionSetLattice((AllocationSite) expression),
 					applySubstitutions(heap, substitutions), substitutions));
 		}
 
@@ -145,7 +145,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap top() {
-		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.top(), Collections.emptyList()));
+		return from(new PointBasedHeap(new ValueExpressionSetLattice(), heapEnv.top(), Collections.emptyList()));
 	}
 
 	@Override
@@ -155,7 +155,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap bottom() {
-		return from(new PointBasedHeap(Collections.emptySet(), heapEnv.bottom(), Collections.emptyList()));
+		return from(new PointBasedHeap(new ValueExpressionSetLattice(), heapEnv.bottom(), Collections.emptyList()));
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
+	public ValueExpressionSetLattice getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -175,7 +175,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap mk(PointBasedHeap reference, ValueExpression expression) {
-		Collection<ValueExpression> rewritten = null;
+		Set<ValueExpression> rewritten = null;
 
 		if (expression instanceof Identifier)
 			for (HeapReplacement r : reference.substitutions)
@@ -183,16 +183,16 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					rewritten = r.getTargets().stream().map(id -> (ValueExpression) id).collect(Collectors.toSet());
 
 		rewritten = rewritten == null ? singleton(expression) : rewritten;
-		return from(new PointBasedHeap(rewritten, reference.heapEnv, reference.substitutions));
+		return from(new PointBasedHeap(new ValueExpressionSetLattice(rewritten), reference.heapEnv,
+				reference.substitutions));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		ArrayList<HeapReplacement> newSubstitions = new ArrayList<>(substitutions);
 		newSubstitions.addAll(other.substitutions);
 
-		return from(new PointBasedHeap(union(rewritten, other.rewritten),
+		return from(new PointBasedHeap(rewritten.lub(other.rewritten),
 				heapEnv.lub(other.heapEnv), newSubstitions));
 	}
 
@@ -336,7 +336,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					result.add((ValueExpression) containerExp);
 			}
 
-			return from(new PointBasedHeap(result, applySubstitutions(childState.heapEnv, substitution), substitution));
+			return from(new PointBasedHeap(new ValueExpressionSetLattice(result),
+					applySubstitutions(childState.heapEnv, substitution), substitution));
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -368,10 +369,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					result = result.stream()
 							.map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId()))
 							.collect(Collectors.toSet());
-				return from(new PointBasedHeap(result, applySubstitutions(heapEnv, substitution), substitution));
+				return from(new PointBasedHeap(new ValueExpressionSetLattice(result),
+						applySubstitutions(heapEnv, substitution), substitution));
 			}
 
-			return from(new PointBasedHeap(singleton(id), applySubstitutions(heapEnv, substitution), substitution));
+			return from(new PointBasedHeap(new ValueExpressionSetLattice(id), applySubstitutions(heapEnv, substitution),
+					substitution));
 		}
 
 		return top();

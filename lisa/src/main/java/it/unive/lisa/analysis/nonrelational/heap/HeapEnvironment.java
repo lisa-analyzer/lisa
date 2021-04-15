@@ -3,13 +3,12 @@ package it.unive.lisa.analysis.nonrelational.heap;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.lattices.ValueExpressionSetLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +32,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	/**
 	 * The rewritten expressions
 	 */
-	private final Collection<ValueExpression> rewritten;
+	private final ValueExpressionSetLattice rewritten;
 
 	/**
 	 * The substitution
@@ -48,7 +47,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 */
 	public HeapEnvironment(T domain) {
 		super(domain);
-		rewritten = Collections.emptyList();
+		rewritten = new ValueExpressionSetLattice();
 		substitution = Collections.emptyList();
 	}
 
@@ -60,10 +59,10 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	 * @param function the initial mapping of this heap environment
 	 */
 	public HeapEnvironment(T domain, Map<Identifier, T> function) {
-		this(domain, function, Collections.emptyList(), Collections.emptyList());
+		this(domain, function, new ValueExpressionSetLattice(), Collections.emptyList());
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function, Collection<ValueExpression> rewritten,
+	private HeapEnvironment(T domain, Map<Identifier, T> function, ValueExpressionSetLattice rewritten,
 			List<HeapReplacement> substitution) {
 		super(domain, function);
 		this.rewritten = rewritten;
@@ -71,7 +70,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
+	public ValueExpressionSetLattice getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -82,7 +81,8 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	protected HeapEnvironment<T> copy() {
-		return new HeapEnvironment<T>(lattice, mkNewFunction(function), new ArrayList<>(rewritten),
+		return new HeapEnvironment<T>(lattice, mkNewFunction(function),
+				new ValueExpressionSetLattice(rewritten.elements()),
 				new ArrayList<>(substitution));
 	}
 
@@ -115,12 +115,13 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public HeapEnvironment<T> top() {
 		return isTop() ? this
-				: new HeapEnvironment<>(lattice.top(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.top(), null, new ValueExpressionSetLattice(), Collections.emptyList());
 	}
 
 	@Override
 	public HeapEnvironment<T> bottom() {
 		return isBottom() ? this
-				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList(), Collections.emptyList());
+				: new HeapEnvironment<>(lattice.bottom(), null, new ValueExpressionSetLattice(),
+						Collections.emptyList());
 	}
 }
