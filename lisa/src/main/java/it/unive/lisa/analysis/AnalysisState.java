@@ -1,15 +1,13 @@
 package it.unive.lisa.analysis;
 
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -121,14 +119,12 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> lub(AnalysisState<A, H, V> other) throws SemanticException {
-		return new AnalysisState<>(state.lub(other.state),
-				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
+		return new AnalysisState<>(state.lub(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
 	public AnalysisState<A, H, V> widening(AnalysisState<A, H, V> other) throws SemanticException {
-		return new AnalysisState<>(state.widening(other.state),
-				lubRewrittenExpressions(computedExpressions, other.computedExpressions));
+		return new AnalysisState<>(state.widening(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
@@ -138,22 +134,22 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> top() {
-		return new AnalysisState<>(state.top(), new Skip());
+		return new AnalysisState<>(state.top(), new ExpressionSet<>());
 	}
 
 	@Override
 	public AnalysisState<A, H, V> bottom() {
-		return new AnalysisState<>(state.bottom(), new Skip());
+		return new AnalysisState<>(state.bottom(), new ExpressionSet<>());
 	}
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.isTop();
+		return state.isTop() && computedExpressions.isBottom();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.isTop();
+		return state.isBottom() && computedExpressions.isBottom();
 	}
 
 	@Override
@@ -190,25 +186,6 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 		} else if (!state.equals(other.state))
 			return false;
 		return true;
-	}
-
-	private ExpressionSet<SymbolicExpression> lubRewrittenExpressions(ExpressionSet<SymbolicExpression> r1,
-			ExpressionSet<SymbolicExpression> r2) throws SemanticException {
-		Set<SymbolicExpression> rewritten = new HashSet<>();
-		rewritten.addAll(r1.elements().stream().filter(e1 -> !(e1 instanceof Identifier)).collect(Collectors.toSet()));
-		rewritten.addAll(r2.elements().stream().filter(e2 -> !(e2 instanceof Identifier)).collect(Collectors.toSet()));
-
-		for (Identifier id1 : r1.elements().stream().filter(t -> t instanceof Identifier).map(Identifier.class::cast)
-				.collect(Collectors.toSet()))
-			for (Identifier id2 : r2.elements().stream().filter(t -> t instanceof Identifier)
-					.map(Identifier.class::cast)
-					.collect(Collectors.toSet()))
-				if (id1.equals(id2))
-					rewritten.add(id1.lub(id2));
-				else if (!r1.contains(id2))
-					rewritten.add(id2);
-
-		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override
