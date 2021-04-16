@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -9,7 +10,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -93,8 +93,8 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
-		return Collections.emptySet();
+	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
+		return new ExpressionSet<ValueExpression>();
 	}
 
 	@Override
