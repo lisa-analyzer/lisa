@@ -1,9 +1,9 @@
 package it.unive.lisa.util.datastructures.graph;
 
+import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -304,49 +304,14 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 
 	private boolean areEqual(Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> first,
 			Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> second) {
-		// the following keeps track of the unmatched nodes in second
-		Collection<N> copy = new HashSet<>(second.keySet());
-		boolean found;
-		for (Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>> entry : first.entrySet()) {
-			found = false;
-			for (Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>> entry2 : second.entrySet())
-				if (copy.contains(entry2.getKey()) && entry.getKey().isEqualTo(entry2.getKey())
-						&& areEqual(entry.getValue().getLeft(), entry2.getValue().getLeft())
-						&& areEqual(entry.getValue().getRight(), entry2.getValue().getRight())) {
-					copy.remove(entry2.getKey());
-					found = true;
-					break;
-				}
-			if (!found)
-				return false;
-		}
-
-		if (!copy.isEmpty())
-			return false;
-
-		return true;
+		return CollectionUtilities.equals(first.entrySet(), second.entrySet(),
+				(e1, e2) -> e1.getKey().isEqualTo(e2.getKey())
+						&& areEqual(e1.getValue().getLeft(), e2.getValue().getLeft())
+						&& areEqual(e1.getValue().getRight(), e2.getValue().getRight()));
 	}
 
 	private boolean areEqual(ExternalSet<E> first, ExternalSet<E> second) {
-		// the following keeps track of the unmatched edges in second
-		Collection<E> copy = second.collect();
-		boolean found;
-		for (E e : first) {
-			found = false;
-			for (E ee : second)
-				if (copy.contains(ee) && e.isEqualTo(ee)) {
-					copy.remove(ee);
-					found = true;
-					break;
-				}
-			if (!found)
-				return false;
-		}
-
-		if (!copy.isEmpty())
-			return false;
-
-		return true;
+		return CollectionUtilities.equals(first, second, (e, ee) -> e.isEqualTo(ee));
 	}
 
 	@Override

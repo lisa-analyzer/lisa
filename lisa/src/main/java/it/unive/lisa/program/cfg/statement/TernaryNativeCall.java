@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
@@ -11,7 +12,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
 
 /**
  * A {@link NativeCall} with a exactly three arguments.
@@ -95,7 +95,7 @@ public abstract class TernaryNativeCall extends NativeCall {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
 					CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = null;
 

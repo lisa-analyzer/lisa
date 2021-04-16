@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.program.Program;
@@ -17,7 +18,6 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.Collection;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic
@@ -136,6 +136,6 @@ public interface CallGraph {
 	<A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> getAbstractResultOf(CFGCall call,
-					AnalysisState<A, H, V> entryState, Collection<SymbolicExpression>[] parameters)
+					AnalysisState<A, H, V> entryState, ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException;
 }

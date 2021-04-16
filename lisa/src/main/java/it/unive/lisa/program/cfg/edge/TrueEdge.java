@@ -4,10 +4,10 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import java.util.Collection;
 
 /**
  * An edge connecting two statements, that is traversed when the condition
@@ -38,7 +38,7 @@ public class TrueEdge extends Edge {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
 					AnalysisState<A, H, V> sourceState) throws SemanticException {
-		Collection<SymbolicExpression> exprs = sourceState.getComputedExpressions();
+		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : exprs) {
 			AnalysisState<A, H, V> tmp = sourceState.assume(expr, getSource());

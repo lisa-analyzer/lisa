@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.impl.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -13,7 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.Utils;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
 
-	private final Collection<ValueExpression> rewritten;
+	private final ExpressionSet<ValueExpression> rewritten;
 
 	private final Collection<String> names;
 
@@ -48,10 +49,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	private TypeBasedHeap(ValueExpression rewritten) {
-		this(Collections.singleton(rewritten), new HashSet<>());
+		this(new ExpressionSet<ValueExpression>(rewritten), new HashSet<>());
 	}
 
-	private TypeBasedHeap(Collection<ValueExpression> rewritten, Collection<String> names) {
+	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Collection<String> names) {
 		this.rewritten = rewritten;
 		this.names = names;
 	}
@@ -83,7 +84,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public String representation() {
 		Collection<String> res = new TreeSet<String>(
-				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		res.addAll(names);
 		return res.toString();
 	}
@@ -99,7 +101,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
+	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -110,7 +112,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	protected TypeBasedHeap mk(TypeBasedHeap reference, ValueExpression expression) {
-		return new TypeBasedHeap(Collections.singleton(expression), reference.names);
+		return new TypeBasedHeap(new ExpressionSet<ValueExpression>(expression), reference.names);
 	}
 
 	@Override
@@ -131,7 +133,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					}
 				}
 
-			return new TypeBasedHeap(ids, names);
+			return new TypeBasedHeap(new ExpressionSet<ValueExpression>(ids), names);
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -143,7 +145,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					names.add(type.toString());
 				}
 
-			return new TypeBasedHeap(ids, names);
+			return new TypeBasedHeap(new ExpressionSet<ValueExpression>(ids), names);
 		}
 
 		return top();
@@ -152,7 +154,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	@SuppressWarnings("unchecked")
 	protected TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
-		return new TypeBasedHeap(CollectionUtils.union(rewritten, other.rewritten),
+		return new TypeBasedHeap(rewritten.lub(other.rewritten),
 				CollectionUtils.union(names, other.names));
 	}
 
