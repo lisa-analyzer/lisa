@@ -13,15 +13,31 @@ public class Annotation {
 
 	private final List<AnnotationMember> annotationMembers;
 
+	private final boolean inherited;
+
 	/**
-	 * Builds an annotation from its name and its members.
+	 * Builds an annotation from its name and its members that it is not
+	 * inherited.
 	 * 
 	 * @param annotationName    the name of the annotation
 	 * @param annotationMembers the annotation members
 	 */
 	public Annotation(String annotationName, List<AnnotationMember> annotationMembers) {
+		this(annotationName, annotationMembers, false);
+	}
+
+	/**
+	 * Builds an annotation from its name and its members.
+	 * 
+	 * @param annotationName    the name of the annotation
+	 * @param annotationMembers the annotation members
+	 * @param inherited         denotes whether the annotation is inherited or
+	 *                              not
+	 */
+	public Annotation(String annotationName, List<AnnotationMember> annotationMembers, boolean inherited) {
 		this.annotationMembers = annotationMembers;
 		this.annotationName = annotationName;
+		this.inherited = inherited;
 	}
 
 	/**
@@ -48,6 +64,7 @@ public class Annotation {
 		int result = 1;
 		result = prime * result + ((annotationMembers == null) ? 0 : annotationMembers.hashCode());
 		result = prime * result + ((annotationName == null) ? 0 : annotationName.hashCode());
+		result = prime * result + (inherited ? 1231 : 1237);
 		return result;
 	}
 
@@ -69,6 +86,8 @@ public class Annotation {
 			if (other.annotationName != null)
 				return false;
 		} else if (!annotationName.equals(other.annotationName))
+			return false;
+		if (inherited != other.inherited)
 			return false;
 		return true;
 	}

@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -153,11 +154,11 @@ public class Parameter implements CodeElement {
 	}
 
 	/**
-	 * Sets the annotations of this parameter.
+	 * Adds an annotations to this parameter.
 	 * 
-	 * @param annotations the annotations to be set
+	 * @param ann the annotation to be added
 	 */
-	public void setAnnotations(Annotations annotations) {
-		this.annotations = annotations;
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 }

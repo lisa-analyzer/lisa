@@ -1,11 +1,13 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -593,6 +595,28 @@ public class CompilationUnit extends Unit {
 					}
 			}
 
+		for (CompilationUnit superUnit : superUnits)
+			for (Annotation ann : superUnit.getAnnotations()) {
+				Annotation inheritedAnn = new Annotation(ann.getAnnotationName(), ann.getAnnotationMembers(), true);
+				addAnnotation(inheritedAnn);
+			}
+
+		for (CodeMember instCfg : getInstanceCodeMembers(false))
+			for (CodeMember matching : instCfg.getDescriptor().overrides())
+				for (Annotation ann : matching.getDescriptor().getAnnotations()) {
+					Annotation inheritedAnn = new Annotation(ann.getAnnotationName(), ann.getAnnotationMembers(), true);
+					instCfg.getDescriptor().addAnnotation(inheritedAnn);
+
+					Parameter[] args = instCfg.getDescriptor().getArgs();
+					Parameter[] superArgs = matching.getDescriptor().getArgs();
+					for (int i = 0; i < args.length; i++)
+						for (Annotation parAnn : superArgs[i].getAnnotations()) {
+							Annotation inheritedParAnn = new Annotation(parAnn.getAnnotationName(),
+									parAnn.getAnnotationMembers(), true);
+							args[i].addAnnotation(inheritedParAnn);
+						}
+				}
+
 		hierarchyComputed = true;
 	}
 
@@ -606,11 +630,11 @@ public class CompilationUnit extends Unit {
 	}
 
 	/**
-	 * Sets the annotations of this compilation unit.
+	 * Adds an annotation to the annotations of this compilation unit.
 	 * 
-	 * @param annotations the annotations to be set
+	 * @param ann the annotation to be added
 	 */
-	public void setAnnotations(Annotations annotations) {
-		this.annotations = annotations;
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 }

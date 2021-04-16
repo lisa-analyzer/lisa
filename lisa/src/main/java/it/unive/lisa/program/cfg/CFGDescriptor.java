@@ -2,6 +2,7 @@ package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -152,6 +153,7 @@ public class CFGDescriptor implements CodeElement {
 		overridable = instance;
 		overriddenBy = new HashSet<>();
 		overrides = new HashSet<>();
+		annotations = new Annotations();
 
 		this.variables = new LinkedList<>();
 		int i = 0;
@@ -434,11 +436,11 @@ public class CFGDescriptor implements CodeElement {
 	}
 
 	/**
-	 * Sets the annotations of this descriptor.
+	 * Adds an annotations to this descriptor.
 	 * 
-	 * @param annotations the annotations to be set
+	 * @param ann the annotation to be added
 	 */
-	public void setAnnotations(Annotations annotations) {
-		this.annotations = annotations;
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 }

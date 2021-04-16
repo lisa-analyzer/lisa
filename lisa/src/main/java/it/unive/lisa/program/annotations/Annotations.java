@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Annotations implements Iterable<Annotation> {
 
-	private final List<Annotation> annotations;
+	private List<Annotation> annotations;
 
 	/**
 	 * Builds an empty list of annotations.
@@ -73,6 +73,15 @@ public class Annotations implements Iterable<Annotation> {
 	@Override
 	public String toString() {
 		return annotations == null ? "[]" : "[" + StringUtils.join(annotations, ", ") + "]";
+	}
+
+	/**
+	 * Adds an annotations to this annotation collection.
+	 * 
+	 * @param ann the annotation to be added
+	 */
+	public void addAnnotation(Annotation ann) {
+		annotations.add(ann);
 	}
 
 	/**
