@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
@@ -63,7 +64,7 @@ public class SemanticsSanityTest {
 		cg = new IntraproceduralCallGraph();
 		cg.build(p);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
-				Collections.emptyList());
+				new ExpressionSet<>());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, null) {
 
