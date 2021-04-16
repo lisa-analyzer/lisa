@@ -4,6 +4,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import java.util.Collection;
 import java.util.HashSet;
@@ -117,12 +118,12 @@ public class IfThenElse extends ControlFlowStructure {
 		if (falseBranch == null) {
 			if (other.falseBranch != null)
 				return false;
-		} else if (!areEqual(falseBranch, other.falseBranch))
+		} else if (!CollectionUtilities.equals(falseBranch, other.falseBranch, Statement::isEqualTo))
 			return false;
 		if (trueBranch == null) {
 			if (other.trueBranch != null)
 				return false;
-		} else if (!areEqual(trueBranch, other.trueBranch))
+		} else if (!CollectionUtilities.equals(trueBranch, other.trueBranch, Statement::isEqualTo))
 			return false;
 		return true;
 	}

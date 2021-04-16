@@ -216,36 +216,4 @@ public abstract class ControlFlowStructure {
 
 	@Override
 	public abstract String toString();
-
-	/**
-	 * Checks if two collections of {@link Statement}s are equal, using
-	 * {@link Statement#isEqualTo(Statement)}.
-	 * 
-	 * @param first  the first collection
-	 * @param second the second collection
-	 * 
-	 * @return {@code true} only if the two collections contain the same
-	 *             elements, according to {@link Statement#isEqualTo(Statement)}
-	 */
-	protected static boolean areEqual(Collection<Statement> first, Collection<Statement> second) {
-		// the following keeps track of the unmatched nodes in second
-		Collection<Statement> copy = new HashSet<>(second);
-		boolean found;
-		for (Statement f : first) {
-			found = false;
-			for (Statement s : second)
-				if (copy.contains(s) && f.isEqualTo(s)) {
-					copy.remove(s);
-					found = true;
-					break;
-				}
-			if (!found)
-				return false;
-		}
-
-		if (!copy.isEmpty())
-			return false;
-
-		return true;
-	}
 }
