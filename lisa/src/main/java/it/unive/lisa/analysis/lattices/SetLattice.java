@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.collections.Utils;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -135,7 +135,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			return Lattice.BOTTOM_STRING;
 
 		Set<E> tmp = new TreeSet<>(
-				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
 		tmp.addAll(elements);
 		return tmp.toString();
 	}

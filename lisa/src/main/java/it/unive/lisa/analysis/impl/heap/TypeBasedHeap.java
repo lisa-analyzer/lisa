@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.Utils;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -84,7 +84,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public String representation() {
 		Collection<String> res = new TreeSet<String>(
-				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
 		res.addAll(names);
 		return res.toString();
 	}

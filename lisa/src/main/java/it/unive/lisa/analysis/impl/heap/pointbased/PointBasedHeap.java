@@ -17,7 +17,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.util.collections.Utils;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -136,7 +136,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return Lattice.BOTTOM_STRING;
 
 		Collection<String> res = new TreeSet<String>(
-				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
 		for (Identifier id : heapEnv.getKeys())
 			for (HeapLocation hid : heapEnv.getState(id))
 				res.add(hid.toString());

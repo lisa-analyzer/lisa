@@ -8,7 +8,7 @@ import java.util.Comparator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Utils {
+public class CollectionUtilities {
 
 	/**
 	 * A {@code null}-safe comparison callback that invokes the given comparator
