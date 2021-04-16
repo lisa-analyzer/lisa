@@ -135,7 +135,8 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			return Lattice.BOTTOM_STRING;
 
 		Set<E> tmp = new TreeSet<>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		tmp.addAll(elements);
 		return tmp.toString();
 	}

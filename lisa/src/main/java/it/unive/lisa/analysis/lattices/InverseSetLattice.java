@@ -134,7 +134,8 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 			return Lattice.BOTTOM_STRING;
 
 		Set<E> tmp = new TreeSet<>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		tmp.addAll(elements);
 		return tmp.toString();
 	}

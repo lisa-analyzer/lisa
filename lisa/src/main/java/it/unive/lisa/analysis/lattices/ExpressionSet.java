@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A set lattice containing a set of symbolic expressions.
@@ -92,29 +93,20 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		other.elements.stream().filter(Predicate.not(Identifier.class::isInstance)).forEach(lub::add);
 
 		// identifiers are added after lubbing the ones with the same name
-		
-		// the following keeps track of the unmatched nodes in second
-		Collection<Identifier> copy = new HashSet<>(other.onlyIds());
-		boolean found;
-		for (Identifier id1 : onlyIds()) {
-			found = false;
-			for (Identifier id2 : other.onlyIds())
-				if (copy.contains(id2) && id1.getName().equals(id2.getName())) {
-					copy.remove(id2);
-					lub.add((T) id1.lub(id2));
-					found = true;
-					break;
-				}
-
-			if (!found)
-				// no match found
-				lub.add((T) id1);
-		}
-
-		// unmatched in other
-		copy.forEach(id -> lub.add((T) id));
+		Set<Identifier> idlub = new HashSet<>();
+		CollectionUtilities.join(onlyIds(), other.onlyIds(), idlub, (id1, id2) -> id1.getName().equals(id2.getName()),
+				(id1, id2) -> wrapper(id1, id2));
+		idlub.stream().map(i -> (T) i).forEach(lub::add);
 
 		return new ExpressionSet<>(lub);
+	}
+
+	private Identifier wrapper(Identifier id1, Identifier id2) {
+		try {
+			return id1.lub(id2);
+		} catch (SemanticException e) {
+			throw new SemanticExceptionWrapper(e);
+		}
 	}
 
 	private Collection<Identifier> onlyIds() {

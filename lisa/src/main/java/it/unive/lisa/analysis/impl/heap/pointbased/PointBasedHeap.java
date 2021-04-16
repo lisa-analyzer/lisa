@@ -136,7 +136,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return Lattice.BOTTOM_STRING;
 
 		Collection<String> res = new TreeSet<String>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		for (Identifier id : heapEnv.getKeys())
 			for (HeapLocation hid : heapEnv.getState(id))
 				res.add(hid.toString());

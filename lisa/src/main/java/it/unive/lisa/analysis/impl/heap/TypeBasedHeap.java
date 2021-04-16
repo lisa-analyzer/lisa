@@ -84,7 +84,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public String representation() {
 		Collection<String> res = new TreeSet<String>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		res.addAll(names);
 		return res.toString();
 	}

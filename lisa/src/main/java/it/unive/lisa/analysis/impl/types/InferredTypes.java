@@ -105,7 +105,8 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			return Lattice.BOTTOM_STRING;
 
 		Set<Type> tmp = new TreeSet<>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		tmp.addAll(elements);
 		return tmp.toString();
 	}
