@@ -119,6 +119,15 @@ public interface InferredValue<T extends InferredValue<T>> extends Lattice<T>, S
 		return bottom();
 	}
 
+	/**
+	 * A pair of instances of {@link InferredValue}, representing the result of
+	 * an evaluation in the form of
+	 * {@code <inferred value, new execution state>}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <T> the type of {@link InferredValue}
+	 */
 	public static class InferredPair<T extends InferredValue<T>> extends BaseLattice<InferredPair<T>> {
 
 		private final T domain;
@@ -127,16 +136,36 @@ public interface InferredValue<T extends InferredValue<T>> extends Lattice<T>, S
 
 		private final T state;
 
-		public InferredPair(T domain, T left, T right) {
+		/**
+		 * Builds the pair.
+		 * 
+		 * @param domain   a singleton instance to be used during semantic
+		 *                     operations to retrieve top and bottom values
+		 * @param inferred the inferred value
+		 * @param state    the execution state
+		 */
+		public InferredPair(T domain, T inferred, T state) {
 			this.domain = domain;
-			this.inferred = left;
-			this.state = right;
+			this.inferred = inferred;
+			this.state = state;
 		}
-		
+
+		/**
+		 * Yields the instance of {@link InferredValue} representing the
+		 * inferred value.
+		 * 
+		 * @return the inferred value
+		 */
 		public T getInferred() {
 			return inferred;
 		}
-		
+
+		/**
+		 * Yields the instance of {@link InferredValue} representing the
+		 * execution state.
+		 * 
+		 * @return the execution state
+		 */
 		public T getState() {
 			return state;
 		}

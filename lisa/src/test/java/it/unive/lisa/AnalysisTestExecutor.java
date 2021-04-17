@@ -101,7 +101,7 @@ public abstract class AnalysisTestExecutor {
 			e.printStackTrace(System.err);
 			fail("Exception while parsing '" + target + "': " + e.getMessage());
 		}
-		
+
 		if (subfolder != null) {
 			expectedPath = Paths.get(expectedPath.toString(), subfolder);
 			actualPath = Paths.get(actualPath.toString(), subfolder);

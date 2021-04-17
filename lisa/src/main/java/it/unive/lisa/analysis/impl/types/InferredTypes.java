@@ -224,7 +224,8 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalTernaryExpression(TernaryOperator operator, InferredTypes left, InferredTypes middle,
+	protected InferredPair<InferredTypes> evalTernaryExpression(TernaryOperator operator, InferredTypes left,
+			InferredTypes middle,
 			InferredTypes right, InferredTypes state, ProgramPoint pp) {
 		switch (operator) {
 		case STRING_SUBSTRING:

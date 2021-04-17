@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.nonInterference;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.inference.BaseInferredValue;
@@ -15,10 +12,20 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
+/**
+ * The type-system based implementation of the non interference analysis.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @see <a href=
+ *          "https://en.wikipedia.org/wiki/Non-interference_(security)">Non-interference</a>
+ */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	public enum NI {
+	private enum NI {
 		BOTTOM, HIGH, LOW, TOP
 	}
 
@@ -26,6 +33,10 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	private final Map<ProgramPoint, NonInterference> guards;
 
+	/**
+	 * Builds a new instance of non interference, referring to the top element
+	 * of the lattice.
+	 */
 	public NonInterference() {
 		this(NI.TOP);
 	}
@@ -55,10 +66,22 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return ni == NI.BOTTOM;
 	}
 
+	/**
+	 * Yields {@code true} if and only if this instance represents a
+	 * {@code high} value for the non interference analysis.
+	 * 
+	 * @return {@code true} if this is the high element
+	 */
 	public boolean isHigh() {
 		return ni == NI.HIGH;
 	}
 
+	/**
+	 * Yields {@code true} if and only if this instance represents a {@code low}
+	 * value for the non interference analysis.
+	 * 
+	 * @return {@code true} if this is the low element
+	 */
 	public boolean isLow() {
 		return ni == NI.LOW;
 	}

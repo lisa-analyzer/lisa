@@ -2,8 +2,6 @@ package it.unive.lisa.cron.nonInterference;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
@@ -20,6 +18,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
+import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 

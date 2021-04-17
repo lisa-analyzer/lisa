@@ -1,16 +1,5 @@
 package it.unive.lisa.analysis.inference;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -21,6 +10,15 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -49,6 +47,13 @@ public class InferenceSystem<T extends InferredValue<T>> extends FunctionalLatti
 		inferred = new InferredPair<>(domain.bottom(), domain.bottom(), domain.bottom());
 	}
 
+	/**
+	 * Builds an inference system identical to the given one, except for the
+	 * execution state that will be set to the given one.
+	 * 
+	 * @param other the inference system to copy
+	 * @param state the new execution state
+	 */
 	public InferenceSystem(InferenceSystem<T> other, T state) {
 		this(other.lattice, other.function, new InferredPair<>(other.lattice, other.inferred.getInferred(), state));
 	}

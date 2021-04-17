@@ -189,6 +189,8 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @param id          the identifier to be evaluated
 	 * @param environment the environment where the identifier must be evaluated
+	 * @param pp          the program point that where this operation is being
+	 *                        evaluated
 	 * 
 	 * @return the evaluation of the identifier
 	 * 
@@ -204,6 +206,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the evaluation of a push-any expression.
 	 * 
 	 * @param pushAny the push-any expression to be evaluated
+	 * @param state   the current execution state
 	 * 
 	 * @return the evaluation of the push-any expression
 	 */
@@ -215,7 +218,9 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	/**
 	 * Yields the evaluation of the null constant {@link NullConstant}.
 	 * 
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param state the current execution state
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return the evaluation of the constant
 	 * 
@@ -230,6 +235,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the evaluation of the given non-null constant.
 	 * 
 	 * @param constant the constant to evaluate
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -251,6 +257,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param operator the operator applied by the expression
 	 * @param arg      the instance of this domain representing the abstract
 	 *                     value of the expresion's argument
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -277,6 +284,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *                     value of the left-hand side argument
 	 * @param right    the instance of this domain representing the abstract
 	 *                     value of the right-hand side argument
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -297,6 +305,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param left  the left expression, namely the expression to be converted
 	 * @param right the right expression, namely the types to which left should
 	 *                  be converted
+	 * @param state the current execution state
 	 * 
 	 * @return the evaluation of the type conversion expression
 	 */
@@ -314,6 +323,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param left  the left expression, namely the expression to be casted
 	 * @param right the right expression, namely the types to which left should
 	 *                  be casted
+	 * @param state the current execution state
 	 * 
 	 * @return the evaluation of the type cast expression
 	 */
@@ -338,6 +348,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *                     value of the middle argument
 	 * @param right    the instance of this domain representing the abstract
 	 *                     value of the right-hand side argument
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -355,6 +366,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the satisfiability of an abstract value of type {@code <T>}.
 	 * 
 	 * @param value the abstract value whose satisfiability is to be evaluated
+	 * @param state the current execution state
 	 * @param pp    the program point that where this operation is being
 	 *                  evaluated
 	 * 
@@ -373,6 +385,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the satisfiability of the push any expression.
 	 * 
 	 * @param pushAny the push any expression to satisfy
+	 * @param state   the current execution state
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -389,7 +402,9 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the satisfiability of the null constant {@link NullConstant} on
 	 * this abstract domain.
 	 * 
-	 * @param pp the program point that where this operation is being evaluated
+	 * @param state the current execution state
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
 	 *             by this domain, {@link Satisfiability#NOT_SATISFIED} if it is
@@ -407,6 +422,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * domain.
 	 * 
 	 * @param constant the constant to satisfied
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -431,6 +447,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param operator the unary operator applied by the expression
 	 * @param arg      an instance of this abstract domain representing the
 	 *                     argument of the unary expression
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -460,6 +477,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param right    an instance of this abstract domain representing the
 	 *                     argument of the right-hand side of the binary
 	 *                     expression
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
@@ -491,6 +509,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param right    an instance of this abstract domain representing the
 	 *                     argument of the right-most side of the ternary
 	 *                     expression
+	 * @param state    the current execution state
 	 * @param pp       the program point that where this operation is being
 	 *                     evaluated
 	 * 
