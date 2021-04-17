@@ -1,0 +1,143 @@
+class Test {
+	foo() {
+		def L_first = 5;
+		def x = L_first + 2;
+		def y = 9;
+	}
+
+	branch() {
+		def L_first = 5;
+		def x = L_first + 2;
+		def y = 9;
+		if (x == 7)
+			y = 15;
+		else 
+			y = 28;
+	}
+
+	loop() {
+		def L_first = 5;
+		def x = L_first + 2;
+		def y = 9;
+		while (x != 10) {
+			y = 15;
+			L_first = y + 18; // VIOLATION
+			x = x - 1;
+		}
+	}
+
+	afterLoop() {
+		def L_first = 5;
+		def x = L_first + 2;
+		def y = 9;
+		while (x != 10) {
+			y = 15;
+			L_first = y + 18; // VIOLATION
+			x = x - 1;
+		}
+		def L_second = 3;
+		def z = 90;
+	}
+
+	lecture_5_1() {
+		def h = 5;
+		def L_l = h; // VIOLATION
+	}
+
+	lecture_5_2() {
+		def h = 5;
+		def L_l = h * 2; // VIOLATION
+	}
+
+	lecture_6() {
+		def h = 5;
+		def L_l = 0;
+		if (h > 5000)
+			L_l = 0; // VIOLATION
+		else
+			L_l = 1; // VIOLATION
+	}
+
+	lecture_7() {
+		def h = 5;
+		def L_l = 0;
+		while (h > 0) {
+			h = h - 1;
+			L_l = L_l + 1; // VIOLATION
+		}
+	}
+
+	lecture_8() {
+		def h = 5;
+		def L_l = 0;
+		while (h > 5000) 
+			h = h;
+		L_l = 1;
+	}
+
+	lecture_16() {
+		def h = 5;
+		def L_l = 0;
+		h = L_l + 4; 
+		L_l = L_l - 3;
+	}
+
+	lecture_17() {
+		def h = 5;
+		def L_l = 0;
+		L_l = h + L_l; // VIOLATION
+	}
+
+	lecture_18_1() {
+		def h = 5;
+		if (h <= 30)
+			h = 5;
+	}
+
+	lecture_18_2() {
+		def h = 5;
+		def L_l = 0;
+		if (h <= 30)
+			L_l = 5; // VIOLATION
+	}
+
+	lecture_19_1() {
+		def h = 5;
+		def L_l = 0;
+		while (L_l <= 34)
+			L_l = L_l + 1;
+	}
+
+	lecture_19_2() {
+		def h = 5;
+		def L_l = 0;
+		while (L_l <= 34) {
+			L_l = L_l + 1;
+			h = h + 1;
+		}
+	}
+
+	lecture_19_3() {
+		def h = 5;
+		def L_l = 0;
+		while (h <= 34)
+			h = h; 
+		L_l = 1;
+	}
+
+	lecture_19_4() {
+		def h = 5;
+		def L_l = 0;
+		L_l = h; // VIOLATION
+		L_l = 0;
+	}
+
+	lecture_19_5() {
+		def h = 5;
+		def L_l = 0;
+		if (h <= 34) 
+			L_l = 0; // VIOLATION
+		else 
+			L_l = 0; // VIOLATION
+	}
+}

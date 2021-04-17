@@ -49,6 +49,10 @@ public class InferenceSystem<T extends InferredValue<T>> extends FunctionalLatti
 		inferred = new InferredPair<>(domain.bottom(), domain.bottom(), domain.bottom());
 	}
 
+	public InferenceSystem(InferenceSystem<T> other, T state) {
+		this(other.lattice, other.function, new InferredPair<>(other.lattice, other.inferred.getInferred(), state));
+	}
+
 	private InferenceSystem(T domain, Map<Identifier, T> function, InferredPair<T> inferred) {
 		super(domain, function);
 		this.inferred = inferred;
@@ -207,14 +211,20 @@ public class InferenceSystem<T extends InferredValue<T>> extends FunctionalLatti
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	public InferenceSystem<T> glb(InferenceSystem<T> other) throws SemanticException {
+		// we always keep the execution state of other since it is the one that
+		// has assumed the condition
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
-			return this;
+			return new InferenceSystem<>(lattice, function,
+					new InferredPair<>(lattice, inferred.getInferred(), other.getExecutionState()));
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual(this))
 			return other;
 
-		return functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		InferenceSystem<
+				T> lift = functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new InferenceSystem<>(lift.lattice, lift.function,
+				new InferredPair<>(lift.lattice, inferred.getInferred(), other.getExecutionState()));
 	}
 
 	@Override
@@ -232,5 +242,30 @@ public class InferenceSystem<T extends InferredValue<T>> extends FunctionalLatti
 	@Override
 	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		return lattice.satisfies(expression, this, pp);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		InferenceSystem<?> other = (InferenceSystem<?>) obj;
+		if (inferred == null) {
+			if (other.inferred != null)
+				return false;
+		} else if (!inferred.equals(other.inferred))
+			return false;
+		return true;
 	}
 }
