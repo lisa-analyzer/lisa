@@ -28,11 +28,11 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class), new NonInterference()))
-				.addSemanticCheck(new NICheck());
-		perform("non-interference", "program.imp", conf);
+				.addSemanticCheck(new TypeSystemNICheck());
+		perform("non-interference", "type-system", "program.imp", conf);
 	}
 
-	private static class NICheck implements SemanticCheck {
+	private static class TypeSystemNICheck implements SemanticCheck {
 
 		@Override
 		public void beforeExecution(CheckToolWithAnalysisResults<?, ?, ?> tool) {
