@@ -64,6 +64,20 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 		lub.addAll(other.elements);
 		return mk(lub);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public final S glb(S other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (S) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((S) this))
+			return (S) other;
+		
+		Set<E> glb = new HashSet<>(elements);
+		glb.retainAll(other.elements);
+		return mk(glb);
+	}
 
 	@Override
 	protected S wideningAux(S other) throws SemanticException {
