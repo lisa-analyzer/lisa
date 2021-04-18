@@ -1,27 +1,26 @@
 package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
-import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
- * A value that can be inferred by {@link InferenceSystem}s. The main difference
- * between a {@link NonRelationalDomain} and an {@link InferredValue} is that
- * methods of the latter class return instances of {@link InferredPair}, to
- * model the fact that every semantic evaluation also modifies the execution
- * state.
+ * A {@link NonRelationalElement} that can be inferred by
+ * {@link InferenceSystem}s. The main difference between a
+ * {@link NonRelationalDomain} and an {@link InferredValue} is that
+ * {@link #eval(ValueExpression, InferenceSystem, ProgramPoint)} returns
+ * instances of {@link InferredPair}, to model the fact that every semantic
+ * evaluation also modifies the execution state.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
  * @param <T> the concrete type of inferred value
  */
-public interface InferredValue<T extends InferredValue<T>> extends Lattice<T>, SemanticEvaluator {
+public interface InferredValue<T extends InferredValue<T>>
+		extends NonRelationalElement<T, ValueExpression, InferenceSystem<T>> {
 
 	/**
 	 * Evaluates a {@link ValueExpression}, assuming that the values of program
@@ -42,82 +41,6 @@ public interface InferredValue<T extends InferredValue<T>> extends Lattice<T>, S
 	 */
 	public InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException;
-
-	/**
-	 * Checks whether {@code expression} is satisfied in {@code environment},
-	 * assuming that the values of program variables are the ones stored in
-	 * {@code environment} and returning an instance of {@link Satisfiability}.
-	 * 
-	 * @param expression  the expression whose satisfiability is to be evaluated
-	 * @param environment the environment containing the values of program
-	 *                        variables for the satisfiability
-	 * @param pp          the program point that where this operation is being
-	 *                        evaluated
-	 * 
-	 * @return {@link Satisfiability#SATISFIED} if the expression is satisfied
-	 *             by the environment, {@link Satisfiability#NOT_SATISFIED} if
-	 *             it is not satisfied, or {@link Satisfiability#UNKNOWN} if it
-	 *             is either impossible to determine if it satisfied, or if it
-	 *             is satisfied by some values and not by some others (this is
-	 *             equivalent to a TOP boolean value)
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	public Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
-			throws SemanticException;
-
-	/**
-	 * Yields the environment {@code environment} on which the expression
-	 * {@code expression} is assumed to hold by this domain.
-	 * 
-	 * @param environment the environment
-	 * @param expression  the expression to be assumed
-	 * @param pp          the program point where {@code expression} occurs.
-	 * 
-	 * @return the environment {@code environment} where {@code expression} is
-	 *             assumed to hold
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
-			throws SemanticException;
-
-	/**
-	 * Performs the greatest lower bound operation between this domain element
-	 * and {@code other}.
-	 * 
-	 * @param other the other domain element
-	 * 
-	 * @return the greatest lowe bound between {@code this} and {@code other}
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public T glb(T other) throws SemanticException;
-
-	/**
-	 * Yields a textual representation of the content of this domain's instance.
-	 * 
-	 * @return the textual representation
-	 */
-	String representation();
-
-	/**
-	 * Yields a fixed abstraction of the given variable. The abstraction does
-	 * not depend on the abstract values that get assigned to the variable, but
-	 * is instead fixed among all possible execution paths. If this method does
-	 * not return the bottom element (as the default implementation does), then
-	 * {@link InferenceSystem#assign(Identifier, ValueExpression, ProgramPoint)}
-	 * will store that abstract element instead of the one computed starting
-	 * from the expression.
-	 * 
-	 * @param id The identifier representing the variable being assigned
-	 * @param pp the program point that where this operation is being evaluated
-	 * 
-	 * @return the fixed abstraction of the variable
-	 */
-	default T variable(Identifier id, ProgramPoint pp) {
-		return bottom();
-	}
 
 	/**
 	 * A pair of instances of {@link InferredValue}, representing the result of
