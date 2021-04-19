@@ -25,11 +25,7 @@ import java.util.Map;
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	private enum NI {
-		BOTTOM, HIGH, LOW, TOP
-	}
-
-	private final NI ni;
+	private final Boolean ni;
 
 	private final Map<ProgramPoint, NonInterference> guards;
 
@@ -38,32 +34,38 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	 * of the lattice.
 	 */
 	public NonInterference() {
-		this(NI.TOP);
+		this(true);
 	}
 
-	private NonInterference(NI ni) {
+	private NonInterference(Boolean ni) {
 		this.ni = ni;
 		this.guards = new IdentityHashMap<>();
 	}
 
 	@Override
 	public NonInterference top() {
-		return new NonInterference(NI.TOP);
+		return new NonInterference(true);
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * For non-interference, the top value is the HIGH element, so invoking this
+	 * method or {@link #isHigh()} yields the same result.
+	 */
 	@Override
 	public boolean isTop() {
-		return ni == NI.TOP;
+		return ni != null && ni == true;
 	}
 
 	@Override
 	public NonInterference bottom() {
-		return new NonInterference(NI.BOTTOM);
+		return new NonInterference(null);
 	}
 
 	@Override
 	public boolean isBottom() {
-		return ni == NI.BOTTOM;
+		return ni == null;
 	}
 
 	/**
@@ -73,7 +75,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	 * @return {@code true} if this is the high element
 	 */
 	public boolean isHigh() {
-		return ni == NI.HIGH;
+		return isTop();
 	}
 
 	/**
@@ -83,22 +85,25 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	 * @return {@code true} if this is the low element
 	 */
 	public boolean isLow() {
-		return ni == NI.LOW;
+		return ni != null && ni == false;
 	}
 
 	@Override
 	protected NonInterference lubAux(NonInterference other) throws SemanticException {
-		return ni == NI.LOW ? other : this;
+		// never called -- three-elements lattice
+		return top();
 	}
 
 	@Override
 	protected NonInterference wideningAux(NonInterference other) throws SemanticException {
-		return lubAux(other);
+		// never called -- three-elements lattice
+		return top();
 	}
 
 	@Override
 	protected boolean lessOrEqualAux(NonInterference other) throws SemanticException {
-		return ni == NI.LOW ? true : other.ni == NI.HIGH;
+		// never called -- three-elements lattice
+		return false;
 	}
 
 	@Override
@@ -124,14 +129,17 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 				return false;
 		} else if (!guards.equals(other.guards))
 			return false;
-		if (ni != other.ni)
+		if (ni == null) {
+			if (other.ni != null)
+				return false;
+		} else if (!ni.equals(other.ni))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String representation() {
-		return isBottom() ? Lattice.BOTTOM_STRING : isTop() ? Lattice.TOP_STRING : isHigh() ? "H" : "L";
+		return isBottom() ? Lattice.BOTTOM_STRING : isHigh() ? "H" : "L";
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {
@@ -149,11 +157,11 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	private NonInterference mkLow() {
-		return new NonInterference(NI.LOW);
+		return new NonInterference(false);
 	}
 
 	private NonInterference mkHigh() {
-		return new NonInterference(NI.HIGH);
+		return top();
 	}
 
 	@Override
