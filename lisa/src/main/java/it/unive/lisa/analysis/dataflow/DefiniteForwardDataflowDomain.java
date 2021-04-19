@@ -102,7 +102,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 		elements.stream().map(e -> e.toString()).forEach(res::add);
 		return res.toString();
 	}
-	
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
