@@ -102,6 +102,29 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 		elements.stream().map(e -> e.toString()).forEach(res::add);
 		return res.toString();
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isTop ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefiniteForwardDataflowDomain<E> other = (DefiniteForwardDataflowDomain<E>) obj;
+		if (isTop != other.isTop)
+			return false;
+		return true;
+	}
 
 	@Override
 	public DefiniteForwardDataflowDomain<E> top() {
