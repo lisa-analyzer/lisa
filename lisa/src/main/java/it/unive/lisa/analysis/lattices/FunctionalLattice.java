@@ -229,10 +229,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((function == null) ? 0 : function.hashCode());
-		// we use the name of the lattice's class since we do not care about the
-		// single
-		// instance, but more about the type itself
-		result = prime * result + ((lattice == null) ? 0 : lattice.getClass().getName().hashCode());
+		result = prime * result + ((lattice == null) ? 0 : lattice.hashCode());
 		return result;
 	}
 
@@ -253,9 +250,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		if (lattice == null) {
 			if (other.lattice != null)
 				return false;
-		} else if (lattice.getClass() != other.lattice.getClass())
-			// we use the lattice's class since we do not care about the single
-			// instance, but more about the type itself
+		} else if (!lattice.equals(other.lattice))
 			return false;
 		return true;
 	}
