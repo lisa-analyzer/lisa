@@ -47,7 +47,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		this.isBottom = isBottom;
 	}
 
-	private Interval(Integer low, Integer high) {
+	public Interval(Integer low, Integer high) {
 		this(low, high, false, false);
 	}
 
@@ -71,6 +71,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	public Interval bottom() {
 		return BOTTOM;
+	}
+	
+	public Integer getHigh() {
+		return high;
+	}
+	
+	public Integer getLow() {
+		return low;
 	}
 
 	@Override
@@ -174,6 +182,9 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		Integer newLow = lowIsMinusInfinity() ? other.low : other.lowIsMinusInfinity() ? low : Math.max(low, other.low);
 		Integer newHigh = highIsPlusInfinity() ? other.high
 				: other.highIsPlusInfinity() ? high : Math.min(high, other.high);
+		
+		if (newLow != null && newHigh != null && newLow > newHigh)
+			return bottom();
 		return new Interval(newLow, newHigh);
 	}
 
