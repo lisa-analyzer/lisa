@@ -95,6 +95,29 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isTop ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PossibleForwardDataflowDomain<E> other = (PossibleForwardDataflowDomain<E>) obj;
+		if (isTop != other.isTop)
+			return false;
+		return true;
+	}
+
+	@Override
 	public String representation() {
 		SortedSet<String> res = new TreeSet<>();
 		elements.stream().map(e -> e.toString()).forEach(res::add);
