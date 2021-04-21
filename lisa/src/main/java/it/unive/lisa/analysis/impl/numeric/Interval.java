@@ -277,14 +277,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 		AtomicBoolean lowInf = new AtomicBoolean(false), highInf = new AtomicBoolean(false);
 
-		// l1 * l2
+		// x1 * y1
 		multiplyBounds(boundSet, l1, l2, lowInf, highInf);
 
 		// x1 * y2
 		multiplyBounds(boundSet, l1, h2, lowInf, highInf);
 
 		// x2 * y1
-		multiplyBounds(boundSet, h2, l2, lowInf, highInf);
+		multiplyBounds(boundSet, h1, l2, lowInf, highInf);
 
 		// x2 * y2
 		multiplyBounds(boundSet, h1, h2, lowInf, highInf);
