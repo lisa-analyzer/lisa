@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.impl.numeric;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -317,6 +318,85 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		divideBounds(boundSet, h1, h2, lowInf, highInf);
 
 		return new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
+	}
+
+	private boolean isSingleton() {
+		return low != null && low == high;
+	}
+
+	@Override
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
+			ProgramPoint pp) {
+		
+		if (left.isTop() || right.isTop())
+			return Satisfiability.UNKNOWN;
+		
+		Interval glb = null;
+		try {
+			glb = left.glb(right);
+		} catch (SemanticException e) {
+			e.printStackTrace();
+		}
+		switch(operator) {
+		case COMPARISON_EQ:
+			if (glb.isBottom())
+				return Satisfiability.NOT_SATISFIED;	
+			else if (left.isSingleton() && left.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_GE:
+			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LE, right, left, pp);
+		case COMPARISON_GT:
+			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LT, right, left, pp);
+		case COMPARISON_LE:
+			Interval firstBound = new Interval(null, right.high);
+			Interval secondBound = new Interval(left.low, null);
+
+			Interval firstCheck = null;
+			Interval secondCheck = null;
+
+			try {
+				firstCheck = firstBound.glb(left);
+				secondCheck = secondBound.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+
+			if (firstCheck.isBottom() || secondCheck.isBottom())
+				return Satisfiability.NOT_SATISFIED;
+
+			if (firstCheck.equals(left) && secondCheck.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_LT:
+			firstBound = new Interval(null, right.high == null ? null : right.high -1);
+			secondBound = new Interval(left.low == null ?  null : left.low - 1, null);
+
+			firstBound = new Interval(null, right.high);
+			secondBound = new Interval(left.low, null);
+
+			firstCheck = null;
+			secondCheck = null;
+
+			try {
+				firstCheck = firstBound.glb(left);
+				secondCheck = secondBound.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+
+			if (firstCheck.isBottom() || secondCheck.isBottom())
+				return Satisfiability.NOT_SATISFIED;
+			if (firstCheck.equals(left) && secondCheck.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_NE:
+			if (glb.isBottom())
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		default:
+			return Satisfiability.UNKNOWN;
+		}
 	}
 
 	private void multiplyBounds(SortedSet<Integer> boundSet, Integer i, Integer j, AtomicBoolean lowInf,
