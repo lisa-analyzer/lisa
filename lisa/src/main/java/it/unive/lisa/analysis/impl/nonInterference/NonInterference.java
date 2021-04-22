@@ -25,7 +25,15 @@ import java.util.Map;
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	private final Boolean ni;
+	private static final byte NI_BOTTOM = 0;
+
+	private static final byte NI_LOW = 1;
+
+	private static final byte NI_HIGH = 2;
+
+	private final byte confidentiality;
+
+	private final byte integrity;
 
 	private final Map<ProgramPoint, NonInterference> guards;
 
@@ -34,84 +42,115 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	 * of the lattice.
 	 */
 	public NonInterference() {
-		this(true);
+		this(NI_HIGH, NI_LOW);
 	}
 
-	private NonInterference(Boolean ni) {
-		this.ni = ni;
+	private NonInterference(byte confidentiality, byte integrity) {
+		this.confidentiality = confidentiality;
+		this.integrity = integrity;
 		this.guards = new IdentityHashMap<>();
 	}
 
 	@Override
 	public NonInterference top() {
-		return new NonInterference(true);
+		return new NonInterference(NI_HIGH, NI_LOW);
 	}
 
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * For non-interference, the top value is the HIGH element, so invoking this
-	 * method or {@link #isHigh()} yields the same result.
-	 */
 	@Override
 	public boolean isTop() {
-		return ni != null && ni == true;
+		return confidentiality == NI_HIGH && integrity == NI_LOW;
 	}
 
 	@Override
 	public NonInterference bottom() {
-		return new NonInterference(null);
+		return new NonInterference(NI_BOTTOM, NI_BOTTOM);
 	}
 
 	@Override
 	public boolean isBottom() {
-		return ni == null;
+		return confidentiality == NI_BOTTOM && integrity == NI_BOTTOM;
 	}
 
 	/**
 	 * Yields {@code true} if and only if this instance represents a
-	 * {@code high} value for the non interference analysis.
+	 * {@code high} value for the confidentiality non interference analysis.
 	 * 
-	 * @return {@code true} if this is the high element
+	 * @return {@code true} if this is a high confidentiality element
 	 */
-	public boolean isHigh() {
-		return isTop();
+	public boolean isHighConfidentiality() {
+		return confidentiality == NI_HIGH;
 	}
 
 	/**
 	 * Yields {@code true} if and only if this instance represents a {@code low}
-	 * value for the non interference analysis.
+	 * value for the confidentiality non interference analysis.
 	 * 
-	 * @return {@code true} if this is the low element
+	 * @return {@code true} if this is a low confidentiality element
 	 */
-	public boolean isLow() {
-		return ni != null && ni == false;
+	public boolean isLowConfidentiality() {
+		return confidentiality == NI_LOW;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this instance represents a
+	 * {@code high} value for the integrity non interference analysis.
+	 * 
+	 * @return {@code true} if this is a high integrity element
+	 */
+	public boolean isHighIntegrity() {
+		return integrity == NI_HIGH;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this instance represents a {@code low}
+	 * value for the integrity non interference analysis.
+	 * 
+	 * @return {@code true} if this is a low integrity element
+	 */
+	public boolean isLowIntegrity() {
+		return integrity == NI_LOW;
 	}
 
 	@Override
 	protected NonInterference lubAux(NonInterference other) throws SemanticException {
-		// never called -- three-elements lattice
-		return top();
+		// HL
+		// | \
+		// HH LL
+		// | /
+		// LH
+		// |
+		// BB
+		byte confidentiality = isHighConfidentiality() || other.isHighConfidentiality() ? NI_HIGH : NI_LOW;
+		byte integrity = isLowIntegrity() || other.isLowIntegrity() ? NI_LOW : NI_HIGH;
+		return new NonInterference(confidentiality, integrity);
 	}
 
 	@Override
 	protected NonInterference wideningAux(NonInterference other) throws SemanticException {
-		// never called -- three-elements lattice
-		return top();
+		return lubAux(other);
 	}
 
 	@Override
 	protected boolean lessOrEqualAux(NonInterference other) throws SemanticException {
-		// never called -- three-elements lattice
-		return false;
+		// HL
+		// | \
+		// HH LL
+		// | /
+		// LH
+		// |
+		// BB
+		boolean confidentiality = isLowConfidentiality() || this.confidentiality == other.confidentiality;
+		boolean integrity = isHighIntegrity() || this.integrity == other.integrity;
+		return confidentiality && integrity;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + confidentiality;
 		result = prime * result + ((guards == null) ? 0 : guards.hashCode());
-		result = prime * result + ((ni == null) ? 0 : ni.hashCode());
+		result = prime * result + integrity;
 		return result;
 	}
 
@@ -124,22 +163,22 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		if (getClass() != obj.getClass())
 			return false;
 		NonInterference other = (NonInterference) obj;
+		if (confidentiality != other.confidentiality)
+			return false;
 		if (guards == null) {
 			if (other.guards != null)
 				return false;
 		} else if (!guards.equals(other.guards))
 			return false;
-		if (ni == null) {
-			if (other.ni != null)
-				return false;
-		} else if (!ni.equals(other.ni))
+		if (integrity != other.integrity)
 			return false;
 		return true;
 	}
 
 	@Override
 	public String representation() {
-		return isBottom() ? Lattice.BOTTOM_STRING : isHigh() ? "H" : "L";
+		return isBottom() ? Lattice.BOTTOM_STRING
+				: (isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L");
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {
@@ -156,24 +195,24 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return res;
 	}
 
-	private NonInterference mkLow() {
-		return new NonInterference(false);
+	private NonInterference mkLowHigh() {
+		return new NonInterference(NI_LOW, NI_HIGH);
 	}
 
-	private NonInterference mkHigh() {
+	private NonInterference mkHighLow() {
 		return top();
 	}
 
 	@Override
 	protected InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
 			throws SemanticException {
-		return new InferredPair<>(this, mkLow(), state(state, pp));
+		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
 	protected InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
 			ProgramPoint pp) throws SemanticException {
-		return new InferredPair<>(this, mkLow(), state(state, pp));
+		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
@@ -203,7 +242,13 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	@Override
 	public NonInterference variable(Identifier id, ProgramPoint pp) {
-		return id.getName().startsWith("L_") ? mkLow() : mkHigh();
+		if (id.getName().startsWith("LC_"))
+			return new NonInterference(NI_LOW, NI_LOW);
+
+		if (id.getName().startsWith("HI_"))
+			return new NonInterference(NI_HIGH, NI_HIGH);
+
+		return mkHighLow();
 	}
 
 	@Override

@@ -1,0 +1,24 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':101:10] on 'untyped Integrity::integrity_lec19ex5(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':16:10] on 'untyped Integrity::integrity_lec6(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':18:10] on 'untyped Integrity::integrity_lec6(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':26:17] on 'untyped Integrity::integrity_lec7(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':48:13] on 'untyped Integrity::integrity_lec17(Integrity this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':4:13] on 'untyped Integrity::integrity_lec5ex1(Integrity this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':61:10] on 'untyped Integrity::integrity_lec18ex2(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':91:9] on 'untyped Integrity::integrity_lec19ex4(Integrity this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':99:10] on 'untyped Integrity::integrity_lec19ex5(Integrity this)': [EXPRESSION] This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference"
+  }, {
+    "message" : "['imp-testcases/non-interference/integrity/program.imp':9:17] on 'untyped Integrity::integrity_lec5ex2(Integrity this)': [EXPRESSION] This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference"
+  } ],
+  "files" : [ "analysis___untyped_Integrity.integrity_lec16(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec17(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec18ex1(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec18ex2(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec19ex1(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec19ex2(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec19ex3(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec19ex4(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec19ex5(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec5ex1(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec5ex2(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec6(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec7(Integrity_this).dot", "analysis___untyped_Integrity.integrity_lec8(Integrity_this).dot" ]
+}

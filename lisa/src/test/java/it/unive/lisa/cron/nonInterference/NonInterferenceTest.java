@@ -23,15 +23,24 @@ import org.junit.Test;
 public class NonInterferenceTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testNonInterference() throws AnalysisSetupException {
+	public void testConfidentialityNI() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class), new NonInterference()))
-				.addSemanticCheck(new TypeSystemNICheck());
-		perform("non-interference", "type-system", "program.imp", conf);
+				.addSemanticCheck(new NICheck());
+		perform("non-interference/confidentiality", "program.imp", conf);
 	}
 
-	private static class TypeSystemNICheck implements SemanticCheck {
+	@Test
+	public void testIntegrityNI() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class), new NonInterference()))
+				.addSemanticCheck(new NICheck());
+		perform("non-interference/integrity", "program.imp", conf);
+	}
+
+	private static class NICheck implements SemanticCheck {
 
 		@Override
 		public void beforeExecution(CheckToolWithAnalysisResults<?, ?, ?> tool) {
@@ -70,13 +79,21 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			InferenceSystem<NonInterference> right = (InferenceSystem<NonInterference>) tool.getResultOf(graph)
 					.getAnalysisStateAt(assign.getRight()).getState().getValueState();
 
-			if (left.getInferredValue().isLow() && right.getInferredValue().isHigh())
+			if (left.getInferredValue().isLowConfidentiality() && right.getInferredValue().isHighConfidentiality())
 				tool.warnOn(assign,
-						"This assignment assigns a HIGH value to LOW variable, thus violating non-interference");
+						"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
-			if (left.getInferredValue().isLow() && state.getExecutionState().isHigh())
+			if (left.getInferredValue().isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
 				tool.warnOn(assign,
-						"This assignment, located in a HIGH block, assigns a LOW variable, thus violating non-interference");
+						"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
+
+			if (left.getInferredValue().isHighIntegrity() && right.getInferredValue().isLowIntegrity())
+				tool.warnOn(assign,
+						"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
+
+			if (left.getInferredValue().isHighIntegrity() && state.getExecutionState().isLowIntegrity())
+				tool.warnOn(assign,
+						"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 
 			return true;
 		}
