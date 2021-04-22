@@ -57,6 +57,20 @@ public class UnaryExpression extends ValueExpression {
 	}
 
 	@Override
+	public ValueExpression removeNegations() {
+		if (operator == UnaryOperator.LOGICAL_NOT && expression instanceof BinaryExpression) {
+			BinaryExpression binary = (BinaryExpression) expression;
+			ValueExpression left = (ValueExpression) binary.getLeft();
+			ValueExpression right = (ValueExpression) binary.getRight();
+			BinaryOperator op = binary.getOperator();
+			return new BinaryExpression(binary.getTypes(), left.removeNegations(), right.removeNegations(),
+					(BinaryOperator) op.opposite());
+		}
+
+		return this;
+	}
+
+	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		return new UnaryExpression(this.getTypes(), this.expression.pushScope(token), this.operator);
 	}

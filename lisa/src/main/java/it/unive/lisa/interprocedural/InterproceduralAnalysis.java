@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -105,7 +106,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			Collection<SymbolicExpression>[] parameters)
+			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException;
 
 	/**

@@ -15,11 +15,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -72,16 +69,8 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		for (Parameter arg : cfg.getDescriptor().getArgs()) {
 			ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-			if (arg.getStaticType().isPointerType()) {
-				prepared = prepared.smallStepSemantics(new HeapReference(all, arg.getName()),
-						cfg.getGenericProgramPoint());
-				for (SymbolicExpression expr : prepared.getComputedExpressions())
-					prepared = prepared.assign((HeapIdentifier) expr,
-							new PushAny(all), cfg.getGenericProgramPoint());
-			} else {
-				ValueIdentifier id = new ValueIdentifier(all, arg.getName());
-				prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
-			}
+			Variable id = new Variable(all, arg.getName());
+			prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
 		}
 
 		return prepared;

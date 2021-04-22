@@ -7,8 +7,9 @@ import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -24,7 +25,7 @@ public interface HeapSemanticOperation {
 	 * heap domain. When evaluating semantics of expressions or assignments, a
 	 * heap domain might rewrite an expression to get rid of the parts that
 	 * access heap structures, substituting them with synthetic
-	 * {@link HeapIdentifier}s representing the accessed locations. The
+	 * {@link HeapLocation}s representing the accessed locations. The
 	 * expressions returned by this method should not contain
 	 * {@link HeapExpression}s.<br>
 	 * <br>
@@ -38,7 +39,7 @@ public interface HeapSemanticOperation {
 	 * 
 	 * @return the rewritten expression, or the original one
 	 */
-	Collection<ValueExpression> getRewrittenExpressions();
+	ExpressionSet<ValueExpression> getRewrittenExpressions();
 
 	/**
 	 * Yields the substitution, in the form of a list of

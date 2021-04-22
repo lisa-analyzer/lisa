@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -51,8 +51,8 @@ public abstract class SymbolicExpression {
 
 	/**
 	 * Pushes a new scope, identified by the give token, in the expression. This
-	 * causes all {@link ValueIdentifier}s to become
-	 * {@link OutOfScopeIdentifier}s associated with the given token.
+	 * causes all {@link Variable}s to become {@link OutOfScopeIdentifier}s
+	 * associated with the given token.
 	 *
 	 * @param token the token identifying the scope to push
 	 * 
@@ -66,8 +66,8 @@ public abstract class SymbolicExpression {
 	/**
 	 * Pops the scope identified by the given token from the expression. This
 	 * causes all the invisible variables (i.e. {@link OutOfScopeIdentifier}s)
-	 * mapped to the given scope to become visible (i.e.
-	 * {@link ValueIdentifier}s) again.
+	 * mapped to the given scope to become visible (i.e. {@link Variable}s)
+	 * again.
 	 *
 	 * @param token the token of the scope to be restored
 	 * 

@@ -2,6 +2,8 @@ package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticEvaluator;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -24,7 +26,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 		E extends SymbolicExpression,
 		F extends FunctionalLattice<F, Identifier, T>>
-		extends Lattice<T> {
+		extends Lattice<T>, SemanticEvaluator {
 
 	/**
 	 * Evaluates a {@link SymbolicExpression}, assuming that the values of
@@ -38,8 +40,10 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * 
 	 * @return an new instance of this domain, representing the abstract result
 	 *             of {@code expression} when evaluated on {@code environment}
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public T eval(E expression, F environment, ProgramPoint pp);
+	public T eval(E expression, F environment, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Checks whether {@code expression} is satisfied in {@code environment},
@@ -58,8 +62,37 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 *             is either impossible to determine if it satisfied, or if it
 	 *             is satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp);
+	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
+
+	/**
+	 * Yields the environment {@code environment} on which the expression
+	 * {@code expression} is assumed to hold by this domain.
+	 * 
+	 * @param environment the environment
+	 * @param expression  the expression to be assumed
+	 * @param pp          the program point where {@code expression} occurs.
+	 * 
+	 * @return the environment {@code environment} where {@code expression} is
+	 *             assumed to hold
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
+
+	/**
+	 * Performs the greatest lower bound operation between this domain element
+	 * and {@code other}.
+	 * 
+	 * @param other the other domain element
+	 * 
+	 * @return the greatest lowe bound between {@code this} and {@code other}
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public T glb(T other) throws SemanticException;
 
 	/**
 	 * Yields a textual representation of the content of this domain's instance.

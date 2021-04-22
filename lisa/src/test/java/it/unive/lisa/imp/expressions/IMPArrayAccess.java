@@ -48,7 +48,7 @@ public class IMPArrayAccess extends BinaryNativeCall {
 					SymbolicExpression right)
 
 					throws SemanticException {
-		if (!left.getDynamicType().isArrayType() || !left.getDynamicType().isUntyped())
+		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
 			return entryState.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap

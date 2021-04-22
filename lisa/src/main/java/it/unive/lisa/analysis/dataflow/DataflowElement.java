@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -23,7 +24,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  *                instances of this element
  * @param <E> the concrete type of {@link DataflowElement}
  */
-public interface DataflowElement<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>> {
+public interface DataflowElement<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
+		extends SemanticEvaluator {
 
 	/**
 	 * Yields the {@link Identifier} this element is associated with.

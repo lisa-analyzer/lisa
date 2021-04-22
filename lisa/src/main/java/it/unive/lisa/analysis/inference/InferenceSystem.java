@@ -128,6 +128,32 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((inferredValue == null) ? 0 : inferredValue.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		@SuppressWarnings("unchecked")
+		InferenceSystem<T> other = (InferenceSystem<T>) obj;
+		if (inferredValue == null) {
+			if (other.inferredValue != null)
+				return false;
+		} else if (!inferredValue.equals(other.inferredValue))
+			return false;
+		return true;
+	}
+
+	@Override
 	public String representation() {
 		if (isBottom() || isTop())
 			return super.representation();

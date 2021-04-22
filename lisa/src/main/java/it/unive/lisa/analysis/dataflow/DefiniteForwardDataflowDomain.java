@@ -51,6 +51,10 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		// if id cannot be tracked by the underlying lattice,
+		// or if the expression cannot be processed, return this
+		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
+			return this;
 		DefiniteForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
@@ -99,6 +103,29 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 		SortedSet<String> res = new TreeSet<>();
 		elements.stream().map(e -> e.toString()).forEach(res::add);
 		return res.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isTop ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DefiniteForwardDataflowDomain<E> other = (DefiniteForwardDataflowDomain<E>) obj;
+		if (isTop != other.isTop)
+			return false;
+		return true;
 	}
 
 	@Override

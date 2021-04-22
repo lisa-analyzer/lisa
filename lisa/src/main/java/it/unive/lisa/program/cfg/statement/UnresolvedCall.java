@@ -1,6 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Collection;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
@@ -9,6 +8,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -240,7 +240,7 @@ public class UnresolvedCall extends Call {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		Call resolved;
 		try {

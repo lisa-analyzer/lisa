@@ -81,7 +81,7 @@ public abstract class BaseCallGraph implements CallGraph {
 						"Hybrid resolution is not supported: when more than one target is present, they must all be CFGs and not NativeCFGs");
 
 			resolved = new CFGCall(call.getCFG(), call.getLocation(), call.getTargetName(),
-					targets.stream().map(t -> (CFG) t).collect(Collectors.toList()),
+					targets.stream().map(CFG.class::cast).collect(Collectors.toList()),
 					call.getParameters());
 		}
 

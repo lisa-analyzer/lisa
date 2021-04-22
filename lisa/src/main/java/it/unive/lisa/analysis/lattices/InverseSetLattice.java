@@ -8,7 +8,7 @@ import java.util.TreeSet;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.util.collections.Utils;
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A generic inverse set lattice containing a set of elements. Lattice
@@ -65,6 +65,30 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 		return mk(lub);
 	}
 
+	/**
+	 * Performs the greatest lower bound between this inverse set lattice
+	 * element and the given one.
+	 * 
+	 * @param other the other inverse set lattice element
+	 * 
+	 * @return the greatest lower bound between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	@SuppressWarnings("unchecked")
+	public final S glb(S other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (S) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((S) this))
+			return (S) other;
+
+		Set<E> glb = new HashSet<>(elements);
+		glb.addAll(other.elements);
+		return mk(glb);
+	}
+
 	@Override
 	protected S wideningAux(S other) throws SemanticException {
 		return lubAux(other);
@@ -100,6 +124,15 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 		return elements.contains(elem);
 	}
 
+	/**
+	 * Yields the set of elements contained in this lattice element.
+	 * 
+	 * @return the set of elements contained in this lattice element.
+	 */
+	public Set<E> elements() {
+		return elements;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -126,8 +159,29 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 			return Lattice.BOTTOM_STRING;
 
 		Set<E> tmp = new TreeSet<>(
-				(l, r) -> Utils.nullSafeCompare(true, l, r, (ll, rr) -> ll.toString().compareTo(rr.toString())));
+				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
+						(ll, rr) -> ll.toString().compareTo(rr.toString())));
 		tmp.addAll(elements);
 		return tmp.toString();
+	}
+
+	/**
+	 * Returns the number of elements in this lattice (its cardinality). If this
+	 * lattice contains more than {@code Integer.MAX_VALUE} elements, returns
+	 * {@code Integer.MAX_VALUE}.
+	 *
+	 * @return the number of elements in this lattice (its cardinality)
+	 */
+	public int size() {
+		return elements.size();
+	}
+
+	/**
+	 * Returns {@code true} if this set contains no elements.
+	 *
+	 * @return {@code true} if this set contains no elements
+	 */
+	public boolean isEmpty() {
+		return elements.isEmpty();
 	}
 }

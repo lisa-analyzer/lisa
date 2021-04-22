@@ -23,9 +23,8 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * 
  * @param <E> the type of {@link DataflowElement} contained in this domain
  */
-public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleForwardDataflowDomain<E>, E>>
-		extends SetLattice<PossibleForwardDataflowDomain<E>, E>
-		implements DataflowDomain<PossibleForwardDataflowDomain<E>, E> {
+public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleForwardDataflowDomain<E>, E>> extends
+		SetLattice<PossibleForwardDataflowDomain<E>, E> implements DataflowDomain<PossibleForwardDataflowDomain<E>, E> {
 
 	private final boolean isTop;
 
@@ -50,6 +49,10 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	public PossibleForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		// if id cannot be tracked by the underlying lattice,
+		// or if the expression cannot be processed, return this
+		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
+			return this;
 		PossibleForwardDataflowDomain<E> killed = forgetIdentifiers(domain.kill(id, expression, pp, this));
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
@@ -91,6 +94,29 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	public Satisfiability satisfies(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		// TODO could be refined
 		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isTop ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		PossibleForwardDataflowDomain<E> other = (PossibleForwardDataflowDomain<E>) obj;
+		if (isTop != other.isTop)
+			return false;
+		return true;
 	}
 
 	@Override

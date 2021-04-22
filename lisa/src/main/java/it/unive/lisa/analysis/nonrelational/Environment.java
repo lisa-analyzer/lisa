@@ -1,14 +1,18 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -19,6 +23,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -75,11 +80,18 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assign(Identifier id, E value, ProgramPoint pp) {
+	public final M assign(Identifier id, E value, ProgramPoint pp) throws SemanticException {
+		// If id cannot be tracked by the underlying
+		// lattice, return this
+		if (!lattice.canProcess(value) || !lattice.tracksIdentifiers(id))
+			return (M) this;
+
 		// the mkNewFunction will return an empty function if the
 		// given one is null
 		Map<Identifier, T> func = mkNewFunction(function);
 		T eval = lattice.eval(value, (M) this, pp);
+		if (id.isWeak())
+			eval = eval.lub(getState(id));
 		func.put(id, eval);
 		return assignAux(id, value, func, eval, pp);
 	}
@@ -111,34 +123,35 @@ public abstract class Environment<M extends Environment<M, E, T>,
 		else if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
 			return (M) this;
 		else
-			return assumeAux(expression, pp);
+			return glb(lattice.assume((M) this, expression, pp));
 	}
 
 	/**
-	 * Auxiliary version of {@link #assume(SymbolicExpression, ProgramPoint)}
-	 * where the cases where the expression is never satisfied
-	 * ({@code lattice.satisfies(expression, this) == Satisfiability.NOT_SATISFIED})
-	 * and is always satisfied
-	 * ({@code lattice.satisfies(expression, this) == Satisfiability.SATISFIED})
-	 * have already been handled. The given expression thus holds sometimes.
+	 * Performs the greatest lower bound between this environment and
+	 * {@code other}.
 	 * 
-	 * @param expression the expression to assume to hold.
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
+	 * @param other the other environment
 	 * 
-	 * @return the (optionally) modified copy of this domain
+	 * @return the greatest lower bound between this environment and
+	 *             {@code other}
 	 * 
-	 * @throws SemanticException if an error occurs during the computation
+	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected M assumeAux(E expression, ProgramPoint pp) throws SemanticException {
-		// TODO: a more precise filtering is needed when satisfiability of
-		// expression is unknown subclasses might add some logic
-		return copy();
+	@SuppressWarnings("unchecked")
+	public M glb(M other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
+				|| this.lessOrEqual(other))
+			return (M) this;
+
+		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
+			return (M) other;
+
+		return functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final Satisfiability satisfies(E expression, ProgramPoint pp) {
+	public final Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 
@@ -242,5 +255,22 @@ public abstract class Environment<M extends Environment<M, E, T>,
 			res.add(entry.getKey() + ": " + entry.getValue().representation());
 
 		return StringUtils.join(res, '\n');
+	}
+
+	@Override
+	protected Set<Identifier> lubKeys(Set<Identifier> k1, Set<Identifier> k2) throws SemanticException {
+		Set<Identifier> keys = new HashSet<>();
+		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1,
+				k2);
+		builder.compute(Comparator.comparing(Identifier::getName));
+		keys.addAll(builder.getOnlyFirst());
+		keys.addAll(builder.getOnlySecond());
+		for (Pair<Identifier, Identifier> pair : builder.getCommons())
+			try {
+				keys.add(pair.getLeft().lub(pair.getRight()));
+			} catch (SemanticException e) {
+				throw new SemanticException("Unable to lub " + pair.getLeft() + " and " + pair.getRight(), e);
+			}
+		return keys;
 	}
 }

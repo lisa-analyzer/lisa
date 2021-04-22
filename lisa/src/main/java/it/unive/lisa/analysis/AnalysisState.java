@@ -1,18 +1,15 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -40,7 +37,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * The last expressions that have been computed, representing side-effect
 	 * free expressions that are pending evaluation
 	 */
-	private final Collection<SymbolicExpression> computedExpressions;
+	private final ExpressionSet<SymbolicExpression> computedExpressions;
 
 	/**
 	 * Builds a new state.
@@ -50,7 +47,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * @param computedExpression the expression that has been computed
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression) {
-		this(state, Collections.singleton(computedExpression));
+		this(state, new ExpressionSet<>(computedExpression));
 	}
 
 	/**
@@ -60,7 +57,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
 	 */
-	public AnalysisState(A state, Collection<SymbolicExpression> computedExpressions) {
+	public AnalysisState(A state, ExpressionSet<SymbolicExpression> computedExpressions) {
 		this.state = state;
 		this.computedExpressions = computedExpressions;
 	}
@@ -87,25 +84,28 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * 
 	 * @return the last computed expression
 	 */
-	public Collection<SymbolicExpression> getComputedExpressions() {
+	public ExpressionSet<SymbolicExpression> getComputedExpressions() {
 		return computedExpressions;
 	}
 
 	@Override
 	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
-		A assigned = state.assign(id, value, pp);
-		if (id.isWeak())
-			assigned = state.lub(assigned);
-		return new AnalysisState<>(assigned, id);
+		A s = state.assign(id, value, pp);
+		ExpressionSet<SymbolicExpression> exprs = new ExpressionSet<>(
+				s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions().elements()
+						.stream()
+						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
+		return new AnalysisState<A, H, V>(s, exprs);
 	}
 
 	@Override
 	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
-		Collection<SymbolicExpression> exprs = s.getHeapState().getRewrittenExpressions().stream()
-				.map(e -> (SymbolicExpression) e).collect(Collectors.toList());
+		ExpressionSet<SymbolicExpression> exprs = new ExpressionSet<>(
+				s.getHeapState().getRewrittenExpressions().elements().stream()
+						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 		return new AnalysisState<>(s, exprs);
 	}
 
@@ -125,12 +125,12 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 				onAllExpressions(this.computedExpressions, scope, true));
 	}
 
-	private Collection<SymbolicExpression> onAllExpressions(Collection<SymbolicExpression> computedExpressions,
+	private ExpressionSet<SymbolicExpression> onAllExpressions(ExpressionSet<SymbolicExpression> computedExpressions,
 			ScopeToken scope, boolean push) throws SemanticException {
-		Collection<SymbolicExpression> result = new HashSet<>();
+		Set<SymbolicExpression> result = new HashSet<>();
 		for (SymbolicExpression exp : computedExpressions)
 			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
-		return result;
+		return new ExpressionSet<>(result);
 	}
 
 	@Override
@@ -140,17 +140,13 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> lubAux(AnalysisState<A, H, V> other) throws SemanticException {
-		return new AnalysisState<>(state.lub(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+		return new AnalysisState<>(state.lub(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public AnalysisState<A, H, V> wideningAux(AnalysisState<A, H, V> other) throws SemanticException {
-		return new AnalysisState<>(state.widening(other.state),
-				CollectionUtils.union(computedExpressions, other.computedExpressions));
+		return new AnalysisState<>(state.widening(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
@@ -160,24 +156,22 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public AnalysisState<A, H, V> top() {
-		return new AnalysisState<>(state.top(), new Skip());
+		return new AnalysisState<>(state.top(), new ExpressionSet<>());
 	}
 
 	@Override
 	public AnalysisState<A, H, V> bottom() {
-		return new AnalysisState<>(state.bottom(), new Skip());
+		return new AnalysisState<>(state.bottom(), new ExpressionSet<>());
 	}
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.size() == 1
-				&& computedExpressions.iterator().next() instanceof Skip;
+		return state.isTop() && computedExpressions.isBottom();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.size() == 1
-				&& computedExpressions.iterator().next() instanceof Skip;
+		return state.isBottom() && computedExpressions.isBottom();
 	}
 
 	@Override

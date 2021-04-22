@@ -14,12 +14,13 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 
 /**
@@ -77,11 +78,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			Collection<SymbolicExpression>[] parameters)
+			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException {
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new ValueIdentifier(call.getRuntimeTypes(), "ret_value"), call);
+		return entryState.top().smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value"), call);
 	}
 }

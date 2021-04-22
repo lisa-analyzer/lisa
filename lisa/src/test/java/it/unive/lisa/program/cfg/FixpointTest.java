@@ -2,14 +2,13 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import java.util.Collections;
-
 import org.junit.Test;
 
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -36,7 +35,7 @@ public class FixpointTest {
 	private AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
 			ValueEnvironment<Sign>> mkState() {
 		return new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
-				Collections.emptyList());
+				new ExpressionSet<>());
 	}
 
 	@Test

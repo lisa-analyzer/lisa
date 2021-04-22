@@ -16,6 +16,7 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -25,7 +26,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 
 /**
@@ -129,7 +130,7 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			Collection<SymbolicExpression>[] parameters)
+			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException {
 		ContextSensitiveToken newToken = token.pushCall(call);
 		AnalysisState<A, H, V> result = entryState.bottom();
@@ -150,7 +151,7 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 			for (int i = 0; i < parameters.length; i++) {
 				AnalysisState<A, H, V> temp = callState.bottom();
 				Parameter parameter = cfg.getDescriptor().getArgs()[i];
-				Identifier parid = new ValueIdentifier(
+				Identifier parid = new Variable(
 						Caches.types().mkSet(parameter.getStaticType().allInstances()),
 						parameter.getName());
 				for (SymbolicExpression exp : parameters[i])
@@ -167,10 +168,11 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 			}
 
 			// store returned variables into the meta variable
-			AnalysisState<A, H, V> tmp = fixpointResult.getExitState();
+			AnalysisState<A, H, V> exitState = fixpointResult.getExitState();
+			AnalysisState<A, H, V> tmp = entryState.bottom();
 			Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
-			for (SymbolicExpression ret : result.getComputedExpressions())
-				tmp = tmp.lub(result.assign(meta, ret, call));
+			for (SymbolicExpression ret : exitState.getComputedExpressions())
+				tmp = tmp.lub(exitState.assign(meta, ret, call));
 			
 			// save the resulting state
 			result = result.lub(tmp.popScope(scope));

@@ -38,7 +38,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the widening between this and other
+	 * @return the least upper bound between this and other
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
@@ -70,7 +70,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the least upper bound
+	 * @return the widening between this and other
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */

@@ -161,6 +161,16 @@ public class ConstantPropagation
 	}
 
 	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return !expression.getDynamicType().isPointerType();
+	}
+
+	@Override
 	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
 		return new ConstantPropagation((Identifier) id.pushScope(scope), v);
 	}

@@ -1,7 +1,6 @@
 package it.unive.lisa.program.cfg.statement;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 import it.unive.lisa.analysis.AbstractState;
@@ -9,6 +8,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
@@ -130,7 +130,7 @@ public abstract class Call extends Expression {
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		@SuppressWarnings("unchecked")
-		Collection<SymbolicExpression>[] computed = new Collection[parameters.length];
+		ExpressionSet<SymbolicExpression>[] computed = new ExpressionSet[parameters.length];
 
 		@SuppressWarnings("unchecked")
 		AnalysisState<A, H, V>[] paramStates = new AnalysisState[parameters.length];
@@ -181,7 +181,7 @@ public abstract class Call extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V>[] computedStates,
-					Collection<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException;
 
 	@Override

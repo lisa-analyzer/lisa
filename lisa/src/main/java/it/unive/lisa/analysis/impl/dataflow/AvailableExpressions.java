@@ -131,6 +131,16 @@ public class AvailableExpressions
 	}
 
 	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		return !id.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return !expression.getDynamicType().isPointerType();
+	}
+
+	@Override
 	public AvailableExpressions pushScope(ScopeToken scope) throws SemanticException {
 		return new AvailableExpressions((Identifier) id.pushScope(scope),
 				(ValueExpression) expression.pushScope(scope));

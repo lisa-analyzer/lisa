@@ -1,17 +1,17 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<a = new()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_ ]]<BR/>}} -&gt; [vid$a]>];
-	"node1" [shape="rect",color="gray",label=<one = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$one: + ]]<BR/>}} -&gt; [vid$one]>];
-	"node2" [shape="rect",color="gray",label=<positive = [unresolved]identity(a, one)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$positive: +<BR/>vid$one: + ]]<BR/>}} -&gt; [vid$positive]>];
-	"node3" [shape="rect",color="gray",label=<minusone = -1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$positive: +<BR/>vid$one: +<BR/>vid$minusone: - ]]<BR/>}} -&gt; [vid$minusone]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$negative: -<BR/>vid$one: +<BR/>vid$top: +<BR/>vid$positive: +<BR/>vid$minusone: - ]]<BR/>}} -&gt; [skip]>];
-	"node5" [shape="rect",color="gray",label=<top = [unresolved]helper(this, one, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$negative: -<BR/>vid$one: +<BR/>vid$top: +<BR/>vid$positive: +<BR/>vid$minusone: - ]]<BR/>}} -&gt; [vid$top]>];
-	"node6" [shape="rect",color="gray",label=<negative = [unresolved]identity(a, minusone)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ vid$a: _|_<BR/>vid$positive: +<BR/>vid$negative: -<BR/>vid$one: +<BR/>vid$minusone: - ]]<BR/>}} -&gt; [vid$negative]>];
-	"node1" -> "node2" [color="black"];
-	"node2" -> "node3" [color="black"];
+	"node0" [shape="rect",color="black",label=<a = new A()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[  ]]<BR/>}} -&gt; [a]>];
+	"node1" [shape="rect",color="gray",label=<minusone = -1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>one: +<BR/>positive: + ]]<BR/>}} -&gt; [minusone]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: +<BR/>top: + ]]<BR/>}} -&gt; [skip]>];
+	"node3" [shape="rect",color="gray",label=<one = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ one: + ]]<BR/>}} -&gt; [one]>];
+	"node4" [shape="rect",color="gray",label=<negative = [unresolved]identity(a, minusone)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: + ]]<BR/>}} -&gt; [negative]>];
+	"node5" [shape="rect",color="gray",label=<top = [unresolved]helper(this, one, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: +<BR/>top: + ]]<BR/>}} -&gt; [top]>];
+	"node6" [shape="rect",color="gray",label=<positive = [unresolved]identity(a, one)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ one: +<BR/>positive: + ]]<BR/>}} -&gt; [positive]>];
+	"node1" -> "node4" [color="black"];
+	"node0" -> "node3" [color="black"];
 	"node3" -> "node6" [color="black"];
-	"node0" -> "node1" [color="black"];
-	"node5" -> "node4" [color="black"];
-	"node6" -> "node5" [color="black"];
+	"node4" -> "node5" [color="black"];
+	"node5" -> "node2" [color="black"];
+	"node6" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

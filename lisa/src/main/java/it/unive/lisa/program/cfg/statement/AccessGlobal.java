@@ -12,7 +12,7 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
@@ -83,7 +83,7 @@ public class AccessGlobal extends Expression {
 					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		// unit globals are unique, we can directly access those
-		return entryState.smallStepSemantics(new HeapReference(getRuntimeTypes(), toString()), this);
+		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString()), this);
 	}
 
 }

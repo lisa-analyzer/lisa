@@ -103,9 +103,9 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 		AnalysisState<A, H, V> result = null;
 		for (Statement st : statements)
 			if (result == null)
-				result = entry ? getAnalysisStateBefore(st) : getAnalysisStateBefore(st);
+				result = entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st);
 			else
-				result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateBefore(st));
+				result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
 		return result;
 
 	}

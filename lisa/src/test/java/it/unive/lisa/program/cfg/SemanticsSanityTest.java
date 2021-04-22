@@ -26,6 +26,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.IMPFrontend;
@@ -45,7 +46,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.symbolic.types.StringType;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
@@ -73,7 +74,7 @@ public class SemanticsSanityTest {
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		interprocedural.build(p, cg);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
-				Collections.emptyList());
+				new ExpressionSet<>());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, null) {
 
@@ -98,7 +99,7 @@ public class SemanticsSanityTest {
 					V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 							InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 							throws SemanticException {
-				return entryState.smallStepSemantics(new ValueIdentifier(getRuntimeTypes(), "fake"), fake);
+				return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), "fake"), fake);
 			}
 		};
 	}

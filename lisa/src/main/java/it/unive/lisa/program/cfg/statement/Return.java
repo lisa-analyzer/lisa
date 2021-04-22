@@ -11,7 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * Returns an expression to the caller CFG, terminating the execution of the CFG
@@ -59,7 +59,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new ValueIdentifier(getExpression().getRuntimeTypes(),
+		return new Variable(getExpression().getRuntimeTypes(),
 				"ret_value@" + getCFG().getDescriptor().getName());
 	}
 

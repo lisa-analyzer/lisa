@@ -1,18 +1,16 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
-import org.apache.commons.collections.CollectionUtils;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapIdentifier;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -31,7 +29,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private final Collection<ValueExpression> rewritten;
+	private final ExpressionSet<ValueExpression> rewritten;
 
 	/**
 	 * Builds a new instance. Invoking {@link #getRewrittenExpressions()} on
@@ -42,15 +40,15 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	private MonolithicHeap(ValueExpression rewritten) {
-		this(Collections.singleton(rewritten));
+		this(new ExpressionSet<ValueExpression>(rewritten));
 	}
 
-	private MonolithicHeap(Collection<ValueExpression> rewritten) {
+	private MonolithicHeap(ExpressionSet<ValueExpression> rewritten) {
 		this.rewritten = rewritten;
 	}
 
 	@Override
-	public Collection<ValueExpression> getRewrittenExpressions() {
+	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
 		return rewritten;
 	}
 
@@ -75,7 +73,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	protected MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
 		// any expression accessing an area of the heap or instantiating a new
 		// one is modeled through the monolith
-		return new MonolithicHeap(new HeapIdentifier(expression.getTypes(), MONOLITH_NAME, true));
+		return new MonolithicHeap(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
 	}
 
 	@Override
@@ -106,9 +104,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
-		return new MonolithicHeap(CollectionUtils.union(rewritten, other.rewritten));
+		return new MonolithicHeap(rewritten.lub(other.rewritten));
 	}
 
 	@Override
