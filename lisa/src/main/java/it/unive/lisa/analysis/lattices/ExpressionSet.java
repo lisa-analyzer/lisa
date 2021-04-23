@@ -83,6 +83,29 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + (isTop ? 1231 : 1237);
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ExpressionSet<T> other = (ExpressionSet<T>) obj;
+		if (isTop != other.isTop)
+			return false;
+		return true;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	protected ExpressionSet<T> lubAux(ExpressionSet<T> other) throws SemanticException {
 		Set<T> lub = new HashSet<>();
