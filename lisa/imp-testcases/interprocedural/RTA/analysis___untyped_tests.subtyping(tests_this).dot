@@ -1,16 +1,16 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<a = new B()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [a]>];
-	"node1" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: 0 ]]<BR/>}} -&gt; [b &lt; 10]>];
-	"node2" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: 0 ]]<BR/>}} -&gt; [b]>];
-	"node3" [shape="rect",color="gray",label=<a = new A()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [a]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ call_ret_value@'imp-testcases/interprocedural/program.imp':20:11: #TOP# ]]<BR/>}} -&gt; [skip]>];
-	"node5" [shape="rect",color="gray",label=<[unresolved]foo(a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ call_ret_value@'imp-testcases/interprocedural/program.imp':20:11: #TOP# ]]<BR/>}} -&gt; [call_ret_value@'imp-testcases/interprocedural/program.imp':20:11]>];
-	"node1" -> "node3" [color="blue",style="dashed"];
-	"node1" -> "node5" [color="red",style="dashed"];
+	"node1" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [skip]>];
+	"node2" [shape="rect",color="gray",label=<[unresolved]foo(a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [open_call_ret_value@'imp-testcases/interprocedural/program.imp':20:11]>];
+	"node3" [shape="rect",color="gray",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: 0 ]]<BR/>}} -&gt; [b]>];
+	"node4" [shape="rect",color="gray",label=<&lt;(b, 10)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ b: 0 ]]<BR/>}} -&gt; [b &lt; 10]>];
+	"node5" [shape="rect",color="gray",label=<a = new A()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [a]>];
+	"node0" -> "node3" [color="black"];
 	"node2" -> "node1" [color="black"];
-	"node3" -> "node5" [color="black"];
-	"node5" -> "node4" [color="black"];
-	"node0" -> "node2" [color="black"];
+	"node3" -> "node4" [color="black"];
+	"node4" -> "node2" [color="red",style="dashed"];
+	"node4" -> "node5" [color="blue",style="dashed"];
+	"node5" -> "node2" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
