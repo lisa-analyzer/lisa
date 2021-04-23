@@ -346,14 +346,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
-		Interval glb = null;
-		try {
-			glb = left.glb(right);
-		} catch (SemanticException e) {
-			e.printStackTrace();
-		}
 		switch (operator) {
 		case COMPARISON_EQ:
+			Interval glb = null;
+			try {
+				glb = left.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
 			if (glb.isBottom())
 				return Satisfiability.NOT_SATISFIED;
 			else if (left.isSingleton() && left.equals(right))
@@ -403,6 +403,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		case COMPARISON_NE:
+			glb = null;
+			try {
+				glb = left.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
 			if (glb.isBottom())
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
