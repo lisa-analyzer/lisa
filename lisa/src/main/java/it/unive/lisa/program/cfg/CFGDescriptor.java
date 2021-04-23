@@ -69,40 +69,6 @@ public class CFGDescriptor implements CodeElement {
 	 */
 	private final CodeLocation location;
 
-//	/**
-//	 * Builds the descriptor for a method that is defined at an unknown location
-//	 * (i.e. no source file/line/column is available) and with untyped return
-//	 * type, that is its type is {@link Untyped#INSTANCE}.
-//	 * 
-//	 * @param unit     the {@link Unit} containing the cfg associated to this
-//	 *                     descriptor
-//	 * @param instance whether or not the cfg associated to this descriptor is
-//	 *                     an instance cfg
-//	 * @param name     the name of the CFG associated with this descriptor
-//	 * @param args     the arguments of the CFG associated with this descriptor
-//	 */
-//	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name, Parameter... args) {
-//		this(location, unit, instance, name, Untyped.INSTANCE, args);
-//	}
-
-//	/**
-//	 * Builds the descriptor for a method that is defined at an unknown location
-//	 * (i.e. no source file/line/column is available).
-//	 * 
-//	 * @param unit       the {@link Unit} containing the cfg associated to this
-//	 *                       descriptor
-//	 * @param instance   whether or not the cfg associated to this descriptor is
-//	 *                       an instance cfg
-//	 * @param name       the name of the CFG associated with this descriptor
-//	 * @param returnType the return type of the CFG associated with this
-//	 *                       descriptor
-//	 * @param args       the arguments of the CFG associated with this
-//	 *                       descriptor
-//	 */
-//	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name, Type returnType, Parameter... args) {
-//		this(location, unit, instance, name, returnType, args);
-//	}
-
 	/**
 	 * Builds the descriptor with {@link Untyped} return type.
 	 * 
@@ -137,6 +103,28 @@ public class CFGDescriptor implements CodeElement {
 	 */
 	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Type returnType, Parameter... args) {
+		this(location, unit, instance, name, returnType, new Annotations(), args);
+	}
+
+	/**
+	 * Builds the descriptor.
+	 * 
+	 * @param location    the location where the cfg associated is define within
+	 *                        the source file, if unknown use {@code null}
+	 * @param unit        the {@link Unit} containing the cfg associated to this
+	 *                        descriptor
+	 * @param instance    whether or not the cfg associated to this descriptor
+	 *                        is an instance cfg
+	 * @param name        the name of the CFG associated with this descriptor
+	 * @param returnType  the return type of the CFG associated with this
+	 *                        descriptor
+	 * @param annotations the annotations of the CFG associated with this
+	 *                        descriptor
+	 * @param args        the arguments of the CFG associated with this
+	 *                        descriptor
+	 */
+	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
+			Type returnType, Annotations annotations, Parameter... args) {
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
 		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
@@ -150,11 +138,11 @@ public class CFGDescriptor implements CodeElement {
 		this.args = args;
 		this.returnType = returnType;
 		this.instance = instance;
+		this.annotations = annotations;
 
 		overridable = instance;
 		overriddenBy = new HashSet<>();
 		overrides = new HashSet<>();
-		annotations = new Annotations();
 
 		this.variables = new LinkedList<>();
 		int i = 0;

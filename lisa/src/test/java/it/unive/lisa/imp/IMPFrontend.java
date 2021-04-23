@@ -21,6 +21,8 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -28,6 +30,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.test.antlr.IMPLexer;
 import it.unive.lisa.test.antlr.IMPParser;
+import it.unive.lisa.test.antlr.IMPParser.AnnotationContext;
+import it.unive.lisa.test.antlr.IMPParser.AnnotationsContext;
 import it.unive.lisa.test.antlr.IMPParser.ConstructorDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldDeclarationContext;
 import it.unive.lisa.test.antlr.IMPParser.FileContext;
@@ -43,7 +47,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CharStreams;
@@ -241,9 +247,28 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
+	public Annotations visitAnnotations(AnnotationsContext ctx) {
+		if (ctx == null)
+			return new Annotations();
+		List<Annotation> anns = new ArrayList<>();
+		for (int i = 0; i < ctx.annotation().size(); i++)
+			anns.add(visitAnnotation(ctx.annotation(i)));
+		return new Annotations(anns);
+	}
+
+	@Override
+	public Annotation visitAnnotation(AnnotationContext ctx) {
+		String annotationName = ctx.IDENTIFIER().getText();
+		if (annotationName.startsWith("Inherited"))
+			return new Annotation(annotationName, new ArrayList<>(), true);
+		else
+			return new Annotation(annotationName, new ArrayList<>(), false);
+	}
+
+	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
 		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
+				Untyped.INSTANCE, visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
@@ -263,7 +288,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), visitFormals(ctx.formals()));
+				true, ctx.name.getText(), Untyped.INSTANCE, visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
 		return descriptor;
 	}
@@ -271,7 +297,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), visitFormals(ctx.formals()));
+				true, ctx.name.getText(), Untyped.INSTANCE, visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 
 		if (ctx.FINAL() != null)
 			descriptor.setOverridable(false);
@@ -295,6 +322,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
+				Untyped.INSTANCE, visitAnnotations(ctx.annotations()));
 	}
 }

@@ -16,6 +16,14 @@ options { tokenVocab = IMPLexer; }
  */
 
 
+annotation
+   : IDENTIFIER
+   ;
+
+annotations
+   : LBRACK (COMMA annotation)+ RBRACK
+   ;
+
 arraySqDeclaration
    : (LBRACK RBRACK)+
    ;
@@ -40,7 +48,7 @@ formals
    ;
 
 formal
-   : name = IDENTIFIER
+   : ((annotations?) (name = IDENTIFIER))
    ;
 /*
  * LITERALS
@@ -226,15 +234,15 @@ memberDeclarations
    ;
 
 fieldDeclaration
-   : name = IDENTIFIER SEMI
+   : annotations? name = IDENTIFIER SEMI
    ;
 
 constructorDeclaration
-   : TILDE name = IDENTIFIER pars = formals code = block
+   : annotations? TILDE name = IDENTIFIER pars = formals code = block
    ;
 
 methodDeclaration
-   : FINAL? name = IDENTIFIER pars = formals code = block
+   : annotations? FINAL? name = IDENTIFIER pars = formals code = block
    ;
 /*
  * CLASS
@@ -242,7 +250,7 @@ methodDeclaration
    
    
 unit
-   : CLASS name = IDENTIFIER (EXTENDS superclass = IDENTIFIER)? LBRACE declarations = memberDeclarations RBRACE
+   : annotations? CLASS name = IDENTIFIER (EXTENDS superclass = IDENTIFIER)? LBRACE declarations = memberDeclarations RBRACE
    ;
 
 file

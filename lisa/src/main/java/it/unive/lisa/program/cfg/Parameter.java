@@ -53,12 +53,28 @@ public class Parameter implements CodeElement {
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Parameter(CodeLocation location, String name, Type staticType) {
+		this(location, name, staticType, new Annotations());
+	}
+
+	/**
+	 * Builds the parameter reference, identified by its name and its type,
+	 * happening at the given location in the program.
+	 * 
+	 * @param location    the location where this parameter is defined within
+	 *                        the source file.
+	 * @param name        the name of this parameter
+	 * @param staticType  the type of this parameter. If unknown, use
+	 *                        {@link Untyped#INSTANCE}
+	 * @param annotations the annotations of this parameter
+	 */
+	public Parameter(CodeLocation location, String name, Type staticType, Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
 		Objects.requireNonNull(location, "The location of a CFG cannot be null");
 		this.location = location;
 		this.name = name;
 		this.staticType = staticType;
+		this.annotations = annotations;
 	}
 
 	/**

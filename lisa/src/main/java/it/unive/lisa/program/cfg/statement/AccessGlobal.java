@@ -69,7 +69,7 @@ public class AccessGlobal extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 					CallGraph callGraph, StatementStore<A, H, V> expressions) throws SemanticException {
 		// unit globals are unique, we can directly access those
-		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString()), this);
+		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString(), target.getAnnotations()),
+				this);
 	}
-
 }
