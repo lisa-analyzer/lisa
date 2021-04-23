@@ -16,7 +16,7 @@ public class Annotation {
 	private final boolean inherited;
 
 	/**
-	 * Builds an annotation from its name and its members that it is not
+	 * Builds an annotation from its name and its members that cannot be
 	 * inherited.
 	 * 
 	 * @param annotationName    the name of the annotation
@@ -31,8 +31,7 @@ public class Annotation {
 	 * 
 	 * @param annotationName    the name of the annotation
 	 * @param annotationMembers the annotation members
-	 * @param inherited         denotes whether the annotation is inherited or
-	 *                              not
+	 * @param inherited         denotes whether the annotation can be inherited
 	 */
 	public Annotation(String annotationName, List<AnnotationMember> annotationMembers, boolean inherited) {
 		this.annotationMembers = annotationMembers;
@@ -90,6 +89,17 @@ public class Annotation {
 		if (inherited != other.inherited)
 			return false;
 		return true;
+	}
+
+	/**
+	 * Yields {@code true} if this annotation can be inherited, {@code false}
+	 * otherwise.
+	 * 
+	 * @return {@code true} if this annotation can be inherited, {@code false}
+	 *             otherwise
+	 */
+	public boolean isInherited() {
+		return inherited;
 	}
 
 	@Override

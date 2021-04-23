@@ -1,5 +1,6 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
@@ -145,11 +146,11 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Sets the annotations of this global element.
+	 * Adds an annotation to the annotations of this global.
 	 * 
-	 * @param annotations the annotations to be set
+	 * @param ann the annotation to be added
 	 */
-	public void setAnnotations(Annotations annotations) {
-		this.annotations = annotations;
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 }

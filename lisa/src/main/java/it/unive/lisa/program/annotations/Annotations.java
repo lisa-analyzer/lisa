@@ -4,6 +4,7 @@ import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -95,5 +96,16 @@ public class Annotations implements Iterable<Annotation> {
 	 */
 	public final boolean contains(AnnotationMatcher m) {
 		return annotations.stream().anyMatch(ann -> m.matches(ann));
+	}
+
+	/**
+	 * Yields the annotations that are matched by the matcher {@code m}.
+	 * 
+	 * @param m the annotation matcher
+	 * 
+	 * @return the annotations that are matched by the matcher {@code m}
+	 */
+	public final Annotations getAnnotations(AnnotationMatcher m) {
+		return new Annotations(annotations.stream().filter(ann -> m.matches(ann)).collect(Collectors.toList()));
 	}
 }

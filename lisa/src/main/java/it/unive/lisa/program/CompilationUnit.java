@@ -596,24 +596,22 @@ public class CompilationUnit extends Unit {
 			}
 
 		for (CompilationUnit superUnit : superUnits)
-			for (Annotation ann : superUnit.getAnnotations()) {
-				Annotation inheritedAnn = new Annotation(ann.getAnnotationName(), ann.getAnnotationMembers(), true);
-				addAnnotation(inheritedAnn);
-			}
+			for (Annotation ann : superUnit.getAnnotations())
+				if (ann.isInherited())
+					addAnnotation(ann);
 
 		for (CodeMember instCfg : getInstanceCodeMembers(false))
 			for (CodeMember matching : instCfg.getDescriptor().overrides())
 				for (Annotation ann : matching.getDescriptor().getAnnotations()) {
-					Annotation inheritedAnn = new Annotation(ann.getAnnotationName(), ann.getAnnotationMembers(), true);
-					instCfg.getDescriptor().addAnnotation(inheritedAnn);
+					if (ann.isInherited())
+						instCfg.getDescriptor().addAnnotation(ann);
 
 					Parameter[] args = instCfg.getDescriptor().getArgs();
 					Parameter[] superArgs = matching.getDescriptor().getArgs();
 					for (int i = 0; i < args.length; i++)
 						for (Annotation parAnn : superArgs[i].getAnnotations()) {
-							Annotation inheritedParAnn = new Annotation(parAnn.getAnnotationName(),
-									parAnn.getAnnotationMembers(), true);
-							args[i].addAnnotation(inheritedParAnn);
+							if (parAnn.isInherited())
+								args[i].addAnnotation(parAnn);
 						}
 				}
 
