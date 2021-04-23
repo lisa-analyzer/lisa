@@ -130,6 +130,7 @@ public class VariableTableEntry implements CodeElement {
 		this.staticType = staticType;
 		this.scopeStart = scopeStart;
 		this.scopeEnd = scopeEnd;
+		this.annotations = new Annotations();
 	}
 
 	/**

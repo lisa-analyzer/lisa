@@ -1,6 +1,8 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -24,6 +26,8 @@ public abstract class Identifier extends ValueExpression {
 	 */
 	private final boolean weak;
 
+	private Annotations annotations;
+
 	/**
 	 * Builds the identifier.
 	 * 
@@ -36,6 +40,7 @@ public abstract class Identifier extends ValueExpression {
 		super(types);
 		this.name = name;
 		this.weak = weak;
+		this.annotations = new Annotations();
 	}
 
 	/**
@@ -67,6 +72,7 @@ public abstract class Identifier extends ValueExpression {
 		// identified by their name, regardless of their type
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -86,7 +92,21 @@ public abstract class Identifier extends ValueExpression {
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		return true;
+	}
+
+	/**
+	 * Adds an annotation to the annotations of this identifier.
+	 * 
+	 * @param ann the annotation to be added
+	 */
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 
 	/**

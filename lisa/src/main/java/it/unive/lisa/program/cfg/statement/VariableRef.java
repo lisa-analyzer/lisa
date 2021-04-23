@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -109,7 +110,10 @@ public class VariableRef extends Expression {
 	 * @return the expression representing the variable
 	 */
 	public Variable getVariable() {
-		return new Variable(getRuntimeTypes(), getName());
+		Variable v = new Variable(getRuntimeTypes(), getName());
+		for (Annotation ann : getAnnotations())
+			v.addAnnotation(ann);
+		return v;
 	}
 
 	@Override
