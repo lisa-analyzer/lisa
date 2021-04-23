@@ -6,6 +6,7 @@ import static it.unive.lisa.LiSAFactory.getInstance;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
@@ -255,40 +256,58 @@ public class LiSA {
 		String message = conf.isDumpTypeInference() ? "Dumping type analysis and propagating it to cfgs"
 				: "Propagating type information to cfgs";
 		for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
-			for (Object result_raw : interproc.getAnalysisResultsOf(cfg)) {
-				CFGWithAnalysisResults result = (CFGWithAnalysisResults) result_raw;
-				if (conf.isDumpTypeInference())
+			Collection results = interproc.getAnalysisResultsOf(cfg);
+			cfg.accept(new TypesPropagator(), results);
+			if (conf.isDumpTypeInference())
+				for (Object result_raw : results) {
+					CFGWithAnalysisResults result = (CFGWithAnalysisResults) result_raw;
 					dumpCFG("typing___", result, st -> result.getAnalysisStateAfter(st).toString());
-				// TODO for typing, we should take the lub of all results
-				cfg.accept(new TypesPropagator(), result);
-			}
+				}
 		}
 
 		interproc.clear();
 	}
 
 	private static class TypesPropagator<H extends HeapDomain<H>>
-			implements GraphVisitor<CFG, Statement, Edge, CFGWithAnalysisResults<
-					SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> {
+			implements GraphVisitor<CFG, Statement, Edge, Collection<CFGWithAnalysisResults<
+					SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>>> {
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-				InferenceSystem<InferredTypes>> tool, CFG graph) {
+		public boolean visit(Collection<CFGWithAnalysisResults<
+				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
+				CFG graph) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-				InferenceSystem<InferredTypes>> tool, CFG graph, Edge edge) {
+		public boolean visit(Collection<CFGWithAnalysisResults<
+				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
+				CFG graph, Edge edge) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-				InferenceSystem<InferredTypes>> tool, CFG graph, Statement node) {
+		public boolean visit(Collection<CFGWithAnalysisResults<
+				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
+				CFG graph, Statement node) {
 			if (node instanceof Expression) {
-				((Expression) node).setRuntimeTypes(tool.getAnalysisStateAfter(node).getState().getValueState()
-						.getInferredValue().getRuntimeTypes());
+				AnalysisState<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+						InferenceSystem<InferredTypes>> state = null;
+				for (CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
+						InferenceSystem<InferredTypes>> res : tool)
+					if (state == null)
+						state = res.getAnalysisStateAfter(node);
+					else
+						try {
+							state = state.lub(res.getAnalysisStateAfter(node));
+						} catch (SemanticException e) {
+							throw new AnalysisExecutionException("Unable to propagate type information inside " + graph,
+									e);
+						}
+
+				if (state != null)
+					((Expression) node).setRuntimeTypes(state.getState().getValueState()
+							.getInferredValue().getRuntimeTypes());
 			}
 			return true;
 		}
