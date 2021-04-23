@@ -37,6 +37,8 @@ public class Program extends Unit {
 
 	/**
 	 * Builds an empty program.
+	 * 
+	 * @param location the location of this program
 	 */
 	public Program(CodeLocation location) {
 		super(location, PROGRAM_NAME);

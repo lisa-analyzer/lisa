@@ -32,12 +32,11 @@ public class Parameter implements CodeElement {
 	private Annotations annotations;
 
 	/**
-	 * Builds an untyped parameter reference, identified by its name. The
-	 * location where this parameter reference happens is unknown (i.e. no
-	 * source file/line/column is available) as well as its type (i.e. it is
-	 * {#link Untyped#INSTANCE}).
+	 * Builds an untyped parameter reference, identified by its name. The type
+	 * of this parameter is unknown (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
-	 * @param name the name of this parameter
+	 * @param location the location of this parameter
+	 * @param name     the name of this parameter
 	 */
 	public Parameter(CodeLocation location, String name) {
 		this(location, name, Untyped.INSTANCE);

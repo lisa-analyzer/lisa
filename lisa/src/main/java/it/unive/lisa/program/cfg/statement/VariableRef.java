@@ -33,12 +33,12 @@ public class VariableRef extends Expression {
 	private final String name;
 
 	/**
-	 * Builds the untyped variable reference, identified by its name. The
-	 * location where this variable reference happens is unknown (i.e. no source
-	 * file/line/column is available) and its type is {@link Untyped#INSTANCE}.
+	 * Builds the untyped variable reference, identified by its name. The type
+	 * of this variable reference is {@link Untyped#INSTANCE}.
 	 * 
-	 * @param cfg  the cfg that this expression belongs to
-	 * @param name the name of this variable
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location of this variable reference
+	 * @param name     the name of this variable reference
 	 */
 	public VariableRef(CFG cfg, CodeLocation location, String name) {
 		this(cfg, location, name, Untyped.INSTANCE);
