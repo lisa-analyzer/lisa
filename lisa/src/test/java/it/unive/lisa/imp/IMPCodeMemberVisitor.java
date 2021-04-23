@@ -10,7 +10,7 @@ import it.unive.lisa.imp.constructs.StringEquals;
 import it.unive.lisa.imp.constructs.StringIndexOf;
 import it.unive.lisa.imp.constructs.StringLength;
 import it.unive.lisa.imp.constructs.StringReplace;
-import it.unive.lisa.imp.constructs.StringStartsWIth;
+import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAdd;
 import it.unive.lisa.imp.expressions.IMPAnd;
@@ -603,7 +603,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRSTARTS() != null)
-			return new StringStartsWIth.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
+			return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
 					visitExpression(ctx.left), visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);

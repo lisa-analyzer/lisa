@@ -18,19 +18,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Throw extends UnaryStatement {
-
-	/**
-	 * Builds the throw, raising {@code expression} as error. The location where
-	 * this throw happens is unknown (i.e. no source file/line/column is
-	 * available).
-	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param expression the expression to raise as error
-	 */
-	public Throw(CFG cfg, Expression expression) {
-		this(cfg, null, expression);
-	}
-
+	
 	/**
 	 * Builds the throw, raising {@code expression} as error, happening at the
 	 * given location in the program.

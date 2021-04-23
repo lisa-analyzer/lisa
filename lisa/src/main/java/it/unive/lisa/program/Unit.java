@@ -8,6 +8,7 @@ import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,7 @@ public abstract class Unit implements CodeElement {
 	 * @param name     the name of the unit
 	 */
 	protected Unit(CodeLocation location, String name) {
+		Objects.requireNonNull(location, "The location of a unit cannot be null.");
 		this.location = location;
 		this.name = name;
 		this.globals = new ConcurrentHashMap<>();

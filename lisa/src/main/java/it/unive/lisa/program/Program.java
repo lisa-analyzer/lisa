@@ -1,12 +1,14 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.type.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.type.Type;
 
 /**
  * A program that LiSA can analyze. A program is a {@link Unit} that is defined
@@ -37,8 +39,8 @@ public class Program extends Unit {
 	/**
 	 * Builds an empty program.
 	 */
-	public Program() {
-		super(null, PROGRAM_NAME);
+	public Program(CodeLocation location) {
+		super(location, PROGRAM_NAME);
 		units = new ConcurrentHashMap<>();
 		types = new ArrayList<>();
 	}

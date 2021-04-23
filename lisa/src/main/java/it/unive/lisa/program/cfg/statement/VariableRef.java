@@ -39,21 +39,8 @@ public class VariableRef extends Expression {
 	 * @param cfg  the cfg that this expression belongs to
 	 * @param name the name of this variable
 	 */
-	public VariableRef(CFG cfg, String name) {
-		this(cfg, name, Untyped.INSTANCE);
-	}
-
-	/**
-	 * Builds a typed variable reference, identified by its name and its type.
-	 * The location where this variable reference happens is unknown (i.e. no
-	 * source file/line/column is available).
-	 * 
-	 * @param cfg  the cfg that this expression belongs to
-	 * @param name the name of this variable
-	 * @param type the type of this variable
-	 */
-	public VariableRef(CFG cfg, String name, Type type) {
-		this(cfg, null, name, type);
+	public VariableRef(CFG cfg, CodeLocation location, String name) {
+		this(cfg, location, name, Untyped.INSTANCE);
 	}
 
 	/**

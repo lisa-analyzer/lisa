@@ -39,20 +39,8 @@ public class Parameter implements CodeElement {
 	 * 
 	 * @param name the name of this parameter
 	 */
-	public Parameter(String name) {
-		this(name, Untyped.INSTANCE);
-	}
-
-	/**
-	 * Builds a typed parameter reference, identified by its name and its type.
-	 * The location where this parameter reference happens is unknown (i.e. no
-	 * source file/line/column is available).
-	 * 
-	 * @param name       the name of this parameter
-	 * @param staticType the type of this parameter
-	 */
-	public Parameter(String name, Type staticType) {
-		this(null, name, staticType);
+	public Parameter(CodeLocation location, String name) {
+		this(location, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -68,6 +56,7 @@ public class Parameter implements CodeElement {
 	public Parameter(CodeLocation location, String name, Type staticType) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
+		Objects.requireNonNull(location, "The location of a CFG cannot be null");
 		this.location = location;
 		this.name = name;
 		this.staticType = staticType;

@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,9 +18,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -29,32 +30,6 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	 * The name of the target of this call
 	 */
 	private final String targetName;
-
-	/**
-	 * Builds the untyped open call. The location where this call happens is
-	 * unknown (i.e. no source file/line/column is available). The static type
-	 * of this call is {@link Untyped}.
-	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param targetName the name of the target of this open call
-	 * @param parameters the parameters of this call
-	 */
-	public OpenCall(CFG cfg, String targetName, Expression... parameters) {
-		this(cfg, targetName, Untyped.INSTANCE, parameters);
-	}
-
-	/**
-	 * Builds the open call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg        the cfg that this expression belongs to
-	 * @param targetName the name of the target of this open call
-	 * @param parameters the parameters of this call
-	 * @param staticType the static type of this call
-	 */
-	public OpenCall(CFG cfg, String targetName, Type staticType, Expression... parameters) {
-		this(cfg, null, targetName, staticType, parameters);
-	}
 
 	/**
 	 * Builds the open call, happening at the given location in the program.

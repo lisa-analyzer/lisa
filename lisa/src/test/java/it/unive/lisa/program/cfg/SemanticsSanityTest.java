@@ -57,16 +57,17 @@ public class SemanticsSanityTest {
 
 	@Before
 	public void setup() throws CallGraphConstructionException {
-		Program p = new Program();
-		unit = new CompilationUnit(null, "foo", false);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		Program p = new Program(unknownLocation);
+		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
-		cfg = new CFG(new CFGDescriptor(unit, false, "foo"));
+		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new IntraproceduralCallGraph();
 		cg.build(p);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
-		fake = new Expression(cfg, null) {
+		fake = new Expression(cfg, unknownLocation) {
 
 			@Override
 			public int setOffset(int offset) {
@@ -121,7 +122,7 @@ public class SemanticsSanityTest {
 		if (param == Unit.class)
 			return unit;
 		if (param == CodeLocation.class)
-			return new SourceCodeLocation(null, 0, 0);
+			return new SourceCodeLocation(null, -1, -1);
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}

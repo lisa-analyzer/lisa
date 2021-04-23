@@ -42,6 +42,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 */
 	protected Statement(CFG cfg, CodeLocation location) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
+		Objects.requireNonNull(location, "The location of a statement cannot be null");
 		this.cfg = cfg;
 		this.location = location;
 		this.offset = -1;
