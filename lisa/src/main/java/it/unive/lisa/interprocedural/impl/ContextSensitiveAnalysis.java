@@ -1,15 +1,5 @@
 package it.unive.lisa.interprocedural.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -28,6 +18,14 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive inteprocedural analysis.
@@ -43,8 +41,8 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 	private static final Logger log = LogManager.getLogger(ContextSensitiveAnalysis.class);
 
 	/**
-	 * The cache of the fixpoints' results. {@link Map#keySet()} will contain all
-	 * the cfgs that have been added. If a key's values's
+	 * The cache of the fixpoints' results. {@link Map#keySet()} will contain
+	 * all the cfgs that have been added. If a key's values's
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
@@ -144,7 +142,8 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 				continue;
 			}
 
-			// prepare the state for the call: hide the visible variables, and then assign 
+			// prepare the state for the call: hide the visible variables, and
+			// then assign
 			// the value to each parameter
 			ScopeToken scope = new ScopeToken(call);
 			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
@@ -173,7 +172,7 @@ public class ContextSensitiveAnalysis<A extends AbstractState<A, H, V>,
 			Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
 			for (SymbolicExpression ret : exitState.getComputedExpressions())
 				tmp = tmp.lub(exitState.assign(meta, ret, call));
-			
+
 			// save the resulting state
 			result = result.lub(tmp.popScope(scope));
 		}

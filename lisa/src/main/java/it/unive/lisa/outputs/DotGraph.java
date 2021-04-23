@@ -1,5 +1,8 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,16 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
-
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
-
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
 
 /**
  * An auxiliary graph built from a {@link Graph} that can be dumped in dot

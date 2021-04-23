@@ -78,7 +78,8 @@ public class StringConcat extends NativeCFG {
 		protected <A extends AbstractState<A, H, V>,
 				H extends HeapDomain<H>,
 				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
+						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
+						SymbolicExpression leftExp,
 						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
 			// we allow untyped for the type inference phase
 			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())

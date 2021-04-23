@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -14,6 +9,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * An environment for a {@link NonRelationalHeapDomain}, that maps
@@ -70,7 +69,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		this.rewritten = rewritten;
 		this.substitution = substitution;
 	}
-	
+
 	@Override
 	protected HeapEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
 		return new HeapEnvironment<>(lattice, function);

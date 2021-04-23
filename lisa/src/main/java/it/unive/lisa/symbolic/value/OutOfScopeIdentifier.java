@@ -1,10 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Objects;
 
 /**
  * An identifier outside the current scope of the call, that is, in a method

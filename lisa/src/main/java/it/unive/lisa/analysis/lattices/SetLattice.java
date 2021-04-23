@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations
@@ -166,22 +165,22 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 		return tmp.toString();
 	}
 
-	 /**
-     * Returns the number of elements in this lattice (its cardinality). If this
-     * lattice contains more than {@code Integer.MAX_VALUE} elements, returns
-     * {@code Integer.MAX_VALUE}.
-     *
-     * @return the number of elements in this lattice (its cardinality)
-     */
+	/**
+	 * Returns the number of elements in this lattice (its cardinality). If this
+	 * lattice contains more than {@code Integer.MAX_VALUE} elements, returns
+	 * {@code Integer.MAX_VALUE}.
+	 *
+	 * @return the number of elements in this lattice (its cardinality)
+	 */
 	public int size() {
 		return elements.size();
 	}
 
 	/**
-     * Returns {@code true} if this set contains no elements.
-     *
-     * @return {@code true} if this set contains no elements
-     */
+	 * Returns {@code true} if this set contains no elements.
+	 *
+	 * @return {@code true} if this set contains no elements
+	 */
 	public boolean isEmpty() {
 		return elements.isEmpty();
 	}

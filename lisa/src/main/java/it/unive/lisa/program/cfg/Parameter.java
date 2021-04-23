@@ -1,10 +1,9 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Objects;
-
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Objects;
 
 /**
  * A CFG parameter identified by its name and its type, containing the

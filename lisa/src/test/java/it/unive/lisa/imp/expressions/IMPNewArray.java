@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.imp.types.ArrayType;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -37,7 +37,8 @@ public class IMPNewArray extends NativeCall {
 	 * @param dimensions the dimensions of the array
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]", ArrayType.lookup(type, dimensions.length),
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]",
+				ArrayType.lookup(type, dimensions.length),
 				dimensions);
 	}
 

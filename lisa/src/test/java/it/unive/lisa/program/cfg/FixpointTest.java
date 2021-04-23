@@ -2,8 +2,6 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
@@ -18,6 +16,7 @@ import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
+import org.junit.Test;
 
 public class FixpointTest {
 
@@ -39,7 +38,8 @@ public class FixpointTest {
 	}
 
 	@Test
-	public void testEmptyCFG() throws InterproceduralAnalysisException, CallGraphConstructionException, ParsingException {
+	public void testEmptyCFG()
+			throws InterproceduralAnalysisException, CallGraphConstructionException, ParsingException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -51,7 +51,8 @@ public class FixpointTest {
 	}
 
 	@Test
-	public void testEmptyIMPMethod() throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+	public void testEmptyIMPMethod()
+			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
@@ -63,7 +64,8 @@ public class FixpointTest {
 	}
 
 	@Test
-	public void testIMPMethodWithEmptyIfBranch() throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
+	public void testIMPMethodWithEmptyIfBranch()
+			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {

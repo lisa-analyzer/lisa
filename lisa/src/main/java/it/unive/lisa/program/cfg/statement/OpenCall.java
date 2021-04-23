@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -19,6 +15,8 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.

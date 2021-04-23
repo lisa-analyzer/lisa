@@ -1,19 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -24,6 +10,18 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -222,6 +220,19 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	}
 
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param lattice  a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * 
+	 * @return a new instance of this environment
+	 */
 	protected abstract M mk(T lattice, Map<Identifier, T> function);
 
 	@Override

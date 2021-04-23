@@ -2,14 +2,32 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.program.CodeElement;
 
+/**
+ * A token that can be used for pushing and popping scopes on local variables
+ * through {@link SemanticDomain#pushScope(ScopeToken)} and
+ * {@link SemanticDomain#popScope(ScopeToken)}. The token is identified by a
+ * {@link CodeElement}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ScopeToken {
 
 	private final CodeElement scoper;
-	
+
+	/**
+	 * Builds a new scope, referring to the given code element.
+	 * 
+	 * @param scoper the code element
+	 */
 	public ScopeToken(CodeElement scoper) {
 		this.scoper = scoper;
 	}
-	
+
+	/**
+	 * Yields the element that this scope refers to.
+	 * 
+	 * @return the code element
+	 */
 	public CodeElement getScoper() {
 		return scoper;
 	}

@@ -8,7 +8,6 @@ import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.dataflow.ReachingDefinitions;
-
 import org.junit.Test;
 
 public class ReachingDefinitionsTest extends AnalysisTestExecutor {

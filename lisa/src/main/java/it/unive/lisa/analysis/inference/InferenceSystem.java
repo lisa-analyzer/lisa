@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -50,7 +49,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	protected InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
 		return new InferenceSystem<>(lattice, function);
 	}
-	
+
 	/**
 	 * Yields the execution state (also called program counter), that might
 	 * change when evaluating an expression.

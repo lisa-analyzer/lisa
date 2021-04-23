@@ -94,7 +94,7 @@ public abstract class TernaryNativeCall extends NativeCall {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
 					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, 
+					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {

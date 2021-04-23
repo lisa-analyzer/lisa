@@ -60,7 +60,7 @@ public class HeapLocation extends Identifier {
 					+ "' and '" + other + "'");
 		return isWeak() ? this : other;
 	}
-	
+
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
 		return this;

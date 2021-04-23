@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.types;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -30,6 +27,8 @@ import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the

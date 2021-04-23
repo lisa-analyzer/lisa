@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -18,6 +14,8 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call that happens inside the program to analyze. At this stage, the

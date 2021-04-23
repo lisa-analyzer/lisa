@@ -1,17 +1,16 @@
 package it.unive.lisa.util.datastructures.graph.algorithms;
 
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
+import it.unive.lisa.util.workset.FIFOWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
-import it.unive.lisa.util.workset.FIFOWorkingSet;
-import it.unive.lisa.util.workset.WorkingSet;
 
 /**
  * An algorithms that evaluates the dominators of each node in a graph. A node

@@ -1,9 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph.impl;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -18,6 +14,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In
@@ -25,8 +24,8 @@ import it.unive.lisa.type.Type;
  * <ul>
  * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
  * target's signature.
- * {@link BaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides
- * the possible types of the receiver that might be reachable, and from where we
+ * {@link BaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides the
+ * possible types of the receiver that might be reachable, and from where we
  * might get the method implementation to analyze</li>
  * <li>returns top when asked for the abstract result of a {@link CFGCall}</li>
  * </ul>

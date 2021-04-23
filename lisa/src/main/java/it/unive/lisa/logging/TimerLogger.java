@@ -3,7 +3,6 @@ package it.unive.lisa.logging;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 

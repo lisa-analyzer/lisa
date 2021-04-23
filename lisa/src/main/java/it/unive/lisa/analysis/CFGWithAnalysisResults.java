@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -41,8 +40,9 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
-	 * @param cfg     the original control flow graph
-	 * @param results the results of the fixpoint computation
+	 * @param cfg         the original control flow graph
+	 * @param entryStates the entry state for each entry point of the cfg
+	 * @param results     the results of the fixpoint computation
 	 */
 	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<A, H, V>> entryStates,
 			Map<Statement, AnalysisState<A, H, V>> results) {

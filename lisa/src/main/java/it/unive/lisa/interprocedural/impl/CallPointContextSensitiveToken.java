@@ -1,14 +1,13 @@
 package it.unive.lisa.interprocedural.impl;
 
-import java.util.Objects;
-
 import it.unive.lisa.program.cfg.statement.Call;
+import java.util.Objects;
 
 /**
  * A context sensitive token representing a call point.
  */
 public class CallPointContextSensitiveToken extends ContextSensitiveToken {
-	
+
 	private static final CallPointContextSensitiveToken singleton = new CallPointContextSensitiveToken(null);
 
 	private final Call callPoint;
@@ -26,7 +25,6 @@ public class CallPointContextSensitiveToken extends ContextSensitiveToken {
 	public ContextSensitiveToken pushCall(Call c) {
 		return new CallPointContextSensitiveToken(c);
 	}
-
 
 	/**
 	 * Return an empty token.
