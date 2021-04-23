@@ -40,7 +40,8 @@ public class StringEndsWith extends NativeCFG {
 	 */
 	public StringEndsWith(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "endsWith", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE), new Parameter(location, "other", StringType.INSTANCE)),
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringEndsWith.class);
 	}
 

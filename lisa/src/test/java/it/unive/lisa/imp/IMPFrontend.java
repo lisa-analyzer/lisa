@@ -284,7 +284,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(null, -1, -1), "this", ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
+		formals[0] = new Parameter(new SourceCodeLocation(null, -1, -1), "this",
+				ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

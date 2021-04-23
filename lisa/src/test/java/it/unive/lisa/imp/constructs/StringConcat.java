@@ -39,7 +39,8 @@ public class StringConcat extends NativeCFG {
 	 */
 	public StringConcat(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "concat", StringType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE), new Parameter(location, "other", StringType.INSTANCE)),
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringConcat.class);
 	}
 

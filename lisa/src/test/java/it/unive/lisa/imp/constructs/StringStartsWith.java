@@ -40,7 +40,8 @@ public class StringStartsWith extends NativeCFG {
 	 */
 	public StringStartsWith(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "startsWith", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE), new Parameter(location, "other", StringType.INSTANCE)),
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringStartsWith.class);
 	}
 

@@ -38,8 +38,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 */
 	private final String qualifiedName;
 
-
-
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
 	 * 

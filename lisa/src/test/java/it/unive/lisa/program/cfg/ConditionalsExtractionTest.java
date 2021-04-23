@@ -226,7 +226,7 @@ public class ConditionalsExtractionTest {
 		IMPNotEqual condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "r"), constant);
-		Return ret = new Return(cfg, unknownLocation,  new VariableRef(cfg, unknownLocation, "x"));
+		Return ret = new Return(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(a1);
 		cfg.addNode(a2);
@@ -320,12 +320,17 @@ public class ConditionalsExtractionTest {
 		IMPIntLiteral constant = new IMPIntLiteral(cfg, null, -1, -1, 10);
 		IMPIntLiteral constant1 = new IMPIntLiteral(cfg, null, -1, -1, 100);
 		IMPNotEqual loop_condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant);
-		Assignment loop_a1 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "loop_a1"), constant);
-		Assignment loop_a2 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "loop_a2"), constant);
+		Assignment loop_a1 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "loop_a1"),
+				constant);
+		Assignment loop_a2 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "loop_a2"),
+				constant);
 		IMPNotEqual if_condition = new IMPNotEqual(cfg, null, -1, -1, constant, constant1);
-		Assignment if_a1 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a1"), constant);
-		Assignment if_a2 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a2"), constant);
-		Assignment if_a3 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a3"), constant);
+		Assignment if_a1 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a1"),
+				constant);
+		Assignment if_a2 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a2"),
+				constant);
+		Assignment if_a3 = new Assignment(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "if_a3"),
+				constant);
 		Return ret = new Return(cfg, unknownLocation, new VariableRef(cfg, unknownLocation, "x"));
 
 		cfg.addNode(loop_condition, true);

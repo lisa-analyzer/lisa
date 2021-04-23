@@ -40,7 +40,8 @@ public class StringReplace extends NativeCFG {
 	 */
 	public StringReplace(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "replace", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE), new Parameter(location, "search", StringType.INSTANCE),
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "search", StringType.INSTANCE),
 				new Parameter(location, "replacement", StringType.INSTANCE)),
 				IMPStringReplace.class);
 	}

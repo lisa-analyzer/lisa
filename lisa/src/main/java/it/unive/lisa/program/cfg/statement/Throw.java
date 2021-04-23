@@ -18,7 +18,7 @@ import it.unive.lisa.symbolic.value.Skip;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class Throw extends UnaryStatement {
-	
+
 	/**
 	 * Builds the throw, raising {@code expression} as error, happening at the
 	 * given location in the program.

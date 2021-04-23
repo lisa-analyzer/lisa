@@ -42,7 +42,8 @@ public class StringSubstring extends NativeCFG {
 	 */
 	public StringSubstring(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "substring", BoolType.INSTANCE,
-				new Parameter(location, "this", StringType.INSTANCE), new Parameter(location, "start", IntType.INSTANCE),
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "start", IntType.INSTANCE),
 				new Parameter(location, "end", IntType.INSTANCE)),
 				IMPStringSubstring.class);
 	}
