@@ -14,7 +14,7 @@ import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import org.junit.Test;
 
 @SuppressWarnings("rawtypes")
-public class ModularWorstCaseInterproceduralAnalysisTest extends AnalysisTestExecutor {
+public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testCHACallGraph() throws AnalysisSetupException {
