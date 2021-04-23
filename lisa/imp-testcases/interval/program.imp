@@ -58,4 +58,25 @@ class tutorial {
 		
 		return x;
 	}
+	
+	sat(x,y) { 
+		def i = -1;
+		def j = 0;
+		
+		while (x == y) {
+			i = i - 1;
+			j = j + 1;
+		}
+		x = 0;
+		if (i < j) // sat
+			x = 1;
+			
+		if (i <= -1) // sat
+			x = x + 1;
+			
+		if (j >= 5) // unknown
+			x = x + 1;
+			
+		return x; // expected x = [2,3]
+	}	
 }
