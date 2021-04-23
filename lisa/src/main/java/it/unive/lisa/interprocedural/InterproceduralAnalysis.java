@@ -52,7 +52,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
 	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
-	 * callgraph. Each result is computed with
+	 * analysis. Each result is computed with
 	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis)} or one of
 	 * its overloads. Results of individual cfgs are then available through
 	 * {@link #getAnalysisResultsOf(CFG)}.
@@ -76,13 +76,6 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *             over {@code cfg}
 	 */
 	Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg);
-
-	/**
-	 * Clears all the data from the last fixpoint computation, effectively
-	 * re-initializing the call graph. The call graph structure obtained throug
-	 * {@link #build(Program, CallGraph)} is not lost.
-	 */
-	void clear();
 
 	/**
 	 * Resolves the given call to all of its possible runtime targets, and then
@@ -124,7 +117,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @return a collection of all the possible runtime targets
 	 *
-	 * @throws CallResolutionException if this call graph is unable to resolve
+	 * @throws CallResolutionException if this analysis is unable to resolve
 	 *                                     the given call
 	 */
 	Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException;

@@ -69,11 +69,6 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final void clear() {
-		results.clear();
-	}
-
-	@Override
 	public final void fixpoint(AnalysisState<A, H, V> entryState) throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))

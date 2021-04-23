@@ -6,7 +6,9 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -110,4 +112,27 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 
 	}
 
+	public CFGWithAnalysisResults<A, H, V> lub(CFG reference, CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()))
+			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+		
+		if (!getDescriptor().equals(reference.getDescriptor()))
+			throw new SemanticException("The reference CFG does not match the results that are to be lubbed");
+		
+		Map<Statement, AnalysisState<A, H, V>> entries = new HashMap<>(entryStates);
+		for (Entry<Statement, AnalysisState<A, H, V>> entry : other.entryStates.entrySet())
+			if (entries.containsKey(entry.getKey()))
+				entries.put(entry.getKey(), entries.get(entry.getKey()).lub(entry.getValue()));
+			else 
+				entries.put(entry.getKey(), entry.getValue());
+		
+		Map<Statement, AnalysisState<A, H, V>> results = new HashMap<>(this.results);
+		for (Entry<Statement, AnalysisState<A, H, V>> entry : other.results.entrySet())
+			if (results.containsKey(entry.getKey()))
+				results.put(entry.getKey(), results.get(entry.getKey()).lub(entry.getValue()));
+			else 
+				results.put(entry.getKey(), entry.getValue());
+		
+		return new CFGWithAnalysisResults<>(reference, entries, results);
+	}
 }

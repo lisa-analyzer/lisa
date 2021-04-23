@@ -1,51 +1,23 @@
 package it.unive.lisa;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
-import static it.unive.lisa.LiSAFactory.getInstance;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.impl.types.InferredTypes;
-import it.unive.lisa.analysis.inference.InferenceSystem;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.checks.ChecksExecutor;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
-import it.unive.lisa.checks.syntactic.CheckTool;
-import it.unive.lisa.checks.warnings.Warning;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
-import it.unive.lisa.logging.IterationLogger;
-import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.value.Skip;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.datastructures.graph.FixpointException;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Function;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.logging.TimerLogger;
+import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.util.file.FileManager;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -97,11 +69,34 @@ public class LiSA {
 	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void run(Program program) throws AnalysisException {
 		printConfig();
 
+		CallGraph callGraph;
 		try {
-			TimerLogger.execAction(log, "Analysis time", () -> runAux(program));
+			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
+			if (conf.getCallGraph() == null)
+				log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
+		} catch (AnalysisSetupException e) {
+			throw new AnalysisExecutionException("Unable to create default call graph", e);
+		}
+
+		InterproceduralAnalysis interproc;
+		try {
+			interproc = conf.getInterproceduralAnalysis() == null ? getDefaultFor(InterproceduralAnalysis.class)
+					: conf.getInterproceduralAnalysis();
+			if (conf.getInterproceduralAnalysis() == null)
+				log.warn("No interprocedural analysis set for this analysis, defaulting to "
+						+ interproc.getClass().getSimpleName());
+		} catch (AnalysisSetupException e) {
+			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
+		}
+
+		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getState());
+
+		try {
+			warnings.addAll(TimerLogger.execSupplier(log, "Analysis time", () -> runner.runAux(program, fileManager)));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
@@ -127,215 +122,6 @@ public class LiSA {
 	private void printStats() {
 		log.info("LiSA statistics:");
 		log.info("  " + warnings.size() + " warnings generated");
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void runAux(Program program)
-			throws AnalysisExecutionException {
-		finalizeProgram(program);
-
-		Collection<CFG> allCFGs = program.getAllCFGs();
-
-		if (conf.isDumpCFGs())
-			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
-				dumpCFG("", cfg, st -> "");
-
-		CheckTool tool = new CheckTool();
-		if (!conf.getSyntacticChecks().isEmpty())
-			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
-		else
-			log.warn("Skipping syntactic checks execution since none have been provided");
-
-		CallGraph callGraph;
-		try {
-			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
-			if (conf.getCallGraph() == null)
-				log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
-		} catch (AnalysisSetupException e) {
-			throw new AnalysisExecutionException("Unable to create default call graph", e);
-		}
-
-		InterproceduralAnalysis interproc;
-		try {
-			interproc = conf.getInterproceduralAnalysis() == null ? getDefaultFor(InterproceduralAnalysis.class)
-					: conf.getInterproceduralAnalysis();
-			if (conf.getInterproceduralAnalysis() == null)
-				log.warn("No interprocedural analysis set for this analysis, defaulting to "
-						+ interproc.getClass().getSimpleName());
-		} catch (AnalysisSetupException e) {
-			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
-		}
-
-		try {
-			callGraph.build(program);
-		} catch (CallGraphConstructionException e) {
-			log.fatal("Exception while building the call graph for the input program", e);
-			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
-		}
-
-		try {
-			interproc.build(program, callGraph);
-		} catch (InterproceduralAnalysisException e) {
-			log.fatal("Exception while building the interprocedural analysis for the input program", e);
-			throw new AnalysisExecutionException(
-					"Exception while building the interprocedural analysis for the input program", e);
-		}
-
-		if (conf.isInferTypes())
-			inferTypes(allCFGs, interproc);
-		else
-			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
-
-		if (conf.getState() != null) {
-			analyze(allCFGs, interproc);
-			Map<CFG, Collection<CFGWithAnalysisResults>> results = new IdentityHashMap<>(allCFGs.size());
-			for (CFG cfg : allCFGs)
-				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
-
-			tool = new CheckToolWithAnalysisResults(tool, results);
-			if (!conf.getSemanticChecks().isEmpty())
-				ChecksExecutor.executeAll((CheckToolWithAnalysisResults) tool, program,
-						conf.getSemanticChecks());
-			else
-				log.warn("Skipping semantic checks execution since none have been provided");
-		} else
-			log.warn("Skipping analysis execution since no abstract sate has been provided");
-
-		warnings.addAll(tool.getWarnings());
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private <A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>> void analyze(
-			Collection<CFG> allCFGs, InterproceduralAnalysis interproc) {
-		A state = (A) conf.getState().top();
-		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
-				() -> {
-					try {
-						interproc.fixpoint(new AnalysisState<>(state, new Skip()));
-					} catch (FixpointException e) {
-						log.fatal("Exception during fixpoint computation", e);
-						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-					}
-				});
-
-		if (conf.isDumpAnalysis())
-			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
-				for (Object result : interproc.getAnalysisResultsOf(cfg))
-					dumpCFG("analysis___", (CFGWithAnalysisResults) result,
-							st -> ((CFGWithAnalysisResults) result).getAnalysisStateAfter(st).toString());
-			}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private <H extends HeapDomain<H>> void inferTypes(Collection<CFG> allCFGs, InterproceduralAnalysis interproc) {
-		SimpleAbstractState typesState;
-		try {
-			AbstractState state = conf.getState();
-			HeapDomain heap;
-			if (state != null)
-				heap = state.getHeapState();
-			else
-				heap = getDefaultFor(HeapDomain.class);
-			// type inference is executed with the simplest abstract state
-			typesState = getInstance(SimpleAbstractState.class, heap, new InferenceSystem<>(new InferredTypes()))
-					.top();
-		} catch (AnalysisSetupException e) {
-			throw new AnalysisExecutionException("Unable to itialize type inference", e);
-		}
-
-		TimerLogger.execAction(log, "Computing type information",
-				() -> {
-					try {
-						interproc.fixpoint(new AnalysisState(typesState, new Skip()));
-					} catch (FixpointException e) {
-						log.fatal("Exception during fixpoint computation", e);
-						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
-					}
-				});
-
-		String message = conf.isDumpTypeInference() ? "Dumping type analysis and propagating it to cfgs"
-				: "Propagating type information to cfgs";
-		for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
-			Collection results = interproc.getAnalysisResultsOf(cfg);
-			cfg.accept(new TypesPropagator(), results);
-			if (conf.isDumpTypeInference())
-				for (Object result_raw : results) {
-					CFGWithAnalysisResults result = (CFGWithAnalysisResults) result_raw;
-					dumpCFG("typing___", result, st -> result.getAnalysisStateAfter(st).toString());
-				}
-		}
-
-		interproc.clear();
-	}
-
-	private static class TypesPropagator<H extends HeapDomain<H>>
-			implements GraphVisitor<CFG, Statement, Edge, Collection<CFGWithAnalysisResults<
-					SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>>> {
-
-		@Override
-		public boolean visit(Collection<CFGWithAnalysisResults<
-				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
-				CFG graph) {
-			return true;
-		}
-
-		@Override
-		public boolean visit(Collection<CFGWithAnalysisResults<
-				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
-				CFG graph, Edge edge) {
-			return true;
-		}
-
-		@Override
-		public boolean visit(Collection<CFGWithAnalysisResults<
-				SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H, InferenceSystem<InferredTypes>>> tool,
-				CFG graph, Statement node) {
-			if (node instanceof Expression) {
-				AnalysisState<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> state = null;
-				for (CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> res : tool)
-					if (state == null)
-						state = res.getAnalysisStateAfter(node);
-					else
-						try {
-							state = state.lub(res.getAnalysisStateAfter(node));
-						} catch (SemanticException e) {
-							throw new AnalysisExecutionException("Unable to propagate type information inside " + graph,
-									e);
-						}
-
-				if (state != null)
-					((Expression) node).setRuntimeTypes(state.getState().getValueState()
-							.getInferredValue().getRuntimeTypes());
-			}
-			return true;
-		}
-	}
-
-	private void finalizeProgram(Program program) {
-		// fill up the types cache by side effect on an external set
-		Caches.types().clear();
-		ExternalSet<Type> types = Caches.types().mkEmptySet();
-		program.getRegisteredTypes().forEach(types::add);
-		types = null;
-
-		TimerLogger.execAction(log, "Finalizing input program", () -> {
-			try {
-				program.validateAndFinalize();
-			} catch (ProgramValidationException e) {
-				throw new AnalysisExecutionException("Unable to finalize target program", e);
-			}
-		});
-	}
-
-	private void dumpCFG(String filePrefix, CFG cfg, Function<Statement, String> labelGenerator) {
-		try (Writer file = fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
-			cfg.dump(file, st -> labelGenerator.apply(st));
-		} catch (IOException e) {
-			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
-					e);
-		}
 	}
 
 	/**
