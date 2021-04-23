@@ -6,7 +6,7 @@ import it.unive.lisa.program.cfg.statement.Call;
  * A context sensitive token that is always the same (aka, do not track any
  * information about the call stack).
  */
-public class SingletonContextSensitiveToken extends ContextSensitiveToken {
+public class SingletonContextSensitiveToken implements ContextSensitiveToken {
 
 	private static final SingletonContextSensitiveToken singleton = new SingletonContextSensitiveToken();
 

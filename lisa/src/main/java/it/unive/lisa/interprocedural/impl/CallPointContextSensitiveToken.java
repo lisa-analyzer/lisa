@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * A context sensitive token representing a call point.
  */
-public class CallPointContextSensitiveToken extends ContextSensitiveToken {
+public class CallPointContextSensitiveToken implements ContextSensitiveToken {
 
 	private static final CallPointContextSensitiveToken singleton = new CallPointContextSensitiveToken(null);
 
