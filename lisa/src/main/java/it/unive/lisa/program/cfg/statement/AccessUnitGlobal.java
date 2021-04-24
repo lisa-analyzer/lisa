@@ -76,7 +76,7 @@ public class AccessUnitGlobal extends Expression {
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = null;
-		Variable v = new Variable(getRuntimeTypes(), target.getName());
+		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, v), this);
 			if (result == null)

@@ -114,6 +114,15 @@ public abstract class Identifier extends ValueExpression {
 	}
 
 	/**
+	 * Yields the annotations of this identifier.
+	 * 
+	 * @return the annotations of this identifier
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
 	 * Adds an annotation to the annotations of this identifier.
 	 * 
 	 * @param ann the annotation to be added
