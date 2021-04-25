@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.impl.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -32,36 +33,38 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
-	private static final Interval TOP = new Interval(null, null, true, false);
-	private static final Interval BOTTOM = new Interval(null, null, false, true);
+	private static final Interval TOP = new Interval(null, null, true);
+	private static final Interval BOTTOM = new Interval(null, null, false);
 
-	private final boolean isTop, isBottom;
+	private final boolean isTop;
 
 	private final Integer low;
 	private final Integer high;
 
-	private Interval(Integer low, Integer high, boolean isTop, boolean isBottom) {
+	private Interval(Integer low, Integer high, boolean isTop) {
 		this.low = low;
 		this.high = high;
 		this.isTop = isTop;
-		this.isBottom = isBottom;
 	}
 
 	/**
-	 * Builds an interval from its low bound and high bound.
+	 * Builds an interval from its low bound and high bound. Call this
+	 * constructor iff {@code low} and {@code high} are not both null. If you
+	 * need to build top or bottom elements, call {@link Interval#top()} and
+	 * {@link Interval#bottom()}, respectively.
 	 * 
 	 * @param low  the low bound
 	 * @param high the high bound
 	 */
 	public Interval(Integer low, Integer high) {
-		this(low, high, false, false);
+		this(low, high, false);
 	}
 
 	/**
 	 * Builds the top interval.
 	 */
 	public Interval() {
-		this(null, null, true, false);
+		this(null, null, true);
 	}
 
 	@Override
@@ -71,12 +74,17 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	public boolean isTop() {
-		return isTop;
+		return isTop && low == null && low == high;
 	}
 
 	@Override
 	public Interval bottom() {
 		return BOTTOM;
+	}
+
+	@Override
+	public boolean isBottom() {
+		return !isTop && low == null && low == high;
 	}
 
 	/**
@@ -190,7 +198,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	protected Interval lubAux(Interval other) throws SemanticException {
 		Integer newLow = lowIsMinusInfinity() || other.lowIsMinusInfinity() ? null : Math.min(low, other.low);
 		Integer newHigh = highIsPlusInfinity() || other.highIsPlusInfinity() ? null : Math.max(high, other.high);
-		return new Interval(newLow, newHigh);
+		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
@@ -201,7 +209,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 		if (newLow != null && newHigh != null && newLow > newHigh)
 			return bottom();
-		return new Interval(newLow, newHigh);
+		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
@@ -217,7 +225,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		else
 			newLow = other.low;
 
-		return new Interval(newLow, newHigh);
+		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
@@ -246,7 +254,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		else
 			newHigh = high + other.high;
 
-		return new Interval(newLow, newHigh);
+		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
 	}
 
 	private Interval diff(Interval other) {
@@ -262,7 +270,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		else
 			newHigh = high - other.low;
 
-		return new Interval(newLow, newHigh);
+		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
 	}
 
 	private Interval mul(Interval other) {
@@ -289,7 +297,11 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		// x2 * y2
 		multiplyBounds(boundSet, h1, h2, lowInf, highInf);
 
-		return new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
+		Interval result = new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
+		if (result.low == null && result.high == result.low)
+			return top();
+		else
+			return result;
 	}
 
 	private Interval div(Interval other) {
@@ -316,7 +328,93 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		// x2 / y2
 		divideBounds(boundSet, h1, h2, lowInf, highInf);
 
-		return new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
+		Interval result = new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
+		if (result.low == null && result.high == result.low)
+			return top();
+		else
+			return result;
+	}
+
+	private boolean isSingleton() {
+		return low != null && low == high;
+	}
+
+	@Override
+	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
+			ProgramPoint pp) {
+
+		if (left.isTop() || right.isTop())
+			return Satisfiability.UNKNOWN;
+
+		switch (operator) {
+		case COMPARISON_EQ:
+			Interval glb = null;
+			try {
+				glb = left.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+			if (glb.isBottom())
+				return Satisfiability.NOT_SATISFIED;
+			else if (left.isSingleton() && left.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_GE:
+			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LE, right, left, pp);
+		case COMPARISON_GT:
+			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LT, right, left, pp);
+		case COMPARISON_LE:
+			Interval firstBound = right.high == null ? top() : new Interval(null, right.high);
+			Interval secondBound = left.low == null ? top() : new Interval(left.low, null);
+
+			Interval firstCheck = null;
+			Interval secondCheck = null;
+
+			try {
+				firstCheck = firstBound.glb(left);
+				secondCheck = secondBound.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+
+			if (firstCheck.isBottom() || secondCheck.isBottom())
+				return Satisfiability.NOT_SATISFIED;
+
+			if (firstCheck.equals(left) && secondCheck.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_LT:
+			firstBound = right.high == null ? top() : new Interval(null, right.high - 1);
+			secondBound = left.low == null ? top() : new Interval(left.low + 1, null);
+
+			firstCheck = null;
+			secondCheck = null;
+
+			try {
+				firstCheck = firstBound.glb(left);
+				secondCheck = secondBound.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+
+			if (firstCheck.isBottom() || secondCheck.isBottom())
+				return Satisfiability.NOT_SATISFIED;
+			if (firstCheck.equals(left) && secondCheck.equals(right))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		case COMPARISON_NE:
+			glb = null;
+			try {
+				glb = left.glb(right);
+			} catch (SemanticException e) {
+				e.printStackTrace();
+			}
+			if (glb.isBottom())
+				return Satisfiability.SATISFIED;
+			return Satisfiability.UNKNOWN;
+		default:
+			return Satisfiability.UNKNOWN;
+		}
 	}
 
 	private void multiplyBounds(SortedSet<Integer> boundSet, Integer i, Integer j, AtomicBoolean lowInf,
@@ -433,7 +531,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((high == null) ? 0 : high.hashCode());
-		result = prime * result + (isBottom ? 1231 : 1237);
 		result = prime * result + (isTop ? 1231 : 1237);
 		result = prime * result + ((low == null) ? 0 : low.hashCode());
 		return result;
@@ -453,8 +550,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return false;
 		} else if (!high.equals(other.high))
 			return false;
-		if (isBottom != other.isBottom)
-			return false;
 		if (isTop != other.isTop)
 			return false;
 		if (low == null) {
@@ -469,6 +564,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	protected ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
+
+		Map<Identifier, Interval> map = null;
+
+		if (environment.getMap() == null)
+			map = new HashMap<Identifier, Interval>();
+		else
+			map = new HashMap<>(environment.getMap());
+
 		switch (operator) {
 		case COMPARISON_EQ:
 			if (left instanceof Identifier)
@@ -482,12 +585,10 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				if (rightEval.lowIsMinusInfinity())
 					return environment;
 
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval bound = new Interval(rightEval.low, null);
 				map.put((Identifier) left, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
 			} else if (right instanceof Identifier) {
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval leftEval = eval(left, environment, pp);
 				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low);
 				map.put((Identifier) right, bound);
@@ -500,12 +601,10 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				if (rightEval.lowIsMinusInfinity())
 					return environment;
 
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval bound = new Interval(rightEval.low + 1, null);
 				map.put((Identifier) left, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
 			} else if (right instanceof Identifier) {
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval leftEval = eval(left, environment, pp);
 				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low - 1);
 				map.put((Identifier) right, bound);
@@ -516,7 +615,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			if (left instanceof Identifier) {
 				Interval rightEval = eval(right, environment, pp);
 				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low);
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				map.put((Identifier) left, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
 			} else if (right instanceof Identifier) {
@@ -524,7 +622,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				if (leftEval.lowIsMinusInfinity())
 					return environment;
 
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval bound = new Interval(leftEval.low, null);
 				map.put((Identifier) right, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
@@ -534,7 +631,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			if (left instanceof Identifier) {
 				Interval rightEval = eval(right, environment, pp);
 				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low - 1);
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				map.put((Identifier) left, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
 			} else if (right instanceof Identifier) {
@@ -542,7 +638,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				if (leftEval.lowIsMinusInfinity())
 					return environment;
 
-				Map<Identifier, Interval> map = new HashMap<>(environment.getMap());
 				Interval bound = new Interval(leftEval.low + 1, null);
 				map.put((Identifier) right, bound);
 				return new ValueEnvironment<Interval>(bottom(), map);
