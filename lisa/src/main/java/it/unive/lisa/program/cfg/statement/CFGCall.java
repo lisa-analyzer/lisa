@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -182,6 +183,13 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
 			getMetaVariables().add((Identifier) expr);
+
+		// propagates the annotations of the targets
+		// to the metavariable of this cfg call
+		for (CFG target : targets)
+			for (Annotation ann : target.getDescriptor().getAnnotations())
+				meta.addAnnotation(ann);
+
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = null;

@@ -42,6 +42,8 @@ import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -66,6 +68,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.test.antlr.IMPParser.AnnotationContext;
+import it.unive.lisa.test.antlr.IMPParser.AnnotationsContext;
 import it.unive.lisa.test.antlr.IMPParser.ArgContext;
 import it.unive.lisa.test.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.test.antlr.IMPParser.ArrayAccessContext;
@@ -99,11 +103,13 @@ import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -206,7 +212,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
+				Untyped.INSTANCE, visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
@@ -733,5 +739,24 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+	}
+
+	@Override
+	public Annotations visitAnnotations(AnnotationsContext ctx) {
+		if (ctx == null)
+			return new Annotations();
+		List<Annotation> anns = new ArrayList<>();
+		for (int i = 0; i < ctx.annotation().size(); i++)
+			anns.add(visitAnnotation(ctx.annotation(i)));
+		return new Annotations(anns);
+	}
+
+	@Override
+	public Annotation visitAnnotation(AnnotationContext ctx) {
+		String annotationName = ctx.IDENTIFIER().getText();
+		if (annotationName.startsWith("Inherited"))
+			return new Annotation(annotationName, new ArrayList<>(), true);
+		else
+			return new Annotation(annotationName, new ArrayList<>(), false);
 	}
 }
