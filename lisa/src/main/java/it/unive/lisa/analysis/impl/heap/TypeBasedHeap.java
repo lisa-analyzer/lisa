@@ -1,13 +1,5 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.collections.CollectionUtils;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -25,6 +17,11 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -41,7 +38,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private final ExpressionSet<ValueExpression> rewritten;
 
-	private final Collection<String> names;
+	private final Set<String> names;
 
 	/**
 	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
@@ -55,7 +52,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		this(new ExpressionSet<ValueExpression>(rewritten), new HashSet<>());
 	}
 
-	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Collection<String> names) {
+	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Set<String> names) {
 		this.rewritten = rewritten;
 		this.names = names;
 	}
@@ -151,10 +148,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
-		return new TypeBasedHeap(rewritten.lub(other.rewritten),
-				CollectionUtils.union(names, other.names));
+		return new TypeBasedHeap(rewritten.lub(other.rewritten), SetUtils.union(names, other.names));
 	}
 
 	@Override
