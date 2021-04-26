@@ -201,7 +201,7 @@ public class LiSA {
 		if (conf.isDumpAnalysis())
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
 				CFGWithAnalysisResults<A, H, V> result = callGraph.getAnalysisResultsOf(cfg);
-				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).toString());
+				dumpCFG("analysis___", result, st -> result.getAnalysisStateAt(st).representation().toString());
 			}
 	}
 
@@ -238,7 +238,7 @@ public class LiSA {
 			CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 					InferenceSystem<InferredTypes>> result = callGraph.getAnalysisResultsOf(cfg);
 			if (conf.isDumpTypeInference())
-				dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).toString());
+				dumpCFG("typing___", result, st -> result.getAnalysisStateAt(st).representation().toString());
 			cfg.accept(new TypesPropagator<>(), result);
 		}
 

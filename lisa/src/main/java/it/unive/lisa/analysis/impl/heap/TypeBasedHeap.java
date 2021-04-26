@@ -1,8 +1,19 @@
 package it.unive.lisa.analysis.impl.heap;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections.CollectionUtils;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -14,14 +25,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import org.apache.commons.collections.CollectionUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -82,12 +85,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public String representation() {
-		Collection<String> res = new TreeSet<String>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
-						(ll, rr) -> ll.toString().compareTo(rr.toString())));
-		res.addAll(names);
-		return res.toString();
+	public DomainRepresentation representation() {
+		return new SetRepresentation(names, StringRepresentation::new);
 	}
 
 	@Override

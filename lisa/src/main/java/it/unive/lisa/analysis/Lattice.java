@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
+
 /**
  * An interface for elements that follow a lattice structure. Implementers of
  * this interface should inherit from {@link BaseLattice}, unless explicitly
@@ -17,9 +20,20 @@ public interface Lattice<L extends Lattice<L>> {
 	public static final String TOP_STRING = "#TOP#";
 
 	/**
+	 * A {@link DomainRepresentation} that can be used to represent top values.
+	 */
+	public static final DomainRepresentation TOP_REPR = new StringRepresentation(TOP_STRING);
+
+	/**
 	 * A string constant that can be used to represent bottom values.
 	 */
 	public static final String BOTTOM_STRING = "_|_";
+
+	/**
+	 * A {@link DomainRepresentation} that can be used to represent bottom
+	 * values.
+	 */
+	public static final DomainRepresentation BOTTOM_REPR = new StringRepresentation(BOTTOM_STRING);
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and

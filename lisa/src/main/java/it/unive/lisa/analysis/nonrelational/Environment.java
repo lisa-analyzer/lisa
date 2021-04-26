@@ -1,22 +1,23 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.MapRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -184,23 +185,14 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	public final String toString() {
-		return representation();
-	}
-
-	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_STRING;
+			return Lattice.TOP_REPR;
 
 		if (isBottom())
-			return Lattice.BOTTOM_STRING;
+			return Lattice.BOTTOM_REPR;
 
-		SortedSet<String> res = new TreeSet<>();
-		for (Entry<Identifier, T> entry : function.entrySet())
-			res.add(entry.getKey() + ": " + entry.getValue().representation());
-
-		return StringUtils.join(res, '\n');
+		return new MapRepresentation(function, StringRepresentation::new, NonRelationalDomain::representation);
 	}
 
 	@Override

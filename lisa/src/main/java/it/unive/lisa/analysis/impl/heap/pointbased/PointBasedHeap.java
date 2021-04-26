@@ -2,11 +2,25 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import static java.util.Collections.singleton;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -17,18 +31,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -128,21 +130,19 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_STRING;
+			return Lattice.TOP_REPR;
 
 		if (isBottom())
-			return Lattice.BOTTOM_STRING;
+			return Lattice.BOTTOM_REPR;
 
-		Collection<String> res = new TreeSet<String>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
-						(ll, rr) -> ll.toString().compareTo(rr.toString())));
+		Collection<HeapLocation> res = new HashSet<>();
 		for (Identifier id : heapEnv.getKeys())
 			for (HeapLocation hid : heapEnv.getState(id))
-				res.add(hid.toString());
+				res.add(hid);
 
-		return res.toString();
+		return new SetRepresentation(res, StringRepresentation::new);
 	}
 
 	@Override
