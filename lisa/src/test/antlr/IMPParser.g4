@@ -16,14 +16,6 @@ options { tokenVocab = IMPLexer; }
  */
 
 
-annotation
-   : IDENTIFIER
-   ;
-
-annotations
-   : LBRACK (COMMA annotation)+ RBRACK
-   ;
-
 arraySqDeclaration
    : (LBRACK RBRACK)+
    ;
@@ -184,7 +176,7 @@ statement
    ;
 
 localDeclaration
-   : DEFINE IDENTIFIER ASSIGN expression
+   : annotations? DEFINE IDENTIFIER ASSIGN expression
    ;
 
 assignment
@@ -210,6 +202,18 @@ whileLoop
 
 forDeclaration
    : (initDecl = localDeclaration | initExpr = expression)? SEMI condition = expression? SEMI post = expression?
+   ;
+/*
+ * ANNOTATIONS
+ */
+   
+   
+annotation
+   : IDENTIFIER
+   ;
+
+annotations
+   : LBRACK annotation (COMMA annotation)* RBRACK
    ;
 /*
  * BLOCK

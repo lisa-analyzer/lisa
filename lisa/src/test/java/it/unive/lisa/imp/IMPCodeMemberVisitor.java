@@ -114,6 +114,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 /**
@@ -132,7 +133,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final Collection<ControlFlowStructure> cfs;
 
-	private final Map<String, VariableRef> visibleIds;
+	private final Map<String, Pair<VariableRef, Annotations>> visibleIds;
 
 	private final CFG cfg;
 
@@ -156,7 +157,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		visibleIds = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
-			visibleIds.put(par.getName(), par.createReference(cfg));
+			visibleIds.put(par.getName(), Pair.of(par.createReference(cfg), par.getAnnotations()));
 	}
 
 	/**
@@ -217,7 +218,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlock(BlockContext ctx) {
-		Map<String, VariableRef> backup = new HashMap<>(visibleIds);
+		Map<String, Pair<VariableRef,
+				Annotations>> backup = new HashMap<>(visibleIds);
 		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>(matrix.getEdgeFactory());
 
 		Statement first = null, last = null;
@@ -233,11 +235,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		}
 
 		Collection<String> toRemove = new HashSet<>();
-		for (Entry<String, VariableRef> id : visibleIds.entrySet())
+		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
 			if (!backup.containsKey(id.getKey())) {
-				VariableRef ref = id.getValue();
+				VariableRef ref = id.getValue().getLeft();
 				descriptor.addVariable(new VariableTableEntry(ref.getLocation(),
-						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE));
+						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE, id.getValue().getRight()));
 				toRemove.add(id.getKey());
 			}
 
@@ -340,7 +342,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			throw new IMPSyntaxException(
 					"Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
 
-		visibleIds.put(ref.getName(), ref);
+		visibleIds.put(ref.getName(), Pair.of(ref, visitAnnotations(ctx.annotations())));
 		// the variable table entry will be generated at the end of the
 		// containing block
 
