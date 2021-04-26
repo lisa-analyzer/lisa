@@ -209,7 +209,32 @@ forDeclaration
    
    
 annotation
-   : IDENTIFIER
+   : IDENTIFIER annotationMembers?
+   ;
+
+annotationMembers
+   : LPAREN annotationMember (COMMA annotationMember)* RPAREN
+   ;
+
+annotationMember
+   : IDENTIFIER ASSIGN annotationValue
+   ;
+
+annotationValue
+   : basicAnnotationValue
+   | arrayAnnotationValue
+   ;
+
+arrayAnnotationValue
+   : LBRACK (basicAnnotationValue (COMMA basicAnnotationValue)*)? RBRACK
+   ;
+
+basicAnnotationValue
+   : SUB? LITERAL_DECIMAL
+   | SUB? LITERAL_FLOAT
+   | LITERAL_STRING
+   | LITERAL_BOOL
+   | unitName = IDENTIFIER
    ;
 
 annotations

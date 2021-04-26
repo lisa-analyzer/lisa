@@ -21,36 +21,50 @@ class first {}
 class second extends first {}
 
 /*
+ * an imp class can be annotated with one or more annotation.
+ * annotation can optionally have one or more members
+ */
+[ann1, inheritedann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
+class third extends second {}
+
+/*
  * the body of a class is a list of fields, constructors and methods
  */
 class example {
 	
 	/* 
 	 * fields are declared by just specifying their name
-	 * and do not support in-place initialization 
+	 * and do not support in-place initialization.
+	 * Field can be annotated 
 	 */
+	[ann1, ann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
 	field;
 	
 	/*
-	 * methods are declared by specifying their name and their parameters
+	 * methods are declared by specifying their name and their parameters.
+	 * Methods and method parameters can be annotated
 	 */
+	[ann1, ann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
 	foo1() {}
 	foo2() { 
 		// void methods can also have explicit return statements
 		return; 
 	}
-	foo3(i, j) { 
+	foo3([notnull] i, [tainted] j) { 
 		// return statements can return something
 		return i + j; 
 	}
 	
 	/*
 	 * methods starting with ~ are constructors and cannot be overridden,
-	 * but you can omit the ~ to invoke them
+	 * but you can omit the ~ to invoke them.
+	 * Also constructors can be annotated.
 	 */
+	[tainted]
 	~example() {
 		// variable definitions are preceeded by the def keyword
-		def x = 10;
+		// and can be annotated
+		[ann1, ann2, ann3] def x = 10;
 	}
 	
 	types() {
