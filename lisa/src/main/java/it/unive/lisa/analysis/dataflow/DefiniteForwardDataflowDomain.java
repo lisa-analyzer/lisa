@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -12,6 +7,10 @@ import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * A {@link DataflowDomain} for <b>forward</b> and <b>definite</b> dataflow

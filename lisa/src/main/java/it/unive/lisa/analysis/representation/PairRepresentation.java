@@ -2,16 +2,42 @@ package it.unive.lisa.analysis.representation;
 
 import java.util.function.Function;
 
+/**
+ * A {@link DomainRepresentation} in the form of a pair of elements.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class PairRepresentation extends DomainRepresentation {
 
 	private final DomainRepresentation left;
+
 	private final DomainRepresentation right;
 
+	/**
+	 * Builds a new representation starting from the given pair of elements.
+	 * {@code leftMapper} and {@code rightMapper} are used for transforming both
+	 * elements to their individual representation.
+	 * 
+	 * @param <L>         the type of the left element
+	 * @param <R>         the type of the right element
+	 * @param left        the left element to represent
+	 * @param right       the right element to represent
+	 * @param leftMapper  the function that knows how to convert the left
+	 *                        element to its representation
+	 * @param rightMapper the function that knows how to convert the right
+	 *                        element to its representation
+	 */
 	public <L, R> PairRepresentation(L left, R right, Function<L, DomainRepresentation> leftMapper,
 			Function<R, DomainRepresentation> rightMapper) {
 		this(leftMapper.apply(left), rightMapper.apply(right));
 	}
 
+	/**
+	 * Builds a new representation containing the given pair of elements.
+	 * 
+	 * @param left  the left-most element
+	 * @param right the right-most element
+	 */
 	public PairRepresentation(DomainRepresentation left, DomainRepresentation right) {
 		this.left = left;
 		this.right = right;

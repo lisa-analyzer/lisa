@@ -1,7 +1,19 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.dataflow.DataflowElement;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.util.collections.CollectionUtilities;
 
+/**
+ * A structured representation of the abstract information present in a single
+ * instance of {@link SemanticDomain}, {@link NonRelationalDomain},
+ * {@link DataflowElement} or other types of domains. Instances of this class
+ * can be used to depict the content of an abstract element in a domain-agnostic
+ * way, such as dumping the information to a file.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
 
 	@Override

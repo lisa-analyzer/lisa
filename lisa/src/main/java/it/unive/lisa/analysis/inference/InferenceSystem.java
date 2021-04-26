@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -10,6 +8,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
 
 /**
  * An inference system that model standard derivation systems (e.g., types

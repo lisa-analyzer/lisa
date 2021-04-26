@@ -6,10 +6,28 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+/**
+ * A {@link DomainRepresentation} in the form of a key-value mapping.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class MapRepresentation extends DomainRepresentation {
 
 	private final SortedMap<DomainRepresentation, DomainRepresentation> map;
 
+	/**
+	 * Builds a new representation starting from the given map.
+	 * {@code keyMapper} and {@code valueMapper} are used for transforming each
+	 * key and value in the map to their individual representation.
+	 * 
+	 * @param <K>         the type of keys in the map
+	 * @param <V>         the type of values in the map
+	 * @param map         the map to represent
+	 * @param keyMapper   the function that knows how to convert keys to their
+	 *                        representation
+	 * @param valueMapper the function that knows how to convert values to their
+	 *                        representation
+	 */
 	public <K, V> MapRepresentation(Map<K, V> map, Function<K, DomainRepresentation> keyMapper,
 			Function<V, DomainRepresentation> valueMapper) {
 		this.map = new TreeMap<>();
@@ -17,6 +35,11 @@ public class MapRepresentation extends DomainRepresentation {
 			this.map.put(keyMapper.apply(e.getKey()), valueMapper.apply(e.getValue()));
 	}
 
+	/**
+	 * Builds a new representation containing the given map.
+	 * 
+	 * @param map the map
+	 */
 	public MapRepresentation(Map<DomainRepresentation, DomainRepresentation> map) {
 		if (map instanceof SortedMap)
 			this.map = (SortedMap<DomainRepresentation, DomainRepresentation>) map;

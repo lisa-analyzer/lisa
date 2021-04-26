@@ -79,7 +79,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 			return Lattice.BOTTOM_REPR;
 		if (isTop())
 			return Lattice.TOP_REPR;
-		
+
 		return new StringRepresentation(value.toString());
 	}
 

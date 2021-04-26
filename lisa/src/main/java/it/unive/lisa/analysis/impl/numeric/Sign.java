@@ -72,15 +72,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return Lattice.BOTTOM_REPR;
 		if (isTop())
 			return Lattice.TOP_REPR;
-		
+
 		String repr;
 		if (this == ZERO)
 			repr = "0";
 		else if (this == POS)
 			repr = "+";
-		else 
+		else
 			repr = "-";
-		
+
 		return new StringRepresentation(repr);
 	}
 

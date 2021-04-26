@@ -1,13 +1,30 @@
 package it.unive.lisa.analysis.representation;
 
+/**
+ * A {@link DomainRepresentation} in the form of a single string element.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class StringRepresentation extends DomainRepresentation {
 
 	private final String representation;
 
+	/**
+	 * Builds a new representation containing the given string.
+	 * 
+	 * @param representation the string
+	 */
 	public StringRepresentation(String representation) {
 		this.representation = representation;
 	}
 
+	/**
+	 * Builds a new representation starting from the given object.
+	 * {@link String#valueOf(Object)} is used to extract its string
+	 * representation.
+	 * 
+	 * @param obj the object
+	 */
 	public StringRepresentation(Object obj) {
 		this(String.valueOf(obj));
 	}

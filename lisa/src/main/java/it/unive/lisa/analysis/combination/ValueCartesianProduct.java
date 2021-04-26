@@ -29,7 +29,7 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	public ValueCartesianProduct(T1 left, T2 right) {
 		super(left, right);
 	}
-	
+
 	@Override
 	protected ValueCartesianProduct<T1, T2> mk(T1 left, T2 right) {
 		return new ValueCartesianProduct<>(left, right);

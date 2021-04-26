@@ -1,24 +1,31 @@
 package it.unive.lisa.analysis.representation;
 
-import java.util.Collection;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
-
 import org.apache.commons.lang3.StringUtils;
 
-import it.unive.lisa.util.collections.IterableArray;
-
+/**
+ * A {@link DomainRepresentation} in the form of a set of values.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SetRepresentation extends DomainRepresentation {
 
 	private final SortedSet<DomainRepresentation> elements;
 
-	@SafeVarargs
-	public <E> SetRepresentation(Function<E, DomainRepresentation> mapper, E... elements) {
-		this(mapAndSort(new IterableArray<>(elements), mapper));
-	}
-
-	public <E> SetRepresentation(Collection<E> elements, Function<E, DomainRepresentation> mapper) {
+	/**
+	 * Builds a new representation starting from the given set. {@code mapper}
+	 * is used for transforming each element in the set to its individual
+	 * representation.
+	 * 
+	 * @param <E>      the type of elements in the set
+	 * @param elements the set to represent
+	 * @param mapper   the function that knows how to convert elements to their
+	 *                     representation
+	 */
+	public <E> SetRepresentation(Set<E> elements, Function<E, DomainRepresentation> mapper) {
 		this(mapAndSort(elements, mapper));
 	}
 
@@ -30,13 +37,12 @@ public class SetRepresentation extends DomainRepresentation {
 		return result;
 	}
 
-	public SetRepresentation(DomainRepresentation... elements) {
-		this.elements = new TreeSet<>();
-		for (DomainRepresentation repr : elements)
-			this.elements.add(repr);
-	}
-
-	public SetRepresentation(Collection<DomainRepresentation> elements) {
+	/**
+	 * Builds a new representation containing the given set.
+	 * 
+	 * @param elements the set
+	 */
+	public SetRepresentation(Set<DomainRepresentation> elements) {
 		if (elements instanceof SortedSet)
 			this.elements = (SortedSet<DomainRepresentation>) elements;
 		else

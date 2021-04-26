@@ -68,13 +68,13 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 			return Lattice.BOTTOM_REPR;
 		if (isTop())
 			return Lattice.TOP_REPR;
-		
+
 		String repr;
 		if (this == EVEN)
 			repr = "Even";
-		else 
+		else
 			repr = "Odd";
-		
+
 		return new StringRepresentation(repr);
 	}
 

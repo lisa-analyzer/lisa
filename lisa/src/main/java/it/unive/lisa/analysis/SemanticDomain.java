@@ -359,7 +359,8 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	}
 
 	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in this domain's instance.
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this domain's instance.
 	 * 
 	 * @return the representation
 	 */
