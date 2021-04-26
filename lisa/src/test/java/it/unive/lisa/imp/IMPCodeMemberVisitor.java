@@ -42,17 +42,7 @@ import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.annotations.Annotation;
-import it.unive.lisa.program.annotations.AnnotationMember;
 import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.program.annotations.values.AnnotationValue;
-import it.unive.lisa.program.annotations.values.ArrayAnnotationValue;
-import it.unive.lisa.program.annotations.values.BasicAnnotationValue;
-import it.unive.lisa.program.annotations.values.BoolAnnotationValue;
-import it.unive.lisa.program.annotations.values.CompilationUnitAnnotationValue;
-import it.unive.lisa.program.annotations.values.FloatAnnotationValue;
-import it.unive.lisa.program.annotations.values.IntAnnotationValue;
-import it.unive.lisa.program.annotations.values.StringAnnotationValue;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
@@ -77,18 +67,11 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.test.antlr.IMPParser.AnnotationContext;
-import it.unive.lisa.test.antlr.IMPParser.AnnotationMemberContext;
-import it.unive.lisa.test.antlr.IMPParser.AnnotationMembersContext;
-import it.unive.lisa.test.antlr.IMPParser.AnnotationValueContext;
-import it.unive.lisa.test.antlr.IMPParser.AnnotationsContext;
 import it.unive.lisa.test.antlr.IMPParser.ArgContext;
 import it.unive.lisa.test.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.test.antlr.IMPParser.ArrayAccessContext;
-import it.unive.lisa.test.antlr.IMPParser.ArrayAnnotationValueContext;
 import it.unive.lisa.test.antlr.IMPParser.ArrayCreatorRestContext;
 import it.unive.lisa.test.antlr.IMPParser.AssignmentContext;
-import it.unive.lisa.test.antlr.IMPParser.BasicAnnotationValueContext;
 import it.unive.lisa.test.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.test.antlr.IMPParser.BinaryStringExprContext;
 import it.unive.lisa.test.antlr.IMPParser.BlockContext;
@@ -117,13 +100,11 @@ import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -227,7 +208,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE, visitAnnotations(ctx.annotations()));
+				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
@@ -356,7 +337,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			throw new IMPSyntaxException(
 					"Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
 
-		visibleIds.put(ref.getName(), Pair.of(ref, visitAnnotations(ctx.annotations())));
+		visibleIds.put(ref.getName(), Pair.of(ref, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations())));
 		// the variable table entry will be generated at the end of the
 		// containing block
 
@@ -755,81 +736,5 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
-	}
-
-	@Override
-	public Annotations visitAnnotations(AnnotationsContext ctx) {
-		if (ctx == null)
-			return new Annotations();
-		List<Annotation> anns = new ArrayList<>();
-		for (int i = 0; i < ctx.annotation().size(); i++)
-			anns.add(visitAnnotation(ctx.annotation(i)));
-		return new Annotations(anns);
-	}
-
-	@Override
-	public Annotation visitAnnotation(AnnotationContext ctx) {
-		String annotationName = ctx.IDENTIFIER().getText();
-		if (annotationName.startsWith("Inherited"))
-			return new Annotation(annotationName, visitAnnotationMembers(ctx.annotationMembers()), true);
-		else
-			return new Annotation(annotationName, visitAnnotationMembers(ctx.annotationMembers()), false);
-	}
-
-	@Override
-	public List<AnnotationMember> visitAnnotationMembers(AnnotationMembersContext ctx) {
-		List<AnnotationMember> arr = new ArrayList<>();
-		if (ctx == null)
-			return arr;
-		else
-			for (int i = 0; i < ctx.annotationMember().size(); i++)
-				arr.add(visitAnnotationMember(ctx.annotationMember(i)));
-		return arr;
-	}
-
-	@Override
-	public AnnotationMember visitAnnotationMember(AnnotationMemberContext ctx) {
-		return new AnnotationMember(ctx.IDENTIFIER().getText(), visitAnnotationValue(ctx.annotationValue()));
-	}
-
-	@Override
-	public AnnotationValue visitAnnotationValue(AnnotationValueContext ctx) {
-		if (ctx.basicAnnotationValue() != null)
-			return visitBasicAnnotationValue(ctx.basicAnnotationValue());
-		else
-			return visitArrayAnnotationValue(ctx.arrayAnnotationValue());
-	}
-
-	@Override
-	public BasicAnnotationValue visitBasicAnnotationValue(BasicAnnotationValueContext ctx) {
-		if (ctx.LITERAL_DECIMAL() != null)
-			if (ctx.SUB() != null)
-				return new IntAnnotationValue(Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
-			else
-				return new IntAnnotationValue(-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
-		else if (ctx.LITERAL_FLOAT() != null)
-			if (ctx.SUB() != null)
-				return new FloatAnnotationValue(Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
-			else
-				return new FloatAnnotationValue(-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
-		else if (ctx.LITERAL_BOOL() != null)
-			return new BoolAnnotationValue(Boolean.parseBoolean(ctx.LITERAL_BOOL().getText()));
-		else if (ctx.LITERAL_STRING() != null)
-			return new StringAnnotationValue(ctx.LITERAL_STRING().getText());
-		else if (ctx.unitName != null)
-			return new CompilationUnitAnnotationValue(ctx.unitName.getText());
-		throw new UnsupportedOperationException("Annotation value not supported: " + ctx);
-	}
-
-	@Override
-	public ArrayAnnotationValue visitArrayAnnotationValue(ArrayAnnotationValueContext ctx) {
-		if (ctx.basicAnnotationValue() == null)
-			return new ArrayAnnotationValue(new BasicAnnotationValue[0]);
-		else {
-			BasicAnnotationValue[] arr = new BasicAnnotationValue[ctx.basicAnnotationValue().size()];
-			for (int i = 0; i < ctx.basicAnnotationValue().size(); i++)
-				arr[i] = visitBasicAnnotationValue(ctx.basicAnnotationValue(i));
-			return new ArrayAnnotationValue(arr);
-		}
 	}
 }
