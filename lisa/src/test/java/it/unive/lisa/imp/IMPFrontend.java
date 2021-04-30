@@ -117,7 +117,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private IMPFrontend(String file) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
-		program = new Program(new SourceCodeLocation(file, 0, 0));
+		program = new Program();
 	}
 
 	private Program work(InputStream inputStream) throws ParsingException {
@@ -146,7 +146,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			Program p = visitFile(parser.file());
 
 			// add constructs
-			SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+			SourceCodeLocation unknownLocation = new SourceCodeLocation("imp-runtime", 0, 0);
 			CompilationUnit str = new CompilationUnit(unknownLocation, "string", true);
 			str.addInstanceConstruct(new StringContains(unknownLocation, str));
 			str.addInstanceConstruct(new StringEndsWith(unknownLocation, str));
@@ -288,7 +288,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(null, -1, -1), "this",
+		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
 				ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
 		int i = 1;
 		for (FormalContext f : ctx.formal())

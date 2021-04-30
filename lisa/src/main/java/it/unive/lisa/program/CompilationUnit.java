@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +25,12 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CompilationUnit extends Unit {
+public class CompilationUnit extends Unit implements CodeElement {
+
+	/**
+	 * The location in the source file of this unit
+	 */
+	private final CodeLocation location;
 
 	/**
 	 * The collection of compilation units this unit directly inherits from
@@ -81,7 +87,9 @@ public class CompilationUnit extends Unit {
 	 *                     units
 	 */
 	public CompilationUnit(CodeLocation location, String name, boolean sealed) {
-		super(location, name);
+		super(name);
+		Objects.requireNonNull(location, "The location of a unit cannot be null.");
+		this.location = location;
 		this.sealed = sealed;
 		superUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -634,5 +642,10 @@ public class CompilationUnit extends Unit {
 	 */
 	public void addAnnotation(Annotation ann) {
 		annotations.addAnnotation(ann);
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
 	}
 }

@@ -1,16 +1,15 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A unit of the program to analyze. A unit is a logical entity that groups a
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Unit implements CodeElement {
+public abstract class Unit {
 
 	/**
 	 * The name of the unit
@@ -45,20 +44,11 @@ public abstract class Unit implements CodeElement {
 	private final Map<String, NativeCFG> constructs;
 
 	/**
-	 * The location in the source file of this unit
-	 */
-	private final CodeLocation location;
-
-	/**
 	 * Builds a unit, defined at the given location.
 	 * 
-	 * @param location the location where the unit is define within the source
-	 *                     file
-	 * @param name     the name of the unit
+	 * @param name the name of the unit
 	 */
-	protected Unit(CodeLocation location, String name) {
-		Objects.requireNonNull(location, "The location of a unit cannot be null.");
-		this.location = location;
+	protected Unit(String name) {
 		this.name = name;
 		this.globals = new ConcurrentHashMap<>();
 		this.cfgs = new ConcurrentHashMap<>();
@@ -376,10 +366,5 @@ public abstract class Unit implements CodeElement {
 
 		for (CFG cfg : getAllCFGs())
 			cfg.validate();
-	}
-
-	@Override
-	public CodeLocation getLocation() {
-		return location;
 	}
 }

@@ -31,7 +31,7 @@ public class FixpointTest {
 
 	@Test
 	public void testEmptyCFG() {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CFG cfg = new CFG(
 				new CFGDescriptor(unknownLocation, new CompilationUnit(unknownLocation, "foo", false), false, "foo"));
 		try {

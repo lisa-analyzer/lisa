@@ -198,17 +198,19 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
-		Parameter[] formals = new Parameter[ctx.formal().size()];
-		int i = 0;
-		for (FormalContext f : ctx.formal())
-			formals[i++] = visitFormal(f);
-		return formals;
+		throw new UnsupportedOperationException();
+//		Parameter[] formals = new Parameter[ctx.formal().size()];
+//		int i = 0;
+//		for (FormalContext f : ctx.formal())
+//			formals[i++] = visitFormal(f);
+//		return formals;
 	}
 
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
-		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+		throw new UnsupportedOperationException();
+//		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
+//				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override

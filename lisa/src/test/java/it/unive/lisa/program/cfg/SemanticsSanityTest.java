@@ -57,8 +57,8 @@ public class SemanticsSanityTest {
 
 	@Before
 	public void setup() throws CallGraphConstructionException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
-		Program p = new Program(unknownLocation);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		Program p = new Program();
 		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
 		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
@@ -102,13 +102,13 @@ public class SemanticsSanityTest {
 		if (param == Expression.class)
 			return fake;
 		if (param == int.class || param == Integer.class)
-			return -1;
+			return 0;
 		if (param == float.class || param == Float.class)
 			return -1f;
 		if (param == boolean.class || param == Boolean.class)
 			return false;
 		if (param == Global.class)
-			return new Global(new SourceCodeLocation(null, -1, -1), "foo");
+			return new Global(new SourceCodeLocation("fake", 0, 0), "foo");
 		if (param == Object.class)
 			return new Object();
 		if (param == Type.class)
@@ -122,7 +122,7 @@ public class SemanticsSanityTest {
 		if (param == Unit.class)
 			return unit;
 		if (param == CodeLocation.class)
-			return new SourceCodeLocation(null, -1, -1);
+			return new SourceCodeLocation("fake", 0, 0);
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}

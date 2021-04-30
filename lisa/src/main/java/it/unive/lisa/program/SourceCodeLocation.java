@@ -1,6 +1,9 @@
 package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CodeLocation;
+
+import java.util.Objects;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -42,6 +45,11 @@ public class SourceCodeLocation implements CodeLocation {
 	 *                       source file. If unknown, use {@code -1}
 	 */
 	public SourceCodeLocation(String sourceFile, int line, int col) {
+		Objects.requireNonNull(sourceFile, "The source file cannot be null");
+		if (line == -1)
+			throw new IllegalArgumentException("Line number cannot be negative");
+		if (col == -1)
+			throw new IllegalArgumentException("Column number cannot be negative");
 		this.sourceFile = FilenameUtils.separatorsToUnix(sourceFile);
 		this.line = line;
 		this.col = col;

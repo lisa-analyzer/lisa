@@ -35,7 +35,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimpleSimplification() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -67,7 +67,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testDoubleSimplification() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -102,7 +102,7 @@ public class CFGSimplificationTest {
 
 	private static class GT extends BinaryNativeCall {
 		protected GT(CFG cfg, Expression left, Expression right) {
-			super(cfg, new SourceCodeLocation(null, -1, -1), "gt", left, right);
+			super(cfg, new SourceCodeLocation("fake", 0, 0), "gt", left, right);
 		}
 
 		@Override
@@ -119,7 +119,7 @@ public class CFGSimplificationTest {
 
 	private static class Print extends UnaryNativeCall {
 		protected Print(CFG cfg, Expression arg) {
-			super(cfg, new SourceCodeLocation(null, -1, -1), "print", arg);
+			super(cfg, new SourceCodeLocation("fake", 0, 0), "print", arg);
 		}
 
 		@Override
@@ -135,7 +135,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -202,7 +202,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -234,7 +234,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheStart() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		NoOp start = new NoOp(first, unknownLocation);
@@ -266,7 +266,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -300,7 +300,7 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation(null, -1, -1);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "b"),
