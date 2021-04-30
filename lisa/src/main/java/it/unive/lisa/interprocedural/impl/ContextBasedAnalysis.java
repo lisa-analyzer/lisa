@@ -28,13 +28,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A context sensitive inteprocedural analysis.
+ * A context sensitive interprocedural analysis. The context sensitivity is
+ * tuned by the kind of {@link ContextSensitiveToken} used.
  * 
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
  * @param <V> the value domain
  */
-public abstract class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
+public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> extends CallGraphBasedAnalysis<A, H, V> {
 
@@ -75,12 +76,19 @@ public abstract class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	/**
-	 * Builds the call graph.
+	 * Builds the analysis, using {@link SingleScopeToken}s.
+	 */
+	public ContextBasedAnalysis() {
+		this(SingleScopeToken.getSingleton());
+	}
+
+	/**
+	 * Builds the analysis.
 	 *
 	 * @param token an instance of the tokens to be used to partition w.r.t.
 	 *                  context sensitivity
 	 */
-	protected ContextBasedAnalysis(ContextSensitiveToken token) {
+	public ContextBasedAnalysis(ContextSensitiveToken token) {
 		this.token = token.empty();
 		this.results = new ConcurrentHashMap<>();
 	}
@@ -125,7 +133,8 @@ public abstract class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException {
-		ContextSensitiveToken newToken = token.pushCall(call);
+		ScopeToken scope = new ScopeToken(call);
+		ContextSensitiveToken newToken = token.pushToken(scope);
 		AnalysisState<A, H, V> result = entryState.bottom();
 
 		for (CFG cfg : call.getTargets()) {
@@ -138,9 +147,7 @@ public abstract class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			}
 
 			// prepare the state for the call: hide the visible variables, and
-			// then assign
-			// the value to each parameter
-			ScopeToken scope = new ScopeToken(call);
+			// then assign the value to each parameter
 			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
 			for (int i = 0; i < parameters.length; i++) {
 				AnalysisState<A, H, V> temp = callState.bottom();

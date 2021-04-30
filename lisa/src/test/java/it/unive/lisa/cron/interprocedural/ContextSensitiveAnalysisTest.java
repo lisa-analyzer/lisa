@@ -11,17 +11,16 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
-import it.unive.lisa.interprocedural.impl.ContextSensitiveAnalysis;
+import it.unive.lisa.interprocedural.impl.ContextBasedAnalysis;
 
-@SuppressWarnings("rawtypes")
-public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExecutor {
+public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive1() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
-				.setInterproceduralAnalysis(new ContextSensitiveAnalysis())
+				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive1", "programContextSensitive1.imp", conf);
 	}
@@ -31,7 +30,7 @@ public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExe
 		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
-				.setInterproceduralAnalysis(new ContextSensitiveAnalysis())
+				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive2", "programContextSensitive2.imp", conf);
 	}
@@ -41,7 +40,7 @@ public class ContextSensitiveInterproceduralAnalysisTest extends AnalysisTestExe
 		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
 				.setDumpAnalysis(true)
-				.setInterproceduralAnalysis(new ContextSensitiveAnalysis())
+				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive3", "programContextSensitive3.imp", conf);
 	}

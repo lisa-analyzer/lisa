@@ -96,7 +96,7 @@ public class LiSA {
 		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getState());
 
 		try {
-			warnings.addAll(TimerLogger.execSupplier(log, "Analysis time", () -> runner.runAux(program, fileManager)));
+			warnings.addAll(TimerLogger.execSupplier(log, "Analysis time", () -> runner.run(program, fileManager)));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}

@@ -1,16 +1,16 @@
 package it.unive.lisa.interprocedural.impl;
 
-import it.unive.lisa.program.cfg.statement.Call;
+import it.unive.lisa.analysis.ScopeToken;
 
 /**
  * A context sensitive token that is always the same (aka, do not track any
  * information about the call stack).
  */
-public class SingletonContextSensitiveToken implements ContextSensitiveToken {
+public class ContextInsensitiveToken implements ContextSensitiveToken {
 
-	private static final SingletonContextSensitiveToken singleton = new SingletonContextSensitiveToken();
+	private static final ContextInsensitiveToken singleton = new ContextInsensitiveToken();
 
-	private SingletonContextSensitiveToken() {
+	private ContextInsensitiveToken() {
 	}
 
 	@Override
@@ -19,7 +19,7 @@ public class SingletonContextSensitiveToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken pushCall(Call c) {
+	public ContextSensitiveToken pushToken(ScopeToken c) {
 		return this;
 	}
 
@@ -28,7 +28,7 @@ public class SingletonContextSensitiveToken implements ContextSensitiveToken {
 	 * 
 	 * @return an instance of the class
 	 */
-	public static SingletonContextSensitiveToken getSingleton() {
+	public static ContextInsensitiveToken getSingleton() {
 		return singleton;
 	}
 }

@@ -67,7 +67,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		this.state = state;
 	}
 
-	Collection<Warning> runAux(Program program, FileManager fileManager)
+	Collection<Warning> run(Program program, FileManager fileManager)
 			throws AnalysisExecutionException {
 		finalizeProgram(program);
 
