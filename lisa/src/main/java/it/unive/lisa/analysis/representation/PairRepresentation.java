@@ -9,9 +9,15 @@ import java.util.function.Function;
  */
 public class PairRepresentation extends DomainRepresentation {
 
-	private final DomainRepresentation left;
+	/**
+	 * The left-most element.
+	 */
+	protected final DomainRepresentation left;
 
-	private final DomainRepresentation right;
+	/**
+	 * The right-most element.
+	 */
+	protected final DomainRepresentation right;
 
 	/**
 	 * Builds a new representation starting from the given pair of elements.
