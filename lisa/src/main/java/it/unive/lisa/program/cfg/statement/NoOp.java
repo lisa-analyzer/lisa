@@ -22,16 +22,6 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 public class NoOp extends Statement {
 
 	/**
-	 * Builds the no-op. The location where this no-op happens is unknown (i.e.
-	 * no source file/line/column is available).
-	 * 
-	 * @param cfg the cfg that this statement belongs to
-	 */
-	public NoOp(CFG cfg) {
-		this(cfg, null);
-	}
-
-	/**
 	 * Builds the no-op, happening at the given location in the program.
 	 * 
 	 * @param cfg      the cfg that this statement belongs to

@@ -12,6 +12,7 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
@@ -30,16 +31,17 @@ import it.unive.lisa.symbolic.value.BinaryOperator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringStartsWIth extends NativeCFG {
+public class StringStartsWith extends NativeCFG {
 
 	/**
 	 * Builds the construct.
 	 * 
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringStartsWIth(CompilationUnit stringUnit) {
-		super(new CFGDescriptor(stringUnit, true, "startsWith", BoolType.INSTANCE,
-				new Parameter("this", StringType.INSTANCE), new Parameter("other", StringType.INSTANCE)),
+	public StringStartsWith(CodeLocation location, CompilationUnit stringUnit) {
+		super(new CFGDescriptor(location, stringUnit, true, "startsWith", BoolType.INSTANCE,
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringStartsWith.class);
 	}
 

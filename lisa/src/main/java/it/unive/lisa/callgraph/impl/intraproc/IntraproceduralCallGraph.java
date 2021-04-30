@@ -143,7 +143,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 		AnalysisState<A, H, V> prepared = entryState;
 		for (Parameter arg : cfg.getDescriptor().getArgs()) {
 			Collection<Type> all = arg.getStaticType().allInstances();
-			Variable id = new Variable(Caches.types().mkSet(all), arg.getName());
+			Variable id = new Variable(Caches.types().mkSet(all), arg.getName(), arg.getAnnotations());
 			prepared = prepared.assign(id, new PushAny(Caches.types().mkSet(all)),
 					cfg.getGenericProgramPoint());
 		}

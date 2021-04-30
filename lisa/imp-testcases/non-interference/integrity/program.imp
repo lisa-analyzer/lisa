@@ -1,51 +1,51 @@
 class Integrity {
 	integrity_lec5ex1() {
 		def h = 5;
-		def HI_l = h; // VIOLATION - integrity by assignment
+		[lisa.ni.HighIntegrity] def l = h; // VIOLATION - integrity by assignment
 	}
 
 	integrity_lec5ex2() {
 		def h = 5;
-		def HI_l = h * 2; // VIOLATION - integrity by assignment
+		[lisa.ni.HighIntegrity] def l = h * 2; // VIOLATION - integrity by assignment
 	}
 
 	integrity_lec6() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		if (h > 5000)
-			HI_l = 0; // VIOLATION - integrity by state
+			l = 0; // VIOLATION - integrity by state
 		else
-			HI_l = 1; // VIOLATION - integrity by state
+			l = 1; // VIOLATION - integrity by state
 	}
 
 	integrity_lec7() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		while (h > 0) {
 			h = h - 1;
-			HI_l = HI_l + 1; // VIOLATION - integrity by state
+			l = l + 1; // VIOLATION - integrity by state
 		}
 	}
 
 	integrity_lec8() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		while (h > 5000) 
 			h = h;
-		HI_l = 1;
+		l = 1;
 	}
 
 	integrity_lec16() {
 		def h = 5;
-		def HI_l = 0;
-		h = HI_l + 4; 
-		HI_l = HI_l - 3;
+		[lisa.ni.HighIntegrity] def l = 0;
+		h = l + 4; 
+		l = l - 3;
 	}
 
 	integrity_lec17() {
 		def h = 5;
-		def HI_l = 0;
-		HI_l = h + HI_l; // VIOLATION - integrity by assignment
+		[lisa.ni.HighIntegrity] def l = 0;
+		l = h + l; // VIOLATION - integrity by assignment
 	}
 
 	integrity_lec18ex1() {
@@ -56,48 +56,48 @@ class Integrity {
 
 	integrity_lec18ex2() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		if (h <= 30)
-			HI_l = 5; // VIOLATION - integrity by state
+			l = 5; // VIOLATION - integrity by state
 	}
 
 	integrity_lec19ex1() {
 		def h = 5;
-		def HI_l = 0;
-		while (HI_l <= 34)
-			HI_l = HI_l + 1;
+		[lisa.ni.HighIntegrity] def l = 0;
+		while (l <= 34)
+			l = l + 1;
 	}
 
 	integrity_lec19ex2() {
 		def h = 5;
-		def HI_l = 0;
-		while (HI_l <= 34) {
-			HI_l = HI_l + 1;
+		[lisa.ni.HighIntegrity] def l = 0;
+		while (l <= 34) {
+			l = l + 1;
 			h = h + 1;
 		}
 	}
 
 	integrity_lec19ex3() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		while (h <= 34)
 			h = h; 
-		HI_l = 1;
+		l = 1;
 	}
 
 	integrity_lec19ex4() {
 		def h = 5;
-		def HI_l = 0;
-		HI_l = h; // VIOLATION - integrity by assignment
-		HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
+		l = h; // VIOLATION - integrity by assignment
+		l = 0;
 	}
 
 	integrity_lec19ex5() {
 		def h = 5;
-		def HI_l = 0;
+		[lisa.ni.HighIntegrity] def l = 0;
 		if (h <= 34) 
-			HI_l = 0; // VIOLATION - integrity by state
+			l = 0; // VIOLATION - integrity by state
 		else 
-			HI_l = 0; // VIOLATION - integrity by state
+			l = 0; // VIOLATION - integrity by state
 	}
 }

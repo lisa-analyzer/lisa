@@ -23,16 +23,6 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 public class Ret extends Statement {
 
 	/**
-	 * Builds the return. The location where this return happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg the cfg that this statement belongs to
-	 */
-	public Ret(CFG cfg) {
-		this(cfg, null);
-	}
-
-	/**
 	 * Builds the return, happening at the given location in the program.
 	 * 
 	 * @param cfg      the cfg that this statement belongs to

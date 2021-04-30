@@ -22,17 +22,6 @@ public class NullLiteral extends Literal {
 	private static final Object NULL_CONST = new Object();
 
 	/**
-	 * Builds the null literal. The location where this literal happens is
-	 * unknown (i.e. no source file/line/column is available). The type of a
-	 * null literal is {@link NullType}.
-	 * 
-	 * @param cfg the cfg that this expression belongs to
-	 */
-	public NullLiteral(CFG cfg) {
-		super(cfg, NULL_CONST, NullType.INSTANCE);
-	}
-
-	/**
 	 * Builds the null literal, happening at the given location in the program.
 	 * The type of a null literal is {@link NullType}.
 	 * 

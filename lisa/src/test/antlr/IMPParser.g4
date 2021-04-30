@@ -40,7 +40,7 @@ formals
    ;
 
 formal
-   : name = IDENTIFIER
+   : ((annotations?) (name = IDENTIFIER))
    ;
 /*
  * LITERALS
@@ -176,7 +176,7 @@ statement
    ;
 
 localDeclaration
-   : DEFINE IDENTIFIER ASSIGN expression
+   : annotations? DEFINE IDENTIFIER ASSIGN expression
    ;
 
 assignment
@@ -204,6 +204,47 @@ forDeclaration
    : (initDecl = localDeclaration | initExpr = expression)? SEMI condition = expression? SEMI post = expression?
    ;
 /*
+ * ANNOTATIONS
+ */
+   
+   
+unitName
+   : IDENTIFIER (DOT IDENTIFIER)*
+   ;
+
+annotation
+   : name = unitName annotationMembers?
+   ;
+
+annotationMembers
+   : LPAREN annotationMember (COMMA annotationMember)* RPAREN
+   ;
+
+annotationMember
+   : IDENTIFIER ASSIGN annotationValue
+   ;
+
+annotationValue
+   : basicAnnotationValue
+   | arrayAnnotationValue
+   ;
+
+arrayAnnotationValue
+   : LBRACK (basicAnnotationValue (COMMA basicAnnotationValue)*)? RBRACK
+   ;
+
+basicAnnotationValue
+   : SUB? LITERAL_DECIMAL
+   | SUB? LITERAL_FLOAT
+   | LITERAL_STRING
+   | LITERAL_BOOL
+   | unit_name = unitName
+   ;
+
+annotations
+   : LBRACK annotation (COMMA annotation)* RBRACK
+   ;
+/*
  * BLOCK
  */
    
@@ -226,15 +267,15 @@ memberDeclarations
    ;
 
 fieldDeclaration
-   : name = IDENTIFIER SEMI
+   : annotations? name = IDENTIFIER SEMI
    ;
 
 constructorDeclaration
-   : TILDE name = IDENTIFIER pars = formals code = block
+   : annotations? TILDE name = IDENTIFIER pars = formals code = block
    ;
 
 methodDeclaration
-   : FINAL? name = IDENTIFIER pars = formals code = block
+   : annotations? FINAL? name = IDENTIFIER pars = formals code = block
    ;
 /*
  * CLASS
@@ -242,7 +283,7 @@ methodDeclaration
    
    
 unit
-   : CLASS name = IDENTIFIER (EXTENDS superclass = IDENTIFIER)? LBRACE declarations = memberDeclarations RBRACE
+   : annotations? CLASS name = unitName (EXTENDS superclass = unitName)? LBRACE declarations = memberDeclarations RBRACE
    ;
 
 file

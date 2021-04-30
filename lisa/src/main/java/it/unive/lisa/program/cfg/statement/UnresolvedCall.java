@@ -132,23 +132,6 @@ public class UnresolvedCall extends Call {
 	private final boolean instanceCall;
 
 	/**
-	 * Builds the call. The location where this call happens is unknown (i.e. no
-	 * source file/line/column is available).
-	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
-	 *                         this call
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not.
-	 * @param targetName   the name of the target of this call
-	 * @param parameters   the parameters of this call
-	 */
-	public UnresolvedCall(CFG cfg, ResolutionStrategy strategy, boolean instanceCall, String targetName,
-			Expression... parameters) {
-		this(cfg, null, strategy, instanceCall, targetName, parameters);
-	}
-
-	/**
 	 * Builds the CFG call, happening at the given location in the program. The
 	 * static type of this CFGCall is the one return type of the descriptor of
 	 * {@code target}.
