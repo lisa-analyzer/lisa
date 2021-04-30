@@ -39,6 +39,7 @@ import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
 import it.unive.lisa.analysis.inference.InferenceSystem;
+import it.unive.lisa.analysis.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -296,8 +297,68 @@ public class SemanticsSanityTest {
 		if (root == StatementStore.class)
 			return new AnalysisState<>(
 					new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())), new Skip());
+		if (root == InferredPair.class)
+			return new InferredTypes();
 
 		throw new UnsupportedOperationException("No default domain for parameter of type " + param);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> int buildDomainsInstances(Set<Class<? extends T>> classes, Set<T> instances, List<String> failures) {
+		int total = 0;
+		Constructor<?> nullary, unary, binary, ternary;
+		nullary = unary = binary = ternary = null;
+		T instance;
+		for (Class<? extends T> clazz : classes)
+			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
+					&& !Satisfiability.class.isAssignableFrom(clazz)) {
+				total++;
+				for (Constructor<?> c : clazz.getConstructors()) {
+					if (c.getParameterCount() == 0)
+						nullary = c;
+					else if (c.getParameterCount() == 1)
+						unary = c;
+					else if (c.getParameterCount() == 2)
+						binary = c;
+					else if (c.getParameterCount() == 3)
+						ternary = c;
+				}
+
+				try {
+					if (nullary != null)
+						instance = (T) nullary.newInstance();
+					else if (unary != null) {
+						Class<?>[] types = unary.getParameterTypes();
+						Object param = domainFor(clazz, types[0]);
+						instance = (T) unary.newInstance(param);
+					} else if (binary != null) {
+						Class<?>[] types = binary.getParameterTypes();
+						Object param1 = domainFor(clazz, types[0]);
+						Object param2 = domainFor(clazz, types[1]);
+						instance = (T) binary.newInstance(param1, param2);
+					} else if (ternary != null) {
+						Class<?>[] types = ternary.getParameterTypes();
+						Object param1 = domainFor(clazz, types[0]);
+						Object param2 = domainFor(clazz, types[1]);
+						Object param3 = domainFor(clazz, types[2]);
+						instance = (T) ternary.newInstance(param1, param2, param3);
+					} else {
+						failures.add(clazz.getName());
+						System.err.println("No suitable consturctor found for " + clazz.getName());
+						continue;
+					}
+
+					instances.add(instance);
+
+					nullary = unary = binary = ternary = null;
+				} catch (Exception e) {
+					failures.add(clazz.getName());
+					System.err.println("Instantiation of class " + clazz.getName() + " failed due to " + e);
+					e.printStackTrace(System.err);
+				}
+			}
+
+		return total;
 	}
 
 	@Test
@@ -309,55 +370,22 @@ public class SemanticsSanityTest {
 
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 		Set<Class<? extends SemanticDomain>> domains = scanner.getSubTypesOf(SemanticDomain.class);
-		Constructor<?> nullary = null, unary = null, binary = null;
-		SemanticDomain instance, assign;
-		int total = 0;
-		for (Class<? extends SemanticDomain> domain : domains)
-			if (!Modifier.isAbstract(domain.getModifiers()) && !Modifier.isInterface(domain.getModifiers())) {
-				total++;
-				for (Constructor<?> c : domain.getConstructors()) {
-					if (c.getParameterCount() == 0)
-						nullary = c;
-					else if (c.getParameterCount() == 1)
-						unary = c;
-					else if (c.getParameterCount() == 2)
-						binary = c;
+		Set<SemanticDomain> instances = new HashSet<>();
+		int total = buildDomainsInstances(domains, instances, failures);
+
+		for (SemanticDomain instance : instances)
+			try {
+				instance = (SemanticDomain) ((Lattice) instance).bottom();
+				instance = instance.assign(new Variable(bool, "b"), new PushAny(bool), fake);
+				if (!((Lattice) instance).isBottom()) {
+					failures.add(instance.getClass().getName());
+					System.err.println("Assigning to the bottom instance of " + instance.getClass().getName()
+							+ " returned a non-bottom instance");
 				}
-
-				try {
-					if (nullary != null)
-						instance = (SemanticDomain) nullary.newInstance();
-					else if (unary != null) {
-						Class<?>[] types = unary.getParameterTypes();
-						Object param = domainFor(domain, types[0]);
-						instance = (SemanticDomain) unary.newInstance(param);
-					} else if (binary != null) {
-						Class<?>[] types = binary.getParameterTypes();
-						Object param1 = domainFor(domain, types[0]);
-						Object param2 = domainFor(domain, types[1]);
-						instance = (SemanticDomain) binary.newInstance(param1, param2);
-					} else {
-						failures.add(domain.getName());
-						System.err.println("No suitable consturctor found for " + domain.getName());
-						continue;
-					}
-
-					instance = (SemanticDomain) ((Lattice) instance).bottom();
-					assign = instance.assign(new Variable(bool, "b"), new PushAny(bool), fake);
-					if (!((Lattice) assign).isBottom()) {
-						failures.add(domain.getName());
-						System.err.println("Assigning to the bottom instance of " + domain.getName()
-								+ " returned a non-bottom instance");
-					}
-
-					nullary = null;
-					unary = null;
-					binary = null;
-				} catch (Exception e) {
-					failures.add(domain.getName());
-					System.err.println(domain.getName() + " failed due to " + e);
-					e.printStackTrace(System.err);
-				}
+			} catch (Exception e) {
+				failures.add(instance.getClass().getName());
+				System.err.println("assignOnBottom: " + instance.getClass().getName() + " failed due to " + e);
+				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
@@ -367,62 +395,29 @@ public class SemanticsSanityTest {
 	@Test
 	@SuppressWarnings({ "rawtypes" })
 	public void testIsTopIsBottom() {
-		Set<String> failures = new HashSet<>();
+		List<String> failures = new ArrayList<>();
 
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 		Set<Class<? extends Lattice>> domains = scanner.getSubTypesOf(Lattice.class);
-		Constructor<?> nullary = null, unary = null, binary = null;
-		Lattice instance;
-		int total = 0;
-		for (Class<? extends Lattice> domain : domains)
-			if (!Modifier.isAbstract(domain.getModifiers()) && !Modifier.isInterface(domain.getModifiers())
-					&& !Satisfiability.class.isAssignableFrom(domain)) {
-				total++;
-				for (Constructor<?> c : domain.getConstructors()) {
-					if (c.getParameterCount() == 0)
-						nullary = c;
-					else if (c.getParameterCount() == 1)
-						unary = c;
-					else if (c.getParameterCount() == 2)
-						binary = c;
+
+		Set<Lattice> instances = new HashSet<>();
+		int total = buildDomainsInstances(domains, instances, failures);
+
+		for (Lattice instance : instances)
+			try {
+				if (!instance.bottom().isBottom()) {
+					failures.add(instance.getClass().getName());
+					System.err.println("bottom().isBottom() returned false on " + instance.getClass().getName());
 				}
 
-				try {
-					if (nullary != null)
-						instance = (Lattice) nullary.newInstance();
-					else if (unary != null) {
-						Class<?>[] types = unary.getParameterTypes();
-						Object param = domainFor(domain, types[0]);
-						instance = (Lattice) unary.newInstance(param);
-					} else if (binary != null) {
-						Class<?>[] types = binary.getParameterTypes();
-						Object param1 = domainFor(domain, types[0]);
-						Object param2 = domainFor(domain, types[1]);
-						instance = (Lattice) binary.newInstance(param1, param2);
-					} else {
-						failures.add(domain.getName());
-						System.err.println("No suitable consturctor found for " + domain.getName());
-						continue;
-					}
-
-					if (!instance.bottom().isBottom()) {
-						failures.add(domain.getName());
-						System.err.println("bottom().isBottom() returned false on " + domain.getName());
-					}
-
-					if (!instance.top().isTop()) {
-						failures.add(domain.getName());
-						System.err.println("top().isTop() returned false on " + domain.getName());
-					}
-
-					nullary = null;
-					unary = null;
-					binary = null;
-				} catch (Exception e) {
-					failures.add(domain.getName());
-					System.err.println(domain.getName() + " failed due to " + e);
-					e.printStackTrace(System.err);
+				if (!instance.top().isTop()) {
+					failures.add(instance.getClass().getName());
+					System.err.println("top().isTop() returned false on " + instance.getClass().getName());
 				}
+			} catch (Exception e) {
+				failures.add(instance.getClass().getName());
+				System.err.println("isTopIsBottom: " + instance.getClass().getName() + " failed due to " + e);
+				e.printStackTrace(System.err);
 			}
 
 		if (!failures.isEmpty())
