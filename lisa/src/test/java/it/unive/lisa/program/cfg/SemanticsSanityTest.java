@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SimpleAbstractState;
@@ -58,11 +60,16 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.types.BoolType;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 public class SemanticsSanityTest {
@@ -290,6 +297,70 @@ public class SemanticsSanityTest {
 					new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())), new Skip());
 
 		throw new UnsupportedOperationException("No default domain for parameter of type " + param);
+	}
+
+	@Test
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void testAssignOnBottom() {
+		List<String> failures = new ArrayList<>();
+
+		ExternalSet<Type> bool = new ExternalSetCache<Type>().mkSingletonSet(BoolType.INSTANCE);
+
+		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Set<Class<? extends SemanticDomain>> domains = scanner.getSubTypesOf(SemanticDomain.class);
+		Constructor<?> nullary = null, unary = null, binary = null;
+		SemanticDomain instance, assign;
+		int total = 0;
+		for (Class<? extends SemanticDomain> domain : domains)
+			if (!Modifier.isAbstract(domain.getModifiers()) && !Modifier.isInterface(domain.getModifiers())) {
+				total++;
+				for (Constructor<?> c : domain.getConstructors()) {
+					if (c.getParameterCount() == 0)
+						nullary = c;
+					else if (c.getParameterCount() == 1)
+						unary = c;
+					else if (c.getParameterCount() == 2)
+						binary = c;
+				}
+
+				try {
+					if (nullary != null)
+						instance = (SemanticDomain) nullary.newInstance();
+					else if (unary != null) {
+						Class<?>[] types = unary.getParameterTypes();
+						Object param = domainFor(domain, types[0]);
+						instance = (SemanticDomain) unary.newInstance(param);
+					} else if (binary != null) {
+						Class<?>[] types = binary.getParameterTypes();
+						Object param1 = domainFor(domain, types[0]);
+						Object param2 = domainFor(domain, types[1]);
+						instance = (SemanticDomain) binary.newInstance(param1, param2);
+					} else {
+						failures.add(domain.getName());
+						System.err.println("No suitable consturctor found for " + domain.getName());
+						continue;
+					}
+
+					instance = (SemanticDomain) ((Lattice) instance).bottom();
+					assign = instance.assign(new Variable(bool, "b"), new PushAny(bool), fake);
+					if (!((Lattice) assign).isBottom()) {
+						failures.add(domain.getName());
+						System.err.println("Assigning to the bottom instance of " + domain.getName()
+								+ " returned a non-bottom instance");
+					}
+
+					nullary = null;
+					unary = null;
+					binary = null;
+				} catch (Exception e) {
+					failures.add(domain.getName());
+					System.err.println(domain.getName() + " failed due to " + e);
+					e.printStackTrace(System.err);
+				}
+			}
+
+		if (!failures.isEmpty())
+			fail(failures.size() + "/" + total + " assignments failed");
 	}
 
 	@Test
