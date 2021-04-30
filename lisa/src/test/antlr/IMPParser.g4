@@ -207,8 +207,11 @@ forDeclaration
  * ANNOTATIONS
  */
    
-unitName: IDENTIFIER (DOT IDENTIFIER)*;
    
+unitName
+   : IDENTIFIER (DOT IDENTIFIER)*
+   ;
+
 annotation
    : name = unitName annotationMembers?
    ;

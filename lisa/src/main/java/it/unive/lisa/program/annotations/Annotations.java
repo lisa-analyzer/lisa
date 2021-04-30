@@ -108,7 +108,13 @@ public class Annotations implements Iterable<Annotation> {
 	public final Annotations getAnnotations(AnnotationMatcher m) {
 		return new Annotations(annotations.stream().filter(ann -> m.matches(ann)).collect(Collectors.toList()));
 	}
-	
+
+	/**
+	 * Yields {@code true} if and only if the set of annotations represented by
+	 * this instance is empty.
+	 * 
+	 * @return whether or not this set of annotations is empty
+	 */
 	public final boolean isEmpty() {
 		return annotations.isEmpty();
 	}

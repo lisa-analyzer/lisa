@@ -270,7 +270,6 @@ LINE_COMMENT
 IDENTIFIER
    : Letter LetterOrDigit*
    ;
-   
    // =========================== RULES ===========================  
    
 fragment EscapeSequence

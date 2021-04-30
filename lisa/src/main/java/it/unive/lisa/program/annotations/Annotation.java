@@ -16,14 +16,25 @@ public class Annotation {
 
 	private final boolean inherited;
 
+	/**
+	 * Builds an annotation from its name .
+	 * 
+	 * @param annotationName the name of the annotation
+	 */
 	public Annotation(String annotationName) {
 		this(annotationName, Collections.emptyList(), false);
 	}
 
+	/**
+	 * Builds an annotation from its name.
+	 * 
+	 * @param annotationName the name of the annotation
+	 * @param inherited      denotes whether the annotation can be inherited
+	 */
 	public Annotation(String annotationName, boolean inherited) {
 		this(annotationName, Collections.emptyList(), inherited);
 	}
-	
+
 	/**
 	 * Builds an annotation from its name and its members that cannot be
 	 * inherited.

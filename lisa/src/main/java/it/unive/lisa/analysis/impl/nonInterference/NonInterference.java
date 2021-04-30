@@ -252,7 +252,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
 	}
-	
+
 	private static final Annotation LOW_CONFIDENTIALITY = new Annotation("lisa.ni.LowConfidentiality");
 	private static final Annotation HIGH_INTEGRITY = new Annotation("lisa.ni.HighIntegrity");
 
@@ -261,10 +261,10 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
 			return mkHighLow();
-		
+
 		boolean lowConf = annots.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY.getAnnotationName()));
 		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY.getAnnotationName()));
-		
+
 		if (lowConf && highInt)
 			return mkLowHigh();
 		else if (lowConf)

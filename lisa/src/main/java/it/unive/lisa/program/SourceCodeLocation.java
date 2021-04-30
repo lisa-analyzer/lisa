@@ -1,9 +1,7 @@
 package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-
 import java.util.Objects;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
