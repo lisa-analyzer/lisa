@@ -187,9 +187,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-		CFGResults result = this.results.get(cfg);
-		if (result == null)
-			result = new CFGResults();
+		CFGResults result = this.results.computeIfAbsent(cfg, c -> new CFGResults());
 		result.putResult(newToken, fixpointResult);
 		return fixpointResult;
 	}
