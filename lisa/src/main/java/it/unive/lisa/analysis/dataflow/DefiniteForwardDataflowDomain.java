@@ -49,6 +49,9 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public DefiniteForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		if (isBottom())
+			return this;
+		
 		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
 		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
