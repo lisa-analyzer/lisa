@@ -1,13 +1,16 @@
 package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -20,10 +23,11 @@ import java.util.Map;
  * 
  * @param <T> the type of {@link InferredValue} in this inference system
  */
-public class InferenceSystem<T extends InferredValue<T>> extends Environment<InferenceSystem<T>, ValueExpression, T>
+public class InferenceSystem<T extends InferredValue<T>>
+		extends Environment<InferenceSystem<T>, ValueExpression, T, InferredPair<T>>
 		implements ValueDomain<InferenceSystem<T>> {
 
-	private final T inferredValue;
+	private final InferredPair<T> inferred;
 
 	/**
 	 * Builds an empty inference system.
@@ -33,16 +37,23 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	 */
 	public InferenceSystem(T domain) {
 		super(domain);
-		inferredValue = domain.bottom();
+		inferred = new InferredPair<>(domain.bottom(), domain.bottom(), domain.bottom());
 	}
 
-	private InferenceSystem(T domain, Map<Identifier, T> function) {
-		this(domain, function, domain.bottom());
+	/**
+	 * Builds an inference system identical to the given one, except for the
+	 * execution state that will be set to the given one.
+	 * 
+	 * @param other the inference system to copy
+	 * @param state the new execution state
+	 */
+	public InferenceSystem(InferenceSystem<T> other, T state) {
+		this(other.lattice, other.function, new InferredPair<>(other.lattice, other.inferred.getInferred(), state));
 	}
 
-	private InferenceSystem(T domain, Map<Identifier, T> function, T inferredValue) {
+	private InferenceSystem(T domain, Map<Identifier, T> function, InferredPair<T> inferred) {
 		super(domain, function);
-		this.inferredValue = inferredValue;
+		this.inferred = inferred;
 	}
 
 	/**
@@ -52,7 +63,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	 * @return the execution state
 	 */
 	public T getExecutionState() {
-		return inferredValue.executionState();
+		return inferred.getState();
 	}
 
 	/**
@@ -64,21 +75,24 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	 * @return the value inferred for the last expression
 	 */
 	public T getInferredValue() {
-		return inferredValue;
+		return inferred.getInferred();
 	}
 
 	@Override
 	protected InferenceSystem<T> copy() {
-		return new InferenceSystem<>(lattice, mkNewFunction(function), inferredValue);
+		return new InferenceSystem<>(lattice, mkNewFunction(function), inferred);
 	}
 
 	@Override
-	protected InferenceSystem<T> assignAux(Identifier id, ValueExpression value, Map<Identifier, T> function, T eval,
-			ProgramPoint pp) {
-		T v = lattice.variable(id, pp);
-		if (!v.isBottom())
-			function.put(id, v);
-		return new InferenceSystem<>(lattice, function, eval);
+	protected Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		InferredPair<T> eval = lattice.eval(expression, this, pp);
+		return Pair.of(eval.getInferred(), eval);
+	}
+
+	@Override
+	protected InferenceSystem<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
+			T value, InferredPair<T> eval, ProgramPoint pp) {
+		return new InferenceSystem<>(lattice, function, new InferredPair<>(lattice, value, eval.getState()));
 	}
 
 	@Override
@@ -89,12 +103,16 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 
 	@Override
 	public InferenceSystem<T> top() {
-		return isTop() ? this : new InferenceSystem<T>(lattice.top(), null);
+		// we do not redefine isTop() since we can ignore 'inferred':
+		// we can infer a non-top value even with a top environment
+		return new InferenceSystem<T>(lattice.top(), null, inferred.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
-		return isBottom() ? this : new InferenceSystem<T>(lattice.bottom(), null);
+		// we do not redefine isBottom() since we can ignore 'inferred':
+		// we can infer a non-bottom value even with a top environment
+		return new InferenceSystem<T>(lattice.bottom(), null, inferred.bottom());
 	}
 
 	@Override
@@ -102,7 +120,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		InferenceSystem<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
-		return new InferenceSystem<>(lub.lattice, lub.function, inferredValue.lub(other.inferredValue));
+		return new InferenceSystem<>(lub.lattice, lub.function, inferred.lub(other.inferred));
 	}
 
 	@Override
@@ -110,7 +128,7 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		InferenceSystem<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
-		return new InferenceSystem<>(widen.lattice, widen.function, inferredValue.widening(other.inferredValue));
+		return new InferenceSystem<>(widen.lattice, widen.function, inferred.widening(other.inferred));
 	}
 
 	@Override
@@ -118,14 +136,27 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 		if (!super.lessOrEqualAux(other))
 			return false;
 
-		return inferredValue.lessOrEqual(other.inferredValue);
+		return inferred.lessOrEqual(other.inferred);
+	}
+
+	@Override
+	protected InferenceSystem<T> assumeSatisfied(InferredPair<T> eval) {
+		return new InferenceSystem<>(lattice, function,
+				new InferredPair<>(lattice, eval.getInferred(), eval.getState()));
+	}
+
+	@Override
+	protected InferenceSystem<T> glbAux(T lattice, Map<Identifier, T> function, InferenceSystem<T> other) {
+		return new InferenceSystem<>(lattice, function,
+				// we take the updated execution state
+				new InferredPair<>(lattice, getInferredValue(), other.getExecutionState()));
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((inferredValue == null) ? 0 : inferredValue.hashCode());
+		result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
 		return result;
 	}
 
@@ -137,22 +168,67 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		@SuppressWarnings("unchecked")
-		InferenceSystem<T> other = (InferenceSystem<T>) obj;
-		if (inferredValue == null) {
-			if (other.inferredValue != null)
+		InferenceSystem<?> other = (InferenceSystem<?>) obj;
+		if (inferred == null) {
+			if (other.inferred != null)
 				return false;
-		} else if (!inferredValue.equals(other.inferredValue))
+		} else if (!inferred.equals(other.inferred))
 			return false;
 		return true;
 	}
 
 	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isBottom() || isTop())
 			return super.representation();
 
-		return super.representation() + "\n[inferred: " + inferredValue + ", state: " + inferredValue.executionState()
-				+ "]";
+		return new SystemRepresentation(super.representation(), inferred.representation());
+	}
+
+	private static class SystemRepresentation extends DomainRepresentation {
+
+		private final DomainRepresentation map;
+		private final DomainRepresentation inferred;
+
+		public SystemRepresentation(DomainRepresentation map, DomainRepresentation inferred) {
+			this.map = map;
+			this.inferred = inferred;
+		}
+
+		@Override
+		public String toString() {
+			return map + "\n[" + inferred + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
+			result = prime * result + ((map == null) ? 0 : map.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SystemRepresentation other = (SystemRepresentation) obj;
+			if (inferred == null) {
+				if (other.inferred != null)
+					return false;
+			} else if (!inferred.equals(other.inferred))
+				return false;
+			if (map == null) {
+				if (other.map != null)
+					return false;
+			} else if (!map.equals(other.map))
+				return false;
+			return true;
+		}
 	}
 }

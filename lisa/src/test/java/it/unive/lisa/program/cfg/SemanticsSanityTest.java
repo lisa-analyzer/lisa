@@ -41,6 +41,8 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.callgraph.CallGraphConstructionException;
@@ -207,8 +209,8 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public String representation() {
-			return "";
+		public DomainRepresentation representation() {
+			return new StringRepresentation("");
 		}
 
 		@Override

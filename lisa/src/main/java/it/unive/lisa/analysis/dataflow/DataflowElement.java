@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
 import it.unive.lisa.analysis.SemanticEvaluator;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -60,4 +61,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @return the collection of identifiers that are killed by the assignment
 	 */
 	Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain);
+
+	/**
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this domain's instance.
+	 * 
+	 * @return the representation
+	 */
+	DomainRepresentation representation();
 }

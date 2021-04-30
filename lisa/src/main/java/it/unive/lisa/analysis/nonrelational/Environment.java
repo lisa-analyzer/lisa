@@ -4,6 +4,9 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.MapRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -11,11 +14,7 @@ import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -30,12 +29,15 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @param <M> the concrete type of environment
  * @param <E> the type of expressions that this domain can evaluate
- * @param <T> the concrete instance of the {@link NonRelationalDomain} whose
+ * @param <T> the concrete instance of the {@link NonRelationalElement} whose
  *                instances are mapped in this environment
+ * @param <V> the type of value returned by the eval function of objects of type
+ *                {@code T}
  */
-public abstract class Environment<M extends Environment<M, E, T>,
+public abstract class Environment<M extends Environment<M, E, T, V>,
 		E extends SymbolicExpression,
-		T extends NonRelationalDomain<T, E, M>>
+		T extends NonRelationalElement<T, E, M>,
+		V extends Lattice<V>>
 		extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Identifier> {
 
 	/**
@@ -73,51 +75,90 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assign(Identifier id, E value, ProgramPoint pp) throws SemanticException {
+	public final M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
 		// If id cannot be tracked by the underlying
 		// lattice, return this
-		if (!lattice.canProcess(value) || !lattice.tracksIdentifiers(id))
+		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
 			return (M) this;
 
 		// the mkNewFunction will return an empty function if the
 		// given one is null
 		Map<Identifier, T> func = mkNewFunction(function);
-		T eval = lattice.eval(value, (M) this, pp);
+		Pair<T, V> eval = eval(expression, pp);
+		T value = eval.getLeft();
+		T v = lattice.variable(id, pp);
+		if (!v.isBottom())
+			value = v;
 		if (id.isWeak())
-			eval = eval.lub(getState(id));
-		func.put(id, eval);
-		return assignAux(id, value, func, eval, pp);
+			value = value.lub(getState(id));
+		func.put(id, value);
+		return assignAux(id, expression, func, value, eval.getRight(), pp);
 	}
+
+	/**
+	 * Yields the evaluation of the given expression, happening at the given
+	 * program point. The result of the evaluation is in the form of
+	 * {@code <abstract element, evaluation result>}, where
+	 * {@code evaluation result} is the true result of the evaluation, while
+	 * {@code abstract element} is the element derived by the result that is to
+	 * be stored inside the environment mapped to an identifier.
+	 * 
+	 * @param expression the expression to evaluate
+	 * @param pp         the program point where the evaluation happens
+	 * 
+	 * @return the result of the evaluation
+	 * 
+	 * @throws SemanticException if something goes wrong during the evaluation
+	 */
+	protected abstract Pair<T, V> eval(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Auxiliary function of
 	 * {@link #assign(Identifier, SymbolicExpression, ProgramPoint)} that is
 	 * invoked after the evaluation of the expression.
 	 * 
-	 * @param id       the identifier that has been assigned
-	 * @param value    the expression that has been evaluated and assigned
-	 * @param function a copy of the current function, where the {@code id} has
-	 *                     been assigned to {@code eval}
-	 * @param eval     the abstract value that is the result of the evaluation
-	 *                     of {@code value}
-	 * @param pp       the program point that where this operation is being
-	 *                     evaluated
+	 * @param id         the identifier that has been assigned
+	 * @param expression the expression that has been evaluated and assigned
+	 * @param function   a copy of the current function, where the {@code id}
+	 *                       has been assigned to {@code eval}
+	 * @param value      the final value stored for {@code id}, after
+	 *                       considering applying
+	 *                       {@link NonRelationalElement#variable(Identifier, ProgramPoint)}
+	 *                       and {@link Identifier#isWeak()}
+	 * @param eval       the abstract value that is the result of the evaluation
+	 *                       of {@code value}
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
 	 * 
 	 * @return a new instance of this environment containing the given function,
 	 *             obtained by assigning {@code id} to {@code eval}
 	 */
-	protected abstract M assignAux(Identifier id, E value, Map<Identifier, T> function, T eval, ProgramPoint pp);
+	protected abstract M assignAux(Identifier id, E expression, Map<Identifier, T> function, T value, V eval,
+			ProgramPoint pp);
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+	public final M assume(E expression, ProgramPoint pp) throws SemanticException {
 		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
 			return bottom();
-		else if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
-			return (M) this;
-		else
-			return glb(lattice.assume((M) this, expression, pp));
+
+		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
+			return assumeSatisfied(eval(expression, pp).getRight());
+
+		return glb(lattice.assume((M) this, expression, pp));
 	}
+
+	/**
+	 * Assumes that an expression, that evaluated to {@code eval}, is always
+	 * satisfied by this environment. This auxiliary method serves as a
+	 * constructor for the final concrete instance of environment.
+	 * 
+	 * @param eval the result of the evaluation of the expression that is always
+	 *                 satisfied
+	 * 
+	 * @return the (possibly) updated environment
+	 */
+	protected abstract M assumeSatisfied(V eval);
 
 	/**
 	 * Performs the greatest lower bound between this environment and
@@ -131,16 +172,32 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public M glb(M other) throws SemanticException {
+	public final M glb(M other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
-			return (M) this;
+			return glbAux(lattice, function, other);
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
-			return (M) other;
+			return glbAux(other.lattice, other.function, other);
 
-		return functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		M lift = functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return glbAux(lift.lattice, lift.function, other);
 	}
+
+	/**
+	 * Auxiliary glb operation, invoked after the result has been computed to
+	 * create the concrete instance of environment. Note that any additional
+	 * information that is instance-specific (i.e. anything but function and
+	 * lattice singleton) has to be computed by this method.
+	 * 
+	 * @param lattice  the lattice that is the result of the glb
+	 * @param function the function that is the result of the glb (might be
+	 *                     {@code null}
+	 * @param other    the other environment
+	 * 
+	 * @return the final instance of the glb
+	 */
+	protected abstract M glbAux(T lattice, Map<Identifier, T> function, M other);
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -184,23 +241,14 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	}
 
 	@Override
-	public final String toString() {
-		return representation();
-	}
-
-	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_STRING;
+			return Lattice.TOP_REPR;
 
 		if (isBottom())
-			return Lattice.BOTTOM_STRING;
+			return Lattice.BOTTOM_REPR;
 
-		SortedSet<String> res = new TreeSet<>();
-		for (Entry<Identifier, T> entry : function.entrySet())
-			res.add(entry.getKey() + ": " + entry.getValue().representation());
-
-		return StringUtils.join(res, '\n');
+		return new MapRepresentation(function, StringRepresentation::new, NonRelationalElement::representation);
 	}
 
 	@Override

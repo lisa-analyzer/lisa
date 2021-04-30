@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -358,9 +359,10 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	}
 
 	/**
-	 * Yields a textual representation of the content of this domain's instance.
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this domain's instance.
 	 * 
-	 * @return the textual representation
+	 * @return the representation
 	 */
-	String representation();
+	DomainRepresentation representation();
 }
