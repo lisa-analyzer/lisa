@@ -527,7 +527,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 
 	@Override
 	public final String toString() {
-		return representation();
+		return representation().toString();
 	}
 
 	@Override

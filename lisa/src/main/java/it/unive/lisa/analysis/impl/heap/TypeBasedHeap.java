@@ -3,6 +3,9 @@ package it.unive.lisa.analysis.impl.heap;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -14,14 +17,11 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -38,7 +38,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private final ExpressionSet<ValueExpression> rewritten;
 
-	private final Collection<String> names;
+	private final Set<String> names;
 
 	/**
 	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
@@ -52,7 +52,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		this(new ExpressionSet<ValueExpression>(rewritten), new HashSet<>());
 	}
 
-	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Collection<String> names) {
+	private TypeBasedHeap(ExpressionSet<ValueExpression> rewritten, Set<String> names) {
 		this.rewritten = rewritten;
 		this.names = names;
 	}
@@ -82,12 +82,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public String representation() {
-		Collection<String> res = new TreeSet<String>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
-						(ll, rr) -> ll.toString().compareTo(rr.toString())));
-		res.addAll(names);
-		return res.toString();
+	public DomainRepresentation representation() {
+		return new SetRepresentation(names, StringRepresentation::new);
 	}
 
 	@Override
@@ -152,10 +148,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	protected TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
-		return new TypeBasedHeap(rewritten.lub(other.rewritten),
-				CollectionUtils.union(names, other.names));
+		return new TypeBasedHeap(rewritten.lub(other.rewritten), SetUtils.union(names, other.names));
 	}
 
 	@Override

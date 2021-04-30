@@ -2,6 +2,9 @@ package it.unive.lisa.analysis.dataflow.impl;
 
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -38,7 +41,7 @@ public class AvailableExpressions
 
 	@Override
 	public String toString() {
-		return "(" + id + ", " + expression + ")";
+		return representation().toString();
 	}
 
 	@Override
@@ -134,5 +137,10 @@ public class AvailableExpressions
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public DomainRepresentation representation() {
+		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(expression));
 	}
 }

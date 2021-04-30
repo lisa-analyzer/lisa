@@ -4,6 +4,8 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.inference.BaseInferredValue;
 import it.unive.lisa.analysis.inference.InferenceSystem;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -176,9 +178,9 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public String representation() {
-		return isBottom() ? Lattice.BOTTOM_STRING
-				: (isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L");
+	public DomainRepresentation representation() {
+		return isBottom() ? Lattice.BOTTOM_REPR
+				: new StringRepresentation((isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L"));
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {

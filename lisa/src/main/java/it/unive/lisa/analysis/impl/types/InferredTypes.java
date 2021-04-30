@@ -6,6 +6,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.inference.BaseInferredValue;
 import it.unive.lisa.analysis.inference.InferenceSystem;
 import it.unive.lisa.analysis.inference.InferredValue;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -25,10 +28,7 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -96,18 +96,14 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_STRING;
+			return Lattice.TOP_REPR;
 
 		if (isBottom())
-			return Lattice.BOTTOM_STRING;
+			return Lattice.BOTTOM_REPR;
 
-		Set<Type> tmp = new TreeSet<>(
-				(l, r) -> CollectionUtilities.nullSafeCompare(true, l, r,
-						(ll, rr) -> ll.toString().compareTo(rr.toString())));
-		tmp.addAll(elements);
-		return tmp.toString();
+		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 
 	private InferredPair<InferredTypes> mk(InferredTypes types) {
