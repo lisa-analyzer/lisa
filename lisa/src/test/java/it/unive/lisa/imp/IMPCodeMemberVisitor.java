@@ -45,7 +45,6 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -79,8 +78,6 @@ import it.unive.lisa.test.antlr.IMPParser.BlockOrStatementContext;
 import it.unive.lisa.test.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.test.antlr.IMPParser.ForLoopContext;
-import it.unive.lisa.test.antlr.IMPParser.FormalContext;
-import it.unive.lisa.test.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.test.antlr.IMPParser.IndexContext;
 import it.unive.lisa.test.antlr.IMPParser.LiteralContext;
 import it.unive.lisa.test.antlr.IMPParser.LocalDeclarationContext;
@@ -194,23 +191,6 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		cfg.simplify();
 		return cfg;
-	}
-
-	@Override
-	public Parameter[] visitFormals(FormalsContext ctx) {
-		throw new UnsupportedOperationException();
-//		Parameter[] formals = new Parameter[ctx.formal().size()];
-//		int i = 0;
-//		for (FormalContext f : ctx.formal())
-//			formals[i++] = visitFormal(f);
-//		return formals;
-	}
-
-	@Override
-	public Parameter visitFormal(FormalContext ctx) {
-		throw new UnsupportedOperationException();
-//		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-//				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
