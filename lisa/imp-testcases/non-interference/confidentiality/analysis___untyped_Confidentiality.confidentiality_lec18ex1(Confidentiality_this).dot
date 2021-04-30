@@ -4,9 +4,9 @@ digraph {
 	"node2" [shape="rect",color="gray",label=<&lt;=(h, 30)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>[inferred: HL, state: _|_] ]]<BR/>}} -&gt; [h &lt;= 30]>];
 	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>[inferred: _|_, state: _|_] ]]<BR/>}} -&gt; [skip]>];
 	"node1" -> "node3" [color="black"];
+	"node0" -> "node2" [color="black"];
 	"node2" -> "node1" [color="blue",style="dashed"];
 	"node2" -> "node3" [color="red",style="dashed"];
-	"node0" -> "node2" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
