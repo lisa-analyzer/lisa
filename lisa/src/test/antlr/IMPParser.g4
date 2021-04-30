@@ -207,7 +207,7 @@ forDeclaration
  * ANNOTATIONS
  */
    
-unitName: IDENTIFIER | QUALIFIED_IDENTIFIER;
+unitName: IDENTIFIER (DOT IDENTIFIER)*;
    
 annotation
    : name = unitName annotationMembers?
