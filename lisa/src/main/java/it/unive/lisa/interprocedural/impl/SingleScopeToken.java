@@ -35,6 +35,11 @@ public class SingleScopeToken implements ContextSensitiveToken {
 	public static SingleScopeToken getSingleton() {
 		return singleton;
 	}
+	
+	@Override
+	public String toString() {
+		return String.valueOf(token);
+	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A token that can be used for pushing and popping scopes on local variables
@@ -52,7 +53,10 @@ public class ScopeToken {
 		if (scoper == null) {
 			if (other.scoper != null)
 				return false;
-		} else if (!scoper.equals(other.scoper))
+		} else if (!(scoper instanceof Statement) || !(other.scoper instanceof Statement)) {
+			if (!scoper.equals(other.scoper))
+				return false;
+		} else if (!((Statement) scoper).isEqualTo((Statement) other.scoper))
 			return false;
 		return true;
 	}

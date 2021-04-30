@@ -185,10 +185,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	private CFGWithAnalysisResults<A, H, V> computeFixpoint(ContextSensitiveToken newToken, CFG cfg,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
-
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
 		CFGResults result = this.results.computeIfAbsent(cfg, c -> new CFGResults());
 		result.putResult(newToken, fixpointResult);
+		fixpointResult.setId(newToken.toString());
 		return fixpointResult;
 	}
 

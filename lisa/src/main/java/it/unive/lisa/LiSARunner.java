@@ -137,11 +137,11 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		if (conf.isDumpAnalysis())
 			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
 				for (CFGWithAnalysisResults<A, H, V> result : interproc.getAnalysisResultsOf(cfg))
-					dumpCFG(fileManager, "analysis___", result, st -> result.getAnalysisStateAfter(st).toString());
+					dumpCFG(fileManager, "analysis___" + (result.getId() == null ? "" : result.getId().hashCode() + "_"), result,
+							st -> result.getAnalysisStateAfter(st).toString());
 			}
 	}
 
-	
 	@SuppressWarnings("unchecked")
 	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs) {
 		SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
