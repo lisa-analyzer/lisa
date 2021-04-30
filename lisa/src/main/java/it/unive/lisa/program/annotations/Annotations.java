@@ -108,4 +108,8 @@ public class Annotations implements Iterable<Annotation> {
 	public final Annotations getAnnotations(AnnotationMatcher m) {
 		return new Annotations(annotations.stream().filter(ann -> m.matches(ann)).collect(Collectors.toList()));
 	}
+	
+	public final boolean isEmpty() {
+		return annotations.isEmpty();
+	}
 }

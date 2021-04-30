@@ -270,6 +270,10 @@ LINE_COMMENT
 IDENTIFIER
    : Letter LetterOrDigit*
    ;
+   
+QUALIFIED_IDENTIFIER
+   : IDENTIFIER (DOT IDENTIFIER)*
+   ;
    // =========================== RULES ===========================  
    
 fragment EscapeSequence

@@ -1,5 +1,6 @@
 package it.unive.lisa.program.annotations;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -15,6 +16,14 @@ public class Annotation {
 
 	private final boolean inherited;
 
+	public Annotation(String annotationName) {
+		this(annotationName, Collections.emptyList(), false);
+	}
+
+	public Annotation(String annotationName, boolean inherited) {
+		this(annotationName, Collections.emptyList(), inherited);
+	}
+	
 	/**
 	 * Builds an annotation from its name and its members that cannot be
 	 * inherited.

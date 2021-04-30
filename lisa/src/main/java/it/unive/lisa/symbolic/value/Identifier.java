@@ -85,7 +85,6 @@ public abstract class Identifier extends ValueExpression {
 		// identified by their name, regardless of their type
 		int result = 1;
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -104,11 +103,6 @@ public abstract class Identifier extends ValueExpression {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
-			return false;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
 			return false;
 		return true;
 	}

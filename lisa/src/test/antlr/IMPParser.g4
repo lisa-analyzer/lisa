@@ -207,9 +207,10 @@ forDeclaration
  * ANNOTATIONS
  */
    
+unitName: IDENTIFIER | QUALIFIED_IDENTIFIER;
    
 annotation
-   : IDENTIFIER annotationMembers?
+   : name = unitName annotationMembers?
    ;
 
 annotationMembers
@@ -234,7 +235,7 @@ basicAnnotationValue
    | SUB? LITERAL_FLOAT
    | LITERAL_STRING
    | LITERAL_BOOL
-   | unitName = IDENTIFIER
+   | unit_name = unitName
    ;
 
 annotations
@@ -279,7 +280,7 @@ methodDeclaration
    
    
 unit
-   : annotations? CLASS name = IDENTIFIER (EXTENDS superclass = IDENTIFIER)? LBRACE declarations = memberDeclarations RBRACE
+   : annotations? CLASS name = unitName (EXTENDS superclass = unitName)? LBRACE declarations = memberDeclarations RBRACE
    ;
 
 file

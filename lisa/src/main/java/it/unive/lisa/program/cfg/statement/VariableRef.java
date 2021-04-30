@@ -138,8 +138,9 @@ public class VariableRef extends Expression {
 	 * @return the annotations of this variable.
 	 */
 	public Annotations getAnnotations() {
+		// FIXME the iteration should be performed inside the descriptor
 		for (VariableTableEntry entry : getCFG().getDescriptor().getVariables())
-			if (entry.getName().equals(getName()) && entry.getLocation().equals(getLocation()))
+			if (entry.getName().equals(getName()))
 				return entry.getAnnotations();
 		return new Annotations();
 	}

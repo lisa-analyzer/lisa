@@ -36,7 +36,7 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Annotation visitAnnotation(AnnotationContext ctx) {
-		String annotationName = ctx.IDENTIFIER().getText();
+		String annotationName = ctx.name.getText();
 		if (annotationName.startsWith("Inherited"))
 			return new Annotation(annotationName, visitAnnotationMembers(ctx.annotationMembers()), true);
 		else
@@ -83,8 +83,8 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 			return new BoolAnnotationValue(Boolean.parseBoolean(ctx.LITERAL_BOOL().getText()));
 		else if (ctx.LITERAL_STRING() != null)
 			return new StringAnnotationValue(ctx.LITERAL_STRING().getText());
-		else if (ctx.unitName != null)
-			return new CompilationUnitAnnotationValue(ctx.unitName.getText());
+		else if (ctx.unit_name != null)
+			return new CompilationUnitAnnotationValue(ctx.unit_name.getText());
 		throw new UnsupportedOperationException("Annotation value not supported: " + ctx);
 	}
 
