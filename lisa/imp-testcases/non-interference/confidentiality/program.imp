@@ -1,51 +1,51 @@
 class Confidentiality {
 	confidentiality_lec5ex1() {
 		def h = 5;
-		def LC_l = h; // VIOLATION - confidentiality by assignment
+		[lisa.ni.LowConfidentiality] def l = h; // VIOLATION - confidentiality by assignment
 	}
 
 	confidentiality_lec5ex2() {
 		def h = 5;
-		def LC_l = h * 2; // VIOLATION - confidentiality by assignment
+		[lisa.ni.LowConfidentiality] def l = h * 2; // VIOLATION - confidentiality by assignment
 	}
 
 	confidentiality_lec6() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		if (h > 5000)
-			LC_l = 0; // VIOLATION - confidentiality by state
+			l = 0; // VIOLATION - confidentiality by state
 		else
-			LC_l = 1; // VIOLATION - confidentiality by state
+			l = 1; // VIOLATION - confidentiality by state
 	}
 
 	confidentiality_lec7() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		while (h > 0) {
 			h = h - 1;
-			LC_l = LC_l + 1; // VIOLATION - confidentiality by state
+			l = l + 1; // VIOLATION - confidentiality by state
 		}
 	}
 
 	confidentiality_lec8() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		while (h > 5000) 
 			h = h;
-		LC_l = 1;
+		l = 1;
 	}
 
 	confidentiality_lec16() {
 		def h = 5;
-		def LC_l = 0;
-		h = LC_l + 4; 
-		LC_l = LC_l - 3;
+		[lisa.ni.LowConfidentiality] def l = 0;
+		h = l + 4; 
+		l = l - 3;
 	}
 
 	confidentiality_lec17() {
 		def h = 5;
-		def LC_l = 0;
-		LC_l = h + LC_l; // VIOLATION - confidentiality by assignment
+		[lisa.ni.LowConfidentiality] def l = 0;
+		l = h + l; // VIOLATION - confidentiality by assignment
 	}
 
 	confidentiality_lec18ex1() {
@@ -56,48 +56,48 @@ class Confidentiality {
 
 	confidentiality_lec18ex2() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		if (h <= 30)
-			LC_l = 5; // VIOLATION - confidentiality by state
+			l = 5; // VIOLATION - confidentiality by state
 	}
 
 	confidentiality_lec19ex1() {
 		def h = 5;
-		def LC_l = 0;
-		while (LC_l <= 34)
-			LC_l = LC_l + 1;
+		[lisa.ni.LowConfidentiality] def l = 0;
+		while (l <= 34)
+			l = l + 1;
 	}
 
 	confidentiality_lec19ex2() {
 		def h = 5;
-		def LC_l = 0;
-		while (LC_l <= 34) {
-			LC_l = LC_l + 1;
+		[lisa.ni.LowConfidentiality] def l = 0;
+		while (l <= 34) {
+			l = l + 1;
 			h = h + 1;
 		}
 	}
 
 	confidentiality_lec19ex3() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		while (h <= 34)
 			h = h; 
-		LC_l = 1;
+		l = 1;
 	}
 
 	confidentiality_lec19ex4() {
 		def h = 5;
-		def LC_l = 0;
-		LC_l = h; // VIOLATION - confidentiality by assignment
-		LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
+		l = h; // VIOLATION - confidentiality by assignment
+		l = 0;
 	}
 
 	confidentiality_lec19ex5() {
 		def h = 5;
-		def LC_l = 0;
+		[lisa.ni.LowConfidentiality] def l = 0;
 		if (h <= 34) 
-			LC_l = 0; // VIOLATION - confidentiality by state
+			l = 0; // VIOLATION - confidentiality by state
 		else 
-			LC_l = 0; // VIOLATION - confidentiality by state
+			l = 0; // VIOLATION - confidentiality by state
 	}
 }

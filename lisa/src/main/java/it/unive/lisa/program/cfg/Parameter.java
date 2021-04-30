@@ -1,6 +1,8 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
@@ -27,28 +29,17 @@ public class Parameter implements CodeElement {
 
 	private final CodeLocation location;
 
-	/**
-	 * Builds an untyped parameter reference, identified by its name. The
-	 * location where this parameter reference happens is unknown (i.e. no
-	 * source file/line/column is available) as well as its type (i.e. it is
-	 * {#link Untyped#INSTANCE}).
-	 * 
-	 * @param name the name of this parameter
-	 */
-	public Parameter(String name) {
-		this(name, Untyped.INSTANCE);
-	}
+	private Annotations annotations;
 
 	/**
-	 * Builds a typed parameter reference, identified by its name and its type.
-	 * The location where this parameter reference happens is unknown (i.e. no
-	 * source file/line/column is available).
+	 * Builds an untyped parameter reference, identified by its name. The type
+	 * of this parameter is unknown (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
-	 * @param name       the name of this parameter
-	 * @param staticType the type of this parameter
+	 * @param location the location of this parameter
+	 * @param name     the name of this parameter
 	 */
-	public Parameter(String name, Type staticType) {
-		this(null, name, staticType);
+	public Parameter(CodeLocation location, String name) {
+		this(location, name, Untyped.INSTANCE);
 	}
 
 	/**
@@ -62,11 +53,28 @@ public class Parameter implements CodeElement {
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Parameter(CodeLocation location, String name, Type staticType) {
+		this(location, name, staticType, new Annotations());
+	}
+
+	/**
+	 * Builds the parameter reference, identified by its name and its type,
+	 * happening at the given location in the program.
+	 * 
+	 * @param location    the location where this parameter is defined within
+	 *                        the source file.
+	 * @param name        the name of this parameter
+	 * @param staticType  the type of this parameter. If unknown, use
+	 *                        {@link Untyped#INSTANCE}
+	 * @param annotations the annotations of this parameter
+	 */
+	public Parameter(CodeLocation location, String name, Type staticType, Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
+		Objects.requireNonNull(location, "The location of a CFG cannot be null");
 		this.location = location;
 		this.name = name;
 		this.staticType = staticType;
+		this.annotations = annotations;
 	}
 
 	/**
@@ -91,6 +99,7 @@ public class Parameter implements CodeElement {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
@@ -121,6 +130,11 @@ public class Parameter implements CodeElement {
 				return false;
 		} else if (!staticType.equals(other.staticType))
 			return false;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		return true;
 	}
 
@@ -132,5 +146,23 @@ public class Parameter implements CodeElement {
 	@Override
 	public CodeLocation getLocation() {
 		return location;
+	}
+
+	/**
+	 * Yields the annotations of this parameter.
+	 * 
+	 * @return the annotations of this parameter
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Adds an annotations to this parameter.
+	 * 
+	 * @param ann the annotation to be added
+	 */
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 }

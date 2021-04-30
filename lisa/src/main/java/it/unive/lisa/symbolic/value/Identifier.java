@@ -1,6 +1,8 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -24,6 +26,8 @@ public abstract class Identifier extends ValueExpression {
 	 */
 	private final boolean weak;
 
+	private Annotations annotations;
+
 	/**
 	 * Builds the identifier.
 	 * 
@@ -33,9 +37,23 @@ public abstract class Identifier extends ValueExpression {
 	 *                  should only receive weak assignments
 	 */
 	protected Identifier(ExternalSet<Type> types, String name, boolean weak) {
+		this(types, name, weak, new Annotations());
+	}
+
+	/**
+	 * Builds the identifier.
+	 * 
+	 * @param types       the runtime types of this expression
+	 * @param name        the name of the identifier
+	 * @param weak        whether or not this identifier is weak, meaning that
+	 *                        it should only receive weak assignments
+	 * @param annotations the annotations of this identifier
+	 */
+	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations) {
 		super(types);
 		this.name = name;
 		this.weak = weak;
+		this.annotations = annotations;
 	}
 
 	/**
@@ -87,6 +105,24 @@ public abstract class Identifier extends ValueExpression {
 		} else if (!name.equals(other.name))
 			return false;
 		return true;
+	}
+
+	/**
+	 * Yields the annotations of this identifier.
+	 * 
+	 * @return the annotations of this identifier
+	 */
+	public Annotations getAnnotations() {
+		return annotations;
+	}
+
+	/**
+	 * Adds an annotation to the annotations of this identifier.
+	 * 
+	 * @param ann the annotation to be added
+	 */
+	public void addAnnotation(Annotation ann) {
+		annotations.addAnnotation(ann);
 	}
 
 	/**

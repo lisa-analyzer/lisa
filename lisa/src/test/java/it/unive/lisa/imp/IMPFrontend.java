@@ -9,7 +9,7 @@ import it.unive.lisa.imp.constructs.StringEquals;
 import it.unive.lisa.imp.constructs.StringIndexOf;
 import it.unive.lisa.imp.constructs.StringLength;
 import it.unive.lisa.imp.constructs.StringReplace;
-import it.unive.lisa.imp.constructs.StringStartsWIth;
+import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.BoolType;
@@ -146,15 +146,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			Program p = visitFile(parser.file());
 
 			// add constructs
-			CompilationUnit str = new CompilationUnit(null, "string", true);
-			str.addInstanceConstruct(new StringContains(str));
-			str.addInstanceConstruct(new StringEndsWith(str));
-			str.addInstanceConstruct(new StringEquals(str));
-			str.addInstanceConstruct(new StringIndexOf(str));
-			str.addInstanceConstruct(new StringLength(str));
-			str.addInstanceConstruct(new StringReplace(str));
-			str.addInstanceConstruct(new StringStartsWIth(str));
-			str.addInstanceConstruct(new StringSubstring(str));
+			SourceCodeLocation unknownLocation = new SourceCodeLocation("imp-runtime", 0, 0);
+			CompilationUnit str = new CompilationUnit(unknownLocation, "string", true);
+			str.addInstanceConstruct(new StringContains(unknownLocation, str));
+			str.addInstanceConstruct(new StringEndsWith(unknownLocation, str));
+			str.addInstanceConstruct(new StringEquals(unknownLocation, str));
+			str.addInstanceConstruct(new StringIndexOf(unknownLocation, str));
+			str.addInstanceConstruct(new StringLength(unknownLocation, str));
+			str.addInstanceConstruct(new StringReplace(unknownLocation, str));
+			str.addInstanceConstruct(new StringStartsWith(unknownLocation, str));
+			str.addInstanceConstruct(new StringSubstring(unknownLocation, str));
 
 			// register all possible types
 			p.registerType(BoolType.INSTANCE);
@@ -242,7 +243,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
 		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
+				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override
@@ -262,7 +263,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), visitFormals(ctx.formals()));
+				true, ctx.name.getText(), Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 		descriptor.setOverridable(false);
 		return descriptor;
 	}
@@ -270,7 +273,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
-				true, ctx.name.getText(), visitFormals(ctx.formals()));
+				true, ctx.name.getText(), Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
 
 		if (ctx.FINAL() != null)
 			descriptor.setOverridable(false);
@@ -283,7 +288,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter("this", ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
+		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
+				ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);
@@ -293,6 +299,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
+				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 }

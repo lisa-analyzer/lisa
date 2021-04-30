@@ -28,19 +28,6 @@ public class Literal extends Expression {
 	private final Object value;
 
 	/**
-	 * Builds a typed literal, consisting of a constant value. The location
-	 * where this literal happens is unknown (i.e. no source file/line/column is
-	 * available).
-	 * 
-	 * @param cfg        the cfg that this literal belongs to
-	 * @param value      the value of this literal
-	 * @param staticType the type of this literal
-	 */
-	public Literal(CFG cfg, Object value, Type staticType) {
-		this(cfg, null, value, staticType);
-	}
-
-	/**
 	 * Builds a typed literal, consisting of a constant value, happening at the
 	 * given location in the program.
 	 * 

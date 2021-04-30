@@ -6,6 +6,9 @@ import it.unive.lisa.analysis.inference.BaseInferredValue;
 import it.unive.lisa.analysis.inference.InferenceSystem;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -201,6 +204,14 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return new NonInterference(NI_LOW, NI_HIGH);
 	}
 
+	private NonInterference mkLowLow() {
+		return new NonInterference(NI_LOW, NI_LOW);
+	}
+
+	private NonInterference mkHighHigh() {
+		return new NonInterference(NI_HIGH, NI_HIGH);
+	}
+
 	private NonInterference mkHighLow() {
 		return top();
 	}
@@ -242,15 +253,26 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
 	}
 
+	private static final Annotation LOW_CONFIDENTIALITY = new Annotation("lisa.ni.LowConfidentiality");
+	private static final Annotation HIGH_INTEGRITY = new Annotation("lisa.ni.HighIntegrity");
+
 	@Override
 	public NonInterference variable(Identifier id, ProgramPoint pp) {
-		if (id.getName().startsWith("LC_"))
-			return new NonInterference(NI_LOW, NI_LOW);
+		Annotations annots = id.getAnnotations();
+		if (annots.isEmpty())
+			return mkHighLow();
 
-		if (id.getName().startsWith("HI_"))
-			return new NonInterference(NI_HIGH, NI_HIGH);
+		boolean lowConf = annots.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY.getAnnotationName()));
+		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY.getAnnotationName()));
 
-		return mkHighLow();
+		if (lowConf && highInt)
+			return mkLowHigh();
+		else if (lowConf)
+			return mkLowLow();
+		else if (highInt)
+			return mkHighHigh();
+		else
+			return mkHighLow();
 	}
 
 	@Override

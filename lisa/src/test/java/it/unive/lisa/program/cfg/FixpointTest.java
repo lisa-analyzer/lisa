@@ -13,6 +13,7 @@ import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
 import org.junit.Test;
 
@@ -30,7 +31,9 @@ public class FixpointTest {
 
 	@Test
 	public void testEmptyCFG() {
-		CFG cfg = new CFG(new CFGDescriptor(new CompilationUnit(null, "foo", false), false, "foo"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CFG cfg = new CFG(
+				new CFGDescriptor(unknownLocation, new CompilationUnit(unknownLocation, "foo", false), false, "foo"));
 		try {
 			cfg.fixpoint(mkState(), mkCallGraph());
 		} catch (FixpointException e) {

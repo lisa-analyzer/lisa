@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -37,32 +38,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	 * The qualified name of the static target of this call
 	 */
 	private final String qualifiedName;
-
-	/**
-	 * Builds the CFG call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param qualifiedName the qualified name of the static target of this call
-	 * @param target        the CFG that is targeted by this CFG call.
-	 * @param parameters    the parameters of this call
-	 */
-	public CFGCall(CFG cfg, String qualifiedName, CFG target, Expression... parameters) {
-		this(cfg, null, qualifiedName, target, parameters);
-	}
-
-	/**
-	 * Builds the CFG call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param qualifiedName the qualified name of the static target of this call
-	 * @param targets       the CFGs that are targeted by this CFG call.
-	 * @param parameters    the parameters of this call
-	 */
-	public CFGCall(CFG cfg, String qualifiedName, Collection<CFG> targets, Expression... parameters) {
-		this(cfg, null, qualifiedName, targets, parameters);
-	}
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program.
@@ -208,6 +183,13 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
 			getMetaVariables().add((Identifier) expr);
+
+		// propagates the annotations of the targets
+		// to the metavariable of this cfg call
+		for (CFG target : targets)
+			for (Annotation ann : target.getDescriptor().getAnnotations())
+				meta.addAnnotation(ann);
+
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = null;
