@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.inference;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -148,11 +149,67 @@ public class InferenceSystem<T extends InferredValue<T>> extends Environment<Inf
 	}
 
 	@Override
-	public String representation() {
+	public DomainRepresentation representation() {
 		if (isBottom() || isTop())
 			return super.representation();
 
-		return super.representation() + "\n[inferred: " + inferredValue + ", state: " + inferredValue.executionState()
-				+ "]";
+		return new SystemRepresentation(super.representation(), inferredValue.representation(),
+				inferredValue.executionState().representation());
+	}
+
+	private static class SystemRepresentation extends DomainRepresentation {
+
+		private final DomainRepresentation map;
+		private final DomainRepresentation inferred;
+		private final DomainRepresentation state;
+
+		public SystemRepresentation(DomainRepresentation map, DomainRepresentation inferred,
+				DomainRepresentation state) {
+			this.map = map;
+			this.inferred = inferred;
+			this.state = state;
+		}
+
+		@Override
+		public String toString() {
+			return map + "\n[inferred: " + inferred + ", state: " + state + "]";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
+			result = prime * result + ((map == null) ? 0 : map.hashCode());
+			result = prime * result + ((state == null) ? 0 : state.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			SystemRepresentation other = (SystemRepresentation) obj;
+			if (inferred == null) {
+				if (other.inferred != null)
+					return false;
+			} else if (!inferred.equals(other.inferred))
+				return false;
+			if (map == null) {
+				if (other.map != null)
+					return false;
+			} else if (!map.equals(other.map))
+				return false;
+			if (state == null) {
+				if (other.state != null)
+					return false;
+			} else if (!state.equals(other.state))
+				return false;
+			return true;
+		}
 	}
 }

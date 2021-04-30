@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -185,12 +186,61 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	}
 
 	@Override
-	public String representation() {
-		return "heap [[ " + heapState.representation() + " ]]\nvalue [[ " + valueState.representation() + " ]]";
+	public DomainRepresentation representation() {
+		return new StateRepresentation(heapState.representation(), valueState.representation());
+	}
+
+	/**
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	private static class StateRepresentation extends DomainRepresentation {
+		private final DomainRepresentation heap;
+		private final DomainRepresentation value;
+
+		private StateRepresentation(DomainRepresentation heap, DomainRepresentation value) {
+			this.heap = heap;
+			this.value = value;
+		}
+
+		@Override
+		public String toString() {
+			return "heap [[ " + heap + " ]]\nvalue [[ " + value + " ]]";
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((heap == null) ? 0 : heap.hashCode());
+			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			StateRepresentation other = (StateRepresentation) obj;
+			if (heap == null) {
+				if (other.heap != null)
+					return false;
+			} else if (!heap.equals(other.heap))
+				return false;
+			if (value == null) {
+				if (other.value != null)
+					return false;
+			} else if (!value.equals(other.value))
+				return false;
+			return true;
+		}
 	}
 
 	@Override
 	public String toString() {
-		return representation();
+		return representation().toString();
 	}
 }

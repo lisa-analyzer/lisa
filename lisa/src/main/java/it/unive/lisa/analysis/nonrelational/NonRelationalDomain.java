@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -95,9 +96,10 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	public T glb(T other) throws SemanticException;
 
 	/**
-	 * Yields a textual representation of the content of this domain's instance.
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this domain's instance.
 	 * 
-	 * @return the textual representation
+	 * @return the representation
 	 */
-	String representation();
+	DomainRepresentation representation();
 }
