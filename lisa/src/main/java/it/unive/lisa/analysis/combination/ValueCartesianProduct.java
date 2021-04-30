@@ -116,7 +116,17 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
+	public boolean isTop() {
+		return left.isTop() && right.isTop();
+	}
+	
+	@Override
 	public ValueCartesianProduct<T1, T2> bottom() {
 		return new ValueCartesianProduct<T1, T2>(left.bottom(), right.bottom());
+	}
+
+	@Override
+	public boolean isBottom() {
+		return left.isBottom() && right.isBottom();
 	}
 }
