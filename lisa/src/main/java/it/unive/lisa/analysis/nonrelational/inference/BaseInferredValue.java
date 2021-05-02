@@ -1,9 +1,12 @@
-package it.unive.lisa.analysis.inference;
+package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -30,6 +33,93 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends BaseLattice<T>
 		implements InferredValue<T> {
 
+	@SuppressWarnings("unchecked")
+	private class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
+
+		@Override
+		public InferredPair<T> visit(AccessChild expression, InferredPair<T> receiver, InferredPair<T> child,
+				Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+
+		@Override
+		public InferredPair<T> visit(HeapAllocation expression, Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+
+		@Override
+		public InferredPair<T> visit(UnaryExpression expression, InferredPair<T> arg, Object... params)
+				throws SemanticException {
+			if (arg.getInferred().isBottom())
+				return arg;
+
+			return evalUnaryExpression(expression.getOperator(), arg.getInferred(),
+					((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
+		}
+
+		@Override
+		public InferredPair<T> visit(BinaryExpression expression, InferredPair<T> left, InferredPair<T> right,
+				Object... params) throws SemanticException {
+			if (left.getInferred().isBottom())
+				return left;
+			if (right.getInferred().isBottom())
+				return right;
+
+			if (expression.getOperator() == BinaryOperator.TYPE_CAST)
+				return evalTypeCast(expression, left.getInferred(), right.getInferred(),
+						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
+
+			if (expression.getOperator() == BinaryOperator.TYPE_CONV)
+				return evalTypeConv(expression, left.getInferred(), right.getInferred(),
+						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
+
+			return evalBinaryExpression(expression.getOperator(), left.getInferred(), right.getInferred(),
+					((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
+		}
+
+		@Override
+		public InferredPair<T> visit(TernaryExpression expression, InferredPair<T> left, InferredPair<T> middle,
+				InferredPair<T> right, Object... params)
+				throws SemanticException {
+			if (left.getInferred().isBottom())
+				return left;
+			if (middle.getInferred().isBottom())
+				return middle;
+			if (right.getInferred().isBottom())
+				return right;
+
+			return evalTernaryExpression(expression.getOperator(), left.getInferred(), middle.getInferred(),
+					right.getInferred(), ((InferenceSystem<T>) params[0]).getExecutionState(),
+					(ProgramPoint) params[1]);
+		}
+
+		@Override
+		public InferredPair<T> visit(Skip expression, Object... params) throws SemanticException {
+			T bot = bottom();
+			return new InferredPair<>(bot, bot, bot);
+		}
+
+		@Override
+		public InferredPair<T> visit(PushAny expression, Object... params) throws SemanticException {
+			return evalPushAny(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
+					(ProgramPoint) params[1]);
+		}
+
+		@Override
+		public InferredPair<T> visit(Constant expression, Object... params) throws SemanticException {
+			if (expression instanceof NullConstant)
+				return evalNullConstant(((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
+			return evalNonNullConstant(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
+					(ProgramPoint) params[1]);
+		}
+
+		@Override
+		public InferredPair<T> visit(Identifier expression, Object... params) throws SemanticException {
+			return evalIdentifier(expression, (InferenceSystem<T>) params[0], (ProgramPoint) params[1]);
+		}
+
+	}
+
 	@Override
 	public final Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
@@ -43,9 +133,6 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 
 		if (expression instanceof Constant)
 			return satisfiesNonNullConstant((Constant) expression, environment.getExecutionState(), pp);
-
-		if (expression instanceof Skip)
-			return Satisfiability.UNKNOWN;
 
 		if (expression instanceof PushAny)
 			return satisfiesPushAny((PushAny) expression, environment.getExecutionState());
@@ -113,75 +200,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
-		if (expression instanceof Identifier)
-			return evalIdentifier((Identifier) expression, environment, pp);
-
-		if (expression instanceof NullConstant)
-			return evalNullConstant(environment.getExecutionState(), pp);
-
-		if (expression instanceof Constant)
-			return evalNonNullConstant((Constant) expression, environment.getExecutionState(), pp);
-
-		if (expression instanceof Skip) {
-			T bot = bottom();
-			return new InferredPair<>(bot, bot, bot);
-		}
-
-		if (expression instanceof PushAny)
-			return evalPushAny((PushAny) expression, environment.getExecutionState());
-
-		if (expression instanceof UnaryExpression) {
-			UnaryExpression unary = (UnaryExpression) expression;
-
-			InferredPair<T> arg = eval((ValueExpression) unary.getExpression(), environment, pp);
-			if (arg.isBottom())
-				return arg;
-
-			return evalUnaryExpression(unary.getOperator(), arg.getInferred(), environment.getExecutionState(), pp);
-		}
-
-		if (expression instanceof BinaryExpression) {
-			BinaryExpression binary = (BinaryExpression) expression;
-
-			InferredPair<T> left = eval((ValueExpression) binary.getLeft(), environment, pp);
-			if (left.isBottom())
-				return left;
-
-			InferredPair<T> right = eval((ValueExpression) binary.getRight(), environment, pp);
-			if (right.isBottom())
-				return right;
-
-			if (binary.getOperator() == BinaryOperator.TYPE_CAST)
-				return evalTypeCast(binary, left.getInferred(), right.getInferred(), environment.getExecutionState());
-
-			if (binary.getOperator() == BinaryOperator.TYPE_CONV)
-				return evalTypeConv(binary, left.getInferred(), right.getInferred(), environment.getExecutionState());
-
-			return evalBinaryExpression(binary.getOperator(), left.getInferred(), right.getInferred(),
-					environment.getExecutionState(), pp);
-		}
-
-		if (expression instanceof TernaryExpression) {
-			TernaryExpression ternary = (TernaryExpression) expression;
-
-			InferredPair<T> left = eval((ValueExpression) ternary.getLeft(), environment, pp);
-			if (left.isBottom())
-				return left;
-
-			InferredPair<T> middle = eval((ValueExpression) ternary.getMiddle(), environment, pp);
-			if (middle.isBottom())
-				return middle;
-
-			InferredPair<T> right = eval((ValueExpression) ternary.getRight(), environment, pp);
-			if (right.isBottom())
-				return right;
-
-			return evalTernaryExpression(ternary.getOperator(), left.getInferred(), middle.getInferred(),
-					right.getInferred(), environment.getExecutionState(), pp);
-		}
-
-		T top = top();
-		return new InferredPair<>(top, top, top);
+		return expression.accept(new EvaluationVisitor(), environment, pp);
 	}
 
 	/**
@@ -207,10 +226,12 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @param pushAny the push-any expression to be evaluated
 	 * @param state   the current execution state
+	 * @param pp      the program point that where this operation is being
+	 *                    evaluated
 	 * 
 	 * @return the evaluation of the push-any expression
 	 */
-	protected InferredPair<T> evalPushAny(PushAny pushAny, T state) {
+	protected InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -306,11 +327,13 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param right the right expression, namely the types to which left should
 	 *                  be converted
 	 * @param state the current execution state
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return the evaluation of the type conversion expression
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state) {
+	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp) {
 		T bot = bottom();
 		return conv.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
@@ -324,11 +347,13 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param right the right expression, namely the types to which left should
 	 *                  be casted
 	 * @param state the current execution state
+	 * @param pp    the program point that where this operation is being
+	 *                  evaluated
 	 * 
 	 * @return the evaluation of the type cast expression
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state) {
+	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp) {
 		T bot = bottom();
 		return cast.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);

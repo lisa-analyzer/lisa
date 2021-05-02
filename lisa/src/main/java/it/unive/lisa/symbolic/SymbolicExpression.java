@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic;
 
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -44,6 +45,8 @@ public abstract class SymbolicExpression {
 	public final Type getDynamicType() {
 		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
+	
+	public abstract <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException;
 
 	@Override
 	public int hashCode() {

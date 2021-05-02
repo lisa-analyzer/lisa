@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.impl.nonInterference;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.inference.BaseInferredValue;
-import it.unive.lisa.analysis.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.annotations.Annotation;

@@ -2,10 +2,10 @@ package it.unive.lisa.analysis.impl.types;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.inference.BaseInferredValue;
-import it.unive.lisa.analysis.inference.InferenceSystem;
-import it.unive.lisa.analysis.inference.InferredValue;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
