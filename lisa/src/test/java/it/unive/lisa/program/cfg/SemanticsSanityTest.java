@@ -258,13 +258,14 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> getRewrittenExpressions() {
-			return new ExpressionSet<>();
+		public List<HeapReplacement> getSubstitution() {
+			return Collections.emptyList();
 		}
 
 		@Override
-		public List<HeapReplacement> getSubstitution() {
-			return Collections.emptyList();
+		public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression,
+				HeapEnvironment<NRHeap> environment, ProgramPoint pp) throws SemanticException {
+			return new ExpressionSet<>();
 		}
 
 	}

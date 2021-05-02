@@ -1,13 +1,20 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
@@ -22,4 +29,53 @@ import it.unive.lisa.symbolic.value.Identifier;
 @DefaultImplementation(MonolithicHeap.class)
 public interface HeapDomain<D extends HeapDomain<D>>
 		extends SemanticDomain<D, SymbolicExpression, Identifier>, Lattice<D>, HeapSemanticOperation {
+
+	/**
+	 * Rewrites a {@link SymbolicExpression}, getting rid of the parts that
+	 * access heap structures, substituting them with synthetic
+	 * {@link HeapLocation}s representing the accessed locations. The expression
+	 * returned by this method should not contain {@link HeapExpression}s.<br>
+	 * <br>
+	 * If no rewriting is necessary, the input expression can be returned
+	 * instead.<br>
+	 * 
+	 * @param expression the expression to rewrite
+	 * 
+	 * @return the rewritten expression, or the original one
+	 * 
+	 * @throws SemanticException if something goes wrong during the rewriting
+	 */
+	ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp) throws SemanticException;
+
+	/**
+	 * Rewrites all {@link SymbolicExpression}s, getting rid of the parts that
+	 * access heap structures, substituting them with synthetic
+	 * {@link HeapLocation}s representing the accessed locations. The
+	 * expressions returned by this method should not contain
+	 * {@link HeapExpression}s.<br>
+	 * <br>
+	 * If no rewriting is necessary, the returned {@link ExpressionSet} will
+	 * contain the input expressions.<br>
+	 * <br>
+	 * The default implementation of this method simply iterates over the input
+	 * expressions, invoking {@link #rewrite(SymbolicExpression, ProgramPoint)} on all of
+	 * them.<br>
+	 * <br>
+	 * The collection returned by this method usually contains one expression,
+	 * but instances created through lattice operations (e.g., lub) might
+	 * contain more.
+	 * 
+	 * @param expressions the expressions to rewrite
+	 * 
+	 * @return the rewritten expressions, or the original ones
+	 * 
+	 * @throws SemanticException if something goes wrong during the rewriting
+	 */
+	default ExpressionSet<ValueExpression> rewriteAll(ExpressionSet<SymbolicExpression> expressions, ProgramPoint pp)
+			throws SemanticException {
+		Set<ValueExpression> result = new HashSet<>();
+		for (SymbolicExpression expr : expressions)
+			result.addAll(rewrite(expr, pp).elements());
+		return new ExpressionSet<>(result);
+	}
 }

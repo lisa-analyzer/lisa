@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis;
 
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -9,7 +11,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.stream.Collectors;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -93,7 +94,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
 		ExpressionSet<SymbolicExpression> exprs = new ExpressionSet<>(
-				s.getHeapState().smallStepSemantics(id, pp).getRewrittenExpressions().elements()
+				s.getHeapState().rewrite(id, pp).elements()
 						.stream()
 						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 		return new AnalysisState<A, H, V>(s, exprs);
@@ -103,8 +104,11 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
+		// we need to rewrite expression: if it ends up being used as
+		// left-hand side of an assignment, it has to be translated
+		// to an identifier
 		ExpressionSet<SymbolicExpression> exprs = new ExpressionSet<>(
-				s.getHeapState().getRewrittenExpressions().elements().stream()
+				s.getHeapState().rewrite(expression, pp).elements().stream()
 						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 		return new AnalysisState<>(s, exprs);
 	}
@@ -146,12 +150,16 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 
 	@Override
 	public boolean isTop() {
-		return state.isTop() && computedExpressions.isBottom();
+		// we do not check the computed expressions since we still have to
+		// track what is on the stack even if it's the top state
+		return state.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		return state.isBottom() && computedExpressions.isBottom();
+		// we do not check the computed expressions since we still have to
+		// track what is on the stack even if it's the bottom state
+		return state.isBottom();
 	}
 
 	@Override

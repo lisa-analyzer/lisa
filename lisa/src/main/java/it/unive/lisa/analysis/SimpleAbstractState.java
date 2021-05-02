@@ -64,7 +64,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	public SimpleAbstractState<H, V> assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		H heap = heapState.assign(id, expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -79,7 +79,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	public SimpleAbstractState<H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		H heap = heapState.smallStepSemantics(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -93,7 +93,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	@Override
 	public SimpleAbstractState<H, V> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		H heap = heapState.assume(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.getRewrittenExpressions();
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
 		V value = valueState;
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty())
@@ -106,8 +106,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		ExpressionSet<
-				ValueExpression> rewritten = heapState.smallStepSemantics(expression, pp).getRewrittenExpressions();
+		ExpressionSet<ValueExpression> rewritten = heapState.rewrite(expression, pp);
 		Satisfiability result = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten)
 			result = result.lub(valueState.satisfies(expr, pp));

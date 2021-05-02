@@ -1,43 +1,21 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapLocation;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.symbolic.value.Identifier;
+
 /**
- * A semantic operation on the heap state of the program, that rewrites
- * expressions and provides a substitution of the available identifiers.
+ * A semantic operation on the heap state of the program, that provides a
+ * substitution of the available identifiers.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface HeapSemanticOperation {
-	/**
-	 * Yields the expressions that were computed during the generation of this
-	 * heap domain. When evaluating semantics of expressions or assignments, a
-	 * heap domain might rewrite an expression to get rid of the parts that
-	 * access heap structures, substituting them with synthetic
-	 * {@link HeapLocation}s representing the accessed locations. The
-	 * expressions returned by this method should not contain
-	 * {@link HeapExpression}s.<br>
-	 * <br>
-	 * If no rewriting was necessary for the generation this domain instance, a
-	 * singleton collection containing just the original expression is returned
-	 * instead.<br>
-	 * <br>
-	 * The collection returned by this method usually contains one expression,
-	 * but instances created through lattice operations (e.g., lub) might
-	 * contain more.
-	 * 
-	 * @return the rewritten expression, or the original one
-	 */
-	ExpressionSet<ValueExpression> getRewrittenExpressions();
 
 	/**
 	 * Yields the substitution, in the form of a list of

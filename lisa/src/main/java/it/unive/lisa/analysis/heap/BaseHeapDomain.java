@@ -1,11 +1,20 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PushAny;
+import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -35,29 +44,15 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
-			H sem = smallStepSemantics(unary.getExpression(), pp);
-			if (sem.isBottom())
-				return sem;
-			H result = bottom();
-			for (ValueExpression expr : sem.getRewrittenExpressions())
-				result = result.lub(mk(sem, new UnaryExpression(expression.getTypes(), expr, unary.getOperator())));
-			return result;
+			return smallStepSemantics(unary.getExpression(), pp);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
-			H sem1 = smallStepSemantics(binary.getLeft(), pp);
-			if (sem1.isBottom())
-				return sem1;
-			H sem2 = sem1.smallStepSemantics(binary.getRight(), pp);
-			if (sem2.isBottom())
-				return sem2;
-			H result = bottom();
-			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
-				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
-					result = result.lub(
-							mk(sem2, new BinaryExpression(expression.getTypes(), expr1, expr2, binary.getOperator())));
-			return result;
+			H sem = smallStepSemantics(binary.getLeft(), pp);
+			if (sem.isBottom())
+				return sem;
+			return sem.smallStepSemantics(binary.getRight(), pp);
 		}
 
 		if (expression instanceof TernaryExpression) {
@@ -68,36 +63,26 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			H sem2 = sem1.smallStepSemantics(ternary.getMiddle(), pp);
 			if (sem2.isBottom())
 				return sem2;
-			H sem3 = sem2.smallStepSemantics(ternary.getRight(), pp);
-			if (sem3.isBottom())
-				return sem3;
-			H result = bottom();
-			for (ValueExpression expr1 : sem1.getRewrittenExpressions())
-				for (ValueExpression expr2 : sem2.getRewrittenExpressions())
-					for (ValueExpression expr3 : sem3.getRewrittenExpressions())
-						result = result.lub(mk(sem3, new TernaryExpression(expression.getTypes(), expr1, expr2, expr3,
-								ternary.getOperator())));
-			return result;
+			return sem2.smallStepSemantics(ternary.getRight(), pp);
 		}
 
 		if (expression instanceof ValueExpression)
-			return mk((H) this, (ValueExpression) expression);
+			return mk((H) this);
 
 		return top();
 	}
 
 	/**
 	 * Creates a new instance of this domain containing the same abstract
-	 * information of reference, but setting as rewritten expression the given
-	 * one.
+	 * information of reference. The returned object is effectively a new
+	 * instance, meaning that all substitutions should be cleared. If this
+	 * domain does not apply substitutions, it is fine to return {@code this}.
 	 * 
-	 * @param reference  the domain whose abstract information needs to be
-	 *                       copied
-	 * @param expression the expression to set as the rewritten one
+	 * @param reference the domain whose abstract information needs to be copied
 	 * 
 	 * @return a new instance of this domain
 	 */
-	protected abstract H mk(H reference, ValueExpression expression);
+	protected abstract H mk(H reference);
 
 	/**
 	 * Yields a new instance of this domain, built by evaluating the semantics
@@ -112,4 +97,58 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
+	
+	protected static abstract class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(UnaryExpression expression, ExpressionSet<ValueExpression> arg,
+				Object... params) throws SemanticException {
+			Set<ValueExpression> result = new HashSet<>();
+			for (ValueExpression expr : arg)
+				result.add(new UnaryExpression(expression.getTypes(), expr, expression.getOperator()));
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(BinaryExpression expression, ExpressionSet<ValueExpression> left,
+				ExpressionSet<ValueExpression> right, Object... params) throws SemanticException {
+			Set<ValueExpression> result = new HashSet<>();
+			for (ValueExpression l : left)
+				for (ValueExpression r : right)
+					result.add(new BinaryExpression(expression.getTypes(), l, r, expression.getOperator()));
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(TernaryExpression expression, ExpressionSet<ValueExpression> left,
+				ExpressionSet<ValueExpression> middle, ExpressionSet<ValueExpression> right, Object... params)
+				throws SemanticException {
+			Set<ValueExpression> result = new HashSet<>();
+			for (ValueExpression l : left)
+				for (ValueExpression m : middle)
+					for (ValueExpression r : right)
+						result.add(new TernaryExpression(expression.getTypes(), l, m, r, expression.getOperator()));
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(Skip expression, Object... params) throws SemanticException {
+			return new ExpressionSet<>(expression);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(PushAny expression, Object... params) throws SemanticException {
+			return new ExpressionSet<>(expression);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(Constant expression, Object... params) throws SemanticException {
+			return new ExpressionSet<>(expression);
+		}
+
+		@Override
+		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params) throws SemanticException {
+			return new ExpressionSet<>(expression);
+		}
+	}
 }

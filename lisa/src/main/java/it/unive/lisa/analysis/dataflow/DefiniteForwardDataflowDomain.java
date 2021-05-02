@@ -28,6 +28,8 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 
 	private final boolean isTop;
 
+	private final boolean isBottom;
+
 	private final E domain;
 
 	/**
@@ -37,13 +39,14 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	 *                   to perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public DefiniteForwardDataflowDomain(E domain) {
-		this(domain, new HashSet<>(), true);
+		this(domain, new HashSet<>(), true, false);
 	}
 
-	private DefiniteForwardDataflowDomain(E domain, Set<E> elements, boolean isTop) {
+	private DefiniteForwardDataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		super(elements);
 		this.domain = domain;
 		this.isTop = isTop;
+		this.isBottom = isBottom;
 	}
 
 	@Override
@@ -60,7 +63,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
 			updated.add(generated);
-		return new DefiniteForwardDataflowDomain<E>(domain, updated, false);
+		return new DefiniteForwardDataflowDomain<E>(domain, updated, false, false);
 	}
 
 	@Override
@@ -90,7 +93,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 			return this;
 		Set<E> updated = new HashSet<>(elements);
 		updated.removeAll(toRemove);
-		return new DefiniteForwardDataflowDomain<E>(domain, updated, false);
+		return new DefiniteForwardDataflowDomain<E>(domain, updated, false, false);
 	}
 
 	@Override
@@ -129,7 +132,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 
 	@Override
 	public DefiniteForwardDataflowDomain<E> top() {
-		return new DefiniteForwardDataflowDomain<>(domain, new HashSet<>(), true);
+		return new DefiniteForwardDataflowDomain<>(domain, new HashSet<>(), true, false);
 	}
 
 	@Override
@@ -139,17 +142,17 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 
 	@Override
 	public DefiniteForwardDataflowDomain<E> bottom() {
-		return new DefiniteForwardDataflowDomain<>(domain, new HashSet<>(), false);
+		return new DefiniteForwardDataflowDomain<>(domain, new HashSet<>(), false, true);
 	}
 
 	@Override
 	public boolean isBottom() {
-		return elements.isEmpty() && !isTop;
+		return elements.isEmpty() && isBottom;
 	}
 
 	@Override
 	protected DefiniteForwardDataflowDomain<E> mk(Set<E> set) {
-		return new DefiniteForwardDataflowDomain<>(domain, set, false);
+		return new DefiniteForwardDataflowDomain<>(domain, set, false, false);
 	}
 
 	@Override
