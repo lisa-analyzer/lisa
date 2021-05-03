@@ -41,7 +41,7 @@ public class HeapAllocation extends HeapExpression {
 	public String toString() {
 		return "new " + getTypes();
 	}
-	
+
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);

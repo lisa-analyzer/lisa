@@ -102,7 +102,7 @@ public class UnaryExpression extends ValueExpression {
 	public String toString() {
 		return operator.toString() + expression.toString();
 	}
-	
+
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		T arg = expression.accept(visitor, params);

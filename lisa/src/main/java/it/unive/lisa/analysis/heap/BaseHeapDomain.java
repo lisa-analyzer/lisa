@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -18,6 +15,8 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
@@ -97,11 +96,19 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
-	
+
+	/**
+	 * An {@link ExpressionVisitor} that rewrites {@link SymbolicExpression}s to
+	 * {@link ValueExpression}s. The visiting of {@link HeapExpression}s is left
+	 * unimplemented for concrete instances to provide their logic.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	protected static abstract class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(UnaryExpression expression, ExpressionSet<ValueExpression> arg,
+		public final ExpressionSet<ValueExpression> visit(UnaryExpression expression,
+				ExpressionSet<ValueExpression> arg,
 				Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression expr : arg)
@@ -110,7 +117,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(BinaryExpression expression, ExpressionSet<ValueExpression> left,
+		public final ExpressionSet<ValueExpression> visit(BinaryExpression expression,
+				ExpressionSet<ValueExpression> left,
 				ExpressionSet<ValueExpression> right, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression l : left)
@@ -120,7 +128,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(TernaryExpression expression, ExpressionSet<ValueExpression> left,
+		public final ExpressionSet<ValueExpression> visit(TernaryExpression expression,
+				ExpressionSet<ValueExpression> left,
 				ExpressionSet<ValueExpression> middle, ExpressionSet<ValueExpression> right, Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
@@ -137,17 +146,20 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(PushAny expression, Object... params) throws SemanticException {
+		public final ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
+				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Constant expression, Object... params) throws SemanticException {
+		public final ExpressionSet<ValueExpression> visit(Constant expression, Object... params)
+				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params) throws SemanticException {
+		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
+				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}
 	}

@@ -38,7 +38,7 @@ public class Variable extends Identifier {
 	public String toString() {
 		return getName();
 	}
-	
+
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);

@@ -90,7 +90,7 @@ public class AccessChild extends HeapExpression {
 	public String toString() {
 		return container + "->" + child;
 	}
-	
+
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		T cont = container.accept(visitor, params);

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import java.util.Collections;
-import java.util.List;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -17,6 +14,8 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -41,7 +40,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		return expression.accept(new Rewriter());
 	}
 
@@ -127,13 +127,14 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			return false;
 		return true;
 	}
-	
+
 	private static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
-			// any expression accessing an area of the heap or instantiating a new
+			// any expression accessing an area of the heap or instantiating a
+			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
 		}
@@ -141,7 +142,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			// any expression accessing an area of the heap or instantiating a new
+			// any expression accessing an area of the heap or instantiating a
+			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
 		}

@@ -95,7 +95,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 			// for some variables
 			value = v;
 		if (id.isWeak() && function != null && function.containsKey(id))
-			// if we have a weak identifier for which we already have 
+			// if we have a weak identifier for which we already have
 			// information, we we perform a weak assignment
 			value = value.lub(getState(id));
 		func.put(id, value);
