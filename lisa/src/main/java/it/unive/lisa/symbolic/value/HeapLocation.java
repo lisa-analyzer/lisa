@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -57,5 +58,10 @@ public class HeapLocation extends Identifier {
 			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
 					+ "' and '" + other + "'");
 		return isWeak() ? this : other;
+	}
+
+	@Override
+	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+		return visitor.visit(this, params);
 	}
 }

@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.inference;
+package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;

@@ -1,8 +1,8 @@
-package it.unive.lisa.analysis.inference;
+package it.unive.lisa.analysis.nonrelational.inference;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.nonrelational.Environment;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;

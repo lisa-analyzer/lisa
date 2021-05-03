@@ -76,6 +76,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public final M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return (M) this;
+
 		// If id cannot be tracked by the underlying
 		// lattice, return this
 		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
@@ -88,8 +91,12 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		T value = eval.getLeft();
 		T v = lattice.variable(id, pp);
 		if (!v.isBottom())
+			// some domains might provide fixed representations
+			// for some variables
 			value = v;
-		if (id.isWeak())
+		if (id.isWeak() && function != null && function.containsKey(id))
+			// if we have a weak identifier for which we already have
+			// information, we we perform a weak assignment
 			value = value.lub(getState(id));
 		func.put(id, value);
 		return assignAux(id, expression, func, value, eval.getRight(), pp);

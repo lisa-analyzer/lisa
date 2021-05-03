@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -38,5 +40,10 @@ public class HeapAllocation extends HeapExpression {
 	@Override
 	public String toString() {
 		return "new " + getTypes();
+	}
+
+	@Override
+	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+		return visitor.visit(this, params);
 	}
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -131,5 +133,13 @@ public class TernaryExpression extends ValueExpression {
 	@Override
 	public String toString() {
 		return left + " " + operator + "(" + middle + ", " + right + ")";
+	}
+
+	@Override
+	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+		T left = this.left.accept(visitor, params);
+		T middle = this.middle.accept(visitor, params);
+		T right = this.right.accept(visitor, params);
+		return visitor.visit(this, left, middle, right, params);
 	}
 }

@@ -117,11 +117,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	public ExpressionSet<ValueExpression> getRewrittenExpressions() {
-		return new ExpressionSet<ValueExpression>();
-	}
-
-	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return Collections.emptyList();
 	}
@@ -163,5 +158,11 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 			SymbolicExpression expression,
 			ProgramPoint pp) throws SemanticException {
 		return environment;
+	}
+
+	@Override
+	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression,
+			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) throws SemanticException {
+		return new ExpressionSet<>();
 	}
 }

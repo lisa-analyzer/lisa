@@ -3,9 +3,9 @@ package it.unive.lisa.analysis.impl.types;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.inference.BaseInferredValue;
-import it.unive.lisa.analysis.inference.InferenceSystem;
-import it.unive.lisa.analysis.inference.InferredValue;
+import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
@@ -120,7 +120,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalPushAny(PushAny pushAny, InferredTypes state) {
+	protected InferredPair<InferredTypes> evalPushAny(PushAny pushAny, InferredTypes state, ProgramPoint pp) {
 		return mk(new InferredTypes(pushAny.getTypes()));
 	}
 
@@ -207,9 +207,9 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				return BOTTOM_PAIR;
 			return mk(new InferredTypes(BoolType.INSTANCE));
 		case TYPE_CAST:
-			return evalTypeCast(null, left, right, state);
+			return evalTypeCast(null, left, right, state, pp);
 		case TYPE_CONV:
-			return evalTypeConv(null, left, right, state);
+			return evalTypeConv(null, left, right, state, pp);
 		case TYPE_CHECK:
 			if (right.elements.noneMatch(Type::isTypeTokenType))
 				return BOTTOM_PAIR;
@@ -436,7 +436,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	protected InferredPair<InferredTypes> evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
-			InferredTypes state) {
+			InferredTypes state, ProgramPoint pp) {
 		if (right.elements.noneMatch(Type::isTypeTokenType))
 			return BOTTOM_PAIR;
 		ExternalSet<Type> set = cast(left.elements, right.elements);
@@ -447,7 +447,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 
 	@Override
 	protected InferredPair<InferredTypes> evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
-			InferredTypes state) {
+			InferredTypes state, ProgramPoint pp) {
 		if (right.elements.noneMatch(Type::isTypeTokenType))
 			return BOTTOM_PAIR;
 		ExternalSet<Type> set = convert(left.elements, right.elements);
