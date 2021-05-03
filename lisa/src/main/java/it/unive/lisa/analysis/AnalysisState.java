@@ -2,6 +2,9 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -210,12 +213,59 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public String representation() {
-		return "{{\n" + state + "\n}} -> " + computedExpressions;
+	public DomainRepresentation representation() {
+		return new AnalysisStateRepresentation(state.representation(),
+				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
+	}
+
+	private static class AnalysisStateRepresentation extends DomainRepresentation {
+		private final DomainRepresentation state;
+		private final DomainRepresentation expressions;
+
+		private AnalysisStateRepresentation(DomainRepresentation state, DomainRepresentation expressions) {
+			this.state = state;
+			this.expressions = expressions;
+		}
+
+		@Override
+		public String toString() {
+			return "{{\n" + state + "\n}} -> " + expressions;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((expressions == null) ? 0 : expressions.hashCode());
+			result = prime * result + ((state == null) ? 0 : state.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			AnalysisStateRepresentation other = (AnalysisStateRepresentation) obj;
+			if (expressions == null) {
+				if (other.expressions != null)
+					return false;
+			} else if (!expressions.equals(other.expressions))
+				return false;
+			if (state == null) {
+				if (other.state != null)
+					return false;
+			} else if (!state.equals(other.state))
+				return false;
+			return true;
+		}
 	}
 
 	@Override
 	public String toString() {
-		return representation();
+		return representation().toString();
 	}
 }

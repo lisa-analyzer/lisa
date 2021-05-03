@@ -35,19 +35,6 @@ public class AccessUnitGlobal extends Expression {
 	private final Global target;
 
 	/**
-	 * Builds the global access. The location where this access happens is
-	 * unknown (e.g., no source file/line/column is available) and its type is
-	 * the one of the accessed global.
-	 * 
-	 * @param cfg      the cfg that this expression belongs to
-	 * @param receiver the expression that determines the accessed instance
-	 * @param target   the accessed global
-	 */
-	public AccessUnitGlobal(CFG cfg, Expression receiver, Global target) {
-		this(cfg, null, receiver, target);
-	}
-
-	/**
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
@@ -89,7 +76,7 @@ public class AccessUnitGlobal extends Expression {
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = null;
-		Variable v = new Variable(getRuntimeTypes(), target.getName());
+		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, v), this);
 			if (result == null)

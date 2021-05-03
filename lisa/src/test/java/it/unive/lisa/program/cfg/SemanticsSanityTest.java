@@ -63,10 +63,11 @@ public class SemanticsSanityTest {
 
 	@Before
 	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		Program p = new Program();
-		unit = new CompilationUnit(null, "foo", false);
+		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
-		cfg = new CFG(new CFGDescriptor(unit, false, "foo"));
+		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();
 		cg.build(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();
@@ -74,7 +75,7 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
-		fake = new Expression(cfg, null) {
+		fake = new Expression(cfg, unknownLocation) {
 
 			@Override
 			public int setOffset(int offset) {
@@ -110,13 +111,13 @@ public class SemanticsSanityTest {
 		if (param == Expression.class)
 			return fake;
 		if (param == int.class || param == Integer.class)
-			return -1;
+			return 0;
 		if (param == float.class || param == Float.class)
 			return -1f;
 		if (param == boolean.class || param == Boolean.class)
 			return false;
 		if (param == Global.class)
-			return new Global("foo");
+			return new Global(new SourceCodeLocation("fake", 0, 0), "foo");
 		if (param == Object.class)
 			return new Object();
 		if (param == Type.class)
@@ -130,7 +131,7 @@ public class SemanticsSanityTest {
 		if (param == Unit.class)
 			return unit;
 		if (param == CodeLocation.class)
-			return new SourceCodeLocation(null, 0, 0);
+			return new SourceCodeLocation("fake", 0, 0);
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}

@@ -33,19 +33,6 @@ public class AccessGlobal extends Expression {
 	private final Global target;
 
 	/**
-	 * Builds the global access. The location where this access happens is
-	 * unknown (i.e. no source file/line/column is available) and its type is
-	 * the one of the accessed global.
-	 * 
-	 * @param cfg       the cfg that this expression belongs to
-	 * @param container the unit containing the accessed global
-	 * @param target    the accessed global
-	 */
-	public AccessGlobal(CFG cfg, Unit container, Global target) {
-		this(cfg, null, container, target);
-	}
-
-	/**
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
@@ -83,7 +70,7 @@ public class AccessGlobal extends Expression {
 					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		// unit globals are unique, we can directly access those
-		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString()), this);
+		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString(), target.getAnnotations()),
+				this);
 	}
-
 }

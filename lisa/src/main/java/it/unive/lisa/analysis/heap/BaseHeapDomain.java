@@ -24,7 +24,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	@Override
 	public final String toString() {
-		return representation();
+		return representation().toString();
 	}
 
 	@Override

@@ -1,9 +1,15 @@
 package it.unive.lisa.analysis.impl.dataflow;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -12,8 +18,6 @@ import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * An implementation of the available expressions dataflow analysis, that
@@ -41,7 +45,7 @@ public class AvailableExpressions
 
 	@Override
 	public String toString() {
-		return "(" + id + ", " + expression + ")";
+		return representation().toString();
 	}
 
 	@Override
@@ -137,6 +141,11 @@ public class AvailableExpressions
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();
+	}
+
+	@Override
+	public DomainRepresentation representation() {
+		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(expression));
 	}
 
 	@Override

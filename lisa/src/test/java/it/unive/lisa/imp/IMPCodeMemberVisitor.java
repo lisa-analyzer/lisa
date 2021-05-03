@@ -10,7 +10,7 @@ import it.unive.lisa.imp.constructs.StringEquals;
 import it.unive.lisa.imp.constructs.StringIndexOf;
 import it.unive.lisa.imp.constructs.StringLength;
 import it.unive.lisa.imp.constructs.StringReplace;
-import it.unive.lisa.imp.constructs.StringStartsWIth;
+import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAdd;
 import it.unive.lisa.imp.expressions.IMPAnd;
@@ -42,9 +42,9 @@ import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -78,8 +78,6 @@ import it.unive.lisa.test.antlr.IMPParser.BlockOrStatementContext;
 import it.unive.lisa.test.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.test.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.test.antlr.IMPParser.ForLoopContext;
-import it.unive.lisa.test.antlr.IMPParser.FormalContext;
-import it.unive.lisa.test.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.test.antlr.IMPParser.IndexContext;
 import it.unive.lisa.test.antlr.IMPParser.LiteralContext;
 import it.unive.lisa.test.antlr.IMPParser.LocalDeclarationContext;
@@ -108,6 +106,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 
 /**
@@ -126,7 +125,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final Collection<ControlFlowStructure> cfs;
 
-	private final Map<String, VariableRef> visibleIds;
+	private final Map<String, Pair<VariableRef, Annotations>> visibleIds;
 
 	private final CFG cfg;
 
@@ -150,7 +149,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 		visibleIds = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
-			visibleIds.put(par.getName(), par.createReference(cfg));
+			visibleIds.put(par.getName(), Pair.of(par.createReference(cfg), par.getAnnotations()));
 	}
 
 	/**
@@ -195,23 +194,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Parameter[] visitFormals(FormalsContext ctx) {
-		Parameter[] formals = new Parameter[ctx.formal().size()];
-		int i = 0;
-		for (FormalContext f : ctx.formal())
-			formals[i++] = visitFormal(f);
-		return formals;
-	}
-
-	@Override
-	public Parameter visitFormal(FormalContext ctx) {
-		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE);
-	}
-
-	@Override
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlock(BlockContext ctx) {
-		Map<String, VariableRef> backup = new HashMap<>(visibleIds);
+		Map<String, Pair<VariableRef,
+				Annotations>> backup = new HashMap<>(visibleIds);
 		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>(matrix.getEdgeFactory());
 
 		Statement first = null, last = null;
@@ -227,11 +212,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		}
 
 		Collection<String> toRemove = new HashSet<>();
-		for (Entry<String, VariableRef> id : visibleIds.entrySet())
+		for (Entry<String, Pair<VariableRef, Annotations>> id : visibleIds.entrySet())
 			if (!backup.containsKey(id.getKey())) {
-				VariableRef ref = id.getValue();
+				VariableRef ref = id.getValue().getLeft();
 				descriptor.addVariable(new VariableTableEntry(ref.getLocation(),
-						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE));
+						0, ref.getRootStatement(), last, id.getKey(), Untyped.INSTANCE, id.getValue().getRight()));
 				toRemove.add(id.getKey());
 			}
 
@@ -334,7 +319,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			throw new IMPSyntaxException(
 					"Duplicate variable '" + ref.getName() + "' declared at " + ref.getLocation());
 
-		visibleIds.put(ref.getName(), ref);
+		visibleIds.put(ref.getName(), Pair.of(ref, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations())));
 		// the variable table entry will be generated at the end of the
 		// containing block
 
@@ -603,7 +588,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
 					visitExpression(ctx.right));
 		else if (ctx.STRSTARTS() != null)
-			return new StringStartsWIth.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
+			return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
 					visitExpression(ctx.left), visitExpression(ctx.right));
 
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);

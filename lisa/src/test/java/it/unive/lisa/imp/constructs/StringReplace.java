@@ -12,6 +12,7 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -37,10 +38,11 @@ public class StringReplace extends NativeCFG {
 	 * 
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringReplace(CompilationUnit stringUnit) {
-		super(new CFGDescriptor(stringUnit, true, "replace", BoolType.INSTANCE,
-				new Parameter("this", StringType.INSTANCE), new Parameter("search", StringType.INSTANCE),
-				new Parameter("replacement", StringType.INSTANCE)),
+	public StringReplace(CodeLocation location, CompilationUnit stringUnit) {
+		super(new CFGDescriptor(location, stringUnit, true, "replace", BoolType.INSTANCE,
+				new Parameter(location, "this", StringType.INSTANCE),
+				new Parameter(location, "search", StringType.INSTANCE),
+				new Parameter(location, "replacement", StringType.INSTANCE)),
 				IMPStringReplace.class);
 	}
 

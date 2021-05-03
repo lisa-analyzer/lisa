@@ -441,7 +441,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 
 	@Override
 	public final String toString() {
-		return representation();
+		return representation().toString();
 	}
 
 	@Override

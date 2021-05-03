@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -34,20 +35,23 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimpleSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
-		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		NoOp noop = new NoOp(first);
-		Return ret = new Return(first, new VariableRef(first, "x"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		NoOp noop = new NoOp(first, unknownLocation);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
-		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new VariableRef(second, "x"));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -63,12 +67,14 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testDoubleSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
-		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		NoOp noop1 = new NoOp(first);
-		NoOp noop2 = new NoOp(first);
-		Return ret = new Return(first, new VariableRef(first, "x"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		NoOp noop1 = new NoOp(first, unknownLocation);
+		NoOp noop2 = new NoOp(first, unknownLocation);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop1);
 		first.addNode(noop2);
@@ -77,9 +83,10 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
-		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new VariableRef(second, "x"));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -95,7 +102,7 @@ public class CFGSimplificationTest {
 
 	private static class GT extends BinaryNativeCall {
 		protected GT(CFG cfg, Expression left, Expression right) {
-			super(cfg, "gt", left, right);
+			super(cfg, new SourceCodeLocation("fake", 0, 0), "gt", left, right);
 		}
 
 		@Override
@@ -111,7 +118,7 @@ public class CFGSimplificationTest {
 
 	private static class Print extends UnaryNativeCall {
 		protected Print(CFG cfg, Expression arg) {
-			super(cfg, "print", arg);
+			super(cfg, new SourceCodeLocation("fake", 0, 0), "print", arg);
 		}
 
 		@Override
@@ -128,14 +135,17 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
-		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		GT gt = new GT(first, new VariableRef(first, "x"), new Literal(first, 2, Untyped.INSTANCE));
-		Print print = new Print(first, new Literal(first, "f", Untyped.INSTANCE));
-		NoOp noop1 = new NoOp(first);
-		NoOp noop2 = new NoOp(first);
-		Return ret = new Return(first, new VariableRef(first, "x", Untyped.INSTANCE));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		GT gt = new GT(first, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 2, Untyped.INSTANCE));
+		Print print = new Print(first, new Literal(first, unknownLocation, "f", Untyped.INSTANCE));
+		NoOp noop1 = new NoOp(first, unknownLocation);
+		NoOp noop2 = new NoOp(first, unknownLocation);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x", Untyped.INSTANCE));
 		first.addNode(assign, true);
 		first.addNode(gt);
 		first.addNode(print);
@@ -156,11 +166,13 @@ public class CFGSimplificationTest {
 		first.addControlFlowStructure(
 				new IfThenElse(first.getAdjacencyMatrix(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
 
-		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
-		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		gt = new GT(second, new VariableRef(second, "x"), new Literal(second, 2, Untyped.INSTANCE));
-		print = new Print(second, new Literal(second, "f", Untyped.INSTANCE));
-		ret = new Return(second, new VariableRef(second, "x", Untyped.INSTANCE));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		gt = new GT(second, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 2, Untyped.INSTANCE));
+		print = new Print(second, new Literal(second, unknownLocation, "f", Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x", Untyped.INSTANCE));
 
 		second.addNode(assign, true);
 		second.addNode(gt);
@@ -190,20 +202,23 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, true, "foo"));
-		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		NoOp noop = new NoOp(first);
-		Return ret = new Return(first, new VariableRef(first, "x"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		NoOp noop = new NoOp(first, unknownLocation);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop);
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unit, true, "foo"));
-		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new VariableRef(first, "x"));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -219,20 +234,23 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheStart() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
-		NoOp start = new NoOp(first);
-		Assignment assign = new Assignment(first, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		Return ret = new Return(first, new VariableRef(first, "x"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		NoOp start = new NoOp(first, unknownLocation);
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(start, true);
 		first.addNode(assign);
 		first.addNode(ret);
 		first.addEdge(new SequentialEdge(assign, ret));
 		first.addEdge(new SequentialEdge(start, assign));
 
-		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
-		assign = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		ret = new Return(second, new VariableRef(first, "x"));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		assign = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -248,22 +266,25 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
-		Assignment assign1 = new Assignment(first, new VariableRef(first, "x"),
-				new Literal(first, 5, Untyped.INSTANCE));
-		Assignment assign2 = new Assignment(first, new VariableRef(first, "y"),
-				new Literal(first, 50, Untyped.INSTANCE));
-		NoOp end = new NoOp(first);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		Assignment assign1 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "y"),
+				new Literal(first, unknownLocation, 50, Untyped.INSTANCE));
+		NoOp end = new NoOp(first, unknownLocation);
 		first.addNode(assign1, true);
 		first.addNode(assign2);
 		first.addNode(end);
 		first.addEdge(new SequentialEdge(assign1, assign2));
 		first.addEdge(new SequentialEdge(assign2, end));
 
-		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
-		assign1 = new Assignment(second, new VariableRef(first, "x"), new Literal(first, 5, Untyped.INSTANCE));
-		assign2 = new Assignment(second, new VariableRef(first, "y"), new Literal(first, 50, Untyped.INSTANCE));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		assign1 = new Assignment(second, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		assign2 = new Assignment(second, unknownLocation, new VariableRef(first, unknownLocation, "y"),
+				new Literal(first, unknownLocation, 50, Untyped.INSTANCE));
 
 		second.addNode(assign1, true);
 		second.addNode(assign2);
@@ -279,15 +300,16 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
-		CompilationUnit unit = new CompilationUnit(null, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unit, false, "foo"));
-		Assignment assign1 = new Assignment(first, new VariableRef(first, "b"),
-				new Literal(first, true, Untyped.INSTANCE));
-		Assignment assign2 = new Assignment(first, new VariableRef(first, "x"),
-				new Literal(first, 5, Untyped.INSTANCE));
-		Assignment assign3 = new Assignment(first, new VariableRef(first, "y"),
-				new Literal(first, 50, Untyped.INSTANCE));
-		NoOp end = new NoOp(first);
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		Assignment assign1 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "b"),
+				new Literal(first, unknownLocation, true, Untyped.INSTANCE));
+		Assignment assign2 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		Assignment assign3 = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "y"),
+				new Literal(first, unknownLocation, 50, Untyped.INSTANCE));
+		NoOp end = new NoOp(first, unknownLocation);
 		first.addNode(end);
 		first.addNode(assign1, true);
 		first.addNode(assign2);
@@ -304,10 +326,13 @@ public class CFGSimplificationTest {
 		first.addControlFlowStructure(
 				new IfThenElse(first.getAdjacencyMatrix(), assign1, end, tbranch.getNodes(), fbranch.getNodes()));
 
-		CFG second = new CFG(new CFGDescriptor(unit, false, "foo"));
-		assign1 = new Assignment(second, new VariableRef(second, "b"), new Literal(second, true, Untyped.INSTANCE));
-		assign2 = new Assignment(second, new VariableRef(second, "x"), new Literal(second, 5, Untyped.INSTANCE));
-		assign3 = new Assignment(second, new VariableRef(second, "y"), new Literal(second, 50, Untyped.INSTANCE));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		assign1 = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "b"),
+				new Literal(second, unknownLocation, true, Untyped.INSTANCE));
+		assign2 = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		assign3 = new Assignment(second, unknownLocation, new VariableRef(second, unknownLocation, "y"),
+				new Literal(second, unknownLocation, 50, Untyped.INSTANCE));
 		second.addNode(assign1, true);
 		second.addNode(assign2);
 		second.addNode(assign3);

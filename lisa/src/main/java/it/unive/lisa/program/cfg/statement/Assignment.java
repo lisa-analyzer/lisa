@@ -22,19 +22,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 public class Assignment extends BinaryExpression {
 
 	/**
-	 * Builds the assignment, assigning {@code expression} to {@code target}.
-	 * The location where this assignment happens is unknown (i.e. no source
-	 * file/line/column is available).
-	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param target     the target of the assignment
-	 * @param expression the expression to assign to {@code target}
-	 */
-	public Assignment(CFG cfg, Expression target, Expression expression) {
-		this(cfg, null, target, expression);
-	}
-
-	/**
 	 * Builds the assignment, assigning {@code expression} to {@code target},
 	 * happening at the given location in the program.
 	 * 

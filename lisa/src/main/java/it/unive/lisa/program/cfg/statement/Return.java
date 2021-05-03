@@ -23,18 +23,6 @@ import it.unive.lisa.symbolic.value.Variable;
 public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	/**
-	 * Builds the return, returning {@code expression} to the caller CFG. The
-	 * location where this return happens is unknown (i.e. no source
-	 * file/line/column is available).
-	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param expression the expression to return
-	 */
-	public Return(CFG cfg, Expression expression) {
-		this(cfg, null, expression);
-	}
-
-	/**
 	 * Builds the return, returning {@code expression} to the caller CFG,
 	 * happening at the given location in the program.
 	 * 

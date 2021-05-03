@@ -1,16 +1,20 @@
 package it.unive.lisa.analysis.impl.dataflow;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * An implementation of the reaching definition dataflow analysis.
@@ -69,7 +73,7 @@ public class ReachingDefinitions
 
 	@Override
 	public String toString() {
-		return "(" + variable + "," + programPoint + ")";
+		return representation().toString();
 	}
 
 	@Override
@@ -97,6 +101,11 @@ public class ReachingDefinitions
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
 		return !expression.getDynamicType().isPointerType();
+	}
+	
+	@Override
+	public DomainRepresentation representation() {
+		return new PairRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
 	}
 
 	@Override
