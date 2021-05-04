@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.nonInterference.NonInterference;
-import it.unive.lisa.analysis.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.program.CompilationUnit;

@@ -1,10 +1,10 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<o1 = new A(1, 2)<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o1]>];
-	"node1" [shape="rect",color="gray",label=<o1::a = 1<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: #TOP# ]]<BR/>}} -&gt; [heap[w]:A]>];
-	"node2" [shape="rect",color="gray",label=<o1::b = 1<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: #TOP# ]]<BR/>}} -&gt; [heap[w]:A]>];
-	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: #TOP# ]]<BR/>}} -&gt; [skip]>];
-	"node1" -> "node2" [color="black"];
+	"node1" [shape="rect",color="gray",label=<o1::a = 1<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [1, 1] ]]<BR/>}} -&gt; [heap[w]:A]>];
+	"node2" [shape="rect",color="gray",label=<o1::b = 1<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [1, 1] ]]<BR/>}} -&gt; [heap[w]:A]>];
+	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [1, 1] ]]<BR/>}} -&gt; [skip]>];
 	"node0" -> "node1" [color="black"];
+	"node1" -> "node2" [color="black"];
 	"node2" -> "node3" [color="black"];
 subgraph cluster_legend {
 	label="Legend";

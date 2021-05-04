@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -87,5 +89,12 @@ public class AccessChild extends HeapExpression {
 	@Override
 	public String toString() {
 		return container + "->" + child;
+	}
+
+	@Override
+	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+		T cont = container.accept(visitor, params);
+		T ch = child.accept(visitor, params);
+		return visitor.visit(this, cont, ch, params);
 	}
 }

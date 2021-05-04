@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import java.util.Objects;
 
@@ -68,5 +69,10 @@ public class OutOfScopeIdentifier extends Identifier {
 	@Override
 	public String toString() {
 		return this.getName();
+	}
+	
+	@Override
+	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
+		return visitor.visit(this, params);
 	}
 }

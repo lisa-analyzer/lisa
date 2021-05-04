@@ -78,6 +78,21 @@ public abstract class SymbolicExpression {
 	 */
 	public abstract SymbolicExpression popScope(ScopeToken token) throws SemanticException;
 
+	/**
+	 * Accepts an {@link ExpressionVisitor}, visiting this expression
+	 * recursively.
+	 * 
+	 * @param <T>     the type of value produced by the visiting callbacks
+	 * @param visitor the visitor
+	 * @param params  additional optional parameters to pass to each visiting
+	 *                    callback
+	 * 
+	 * @return the value produced by the visiting operation
+	 * 
+	 * @throws SemanticException if an error occurs during the visiting
+	 */
+	public abstract <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException;
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

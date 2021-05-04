@@ -27,6 +27,8 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	private final boolean isTop;
 
+	private final boolean isBottom;
+
 	private final E domain;
 
 	/**
@@ -36,18 +38,22 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	 *                   to perform <i>kill</i> and <i>gen</i> operations
 	 */
 	public PossibleForwardDataflowDomain(E domain) {
-		this(domain, new HashSet<>(), true);
+		this(domain, new HashSet<>(), true, false);
 	}
 
-	private PossibleForwardDataflowDomain(E domain, Set<E> elements, boolean isTop) {
+	private PossibleForwardDataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		super(elements);
 		this.domain = domain;
 		this.isTop = isTop;
+		this.isBottom = isBottom;
 	}
 
 	@Override
 	public PossibleForwardDataflowDomain<E> assign(Identifier id, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		if (isBottom())
+			return this;
+
 		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
 		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
@@ -56,7 +62,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 		Set<E> updated = new HashSet<>(killed.elements);
 		for (E generated : domain.gen(id, expression, pp, this))
 			updated.add(generated);
-		return new PossibleForwardDataflowDomain<E>(domain, updated, false);
+		return new PossibleForwardDataflowDomain<E>(domain, updated, false, false);
 	}
 
 	@Override
@@ -86,7 +92,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 			return this;
 		Set<E> updated = new HashSet<>(elements);
 		updated.removeAll(toRemove);
-		return new PossibleForwardDataflowDomain<E>(domain, updated, false);
+		return new PossibleForwardDataflowDomain<E>(domain, updated, false, false);
 	}
 
 	@Override
@@ -125,7 +131,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	@Override
 	public PossibleForwardDataflowDomain<E> top() {
-		return new PossibleForwardDataflowDomain<>(domain, new HashSet<>(), true);
+		return new PossibleForwardDataflowDomain<>(domain, new HashSet<>(), true, false);
 	}
 
 	@Override
@@ -135,17 +141,17 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	@Override
 	public PossibleForwardDataflowDomain<E> bottom() {
-		return new PossibleForwardDataflowDomain<>(domain, new HashSet<>(), false);
+		return new PossibleForwardDataflowDomain<>(domain, new HashSet<>(), false, true);
 	}
 
 	@Override
 	public boolean isBottom() {
-		return elements.isEmpty() && !isTop;
+		return elements.isEmpty() && isBottom;
 	}
 
 	@Override
 	protected PossibleForwardDataflowDomain<E> mk(Set<E> set) {
-		return new PossibleForwardDataflowDomain<>(domain, set, false);
+		return new PossibleForwardDataflowDomain<>(domain, set, false, false);
 	}
 
 	@Override
