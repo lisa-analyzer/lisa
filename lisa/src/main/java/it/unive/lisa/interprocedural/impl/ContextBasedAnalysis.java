@@ -1,5 +1,14 @@
 package it.unive.lisa.interprocedural.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -7,7 +16,6 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -19,14 +27,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -48,53 +48,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
-	private final Map<CFG, CFGResults> results;
+	private FixpointResults<A, H, V> results;
 
 	private final ContextSensitiveToken token;
-
-	private class CFGResults
-			extends FunctionalLattice<CFGResults, ContextSensitiveToken, CFGWithAnalysisResults<A, H, V>> {
-
-		protected CFGResults(CFGWithAnalysisResults<A, H, V> lattice) {
-			super(lattice);
-		}
-
-		public void putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
-				throws InterproceduralAnalysisException, SemanticException {
-			CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
-			if (previousResult == null)
-				function.put(token, result);
-			else {
-				if (!previousResult.getEntryState().lessOrEqual(result.getEntryState()))
-					throw new InterproceduralAnalysisException(
-							"Cannot reduce the entry state in the interprocedural analysis");
-			}
-		}
-
-		public Collection<CFGWithAnalysisResults<A, H, V>> getAll() {
-			return function.values();
-		}
-
-		@Override
-		public ContextBasedAnalysis<A, H, V>.CFGResults top() {
-			return new CFGResults(lattice.top());
-		}
-
-		@Override
-		public boolean isTop() {
-			return lattice.isTop() && (function == null || function.isEmpty());
-		}
-
-		@Override
-		public ContextBasedAnalysis<A, H, V>.CFGResults bottom() {
-			return new CFGResults(lattice.bottom());
-		}
-
-		@Override
-		public boolean isBottom() {
-			return lattice.isBottom() && (function == null || function.isEmpty());
-		}
-	}
 
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
@@ -111,21 +67,25 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	 */
 	public ContextBasedAnalysis(ContextSensitiveToken token) {
 		this.token = token.empty();
-		this.results = new ConcurrentHashMap<>();
 	}
 
 	@Override
 	public final void fixpoint(
 			AnalysisState<A, H, V> entryState)
 			throws FixpointException {
+		if (program.getEntryPoints().isEmpty())
+			throw new FixpointException("The program contains no entrypoints");
+		
+		this.results = null;
 		for (CFG cfg : IterationLogger.iterate(log, program.getEntryPoints(),
 				"Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
-				CFGResults value = new CFGResults(new CFGWithAnalysisResults<>(cfg, entryState));
+				CFGResults<A, H, V> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 				AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-				value.putResult(token.empty(), cfg.fixpoint(entryStateCFG, this));
-				results.put(cfg, value);
+				if (results == null)
+					this.results = new FixpointResults<>(value.top());
+				results.putResult(cfg, token.empty(), cfg.fixpoint(entryStateCFG, this));
 			} catch (SemanticException | InterproceduralAnalysisException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
@@ -133,15 +93,15 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public final Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
-		if (results.get(cfg) != null)
-			return results.get(cfg).getAll();
+		if (results.getState(cfg) != null)
+			return results.getState(cfg).getAll();
 		else
 			return Collections.emptySet();
 	}
 
 	private Pair<AnalysisState<A, H, V>, AnalysisState<A, H, V>> getEntryAndExit(CFG cfg, ContextSensitiveToken token)
 			throws SemanticException {
-		CFGResults cfgresult = results.get(cfg);
+		CFGResults<A, H, V> cfgresult = results.getState(cfg);
 		CFGWithAnalysisResults<A, H, V> analysisresult = null;
 		if (cfgresult != null)
 			analysisresult = cfgresult.getState(token);
@@ -207,9 +167,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-		CFGResults result = this.results.computeIfAbsent(cfg,
-				c -> new CFGResults(new CFGWithAnalysisResults<>(cfg, computedEntryState)));
-		result.putResult(newToken, fixpointResult);
+		results.putResult(cfg, newToken, fixpointResult);
 		fixpointResult.setId(newToken.toString());
 		return fixpointResult;
 	}

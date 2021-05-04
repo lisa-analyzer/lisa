@@ -48,12 +48,12 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
-	 * @param cfg         the original control flow graph
+	 * @param cfg the original control flow graph
 	 */
 	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton) {
 		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
-	
+
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
@@ -188,7 +188,17 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	@Override
+	public boolean isTop() {
+		return entryStates.isTop() && results.isTop();
+	}
+
+	@Override
 	public CFGWithAnalysisResults<A, H, V> bottom() {
 		return new CFGWithAnalysisResults<>(this, entryStates.bottom(), results.bottom());
+	}
+
+	@Override
+	public boolean isBottom() {
+		return entryStates.isBottom() && results.isBottom();
 	}
 }

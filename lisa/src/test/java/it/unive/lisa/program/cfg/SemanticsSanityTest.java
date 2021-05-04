@@ -23,6 +23,7 @@ import org.reflections.scanners.SubTypesScanner;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -53,6 +54,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
+import it.unive.lisa.interprocedural.impl.CFGResults;
 import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -304,12 +306,19 @@ public class SemanticsSanityTest {
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
-			return new AnalysisState<>(
-					new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())), new Skip());
+			return as;
 		if (root == InferredPair.class)
 			return new InferredTypes();
+		if (param == CFG.class)
+			return cfg;
+		if (param == AnalysisState.class)
+			return as;
+		if (param == CFGWithAnalysisResults.class)
+			return new CFGWithAnalysisResults<>(cfg, as);
+		if (param == CFGResults.class)
+			return new CFGResults<>(new CFGWithAnalysisResults<>(cfg, as));
 
-		throw new UnsupportedOperationException("No default domain for parameter of type " + param);
+		throw new UnsupportedOperationException("No default domain for domain " + root + " and parameter of type " + param);
 	}
 
 	@SuppressWarnings("unchecked")
