@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
@@ -51,27 +52,47 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private final ContextSensitiveToken token;
 
-	private class CFGResults {
-		private Map<ContextSensitiveToken, CFGWithAnalysisResults<A, H, V>> result = new ConcurrentHashMap<>();
+	private class CFGResults
+			extends FunctionalLattice<CFGResults, ContextSensitiveToken, CFGWithAnalysisResults<A, H, V>> {
 
-		public CFGWithAnalysisResults<A, H, V> getResult(ContextSensitiveToken token) {
-			return result.get(token);
+		protected CFGResults(CFGWithAnalysisResults<A, H, V> lattice) {
+			super(lattice);
 		}
 
-		public void putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> CFGresult)
+		public void putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
 				throws InterproceduralAnalysisException, SemanticException {
-			CFGWithAnalysisResults<A, H, V> previousResult = result.get(token);
+			CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
 			if (previousResult == null)
-				result.put(token, CFGresult);
+				function.put(token, result);
 			else {
-				if (!previousResult.getEntryState().lessOrEqual(CFGresult.getEntryState()))
+				if (!previousResult.getEntryState().lessOrEqual(result.getEntryState()))
 					throw new InterproceduralAnalysisException(
 							"Cannot reduce the entry state in the interprocedural analysis");
 			}
 		}
 
 		public Collection<CFGWithAnalysisResults<A, H, V>> getAll() {
-			return this.result.values();
+			return function.values();
+		}
+
+		@Override
+		public ContextBasedAnalysis<A, H, V>.CFGResults top() {
+			return new CFGResults(lattice.top());
+		}
+
+		@Override
+		public boolean isTop() {
+			return lattice.isTop() && (function == null || function.isEmpty());
+		}
+
+		@Override
+		public ContextBasedAnalysis<A, H, V>.CFGResults bottom() {
+			return new CFGResults(lattice.bottom());
+		}
+
+		@Override
+		public boolean isBottom() {
+			return lattice.isBottom() && (function == null || function.isEmpty());
 		}
 	}
 
@@ -101,7 +122,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				"Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
-				CFGResults value = new CFGResults();
+				CFGResults value = new CFGResults(new CFGWithAnalysisResults<>(cfg, entryState));
 				AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 				value.putResult(token.empty(), cfg.fixpoint(entryStateCFG, this));
 				results.put(cfg, value);
@@ -123,7 +144,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		CFGResults cfgresult = results.get(cfg);
 		CFGWithAnalysisResults<A, H, V> analysisresult = null;
 		if (cfgresult != null)
-			analysisresult = cfgresult.getResult(token);
+			analysisresult = cfgresult.getState(token);
 		if (analysisresult != null)
 			return Pair.of(analysisresult.getEntryState(), analysisresult.getExitState());
 		return null;
@@ -186,7 +207,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-		CFGResults result = this.results.computeIfAbsent(cfg, c -> new CFGResults());
+		CFGResults result = this.results.computeIfAbsent(cfg,
+				c -> new CFGResults(new CFGWithAnalysisResults<>(cfg, computedEntryState)));
 		result.putResult(newToken, fixpointResult);
 		fixpointResult.setId(newToken.toString());
 		return fixpointResult;

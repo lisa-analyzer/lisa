@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -43,6 +44,16 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 */
 	private String id;
 
+	/**
+	 * Builds the control flow graph, storing the given mapping between nodes
+	 * and fixpoint computation results.
+	 * 
+	 * @param cfg         the original control flow graph
+	 */
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton) {
+		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
+	}
+	
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
