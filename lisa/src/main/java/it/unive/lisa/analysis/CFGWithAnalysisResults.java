@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Map;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -26,17 +25,17 @@ import java.util.Map.Entry;
  *                abstract state
  */
 public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		extends CFG {
+		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V>> {
 
 	/**
 	 * The map storing the analysis results
 	 */
-	private final Map<Statement, AnalysisState<A, H, V>> results;
+	private final StatementStore<A, H, V> results;
 
 	/**
 	 * The map storing the entry state of each entry point
 	 */
-	private final Map<Statement, AnalysisState<A, H, V>> entryStates;
+	private final StatementStore<A, H, V> entryStates;
 
 	/**
 	 * An optional string meant to identify this specific result, based on how
@@ -52,8 +51,17 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, Map<Statement, AnalysisState<A, H, V>> entryStates,
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton,
+			Map<Statement, AnalysisState<A, H, V>> entryStates,
 			Map<Statement, AnalysisState<A, H, V>> results) {
+		super(cfg);
+		this.results = new StatementStore<>(singleton);
+		results.forEach(this.results::put);
+		this.entryStates = new StatementStore<>(singleton);
+		entryStates.forEach(this.entryStates::put);
+	}
+
+	private CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V> entryStates, StatementStore<A, H, V> results) {
 		super(cfg);
 		this.results = results;
 		this.entryStates = entryStates;
@@ -90,7 +98,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 */
 	public final AnalysisState<A, H, V> getAnalysisStateBefore(Statement st) throws SemanticException {
 		if (getEntrypoints().contains(st))
-			return entryStates.get(st);
+			return entryStates.getState(st);
 		return lub(predecessorsOf(st), false);
 	}
 
@@ -102,7 +110,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * @return the result computed at the given statement
 	 */
 	public final AnalysisState<A, H, V> getAnalysisStateAfter(Statement st) {
-		return results.get(st);
+		return results.getState(st);
 	}
 
 	/**
@@ -138,28 +146,38 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 
 	}
 
-	public CFGWithAnalysisResults<A, H, V> lub(CFG reference, CFGWithAnalysisResults<A, H, V> other)
-			throws SemanticException {
+	@Override
+	public CFGWithAnalysisResults<A, H, V> lub(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
 
-		if (!getDescriptor().equals(reference.getDescriptor()))
-			throw new SemanticException("The reference CFG does not match the results that are to be lubbed");
+		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates), results.lub(other.results));
+	}
 
-		Map<Statement, AnalysisState<A, H, V>> entries = new HashMap<>(entryStates);
-		for (Entry<Statement, AnalysisState<A, H, V>> entry : other.entryStates.entrySet())
-			if (entries.containsKey(entry.getKey()))
-				entries.put(entry.getKey(), entries.get(entry.getKey()).lub(entry.getValue()));
-			else
-				entries.put(entry.getKey(), entry.getValue());
+	@Override
+	public CFGWithAnalysisResults<A, H, V> widening(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()))
+			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
 
-		Map<Statement, AnalysisState<A, H, V>> results = new HashMap<>(this.results);
-		for (Entry<Statement, AnalysisState<A, H, V>> entry : other.results.entrySet())
-			if (results.containsKey(entry.getKey()))
-				results.put(entry.getKey(), results.get(entry.getKey()).lub(entry.getValue()));
-			else
-				results.put(entry.getKey(), entry.getValue());
+		return new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
+				results.widening(other.results));
+	}
 
-		return new CFGWithAnalysisResults<>(reference, entries, results);
+	@Override
+	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()))
+			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+
+		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
+	}
+
+	@Override
+	public CFGWithAnalysisResults<A, H, V> top() {
+		return new CFGWithAnalysisResults<>(this, entryStates.top(), results.top());
+	}
+
+	@Override
+	public CFGWithAnalysisResults<A, H, V> bottom() {
+		return new CFGWithAnalysisResults<>(this, entryStates.bottom(), results.bottom());
 	}
 }
