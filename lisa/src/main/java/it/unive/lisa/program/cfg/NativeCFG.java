@@ -80,7 +80,7 @@ public class NativeCFG implements CodeMember {
 		pars[0] = original.getCFG();
 		pars[1] = original.getLocation();
 		for (int i = 0; i < params.length; i++)
-			pars[i + 4] = params[i];
+			pars[i + 2] = params[i];
 
 		try {
 			NativeCall instance = LiSAFactory.getInstance(construct, pars);
