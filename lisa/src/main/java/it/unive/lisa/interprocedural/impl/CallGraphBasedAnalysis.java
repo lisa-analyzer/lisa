@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -73,6 +74,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 			prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
 		}
 
-		return prepared;
+		// the stack has to be empty
+		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>());
 	}
 }

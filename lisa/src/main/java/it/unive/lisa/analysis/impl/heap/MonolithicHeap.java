@@ -1,7 +1,9 @@
 package it.unive.lisa.analysis.impl.heap;
 
+import java.util.Collections;
+import java.util.List;
+
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -15,8 +17,6 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -76,16 +76,6 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public MonolithicHeap pushScope(ScopeToken scope) throws SemanticException {
-		return top();
-	}
-
-	@Override
-	public MonolithicHeap popScope(ScopeToken scope) throws SemanticException {
-		return top();
 	}
 
 	@Override

@@ -374,7 +374,7 @@ public class CFGDescriptor implements CodeElement {
 
 	@Override
 	public String toString() {
-		return getFullSignature() + " [at '" + location + "]";
+		return getFullSignature() + " [at " + location + "]";
 	}
 
 	/**

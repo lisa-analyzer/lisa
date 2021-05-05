@@ -19,16 +19,29 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 		super(lattice);
 	}
 
-	public void putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
+	public boolean putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
 			throws InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
-		if (previousResult == null)
+		if (previousResult == null) {
+			// no previous result
 			function.put(token, result);
-		else {
-			if (!previousResult.getEntryState().lessOrEqual(result.getEntryState()))
-				throw new InterproceduralAnalysisException(
-						"Cannot reduce the entry state in the interprocedural analysis");
+			return false;
+		} else if (previousResult.lessOrEqual(result)) {
+			// previous is smaller than result
+			function.put(token, result);
+			return true;
+		} else if (result.lessOrEqual(previousResult)) {
+			// result is smaller than previous
+			return false;
+		} else {
+			// result and previous are not comparable
+			function.put(token, previousResult.lub(result));
+			return true;
 		}
+	}
+
+	public boolean contains(ContextSensitiveToken token) {
+		return function != null && function.containsKey(token);
 	}
 
 	public Collection<CFGWithAnalysisResults<A, H, V>> getAll() {

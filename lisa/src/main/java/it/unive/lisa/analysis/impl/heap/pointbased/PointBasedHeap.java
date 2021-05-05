@@ -2,8 +2,17 @@ package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import static java.util.Collections.singleton;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -22,15 +31,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -384,15 +384,5 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 			return new ExpressionSet<>(id);
 		}
-	}
-
-	@Override
-	public PointBasedHeap pushScope(ScopeToken scope) throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public PointBasedHeap popScope(ScopeToken scope) throws SemanticException {
-		return this;
 	}
 }

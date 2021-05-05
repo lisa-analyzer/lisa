@@ -119,6 +119,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
+		result = prime * result + ((qualifiedName == null) ? 0 : qualifiedName.hashCode());
 		return result;
 	}
 
@@ -164,15 +165,17 @@ public class CFGCall extends Call implements MetaVariableCreator {
 					throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the
 		// parameters of this call, it is the entry state if this call has no
-		// parameters
-		// (the semantics of this call does not need information about the
-		// intermediate analysis states)
-		AnalysisState<A, H,
-				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
+		// parameters (the semantics of this call does not need information
+		// about the intermediate analysis states)
+		AnalysisState<A, H, V> callState = computedStates.length == 0
+				? entryState
+				: computedStates[computedStates.length - 1];
+		// the stack has to be empty
+		callState = new AnalysisState<>(callState.getState(), new ExpressionSet<>());
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, lastPostState, params);
+		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, callState, params);
 		// the lub will include the metavariable inside the state
 		// AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 

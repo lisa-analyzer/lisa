@@ -174,9 +174,11 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
 			Collection<CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 					InferenceSystem<InferredTypes>>> results = typesInterproc.getAnalysisResultsOf(cfg);
-			if (results.isEmpty())
+			if (results.isEmpty()) {
 				log.warn("No type information computed for '" + cfg + "': it is unreachable");
-
+				continue;
+			}
+			
 			CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 					InferenceSystem<InferredTypes>> result = null;
 			try {

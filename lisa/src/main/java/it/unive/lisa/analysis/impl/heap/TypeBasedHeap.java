@@ -1,6 +1,12 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import it.unive.lisa.analysis.ScopeToken;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.collections4.SetUtils;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -18,11 +24,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import org.apache.commons.collections4.SetUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -171,16 +172,6 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		} else if (!names.equals(other.names))
 			return false;
 		return true;
-	}
-
-	@Override
-	public TypeBasedHeap pushScope(ScopeToken scope) throws SemanticException {
-		return this;
-	}
-
-	@Override
-	public TypeBasedHeap popScope(ScopeToken scope) throws SemanticException {
-		return this;
 	}
 
 	private static class Rewriter extends BaseHeapDomain.Rewriter {

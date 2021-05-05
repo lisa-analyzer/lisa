@@ -87,8 +87,9 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
-		return prime * result;
+		int result = 1;
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		return result;
 	}
 
 	/**
@@ -117,8 +118,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 		if (location == null) {
 			if (st.location == null)
 				return true;
-		} else if (!location.equals(st.location)) // checking source code
-													// location
+		} else if (!location.equals(st.location))
 			return false;
 		return true;
 	}

@@ -1,6 +1,10 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -15,8 +19,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
@@ -82,6 +84,18 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * @return a new instance of this domain
 	 */
 	protected abstract H mk(H reference);
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public H pushScope(ScopeToken scope) throws SemanticException {
+		return (H) this;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public H popScope(ScopeToken scope) throws SemanticException {
+		return (H) this;
+	}
 
 	/**
 	 * Yields a new instance of this domain, built by evaluating the semantics

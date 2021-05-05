@@ -1,11 +1,11 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<&lt;=(i, 0)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ (([1 targets]getPositive(a, -1))):one: +<BR/>(([1 targets]getPositive(a, -1))):positive1: +<BR/>i: - ]]<BR/>}} -&gt; [i &lt;= 0]>];
-	"node1" [shape="rect",color="gray",label=<i = 10<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: + ]]<BR/>}} -&gt; [i]>];
+	"node1" [shape="rect",color="gray",label=<i = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ (([1 targets]getPositive(a, -1))):one: +<BR/>(([1 targets]getPositive(a, -1))):positive1: +<BR/>i: + ]]<BR/>}} -&gt; [i]>];
 	"node2" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ (([1 targets]getPositive(a, -1))):one: +<BR/>(([1 targets]getPositive(a, -1))):positive1: +<BR/>i: +<BR/>ret_value@getPositive: + ]]<BR/>}} -&gt; [ret_value@getPositive]>];
-	"node3" [shape="rect",color="gray",label=<i = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ (([1 targets]getPositive(a, -1))):one: +<BR/>(([1 targets]getPositive(a, -1))):positive1: +<BR/>i: + ]]<BR/>}} -&gt; [i]>];
+	"node3" [shape="rect",color="gray",label=<i = 10<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ _|_ ]]<BR/>}} -&gt; [i]>];
+	"node0" -> "node1" [color="blue",style="dashed"];
+	"node0" -> "node3" [color="red",style="dashed"];
 	"node1" -> "node2" [color="black"];
-	"node0" -> "node1" [color="red",style="dashed"];
-	"node0" -> "node3" [color="blue",style="dashed"];
 	"node3" -> "node2" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
