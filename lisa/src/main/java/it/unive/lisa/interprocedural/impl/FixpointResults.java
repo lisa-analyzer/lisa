@@ -26,6 +26,10 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 		lubbedSomething |= res.putResult(token, result);
 	}
 	
+	public void newIteration() {
+		lubbedSomething = false;
+	}
+	
 	public boolean lubbedSomething() {
 		return lubbedSomething;
 	}

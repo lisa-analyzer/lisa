@@ -83,7 +83,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private static String ordinal(int i) {
 		int n = i % 100;
-		if (n == 11 || n == 12 || n == 13 || n % 10 > 3)
+		if (n == 11 || n == 12 || n == 13 || n % 10 == 0 || n % 10 > 3)
 			return i + "th";
 
 		if (n % 10 == 1)
@@ -100,6 +100,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		int iter = 0;
 		do {
 			log.info("Performing " + ordinal(iter + 1) + " fixpoint iteration");
+			if (results != null)
+				results.newIteration();
 			for (CFG cfg : IterationLogger.iterate(log, program.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
@@ -147,38 +149,43 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		for (CFG cfg : call.getTargets()) {
 			Pair<AnalysisState<A, H, V>, AnalysisState<A, H, V>> states = getEntryAndExit(cfg, newToken);
-			if (states != null && entryState.lessOrEqual(states.getLeft())) {
+
+			// prepare the state for the call: hide the visible variables
+			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
+			AnalysisState<A, H, V> exitState;
+
+			if (states != null && entryState.lessOrEqual(states.getLeft()))
 				// no need to compute the fixpoint: we already have an
 				// approximation
-				result = result.lub(states.getRight());
-				continue;
-			}
+				exitState = states.getRight();
+			else {
+				// prepare the state for the call: assign the value to each
+				// parameter
+				AnalysisState<A, H, V> prepared = callState;
+				for (int i = 0; i < parameters.length; i++) {
+					AnalysisState<A, H, V> temp = prepared.bottom();
+					Parameter parameter = cfg.getDescriptor().getArgs()[i];
+					Identifier parid = new Variable(
+							Caches.types().mkSet(parameter.getStaticType().allInstances()),
+							parameter.getName(), parameter.getAnnotations());
+					for (SymbolicExpression exp : parameters[i])
+						temp = temp.lub(prepared.assign(parid, exp.pushScope(scope), cfg.getGenericProgramPoint()));
+					prepared = temp;
+				}
 
-			// prepare the state for the call: hide the visible variables, and
-			// then assign the value to each parameter
-			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
-			AnalysisState<A, H, V> prepared = callState;
-			for (int i = 0; i < parameters.length; i++) {
-				AnalysisState<A, H, V> temp = prepared.bottom();
-				Parameter parameter = cfg.getDescriptor().getArgs()[i];
-				Identifier parid = new Variable(
-						Caches.types().mkSet(parameter.getStaticType().allInstances()),
-						parameter.getName(), parameter.getAnnotations());
-				for (SymbolicExpression exp : parameters[i])
-					temp = temp.lub(prepared.assign(parid, exp.pushScope(scope), cfg.getGenericProgramPoint()));
-				prepared = temp;
-			}
+				// compute the result
+				CFGWithAnalysisResults<A, H, V> fixpointResult = null;
+				try {
+					fixpointResult = computeFixpoint(newToken, cfg, prepared);
+				} catch (FixpointException | InterproceduralAnalysisException e) {
+					throw new SemanticException("Exception during the interprocedural analysis", e);
+				}
 
-			// compute the result
-			CFGWithAnalysisResults<A, H, V> fixpointResult = null;
-			try {
-				fixpointResult = computeFixpoint(newToken, cfg, prepared);
-			} catch (FixpointException | InterproceduralAnalysisException e) {
-				throw new SemanticException("Exception during the interprocedural analysis", e);
+				// store returned variables into the meta variable
+				exitState = fixpointResult.getExitState();
 			}
-
-			// store returned variables into the meta variable
-			AnalysisState<A, H, V> exitState = fixpointResult.getExitState();
+			
+			// store the return value of the call inside the meta variable
 			AnalysisState<A, H, V> tmp = callState.bottom();
 			Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
 			for (SymbolicExpression ret : exitState.getComputedExpressions())
@@ -195,8 +202,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-		results.putResult(cfg, newToken, fixpointResult);
 		fixpointResult.setId(newToken.toString());
+		results.putResult(cfg, newToken, fixpointResult);
 		return fixpointResult;
 	}
 

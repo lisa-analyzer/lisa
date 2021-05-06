@@ -162,7 +162,10 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
 
-		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates), results.lub(other.results));
+		CFGWithAnalysisResults<A, H, V> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
+				results.lub(other.results));
+		lub.setId(joinIDs(other));
+		return lub;
 	}
 
 	@Override
@@ -170,8 +173,34 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
 
-		return new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
-				results.widening(other.results));
+		CFGWithAnalysisResults<A, H,
+				V> widen = new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
+						results.widening(other.results));
+		widen.setId(joinIDs(other));
+		return widen;
+	}
+
+	private String joinIDs(CFGWithAnalysisResults<A, H, V> other) {
+		// the returned string should be deterministic, no matter
+		// the order of the two graphs
+
+		if (id == null) {
+			if (other.id == null)
+				return null;
+
+			return "<entry>|" + other.id;
+		}
+
+		if (other.id == null)
+			return "<entry>|" + id;
+
+		if (id.equals(other.id))
+			return id;
+
+		if (id.compareTo(other.id) > 0)
+			return id + "|" + other.id;
+
+		return other.id + "|" + id;
 	}
 
 	@Override

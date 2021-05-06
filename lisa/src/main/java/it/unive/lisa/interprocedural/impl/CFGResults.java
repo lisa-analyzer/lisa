@@ -28,8 +28,14 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 			return false;
 		} else if (previousResult.lessOrEqual(result)) {
 			// previous is smaller than result
-			function.put(token, result);
-			return true;
+			if (result.lessOrEqual(previousResult))
+				// they are equal
+				return false;
+			else {
+				// result is bigger, store that instead
+				function.put(token, result);
+				return true;
+			}
 		} else if (result.lessOrEqual(previousResult)) {
 			// result is smaller than previous
 			return false;
