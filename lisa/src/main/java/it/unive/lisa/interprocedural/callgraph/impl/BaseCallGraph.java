@@ -58,12 +58,13 @@ public abstract class BaseCallGraph implements CallGraph {
 				CompilationUnit unit = recType.asUnitType().getUnit();
 				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
 				for (CodeMember candidate : candidates)
-					if (call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
+					if (candidate.getDescriptor().isInstance()
+							&& call.getStrategy().matches(candidate.getDescriptor().getArgs(), call.getParameters()))
 						targets.add(candidate);
 			}
 		} else {
 			for (CodeMember cm : program.getAllCodeMembers())
-				if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
+				if (!cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
 						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
 					targets.add(cm);
 		}
