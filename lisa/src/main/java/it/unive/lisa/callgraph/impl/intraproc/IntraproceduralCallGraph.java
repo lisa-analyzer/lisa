@@ -100,7 +100,7 @@ public class IntraproceduralCallGraph implements CallGraph {
 			}
 		} else {
 			for (CodeMember cm : program.getAllCodeMembers())
-				if (cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
+				if (!cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
 						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
 					targets.add(cm);
 		}
