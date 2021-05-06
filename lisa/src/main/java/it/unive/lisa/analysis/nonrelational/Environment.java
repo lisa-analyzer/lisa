@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -243,47 +242,42 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	public M pushScope(ScopeToken scope) throws SemanticException {
-		return this.liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
+		return liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
 	}
 
 	@Override
 	public M popScope(ScopeToken scope) throws SemanticException {
-		AtomicReference<SemanticException> e = new AtomicReference<>();
-		M result = this.liftIdentifiers(id -> {
-			if (!(id instanceof OutOfScopeIdentifier))
-				return null;
-			else
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+		
+		M result = liftIdentifiers(id -> {
+			if (id instanceof OutOfScopeIdentifier)
 				try {
-					return ((OutOfScopeIdentifier) id).popScope(scope);
-				} catch (SemanticException semanticException) {
-					e.set(semanticException);
-					return null;
+					return (Identifier) id.popScope(scope);
+				} catch (SemanticException e) {
+					holder.set(e);
 				}
+			return null;
 		});
-		if (e.get() != null)
-			throw new SemanticException("Popping the scope '" + scope + "' raised an error", e.get());
-		else
-			return result;
+
+		if (holder.get() != null)
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
 	}
 
+	@SuppressWarnings("unchecked")
 	private M liftIdentifiers(Function<Identifier, Identifier> lifter) throws SemanticException {
-		if (this.isBottom())
-			return this.bottom();
-		if (this.isTop())
-			return this.top();
-		Map<Identifier, T> function = new HashMap<>();
-		M result = this.copy();
-		for (Identifier id : this.getKeys()) {
-			Identifier outsideScopeIdentifier = lifter.apply(id);
-			if (outsideScopeIdentifier != null) {
-				T value = this.getState(id);
-				function.put(outsideScopeIdentifier, value);
-				result = mk(lattice, function);
-			}
-			result = result.forgetIdentifier(id);
-		}
-		return result;
+		if (isBottom() || isTop())
+			return (M) this;
 
+		Map<Identifier, T> function = mkNewFunction(null);
+		for (Identifier id : getKeys()) {
+			Identifier lifted = lifter.apply(id);
+			if (lifted != null)
+				function.put(lifted, getState(id));
+		}
+
+		return mk(lattice, function);
 	}
 
 	/**
