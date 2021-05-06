@@ -1,26 +1,68 @@
 package it.unive.lisa.interprocedural.impl;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import java.util.Collection;
 
+/**
+ * A {@link FunctionalLattice} from {@link ContextSensitiveToken}s to
+ * {@link CFGWithAnalysisResults}s. This class is meant to store fixpoint
+ * results on each token generated during the interprocedural analysis.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state
+ * @param <H> the type of {@link HeapDomain} contained into the computed
+ *                abstract state
+ * @param <V> the type of {@link ValueDomain} contained into the computed
+ *                abstract state
+ */
 public class CFGResults<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>>
 		extends FunctionalLattice<CFGResults<A, H, V>, ContextSensitiveToken, CFGWithAnalysisResults<A, H, V>> {
 
+	/**
+	 * Builds a new result.
+	 * 
+	 * @param lattice a singleton instance used for retrieving top and bottom
+	 *                    values
+	 */
 	public CFGResults(CFGWithAnalysisResults<A, H, V> lattice) {
 		super(lattice);
 	}
 
+	/**
+	 * Stores the result of a fixpoint computation on a cfg, if needed. If no
+	 * result was stored for the given {@code token}, than that token is mapped
+	 * to {@code result} and this method returns {@code false}. Instead, if a
+	 * result {@code prev} is already present for the given {@code token}:
+	 * <ul>
+	 * <li>if {@code prev <= result}, then {@code token} is mapped to
+	 * {@code result} and this method returns {@code true}</li>
+	 * <li>if {@code result <= prev}, then the mapping is left untouched and
+	 * this method returns {@code false}</li>
+	 * <li>otherwise, {@code token} is mapped to {@code prev.lub(result)} and
+	 * this method returns {@code true}</li>
+	 * </ul>
+	 * The value returned by this method is intended to be a hint that a new
+	 * fixpoint computation is needed to ensure that the results are stable.
+	 * 
+	 * @param token  the {@link ContextSensitiveToken} that identifying the
+	 *                   result
+	 * @param result the {@link CFGWithAnalysisResults} to store
+	 * 
+	 * @return {@code true} if the previous result has been updated, if any
+	 * 
+	 * @throws SemanticException if something goes wrong during the update
+	 */
 	public boolean putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
-			throws InterproceduralAnalysisException, SemanticException {
+			throws SemanticException {
 		CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
@@ -46,10 +88,24 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 		}
 	}
 
+	/**
+	 * Yields {@code true} if a result exists for the given {@code token}.
+	 * 
+	 * @param token the {@link ContextSensitiveToken} that identifying the
+	 *                  result
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean contains(ContextSensitiveToken token) {
 		return function != null && function.containsKey(token);
 	}
 
+	/**
+	 * Yields all the results stored in this object, for any possible
+	 * {@link ContextSensitiveToken} used.
+	 * 
+	 * @return the results
+	 */
 	public Collection<CFGWithAnalysisResults<A, H, V>> getAll() {
 		return function.values();
 	}

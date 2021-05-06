@@ -1,8 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -15,6 +12,8 @@ import it.unive.lisa.program.cfg.statement.HybridCall;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * An instance of {@link CallGraph} that does not handle interprocedurality. In

@@ -1,14 +1,13 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -48,7 +47,10 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
-	 * @param cfg the original control flow graph
+	 * @param cfg       the original control flow graph
+	 * @param singleton an instance of the {@link AnalysisState} containing the
+	 *                      abstract state of the analysis that was executed,
+	 *                      used to retrieve top and bottom values
 	 */
 	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton) {
 		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
@@ -59,6 +61,9 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg         the original control flow graph
+	 * @param singleton   an instance of the {@link AnalysisState} containing
+	 *                        the abstract state of the analysis that was
+	 *                        executed, used to retrieve top and bottom values
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */

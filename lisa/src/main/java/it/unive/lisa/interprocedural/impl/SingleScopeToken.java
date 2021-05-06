@@ -1,11 +1,10 @@
 package it.unive.lisa.interprocedural.impl;
 
+import it.unive.lisa.analysis.ScopeToken;
 import java.util.Objects;
 
-import it.unive.lisa.analysis.ScopeToken;
-
 /**
- * A context sensitive token representing a single {@link ScopeToken}. 
+ * A context sensitive token representing a single {@link ScopeToken}.
  */
 public class SingleScopeToken implements ContextSensitiveToken {
 
@@ -35,7 +34,7 @@ public class SingleScopeToken implements ContextSensitiveToken {
 	public static SingleScopeToken getSingleton() {
 		return singleton;
 	}
-	
+
 	@Override
 	public String toString() {
 		return String.valueOf(token);

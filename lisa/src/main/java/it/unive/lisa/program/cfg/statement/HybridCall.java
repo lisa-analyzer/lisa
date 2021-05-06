@@ -1,11 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,6 +14,10 @@ import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more {@link CFG}s or {@link NativeCFG}s under analysis.
@@ -51,6 +49,7 @@ public class HybridCall extends Call {
 	 *                          the source file. If unknown, use {@code null}
 	 * @param qualifiedName the qualified name of the static target of this call
 	 * @param targets       the CFGs that are targeted by this CFG call
+	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
 	public HybridCall(CFG cfg, CodeLocation location, String qualifiedName, Collection<CFG> targets,
@@ -160,7 +159,7 @@ public class HybridCall extends Call {
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = entryState.bottom();
-		
+
 		if (!targets.isEmpty()) {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), qualifiedName, getTargets(), getParameters());
 			cfgcall.setRuntimeTypes(getRuntimeTypes());

@@ -151,7 +151,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 		T2 newRight = right.forgetIdentifier(id);
 		return mk(newLeft, newRight);
 	}
-	
+
 	@Override
 	public C pushScope(ScopeToken scope) throws SemanticException {
 		T1 newLeft = left.pushScope(scope);

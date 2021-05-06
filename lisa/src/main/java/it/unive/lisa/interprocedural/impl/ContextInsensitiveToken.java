@@ -22,7 +22,7 @@ public class ContextInsensitiveToken implements ContextSensitiveToken {
 	public ContextSensitiveToken pushToken(ScopeToken c) {
 		return this;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "<empty>";

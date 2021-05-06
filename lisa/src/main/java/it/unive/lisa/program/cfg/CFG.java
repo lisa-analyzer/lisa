@@ -648,6 +648,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param singleton       an instance of the {@link AnalysisState}
+	 *                            containing the abstract state of the analysis
+	 *                            to run, used to retrieve top and bottom values
 	 * @param startingPoints  a map between {@link Statement}s that to use as a
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
@@ -667,7 +670,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> singleton, 
+					AnalysisState<A, H, V> singleton,
 					Map<Statement, AnalysisState<A, H, V>> startingPoints,
 					InterproceduralAnalysis<A, H, V> interprocedural)
 					throws FixpointException {
@@ -695,6 +698,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param singleton       an instance of the {@link AnalysisState}
+	 *                            containing the abstract state of the analysis
+	 *                            to run, used to retrieve top and bottom values
 	 * @param startingPoints  a map between {@link Expression}s that to use as a
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
@@ -720,7 +726,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> singleton, 
+					AnalysisState<A, H, V> singleton,
 					Map<Statement, AnalysisState<A, H, V>> startingPoints,
 					InterproceduralAnalysis<A, H, V> interprocedural, int widenAfter)
 					throws FixpointException {
@@ -748,6 +754,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param singleton       an instance of the {@link AnalysisState}
+	 *                            containing the abstract state of the analysis
+	 *                            to run, used to retrieve top and bottom values
 	 * @param startingPoints  a map between {@link Expression}s that to use as a
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
@@ -769,7 +778,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> singleton, 
+					AnalysisState<A, H, V> singleton,
 					Map<Statement, AnalysisState<A, H, V>> startingPoints,
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					WorkingSet<Statement> ws)
@@ -797,6 +806,9 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param singleton       an instance of the {@link AnalysisState}
+	 *                            containing the abstract state of the analysis
+	 *                            to run, used to retrieve top and bottom values
 	 * @param startingPoints  a map between {@link Statement}s that to use as a
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
@@ -825,7 +837,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> singleton, 
+					AnalysisState<A, H, V> singleton,
 					Map<Statement, AnalysisState<A, H, V>> startingPoints,
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					WorkingSet<Statement> ws,

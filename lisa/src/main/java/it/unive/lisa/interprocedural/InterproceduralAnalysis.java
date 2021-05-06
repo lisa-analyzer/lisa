@@ -117,8 +117,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @return a collection of all the possible runtime targets
 	 *
-	 * @throws CallResolutionException if this analysis is unable to resolve
-	 *                                     the given call
+	 * @throws CallResolutionException if this analysis is unable to resolve the
+	 *                                     given call
 	 */
 	Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException;
 }

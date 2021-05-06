@@ -1,14 +1,5 @@
 package it.unive.lisa.interprocedural.impl;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -29,6 +20,13 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.FixpointException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -111,8 +109,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 					results.putResult(cfg, token.empty(), cfg.fixpoint(entryStateCFG, this));
 				} catch (SemanticException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
-				} catch (InterproceduralAnalysisException e) {
-					throw new AnalysisExecutionException("Error while updating analysis results for " + cfg, e);
 				} catch (FixpointException e) {
 					throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
 				}
@@ -184,7 +180,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				// store returned variables into the meta variable
 				exitState = fixpointResult.getExitState();
 			}
-			
+
 			// store the return value of the call inside the meta variable
 			AnalysisState<A, H, V> tmp = callState.bottom();
 			Identifier meta = (Identifier) call.getMetaVariable().pushScope(scope);
