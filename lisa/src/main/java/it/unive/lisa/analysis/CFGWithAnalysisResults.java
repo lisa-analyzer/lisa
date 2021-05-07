@@ -162,6 +162,25 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 
 	}
 
+	/**
+	 * Joins two {@link CFGWithAnalysisResults} together. The difference between
+	 * this method and {@link #lub(CFGWithAnalysisResults)} is that this method
+	 * does not set the ID of the resulting cfg.
+	 * 
+	 * @param other the other cfg
+	 * 
+	 * @return the least upper bound of the two cfgs without its id set
+	 * 
+	 * @throws SemanticException if something goes wrong during the join
+	 */
+	public CFGWithAnalysisResults<A, H, V> join(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()))
+			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+
+		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
+				results.lub(other.results));
+	}
+
 	@Override
 	public CFGWithAnalysisResults<A, H, V> lub(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
@@ -185,27 +204,25 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 		return widen;
 	}
 
-	private String joinIDs(CFGWithAnalysisResults<A, H, V> other) {
-		// the returned string should be deterministic, no matter
-		// the order of the two graphs
-
+	private String joinIDs(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+		// we accept merging only if the ids are the same
 		if (id == null) {
 			if (other.id == null)
 				return null;
 
-			return "<entry>|" + other.id;
+			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
+					+ String.valueOf(other.id) + "'");
 		}
 
 		if (other.id == null)
-			return "<entry>|" + id;
+			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
+					+ String.valueOf(other.id) + "'");
 
-		if (id.equals(other.id))
-			return id;
+		if (!id.equals(other.id))
+			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
+					+ String.valueOf(other.id) + "'");
 
-		if (id.compareTo(other.id) > 0)
-			return id + "|" + other.id;
-
-		return other.id + "|" + id;
+		return id;
 	}
 
 	@Override

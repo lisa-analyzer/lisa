@@ -213,7 +213,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 					if (result == null)
 						result = res;
 					else
-						result = result.lub(res);
+						result = result.join(res);
 			} catch (SemanticException e) {
 				throw new AnalysisExecutionException("Unable to compute type information for " + cfg, e);
 			}
