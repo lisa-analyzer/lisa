@@ -51,6 +51,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	private FixpointResults<A, H, V> results;
 
 	private final ContextSensitiveToken token;
+	
+	private boolean lubbed;
 
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
@@ -98,22 +100,21 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		int iter = 0;
 		do {
 			log.info("Performing " + ordinal(iter + 1) + " fixpoint iteration");
-			if (results != null)
-				results.newIteration();
+			lubbed = false;
 			for (CFG cfg : IterationLogger.iterate(log, program.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 					if (results == null)
 						this.results = new FixpointResults<>(value.top());
-					results.putResult(cfg, token.empty(), cfg.fixpoint(entryStateCFG, this));
+					lubbed |= results.putResult(cfg, token.empty(), cfg.fixpoint(entryStateCFG, this));
 				} catch (SemanticException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 				} catch (FixpointException e) {
 					throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
 				}
 			iter++;
-		} while (results.lubbedSomething());
+		} while (lubbed);
 	}
 
 	@Override
@@ -199,7 +200,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
 		fixpointResult.setId(newToken.toString());
-		results.putResult(cfg, newToken, fixpointResult);
+		lubbed |= results.putResult(cfg, newToken, fixpointResult); // TODO
 		return fixpointResult;
 	}
 
