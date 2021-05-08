@@ -24,7 +24,7 @@ public class ContextInsensitiveToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken popToken(ScopeToken c) {
+	public ContextSensitiveToken popToken() {
 		return this;
 	}
 

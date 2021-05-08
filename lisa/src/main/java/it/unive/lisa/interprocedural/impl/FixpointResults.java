@@ -88,7 +88,12 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	public boolean isBottom() {
 		return lattice.isBottom() && (function == null || function.isEmpty());
 	}
-	
+
+	/**
+	 * Forgets all results about the given {@link CFG}.
+	 * 
+	 * @param cfg the cfg to forget
+	 */
 	public void forget(CFG cfg) {
 		function.remove(cfg);
 	}

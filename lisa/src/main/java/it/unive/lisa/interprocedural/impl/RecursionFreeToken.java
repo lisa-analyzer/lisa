@@ -1,11 +1,10 @@
 package it.unive.lisa.interprocedural.impl;
 
+import it.unive.lisa.analysis.ScopeToken;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-
-import it.unive.lisa.analysis.ScopeToken;
 
 /**
  * A context sensitive token representing an entire call chain up until a
@@ -41,7 +40,7 @@ public class RecursionFreeToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken popToken(ScopeToken scope) {
+	public ContextSensitiveToken popToken() {
 		List<ScopeToken> toks = new ArrayList<>(tokens);
 		toks.remove(tokens.size() - 1);
 		return new RecursionFreeToken(toks, null);

@@ -1,20 +1,18 @@
 package it.unive.lisa.outputs;
 
-import java.io.Reader;
-import java.util.function.Function;
-
-import org.graphstream.graph.implementations.MultiGraph;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.io.Reader;
+import java.util.function.Function;
+import org.graphstream.graph.implementations.MultiGraph;
 
 /**
  * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be
- * created through {@link #fromCFG(CFG, String, Function)}, or read from a file through
- * {@link DotGraph#readDot(Reader)}.
+ * created through {@link #fromCFG(CFG, String, Function)}, or read from a file
+ * through {@link DotGraph#readDot(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -32,6 +30,7 @@ public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 	 * through a new line.
 	 * 
 	 * @param source         the source to export into dot format
+	 * @param title          the title of the graph, if any
 	 * @param labelGenerator the function used to generate extra labels
 	 * 
 	 * @return the exported graph built starting from the source

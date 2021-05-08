@@ -3,11 +3,22 @@ package it.unive.lisa.interprocedural.callgraph;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
+/**
+ * An edge between two {@link CallGraphNode}s in a {@link BaseCallGraph}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class CallGraphEdge implements Edge<CallGraphNode, CallGraphEdge, BaseCallGraph> {
 
 	private final CallGraphNode source;
 	private final CallGraphNode destination;
 
+	/**
+	 * Build the edge.
+	 * 
+	 * @param source      the source node
+	 * @param destination the destination node
+	 */
 	public CallGraphEdge(CallGraphNode source, CallGraphNode destination) {
 		this.source = source;
 		this.destination = destination;

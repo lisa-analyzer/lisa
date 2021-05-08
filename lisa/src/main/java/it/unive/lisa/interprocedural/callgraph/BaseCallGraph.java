@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.function.Function;
@@ -130,7 +129,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		return predecessorsOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
 				.collect(Collectors.toList());
 	}
-	
+
 	@Override
 	protected DotGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toDot(
 			Function<CallGraphNode, String> labelGenerator) {

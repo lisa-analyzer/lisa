@@ -4,20 +4,41 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.Node;
 
+/**
+ * A node of a {@link BaseCallGraph}, representing a single {@link CodeMember}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class CallGraphNode implements Node<CallGraphNode, CallGraphEdge, BaseCallGraph> {
 
 	private final BaseCallGraph graph;
 	private final CodeMember cm;
 
-	public CallGraphNode(BaseCallGraph graph, CodeMember cfg) {
+	/**
+	 * Builds the node.
+	 * 
+	 * @param graph the parent graph
+	 * @param cm    the code member represented by this node
+	 */
+	public CallGraphNode(BaseCallGraph graph, CodeMember cm) {
 		this.graph = graph;
-		this.cm = cfg;
+		this.cm = cm;
 	}
-	
+
+	/**
+	 * Yields the {@link CodeMember} represented by this node.
+	 * 
+	 * @return the code member
+	 */
 	public CodeMember getCodeMember() {
 		return cm;
 	}
-	
+
+	/**
+	 * Yields the parent {@link BaseCallGraph} containing this node.
+	 * 
+	 * @return the parent graph
+	 */
 	public BaseCallGraph getGraph() {
 		return graph;
 	}

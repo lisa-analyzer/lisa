@@ -114,7 +114,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	}
 
 	private final org.graphstream.graph.Graph graph, legend;
-	
+
 	private final String title;
 
 	private final Map<N, Long> codes = new IdentityHashMap<>();
@@ -124,6 +124,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	/**
 	 * Builds a graph.
 	 * 
+	 * @param title  the title of the graph, if any
 	 * @param legend the legend to append to the graph, if any
 	 */
 	protected DotGraph(String title, org.graphstream.graph.Graph legend) {
@@ -343,10 +344,10 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter();) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				if  (line.trim().startsWith("label"))
+				if (line.trim().startsWith("label"))
 					// skip graph title
 					continue;
-				
+
 				int i = line.indexOf(sentinel);
 				if (i != -1) {
 					writer.append(line.substring(0, i));
@@ -387,7 +388,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 				out.printf("\tlabel=\"" + title + "\";%n");
 			}
 		}
-		
+
 		@Override
 		protected String outputAttribute(String key, Object value, boolean first) {
 			boolean quote = true;

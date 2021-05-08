@@ -25,5 +25,10 @@ public interface ContextSensitiveToken {
 	 */
 	ContextSensitiveToken pushToken(ScopeToken c);
 
-	ContextSensitiveToken popToken(ScopeToken scope);
+	/**
+	 * Creates a context sensitive token popping the scope on top of the stack.
+	 * 
+	 * @return a token without the this token's top scope
+	 */
+	ContextSensitiveToken popToken();
 }
