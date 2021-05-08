@@ -26,6 +26,11 @@ public class SingleScopeToken implements ContextSensitiveToken {
 		return new SingleScopeToken(c);
 	}
 
+	@Override
+	public ContextSensitiveToken popToken(ScopeToken scope) {
+		return empty();
+	}
+	
 	/**
 	 * Return an empty token.
 	 * 

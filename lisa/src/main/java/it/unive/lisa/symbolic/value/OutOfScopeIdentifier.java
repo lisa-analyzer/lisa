@@ -49,7 +49,9 @@ public class OutOfScopeIdentifier extends Identifier {
 	public Identifier popScope(ScopeToken token) throws SemanticException {
 		if (getScope().equals(token))
 			return this.id;
-		throw new SemanticException("Unable to pop scope '" + token + "' from '" + getScope() + "'");
+		// throw new SemanticException("Unable to pop scope '" + token + "' from
+		// '" + getScope() + "'");
+		return null;
 	}
 
 	/**

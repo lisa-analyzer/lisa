@@ -24,6 +24,11 @@ public class ContextInsensitiveToken implements ContextSensitiveToken {
 	}
 
 	@Override
+	public ContextSensitiveToken popToken(ScopeToken c) {
+		return this;
+	}
+
+	@Override
 	public String toString() {
 		return "<empty>";
 	}

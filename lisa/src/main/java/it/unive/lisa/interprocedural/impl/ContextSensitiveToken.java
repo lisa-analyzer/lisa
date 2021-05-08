@@ -24,4 +24,6 @@ public interface ContextSensitiveToken {
 	 * @return a token with the given scope on the top of the call stack
 	 */
 	ContextSensitiveToken pushToken(ScopeToken c);
+
+	ContextSensitiveToken popToken(ScopeToken scope);
 }

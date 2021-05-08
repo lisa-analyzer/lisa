@@ -88,4 +88,8 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	public boolean isBottom() {
 		return lattice.isBottom() && (function == null || function.isEmpty());
 	}
+	
+	public void forget(CFG cfg) {
+		function.remove(cfg);
+	}
 }

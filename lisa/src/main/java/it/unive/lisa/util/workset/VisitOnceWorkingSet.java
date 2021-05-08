@@ -73,4 +73,8 @@ public class VisitOnceWorkingSet<E> implements WorkingSet<E> {
 	public String toString() {
 		return ws.toString();
 	}
+	
+	public Collection<E> getSeen() {
+		return seen;
+	}
 }
