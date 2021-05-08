@@ -35,7 +35,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	/**
 	 * The call graph used to resolve method calls.
 	 */
-	private CallGraph callgraph;
+	protected CallGraph callgraph;
 
 	/**
 	 * The program.
@@ -43,7 +43,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	protected Program program;
 
 	@Override
-	public final void build(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
+	public final void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.program = program;
 	}

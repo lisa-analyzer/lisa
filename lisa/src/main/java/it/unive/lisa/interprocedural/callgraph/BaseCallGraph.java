@@ -1,5 +1,6 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -12,30 +13,30 @@ import it.unive.lisa.program.cfg.statement.HybridCall;
 import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.datastructures.graph.Graph;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
- * An instance of {@link CallGraph} that does not handle interprocedurality. In
- * particular:
- * <ul>
- * <li>resolves {@link UnresolvedCall} to all the {@link CFG}s that match the
- * target's signature.
- * {@link BaseCallGraph#getPossibleTypesOfReceiver(Expression)} provides the
- * possible types of the receiver that might be reachable, and from where we
- * might get the method implementation to analyze</li>
- * <li>returns top when asked for the abstract result of a {@link CFGCall}</li>
- * </ul>
+ * An instance of {@link CallGraph} that provides the basic mechanism to resolve
+ * {@link UnresolvedCall}s.<br>
+ * <br>
+ * The graph underlying this call graph is built lazily through each call to
+ * resolve: querying for information about the graph before the completion of
+ * the analysis might lead to wrong results.
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph implements CallGraph {
+public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
 
 	private Program program;
 
 	@Override
-	public final void build(Program program) throws CallGraphConstructionException {
+	public final void init(Program program) throws CallGraphConstructionException {
 		this.program = program;
 	}
 
@@ -85,6 +86,25 @@ public abstract class BaseCallGraph implements CallGraph {
 					call.getParameters());
 
 		resolved.setOffset(call.getOffset());
+
+		CallGraphNode source = new CallGraphNode(this, call.getCFG());
+		if (!adjacencyMatrix.containsNode(source, false))
+			addNode(source, program.getEntryPoints().contains(call.getCFG()));
+
+		for (CFG target : targets) {
+			CallGraphNode t = new CallGraphNode(this, target);
+			if (!adjacencyMatrix.containsNode(t, false))
+				addNode(t, program.getEntryPoints().contains(call.getCFG()));
+			addEdge(new CallGraphEdge(source, t));
+		}
+
+		for (NativeCFG target : nativeTargets) {
+			CallGraphNode t = new CallGraphNode(this, target);
+			if (!adjacencyMatrix.containsNode(t, false))
+				addNode(t, false);
+			addEdge(new CallGraphEdge(source, t));
+		}
+
 		return resolved;
 	}
 
@@ -99,4 +119,21 @@ public abstract class BaseCallGraph implements CallGraph {
 	 */
 	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver);
 
+	@Override
+	public Collection<CodeMember> getCallees(CodeMember cm) {
+		return followersOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<CodeMember> getCallers(CodeMember cm) {
+		return predecessorsOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	protected DotGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toDot(
+			Function<CallGraphNode, String> labelGenerator) {
+		throw new UnsupportedOperationException();
+	}
 }

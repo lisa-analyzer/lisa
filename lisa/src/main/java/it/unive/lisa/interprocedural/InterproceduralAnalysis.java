@@ -38,7 +38,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 		V extends ValueDomain<V>> {
 
 	/**
-	 * Builds the interprocedural analysis of the given program.
+	 * Initializes the interprocedural analysis of the given program.
 	 *
 	 * @param callgraph the callgraph used to resolve method calls
 	 * @param program   the program
@@ -47,7 +47,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *                                              performing the
 	 *                                              interprocedural analysis
 	 */
-	void build(Program program, CallGraph callgraph) throws InterproceduralAnalysisException;
+	void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a

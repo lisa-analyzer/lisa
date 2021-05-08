@@ -103,7 +103,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public void build(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
+	public void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
 		this.program = program;
 	}
 

@@ -26,8 +26,8 @@ public class FixpointTest {
 		ModularWorstCaseAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
 				ValueEnvironment<Sign>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
-		callgraph.build(p);
-		analysis.build(p, callgraph);
+		callgraph.init(p);
+		analysis.init(p, callgraph);
 		return analysis;
 	}
 

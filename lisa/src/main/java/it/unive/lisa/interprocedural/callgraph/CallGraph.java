@@ -1,9 +1,12 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import java.util.Collection;
+
 import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.OpenCall;
@@ -19,14 +22,14 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 public interface CallGraph {
 
 	/**
-	 * Builds the call graph of the given program.
+	 * Initializes the call graph of the given program.
 	 *
 	 * @param program the program to analyze
 	 *
 	 * @throws CallGraphConstructionException if an exception happens while
 	 *                                            building the call graph
 	 */
-	void build(Program program) throws CallGraphConstructionException;
+	void init(Program program) throws CallGraphConstructionException;
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
@@ -49,4 +52,7 @@ public interface CallGraph {
 	 */
 	Call resolve(UnresolvedCall call) throws CallResolutionException;
 
+	Collection<CodeMember> getCallers(CodeMember cm);
+	
+	Collection<CodeMember> getCallees(CodeMember cm);
 }

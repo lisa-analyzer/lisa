@@ -109,14 +109,14 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			log.warn("Skipping syntactic checks execution since none have been provided");
 
 		try {
-			callGraph.build(program);
+			callGraph.init(program);
 		} catch (CallGraphConstructionException e) {
 			log.fatal("Exception while building the call graph for the input program", e);
 			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
 		}
 
 		try {
-			interproc.build(program, callGraph);
+			interproc.init(program, callGraph);
 		} catch (InterproceduralAnalysisException e) {
 			log.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisExecutionException(
@@ -179,7 +179,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			HeapDomain<?> heap = state == null ? LiSAFactory.getDefaultFor(HeapDomain.class) : state.getHeapState();
 			typesState = getInstance(SimpleAbstractState.class, heap, types).top();
 			typesInterproc = getInstance(interproc.getClass());
-			typesInterproc.build(program, callGraph);
+			typesInterproc.init(program, callGraph);
 		} catch (AnalysisSetupException | InterproceduralAnalysisException e) {
 			throw new AnalysisExecutionException("Unable to initialize type inference", e);
 		}

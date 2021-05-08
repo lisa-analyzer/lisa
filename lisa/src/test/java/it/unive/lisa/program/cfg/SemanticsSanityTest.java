@@ -97,9 +97,9 @@ public class SemanticsSanityTest {
 		p.addCompilationUnit(unit);
 		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();
-		cg.build(p);
+		cg.init(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();
-		interprocedural.build(p, cg);
+		interprocedural.init(p, cg);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
