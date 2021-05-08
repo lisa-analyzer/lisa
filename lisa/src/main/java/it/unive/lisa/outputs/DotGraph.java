@@ -343,6 +343,10 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter();) {
 			String line;
 			while ((line = br.readLine()) != null) {
+				if  (line.trim().startsWith("label"))
+					// skip graph title
+					continue;
+				
 				int i = line.indexOf(sentinel);
 				if (i != -1) {
 					writer.append(line.substring(0, i));

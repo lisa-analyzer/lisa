@@ -191,7 +191,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				// compute the result
 				CFGWithAnalysisResults<A, H, V> fixpointResult = null;
 				try {
-					fixpointResult = computeFixpoint(cfg, prepared);
+					fixpointResult = computeFixpoint(cfg, token, prepared);
 				} catch (FixpointException | InterproceduralAnalysisException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}
@@ -214,12 +214,12 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		return result;
 	}
 
-	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg,
+	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitiveToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
-		fixpointResult.setId(token.toString());
-		if (results.putResult(cfg, token, fixpointResult))
+		fixpointResult.setId(localToken.toString());
+		if (results.putResult(cfg, localToken, fixpointResult))
 			fixpointTriggers.add(cfg);
 		return fixpointResult;
 	}
