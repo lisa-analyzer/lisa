@@ -114,6 +114,8 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	}
 
 	private final org.graphstream.graph.Graph graph, legend;
+	
+	private final String title;
 
 	private final Map<N, Long> codes = new IdentityHashMap<>();
 
@@ -124,9 +126,10 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * 
 	 * @param legend the legend to append to the graph, if any
 	 */
-	protected DotGraph(org.graphstream.graph.Graph legend) {
+	protected DotGraph(String title, org.graphstream.graph.Graph legend) {
 		this.graph = new MultiGraph("graph");
 		this.legend = legend;
+		this.title = title;
 	}
 
 	/**
@@ -359,7 +362,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 			content = writer.toString();
 		}
 		FileSourceDOT source = new FileSourceDOT();
-		DotGraph<N, E, G> graph = new DotGraph<>(null) {
+		DotGraph<N, E, G> graph = new DotGraph<>(null, null) {
 		};
 		source.addSink(graph.graph);
 		try (StringReader sr = new StringReader(content)) {
@@ -368,8 +371,19 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		return graph;
 	}
 
-	private static class CustomDotSink extends FileSinkDOT {
+	private class CustomDotSink extends FileSinkDOT {
 
+		@Override
+		protected void outputHeader() throws IOException {
+			out = (PrintWriter) output;
+			out.printf("%s {%n", "digraph");
+
+			if (title != null) {
+				out.printf("\tlabelloc=\"t\";%n");
+				out.printf("\tlabel=\"" + title + "\";%n");
+			}
+		}
+		
 		@Override
 		protected String outputAttribute(String key, Object value, boolean first) {
 			boolean quote = true;
@@ -406,7 +420,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		}
 	}
 
-	private static class LegendClusterSink extends CustomDotSink {
+	private class LegendClusterSink extends CustomDotSink {
 		@Override
 		protected void outputHeader() throws IOException {
 			out = (PrintWriter) output;

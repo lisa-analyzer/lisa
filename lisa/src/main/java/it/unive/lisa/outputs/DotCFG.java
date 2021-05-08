@@ -1,25 +1,27 @@
 package it.unive.lisa.outputs;
 
+import java.io.Reader;
+import java.util.function.Function;
+
+import org.graphstream.graph.implementations.MultiGraph;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.io.Reader;
-import java.util.function.Function;
-import org.graphstream.graph.implementations.MultiGraph;
 
 /**
  * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be
- * created through {@link #fromCFG(CFG, Function)}, or read from a file through
+ * created through {@link #fromCFG(CFG, String, Function)}, or read from a file through
  * {@link DotGraph#readDot(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 
-	private DotCFG() {
-		super(new CFGLegend().graph);
+	private DotCFG(String title) {
+		super(title, new CFGLegend().graph);
 	}
 
 	/**
@@ -34,8 +36,8 @@ public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 	 * 
 	 * @return the exported graph built starting from the source
 	 */
-	public static DotCFG fromCFG(CFG source, Function<Statement, String> labelGenerator) {
-		DotCFG graph = new DotCFG();
+	public static DotCFG fromCFG(CFG source, String title, Function<Statement, String> labelGenerator) {
+		DotCFG graph = new DotCFG(title);
 
 		for (Statement node : source.getEntrypoints())
 			graph.addNode(node, true, node.stopsExecution(), labelGenerator);

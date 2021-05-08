@@ -882,7 +882,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 
 	@Override
 	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
-		return DotCFG.fromCFG(this, labelGenerator);
+		return DotCFG.fromCFG(this, null, labelGenerator);
 	}
 
 	@Override
