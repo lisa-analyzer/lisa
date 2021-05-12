@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.ScopeToken;
  * A context sensitive token that is always the same (aka, do not track any
  * information about the call stack).
  */
-public class ContextInsensitiveToken implements ContextSensitiveToken {
+public class ContextInsensitiveToken implements ContextSensitivityToken {
 
 	private static final ContextInsensitiveToken singleton = new ContextInsensitiveToken();
 
@@ -14,17 +14,17 @@ public class ContextInsensitiveToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken empty() {
+	public ContextSensitivityToken empty() {
 		return this;
 	}
 
 	@Override
-	public ContextSensitiveToken pushToken(ScopeToken c) {
+	public ContextSensitivityToken pushToken(ScopeToken c) {
 		return this;
 	}
 
 	@Override
-	public ContextSensitiveToken popToken() {
+	public ContextSensitivityToken popToken() {
 		return this;
 	}
 

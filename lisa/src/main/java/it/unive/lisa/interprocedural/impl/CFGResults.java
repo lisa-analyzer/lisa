@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import java.util.Collection;
 
 /**
- * A {@link FunctionalLattice} from {@link ContextSensitiveToken}s to
+ * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
  * {@link CFGWithAnalysisResults}s. This class is meant to store fixpoint
  * results on each token generated during the interprocedural analysis.
  * 
@@ -25,7 +25,7 @@ import java.util.Collection;
 public class CFGResults<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>>
-		extends FunctionalLattice<CFGResults<A, H, V>, ContextSensitiveToken, CFGWithAnalysisResults<A, H, V>> {
+		extends FunctionalLattice<CFGResults<A, H, V>, ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> {
 
 	/**
 	 * Builds a new result.
@@ -53,7 +53,7 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * The value returned by this method is intended to be a hint that a new
 	 * fixpoint computation is needed to ensure that the results are stable.
 	 * 
-	 * @param token  the {@link ContextSensitiveToken} that identifying the
+	 * @param token  the {@link ContextSensitivityToken} that identifying the
 	 *                   result
 	 * @param result the {@link CFGWithAnalysisResults} to store
 	 * 
@@ -61,7 +61,7 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public boolean putResult(ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
+	public boolean putResult(ContextSensitivityToken token, CFGWithAnalysisResults<A, H, V> result)
 			throws SemanticException {
 		CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
 		if (previousResult == null) {
@@ -91,18 +91,18 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	/**
 	 * Yields {@code true} if a result exists for the given {@code token}.
 	 * 
-	 * @param token the {@link ContextSensitiveToken} that identifying the
+	 * @param token the {@link ContextSensitivityToken} that identifying the
 	 *                  result
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(ContextSensitiveToken token) {
+	public boolean contains(ContextSensitivityToken token) {
 		return function != null && function.containsKey(token);
 	}
 
 	/**
 	 * Yields all the results stored in this object, for any possible
-	 * {@link ContextSensitiveToken} used.
+	 * {@link ContextSensitivityToken} used.
 	 * 
 	 * @return the results
 	 */

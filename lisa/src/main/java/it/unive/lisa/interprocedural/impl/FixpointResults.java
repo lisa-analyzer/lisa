@@ -39,12 +39,12 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	/**
 	 * Stores the result of a fixpoint computation on a cfg. This method returns
 	 * the result of calling
-	 * {@link CFGResults#putResult(ContextSensitiveToken, CFGWithAnalysisResults)}
+	 * {@link CFGResults#putResult(ContextSensitivityToken, CFGWithAnalysisResults)}
 	 * with the given {@code token} and {@code result} on the {@link CFGResults}
 	 * instance corresponding to {@code cfg}.
 	 * 
 	 * @param cfg    the {@link CFG} on which the result has been computed
-	 * @param token  the {@link ContextSensitiveToken} that identifying the
+	 * @param token  the {@link ContextSensitivityToken} that identifying the
 	 *                   result
 	 * @param result the {@link CFGWithAnalysisResults} to store
 	 * 
@@ -52,7 +52,7 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public boolean putResult(CFG cfg, ContextSensitiveToken token, CFGWithAnalysisResults<A, H, V> result)
+	public boolean putResult(CFG cfg, ContextSensitivityToken token, CFGWithAnalysisResults<A, H, V> result)
 			throws SemanticException {
 		CFGResults<A, H, V> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
 		return res.putResult(token, result);

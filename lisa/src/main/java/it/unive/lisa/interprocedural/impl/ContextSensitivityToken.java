@@ -3,16 +3,17 @@ package it.unive.lisa.interprocedural.impl;
 import it.unive.lisa.analysis.ScopeToken;
 
 /**
- * A context sensitive token for interprocedural analysis.
+ * A token for interprocedural analysis that tunes the level of context
+ * sensitivity.
  */
-public interface ContextSensitiveToken {
+public interface ContextSensitivityToken {
 
 	/**
 	 * A token without any context sensitivity.
 	 * 
 	 * @return an empty context sensitive token
 	 */
-	ContextSensitiveToken empty();
+	ContextSensitivityToken empty();
 
 	/**
 	 * Creates a context sensitive token with the given scope on the top of the
@@ -23,12 +24,12 @@ public interface ContextSensitiveToken {
 	 * 
 	 * @return a token with the given scope on the top of the call stack
 	 */
-	ContextSensitiveToken pushToken(ScopeToken c);
+	ContextSensitivityToken pushToken(ScopeToken c);
 
 	/**
 	 * Creates a context sensitive token popping the scope on top of the stack.
 	 * 
 	 * @return a token without the this token's top scope
 	 */
-	ContextSensitiveToken popToken();
+	ContextSensitivityToken popToken();
 }

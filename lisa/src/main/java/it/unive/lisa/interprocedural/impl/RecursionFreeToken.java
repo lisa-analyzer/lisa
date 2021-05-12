@@ -10,7 +10,7 @@ import java.util.Objects;
  * A context sensitive token representing an entire call chain up until a
  * recursion.
  */
-public class RecursionFreeToken implements ContextSensitiveToken {
+public class RecursionFreeToken implements ContextSensitivityToken {
 
 	private static final RecursionFreeToken singleton = new RecursionFreeToken(null);
 
@@ -28,19 +28,19 @@ public class RecursionFreeToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken empty() {
+	public ContextSensitivityToken empty() {
 		return new RecursionFreeToken(null);
 	}
 
 	@Override
-	public ContextSensitiveToken pushToken(ScopeToken c) {
+	public ContextSensitivityToken pushToken(ScopeToken c) {
 		if (tokens.contains(c))
 			return this;
 		return new RecursionFreeToken(tokens, c);
 	}
 
 	@Override
-	public ContextSensitiveToken popToken() {
+	public ContextSensitivityToken popToken() {
 		List<ScopeToken> toks = new ArrayList<>(tokens);
 		toks.remove(tokens.size() - 1);
 		return new RecursionFreeToken(toks, null);

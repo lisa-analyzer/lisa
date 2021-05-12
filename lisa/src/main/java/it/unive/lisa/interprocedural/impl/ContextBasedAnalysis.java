@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
- * tuned by the kind of {@link ContextSensitiveToken} used.
+ * tuned by the kind of {@link ContextSensitivityToken} used.
  * 
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
@@ -53,7 +53,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	 */
 	private FixpointResults<A, H, V> results;
 
-	private ContextSensitiveToken token;
+	private ContextSensitivityToken token;
 
 	private final Collection<CFG> fixpointTriggers;
 
@@ -70,7 +70,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	 * @param token an instance of the tokens to be used to partition w.r.t.
 	 *                  context sensitivity
 	 */
-	public ContextBasedAnalysis(ContextSensitiveToken token) {
+	public ContextBasedAnalysis(ContextSensitivityToken token) {
 		this.token = token.empty();
 		fixpointTriggers = new HashSet<>();
 	}
@@ -212,7 +212,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		return result;
 	}
 
-	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitiveToken localToken,
+	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, InterproceduralAnalysisException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);

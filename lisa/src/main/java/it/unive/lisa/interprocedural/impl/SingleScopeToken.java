@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * A context sensitive token representing a single {@link ScopeToken}.
  */
-public class SingleScopeToken implements ContextSensitiveToken {
+public class SingleScopeToken implements ContextSensitivityToken {
 
 	private static final SingleScopeToken singleton = new SingleScopeToken(null);
 
@@ -17,17 +17,17 @@ public class SingleScopeToken implements ContextSensitiveToken {
 	}
 
 	@Override
-	public ContextSensitiveToken empty() {
+	public ContextSensitivityToken empty() {
 		return new SingleScopeToken(null);
 	}
 
 	@Override
-	public ContextSensitiveToken pushToken(ScopeToken c) {
+	public ContextSensitivityToken pushToken(ScopeToken c) {
 		return new SingleScopeToken(c);
 	}
 
 	@Override
-	public ContextSensitiveToken popToken() {
+	public ContextSensitivityToken popToken() {
 		return empty();
 	}
 
