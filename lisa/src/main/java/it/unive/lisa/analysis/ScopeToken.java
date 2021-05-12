@@ -63,6 +63,6 @@ public class ScopeToken {
 
 	@Override
 	public String toString() {
-		return "((" + scoper + "))";
+		return "[" + scoper.getLocation() + "]";
 	}
 }

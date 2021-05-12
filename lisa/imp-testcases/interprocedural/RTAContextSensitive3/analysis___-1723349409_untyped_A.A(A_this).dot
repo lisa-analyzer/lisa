@@ -1,7 +1,9 @@
 digraph {
 	labelloc="t";
-	label="(([1 targets]helper(this, one, a)))";
-	"node0" [shape="rect",color="black",peripheries="2",label=<return [unresolved]identity(dispatcher, i)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ (([1 targets]helper(this, one, a))):minusone: -<BR/>(([1 targets]helper(this, one, a))):negative: -<BR/>(([1 targets]helper(this, one, a))):one: +<BR/>(([1 targets]helper(this, one, a))):positive: +<BR/>i: +<BR/>ret_value@helper: + ]]<BR/>}} -&gt; [ret_value@helper]>];
+	label="['imp-testcases/interprocedural/programContextSensitive3.imp':24:22]";
+	"node0" [shape="rect",color="black",label=<i1 = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i1: 0 ]]<BR/>}} -&gt; [i1]>];
+	"node1" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i1: 0 ]]<BR/>}} -&gt; [skip]>];
+	"node0" -> "node1" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;
