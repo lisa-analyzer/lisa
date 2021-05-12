@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import java.util.Collection;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
@@ -38,17 +39,20 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	}
 
 	/**
-	 * Stores the result of a fixpoint computation on a cfg, if needed. If no
-	 * result was stored for the given {@code token}, than that token is mapped
-	 * to {@code result} and this method returns {@code false}. Instead, if a
-	 * result {@code prev} is already present for the given {@code token}:
+	 * Stores the result of a fixpoint computation on a cfg, if needed. This
+	 * method returns a pair of a boolean and a {@link CFGWithAnalysisResults},
+	 * where ({@code prev} is the {@link CFGWithAnalysisResults} already present
+	 * for the given {@code token}):
 	 * <ul>
+	 * <li>if no {@code prev} was stored for {@code token}, than that token is
+	 * mapped to {@code result} and this method returns
+	 * {@code <false, result>}</li>
 	 * <li>if {@code prev <= result}, then {@code token} is mapped to
-	 * {@code result} and this method returns {@code true}</li>
+	 * {@code result} and this method returns {@code <true, result>}</li>
 	 * <li>if {@code result <= prev}, then the mapping is left untouched and
-	 * this method returns {@code false}</li>
-	 * <li>otherwise, {@code token} is mapped to {@code prev.lub(result)} and
-	 * this method returns {@code true}</li>
+	 * this method returns {@code <false, prev>}</li>
+	 * <li>otherwise, {@code token} is mapped to {@code lub = prev.lub(result)}
+	 * and this method returns {@code <true, lub>}</li>
 	 * </ul>
 	 * The value returned by this method is intended to be a hint that a new
 	 * fixpoint computation is needed to ensure that the results are stable.
@@ -61,30 +65,32 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public boolean putResult(ContextSensitivityToken token, CFGWithAnalysisResults<A, H, V> result)
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V>> putResult(ContextSensitivityToken token,
+			CFGWithAnalysisResults<A, H, V> result)
 			throws SemanticException {
 		CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
 			function.put(token, result);
-			return false;
+			return Pair.of(false, result);
 		} else if (previousResult.lessOrEqual(result)) {
 			// previous is smaller than result
 			if (result.lessOrEqual(previousResult))
 				// they are equal
-				return false;
+				return Pair.of(false, previousResult);
 			else {
 				// result is bigger, store that instead
 				function.put(token, result);
-				return true;
+				return Pair.of(true, result);
 			}
 		} else if (result.lessOrEqual(previousResult)) {
 			// result is smaller than previous
-			return false;
+			return Pair.of(false, previousResult);
 		} else {
 			// result and previous are not comparable
-			function.put(token, previousResult.lub(result));
-			return true;
+			CFGWithAnalysisResults<A, H, V> lub = previousResult.lub(result);
+			function.put(token, lub);
+			return Pair.of(true, lub);
 		}
 	}
 

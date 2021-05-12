@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link CFG}s to {@link CFGResults}s. This
@@ -52,7 +53,8 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public boolean putResult(CFG cfg, ContextSensitivityToken token, CFGWithAnalysisResults<A, H, V> result)
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V>> putResult(CFG cfg, ContextSensitivityToken token,
+			CFGWithAnalysisResults<A, H, V> result)
 			throws SemanticException {
 		CFGResults<A, H, V> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
 		return res.putResult(token, result);
