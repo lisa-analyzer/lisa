@@ -50,3 +50,7 @@ tasks.register('cron', Test) {
 		includeTestsMatching "it.unive.lisa.cron.*"
 	}
 }
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
