@@ -1,0 +1,31 @@
+name: 'Gradle Build (non-master branch)'
+
+on:
+  push:
+    branches-ignore: 
+      - 'master'
+      - 'gh-pages'
+
+jobs:
+  compile-and-test:
+    name: 'Compile with gradle and run unit tests'
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 'Checkout'
+      uses: actions/checkout@v2
+    - name: 'Set up JDK 11'
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: 'Grant execute permission for gradlew'
+      run: chmod +x lisa/gradlew
+    - name: 'Gradle: compile and run unit tests'
+      run: cd lisa && ./gradlew test
+    - name: 'Publish unit test results'
+      uses: EnricoMi/publish-unit-test-result-action@v1.6
+      if: always()
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        files: lisa/build/test-results/test/TEST-*.xml
