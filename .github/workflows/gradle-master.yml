@@ -8,9 +8,7 @@ on:
 jobs:
   build-and-cron:
     name: 'Run a full gradle build and execute cron tests'
-
     runs-on: ubuntu-latest
-
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v2
@@ -27,4 +25,5 @@ jobs:
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: lisa/build/test-results/test/TEST-*.xml
+        check_name: 'All Test Results (unit + cron)'
+        files: lisa/build/test-results/**/TEST-*.xml
