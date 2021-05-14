@@ -1,4 +1,4 @@
-name: Archive issues and prs for closed milestones
+name: Create release draft on closed milestone
 
 on:
   milestone:
