@@ -10,12 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Move to the DONE column
-      uses: alex-page/github-project-automation-plus@v0.7.1
-      with:
-        project: LiSA
-        column: DONE
-        repo-token: ${{ secrets.SSVPAT }}
     - name: add label
       uses: andymckay/labeler@22d5392de2b725cea4b284df5824125054049d84
       with:
