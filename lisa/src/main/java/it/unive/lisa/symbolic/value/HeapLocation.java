@@ -1,7 +1,9 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -58,6 +60,16 @@ public class HeapLocation extends Identifier {
 			throw new SemanticException("Cannot perform the least upper bound between different identifiers: '" + this
 					+ "' and '" + other + "'");
 		return isWeak() ? this : other;
+	}
+
+	@Override
+	public SymbolicExpression pushScope(ScopeToken token) {
+		return this;
+	}
+
+	@Override
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		return this;
 	}
 
 	@Override

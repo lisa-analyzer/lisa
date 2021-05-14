@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -14,9 +15,9 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.combination.ValueCartesianProduct;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
-import it.unive.lisa.analysis.dataflow.impl.AvailableExpressions;
-import it.unive.lisa.analysis.dataflow.impl.ReachingDefinitions;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.impl.dataflow.AvailableExpressions;
+import it.unive.lisa.analysis.impl.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.analysis.impl.types.InferredTypes;
@@ -29,10 +30,14 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
-import it.unive.lisa.callgraph.CallGraphConstructionException;
-import it.unive.lisa.callgraph.impl.intraproc.IntraproceduralCallGraph;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
+import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
+import it.unive.lisa.interprocedural.impl.CFGResults;
+import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -76,6 +81,8 @@ public class SemanticsSanityTest {
 	private CompilationUnit unit;
 	private CFG cfg;
 	private CallGraph cg;
+	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
+			ValueEnvironment<Sign>> interprocedural;
 	private AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
 			ValueEnvironment<Sign>> as;
 	private StatementStore<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
@@ -83,14 +90,16 @@ public class SemanticsSanityTest {
 	private Expression fake;
 
 	@Before
-	public void setup() throws CallGraphConstructionException {
+	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		Program p = new Program();
 		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
 		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
-		cg = new IntraproceduralCallGraph();
-		cg.build(p);
+		cg = new RTACallGraph();
+		cg.init(p);
+		interprocedural = new ModularWorstCaseAnalysis<>();
+		interprocedural.init(p, cg);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
@@ -115,8 +124,9 @@ public class SemanticsSanityTest {
 			public <A extends AbstractState<A, H, V>,
 					H extends HeapDomain<H>,
 					V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-							CallGraph callGraph, StatementStore<A, H, V> expressions) throws SemanticException {
-				return entryState;
+							InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+							throws SemanticException {
+				return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), "fake"), fake);
 			}
 		};
 	}
@@ -170,7 +180,7 @@ public class SemanticsSanityTest {
 						for (int i = 0; i < params.length; i++)
 							params[i] = valueFor(types[i]);
 						Statement st = (Statement) c.newInstance(params);
-						st.semantics(as, cg, store);
+						st.semantics(as, interprocedural, store);
 					} catch (Exception e) {
 						failures.computeIfAbsent(statement, s -> new HashMap<>())
 								.put(Arrays.toString(c.getParameterTypes()), e);
@@ -294,12 +304,20 @@ public class SemanticsSanityTest {
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
-			return new AnalysisState<>(
-					new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())), new Skip());
+			return as;
 		if (root == InferredPair.class)
 			return new InferredTypes();
+		if (param == CFG.class)
+			return cfg;
+		if (param == AnalysisState.class)
+			return as;
+		if (param == CFGWithAnalysisResults.class)
+			return new CFGWithAnalysisResults<>(cfg, as);
+		if (param == CFGResults.class)
+			return new CFGResults<>(new CFGWithAnalysisResults<>(cfg, as));
 
-		throw new UnsupportedOperationException("No default domain for parameter of type " + param);
+		throw new UnsupportedOperationException(
+				"No default domain for domain " + root + " and parameter of type " + param);
 	}
 
 	@SuppressWarnings("unchecked")

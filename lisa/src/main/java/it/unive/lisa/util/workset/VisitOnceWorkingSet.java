@@ -73,4 +73,14 @@ public class VisitOnceWorkingSet<E> implements WorkingSet<E> {
 	public String toString() {
 		return ws.toString();
 	}
+
+	/**
+	 * Yields the elements visited (and this no longer able to be added to this
+	 * working set) by this object.
+	 * 
+	 * @return the collection of visited elements
+	 */
+	public Collection<E> getSeen() {
+		return seen;
+	}
 }

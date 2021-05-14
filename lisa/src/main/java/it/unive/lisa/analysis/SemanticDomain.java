@@ -119,6 +119,36 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
+	 * Pushes a new scope, identified by the give token, in the domain. This
+	 * causes information about all variables not associated with a scope (and
+	 * thus visible) to be mapped to the given scope and hidden away, until the
+	 * scope is popped with {@link #popScope(ScopeToken)}.
+	 *
+	 * @param token the token identifying the scope to push
+	 * 
+	 * @return a copy of this domain where the local variables have been hidden
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	D pushScope(ScopeToken token) throws SemanticException;
+
+	/**
+	 * Pops the scope identified by the given token from the domain. This causes
+	 * all the visible variables (i.e. that are not mapped to a scope) to be
+	 * removed from the domain, while the local variables that were associated
+	 * to the given scope token (and thus hidden) will become visible again.
+	 *
+	 * @param token the token of the scope to be restored
+	 * 
+	 * @return a copy of this domain where the local variables have been
+	 *             removed, while the variables mapped to the given scope are
+	 *             visible again
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	D popScope(ScopeToken token) throws SemanticException;
+
+	/**
 	 * The satisfiability of an expression.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

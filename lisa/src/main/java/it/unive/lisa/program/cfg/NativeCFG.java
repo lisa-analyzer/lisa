@@ -2,7 +2,7 @@ package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.LiSAFactory;
-import it.unive.lisa.callgraph.CallResolutionException;
+import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;

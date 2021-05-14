@@ -96,7 +96,7 @@ public abstract class AnalysisTestExecutor {
 
 		Program program = null;
 		try {
-			program = IMPFrontend.processFile(target.toString());
+			program = IMPFrontend.processFile(target.toString(), true);
 		} catch (ParsingException e) {
 			e.printStackTrace(System.err);
 			fail("Exception while parsing '" + target + "': " + e.getMessage());

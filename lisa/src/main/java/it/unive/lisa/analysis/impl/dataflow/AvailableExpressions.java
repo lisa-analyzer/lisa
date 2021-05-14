@@ -1,5 +1,7 @@
-package it.unive.lisa.analysis.dataflow.impl;
+package it.unive.lisa.analysis.impl.dataflow;
 
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -9,6 +11,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -142,5 +145,20 @@ public class AvailableExpressions
 	@Override
 	public DomainRepresentation representation() {
 		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(expression));
+	}
+
+	@Override
+	public AvailableExpressions pushScope(ScopeToken scope) throws SemanticException {
+		return new AvailableExpressions((Identifier) id.pushScope(scope),
+				(ValueExpression) expression.pushScope(scope));
+	}
+
+	@Override
+	public AvailableExpressions popScope(ScopeToken scope) throws SemanticException {
+		if (!(id instanceof OutOfScopeIdentifier))
+			return this;
+
+		return new AvailableExpressions(((OutOfScopeIdentifier) id).popScope(scope),
+				(ValueExpression) expression.popScope(scope));
 	}
 }

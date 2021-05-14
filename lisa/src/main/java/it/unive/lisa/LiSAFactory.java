@@ -13,7 +13,7 @@ import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;

@@ -11,7 +11,7 @@ public class IMPFrontendTest {
 	@Test
 	public void testExampleProgram() {
 		try {
-			IMPFrontend.processFile("imp-testcases/example.imp");
+			IMPFrontend.processFile("imp-testcases/example.imp", false);
 		} catch (ParsingException e) {
 			fail("Processing the example file thrown an exception: " + e);
 		}

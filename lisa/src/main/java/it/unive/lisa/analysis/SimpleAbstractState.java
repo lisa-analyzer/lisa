@@ -24,6 +24,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 @DefaultParameters({ MonolithicHeap.class, Interval.class })
 public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
+		extends BaseLattice<SimpleAbstractState<H, V>>
 		implements AbstractState<SimpleAbstractState<H, V>, H, V> {
 
 	/**
@@ -114,17 +115,27 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> lub(SimpleAbstractState<H, V> other) throws SemanticException {
+	public SimpleAbstractState<H, V> pushScope(ScopeToken scope) throws SemanticException {
+		return new SimpleAbstractState<>(heapState.pushScope(scope), valueState.pushScope(scope));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V> popScope(ScopeToken scope) throws SemanticException {
+		return new SimpleAbstractState<>(heapState.popScope(scope), valueState.popScope(scope));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V> lubAux(SimpleAbstractState<H, V> other) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.lub(other.heapState), valueState.lub(other.valueState));
 	}
 
 	@Override
-	public SimpleAbstractState<H, V> widening(SimpleAbstractState<H, V> other) throws SemanticException {
+	public SimpleAbstractState<H, V> wideningAux(SimpleAbstractState<H, V> other) throws SemanticException {
 		return new SimpleAbstractState<>(heapState.widening(other.heapState), valueState.widening(other.valueState));
 	}
 
 	@Override
-	public boolean lessOrEqual(SimpleAbstractState<H, V> other) throws SemanticException {
+	public boolean lessOrEqualAux(SimpleAbstractState<H, V> other) throws SemanticException {
 		return heapState.lessOrEqual(other.heapState) && valueState.lessOrEqual(other.valueState);
 	}
 

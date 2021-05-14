@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.imp.types.ArrayType;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -37,7 +37,8 @@ public class IMPNewArray extends NativeCall {
 	 * @param dimensions the dimensions of the array
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new[]", ArrayType.lookup(type, dimensions.length),
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]",
+				ArrayType.lookup(type, dimensions.length),
 				dimensions);
 	}
 
@@ -45,7 +46,8 @@ public class IMPNewArray extends NativeCall {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		// it corresponds to the analysis state after the evaluation of all the

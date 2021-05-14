@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -63,21 +63,19 @@ public class Assignment extends BinaryExpression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> right = getRight().semantics(entryState, callGraph, expressions);
-		AnalysisState<A, H, V> left = getLeft().semantics(right, callGraph, expressions);
+		AnalysisState<A, H, V> right = getRight().semantics(entryState, interprocedural, expressions);
+		AnalysisState<A, H, V> left = getLeft().semantics(right, interprocedural, expressions);
 		expressions.put(getRight(), right);
 		expressions.put(getLeft(), left);
 
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = right.bottom();
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
 				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
+				result = result.lub(tmp);
 			}
 
 		if (!getRight().getMetaVariables().isEmpty())

@@ -1,10 +1,11 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.nio.file.Paths;
@@ -33,6 +34,11 @@ public class LiSAConfiguration {
 	 * The callgraph to use during the analysis
 	 */
 	private CallGraph callGraph;
+
+	/**
+	 * The interprocedural analysis to use during the analysis
+	 */
+	private InterproceduralAnalysis<?, ?, ?> interproceduralAnalysis;
 
 	/**
 	 * The abstract state to run during the analysis
@@ -80,6 +86,7 @@ public class LiSAConfiguration {
 	 * <li>no syntactic check is executed</li>
 	 * <li>no {@link AbstractState} is set for the analysis</li>
 	 * <li>no {@link CallGraph} is set for the analysis</li>
+	 * <li>no {@link InterproceduralAnalysis} is set for the analysis</li>
 	 * <li>the workdir is the one where LiSA was executed</li>
 	 * <li>the input program will not be dumped</li>
 	 * <li>no type inference will be run</li>
@@ -150,13 +157,25 @@ public class LiSAConfiguration {
 	 * Sets the {@link CallGraph} to use for the analysis. Any existing value is
 	 * overwritten.
 	 * 
-	 * @param <T>       the concrete type of the call graph
 	 * @param callGraph the callgraph to use
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public <T extends CallGraph> LiSAConfiguration setCallGraph(T callGraph) {
+	public LiSAConfiguration setCallGraph(CallGraph callGraph) {
 		this.callGraph = callGraph;
+		return this;
+	}
+
+	/**
+	 * Sets the {@link InterproceduralAnalysis} to use for the analysis. Any
+	 * existing value is overwritten.
+	 * 
+	 * @param analysis the interprocedural analysis to use
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setInterproceduralAnalysis(InterproceduralAnalysis<?, ?, ?> analysis) {
+		this.interproceduralAnalysis = analysis;
 		return this;
 	}
 
@@ -288,7 +307,7 @@ public class LiSAConfiguration {
 
 	/**
 	 * Yields the {@link CallGraph} for the analysis. Might be {@code null} if
-	 * none was set,
+	 * none was set.
 	 * 
 	 * @return the call graph for the analysis
 	 */
@@ -297,8 +316,18 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Yields the {@link InterproceduralAnalysis} for the analysis. Might be
+	 * {@code null} if none was set.
+	 * 
+	 * @return the interprocedural analysis for the analysis
+	 */
+	public InterproceduralAnalysis<?, ?, ?> getInterproceduralAnalysis() {
+		return interproceduralAnalysis;
+	}
+
+	/**
 	 * Yields the {@link AbstractState} for the analysis. Might be {@code null}
-	 * if none was set,
+	 * if none was set.
 	 * 
 	 * @return the abstract state for the analysis
 	 */

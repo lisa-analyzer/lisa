@@ -3,7 +3,6 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -135,9 +134,9 @@ public abstract class Expression extends Statement {
 	 * expression. These should be removed as soon as the values computed by
 	 * those gets out of scope (e.g., popped from the stack). The returned
 	 * collection will be filled while evaluating this expression
-	 * {@link #semantics(AnalysisState, CallGraph, StatementStore)}, thus
-	 * invoking this method before computing the semantics will yield an empty
-	 * collection.
+	 * {@link Statement#semantics(AnalysisState, it.unive.lisa.interprocedural.InterproceduralAnalysis, StatementStore)},
+	 * thus invoking this method before computing the semantics will yield an
+	 * empty collection.
 	 * 
 	 * @return the meta variables
 	 */
