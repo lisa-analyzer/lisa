@@ -48,6 +48,11 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
+	protected ValueEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+		return new ValueEnvironment<>(lattice, function);
+	}
+
+	@Override
 	protected ValueEnvironment<T> copy() {
 		return new ValueEnvironment<>(lattice, mkNewFunction(function));
 	}

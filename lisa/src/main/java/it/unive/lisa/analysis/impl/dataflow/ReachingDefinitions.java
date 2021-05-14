@@ -1,5 +1,7 @@
-package it.unive.lisa.analysis.dataflow.impl;
+package it.unive.lisa.analysis.impl.dataflow;
 
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -8,6 +10,7 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,5 +105,18 @@ public class ReachingDefinitions
 	@Override
 	public DomainRepresentation representation() {
 		return new PairRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
+	}
+
+	@Override
+	public ReachingDefinitions pushScope(ScopeToken scope) throws SemanticException {
+		return new ReachingDefinitions((Identifier) variable.pushScope(scope), programPoint);
+	}
+
+	@Override
+	public ReachingDefinitions popScope(ScopeToken scope) throws SemanticException {
+		if (!(variable instanceof OutOfScopeIdentifier))
+			return null;
+
+		return new ReachingDefinitions(((OutOfScopeIdentifier) variable).popScope(scope), programPoint);
 	}
 }

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.dataflow;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -157,4 +158,25 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	public Collection<E> getDataflowElements() {
 		return elements;
 	}
+
+	@Override
+	public PossibleForwardDataflowDomain<E> pushScope(ScopeToken scope) throws SemanticException {
+		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		E pushed;
+		for (E element : this.elements)
+			if ((pushed = element.pushScope(scope)) != null)
+				result.elements.add(pushed);
+		return result;
+	}
+
+	@Override
+	public PossibleForwardDataflowDomain<E> popScope(ScopeToken scope) throws SemanticException {
+		PossibleForwardDataflowDomain<E> result = new PossibleForwardDataflowDomain<>(this.domain);
+		E popped;
+		for (E element : this.elements)
+			if ((popped = element.popScope(scope)) != null)
+				result.elements.add(popped);
+		return result;
+	}
+
 }

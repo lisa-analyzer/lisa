@@ -1,0 +1,22 @@
+class A {
+    foo() {
+        return 1;
+    }
+}
+
+class B extends A {
+    foo() {
+        return -1;
+    }
+}
+
+class tests {
+
+	subtyping() {
+		def a = new B();
+		def b = 0;
+   		if (b < 10)
+   		    a = new A();
+   		a.foo();
+    }
+}

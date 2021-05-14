@@ -1,0 +1,4 @@
+{
+  "warnings" : [ ],
+  "files" : [ "analysis___untyped_A.foo(A_this).dot", "analysis___untyped_B.foo(B_this).dot", "analysis___untyped_tests.subtyping(tests_this).dot" ]
+}

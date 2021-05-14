@@ -9,6 +9,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -25,7 +27,7 @@ import java.util.stream.Collectors;
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		implements Lattice<AnalysisState<A, H, V>>,
+		extends BaseLattice<AnalysisState<A, H, V>> implements
 		SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 
 	/**
@@ -123,17 +125,37 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> lub(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V> pushScope(ScopeToken scope) throws SemanticException {
+		return new AnalysisState<A, H, V>(state.pushScope(scope),
+				onAllExpressions(this.computedExpressions, scope, true));
+	}
+
+	private ExpressionSet<SymbolicExpression> onAllExpressions(ExpressionSet<SymbolicExpression> computedExpressions,
+			ScopeToken scope, boolean push) throws SemanticException {
+		Set<SymbolicExpression> result = new HashSet<>();
+		for (SymbolicExpression exp : computedExpressions)
+			result.add(push ? exp.pushScope(scope) : exp.popScope(scope));
+		return new ExpressionSet<>(result);
+	}
+
+	@Override
+	public AnalysisState<A, H, V> popScope(ScopeToken scope) throws SemanticException {
+		return new AnalysisState<A, H, V>(state.popScope(scope),
+				onAllExpressions(this.computedExpressions, scope, false));
+	}
+
+	@Override
+	public AnalysisState<A, H, V> lubAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.lub(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
-	public AnalysisState<A, H, V> widening(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V> wideningAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return new AnalysisState<>(state.widening(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
-	public boolean lessOrEqual(AnalysisState<A, H, V> other) throws SemanticException {
+	public boolean lessOrEqualAux(AnalysisState<A, H, V> other) throws SemanticException {
 		return state.lessOrEqual(other.state);
 	}
 

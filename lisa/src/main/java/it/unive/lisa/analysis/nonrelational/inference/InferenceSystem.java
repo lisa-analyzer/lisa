@@ -56,6 +56,11 @@ public class InferenceSystem<T extends InferredValue<T>>
 		this.inferred = inferred;
 	}
 
+	@Override
+	protected InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
+		return new InferenceSystem<>(lattice, function, inferred);
+	}
+
 	/**
 	 * Yields the execution state (also called program counter), that might
 	 * change when evaluating an expression.

@@ -158,4 +158,24 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 
 		return elements.toString();
 	}
+
+	/**
+	 * Returns the number of elements in this lattice (its cardinality). If this
+	 * lattice contains more than {@code Integer.MAX_VALUE} elements, returns
+	 * {@code Integer.MAX_VALUE}.
+	 *
+	 * @return the number of elements in this lattice (its cardinality)
+	 */
+	public int size() {
+		return elements.size();
+	}
+
+	/**
+	 * Returns {@code true} if this set contains no elements.
+	 *
+	 * @return {@code true} if this set contains no elements
+	 */
+	public boolean isEmpty() {
+		return elements.isEmpty();
+	}
 }

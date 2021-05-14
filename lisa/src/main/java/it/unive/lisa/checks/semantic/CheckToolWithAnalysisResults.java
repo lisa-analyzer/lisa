@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.program.cfg.CFG;
+import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -22,14 +23,14 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> extends CheckTool {
 
-	private final Map<CFG, CFGWithAnalysisResults<A, H, V>> results;
+	private final Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results;
 
 	/**
 	 * Builds the tool, storing the given results.
 	 * 
 	 * @param results the results to store
 	 */
-	public CheckToolWithAnalysisResults(Map<CFG, CFGWithAnalysisResults<A, H, V>> results) {
+	public CheckToolWithAnalysisResults(Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results) {
 		super();
 		this.results = results;
 	}
@@ -40,7 +41,8 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 	 * @param other   the tool to copy
 	 * @param results the results to store
 	 */
-	public CheckToolWithAnalysisResults(CheckTool other, Map<CFG, CFGWithAnalysisResults<A, H, V>> results) {
+	public CheckToolWithAnalysisResults(CheckTool other,
+			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results) {
 		super(other);
 		this.results = results;
 	}
@@ -53,7 +55,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @return the results on the given cfg
 	 */
-	public CFGWithAnalysisResults<A, H, V> getResultOf(CFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V>> getResultOf(CFG cfg) {
 		return results.get(cfg);
 	}
 }

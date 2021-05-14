@@ -6,6 +6,7 @@ import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.impl.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
@@ -18,6 +19,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
 import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
@@ -72,29 +74,33 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				return true;
 
 			Assignment assign = (Assignment) node;
-			InferenceSystem<NonInterference> state = (InferenceSystem<NonInterference>) tool.getResultOf(graph)
-					.getAnalysisStateAt(assign).getState().getValueState();
-			InferenceSystem<NonInterference> left = (InferenceSystem<NonInterference>) tool.getResultOf(graph)
-					.getAnalysisStateAt(assign.getLeft()).getState().getValueState();
-			InferenceSystem<NonInterference> right = (InferenceSystem<NonInterference>) tool.getResultOf(graph)
-					.getAnalysisStateAt(assign.getRight()).getState().getValueState();
+			Collection<?> results = tool.getResultOf(graph);
 
-			if (left.getInferredValue().isLowConfidentiality() && right.getInferredValue().isHighConfidentiality())
-				tool.warnOn(assign,
-						"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
+			for (Object res : results) {
+				CFGWithAnalysisResults<?, ?, ?> result = (CFGWithAnalysisResults<?, ?, ?>) res;
+				InferenceSystem<NonInterference> state = (InferenceSystem<NonInterference>) result
+						.getAnalysisStateAfter(assign).getState().getValueState();
+				InferenceSystem<NonInterference> left = (InferenceSystem<NonInterference>) result
+						.getAnalysisStateAfter(assign.getLeft()).getState().getValueState();
+				InferenceSystem<NonInterference> right = (InferenceSystem<NonInterference>) result
+						.getAnalysisStateAfter(assign.getRight()).getState().getValueState();
 
-			if (left.getInferredValue().isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
-				tool.warnOn(assign,
-						"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
+				if (left.getInferredValue().isLowConfidentiality() && right.getInferredValue().isHighConfidentiality())
+					tool.warnOn(assign,
+							"This assignment assigns a HIGH confidentiality value to a LOW confidentiality variable, thus violating non-interference");
 
-			if (left.getInferredValue().isHighIntegrity() && right.getInferredValue().isLowIntegrity())
-				tool.warnOn(assign,
-						"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
+				if (left.getInferredValue().isLowConfidentiality() && state.getExecutionState().isHighConfidentiality())
+					tool.warnOn(assign,
+							"This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference");
 
-			if (left.getInferredValue().isHighIntegrity() && state.getExecutionState().isLowIntegrity())
-				tool.warnOn(assign,
-						"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
+				if (left.getInferredValue().isHighIntegrity() && right.getInferredValue().isLowIntegrity())
+					tool.warnOn(assign,
+							"This assignment assigns a LOW integrity value to a HIGH integrity variable, thus violating non-interference");
 
+				if (left.getInferredValue().isHighIntegrity() && state.getExecutionState().isLowIntegrity())
+					tool.warnOn(assign,
+							"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
+			}
 			return true;
 		}
 

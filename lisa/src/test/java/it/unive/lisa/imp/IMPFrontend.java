@@ -74,7 +74,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
 	 * produced by compiling the ANTLR4 grammar, and yields the {@link Program}
-	 * that corresponds to the one parsed from that file.
+	 * that corresponds to the one parsed from that file. Invoking this method
+	 * is equivalent to invoking {@link #processFile(String, boolean)} passing
+	 * {@code false} as second parameter.
 	 * 
 	 * @param file the complete path (relative or absolute) of the file to parse
 	 * 
@@ -83,14 +85,33 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * @throws ParsingException if this frontend is unable to parse the file
 	 */
 	public static Program processFile(String file) throws ParsingException {
-		return new IMPFrontend(file).work(null);
+		return new IMPFrontend(file, false).work(null);
+	}
+
+	/**
+	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
+	 * produced by compiling the ANTLR4 grammar, and yields the {@link Program}
+	 * that corresponds to the one parsed from that file.
+	 * 
+	 * @param file     the complete path (relative or absolute) of the file to
+	 *                     parse
+	 * @param onlyMain true iff the only entry point is the main method
+	 * 
+	 * @return the resulting {@link Program}
+	 * 
+	 * @throws ParsingException if this frontend is unable to parse the file
+	 */
+	public static Program processFile(String file, boolean onlyMain) throws ParsingException {
+		return new IMPFrontend(file, onlyMain).work(null);
 	}
 
 	/**
 	 * Parses a piece of IMP code using the {@link IMPLexer} and the
 	 * {@link IMPParser} produced by compiling the ANTLR4 grammar, and yields
 	 * the {@link Program} that corresponds to the one parsed from the given
-	 * text.
+	 * text. Invoking this method is equivalent to invoking
+	 * {@link #processText(String, boolean)} passing {@code false} as second
+	 * parameter.
 	 * 
 	 * @param text the IMP program to parse
 	 * 
@@ -99,8 +120,25 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	 * @throws ParsingException if this frontend is unable to parse the text
 	 */
 	public static Program processText(String text) throws ParsingException {
+		return processText(text, false);
+	}
+
+	/**
+	 * Parses a piece of IMP code using the {@link IMPLexer} and the
+	 * {@link IMPParser} produced by compiling the ANTLR4 grammar, and yields
+	 * the {@link Program} that corresponds to the one parsed from the given
+	 * text.
+	 * 
+	 * @param text     the IMP program to parse
+	 * @param onlyMain true iff the only entry point is the main method
+	 * 
+	 * @return the resulting {@link Program}
+	 * 
+	 * @throws ParsingException if this frontend is unable to parse the text
+	 */
+	public static Program processText(String text, boolean onlyMain) throws ParsingException {
 		try (InputStream is = new ByteArrayInputStream(text.getBytes())) {
-			return new IMPFrontend("in-memory.imp").work(is);
+			return new IMPFrontend("in-memory.imp", onlyMain).work(is);
 		} catch (IOException e) {
 			throw new ParsingException("Exception while parsing the input text", e);
 		}
@@ -114,10 +152,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private CompilationUnit currentUnit;
 
-	private IMPFrontend(String file) {
+	private final boolean onlyMain;
+
+	private IMPFrontend(String file, boolean onlyMain) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
 		program = new Program();
+		this.onlyMain = onlyMain;
 	}
 
 	private Program work(InputStream inputStream) throws ParsingException {
@@ -223,11 +264,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (CFG cfg : currentUnit.getInstanceCFGs(false))
+		for (CFG cfg : currentUnit.getInstanceCFGs(false)) {
 			if (currentUnit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
+			if (isEntryPoint(cfg))
+				program.addEntryPoint(cfg);
+		}
 
 		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
 			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
@@ -238,6 +282,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				throw new IMPSyntaxException("Duplicate global: " + global);
 
 		return currentUnit;
+	}
+
+	private boolean isEntryPoint(CFG cfg) {
+		if (!onlyMain)
+			return true;
+		else
+			return cfg.getDescriptor().getName().equals("main");
 	}
 
 	@Override

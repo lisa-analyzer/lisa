@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -71,6 +72,16 @@ public class BinaryExpression extends ValueExpression {
 	 */
 	public BinaryOperator getOperator() {
 		return operator;
+	}
+
+	@Override
+	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
+		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator);
+	}
+
+	@Override
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator);
 	}
 
 	@Override

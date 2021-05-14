@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.nonrelational;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
@@ -10,11 +11,14 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -233,6 +237,61 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	public final boolean isBottom() {
 		return lattice.isBottom() && function == null;
 	}
+
+	@Override
+	public M pushScope(ScopeToken scope) throws SemanticException {
+		return liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
+	}
+
+	@Override
+	public M popScope(ScopeToken scope) throws SemanticException {
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+
+		M result = liftIdentifiers(id -> {
+			if (id instanceof OutOfScopeIdentifier)
+				try {
+					return (Identifier) id.popScope(scope);
+				} catch (SemanticException e) {
+					holder.set(e);
+				}
+			return null;
+		});
+
+		if (holder.get() != null)
+			throw new SemanticException("Popping the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private M liftIdentifiers(Function<Identifier, Identifier> lifter) throws SemanticException {
+		if (isBottom() || isTop())
+			return (M) this;
+
+		Map<Identifier, T> function = mkNewFunction(null);
+		for (Identifier id : getKeys()) {
+			Identifier lifted = lifter.apply(id);
+			if (lifted != null)
+				function.put(lifted, getState(id));
+		}
+
+		return mk(lattice, function);
+	}
+
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param lattice  a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * 
+	 * @return a new instance of this environment
+	 */
+	protected abstract M mk(T lattice, Map<Identifier, T> function);
 
 	@Override
 	@SuppressWarnings("unchecked")

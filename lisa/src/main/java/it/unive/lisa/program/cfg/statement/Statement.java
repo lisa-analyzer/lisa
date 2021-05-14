@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -87,8 +87,9 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
-		return prime * result;
+		int result = 1;
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		return result;
 	}
 
 	/**
@@ -117,8 +118,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 		if (location == null) {
 			if (st.location == null)
 				return true;
-		} else if (!location.equals(st.location)) // checking source code
-													// location
+		} else if (!location.equals(st.location))
 			return false;
 		return true;
 	}
@@ -130,20 +130,22 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 * Computes the semantics of the statement, expressing how semantic
 	 * information is transformed by the execution of this statement. This
 	 * method is also responsible for recursively invoking the
-	 * {@link #semantics(AnalysisState, CallGraph, StatementStore)} of each
-	 * nested {@link Expression}, saving the result of each call in
+	 * {@link #semantics(AnalysisState, InterproceduralAnalysis, StatementStore)}
+	 * of each nested {@link Expression}, saving the result of each call in
 	 * {@code expressions}.
 	 * 
-	 * @param <A>         the type of {@link AbstractState}
-	 * @param <H>         the type of the {@link HeapDomain}
-	 * @param <V>         the type of the {@link ValueDomain}
-	 * @param entryState  the entry state that represents the abstract values of
-	 *                        each program variable and memory location when the
-	 *                        execution reaches this statement
-	 * @param callGraph   the call graph of the program to analyze
-	 * @param expressions the cache where analysis states of intermediate
-	 *                        expressions must be stored
-	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param <H>             the type of the {@link HeapDomain}
+	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param entryState      the entry state that represents the abstract
+	 *                            values of each program variable and memory
+	 *                            location when the execution reaches this
+	 *                            statement
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored
+	 *
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this statement
 	 * 
@@ -152,7 +154,8 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, CallGraph callGraph, StatementStore<A, H, V> expressions)
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException;
 
 	@Override

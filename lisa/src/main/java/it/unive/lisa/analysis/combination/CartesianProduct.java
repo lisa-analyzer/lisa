@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.combination;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -149,6 +150,21 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 		T1 newLeft = left.forgetIdentifier(id);
 		T2 newRight = right.forgetIdentifier(id);
 		return mk(newLeft, newRight);
+	}
+
+	@Override
+	public C pushScope(ScopeToken scope) throws SemanticException {
+		T1 newLeft = left.pushScope(scope);
+		T2 newRight = right.pushScope(scope);
+		return mk(newLeft, newRight);
+	}
+
+	@Override
+	public C popScope(ScopeToken scope) throws SemanticException {
+		T1 newLeft = left.popScope(scope);
+		T2 newRight = right.popScope(scope);
+		return mk(newLeft, newRight);
+
 	}
 
 	@Override

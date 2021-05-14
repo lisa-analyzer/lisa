@@ -1,18 +1,20 @@
-package it.unive.lisa.callgraph;
+package it.unive.lisa.interprocedural.callgraph;
+
+import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 
 /**
- * An exception that occurred while building the callgraph.
+ * An exception that occurred while resolving an {@link UnresolvedCall}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphConstructionException extends Exception {
+public class CallResolutionException extends Exception {
 
-	private static final long serialVersionUID = 3751365560725223528L;
+	private static final long serialVersionUID = -284151525683946469L;
 
 	/**
 	 * Builds the exception.
 	 */
-	public CallGraphConstructionException() {
+	public CallResolutionException() {
 		super();
 	}
 
@@ -22,7 +24,7 @@ public class CallGraphConstructionException extends Exception {
 	 * @param message the message of this exception
 	 * @param cause   the cause of this exception
 	 */
-	public CallGraphConstructionException(String message, Throwable cause) {
+	public CallResolutionException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
@@ -31,7 +33,7 @@ public class CallGraphConstructionException extends Exception {
 	 * 
 	 * @param message the message of this exception
 	 */
-	public CallGraphConstructionException(String message) {
+	public CallResolutionException(String message) {
 		super(message);
 	}
 
@@ -40,7 +42,7 @@ public class CallGraphConstructionException extends Exception {
 	 * 
 	 * @param cause the cause of this exception
 	 */
-	public CallGraphConstructionException(Throwable cause) {
+	public CallResolutionException(Throwable cause) {
 		super(cause);
 	}
 

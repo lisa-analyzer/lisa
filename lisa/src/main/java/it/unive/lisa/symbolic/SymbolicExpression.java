@@ -1,7 +1,10 @@
 package it.unive.lisa.symbolic;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -45,6 +48,35 @@ public abstract class SymbolicExpression {
 	public final Type getDynamicType() {
 		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
+
+	/**
+	 * Pushes a new scope, identified by the give token, in the expression. This
+	 * causes all {@link Variable}s to become {@link OutOfScopeIdentifier}s
+	 * associated with the given token.
+	 *
+	 * @param token the token identifying the scope to push
+	 * 
+	 * @return a copy of this expression where the local variables have gone out
+	 *             of scope
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract SymbolicExpression pushScope(ScopeToken token) throws SemanticException;
+
+	/**
+	 * Pops the scope identified by the given token from the expression. This
+	 * causes all the invisible variables (i.e. {@link OutOfScopeIdentifier}s)
+	 * mapped to the given scope to become visible (i.e. {@link Variable}s)
+	 * again.
+	 *
+	 * @param token the token of the scope to be restored
+	 * 
+	 * @return a copy of this expression where the local variables associated
+	 *             with the given scope are visible again
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract SymbolicExpression popScope(ScopeToken token) throws SemanticException;
 
 	/**
 	 * Accepts an {@link ExpressionVisitor}, visiting this expression

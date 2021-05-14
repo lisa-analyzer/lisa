@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -25,4 +27,15 @@ public abstract class HeapExpression extends SymbolicExpression {
 		super(types);
 	}
 
+	// By default a heap expression does not change the scope.
+	@Override
+	public final SymbolicExpression pushScope(ScopeToken token) {
+		return this;
+	}
+
+	// By default a heap expression does not change the scope.
+	@Override
+	public final SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		return this;
+	}
 }

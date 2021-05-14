@@ -64,6 +64,11 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
+	protected HeapEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+		return new HeapEnvironment<>(lattice, function);
+	}
+
+	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return lattice.rewrite(expression, this, pp);

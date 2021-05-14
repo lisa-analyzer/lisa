@@ -1,5 +1,7 @@
-package it.unive.lisa.analysis.dataflow.impl;
+package it.unive.lisa.analysis.impl.dataflow;
 
+import it.unive.lisa.analysis.ScopeToken;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -10,6 +12,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -172,5 +175,18 @@ public class ConstantPropagation
 	@Override
 	public DomainRepresentation representation() {
 		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(v));
+	}
+
+	@Override
+	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
+		return new ConstantPropagation((Identifier) id.pushScope(scope), v);
+	}
+
+	@Override
+	public ConstantPropagation popScope(ScopeToken scope) throws SemanticException {
+		if (!(id instanceof OutOfScopeIdentifier))
+			return this;
+
+		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), v);
 	}
 }

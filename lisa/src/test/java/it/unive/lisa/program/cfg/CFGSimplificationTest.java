@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -109,10 +109,9 @@ public class CFGSimplificationTest {
 		protected <A extends AbstractState<A, H, V>,
 				H extends HeapDomain<H>,
 				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-						AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> leftState,
-						SymbolicExpression left,
-						AnalysisState<A, H, V> rightState,
-						SymbolicExpression right) throws SemanticException {
+						AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+						AnalysisState<A, H, V> leftState, SymbolicExpression left,
+						AnalysisState<A, H, V> rightState, SymbolicExpression right) throws SemanticException {
 			return rightState;
 		}
 	}
@@ -126,11 +125,12 @@ public class CFGSimplificationTest {
 		protected <A extends AbstractState<A, H, V>,
 				H extends HeapDomain<H>,
 				V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-						AnalysisState<A, H, V> entryState, CallGraph callGraph, AnalysisState<A, H, V> exprState,
-						SymbolicExpression expr)
+						AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+						AnalysisState<A, H, V> exprState, SymbolicExpression expr)
 						throws SemanticException {
 			return entryState;
 		}
+
 	}
 
 	@Test
