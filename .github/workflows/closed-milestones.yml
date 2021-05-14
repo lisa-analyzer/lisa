@@ -17,5 +17,5 @@ jobs:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
     - name: Print the URL of the release draft
       if: ${{ steps.create-release-milestone.outputs.release-url != '' }}
-      run: echo "Release draft: ${{ steps.create-release-draft.outputs.release-url }}"
+      run: echo Released drafted to ${{ steps.create-release-draft.outputs.release-url }}
   
