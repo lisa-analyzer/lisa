@@ -1,4 +1,9 @@
-*                  @lucaneg @VincenzoArceri
-.github/*          @lucaneg
-LICENSE            @lucaneg @VincenzoArceri
-/lisa/build.gradle @lucaneg
+.github/*                       @lucaneg
+LICENSE                         @lucaneg
+*.md                            @lucaneg
+logo.png                        @lucaneg
+/lisa/*.gradle                  @lucaneg
+/lisa/checkstyle-config.xml     @lucaneg
+/lisa/spotless-formatting.xml   @lucaneg
+/lisa/gradle/*                  @lucaneg
+*                               @lucaneg @VincenzoArceri

@@ -31,3 +31,26 @@ javadoc {
         options.addBooleanOption('html5', true)
     }
 }
+
+test {
+	filter {
+		includeTestsMatching "it.unive.lisa.*"
+		excludeTestsMatching "it.unive.lisa.cron.*"
+	}
+}
+
+tasks.register('cron', Test) {
+    description = 'Runs cron tests'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    
+    filter {
+		includeTestsMatching "it.unive.lisa.cron.*"
+	}
+}
+
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
+}
