@@ -13,3 +13,4 @@ jobs:
       - uses: docker://chinthakagodawita/autoupdate-action:v1
         env:
           GITHUB_TOKEN: ${{ secrets.SSVPAT }}
+          MERGE_CONFLICT_ACTION: "ignore"
