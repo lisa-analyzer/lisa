@@ -17,11 +17,3 @@ jobs:
         project: LiSA
         column: DONE
         repo-token: ${{ secrets.SSVPAT }}
-    - name: Create missing milestone comment
-      if: ${{ github.event.milestone == null }}
-      uses: peter-evans/create-or-update-comment@v1
-      with:
-        issue-number: ${{ github.event.number }}
-        body: |
-          This issue has been marked as resolved but no milestone
-          is set. Link it to an existing milestone or create a new one.
