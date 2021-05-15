@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: 'Ensure git is installed'
-      run: apt-get install -y git
+      run: sudo apt-get install -y git
     - name: 'Checkout all branches'
       uses: actions/checkout@v2
       with:
