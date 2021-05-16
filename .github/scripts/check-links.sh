@@ -1,9 +1,5 @@
 #!/bin/sh
 
-declare -a whitelist=(
-	"https://www.sciencedirect.com/science/article/pii/S0304397516300299"
-	)
-
 function check_link() {
 	# we remove any in-page anchor
 	polished=$(echo $link | cut -d'#' -f 1)
@@ -11,13 +7,6 @@ function check_link() {
 		# in-page link
 		return 0
 	fi
-	
-	for item in "${whitelist[@]}"; do
-		if [[ "$polished" == "$item" ]]; then
-			echo "- whitelisted: $polished"
-			return 0
-		fi
-	done
 
 	if [[ $polished == https://* ]]; then
 		curl -o /dev/null -Ifs "$polished"

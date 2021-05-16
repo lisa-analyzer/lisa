@@ -3,6 +3,7 @@ name: 'Cron scheduler'
 on:
   schedule:
     - cron:  '0 0 * * *'
+  workflow_dispatch:
     
 jobs:
   scheduler:
@@ -11,30 +12,32 @@ jobs:
     steps:
     - name: 'Ensure git is installed'
       run: sudo apt-get install -y git
+    - name: 'Ensure jq is installed'
+      run: sudo apt-get install -y jq
     - name: 'Checkout all branches'
       uses: actions/checkout@v2
       with:
         fetch-depth: 0
-    - run: |
+    - name: 'Scan all open branches'
+      run: |
         for source in $(git for-each-ref --format='%(refname:lstrip=3)' refs/remotes/origin/); do
-          echo "Evaluating branch: $source"
+          echo "+ Evaluating branch: $source"
           if [ "$source" = "HEAD" ] || [ "$source" = "master" ] || [ "$source" = "gh-pages" ]; then
-            echo "  Skipping branch $source"
+            echo "+- Skipping branch $source"
             continue
           fi
           curl -sL https://api.github.com/repos/$GITHUB_REPOSITORY/commits?sha=$source | jq -r '[.[]][0]' > commit.json
-          echo "Last commit: $(cat commit.json)"
           date="$(jq -r '.commit.author.date' commit.json)"
           timestamp=$(date -u -d "$date" +%s)
           days=$(( ( $(date -u +%s) - $timestamp ) / 86400 ))
-          echo "  Last commit was $days ago"
+          echo "+- Last commit was $days days ago"
           if [ $days -lt 1 ]; then
-            echo "  Launching cron tests on $source"
+            echo "+- Launching cron tests on $source"
             curl -X POST -H "Accept: application/vnd.github.v3+json" \
               https://api.github.com/repos/$GITHUB_REPOSITORY/actions/workflows/cron-runner.yml/dispatches \
               -d '{ "ref" : "$source", "inputs" : { "source" : "$source" }}' \
               -u ${{ secrets.SSVPAT }} 
           else
-            echo "  Skipping cron tests on $source"
+            echo "+- Skipping cron tests on $source"
           fi
         done
