@@ -1,6 +1,6 @@
 #!/bin/sh
 
-function check_link() {
+function check_link {
 	# we remove any in-page anchor
 	polished=$(echo $link | cut -d'#' -f 1)
 	if [ -z "$polished" ]; then
