@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function check_link {
 	# we remove any in-page anchor
