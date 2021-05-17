@@ -7,6 +7,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -44,6 +45,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 
 		@Override
 		public InferredPair<T> visit(HeapAllocation expression, Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+		
+		@Override
+		public InferredPair<T> visit(HeapReference expression, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 

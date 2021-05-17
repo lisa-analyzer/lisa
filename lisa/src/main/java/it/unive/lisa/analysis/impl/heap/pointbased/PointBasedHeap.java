@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -376,12 +377,23 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					result = singleton(id);
 				else
 					result = result.stream()
-							.map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId()))
-							.collect(Collectors.toSet());
+					.map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId()))
+					.collect(Collectors.toSet());
 				return new ExpressionSet<>(result);
 			}
 
 			return new ExpressionSet<>(id);
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
+				throws SemanticException {
+			Set<ValueExpression> result = new HashSet<>();
+			for (AllocationSites sites : heapEnv.values())
+				for (AllocationSite site : sites)
+					if (site.getName().equals(expression.getName()))
+						result.add(site);
+			return new ExpressionSet<>(result);
 		}
 	}
 }

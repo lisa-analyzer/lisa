@@ -11,6 +11,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -195,6 +196,14 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			for (Type t : types)
 				if (t.isPointerType())
 					result.add(new HeapLocation(types, t.toString(), true));
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
+				throws SemanticException {
+			Set<ValueExpression> result = new HashSet<>();
+			result.add(new HeapLocation(expression.getTypes(), expression.getName(), true));
 			return new ExpressionSet<>(result);
 		}
 	}
