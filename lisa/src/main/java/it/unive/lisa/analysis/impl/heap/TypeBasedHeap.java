@@ -129,6 +129,9 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(names);
 		}
+		
+		if (expression instanceof HeapReference)
+			return new TypeBasedHeap(names);
 
 		return top();
 	}
@@ -202,9 +205,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			result.add(new HeapLocation(expression.getTypes(), expression.getName(), true));
-			return new ExpressionSet<>(result);
+			return new ExpressionSet<>(Collections.singleton(expression.getLocation()));
 		}
 	}
 }

@@ -113,6 +113,10 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	@Override
 	protected InferredPair<InferredTypes> evalIdentifier(Identifier id, InferenceSystem<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
+		
+		if (id.getDynamicType().isPointerType())
+			return mk(new InferredTypes(id.getTypes()));
+
 		InferredPair<InferredTypes> eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.getInferred().isTop() && !eval.getInferred().isBottom())
 			return eval;

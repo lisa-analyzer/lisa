@@ -303,6 +303,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return from(new PointBasedHeap(applySubstitutions(heapEnv, substitution), substitution));
 		}
 
+		if (expression instanceof HeapReference) 
+			return from(new PointBasedHeap(heapEnv, substitutions));
+		
 		return top();
 	}
 
@@ -388,12 +391,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
 				throws SemanticException {
-			Set<ValueExpression> result = new HashSet<>();
-			for (AllocationSites sites : heapEnv.values())
-				for (AllocationSite site : sites)
-					if (site.getName().equals(expression.getName()))
-						result.add(site);
-			return new ExpressionSet<>(result);
+			return new ExpressionSet<>(Collections.singleton(expression.getLocation()));
 		}
 	}
 }

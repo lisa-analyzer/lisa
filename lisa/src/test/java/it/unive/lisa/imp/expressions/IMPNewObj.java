@@ -1,5 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,9 +18,10 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -49,11 +52,11 @@ public class IMPNewObj extends NativeCall {
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
-					ExpressionSet<SymbolicExpression>[] params)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+			AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+			AnalysisState<A, H, V>[] computedStates,
+			ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
@@ -67,8 +70,18 @@ public class IMPNewObj extends NativeCall {
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		AnalysisState<A, H, V> sem = call.callSemantics(entryState, interprocedural, computedStates, fullParams);
+
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
-		return sem.smallStepSemantics(created, this);
+		
+		sem = sem.smallStepSemantics(created, call);
+		
+		AnalysisState<A, H, V> result = entryState.bottom();
+
+		for (SymbolicExpression loc : sem.getComputedExpressions()) 
+			if (loc instanceof HeapLocation) 
+				result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), (HeapLocation) loc), call));
+			
+		return result;
 	}
 }

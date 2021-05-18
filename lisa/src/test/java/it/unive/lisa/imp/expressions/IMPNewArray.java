@@ -14,6 +14,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 
 /**
@@ -54,7 +56,15 @@ public class IMPNewArray extends NativeCall {
 		// parameters of this call
 		// (the semantics of this call does not need information about the
 		// intermediate analysis states)
-		AnalysisState<A, H, V> lastPostState = computedStates[computedStates.length - 1];
-		return lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()), this);
+		AnalysisState<A, H, V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
+		AnalysisState<A, H, V> sem = lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()), this);
+
+		AnalysisState<A, H, V> result = entryState.bottom();
+		
+		for (SymbolicExpression loc : sem.getComputedExpressions()) 
+			if (loc instanceof HeapLocation) 
+				result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), (HeapLocation) loc), this));
+
+		return result;
 	}
 }

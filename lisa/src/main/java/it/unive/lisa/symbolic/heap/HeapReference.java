@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -15,7 +16,7 @@ public class HeapReference extends HeapExpression {
 	/**
 	 * The name representing the memory location
 	 */
-	private final String name;
+	private final HeapLocation loc;
 
 	/**
 	 * Builds the heap reference.
@@ -23,9 +24,9 @@ public class HeapReference extends HeapExpression {
 	 * @param types the runtime types of this expression
 	 * @param name  the name that identifies the memory location
 	 */
-	public HeapReference(ExternalSet<Type> types, String name) {
+	public HeapReference(ExternalSet<Type> types, HeapLocation loc) {
 		super(types);
-		this.name = name;
+		this.loc = loc;
 	}
 
 	/**
@@ -33,15 +34,24 @@ public class HeapReference extends HeapExpression {
 	 * 
 	 * @return the name
 	 */
-	public final String getName() {
-		return name;
+	public final HeapLocation getLocation() {
+		return loc;
 	}
 
+
+
+	@Override
+	public String toString() {
+		return "ref$" + loc.getName();
+	}
+
+	
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + ((loc == null) ? 0 : loc.hashCode());
 		return result;
 	}
 
@@ -54,17 +64,12 @@ public class HeapReference extends HeapExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		HeapReference other = (HeapReference) obj;
-		if (name == null) {
-			if (other.name != null)
+		if (loc == null) {
+			if (other.loc != null)
 				return false;
-		} else if (!name.equals(other.name))
+		} else if (!loc.equals(other.loc))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "ref$" + name;
 	}
 
 	@Override
