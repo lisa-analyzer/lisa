@@ -1,0 +1,19 @@
+name: Move resolved issues
+
+on:
+  issues:
+    types:
+      - labeled
+
+jobs:
+  move_issues:
+    if: github.event.label.name == 'resolved'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Move to the DONE column
+      uses: alex-page/github-project-automation-plus@v0.7.1
+      with:
+        project: LiSA
+        column: DONE
+        repo-token: ${{ secrets.SSVPAT }}

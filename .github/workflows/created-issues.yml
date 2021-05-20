@@ -1,0 +1,20 @@
+name: Import created issues
+
+on:
+  issues:
+    types:
+      - opened
+      - reopened
+
+jobs:
+  move_issues:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Move to the TODO column
+      uses: alex-page/github-project-automation-plus@v0.7.1
+      with:
+        project: LiSA
+        column: TODO
+        repo-token: ${{ secrets.SSVPAT }}
+    

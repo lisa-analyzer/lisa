@@ -1,0 +1,19 @@
+name: Label ready prs
+
+on:
+  pull_request:
+    types:
+      - unlabeled
+
+jobs:
+  move_prs:
+    if: github.event.label.name == 'resolved'
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Move to the PR-READY column
+      uses: alex-page/github-project-automation-plus@v0.7.1
+      with:
+        project: LiSA
+        column: PR-READY
+        repo-token: ${{ secrets.SSVPAT }}

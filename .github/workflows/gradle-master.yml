@@ -1,12 +1,13 @@
-name: 'PR: compile, test and check style'
+name: 'Gradle Build (master)'
 
 on:
-  pull_request:
-    branches: [ master ]
+  push:
+    branches: 
+      - 'master'
 
 jobs:
-  build-and-check:
-    name: 'Compile, execute all tests, check code style'
+  build-and-cron:
+    name: 'Run a full gradle build and execute cron tests'
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout'
@@ -17,8 +18,8 @@ jobs:
         java-version: 11
     - name: 'Grant execute permission for gradlew'
       run: chmod +x lisa/gradlew
-    - name: 'Gradle: full build, run all tests and check code style'
-      run: cd lisa && ./gradlew build cron checkCodeStyle
+    - name: 'Gradle: full build and run cron tests'
+      run: cd lisa && ./gradlew build cron
     - name: 'Publish unit test results'
       uses: EnricoMi/publish-unit-test-result-action@v1.6
       if: always()

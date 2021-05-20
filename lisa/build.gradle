@@ -50,6 +50,9 @@ plugins {
     // publication on maven central
     id 'maven-publish'
     id 'signing'
+    
+    // coverage reports
+    id 'jacoco'
 }
 
 // the code reading data from the git repo has to be placed in the same file where its

@@ -1,0 +1,21 @@
+name: Create release draft on closed milestone
+
+on:
+  milestone:
+    types:
+      - closed
+
+jobs:
+  move_prs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Create a release draft for a milestone
+      id: create-release-milestone
+      uses: ecampidoglio/auto-release-milestone@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Print the URL of the release draft
+      if: ${{ steps.create-release-milestone.outputs.release-url != '' }}
+      run: echo Released drafted to ${{ steps.create-release-draft.outputs.release-url }}
+  

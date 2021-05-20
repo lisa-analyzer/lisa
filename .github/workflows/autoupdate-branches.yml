@@ -1,0 +1,17 @@
+name: Autoupdate PRs on master
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  autoupdate:
+    name: autoupdate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker://chinthakagodawita/autoupdate-action:v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.SSVPAT }}
+          MERGE_CONFLICT_ACTION: "ignore"
