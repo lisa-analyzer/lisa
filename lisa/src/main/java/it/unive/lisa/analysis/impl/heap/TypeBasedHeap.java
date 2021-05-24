@@ -37,7 +37,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
 
-	private final Set<String> names;
+	protected final Set<String> names;
 
 	/**
 	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
@@ -129,7 +129,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(names);
 		}
-		
+
 		if (expression instanceof HeapReference)
 			return new TypeBasedHeap(names);
 
@@ -176,7 +176,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		return true;
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	protected class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -205,7 +205,9 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(Collections.singleton(expression.getLocation()));
+			if (names.contains(expression.getLocation().getName()))
+				return new ExpressionSet<>(Collections.singleton(new HeapLocation(expression.getTypes(), expression.getLocation().getName(), true)));
+			throw new SemanticException("Heap location " + expression.getLocation() + " not allocated");
 		}
 	}
 }

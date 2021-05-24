@@ -305,7 +305,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		if (expression instanceof HeapReference) 
 			return from(new PointBasedHeap(heapEnv, substitutions));
-		
+
 		return top();
 	}
 
@@ -391,7 +391,28 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(Collections.singleton(expression.getLocation()));
+
+			HeapLocation loc = expression.getLocation();
+			for (AllocationSites sites : heapEnv.values())
+				for (AllocationSite site : sites)
+					if (site.getName().equals(loc.getName()))
+						return new ExpressionSet<>(Collections.singleton(new AllocationSite(expression.getTypes(), site.getId(), site.isWeak())));
+		
+			// Check if the allocation site, at that point, has not been
+			// already allocated but must be rewritten
+			Set<ValueExpression> result = null;
+			for (HeapReplacement r : substitutions)
+				if (r.getSources().stream().anyMatch(id -> id.getName().equals(loc.getName())))
+					result = r.getTargets().stream().map(e -> (ValueExpression) e).collect(Collectors.toSet());
+
+			if (result == null)
+				result = singleton(loc);
+			else
+				result = result.stream()
+				.map(l -> new AllocationSite(expression.getTypes(), ((AllocationSite) l).getId(), ((AllocationSite) l).isWeak()))
+				.collect(Collectors.toSet());
+			
+			return new ExpressionSet<>(result);
 		}
 	}
 }
