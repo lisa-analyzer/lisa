@@ -12,14 +12,10 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.atomic.AtomicBoolean;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 
 /**
  * The interval abstract domain, approximating integer values as the minimum
@@ -35,38 +31,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
-	private static final Interval TOP = new Interval(null, null, true);
-	private static final Interval BOTTOM = new Interval(null, null, false);
+	private static final Interval ZERO = new Interval(IntInterval.ZERO);
+	private static final Interval TOP = new Interval(IntInterval.INFINITY);
+	private static final Interval BOTTOM = new Interval(null);
 
-	private final boolean isTop;
+	final IntInterval interval;
 
-	private final Integer low;
-	private final Integer high;
-
-	private Interval(Integer low, Integer high, boolean isTop) {
-		this.low = low;
-		this.high = high;
-		this.isTop = isTop;
+	private Interval(IntInterval interval) {
+		this.interval = interval;
 	}
 
-	/**
-	 * Builds an interval from its low bound and high bound. Call this
-	 * constructor iff {@code low} and {@code high} are not both null. If you
-	 * need to build top or bottom elements, call {@link Interval#top()} and
-	 * {@link Interval#bottom()}, respectively.
-	 * 
-	 * @param low  the low bound
-	 * @param high the high bound
-	 */
-	public Interval(Integer low, Integer high) {
-		this(low, high, false);
+	private Interval(MathNumber low, MathNumber high) {
+		this(new IntInterval(low, high));
 	}
 
 	/**
 	 * Builds the top interval.
 	 */
 	public Interval() {
-		this(null, null, true);
+		this(IntInterval.INFINITY);
 	}
 
 	@Override
@@ -76,7 +59,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	public boolean isTop() {
-		return isTop && low == null && low == high;
+		return interval != null && interval.isInfinity();
 	}
 
 	@Override
@@ -86,48 +69,22 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	public boolean isBottom() {
-		return !isTop && low == null && low == high;
-	}
-
-	/**
-	 * Yields the high bound of this interval.
-	 * 
-	 * @return the high bound of this interval.
-	 */
-	public Integer getHigh() {
-		return high;
-	}
-
-	/**
-	 * Yields the low bound of this interval.
-	 * 
-	 * @return the low bound of this interval.
-	 */
-	public Integer getLow() {
-		return low;
+		return interval == null;
 	}
 
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.BOTTOM_REPR;
-		if (isTop())
-			return Lattice.TOP_REPR;
 
-		return new StringRepresentation("[" + (lowIsMinusInfinity() ? "-Inf" : low) + ", "
-				+ (highIsPlusInfinity() ? "+Inf" : high) + "]");
-	}
-
-	@Override
-	protected Interval evalNullConstant(ProgramPoint pp) {
-		return top();
+		return new StringRepresentation(interval.toString());
 	}
 
 	@Override
 	protected Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
-			return new Interval(i, i);
+			return new Interval(new MathNumber(i), new MathNumber(i));
 		}
 
 		return top();
@@ -139,207 +96,84 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		case NUMERIC_NEG:
 			if (arg.isTop())
 				return top();
-			return arg.mul(new Interval(-1, -1));
+			return new Interval(arg.interval.mul(IntInterval.MINUS_ONE));
 		case STRING_LENGTH:
-			return new Interval(0, null);
+			return new Interval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 		default:
 			return top();
 		}
 	}
 
 	private boolean is(int n) {
-		if (low == null || high == null)
-			return false;
-
-		return low == n && high == n;
+		return !isBottom() && interval.is(n);
 	}
 
 	@Override
 	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
+		if (operator != BinaryOperator.NUMERIC_DIV && (left.isTop() || right.isTop()))
+			// with div, we can return zero or bottom even if one of the
+			// operands is top
+			return top();
+
 		switch (operator) {
 		case NUMERIC_ADD:
-			if (left.isTop() || right.isTop())
-				return top();
-			return left.plus(right);
+			return new Interval(left.interval.plus(right.interval));
 		case NUMERIC_SUB:
-			if (left.isTop() || right.isTop())
-				return top();
-			return left.diff(right);
+			return new Interval(left.interval.diff(right.interval));
 		case NUMERIC_MUL:
 			if (left.is(0) || right.is(0))
-				return new Interval(0, 0);
-
-			if (left.isTop() || right.isTop())
-				return top();
-
-			return left.mul(right);
+				return ZERO;
+			return new Interval(left.interval.mul(right.interval));
 		case NUMERIC_DIV:
 			if (right.is(0))
 				return bottom();
-
 			if (left.is(0))
-				return new Interval(0, 0);
-
+				return ZERO;
 			if (left.isTop() || right.isTop())
 				return top();
 
-			return left.div(right);
-		case NUMERIC_MOD:
-			return top();
+			return new Interval(left.interval.div(right.interval, false, false));
 		default:
 			return top();
 		}
 	}
 
 	@Override
-	protected Interval evalTernaryExpression(TernaryOperator operator, Interval left, Interval middle, Interval right,
-			ProgramPoint pp) {
-		return top();
-	}
-
-	@Override
 	protected Interval lubAux(Interval other) throws SemanticException {
-		Integer newLow = lowIsMinusInfinity() || other.lowIsMinusInfinity() ? null : Math.min(low, other.low);
-		Integer newHigh = highIsPlusInfinity() || other.highIsPlusInfinity() ? null : Math.max(high, other.high);
-		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
+		MathNumber newLow = interval.getLow().min(other.interval.getLow());
+		MathNumber newHigh = interval.getHigh().max(other.interval.getHigh());
+		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
-	public Interval glbAux(Interval other) {
-		Integer newLow = lowIsMinusInfinity() ? other.low : other.lowIsMinusInfinity() ? low : Math.max(low, other.low);
-		Integer newHigh = highIsPlusInfinity() ? other.high
-				: other.highIsPlusInfinity() ? high : Math.min(high, other.high);
+	protected Interval glbAux(Interval other) {
+		MathNumber newLow = interval.getLow().max(other.interval.getLow());
+		MathNumber newHigh = interval.getHigh().min(other.interval.getHigh());
 
-		if (newLow != null && newHigh != null && newLow > newHigh)
+		if (newLow.compareTo(newHigh) > 0)
 			return bottom();
-		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
+		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
 	protected Interval wideningAux(Interval other) throws SemanticException {
-		Integer newLow, newHigh;
-		if (other.highIsPlusInfinity() || (!highIsPlusInfinity() && other.high > high))
-			newHigh = null;
+		MathNumber newLow, newHigh;
+		if (other.interval.getHigh().compareTo(interval.getHigh()) > 0)
+			newHigh = MathNumber.PLUS_INFINITY;
 		else
-			newHigh = other.high;
+			newHigh = interval.getHigh();
 
-		if (other.lowIsMinusInfinity() || (!lowIsMinusInfinity() && other.low < low))
-			newLow = null;
+		if (other.interval.getLow().compareTo(interval.getLow()) < 0)
+			newLow = MathNumber.MINUS_INFINITY;
 		else
-			newLow = other.low;
+			newLow = interval.getLow();
 
-		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
+		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
 	protected boolean lessOrEqualAux(Interval other) throws SemanticException {
-		return geqLow(low, other.low) && leqHigh(high, other.high);
-	}
-
-	private boolean lowIsMinusInfinity() {
-		return low == null;
-	}
-
-	private boolean highIsPlusInfinity() {
-		return high == null;
-	}
-
-	private Interval plus(Interval other) {
-		Integer newLow, newHigh;
-
-		if (lowIsMinusInfinity() || other.lowIsMinusInfinity())
-			newLow = null;
-		else
-			newLow = low + other.low;
-
-		if (highIsPlusInfinity() || other.highIsPlusInfinity())
-			newHigh = null;
-		else
-			newHigh = high + other.high;
-
-		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
-	}
-
-	private Interval diff(Interval other) {
-		Integer newLow, newHigh;
-
-		if (other.highIsPlusInfinity() || lowIsMinusInfinity())
-			newLow = null;
-		else
-			newLow = low - other.high;
-
-		if (other.lowIsMinusInfinity() || highIsPlusInfinity())
-			newHigh = null;
-		else
-			newHigh = high - other.low;
-
-		return newLow == null && newLow == newHigh ? top() : new Interval(newLow, newHigh);
-	}
-
-	private Interval mul(Interval other) {
-		// this = [l1, h1]
-		// other = [l2, h2]
-
-		SortedSet<Integer> boundSet = new TreeSet<>();
-		Integer l1 = low;
-		Integer h1 = high;
-		Integer l2 = other.low;
-		Integer h2 = other.high;
-
-		AtomicBoolean lowInf = new AtomicBoolean(false), highInf = new AtomicBoolean(false);
-
-		// x1 * y1
-		multiplyBounds(boundSet, l1, l2, lowInf, highInf);
-
-		// x1 * y2
-		multiplyBounds(boundSet, l1, h2, lowInf, highInf);
-
-		// x2 * y1
-		multiplyBounds(boundSet, h1, l2, lowInf, highInf);
-
-		// x2 * y2
-		multiplyBounds(boundSet, h1, h2, lowInf, highInf);
-
-		Interval result = new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
-		if (result.low == null && result.high == result.low)
-			return top();
-		else
-			return result;
-	}
-
-	private Interval div(Interval other) {
-		// this = [l1, h1]
-		// other = [l2, h2]
-
-		SortedSet<Integer> boundSet = new TreeSet<>();
-		Integer l1 = low;
-		Integer h1 = high;
-		Integer l2 = other.low;
-		Integer h2 = other.high;
-
-		AtomicBoolean lowInf = new AtomicBoolean(false), highInf = new AtomicBoolean(false);
-
-		// l1 / l2
-		divideBounds(boundSet, l1, l2, lowInf, highInf);
-
-		// x1 / y2
-		divideBounds(boundSet, l1, h2, lowInf, highInf);
-
-		// x2 / y1
-		divideBounds(boundSet, h2, l2, lowInf, highInf);
-
-		// x2 / y2
-		divideBounds(boundSet, h1, h2, lowInf, highInf);
-
-		Interval result = new Interval(lowInf.get() ? null : boundSet.first(), highInf.get() ? null : boundSet.last());
-		if (result.low == null && result.high == result.low)
-			return top();
-		else
-			return result;
-	}
-
-	private boolean isSingleton() {
-		return low != null && low == high;
+		return other.interval.includes(interval);
 	}
 
 	@Override
@@ -355,11 +189,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			try {
 				glb = left.glb(right);
 			} catch (SemanticException e) {
-				e.printStackTrace();
+				return Satisfiability.UNKNOWN;
 			}
+
 			if (glb.isBottom())
 				return Satisfiability.NOT_SATISFIED;
-			else if (left.isSingleton() && left.equals(right))
+			else if (left.interval.isSingleton() && left.equals(right))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		case COMPARISON_GE:
@@ -367,50 +202,36 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		case COMPARISON_GT:
 			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LT, right, left, pp);
 		case COMPARISON_LE:
-			Interval firstBound = right.high == null ? top() : new Interval(null, right.high);
-			Interval secondBound = left.low == null ? top() : new Interval(left.low, null);
-
-			Interval firstCheck = null;
-			Interval secondCheck = null;
-
+			glb = null;
 			try {
-				firstCheck = firstBound.glb(left);
-				secondCheck = secondBound.glb(right);
+				glb = left.glb(right);
 			} catch (SemanticException e) {
-				e.printStackTrace();
+				return Satisfiability.UNKNOWN;
 			}
 
-			if (firstCheck.isBottom() || secondCheck.isBottom())
-				return Satisfiability.NOT_SATISFIED;
-
-			if (firstCheck.equals(left) && secondCheck.equals(right))
+			if (glb.isBottom())
+				return Satisfiability.fromBoolean(left.interval.getHigh().compareTo(right.interval.getLow()) <= 0);
+			// we might have a singleton as glb if the two intervals share a bound
+			if (glb.interval.isSingleton() && left.interval.getHigh().compareTo(right.interval.getLow()) == 0)
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		case COMPARISON_LT:
-			firstBound = right.high == null ? top() : new Interval(null, right.high - 1);
-			secondBound = left.low == null ? top() : new Interval(left.low + 1, null);
-
-			firstCheck = null;
-			secondCheck = null;
-
+			glb = null;
 			try {
-				firstCheck = firstBound.glb(left);
-				secondCheck = secondBound.glb(right);
+				glb = left.glb(right);
 			} catch (SemanticException e) {
-				e.printStackTrace();
+				return Satisfiability.UNKNOWN;
 			}
 
-			if (firstCheck.isBottom() || secondCheck.isBottom())
-				return Satisfiability.NOT_SATISFIED;
-			if (firstCheck.equals(left) && secondCheck.equals(right))
-				return Satisfiability.SATISFIED;
+			if (glb.isBottom())
+				return Satisfiability.fromBoolean(left.interval.getHigh().compareTo(right.interval.getLow()) < 0);
 			return Satisfiability.UNKNOWN;
 		case COMPARISON_NE:
 			glb = null;
 			try {
 				glb = left.glb(right);
 			} catch (SemanticException e) {
-				e.printStackTrace();
+				return Satisfiability.UNKNOWN;
 			}
 			if (glb.isBottom())
 				return Satisfiability.SATISFIED;
@@ -420,122 +241,11 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		}
 	}
 
-	private void multiplyBounds(SortedSet<Integer> boundSet, Integer i, Integer j, AtomicBoolean lowInf,
-			AtomicBoolean highInf) {
-		if (i == null) {
-			if (j == null)
-				// -inf * -inf = +inf
-				highInf.set(true);
-			else {
-				if (j > 0)
-					// -inf * positive
-					lowInf.set(true);
-				else if (j < 0)
-					// -inf * negative
-					highInf.set(true);
-				else
-					boundSet.add(0);
-			}
-		} else if (j == null) {
-			if (i > 0)
-				// -inf * positive
-				lowInf.set(true);
-			else if (i < 0)
-				// -inf * negative
-				highInf.set(true);
-			else
-				boundSet.add(0);
-		} else
-			boundSet.add(i * j);
-	}
-
-	private void divideBounds(SortedSet<Integer> boundSet, Integer i, Integer j, AtomicBoolean lowInf,
-			AtomicBoolean highInf) {
-		if (i == null) {
-			if (j == null)
-				// -inf * -inf = +inf
-				highInf.set(true);
-			else {
-				if (j > 0)
-					// -inf * positive
-					lowInf.set(true);
-				else if (j < 0)
-					// -inf * negative
-					highInf.set(true);
-
-				// division by zero!
-			}
-		} else if (j == null) {
-			if (i > 0)
-				// -inf * positive
-				lowInf.set(true);
-			else if (i < 0)
-				// -inf * negative
-				highInf.set(true);
-			else
-				boundSet.add(0);
-		} else if (j != 0) {
-			boundSet.add((int) Math.ceil(i / (double) j));
-			boundSet.add((int) Math.floor(i / (double) j));
-		}
-		// division by zero!
-	}
-
-	/**
-	 * Given two interval lower bounds, yields {@code true} iff l1 >= l2, taking
-	 * into account -Inf values (i.e., when l1 or l2 is {@code null}.) This
-	 * method is used for the implementation of {@link Interval#lessOrEqualAux}.
-	 * 
-	 * @param l1 the lower bound of the first interval.
-	 * @param l2 the lower bounds of the second interval.
-	 * 
-	 * @return {@code true} iff iff l1 >= l2, taking into account -Inf values;
-	 */
-	private boolean geqLow(Integer l1, Integer l2) {
-		if (l1 == null) {
-			if (l2 == null)
-				return true;
-			else
-				return false;
-		} else {
-			if (l2 == null)
-				return true;
-			else
-				return l1 >= l2;
-		}
-	}
-
-	/**
-	 * Given two interval upper bounds, yields {@code true} iff h1 <= h2, taking
-	 * into account +Inf values (i.e., when h1 or h2 is {@code null}.) This
-	 * method is used for the implementation of {@link Interval#lessOrEqualAux}.
-	 * 
-	 * @param h1 the upper bound of the first interval.
-	 * @param h2 the upper bounds of the second interval.
-	 * 
-	 * @return {@code true} iff iff h1 <= h2, taking into account +Inf values;
-	 */
-	private boolean leqHigh(Integer h1, Integer h2) {
-		if (h1 == null) {
-			if (h2 == null)
-				return true;
-			else
-				return false;
-		} else {
-			if (h2 == null)
-				return false;
-			else
-				return h1 <= h2;
-		}
-	}
-
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((high == null) ? 0 : high.hashCode());
-		result = prime * result + (isTop ? 1231 : 1237);
-		result = prime * result + ((low == null) ? 0 : low.hashCode());
+		result = prime * result + ((interval == null) ? 0 : interval.hashCode());
 		return result;
 	}
 
@@ -548,17 +258,10 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		if (getClass() != obj.getClass())
 			return false;
 		Interval other = (Interval) obj;
-		if (high == null) {
-			if (other.high != null)
+		if (interval == null) {
+			if (other.interval != null)
 				return false;
-		} else if (!high.equals(other.high))
-			return false;
-		if (isTop != other.isTop)
-			return false;
-		if (low == null) {
-			if (other.low != null)
-				return false;
-		} else if (!low.equals(other.low))
+		} else if (!interval.equals(other.interval))
 			return false;
 		return true;
 	}
@@ -568,84 +271,52 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 
-		Map<Identifier, Interval> map = null;
+		Identifier id;
+		Interval eval;
+		boolean rightIsExpr;
+		if (left instanceof Identifier) {
+			eval = eval(right, environment, pp);
+			id = (Identifier) left;
+			rightIsExpr = true;
+		} else if (right instanceof Identifier) {
+			eval = eval(left, environment, pp);
+			id = (Identifier) right;
+			rightIsExpr = false;
+		} else
+			return environment;
 
-		if (environment.getMap() == null)
-			map = new HashMap<Identifier, Interval>();
-		else
-			map = new HashMap<>(environment.getMap());
+		if (eval.isBottom())
+			return environment.bottom();
+
+		boolean lowIsMinusInfinity = eval.interval.lowIsMinusInfinity();
+		Interval low_inf = new Interval(eval.interval.getLow(), MathNumber.PLUS_INFINITY);
+		Interval lowp1_inf = new Interval(eval.interval.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
+		Interval inf_high = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh());
+		Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh().subtract(MathNumber.ONE));
 
 		switch (operator) {
 		case COMPARISON_EQ:
-			if (left instanceof Identifier)
-				environment = environment.assign((Identifier) left, right, pp);
-			else if (right instanceof Identifier)
-				environment = environment.assign((Identifier) right, left, pp);
-			return environment;
+			return environment.putState(id, eval);
 		case COMPARISON_GE:
-			if (left instanceof Identifier) {
-				Interval rightEval = eval(right, environment, pp);
-				if (rightEval.lowIsMinusInfinity())
-					return environment;
-
-				Interval bound = new Interval(rightEval.low, null);
-				map.put((Identifier) left, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else if (right instanceof Identifier) {
-				Interval leftEval = eval(left, environment, pp);
-				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low);
-				map.put((Identifier) right, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else
-				return environment;
+			if (rightIsExpr)
+				return lowIsMinusInfinity ? environment : environment.putState((Identifier) left, low_inf);
+			else
+				return environment.putState((Identifier) right, inf_high);
 		case COMPARISON_GT:
-			if (left instanceof Identifier) {
-				Interval rightEval = eval(right, environment, pp);
-				if (rightEval.lowIsMinusInfinity())
-					return environment;
-
-				Interval bound = new Interval(rightEval.low + 1, null);
-				map.put((Identifier) left, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else if (right instanceof Identifier) {
-				Interval leftEval = eval(left, environment, pp);
-				Interval bound = leftEval.lowIsMinusInfinity() ? leftEval : new Interval(null, leftEval.low - 1);
-				map.put((Identifier) right, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else
-				return environment;
+			if (rightIsExpr)
+				return lowIsMinusInfinity ? environment : environment.putState((Identifier) left, lowp1_inf);
+			else
+				return environment.putState((Identifier) right, lowIsMinusInfinity ? eval : inf_highm1);
 		case COMPARISON_LE:
-			if (left instanceof Identifier) {
-				Interval rightEval = eval(right, environment, pp);
-				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low);
-				map.put((Identifier) left, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else if (right instanceof Identifier) {
-				Interval leftEval = eval(left, environment, pp);
-				if (leftEval.lowIsMinusInfinity())
-					return environment;
-
-				Interval bound = new Interval(leftEval.low, null);
-				map.put((Identifier) right, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else
-				return environment;
+			if (rightIsExpr)
+				return environment.putState((Identifier) left, inf_high);
+			else
+				return lowIsMinusInfinity ? environment : environment.putState((Identifier) right, low_inf);
 		case COMPARISON_LT:
-			if (left instanceof Identifier) {
-				Interval rightEval = eval(right, environment, pp);
-				Interval bound = rightEval.lowIsMinusInfinity() ? rightEval : new Interval(null, rightEval.low - 1);
-				map.put((Identifier) left, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else if (right instanceof Identifier) {
-				Interval leftEval = eval(left, environment, pp);
-				if (leftEval.lowIsMinusInfinity())
-					return environment;
-
-				Interval bound = new Interval(leftEval.low + 1, null);
-				map.put((Identifier) right, bound);
-				return new ValueEnvironment<Interval>(bottom(), map);
-			} else
-				return environment;
+			if (rightIsExpr)
+				return environment.putState((Identifier) left, lowIsMinusInfinity ? eval : inf_highm1);
+			else
+				return lowIsMinusInfinity ? environment : environment.putState((Identifier) right, lowp1_inf);
 		default:
 			return environment;
 		}

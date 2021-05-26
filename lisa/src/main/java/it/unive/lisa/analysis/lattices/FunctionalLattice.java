@@ -100,6 +100,26 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return lattice.bottom();
 	}
 
+	/**
+	 * Yields an instance of this class equal to the receiver of the call, but
+	 * with {@code key} mapped to {@code state}.
+	 * 
+	 * @param key   the key
+	 * @param state the state
+	 * 
+	 * @return the new instance of this class with the updated mapping
+	 */
+	public final F putState(K key, V state) {
+		F result = bottom();
+		result.function = mkNewFunction(null);
+
+		result.function.put(key, state);
+		for (K k : getKeys())
+			if (!k.equals(key))
+				result.function.put(k, getState(k));
+		return result;
+	}
+
 	@Override
 	public F lubAux(F other) throws SemanticException {
 		return functionalLift(other, (f1, f2) -> lubKeys(f1, f2), (o1, o2) -> o1 == null ? o2 : o1.lub(o2));

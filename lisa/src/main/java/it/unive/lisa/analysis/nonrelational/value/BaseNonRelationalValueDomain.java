@@ -634,7 +634,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the greatest lower bound between this domain element and other
 	 */
-	public T glbAux(T other) {
+	protected T glbAux(T other) {
 		return bottom();
 	}
 }
