@@ -12,10 +12,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -67,21 +65,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics(
-					access.getContainer(), pp);
-			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics(
+			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) smallStepSemantics(
 					access.getChild(), pp);
 
 			List<HeapReplacement> substitution = new ArrayList<>(childState.getSubstitution());
 
-			for (SymbolicExpression containerExp : containerState.rewrite(access.getContainer(), pp))
-				if (containerExp instanceof Variable) {
-					AllocationSites expHids = childState.heapEnv.getState((Identifier) containerExp);
-					for (AllocationSite hid : expHids)
-						if (hid.isWeak())
-							for (SymbolicExpression childRewritten : childState.rewrite(access.getChild(), pp))
-								substitution.add(replaceStrong(hid, access.getTypes(), childRewritten));
-				}
+			AllocationSite site = (AllocationSite) access.getContainer().getLocation();
+			if (site.isWeak())
+				for (SymbolicExpression childRewritten : childState.rewrite(access.getChild(), pp))
+					substitution.add(replaceStrong(site, access.getTypes(), childRewritten));
 
 			return new FieldSensitivePointBasedHeap(applySubstitutions(childState.heapEnv, substitution), substitution);
 		}
@@ -100,30 +92,11 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			AccessChild access = (AccessChild) expression;
-			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics(
-					access.getContainer(), (ProgramPoint) params[0]);
-			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) containerState.smallStepSemantics(
-					access.getChild(), (ProgramPoint) params[0]);
-
 			Set<ValueExpression> result = new HashSet<>();
-//				if (receiver instanceof Variable) {
-//					AllocationSites expHids = childState.heapEnv.getState((Identifier) containerExp);
-//					for (AllocationSite hid : expHids)
-//						for (SymbolicExpression childRewritten : child)
-//							if (hid.isWeak())
-//								result.add(new AllocationSite(access.getTypes(), hid.getId(),
-//										childRewritten, true));
-//							else
-//								result.add(new AllocationSite(access.getTypes(), hid.getId(),
-//										childRewritten));
-//				} else if (containerExp instanceof PointerIdentifier) {
-					AllocationSite site = (AllocationSite) receiver.getLocation();
+			AllocationSite site = (AllocationSite) receiver.getLocation();
 
-					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(access.getTypes(), site.getId(),
-								childRewritten));
-//				} else if (containerExp instanceof HeapLocation)
-//					result.add((ValueExpression) containerExp);
+			for (SymbolicExpression childRewritten : child)
+				result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak()));
 
 			return new ExpressionSet<>(result);
 		}
