@@ -65,15 +65,8 @@ public interface HeapSemanticOperation {
 		 * sources of this replacement.
 		 * 
 		 * @param id the identifier to add
-		 * 
-		 * @throws IllegalArgumentException if the given identifier is already
-		 *                                      in the set of target identifiers
 		 */
 		public void addSource(Identifier id) {
-			if (targets.contains(id))
-				throw new IllegalArgumentException(
-						"The given identifier has already been considered as target of this replacement");
-
 			sources.add(id);
 		}
 
@@ -82,15 +75,8 @@ public interface HeapSemanticOperation {
 		 * targets of this replacement.
 		 * 
 		 * @param id the identifier to add
-		 * 
-		 * @throws IllegalArgumentException if the given identifier is already
-		 *                                      in the set of source identifiers
 		 */
 		public void addTarget(Identifier id) {
-			if (sources.contains(id))
-				throw new IllegalArgumentException(
-						"The given identifier has already been considered as source of this replacement");
-
 			targets.add(id);
 		}
 

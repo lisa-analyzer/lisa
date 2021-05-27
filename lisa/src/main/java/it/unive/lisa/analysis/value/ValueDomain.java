@@ -43,11 +43,13 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 */
 	@SuppressWarnings("unchecked")
 	public default D applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp) throws SemanticException {
-		if (isTop() || isBottom())
+		if (isTop() || isBottom() || substitution == null || substitution.isEmpty())
 			return (D) this;
 
 		D result = (D) this;
 		for (HeapReplacement r : substitution) {
+			if (r.getSources().isEmpty())
+				continue;
 			D lub = bottom();
 			for (Identifier source : r.getSources()) {
 				D partial = result;

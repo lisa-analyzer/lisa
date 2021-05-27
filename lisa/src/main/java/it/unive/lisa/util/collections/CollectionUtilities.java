@@ -1,5 +1,6 @@
 package it.unive.lisa.util.collections;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -125,5 +126,13 @@ public class CollectionUtilities {
 
 		// unmatched in other
 		copy.forEach(result::add);
+	}
+
+	@SafeVarargs
+	public static <T> Collection<T> collect(T... objs) {
+		ArrayList<T> res = new ArrayList<>(objs.length);
+		for (T o : objs)
+			res.add(o);
+		return res;
 	}
 }
