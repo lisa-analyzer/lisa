@@ -12,6 +12,8 @@ import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.value.PointerIdentifier;
 
 /**
  * An expression modeling the array element access operation
@@ -54,6 +56,18 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), left, right), this);
+		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left);
+	
+		AnalysisState<A, H, V> rec = rightState.smallStepSemantics(deref, getParentStatement());
+		AnalysisState<A, H, V> result = entryState.bottom();
+		for (SymbolicExpression l : rec.getComputedExpressions())
+			if (!(l instanceof PointerIdentifier))
+				continue;
+			else {
+				AnalysisState<A, H, V> smallStepSemantics = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, right), this);
+				result = result.lub(smallStepSemantics);
+			}
+		
+		return result;
 	}
 }

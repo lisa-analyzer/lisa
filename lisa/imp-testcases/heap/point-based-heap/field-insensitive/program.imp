@@ -35,7 +35,7 @@ class A {
 		def o = new int[6];
 		def i = 0;
 		while (true) {
-			o.a = 0;
+			o[0] = 0;
 			i = i + 1;
 		}
 	}

@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -7,16 +12,12 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapExpression;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -96,7 +97,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	private class Rewriter extends PointBasedHeap.Rewriter {
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
+		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			AccessChild access = (AccessChild) expression;
 			FieldSensitivePointBasedHeap containerState = (FieldSensitivePointBasedHeap) smallStepSemantics(
@@ -105,23 +106,24 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 					access.getChild(), (ProgramPoint) params[0]);
 
 			Set<ValueExpression> result = new HashSet<>();
-			for (SymbolicExpression containerExp : receiver)
-				if (containerExp instanceof Variable) {
-					AllocationSites expHids = childState.heapEnv.getState((Identifier) containerExp);
-					for (AllocationSite hid : expHids)
-						for (SymbolicExpression childRewritten : child)
-							if (hid.isWeak())
-								result.add(new AllocationSite(access.getTypes(), hid.getId(),
-										childRewritten, true));
-							else
-								result.add(new AllocationSite(access.getTypes(), hid.getId(),
-										childRewritten));
-				} else if (containerExp instanceof AllocationSite) {
+//				if (receiver instanceof Variable) {
+//					AllocationSites expHids = childState.heapEnv.getState((Identifier) containerExp);
+//					for (AllocationSite hid : expHids)
+//						for (SymbolicExpression childRewritten : child)
+//							if (hid.isWeak())
+//								result.add(new AllocationSite(access.getTypes(), hid.getId(),
+//										childRewritten, true));
+//							else
+//								result.add(new AllocationSite(access.getTypes(), hid.getId(),
+//										childRewritten));
+//				} else if (containerExp instanceof PointerIdentifier) {
+					AllocationSite site = (AllocationSite) receiver.getLocation();
+
 					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(access.getTypes(), ((AllocationSite) containerExp).getId(),
+						result.add(new AllocationSite(access.getTypes(), site.getId(),
 								childRewritten));
-				} else if (containerExp instanceof HeapLocation)
-					result.add((ValueExpression) containerExp);
+//				} else if (containerExp instanceof HeapLocation)
+//					result.add((ValueExpression) containerExp);
 
 			return new ExpressionSet<>(result);
 		}

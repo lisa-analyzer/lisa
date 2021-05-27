@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.heap;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -17,7 +18,7 @@ public class AccessChild extends HeapExpression {
 	/**
 	 * The expression representing the parent memory location
 	 */
-	private final SymbolicExpression container;
+	private final PointerIdentifier container;
 
 	/**
 	 * The expression representing the child memory location
@@ -31,7 +32,7 @@ public class AccessChild extends HeapExpression {
 	 * @param container the expression representing the parent memory location
 	 * @param child     the expression representing the child memory location
 	 */
-	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child) {
+	public AccessChild(ExternalSet<Type> types, PointerIdentifier container, SymbolicExpression child) {
 		super(types);
 		this.container = container;
 		this.child = child;
@@ -42,7 +43,7 @@ public class AccessChild extends HeapExpression {
 	 * 
 	 * @return the container
 	 */
-	public SymbolicExpression getContainer() {
+	public PointerIdentifier getContainer() {
 		return container;
 	}
 
@@ -93,8 +94,7 @@ public class AccessChild extends HeapExpression {
 
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
-		T cont = container.accept(visitor, params);
 		T ch = child.accept(visitor, params);
-		return visitor.visit(this, cont, ch, params);
+		return visitor.visit(this, container, ch, params);
 	}
 }

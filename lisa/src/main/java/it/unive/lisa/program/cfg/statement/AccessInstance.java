@@ -14,6 +14,8 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
@@ -22,7 +24,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessUnitGlobal extends Expression {
+public class AccessInstance extends Expression {
 
 	/**
 	 * The receiver of the access
@@ -44,7 +46,7 @@ public class AccessUnitGlobal extends Expression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessUnitGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessInstance(CFG cfg, CodeLocation location, Expression receiver, Global target) {
 		super(cfg, location, target.getStaticType());
 		this.receiver = receiver;
 		this.target = target;
@@ -68,26 +70,31 @@ public class AccessUnitGlobal extends Expression {
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
+			InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
+
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
 		expressions.put(receiver, rec);
 
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = entryState.bottom();
 		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
-		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, v), this);
-			if (result == null)
-				result = tmp;
-			else
+		for (SymbolicExpression expr : rec.getComputedExpressions()) {	
+			HeapDereference deref = new HeapDereference(getRuntimeTypes(), expr);
+			AnalysisState<A, H, V> refState = entryState.smallStepSemantics(deref, this);
+
+			for (SymbolicExpression l : refState.getComputedExpressions()) {
+				if (!(l instanceof PointerIdentifier))
+					continue;
+
+				AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, v), this);
 				result = result.lub(tmp);
+			}
 		}
 
 		if (!receiver.getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(receiver.getMetaVariables());
 		return result;
 	}
-
 }

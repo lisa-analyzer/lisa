@@ -8,12 +8,14 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
+import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -39,7 +41,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	private class EvaluationVisitor implements ExpressionVisitor<T> {
 
 		@Override
-		public T visit(AccessChild expression, T receiver, T child, Object... params) throws SemanticException {
+		public T visit(AccessChild expression, PointerIdentifier receiver, T child, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 
@@ -53,6 +55,11 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 
+		@Override
+		public T visit(HeapDereference expression, Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+		
 		@Override
 		public T visit(UnaryExpression expression, T arg, Object... params) throws SemanticException {
 			if (arg.isBottom())

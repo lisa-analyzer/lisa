@@ -53,7 +53,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
-import it.unive.lisa.program.cfg.statement.AccessUnitGlobal;
+import it.unive.lisa.program.cfg.statement.AccessInstance;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
@@ -444,11 +444,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public AccessUnitGlobal visitFieldAccess(FieldAccessContext ctx) {
+	public AccessInstance visitFieldAccess(FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
 		Global id = new Global(new SourceCodeLocation(file, getLine(ctx.name), getCol(ctx.name)), ctx.name.getText(),
 				Untyped.INSTANCE);
-		return new AccessUnitGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver, id);
+		return new AccessInstance(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver, id);
 	}
 
 	@Override
