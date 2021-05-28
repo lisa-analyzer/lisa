@@ -4,17 +4,18 @@ import static it.unive.lisa.outputs.compare.JsonReportComparer.compare;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.imp.IMPFrontend;
-import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.program.Program;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.apache.commons.io.FileUtils;
+
+import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.util.file.FileManager;
 
 public abstract class AnalysisTestExecutor {
 
@@ -108,14 +109,11 @@ public abstract class AnalysisTestExecutor {
 		}
 
 		File workdir = actualPath.toFile();
-		if (workdir.exists()) {
-			System.out.println(workdir + " already exists: deleting...");
-			try {
-				FileUtils.forceDelete(workdir);
-			} catch (IOException e) {
-				e.printStackTrace(System.err);
-				fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
-			}
+		try {
+			FileManager.forceDeleteFolder(workdir.toString());
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
 		}
 		configuration.setWorkdir(workdir.toString());
 

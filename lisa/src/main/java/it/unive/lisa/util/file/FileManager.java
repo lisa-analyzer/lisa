@@ -10,6 +10,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.TreeSet;
 
+import org.apache.commons.io.FileUtils;
+
 /**
  * A file manager that provides standard functionalities for communicating with
  * the file system.
@@ -17,6 +19,12 @@ import java.util.TreeSet;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class FileManager {
+
+	public static void forceDeleteFolder(String path) throws IOException {
+		File workdir = new File(path);
+		if (workdir.exists())
+			FileUtils.forceDelete(workdir);
+	}
 
 	private final File workdir;
 
