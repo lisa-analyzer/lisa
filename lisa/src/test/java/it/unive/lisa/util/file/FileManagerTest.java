@@ -113,7 +113,7 @@ public class FileManagerTest {
 	@Test
 	public void testDotFileNameSanitization() {
 		FileManager manager = new FileManager(TESTDIR);
-		try (Writer w = manager.mkOutputFile("foo()  bar::.txt")) {
+		try (Writer w = manager.mkDotFile("foo()  bar::jar")) {
 			w.write("foo");
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -124,7 +124,7 @@ public class FileManagerTest {
 		if (!dir.exists())
 			fail("The working directory has not been created");
 
-		File file = new File(dir, "foo()__bar..txt");
+		File file = new File(dir, "foo()__bar.jar.dot");
 		if (!file.exists())
 			fail("The file has not been created");
 	}

@@ -64,7 +64,7 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public Writer mkOutputFile(String name) throws IOException {
-		return mkOutputFile(cleanupForDotFile(name), false);
+		return mkOutputFile(name, false);
 	}
 
 	/**
