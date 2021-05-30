@@ -20,6 +20,7 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -46,7 +47,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new Rewriter());
+		return expression.accept(new Rewriter(), pp);
 	}
 
 	@Override
@@ -126,7 +127,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return this == obj;
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	protected class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
@@ -152,14 +153,16 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
+			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, Object... params)
 				throws SemanticException {
-			HeapLocation loc = new HeapLocation(expression.getTypes(), MONOLITH_NAME, true);
-			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), loc));
+			if (expression.getExpression() instanceof Variable) 
+				return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
+
+			return rewrite(expression.getExpression(), (ProgramPoint) params[0]);
 		}
 	}
 }
