@@ -63,8 +63,8 @@ public class IMPNewArray extends NativeCall {
 		
 		for (SymbolicExpression loc : sem.getComputedExpressions()) 
 			if (loc instanceof HeapLocation) {
-				AnalysisState<A, H, V> smallStepSemantics = sem.smallStepSemantics(new HeapReference(loc.getTypes(), (HeapLocation) loc), this);
-				result = result.lub(smallStepSemantics);
+				AnalysisState<A, H, V> refSem = sem.smallStepSemantics(new HeapReference(loc.getTypes(), (HeapLocation) loc), this);
+				result = result.lub(refSem);
 			}
 
 		return result;

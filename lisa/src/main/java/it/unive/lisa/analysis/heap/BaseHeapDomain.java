@@ -171,7 +171,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}

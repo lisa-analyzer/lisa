@@ -58,14 +58,12 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		// type
 		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left);
 	
-		AnalysisState<A, H, V> rec = rightState.smallStepSemantics(deref, getParentStatement());
+		AnalysisState<A, H, V> rec = rightState.smallStepSemantics(deref, this);
 		AnalysisState<A, H, V> result = entryState.bottom();
 		for (SymbolicExpression l : rec.getComputedExpressions())
-			if (!(l instanceof PointerIdentifier))
-				continue;
-			else {
-				AnalysisState<A, H, V> smallStepSemantics = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, right), this);
-				result = result.lub(smallStepSemantics);
+			if (l instanceof PointerIdentifier) {
+				AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, right), this);
+				result = result.lub(tmp);
 			}
 		
 		return result;

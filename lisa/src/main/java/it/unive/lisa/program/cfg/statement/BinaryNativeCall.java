@@ -86,22 +86,19 @@ public abstract class BinaryNativeCall extends NativeCall {
 
 	@Override
 	public final <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V>[] computedStates,
-					ExpressionSet<SymbolicExpression>[] params)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+			AnalysisState<A, H, V> entryState,
+			InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V>[] computedStates,
+			ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = entryState.bottom();
 
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1]) {
 				AnalysisState<A, H, V> tmp = binarySemantics(entryState, interprocedural, computedStates[0], left,
 						computedStates[1], right);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
+				result = result.lub(tmp);
 			}
 
 		return result;
@@ -133,11 +130,11 @@ public abstract class BinaryNativeCall extends NativeCall {
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	protected abstract <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
-					AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			AnalysisState<A, H, V> entryState,
+			InterproceduralAnalysis<A, H, V> interprocedural,
+			AnalysisState<A, H, V> leftState, SymbolicExpression leftExp,
+			AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
 					throws SemanticException;
 }
