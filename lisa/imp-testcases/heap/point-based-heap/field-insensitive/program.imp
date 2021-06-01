@@ -49,4 +49,11 @@ class A {
 			i = i + 1;
 		}
 	}
+	
+	f6() {
+		def x = new int[3];
+		def y = x;
+		x[0] = 1;
+		def a = x[0] + y[0];
+	}
 }

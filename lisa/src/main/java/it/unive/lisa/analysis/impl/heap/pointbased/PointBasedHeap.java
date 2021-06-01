@@ -28,7 +28,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -102,7 +101,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			subs.add(replaceStrong((AllocationSite) id));
 			return from(new PointBasedHeap(applySubstitutions(sss.heapEnv, subs), subs));
 		}
-		
+
 		return smallStepSemantics(expression, pp);
 	}
 
@@ -326,8 +325,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, Object... params)
 				throws SemanticException {
 
-			if (expression.getExpression() instanceof Variable) {
-				Variable v = (Variable) expression.getExpression();
+			if (expression.getExpression() instanceof Identifier && !(expression.getExpression() instanceof PointerIdentifier)) {
+				Identifier v = (Identifier) expression.getExpression();
 
 				if (heapEnv.getKeys().contains(v)) {
 					Set<ValueExpression> result = new HashSet<>();
@@ -344,16 +343,15 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (expression instanceof Variable) {
-				Variable v = (Variable) expression;
-				if (heapEnv.getKeys().contains(v)) {
+
+			if (!(expression instanceof PointerIdentifier)) 
+				if (heapEnv.getKeys().contains(expression)) {
 					Set<ValueExpression> result = new HashSet<>();
 
-					for (AllocationSite site : heapEnv.getState(v))
+					for (AllocationSite site : heapEnv.getState(expression))
 						result.add(new PointerIdentifier(site.getTypes(), site));
 					return new ExpressionSet<>(result);
 				}	
-			}
 
 			return new ExpressionSet<>(expression);
 		}

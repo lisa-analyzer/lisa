@@ -24,12 +24,12 @@ public class PointerIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new OutOfScopeIdentifier(this, token);
+		return this;
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		throw new SemanticException("Cannot pop the scope of a non-scoped value identifier");
+		return this;
 	}
 
 	public HeapLocation getLocation() {
