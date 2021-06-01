@@ -90,8 +90,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			throws SemanticException {
 
 		if (expression instanceof PointerIdentifier) {
-			PointerIdentifier pid = (PointerIdentifier) expression;
-			HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, pid.getLocation(), pp);
+			PointerIdentifier pid = (PointerIdentifier) expression;	
+			Identifier v = id instanceof PointerIdentifier ? ((PointerIdentifier) id).getLocation() : id;
+			HeapEnvironment<AllocationSites> heap = heapEnv.assign(v, pid.getLocation(), pp);
 			return from(new PointBasedHeap(applySubstitutions(heap, substitutions), substitutions));
 		}
 
@@ -288,6 +289,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return expression.accept(new Rewriter(), pp);
 	}
 
+	private ExpressionSet<ValueExpression> resolveIdentifier(Identifier v) {
+		return new ExpressionSet<>(resolveIdentifierAux(v));
+	}
+
+	private Set<ValueExpression> resolveIdentifierAux(Identifier v) {
+		Set<ValueExpression> result = new HashSet<>();
+		for (AllocationSite site : heapEnv.getState(v)) 
+			result.add(new PointerIdentifier(site.getTypes(), site));
+
+		return result;
+	}
+
 	/**
 	 * A {@link it.unive.lisa.analysis.heap.BaseHeapDomain.Rewriter} for the
 	 * {@link PointBasedHeap} domain.
@@ -326,15 +339,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				throws SemanticException {
 
 			if (expression.getExpression() instanceof Identifier && !(expression.getExpression() instanceof PointerIdentifier)) {
-				Identifier v = (Identifier) expression.getExpression();
-
-				if (heapEnv.getKeys().contains(v)) {
-					Set<ValueExpression> result = new HashSet<>();
-
-					for (AllocationSite site : heapEnv.getState(v))
-						result.add(new PointerIdentifier(site.getTypes(), site));
-					return new ExpressionSet<>(result);
-				}
+				Identifier id = (Identifier) expression.getExpression();
+				if (heapEnv.getKeys().contains(id)) 
+					return resolveIdentifier(id);
 			}
 
 			return rewrite(expression.getExpression(), (ProgramPoint) params[0]);
@@ -343,15 +350,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-
 			if (!(expression instanceof PointerIdentifier)) 
-				if (heapEnv.getKeys().contains(expression)) {
-					Set<ValueExpression> result = new HashSet<>();
-
-					for (AllocationSite site : heapEnv.getState(expression))
-						result.add(new PointerIdentifier(site.getTypes(), site));
-					return new ExpressionSet<>(result);
-				}	
+				if (heapEnv.getKeys().contains(expression)) 
+					return resolveIdentifier(expression);
 
 			return new ExpressionSet<>(expression);
 		}

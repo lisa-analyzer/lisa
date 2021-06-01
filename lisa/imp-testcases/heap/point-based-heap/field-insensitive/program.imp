@@ -56,4 +56,15 @@ class A {
 		x[0] = 1;
 		def a = x[0] + y[0];
 	}
+	
+	f7() {
+		def x = new int[3];
+		def y = new int[3];
+		def z = x;
+		z[0] = 5;
+		def a = x[0] + z[0]; // expected: 10
+		z = y;
+		z[0] = 7;
+		def b = x[0] + z[0]; // expected: 12 
+	}
 }
