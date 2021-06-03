@@ -113,13 +113,17 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	protected TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-			TypeBasedHeap childState = smallStepSemantics(access.getChild(), pp);
+			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
+			TypeBasedHeap childState = containerState.smallStepSemantics(access.getChild(), pp);
 			Set<String> names = new HashSet<>(childState.names);
-			PointerIdentifier pid = access.getContainer();
 
-			for (Type type : pid.getTypes())
-				if (type.isPointerType())
-					names.add(type.toString());
+			for (ValueExpression cont : containerState.rewrite(access.getContainer(), pp))
+				if (cont instanceof PointerIdentifier) {
+					PointerIdentifier pid = (PointerIdentifier) cont;
+					for (Type type : pid.getTypes())
+						if (type.isPointerType())
+							names.add(type.toString());
+				}
 
 			return new TypeBasedHeap(names);
 		}
@@ -182,14 +186,19 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	protected class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
+		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			// we use the container because we are not field-sensitive
 			ExternalSet<Type> types = expression.getTypes();
 			Set<ValueExpression> result = new HashSet<>();
-			for (Type t : receiver.getTypes())
-				if (t.isPointerType())
-					result.add(new HeapLocation(types, t.toString(), true));
+
+			for (ValueExpression rec : receiver)
+				if (rec instanceof PointerIdentifier) {
+					PointerIdentifier	pid = (PointerIdentifier) rec;
+					for (Type t : pid.getTypes())
+						if (t.isPointerType())
+							result.add(new HeapLocation(types, t.toString(), true));
+				}
 			return new ExpressionSet<>(result);
 		}
 
@@ -205,27 +214,36 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref, Object... params)
 				throws SemanticException {
-			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), expression.getLocation()));
+
+			Set<ValueExpression> result = new HashSet<>();
+			for (ValueExpression refExp : ref)
+				if (refExp instanceof HeapLocation) 
+					result.add(new PointerIdentifier(expression.getTypes(), (HeapLocation) refExp));
+
+			return new ExpressionSet<>(result);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref, Object... params)
 				throws SemanticException {
 
-			if (expression.getExpression() instanceof Variable) {
-				Variable v = (Variable) expression.getExpression();
-				Set<ValueExpression> result = new HashSet<>();
-				ExternalSet<Type> types = v.getTypes();
+			Set<ValueExpression> result = new HashSet<>();
 
-				for (Type t : types)
-					if (t.isPointerType())
-						result.add(new PointerIdentifier(types, new HeapLocation(types, t.toString(), true)));
-				return new ExpressionSet<>(result);				
+			for (ValueExpression derefExp : deref) {
+				if (derefExp instanceof Variable) {
+					Variable v = (Variable) derefExp;
+					ExternalSet<Type> types = v.getTypes();
+					for (Type t : types)
+						if (t.isPointerType())
+							result.add(new PointerIdentifier(types, new HeapLocation(types, t.toString(), true)));
+				} else 
+					for (ValueExpression rew : rewrite(expression.getExpression(), (ProgramPoint) params[0]))
+						result.add(rew);
 			}
 
-			return rewrite(expression.getExpression(), (ProgramPoint) params[0]);
+			return new ExpressionSet<>(result);
 		}
 	}
 }

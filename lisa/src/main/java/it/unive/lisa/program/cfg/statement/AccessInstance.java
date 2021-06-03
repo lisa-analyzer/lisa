@@ -15,7 +15,6 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
@@ -74,23 +73,14 @@ public class AccessInstance extends Expression {
 	V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 			InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = entryState.bottom();
 		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {	
-			HeapDereference deref = new HeapDereference(getRuntimeTypes(), expr);
-			AnalysisState<A, H, V> refState = entryState.smallStepSemantics(deref, this);
-
-			for (SymbolicExpression l : refState.getComputedExpressions()) {
-				if (!(l instanceof PointerIdentifier))
-					continue;
-
-				AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, v), this);
-				result = result.lub(tmp);
-			}
+			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr), v), this);
+			result = result.lub(tmp);
 		}
 
 		if (!receiver.getMetaVariables().isEmpty())

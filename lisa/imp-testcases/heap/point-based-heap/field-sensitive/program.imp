@@ -56,4 +56,12 @@ class A {
 		x[0] = 1;
 		def a = x[0] + y[0];
 	}
+	
+	f7() {
+		def x = new int[3]; 
+		def y = new int[3]; 
+		def z = x;
+		z = y;  
+		z[0] =  1;
+	}
 }

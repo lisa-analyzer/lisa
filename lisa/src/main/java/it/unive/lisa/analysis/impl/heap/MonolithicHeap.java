@@ -20,7 +20,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -130,7 +129,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	protected class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
+		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new
@@ -148,7 +147,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref, Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new
@@ -157,12 +156,12 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref, Object... params)
 				throws SemanticException {
-			if (expression.getExpression() instanceof Variable) 
-				return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
-
-			return rewrite(expression.getExpression(), (ProgramPoint) params[0]);
+			// any expression accessing an area of the heap or instantiating a
+			// new
+			// one is modeled through the monolith
+			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 	}
 }

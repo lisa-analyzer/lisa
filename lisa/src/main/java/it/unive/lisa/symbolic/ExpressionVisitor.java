@@ -8,7 +8,6 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -44,7 +43,7 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(AccessChild expression, PointerIdentifier receiver, T child, Object... params) throws SemanticException;
+	T visit(AccessChild expression, T receiver, T child, Object... params) throws SemanticException;
 
 	/**
 	 * Visits a {@link HeapAllocation}.
@@ -72,7 +71,7 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapReference expression, Object... params) throws SemanticException;
+	T visit(HeapReference expression, T ref, Object... params) throws SemanticException;
 	
 	/**
 	 * Visits a {@link HeapDereference}.
@@ -86,7 +85,7 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapDereference expression, Object... params) throws SemanticException;
+	T visit(HeapDereference expression, T deref, Object... params) throws SemanticException;
 
 	/**
 	 * Visits a {@link UnaryExpression}. This callback is invoked after the

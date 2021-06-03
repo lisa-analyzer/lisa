@@ -14,7 +14,6 @@ import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -40,7 +39,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	private class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
 
 		@Override
-		public InferredPair<T> visit(AccessChild expression, PointerIdentifier receiver, InferredPair<T> child,
+		public InferredPair<T> visit(AccessChild expression, InferredPair<T> receiver, InferredPair<T> child,
 				Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
@@ -51,12 +50,12 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 		}
 		
 		@Override
-		public InferredPair<T> visit(HeapReference expression, Object... params) throws SemanticException {
+		public InferredPair<T> visit(HeapReference expression, InferredPair<T> arg, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 		
 		@Override
-		public InferredPair<T> visit(HeapDereference expression, Object... params) throws SemanticException {
+		public InferredPair<T> visit(HeapDereference expression, InferredPair<T> arg, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 

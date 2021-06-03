@@ -2,7 +2,7 @@ package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.ExpressionVisitor;
-import it.unive.lisa.symbolic.value.HeapLocation;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -16,7 +16,7 @@ public class HeapReference extends HeapExpression {
 	/**
 	 * The name representing the memory location
 	 */
-	private final HeapLocation loc;
+	private final SymbolicExpression loc;
 
 	/**
 	 * Builds the heap reference.
@@ -24,29 +24,16 @@ public class HeapReference extends HeapExpression {
 	 * @param types the runtime types of this expression
 	 * @param name  the name that identifies the memory location
 	 */
-	public HeapReference(ExternalSet<Type> types, HeapLocation loc) {
+	public HeapReference(ExternalSet<Type> types, SymbolicExpression loc) {
 		super(types);
 		this.loc = loc;
 	}
 
-	/**
-	 * Yields the name that identifies the memory location.
-	 * 
-	 * @return the name
-	 */
-	public final HeapLocation getLocation() {
-		return loc;
-	}
-
-
-
 	@Override
 	public String toString() {
-		return "ref$" + loc.getName();
+		return "ref$" + loc.toString();
 	}
 
-	
-	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -74,6 +61,7 @@ public class HeapReference extends HeapExpression {
 
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
-		return visitor.visit(this, params);
+		T l = loc.accept(visitor, params);
+		return visitor.visit(this, l, params);
 	}
 }

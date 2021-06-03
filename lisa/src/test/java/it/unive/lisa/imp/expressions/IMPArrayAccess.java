@@ -13,7 +13,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
 
 /**
  * An expression modeling the array element access operation
@@ -41,13 +40,13 @@ public class IMPArrayAccess extends BinaryNativeCall {
 
 	@Override
 	protected <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
-					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
-					SymbolicExpression right)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+			AnalysisState<A, H, V> leftState,
+			SymbolicExpression left,
+			AnalysisState<A, H, V> rightState,
+			SymbolicExpression right)
 
 					throws SemanticException {
 		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
@@ -57,15 +56,6 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		// domain to translate this into a variable that will have its correct
 		// type
 		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left);
-	
-		AnalysisState<A, H, V> rec = rightState.smallStepSemantics(deref, this);
-		AnalysisState<A, H, V> result = entryState.bottom();
-		for (SymbolicExpression l : rec.getComputedExpressions())
-			if (l instanceof PointerIdentifier) {
-				AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), (PointerIdentifier) l, right), this);
-				result = result.lub(tmp);
-			}
-		
-		return result;
+		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right), this);
 	}
 }

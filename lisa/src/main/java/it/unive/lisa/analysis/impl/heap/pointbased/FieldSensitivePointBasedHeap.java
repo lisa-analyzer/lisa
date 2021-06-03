@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +10,6 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PointerIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -51,46 +49,25 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		return new FieldSensitivePointBasedHeap(original.heapEnv, original.getSubstitution());
 	}
 
-	private HeapReplacement replaceStrong(AllocationSite site, SymbolicExpression extra) {
-		AllocationSite weak = new AllocationSite(site.getTypes(), site.getId(), extra, true);
-		AllocationSite strong = new AllocationSite(site.getTypes(), site.getId(), extra);
-		HeapReplacement replacement = new HeapReplacement();
-		replacement.addSource(strong);
-		replacement.addTarget(weak);
-		return replacement;
-	}
-
 	@Override
 	public FieldSensitivePointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 
-		if (expression instanceof PointerIdentifier) {
-			PointerIdentifier pid = (PointerIdentifier) expression;
-			HeapEnvironment<AllocationSites> heap = heapEnv.assign(id, pid.getLocation(), pp);
-			return from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, getSubstitution()), getSubstitution()));
+		FieldSensitivePointBasedHeap sss = from(smallStepSemantics(expression, pp));
+		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
+
+		FieldSensitivePointBasedHeap result = from(bottom());
+		for (ValueExpression exp : rewrittenExp) {
+			if (exp instanceof PointerIdentifier) {
+				PointerIdentifier pid = (PointerIdentifier) exp;	
+				Identifier v = id instanceof PointerIdentifier ? ((PointerIdentifier) id).getLocation() : id;
+				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
+				result = from(result.lub(from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, sss.getSubstitution()), sss.getSubstitution()))));
+			} else
+				result = from(result.lub(sss));
 		}
 		
-		return from(super.smallStepSemantics(expression, pp));
-	}
-	
-	@Override
-	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
-		if (expression instanceof AccessChild) {
-			AccessChild access = (AccessChild) expression;
-			FieldSensitivePointBasedHeap childState = (FieldSensitivePointBasedHeap) smallStepSemantics(
-					access.getChild(), pp);
-
-			List<HeapReplacement> substitution = new ArrayList<>(childState.getSubstitution());
-
-			AllocationSite site = (AllocationSite) access.getContainer().getLocation();
-			if (site.isWeak())
-				for (SymbolicExpression childRewritten : childState.rewrite(access.getChild(), pp))
-					substitution.add(replaceStrong(site, childRewritten));
-
-			return new FieldSensitivePointBasedHeap(applySubstitutions(childState.heapEnv, substitution), substitution);
-		}
-
-		return super.semanticsOf(expression, pp);
+		return result;
 	}
 
 	@Override
@@ -100,15 +77,19 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	private class Rewriter extends PointBasedHeap.Rewriter {
+		
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, PointerIdentifier receiver,
+		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression>  receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			AccessChild access = (AccessChild) expression;
 			Set<ValueExpression> result = new HashSet<>();
-			AllocationSite site = (AllocationSite) receiver.getLocation();
 
-			for (SymbolicExpression childRewritten : child)
-				result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak()));
+			for (SymbolicExpression contRewritten : receiver)
+				if (contRewritten instanceof PointerIdentifier) {
+					AllocationSite site = (AllocationSite) ((PointerIdentifier) contRewritten).getLocation();
+					for (SymbolicExpression childRewritten : child)
+						result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak()));
+				}
 
 			return new ExpressionSet<>(result);
 		}

@@ -74,7 +74,7 @@ public class Assignment extends BinaryExpression {
 		AnalysisState<A, H, V> result = right.bottom();
 		for (SymbolicExpression expr1 : left.getComputedExpressions())
 			for (SymbolicExpression expr2 : right.getComputedExpressions()) {
-				AnalysisState<A, H, V> tmp = left.assign((Identifier) expr1, expr2, this);
+				AnalysisState<A, H, V> tmp = left.assign(expr1, expr2, this);
 				result = result.lub(tmp);
 			}
 

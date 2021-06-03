@@ -1,18 +1,18 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<o = new A(-1, -1)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [&amp;pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21]>];
+	"node0" [shape="rect",color="black",label=<o = new A(-1, -1)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
 	"node1" [shape="rect",color="gray",label=<o::b = 3<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 3]<BR/>heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 3] ]]<BR/>}} -&gt; [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16]>];
 	"node2" [shape="rect",color="gray",label=<o::a = 2<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 2]<BR/>heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 2] ]]<BR/>}} -&gt; [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16]>];
-	"node3" [shape="rect",color="gray",label=<o = new A(1, 1)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [&amp;pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16]>];
-	"node4" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [true]>];
-	"node5" [shape="rect",color="gray",label=<o = new A(0, 0)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [&amp;pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16]>];
+	"node3" [shape="rect",color="gray",label=<o = new A(1, 1)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
+	"node4" [shape="rect",color="gray",label=<o = new A(0, 0)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
+	"node5" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':23:21] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [true]>];
 	"node6" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16, heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':25:16: [2, 3]<BR/>heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':27:16: [2, 3] ]]<BR/>}} -&gt; [skip]>];
 	"node1" -> "node6" [color="black"];
 	"node2" -> "node1" [color="black"];
 	"node3" -> "node2" [color="black"];
-	"node0" -> "node4" [color="black"];
-	"node4" -> "node3" [color="red",style="dashed"];
-	"node4" -> "node5" [color="blue",style="dashed"];
-	"node5" -> "node2" [color="black"];
+	"node0" -> "node5" [color="black"];
+	"node4" -> "node2" [color="black"];
+	"node5" -> "node3" [color="red",style="dashed"];
+	"node5" -> "node4" [color="blue",style="dashed"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

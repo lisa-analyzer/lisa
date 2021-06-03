@@ -19,7 +19,6 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 
@@ -73,15 +72,13 @@ public class IMPNewObj extends NativeCall {
 
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
-		
-		sem = sem.smallStepSemantics(created, call);
+
+		sem =  sem.smallStepSemantics(created, this);
 		
 		AnalysisState<A, H, V> result = entryState.bottom();
-
 		for (SymbolicExpression loc : sem.getComputedExpressions()) 
-			if (loc instanceof HeapLocation) 
-				result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), (HeapLocation) loc), call));
-			
+			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc), call));
+
 		return result;
 	}
 }
