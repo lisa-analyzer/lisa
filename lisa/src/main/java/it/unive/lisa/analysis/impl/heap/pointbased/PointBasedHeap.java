@@ -116,7 +116,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	public PointBasedHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		// we just rewrite the expression if needed
-		return smallStepSemantics(expression, pp);
+		return from(smallStepSemantics(expression, pp));
 	}
 
 	@Override
@@ -281,10 +281,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
-
 			PointBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			return containerState.smallStepSemantics(access.getChild(), pp);
-
+			return from(containerState.smallStepSemantics(access.getChild(), pp));
 		}
 
 		if (expression instanceof HeapAllocation || expression instanceof HeapReference || expression instanceof HeapDereference) 

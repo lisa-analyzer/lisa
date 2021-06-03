@@ -50,26 +50,26 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+	public PointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 
-		FieldSensitivePointBasedHeap sss = from(smallStepSemantics(expression, pp));
+		FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) smallStepSemantics(expression, pp);
 		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
 
-		FieldSensitivePointBasedHeap result = from(bottom());
+		FieldSensitivePointBasedHeap result = (FieldSensitivePointBasedHeap) bottom();
 		for (ValueExpression exp : rewrittenExp) {
 			if (exp instanceof PointerIdentifier) {
 				PointerIdentifier pid = (PointerIdentifier) exp;	
 				Identifier v = id instanceof PointerIdentifier ? ((PointerIdentifier) id).getLocation() : id;
 				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
-				result = from(result.lub(from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, sss.getSubstitution()), sss.getSubstitution()))));
+				result = (FieldSensitivePointBasedHeap) result.lub(from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, sss.getSubstitution()), sss.getSubstitution())));
 			} else
-				result = from(result.lub(sss));
+				result = (FieldSensitivePointBasedHeap) result.lub(sss);
 		}
 		
 		return result;
 	}
-
+	
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
