@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.caches.Caches;
@@ -18,6 +19,7 @@ import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collections;
@@ -36,8 +38,11 @@ public class InferredTypesTest {
 
 	private static final ExternalSetCache<Type> TYPES = Caches.types();
 
+	private static final InferredTypes untyped = new InferredTypes(Untyped.INSTANCE);
 	private static final InferredTypes bool = new InferredTypes(BoolType.INSTANCE);
 	private static final InferredTypes string = new InferredTypes(StringType.INSTANCE);
+	private static final InferredTypes bool_or_string = new InferredTypes(
+			TYPES.mkSet(List.of(BoolType.INSTANCE, StringType.INSTANCE)));
 	private static final InferredTypes integer = new InferredTypes(IntType.INSTANCE);
 	private static final InferredTypes floating = new InferredTypes(FloatType.INSTANCE);
 	private static final InferredTypes numeric;
@@ -56,6 +61,7 @@ public class InferredTypesTest {
 
 		combos.put("bool", bool);
 		combos.put("string", string);
+		combos.put("(bool,string)", bool_or_string);
 		combos.put("int", integer);
 		combos.put("float", floating);
 		combos.put("(int,float)", numeric);
@@ -81,7 +87,7 @@ public class InferredTypesTest {
 	public void testCastWithNoTokens() {
 		// cast(str, x) = emptyset if x does not contain type tokens
 		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> cast = domain.cast(str, str);
+		ExternalSet<Type> cast = domain.cast(str, str, null);
 		assertTrue("Casting where the second arg does not have tokens succeded", cast.isEmpty());
 	}
 
@@ -90,7 +96,7 @@ public class InferredTypesTest {
 		// cast(str, int) = emptyset
 		ExternalSet<Type> str = string.getRuntimeTypes();
 		ExternalSet<Type> in = TYPES.mkSingletonSet(new TypeTokenType(integer.getRuntimeTypes()));
-		ExternalSet<Type> cast = domain.cast(str, in);
+		ExternalSet<Type> cast = domain.cast(str, in, null);
 		assertTrue("Casting a string into an integer succeded", cast.isEmpty());
 	}
 
@@ -99,7 +105,7 @@ public class InferredTypesTest {
 		// cast(str, str) = str
 		ExternalSet<Type> str = string.getRuntimeTypes();
 		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
-		ExternalSet<Type> cast = domain.cast(str, tok);
+		ExternalSet<Type> cast = domain.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
@@ -109,7 +115,7 @@ public class InferredTypesTest {
 		ExternalSet<Type> str = string.getRuntimeTypes();
 		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
 		tok.add(new TypeTokenType(integer.getRuntimeTypes()));
-		ExternalSet<Type> cast = domain.cast(str, tok);
+		ExternalSet<Type> cast = domain.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
@@ -120,7 +126,7 @@ public class InferredTypesTest {
 		ExternalSet<Type> tt = str.copy();
 		tt.addAll(integer.getRuntimeTypes());
 		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(tt));
-		ExternalSet<Type> cast = domain.cast(str, tok);
+		ExternalSet<Type> cast = domain.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
@@ -131,7 +137,7 @@ public class InferredTypesTest {
 		ExternalSet<Type> tt = str.copy();
 		tt.addAll(integer.getRuntimeTypes());
 		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
-		ExternalSet<Type> cast = domain.cast(tt, tok);
+		ExternalSet<Type> cast = domain.cast(tt, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
@@ -156,6 +162,25 @@ public class InferredTypesTest {
 		ExternalSet<Type> fl = floating.getRuntimeTypes();
 		ExternalSet<Type> common = domain.commonNumericalType(in, fl);
 		assertEquals("Common numerical type between an integer and a float is not a float", fl, common);
+	}
+
+	@Test
+	public void testCommonNumericalTypeWithUntyped() {
+		ExternalSet<Type> un = untyped.getRuntimeTypes();
+		ExternalSet<Type> fl = floating.getRuntimeTypes();
+		ExternalSet<Type> union = un.union(fl);
+		ExternalSet<Type> common = domain.commonNumericalType(un, fl);
+		assertEquals("Common numerical type between an untyped and a float is not a float", fl, common);
+		common = domain.commonNumericalType(fl, un);
+		assertEquals("Common numerical type between a float and un untyped is not a float", fl, common);
+		common = domain.commonNumericalType(un, un);
+		assertEquals("Common numerical type between two untyped is not empty", TYPES.mkEmptySet(), common);
+		common = domain.commonNumericalType(fl, union);
+		assertEquals("Common numerical type between a float and an (untyped,float) is not float", fl, common);
+		common = domain.commonNumericalType(union, fl);
+		assertEquals("Common numerical type between an (untyped,float) and a float is not float", fl, common);
+		common = domain.commonNumericalType(union, union);
+		assertEquals("Common numerical type between two (untyped,float) is not (untyped,float)", union, common);
 	}
 
 	private void unaryLE(UnaryOperator op, InferredTypes expected, InferredTypes operand) throws SemanticException {
@@ -193,7 +218,8 @@ public class InferredTypesTest {
 				integer, new InferredTypes(new TypeTokenType(integer.getRuntimeTypes())),
 				floating, new InferredTypes(new TypeTokenType(floating.getRuntimeTypes())),
 				numeric, new InferredTypes(new TypeTokenType(numeric.getRuntimeTypes())),
-				all, new InferredTypes(new TypeTokenType(all.getRuntimeTypes()))));
+				all, new InferredTypes(new TypeTokenType(all.getRuntimeTypes())),
+				bool_or_string, new InferredTypes(new TypeTokenType(bool_or_string.getRuntimeTypes()))));
 	}
 
 	private void binaryLE(BinaryOperator op, InferredTypes expected, InferredTypes left, InferredTypes right)
@@ -282,14 +308,13 @@ public class InferredTypesTest {
 	public void testEvalBinary() throws SemanticException {
 		binaryFixed(BinaryOperator.COMPARISON_EQ, bool, Collections.emptyList());
 		binaryFixed(BinaryOperator.COMPARISON_NE, bool, Collections.emptyList());
-		binaryFixed(BinaryOperator.COMPARISON_GE, bool,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryFixed(BinaryOperator.COMPARISON_GT, bool,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryFixed(BinaryOperator.COMPARISON_LE, bool,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryFixed(BinaryOperator.COMPARISON_LT, bool,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
+		List<Pair<InferredTypes, InferredTypes>> excluded = List.of(Pair.of(bool, null), Pair.of(null, bool),
+				Pair.of(string, null), Pair.of(null, string), Pair.of(bool_or_string, null),
+				Pair.of(null, bool_or_string));
+		binaryFixed(BinaryOperator.COMPARISON_GE, bool, excluded);
+		binaryFixed(BinaryOperator.COMPARISON_GT, bool, excluded);
+		binaryFixed(BinaryOperator.COMPARISON_LE, bool, excluded);
+		binaryFixed(BinaryOperator.COMPARISON_LT, bool, excluded);
 
 		binaryLE(BinaryOperator.LOGICAL_AND, bool, bool, bool);
 		binaryLE(BinaryOperator.LOGICAL_OR, bool, bool, bool);
@@ -307,19 +332,14 @@ public class InferredTypesTest {
 				return domain.bottom();
 			return new InferredTypes(set);
 		};
-		binaryTransform(BinaryOperator.NUMERIC_ADD, commonNumbers,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryTransform(BinaryOperator.NUMERIC_DIV, commonNumbers,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryTransform(BinaryOperator.NUMERIC_MUL, commonNumbers,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryTransform(BinaryOperator.NUMERIC_SUB, commonNumbers,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
-		binaryTransform(BinaryOperator.NUMERIC_MOD, commonNumbers,
-				List.of(Pair.of(bool, null), Pair.of(null, bool), Pair.of(string, null), Pair.of(null, string)));
+		binaryTransform(BinaryOperator.NUMERIC_ADD, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_DIV, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_MUL, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_SUB, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_MOD, commonNumbers, excluded);
 
 		binaryTransformSecond(BinaryOperator.TYPE_CAST, (l, r) -> {
-			ExternalSet<Type> set = domain.cast(l.getRuntimeTypes(), r.getRuntimeTypes());
+			ExternalSet<Type> set = domain.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);
 			if (set.isEmpty())
 				return domain.bottom();
 			return new InferredTypes(set);
@@ -364,5 +384,50 @@ public class InferredTypesTest {
 	public void testTernary() throws SemanticException {
 		ternaryLE(TernaryOperator.STRING_SUBSTRING, string, string, integer, integer);
 		ternaryLE(TernaryOperator.STRING_REPLACE, string, string, string, string);
+	}
+
+	private void satisfies(BinaryOperator op, InferredTypes left, InferredTypes right, Satisfiability expected) {
+		assertEquals("Satisfies(" + left + " " + op + " " + right + ") returned wrong result", expected,
+				domain.satisfiesBinaryExpression(op, left, right, domain.bottom(), fake));
+	}
+
+	@Test
+	public void testSatisfies() {
+		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)));
+		satisfies(BinaryOperator.COMPARISON_EQ, left, left, Satisfiability.SATISFIED);
+		satisfies(BinaryOperator.COMPARISON_NE, left, left, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, integer, left, Satisfiability.SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, floating, left, Satisfiability.SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, string, left, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool, left, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, left, Satisfiability.NOT_SATISFIED);
+
+		InferredTypes right = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)));
+		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, integer, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, floating, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, string, right, Satisfiability.SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
+
+		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(IntType.INSTANCE, StringType.INSTANCE))));
+		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, integer, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, floating, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, string, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
+
+		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)),
+				new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)))));
+		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, integer, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, floating, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, string, right, Satisfiability.UNKNOWN);
+		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
+		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
 	}
 }

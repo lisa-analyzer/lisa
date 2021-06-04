@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.impl.types;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -253,18 +255,20 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				// token, than we cannot reason about it
 				return Satisfiability.UNKNOWN;
 
+			ExternalSet<Type> lfiltered = left.elements.filter(Type::isTypeTokenType);
+			ExternalSet<Type> rfiltered = right.elements.filter(Type::isTypeTokenType);
 			if (operator == BinaryOperator.COMPARISON_EQ) {
 				if (left.elements.size() == 1 && left.elements.equals(right.elements))
 					// only one element, and it is the same
 					return Satisfiability.SATISFIED;
-				else if (!left.elements.intersects(right.elements))
+				else if (!left.elements.intersects(right.elements) && !typeTokensIntersect(lfiltered, rfiltered))
 					// no common elements, they cannot be equal
 					return Satisfiability.NOT_SATISFIED;
 				else
 					// we don't know really
 					return Satisfiability.UNKNOWN;
 			} else {
-				if (!left.elements.intersects(right.elements))
+				if (!left.elements.intersects(right.elements) && !typeTokensIntersect(lfiltered, rfiltered))
 					// no common elements, they cannot be equal
 					return Satisfiability.SATISFIED;
 				else if (left.elements.size() == 1 && left.elements.equals(right.elements))
@@ -278,8 +282,9 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			if (evalBinaryExpression(BinaryOperator.TYPE_CAST, left, right, state, pp).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
-			ExternalSet<Type> set = cast(left.elements, right.elements);
-			if (left.elements.equals(set))
+			AtomicBoolean mightFail = new AtomicBoolean();
+			ExternalSet<Type> set = cast(left.elements, right.elements, mightFail);
+			if (left.elements.equals(set) && !mightFail.get())
 				// if all the types stayed in 'set' then the there is no
 				// execution that reach the expression with a type that cannot
 				// be casted, and thus this is a tautology
@@ -290,6 +295,15 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		default:
 			return Satisfiability.UNKNOWN;
 		}
+	}
+
+	static boolean typeTokensIntersect(ExternalSet<Type> lfiltered, ExternalSet<Type> rfiltered) {
+		for (Type l : lfiltered)
+			for (Type r : rfiltered)
+				if (l.asTypeTokenType().getTypes().intersects(r.asTypeTokenType().getTypes()))
+					return true;
+
+		return false;
 	}
 
 	@Override
@@ -341,17 +355,26 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	 * {@code types}, keeping only the ones that can be assigned to one of the
 	 * types represented by one of the tokens in {@code tokens}.
 	 * 
-	 * @param types  the types of the expression being casted
-	 * @param tokens the tokens representing the operand of the cast
+	 * @param types     the types of the expression being casted
+	 * @param tokens    the tokens representing the operand of the cast
+	 * @param mightFail a reference to the boolean to set if this cast might
+	 *                      fail (e.g., casting an [int, string] to an int will
+	 *                      yield a set containing int and will set the boolean
+	 *                      to true)
 	 * 
 	 * @return the set of possible types after the cast
 	 */
-	ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens) {
+	ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens, AtomicBoolean mightFail) {
+		if (mightFail != null)
+			mightFail.set(false);
+		
 		ExternalSet<Type> result = Caches.types().mkEmptySet();
 		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
 			for (Type t : types)
 				if (t.canBeAssignedTo(token))
 					result.add(t);
+				else if (mightFail != null)
+					mightFail.set(true);
 
 		return result;
 	}
@@ -439,7 +462,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			InferredTypes state, ProgramPoint pp) {
 		if (right.elements.noneMatch(Type::isTypeTokenType))
 			return BOTTOM_PAIR;
-		ExternalSet<Type> set = cast(left.elements, right.elements);
+		ExternalSet<Type> set = cast(left.elements, right.elements, null);
 		if (set.isEmpty())
 			return BOTTOM_PAIR;
 		return mk(new InferredTypes(set));
