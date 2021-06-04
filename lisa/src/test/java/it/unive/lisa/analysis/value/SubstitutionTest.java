@@ -160,12 +160,9 @@ public class SubstitutionTest {
 	}
 
 	@Test
-	public void testNoSubstitution() throws SemanticException {
-		check(new ArrayList<>(), collect(), collect());
-	}
-
-	@Test
 	public void testEmptySubstitution() throws SemanticException {
+		check(null, collect(), collect());
+		check(new ArrayList<>(), collect(), collect());
 		check(Arrays.asList(new HeapReplacement()), collect(), collect());
 	}
 
