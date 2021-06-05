@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 /**
@@ -86,6 +87,12 @@ public class AvailableExpressions
 	}
 
 	@Override
+	public Collection<AvailableExpressions> gen(ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+		return Collections.emptyList();
+	}
+	
+	@Override
 	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		Collection<Identifier> result = new HashSet<>();
@@ -101,6 +108,12 @@ public class AvailableExpressions
 		return result;
 	}
 
+	@Override
+	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
+		return Collections.emptyList();
+	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

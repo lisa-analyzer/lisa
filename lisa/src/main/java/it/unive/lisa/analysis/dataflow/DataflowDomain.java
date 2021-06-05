@@ -66,18 +66,31 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		// or if the expression cannot be processed, return this
 		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
 			return (D) this;
+		
 		D killed = forgetIdentifiers(domain.kill(id, expression, pp, (D) this));
 		Set<E> updated = new HashSet<>(killed.getDataflowElements());
 		for (E generated : domain.gen(id, expression, pp, (D) this))
 			updated.add(generated);
+		
 		return mk(domain, updated, false, false);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public final D smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		// TODO we have to implement a version of kill/gen also for semantics
-		return (D) this;
+		if (isBottom())
+			return (D) this;
+
+		// if expression cannot be processed, return this
+		if (!domain.canProcess(expression))
+			return (D) this;
+		
+		D killed = forgetIdentifiers(domain.kill(expression, pp, (D) this));
+		Set<E> updated = new HashSet<>(killed.getDataflowElements());
+		for (E generated : domain.gen(expression, pp, (D) this))
+			updated.add(generated);
+		
+		return mk(domain, updated, false, false);
 	}
 
 	@Override

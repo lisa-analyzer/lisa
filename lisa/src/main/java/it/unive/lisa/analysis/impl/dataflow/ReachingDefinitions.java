@@ -87,11 +87,23 @@ public class ReachingDefinitions
 	}
 
 	@Override
+	public Collection<ReachingDefinitions> gen(ValueExpression expression, ProgramPoint pp,
+			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+		return Collections.emptyList();
+	}
+	
+	@Override
 	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.singleton(id);
 	}
 
+	@Override
+	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
+		return Collections.emptyList();
+	}
+	
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		return !id.getDynamicType().isPointerType();

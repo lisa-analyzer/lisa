@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -122,6 +123,12 @@ public class ConstantPropagation
 
 		return gen;
 	}
+	
+	@Override
+	public Collection<ConstantPropagation> gen(ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+		return Collections.emptyList();
+	}
 
 	@Override
 	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
@@ -129,6 +136,12 @@ public class ConstantPropagation
 		Set<Identifier> set = new HashSet<>();
 		set.add(id);
 		return set;
+	}
+	
+	@Override
+	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+		return Collections.emptyList();
 	}
 
 	@Override
