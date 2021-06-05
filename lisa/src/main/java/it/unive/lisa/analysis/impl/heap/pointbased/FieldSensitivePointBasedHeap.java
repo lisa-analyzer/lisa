@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import it.unive.lisa.analysis.SemanticException;
@@ -40,13 +39,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	private FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> allocationSites,
-			List<HeapReplacement> substitutions) {
+			AllocationSites substitutions) {
 		super(allocationSites, substitutions);
 	}
 
 	@Override
 	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
-		return new FieldSensitivePointBasedHeap(original.heapEnv, original.getSubstitution());
+		return new FieldSensitivePointBasedHeap(original.heapEnv, original.toWeaken);
 	}
 
 	@Override
@@ -62,7 +61,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				MemoryPointer pid = (MemoryPointer) exp;	
 				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getLocation() : id;
 				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
-				result = (FieldSensitivePointBasedHeap) result.lub(from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, sss.getSubstitution()), sss.getSubstitution())));
+				result = (FieldSensitivePointBasedHeap) result.lub(from(new FieldSensitivePointBasedHeap(weaken(heap, sss.toWeaken), sss.toWeaken)));
 			} else
 				result = (FieldSensitivePointBasedHeap) result.lub(sss);
 		}
