@@ -267,11 +267,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
 			PointBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			return from(containerState.smallStepSemantics(access.getChild(), pp));
+			return containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
-		if (expression instanceof HeapAllocation || expression instanceof HeapReference || expression instanceof HeapDereference) 
+		if (expression instanceof HeapAllocation)
 			return from(new PointBasedHeap(heapEnv, toWeaken));
+
+		if (expression instanceof HeapReference)
+			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
+
+		if (expression instanceof HeapDereference) 
+			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
+			
 
 		return top();
 	}

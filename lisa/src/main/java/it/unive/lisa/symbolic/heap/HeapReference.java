@@ -16,7 +16,7 @@ public class HeapReference extends HeapExpression {
 	/**
 	 * The name representing the memory location
 	 */
-	private final SymbolicExpression loc;
+	private final SymbolicExpression expression;
 
 	/**
 	 * Builds the heap reference.
@@ -24,22 +24,26 @@ public class HeapReference extends HeapExpression {
 	 * @param types the runtime types of this expression
 	 * @param name  the name that identifies the memory location
 	 */
-	public HeapReference(ExternalSet<Type> types, SymbolicExpression loc) {
+	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression) {
 		super(types);
-		this.loc = loc;
+		this.expression = expression;
 	}
 
 	@Override
 	public String toString() {
-		return "ref$" + loc.toString();
+		return "ref$" + expression.toString();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((loc == null) ? 0 : loc.hashCode());
+		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
 		return result;
+	}
+	
+	public SymbolicExpression getExpression() {
+		return expression;
 	}
 
 	@Override
@@ -51,17 +55,17 @@ public class HeapReference extends HeapExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		HeapReference other = (HeapReference) obj;
-		if (loc == null) {
-			if (other.loc != null)
+		if (expression == null) {
+			if (other.expression != null)
 				return false;
-		} else if (!loc.equals(other.loc))
+		} else if (!expression.equals(other.expression))
 			return false;
 		return true;
 	}
 
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
-		T l = loc.accept(visitor, params);
+		T l = expression.accept(visitor, params);
 		return visitor.visit(this, l, params);
 	}
 }
