@@ -123,7 +123,7 @@ public class ConstantPropagation
 
 		return gen;
 	}
-	
+
 	@Override
 	public Collection<ConstantPropagation> gen(ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
@@ -131,15 +131,19 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
-		Set<Identifier> set = new HashSet<>();
-		set.add(id);
-		return set;
+		Collection<ConstantPropagation> result = new HashSet<>();
+
+		for (ConstantPropagation cp : domain.getDataflowElements())
+			if (cp.getIdentifier().equals(id))
+				result.add(cp);
+
+		return result;
 	}
-	
+
 	@Override
-	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> kill(ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 		return Collections.emptyList();
 	}

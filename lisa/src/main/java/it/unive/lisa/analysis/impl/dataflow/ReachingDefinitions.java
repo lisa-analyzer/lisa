@@ -14,6 +14,7 @@ import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * An implementation of the reaching definition dataflow analysis.
@@ -93,13 +94,19 @@ public class ReachingDefinitions
 	}
 	
 	@Override
-	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
-		return Collections.singleton(id);
+		Collection<ReachingDefinitions> result = new HashSet<>();
+
+		for (ReachingDefinitions rd : domain.getDataflowElements())
+			if (rd.getIdentifier().equals(id))
+				result.add(rd);
+
+		return result;
 	}
 
 	@Override
-	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<ReachingDefinitions> kill(ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}

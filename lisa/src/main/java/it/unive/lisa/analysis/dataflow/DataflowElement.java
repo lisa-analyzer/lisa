@@ -65,7 +65,7 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	Collection<E> gen(ValueExpression expression, ProgramPoint pp, D domain);
 
 	/**
-	 * The dataflow <i>kill</i> operation, yielding the {@link Identifier}s that
+	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
 	 * are killed by the assignment of the given {@code expression} to the given
 	 * {@code id}.
 	 * 
@@ -75,12 +75,13 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @param domain     the {@link DataflowDomain} that is being used to track
 	 *                       instances of this element
 	 * 
-	 * @return the collection of identifiers that are killed by the assignment
+	 * @return the collection of dataflow elements that are killed by the
+	 *             assignment
 	 */
-	Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain);
+	Collection<E> kill(Identifier id, ValueExpression expression, ProgramPoint pp, D domain);
 
 	/**
-	 * The dataflow <i>kill</i> operation, yielding the {@link Identifier}s that
+	 * The dataflow <i>kill</i> operation, yielding the dataflow elements that
 	 * are killed by evaluating the given non-assigning {@code expression}.
 	 * 
 	 * @param expression the expressions that is being evaluated
@@ -88,9 +89,10 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @param domain     the {@link DataflowDomain} that is being used to track
 	 *                       instances of this element
 	 * 
-	 * @return the collection of identifiers that are killed by the expression
+	 * @return the collection of dataflow elements that are killed by the
+	 *             expression
 	 */
-	Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp, D domain);
+	Collection<E> kill(ValueExpression expression, ProgramPoint pp, D domain);
 
 	/**
 	 * Yields a {@link DomainRepresentation} of the information contained in

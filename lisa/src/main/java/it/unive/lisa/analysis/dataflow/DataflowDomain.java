@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.function.Supplier;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -9,11 +15,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A
@@ -59,37 +60,36 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	@Override
 	@SuppressWarnings("unchecked")
 	public final D assign(Identifier id, ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		if (isBottom())
-			return (D) this;
-
 		// if id cannot be tracked by the underlying lattice,
 		// or if the expression cannot be processed, return this
-		if (!domain.tracksIdentifiers(id) || !domain.canProcess(expression))
-			return (D) this;
-		
-		D killed = forgetIdentifiers(domain.kill(id, expression, pp, (D) this));
-		Set<E> updated = new HashSet<>(killed.getDataflowElements());
-		for (E generated : domain.gen(id, expression, pp, (D) this))
-			updated.add(generated);
-		
-		return mk(domain, updated, false, false);
+		return update(() -> !domain.tracksIdentifiers(id) || !domain.canProcess(expression),
+				() -> domain.gen(id, expression, pp, (D) this),
+				() -> domain.kill(id, expression, pp, (D) this));
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public final D smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		// if expression cannot be processed, return this
+		return update(() -> !domain.canProcess(expression),
+				() -> domain.gen(expression, pp, (D) this),
+				() -> domain.kill(expression, pp, (D) this));
+	}
+
+	@SuppressWarnings("unchecked")
+	private D update(Supplier<Boolean> guard, Supplier<Collection<E>> gen, Supplier<Collection<E>> kill) {
 		if (isBottom())
 			return (D) this;
 
-		// if expression cannot be processed, return this
-		if (!domain.canProcess(expression))
+		if (guard.get())
 			return (D) this;
-		
-		D killed = forgetIdentifiers(domain.kill(expression, pp, (D) this));
-		Set<E> updated = new HashSet<>(killed.getDataflowElements());
-		for (E generated : domain.gen(expression, pp, (D) this))
+
+		Set<E> updated = new HashSet<>(getDataflowElements());
+		for (E killed : kill.get())
+			updated.remove(killed);
+		for (E generated : gen.get())
 			updated.add(generated);
-		
+
 		return mk(domain, updated, false, false);
 	}
 
@@ -113,7 +113,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 		if (toRemove.isEmpty())
 			return (D) this;
-		
+
 		Set<E> updated = new HashSet<>(elements);
 		updated.removeAll(toRemove);
 		return mk(domain, updated, false, false);

@@ -93,23 +93,22 @@ public class AvailableExpressions
 	}
 	
 	@Override
-	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
-		Collection<Identifier> result = new HashSet<>();
-		result.add(id);
+		Collection<AvailableExpressions> result = new HashSet<>();
 
 		for (AvailableExpressions ae : domain.getDataflowElements()) {
 			Collection<Identifier> ids = getIdentifierOperands(ae.expression);
 
-			if (ids.contains(id))
-				result.add(ae.getIdentifier());
+			if (ae.getIdentifier().equals(id) || ids.contains(id))
+				result.add(ae);
 		}
 
 		return result;
 	}
 
 	@Override
-	public Collection<Identifier> kill(ValueExpression expression, ProgramPoint pp,
+	public Collection<AvailableExpressions> kill(ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {
 		return Collections.emptyList();
 	}
