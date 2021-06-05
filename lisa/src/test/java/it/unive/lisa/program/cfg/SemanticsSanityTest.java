@@ -20,7 +20,7 @@ import it.unive.lisa.analysis.impl.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.impl.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
-import it.unive.lisa.analysis.impl.types.InferredTypes;
+import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;

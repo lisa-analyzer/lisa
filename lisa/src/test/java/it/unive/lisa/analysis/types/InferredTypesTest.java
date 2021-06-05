@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.impl.types;
+package it.unive.lisa.analysis.types;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.impl.types;
+package it.unive.lisa.analysis.types;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
