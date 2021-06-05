@@ -39,10 +39,10 @@ import org.apache.commons.lang3.tuple.Pair;
  *                {@code T}
  */
 public abstract class Environment<M extends Environment<M, E, T, V>,
-		E extends SymbolicExpression,
-		T extends NonRelationalElement<T, E, M>,
-		V extends Lattice<V>>
-		extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Identifier> {
+E extends SymbolicExpression,
+T extends NonRelationalElement<T, E, M>,
+V extends Lattice<V>>
+extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Identifier> {
 
 	/**
 	 * Builds an empty environment.
@@ -272,7 +272,11 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null)
-				function.put(lifted, getState(id));
+				if (!function.containsKey(lifted))
+					function.put(lifted, getState(id));
+				else
+					function.put(lifted, getState(id).lub(function.get(lifted)));
+
 		}
 
 		return mk(lattice, function);
