@@ -18,7 +18,7 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
@@ -152,7 +152,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 
 		@Override
@@ -161,7 +161,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new PointerIdentifier(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 	}
 }

@@ -20,7 +20,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
@@ -461,7 +461,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		// Type analysis tracks information on any identifier
-		return !(id instanceof PointerIdentifier);
+		return !(id instanceof MemoryPointer);
 	}
 
 	@Override

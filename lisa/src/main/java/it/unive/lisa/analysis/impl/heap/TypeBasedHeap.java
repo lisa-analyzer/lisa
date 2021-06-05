@@ -22,7 +22,7 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
@@ -118,8 +118,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<String> names = new HashSet<>(childState.names);
 
 			for (ValueExpression cont : containerState.rewrite(access.getContainer(), pp))
-				if (cont instanceof PointerIdentifier) {
-					PointerIdentifier pid = (PointerIdentifier) cont;
+				if (cont instanceof MemoryPointer) {
+					MemoryPointer pid = (MemoryPointer) cont;
 					for (Type type : pid.getTypes())
 						if (type.isPointerType())
 							names.add(type.toString());
@@ -193,8 +193,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression rec : receiver)
-				if (rec instanceof PointerIdentifier) {
-					PointerIdentifier	pid = (PointerIdentifier) rec;
+				if (rec instanceof MemoryPointer) {
+					MemoryPointer	pid = (MemoryPointer) rec;
 					for (Type t : pid.getTypes())
 						if (t.isPointerType())
 							result.add(new HeapLocation(types, t.toString(), true));
@@ -220,7 +220,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression refExp : ref)
 				if (refExp instanceof HeapLocation) 
-					result.add(new PointerIdentifier(expression.getTypes(), (HeapLocation) refExp));
+					result.add(new MemoryPointer(expression.getTypes(), (HeapLocation) refExp));
 
 			return new ExpressionSet<>(result);
 		}
@@ -237,7 +237,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					ExternalSet<Type> types = v.getTypes();
 					for (Type t : types)
 						if (t.isPointerType())
-							result.add(new PointerIdentifier(types, new HeapLocation(types, t.toString(), true)));
+							result.add(new MemoryPointer(types, new HeapLocation(types, t.toString(), true)));
 				} else 
 					for (ValueExpression rew : rewrite(expression.getExpression(), (ProgramPoint) params[0]))
 						result.add(rew);

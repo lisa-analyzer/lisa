@@ -43,7 +43,7 @@ public class Variable extends Identifier {
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		throw new SemanticException("Cannot pop the scope of a non-scoped value identifier");
+		return null;
 	}
 
 	@Override

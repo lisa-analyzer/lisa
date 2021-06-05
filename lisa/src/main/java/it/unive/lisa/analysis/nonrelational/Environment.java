@@ -248,12 +248,11 @@ extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Iden
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
-			if (id instanceof OutOfScopeIdentifier)
-				try {
-					return (Identifier) id.popScope(scope);
-				} catch (SemanticException e) {
-					holder.set(e);
-				}
+			try {
+				return (Identifier) id.popScope(scope);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
 			return null;
 		});
 

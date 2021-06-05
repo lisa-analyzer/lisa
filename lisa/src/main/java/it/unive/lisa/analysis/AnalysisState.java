@@ -100,18 +100,14 @@ SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 
 	public AnalysisState<A, H, V> assign(SymbolicExpression id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
+
+		if (id instanceof Identifier) 
+			return assign((Identifier) id, value, pp);
+
 		A s = (A) state.bottom();
-		ExpressionSet<SymbolicExpression> rewritten = null;
-		
-		if (id instanceof Identifier) {
-			s = state.assign((Identifier) id, value, pp);
-			rewritten = new ExpressionSet<>(id);
-		} else { 
-			rewritten = rewrite(id, pp);
-			for (SymbolicExpression i :  rewritten)
-				s = s.lub(state.assign((Identifier) i, value, pp));
-		}
-		
+		ExpressionSet<SymbolicExpression> rewritten = rewrite(id, pp);
+		for (SymbolicExpression i :  rewritten)
+			s = s.lub(state.assign((Identifier) i, value, pp));
 		return new AnalysisState<A, H, V>(s, rewritten);
 	}
 

@@ -8,28 +8,28 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
-public class PointerIdentifier extends Identifier {
+public class MemoryPointer extends Identifier {
 
 	private final HeapLocation loc;
 	
-	public PointerIdentifier(ExternalSet<Type> types, HeapLocation loc) {
+	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc) {
 		this(types, loc, new Annotations());
 	}
 	
-	public PointerIdentifier(ExternalSet<Type> types, HeapLocation loc, Annotations annotations) {
+	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc, Annotations annotations) {
 		// A pointer identifier is always a strong identifier
 		super(types, loc.getName(), false, annotations);
 		this.loc = loc;
 	}
 
 	@Override
-	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return this;
+	public SymbolicExpression pushScope(ScopeToken token) {
+		return new OutOfScopeIdentifier(this, token);
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return this;
+		return null;
 	}
 
 	public HeapLocation getLocation() {

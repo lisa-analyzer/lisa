@@ -11,7 +11,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.PointerIdentifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
@@ -58,9 +58,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 		FieldSensitivePointBasedHeap result = (FieldSensitivePointBasedHeap) bottom();
 		for (ValueExpression exp : rewrittenExp) {
-			if (exp instanceof PointerIdentifier) {
-				PointerIdentifier pid = (PointerIdentifier) exp;	
-				Identifier v = id instanceof PointerIdentifier ? ((PointerIdentifier) id).getLocation() : id;
+			if (exp instanceof MemoryPointer) {
+				MemoryPointer pid = (MemoryPointer) exp;	
+				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getLocation() : id;
 				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
 				result = (FieldSensitivePointBasedHeap) result.lub(from(new FieldSensitivePointBasedHeap(applySubstitutions(heap, sss.getSubstitution()), sss.getSubstitution())));
 			} else
@@ -85,8 +85,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (SymbolicExpression contRewritten : receiver)
-				if (contRewritten instanceof PointerIdentifier) {
-					AllocationSite site = (AllocationSite) ((PointerIdentifier) contRewritten).getLocation();
+				if (contRewritten instanceof MemoryPointer) {
+					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getLocation();
 					for (SymbolicExpression childRewritten : child)
 						result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak()));
 				}
