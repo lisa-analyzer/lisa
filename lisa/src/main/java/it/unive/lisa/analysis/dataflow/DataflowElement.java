@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticEvaluator;
@@ -8,15 +10,15 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
 
 /**
- * An element of the dataflow domain, that is associated to an
- * {@link Identifier} through {@link #getIdentifier()}. A domain element
- * implements standard dataflow
- * {@link #gen(Identifier, ValueExpression, ProgramPoint, DataflowDomain)} and
- * {@link #kill(Identifier, ValueExpression, ProgramPoint, DataflowDomain)}
- * operations.
+ * An element of the dataflow domain, that contains a collection of
+ * {@link Identifier}s in its definition. A domain element implements standard
+ * dataflow gen (
+ * {@link #gen(Identifier, ValueExpression, ProgramPoint, DataflowDomain)},
+ * {@link #gen(ValueExpression, ProgramPoint, DataflowDomain)}) and kill
+ * ({@link #kill(Identifier, ValueExpression, ProgramPoint, DataflowDomain)},
+ * {@link #kill(ValueExpression, ProgramPoint, DataflowDomain)}) operations.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -28,11 +30,12 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 		extends SemanticEvaluator {
 
 	/**
-	 * Yields the {@link Identifier} this element is associated with.
+	 * Yields all the {@link Identifier}s that are involved in the definition of
+	 * this element.
 	 * 
-	 * @return the identifier
+	 * @return the identifiers
 	 */
-	Identifier getIdentifier();
+	Collection<Identifier> getInvolvedIdentifiers();
 
 	/**
 	 * The dataflow <i>gen</i> operation, yielding the dataflow elements that

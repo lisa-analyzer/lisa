@@ -77,8 +77,8 @@ public class ReachingDefinitions
 	}
 
 	@Override
-	public Identifier getIdentifier() {
-		return this.variable;
+	public Collection<Identifier> getInvolvedIdentifiers() {
+		return Collections.singleton(variable);
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class ReachingDefinitions
 		Collection<ReachingDefinitions> result = new HashSet<>();
 
 		for (ReachingDefinitions rd : domain.getDataflowElements())
-			if (rd.getIdentifier().equals(id))
+			if (rd.variable.equals(id))
 				result.add(rd);
 
 		return result;

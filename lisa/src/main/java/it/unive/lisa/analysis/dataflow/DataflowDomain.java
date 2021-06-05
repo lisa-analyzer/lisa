@@ -108,7 +108,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 		Collection<E> toRemove = new LinkedList<>();
 		for (E e : elements)
-			if (e.getIdentifier().equals(id))
+			if (e.getInvolvedIdentifiers().contains(id))
 				toRemove.add(e);
 
 		if (toRemove.isEmpty())

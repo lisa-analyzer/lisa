@@ -50,8 +50,8 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Identifier getIdentifier() {
-		return id;
+	public Collection<Identifier> getInvolvedIdentifiers() {
+		return Collections.singleton(id);
 	}
 
 	private Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
@@ -63,7 +63,7 @@ public class ConstantPropagation
 
 		if (e instanceof Identifier) {
 			for (ConstantPropagation cp : domain.getDataflowElements())
-				if (cp.getIdentifier().equals(e))
+				if (cp.id.equals(e))
 					return cp.v;
 
 			return null;
@@ -136,7 +136,7 @@ public class ConstantPropagation
 		Collection<ConstantPropagation> result = new HashSet<>();
 
 		for (ConstantPropagation cp : domain.getDataflowElements())
-			if (cp.getIdentifier().equals(id))
+			if (cp.id.equals(id))
 				result.add(cp);
 
 		return result;
