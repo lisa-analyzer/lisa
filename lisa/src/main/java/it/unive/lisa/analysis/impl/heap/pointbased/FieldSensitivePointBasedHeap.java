@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
@@ -38,35 +38,22 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		super();
 	}
 
-	private FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> allocationSites,
-			AllocationSites substitutions) {
-		super(allocationSites, substitutions);
+	private FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> allocationSites) {
+		super(allocationSites);
 	}
 
 	@Override
 	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
-		return new FieldSensitivePointBasedHeap(original.heapEnv, original.toWeaken);
+		return new FieldSensitivePointBasedHeap(original.heapEnv);
 	}
+	
+	private AllocationSite alreadyAllocated(AllocationSite id) {
+		for (AllocationSites set : heapEnv.values())
+			for (AllocationSite site : set)
+				if (site.getName().equals(id.getName()))
+					return site;
 
-	@Override
-	public PointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
-			throws SemanticException {
-
-		FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) smallStepSemantics(expression, pp);
-		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
-
-		FieldSensitivePointBasedHeap result = (FieldSensitivePointBasedHeap) bottom();
-		for (ValueExpression exp : rewrittenExp) {
-			if (exp instanceof MemoryPointer) {
-				MemoryPointer pid = (MemoryPointer) exp;	
-				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getLocation() : id;
-				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
-				result = (FieldSensitivePointBasedHeap) result.lub(from(new FieldSensitivePointBasedHeap(weaken(heap, sss.toWeaken), sss.toWeaken)));
-			} else
-				result = (FieldSensitivePointBasedHeap) result.lub(sss);
-		}
-		
-		return result;
+		return null;
 	}
 	
 	@Override
@@ -91,6 +78,18 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				}
 
 			return new ExpressionSet<>(result);
+		}
+		
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+				throws SemanticException {
+			AllocationSite id = new AllocationSite(expression.getTypes(),
+					((ProgramPoint) params[0]).getLocation().getCodeLocation());
+
+			if (alreadyAllocated(id) != null) 
+				return new ExpressionSet<>(new AllocationSite(id.getTypes(), id.getId(), true));
+			else
+				return new ExpressionSet<>(new AllocationSite(id.getTypes(), id.getId(), false));
 		}
 	}
 }
