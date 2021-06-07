@@ -47,10 +47,10 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		return new FieldSensitivePointBasedHeap(original.heapEnv);
 	}
 	
-	private AllocationSite alreadyAllocated(AllocationSite id) {
+	private AllocationSite alreadyAllocated(String id) {
 		for (AllocationSites set : heapEnv.values())
 			for (AllocationSite site : set)
-				if (site.getName().equals(id.getName()))
+				if (site.getId().equals(id))
 					return site;
 
 		return null;
@@ -80,16 +80,16 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			return new ExpressionSet<>(result);
 		}
 		
+		
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			AllocationSite id = new AllocationSite(expression.getTypes(),
-					((ProgramPoint) params[0]).getLocation().getCodeLocation());
+			String pp = ((ProgramPoint) params[0]).getLocation().getCodeLocation();
 
-			if (alreadyAllocated(id) != null) 
-				return new ExpressionSet<>(new AllocationSite(id.getTypes(), id.getId(), true));
+			if (alreadyAllocated(pp) != null) 
+				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, true));
 			else
-				return new ExpressionSet<>(new AllocationSite(id.getTypes(), id.getId(), false));
+				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, false));
 		}
 	}
 }

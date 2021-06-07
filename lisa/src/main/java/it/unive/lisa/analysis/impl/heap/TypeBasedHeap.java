@@ -114,18 +114,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
 			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			TypeBasedHeap childState = containerState.smallStepSemantics(access.getChild(), pp);
-			Set<String> names = new HashSet<>(childState.names);
-
-			for (ValueExpression cont : containerState.rewrite(access.getContainer(), pp))
-				if (cont instanceof MemoryPointer) {
-					MemoryPointer pid = (MemoryPointer) cont;
-					for (Type type : pid.getTypes())
-						if (type.isPointerType())
-							names.add(type.toString());
-				}
-
-			return new TypeBasedHeap(names);
+			return  containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -137,8 +126,12 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			return new TypeBasedHeap(names);
 		}
 
-		if (expression instanceof HeapReference || expression instanceof HeapDereference)
-			return new TypeBasedHeap(names);
+		if (expression instanceof HeapReference)
+			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
+
+		if (expression instanceof HeapDereference) 
+			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
+			
 
 		return top();
 	}

@@ -271,8 +271,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id = new AllocationSite(expression.getTypes(),
-					((ProgramPoint) params[0]).getLocation().getCodeLocation());
-			return new ExpressionSet<>(new AllocationSite(id.getTypes(), id.getId(), true));
+					((ProgramPoint) params[0]).getLocation().getCodeLocation(), true);
+			return new ExpressionSet<>(id);
 		}
 
 		@Override
