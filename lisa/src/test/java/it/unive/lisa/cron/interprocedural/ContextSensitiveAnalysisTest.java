@@ -67,5 +67,15 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive5", "programContextSensitive4.imp", conf);
 	}
+	
+	@Test
+	public void testRTAContextSensitive6() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
+				.setAbstractState(getDefaultFor(AbstractState.class,  new PointBasedHeap(), new Interval()))
+				.setDumpAnalysis(true)
+				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
+				.setCallGraph(new RTACallGraph());
+		perform("interprocedural", "RTAContextSensitive6", "programContextSensitive5.imp", conf);
+	}
 
 }
