@@ -294,27 +294,13 @@ public abstract class Unit {
 
 	@Override
 	public final int hashCode() {
+		// Note: no implementation of equals is provided since 
+		// all units are unique. hashCode relies on the name of 
+		// the unit since it is the only identifier.
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		return result;
-	}
-
-	@Override
-	public final boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Unit other = (Unit) obj;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		return true;
 	}
 
 	@Override

@@ -54,6 +54,17 @@ public class NativeCFG implements CodeMember {
 	}
 
 	@Override
+	public int hashCode() {
+		// Note: no implementation of equals is provided since
+		// all constructs are unique. hashCode relies on the descriptor of
+		// the unit since it is the only identifier.
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
+		return result;
+	}
+
+	@Override
 	public CFGDescriptor getDescriptor() {
 		return descriptor;
 	}
