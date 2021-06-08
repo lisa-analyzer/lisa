@@ -11,11 +11,11 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 public class MemoryPointer extends Identifier {
 
 	private final HeapLocation loc;
-	
+
 	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc) {
 		this(types, loc, new Annotations());
 	}
-	
+
 	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc, Annotations annotations) {
 		// A pointer identifier is always a strong identifier
 		super(types, loc.getName(), false, annotations);
@@ -35,7 +35,7 @@ public class MemoryPointer extends Identifier {
 	public HeapLocation getLocation() {
 		return loc;
 	}
-	
+
 	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);

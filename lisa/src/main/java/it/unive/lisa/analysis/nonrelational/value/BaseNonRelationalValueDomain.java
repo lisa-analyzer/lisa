@@ -48,7 +48,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		public T visit(HeapAllocation expression, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
-		
+
 		@Override
 		public T visit(HeapReference expression, T arg, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
@@ -58,7 +58,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		public T visit(HeapDereference expression, T arg, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
-		
+
 		@Override
 		public T visit(UnaryExpression expression, T arg, Object... params) throws SemanticException {
 			if (arg.isBottom())

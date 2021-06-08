@@ -69,17 +69,18 @@ public class AccessInstance extends Expression {
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
-	H extends HeapDomain<H>,
-	V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-			InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = entryState.bottom();
 		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
-		for (SymbolicExpression expr : rec.getComputedExpressions()) {	
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr), v), this);
+		for (SymbolicExpression expr : rec.getComputedExpressions()) {
+			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
+					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr), v), this);
 			result = result.lub(tmp);
 		}
 

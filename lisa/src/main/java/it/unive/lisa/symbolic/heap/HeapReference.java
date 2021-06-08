@@ -14,15 +14,15 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 public class HeapReference extends HeapExpression {
 
 	/**
-	 * The name representing the memory location
+	 * The expression referred by this expression
 	 */
 	private final SymbolicExpression expression;
 
 	/**
 	 * Builds the heap reference.
 	 * 
-	 * @param types the runtime types of this expression
-	 * @param name  the name that identifies the memory location
+	 * @param types      the runtime types of this expression
+	 * @param expression the expression that this refers to
 	 */
 	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression) {
 		super(types);
@@ -41,7 +41,7 @@ public class HeapReference extends HeapExpression {
 		result = prime * result + ((expression == null) ? 0 : expression.hashCode());
 		return result;
 	}
-	
+
 	public SymbolicExpression getExpression() {
 		return expression;
 	}

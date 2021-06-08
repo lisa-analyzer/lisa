@@ -58,11 +58,13 @@ public interface ExpressionVisitor<T> {
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(HeapAllocation expression, Object... params) throws SemanticException;
-	
+
 	/**
 	 * Visits a {@link HeapReference}.
 	 * 
 	 * @param expression the heap reference
+	 * @param arg        the value produced by visiting the argument of the
+	 *                       expression
 	 * @param params     the additional parameters provided to
 	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
 	 *                       if any
@@ -71,12 +73,14 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapReference expression, T ref, Object... params) throws SemanticException;
-	
+	T visit(HeapReference expression, T arg, Object... params) throws SemanticException;
+
 	/**
 	 * Visits a {@link HeapDereference}.
 	 * 
 	 * @param expression the heap dereference
+	 * @param arg        the value produced by visiting the argument of the
+	 *                       expression
 	 * @param params     the additional parameters provided to
 	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
 	 *                       if any
@@ -85,7 +89,7 @@ public interface ExpressionVisitor<T> {
 	 * 
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
-	T visit(HeapDereference expression, T deref, Object... params) throws SemanticException;
+	T visit(HeapDereference expression, T arg, Object... params) throws SemanticException;
 
 	/**
 	 * Visits a {@link UnaryExpression}. This callback is invoked after the

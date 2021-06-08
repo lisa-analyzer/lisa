@@ -2,8 +2,6 @@ package it.unive.lisa.cron.interprocedural;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
@@ -15,6 +13,7 @@ import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.impl.RecursionFreeToken;
+import org.junit.Test;
 
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
@@ -57,21 +56,21 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive4", "programContextSensitive3.imp", conf);
 	}
-	
+
 	@Test
 	public void testRTAContextSensitive5() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,  new PointBasedHeap(), new Interval()))
+				.setAbstractState(getDefaultFor(AbstractState.class, new PointBasedHeap(), new Interval()))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive5", "programContextSensitive4.imp", conf);
 	}
-	
+
 	@Test
 	public void testRTAContextSensitive6() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,  new PointBasedHeap(), new Interval()))
+				.setAbstractState(getDefaultFor(AbstractState.class, new PointBasedHeap(), new Interval()))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.heap;
 
-import java.util.Collections;
-import java.util.List;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -20,6 +17,8 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -147,21 +146,25 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(), new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true)));
 		}
 	}
 }

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -12,6 +9,8 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -46,7 +45,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
 		return new FieldSensitivePointBasedHeap(original.heapEnv);
 	}
-	
+
 	private AllocationSite alreadyAllocated(String id) {
 		for (AllocationSites set : heapEnv.values())
 			for (AllocationSite site : set)
@@ -55,7 +54,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 		return null;
 	}
-	
+
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
@@ -63,9 +62,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	private class Rewriter extends PointBasedHeap.Rewriter {
-		
+
 		@Override
-		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression>  receiver,
+		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			AccessChild access = (AccessChild) expression;
 			Set<ValueExpression> result = new HashSet<>();
@@ -79,14 +78,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			return new ExpressionSet<>(result);
 		}
-		
-		
+
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			String pp = ((ProgramPoint) params[0]).getLocation().getCodeLocation();
 
-			if (alreadyAllocated(pp) != null) 
+			if (alreadyAllocated(pp) != null)
 				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, true));
 			else
 				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, false));

@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -25,6 +20,10 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -58,8 +57,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap from its heap
 	 * environment and substitutions.
 	 * 
-	 * @param heapEnv       the heap environment that this instance tracks
-	 * @param substitutions the list of heap replacement
+	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	protected PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
 		this.heapEnv = heapEnv;
@@ -86,7 +84,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		PointBasedHeap result = bottom();
 		for (ValueExpression exp : rewrittenExp) {
 			if (exp instanceof MemoryPointer) {
-				MemoryPointer pid = (MemoryPointer) exp;	
+				MemoryPointer pid = (MemoryPointer) exp;
 				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getLocation() : id;
 				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
 				result = result.lub(from(new PointBasedHeap(heap)));
@@ -214,9 +212,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (expression instanceof HeapReference)
 			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
 
-		if (expression instanceof HeapDereference) 
+		if (expression instanceof HeapDereference)
 			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
-			
+
 		return top();
 	}
 
@@ -228,7 +226,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	private Set<ValueExpression> resolveIdentifier(Identifier v) {
 		Set<ValueExpression> result = new HashSet<>();
-		for (AllocationSite site : heapEnv.getState(v)) 
+		for (AllocationSite site : heapEnv.getState(v))
 			result.add(new MemoryPointer(site.getTypes(), site));
 
 		return result;
@@ -257,7 +255,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
-			for (ValueExpression rec : receiver) 
+			for (ValueExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getLocation();
@@ -276,7 +274,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> loc, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> loc,
+				Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
@@ -289,28 +288,29 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> ref, Object... params)
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> ref,
+				Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
-			for(ValueExpression refExp : ref) {
+			for (ValueExpression refExp : ref) {
 				if (refExp instanceof Identifier && !(refExp instanceof MemoryPointer)) {
 					Identifier id = (Identifier) refExp;
-					if (heapEnv.getKeys().contains(id)) 
+					if (heapEnv.getKeys().contains(id))
 						result.addAll(resolveIdentifier(id));
-				} else 
+				} else
 					for (ValueExpression rew : rewrite(expression.getExpression(), (ProgramPoint) params[0]))
 						result.add(rew);
 			}
 
-			return new ExpressionSet<>(result); 
+			return new ExpressionSet<>(result);
 		}
 
 		@Override
 		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer)) 
-				if (heapEnv.getKeys().contains(expression)) 
+			if (!(expression instanceof MemoryPointer))
+				if (heapEnv.getKeys().contains(expression))
 					return new ExpressionSet<>(resolveIdentifier(expression));
 
 			return new ExpressionSet<>(expression);

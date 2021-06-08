@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -13,6 +9,9 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -28,8 +27,8 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-extends BaseLattice<AnalysisState<A, H, V>> implements
-SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
+		extends BaseLattice<AnalysisState<A, H, V>> implements
+		SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -101,12 +100,12 @@ SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 	public AnalysisState<A, H, V> assign(SymbolicExpression id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 
-		if (id instanceof Identifier) 
+		if (id instanceof Identifier)
 			return assign((Identifier) id, value, pp);
 
 		A s = (A) state.bottom();
 		ExpressionSet<SymbolicExpression> rewritten = rewrite(id, pp);
-		for (SymbolicExpression i :  rewritten)
+		for (SymbolicExpression i : rewritten)
 			s = s.lub(state.assign((Identifier) i, value, pp));
 		return new AnalysisState<A, H, V>(s, rewritten);
 	}
@@ -118,11 +117,12 @@ SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
 		return new AnalysisState<>(s, new ExpressionSet<>(expression));
 	}
 
-	private ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {		
+	private ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		return new ExpressionSet<>(
 				getState().getHeapState().rewrite(expression, pp).elements()
-				.stream()
-				.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
+						.stream()
+						.map(e -> (SymbolicExpression) e).collect(Collectors.toSet()));
 	}
 
 	@Override

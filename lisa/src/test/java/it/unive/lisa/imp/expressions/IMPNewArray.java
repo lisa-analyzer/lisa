@@ -55,13 +55,14 @@ public class IMPNewArray extends NativeCall {
 		// parameters of this call
 		// (the semantics of this call does not need information about the
 		// intermediate analysis states)
-		AnalysisState<A, H, V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
+		AnalysisState<A, H,
+				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
 		AnalysisState<A, H, V> sem = lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes()), this);
 
 		AnalysisState<A, H, V> result = entryState.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-				AnalysisState<A, H, V> refSem = sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc), this);
-				result = result.lub(refSem);
+			AnalysisState<A, H, V> refSem = sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc), this);
+			result = result.lub(refSem);
 		}
 
 		return result;

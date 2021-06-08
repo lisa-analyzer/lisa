@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -21,6 +12,13 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -40,10 +38,10 @@ import it.unive.lisa.util.collections.CollectionsDiffBuilder;
  *                {@code T}
  */
 public abstract class Environment<M extends Environment<M, E, T, V>,
-E extends SymbolicExpression,
-T extends NonRelationalElement<T, E, M>,
-V extends Lattice<V>>
-extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Identifier> {
+		E extends SymbolicExpression,
+		T extends NonRelationalElement<T, E, M>,
+		V extends Lattice<V>>
+		extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Identifier> {
 
 	/**
 	 * Builds an empty environment.

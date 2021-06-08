@@ -40,13 +40,13 @@ public class IMPArrayAccess extends BinaryNativeCall {
 
 	@Override
 	protected <A extends AbstractState<A, H, V>,
-	H extends HeapDomain<H>,
-	V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-			AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-			AnalysisState<A, H, V> leftState,
-			SymbolicExpression left,
-			AnalysisState<A, H, V> rightState,
-			SymbolicExpression right)
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> leftState,
+					SymbolicExpression left,
+					AnalysisState<A, H, V> rightState,
+					SymbolicExpression right)
 
 					throws SemanticException {
 		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())

@@ -1,7 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,6 +19,7 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -51,11 +50,11 @@ public class IMPNewObj extends NativeCall {
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
-	H extends HeapDomain<H>,
-	V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-			AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-			AnalysisState<A, H, V>[] computedStates,
-			ExpressionSet<SymbolicExpression>[] params)
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V>[] computedStates,
+					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
 
@@ -73,10 +72,10 @@ public class IMPNewObj extends NativeCall {
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
 
-		sem =  sem.smallStepSemantics(created, this);
-		
+		sem = sem.smallStepSemantics(created, this);
+
 		AnalysisState<A, H, V> result = entryState.bottom();
-		for (SymbolicExpression loc : sem.getComputedExpressions()) 
+		for (SymbolicExpression loc : sem.getComputedExpressions())
 			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc), call));
 
 		return result;
