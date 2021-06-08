@@ -1,0 +1,21 @@
+class A {
+
+	build(a,b,c) {
+		def res = new int[3];
+		res[0] = a;
+		res[1] = b;
+		res[2] = c;
+		return this.identity(res);
+	}
+	
+	identity(x) {
+		def y = x;
+		return y;
+	}
+
+    main() {
+        def arr1 = this.build(1,2,3);
+        def arr2 = this.build(-5,5,6);
+    }
+    
+}
