@@ -183,37 +183,6 @@ public abstract class ControlFlowStructure {
 		return true;
 	}
 
-	/**
-	 * Checks if this conditional structure is effectively equal to the given
-	 * one, that is, if they have the same structure while potentially being
-	 * different instances.
-	 * 
-	 * @param obj the other conditional structure
-	 * 
-	 * @return {@code true} if this conditional structure and the given one are
-	 *             effectively equals
-	 */
-	public boolean isEqualTo(ControlFlowStructure obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		ControlFlowStructure other = (ControlFlowStructure) obj;
-		if (condition == null) {
-			if (other.condition != null)
-				return false;
-		} else if (!condition.isEqualTo(other.condition))
-			return false;
-		if (firstFollower == null) {
-			if (other.firstFollower != null)
-				return false;
-		} else if (!firstFollower.isEqualTo(other.firstFollower))
-			return false;
-		return true;
-	}
-
 	@Override
 	public abstract String toString();
 }

@@ -84,27 +84,6 @@ public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 	}
 
 	@Override
-	public boolean isEqualTo(Edge other) {
-		if (this == other)
-			return true;
-		if (other == null)
-			return false;
-		if (getClass() != other.getClass())
-			return false;
-		if (destination == null) {
-			if (other.destination != null)
-				return false;
-		} else if (!destination.isEqualTo(other.destination))
-			return false;
-		if (source == null) {
-			if (other.source != null)
-				return false;
-		} else if (!source.isEqualTo(other.source))
-			return false;
-		return true;
-	}
-
-	@Override
 	public abstract String toString();
 
 	@Override

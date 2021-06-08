@@ -1046,7 +1046,7 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 			for (Statement st : struct.allStatements())
 				// we tolerate null values only if its the follower
 				if ((st == null && struct.getFirstFollower() != null)
-						|| (st != null && !adjacencyMatrix.containsNode(st, false)))
+						|| (st != null && !adjacencyMatrix.containsNode(st)))
 					throw new ProgramValidationException(this + " has a conditional structure (" + struct
 							+ ") that contains a node not in the graph: " + st);
 		}

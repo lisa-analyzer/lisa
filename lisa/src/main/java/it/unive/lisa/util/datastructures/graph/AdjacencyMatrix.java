@@ -1,12 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
-import it.unive.lisa.util.workset.LIFOWorkingSet;
-import it.unive.lisa.util.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.workset.WorkingSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,8 +12,16 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
+import it.unive.lisa.util.workset.LIFOWorkingSet;
+import it.unive.lisa.util.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.workset.WorkingSet;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and
@@ -117,7 +118,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @param node the node to remove
 	 */
 	public void removeNode(N node) {
-		if (!containsNode(node, false))
+		if (!containsNode(node))
 			return;
 
 		Pair<ExternalSet<E>, ExternalSet<E>> edges = matrix.get(node);
@@ -350,38 +351,25 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	/**
 	 * Yields {@code true} if the given node is contained in this matrix.
 	 * 
-	 * @param node         the node to check
-	 * @param weakEquality if {@code true}, {@link Node#isEqualTo(Node)} is used
-	 *                         to test for equality while searching for the node
-	 *                         instead of using {@link Object#equals(Object)}.
+	 * @param node the node to check
 	 * 
 	 * @return {@code true} if the node is in this matrix
 	 */
-	public boolean containsNode(N node, boolean weakEquality) {
-		if (!weakEquality)
-			return matrix.containsKey(node);
-
-		for (N n : matrix.keySet())
-			if (n == node || n.equals(node) || n.isEqualTo(node))
-				return true;
-
-		return false;
+	public boolean containsNode(N node) {
+		return matrix.containsKey(node);
 	}
 
 	/**
 	 * Yields {@code true} if the given edge is contained in this matrix.
 	 * 
-	 * @param edge         the edge to check
-	 * @param weakEquality if {@code true}, {@link Edge#isEqualTo(Edge)} is used
-	 *                         to test for equality while searching for the edge
-	 *                         instead of using {@link Object#equals(Object)}.
+	 * @param edge the edge to check
 	 * 
 	 * @return {@code true} if the edge is in this matrix
 	 */
-	public boolean containsEdge(E edge, boolean weakEquality) {
+	public boolean containsEdge(E edge) {
 		for (Pair<ExternalSet<E>, ExternalSet<E>> pair : matrix.values())
 			for (E e : pair.getRight())
-				if (e == edge || e.equals(edge) || (weakEquality && e.isEqualTo(edge)))
+				if (e == edge || e.equals(edge))
 					return true;
 
 		return false;
@@ -417,40 +405,6 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		return true;
 	}
 
-	/**
-	 * Checks if this matrix is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
-	 * 
-	 * @param other the other matrix
-	 * 
-	 * @return {@code true} if this matrix and the given one are effectively
-	 *             equals
-	 */
-	public boolean isEqualTo(AdjacencyMatrix<N, E, G> other) {
-		if (this == other)
-			return true;
-		if (other == null)
-			return false;
-		if (matrix == null) {
-			if (other.matrix != null)
-				return false;
-		} else if (!areEqual(matrix, other.matrix))
-			return false;
-		return true;
-	}
-
-	private boolean areEqual(Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> first,
-			Map<N, Pair<ExternalSet<E>, ExternalSet<E>>> second) {
-		return CollectionUtilities.equals(first.entrySet(), second.entrySet(),
-				(e1, e2) -> e1.getKey().isEqualTo(e2.getKey())
-						&& areEqual(e1.getValue().getLeft(), e2.getValue().getLeft())
-						&& areEqual(e1.getValue().getRight(), e2.getValue().getRight()));
-	}
-
-	private boolean areEqual(ExternalSet<E> first, ExternalSet<E> second) {
-		return CollectionUtilities.equals(first, second, (e, ee) -> e.isEqualTo(ee));
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -471,16 +425,16 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @param root the node to use as root for the removal
 	 */
 	public void removeFrom(N root) {
-		if (!containsNode(root, true))
+		if (!containsNode(root))
 			return;
 
 		Set<N> add = new HashSet<>(), remove = new HashSet<>(), check = new HashSet<>();
 
-		if (containsNode(root, false))
+		if (containsNode(root))
 			add.add(root);
 		else {
 			for (N n : matrix.keySet())
-				if (n.isEqualTo(root))
+				if (n.equals(root))
 					add.add(n);
 		}
 
@@ -538,7 +492,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 *             between the given nodes
 	 */
 	public int distance(N from, N to) {
-		if (!containsNode(from, false) || !containsNode(to, false))
+		if (!containsNode(from) || !containsNode(to))
 			return -1;
 
 		int distance = -1;

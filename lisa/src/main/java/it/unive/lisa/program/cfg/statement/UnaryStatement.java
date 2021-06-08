@@ -66,16 +66,18 @@ public abstract class UnaryStatement extends Statement {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		UnaryStatement other = (UnaryStatement) st;
+		if (getClass() != obj.getClass())
+			return false;
+		UnaryStatement other = (UnaryStatement) obj;
 		if (expression == null) {
 			if (other.expression != null)
 				return false;
-		} else if (!expression.isEqualTo(other.expression))
+		} else if (!expression.equals(other.expression))
 			return false;
 		return true;
 	}

@@ -197,7 +197,7 @@ public abstract class FixpointGraph<G extends FixpointGraph<G, N, E>,
 				if (current == null)
 					throw new FixpointException(
 							"Unknown node encountered during fixpoint execution in '" + this + "'");
-				if (!adjacencyMatrix.getNodes().contains(current))
+				if (!adjacencyMatrix.containsNode(current))
 					throw new FixpointException("'" + current
 							+ "' is not part of this graph, and cannot be analyzed in this fixpoint computation");
 

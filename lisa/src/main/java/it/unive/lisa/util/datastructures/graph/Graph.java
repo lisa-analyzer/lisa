@@ -308,38 +308,12 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		if (entrypoints == null) {
 			if (graph.entrypoints != null)
 				return false;
-		} else if (entrypoints.size() != graph.entrypoints.size())
+		} else if (!entrypoints.equals(graph.entrypoints))
 			return false;
-		else {
-			// nodes use reference equality, thus
-			// entrypoint.equals(graph.entrypoints) won't
-			// achieve content comparison. Need to do this manually.
-
-			// the following keeps track of the unmatched nodes in
-			// graph.entrypoints
-			Collection<N> copy = new HashSet<>(graph.entrypoints);
-			boolean found;
-			for (N s : entrypoints) {
-				found = false;
-				for (N ss : graph.entrypoints)
-					if (copy.contains(ss) && s.isEqualTo(ss)) {
-						copy.remove(ss);
-						found = true;
-						break;
-					}
-				if (!found)
-					return false;
-			}
-
-			if (!copy.isEmpty())
-				// we also have to match all of the entrypoints in
-				// graph.entrypoints
-				return false;
-		}
 		if (adjacencyMatrix == null) {
 			if (graph.adjacencyMatrix != null)
 				return false;
-		} else if (!adjacencyMatrix.isEqualTo(graph.adjacencyMatrix))
+		} else if (!adjacencyMatrix.equals(graph.adjacencyMatrix))
 			return false;
 		return true;
 	}

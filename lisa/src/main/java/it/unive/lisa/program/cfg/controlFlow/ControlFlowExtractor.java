@@ -127,7 +127,7 @@ public class ControlFlowExtractor {
 				// in empty loops, the conditional is a follower of itself
 				// and it is not in the body of the loop, so we have to
 				// manually exclude it
-				if (out.getDestination() != conditional && !body.containsNode(out.getDestination(), false)) {
+				if (out.getDestination() != conditional && !body.containsNode(out.getDestination())) {
 					exit = out;
 					break;
 				}
@@ -283,14 +283,14 @@ public class ControlFlowExtractor {
 		}
 
 		private ControlFlowStructure tryClose(Statement trueNext, Statement falseNext) {
-			if (falseBranch.containsNode(trueNext, false)) {
+			if (falseBranch.containsNode(trueNext)) {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
 				return new IfThenElse(target.getAdjacencyMatrix(), conditional, trueNext, trueBranch.getNodes(),
 						falseBranch.getNodes());
 			}
 
-			if (trueBranch.containsNode(falseNext, false)) {
+			if (trueBranch.containsNode(falseNext)) {
 				// need to cut the extra part from the false branch
 				trueBranch.removeFrom(falseNext);
 				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),

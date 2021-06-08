@@ -92,29 +92,15 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 		return result;
 	}
 
-	/**
-	 * All statements use reference equality for equality checks, to allow
-	 * different statement with the same content but placed in different part of
-	 * the cfg to being not equal if there are no debug information available.
-	 * For checking if two statements are effectively equal (that is, they are
-	 * different object with the same structure) use
-	 * {@link #isEqualTo(Statement)}. <br>
-	 * <br>
-	 * {@inheritDoc}
-	 */
 	@Override
-	public final boolean equals(Object obj) {
-		return this == obj;
-	}
-
-	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (st == null)
+		if (obj == null)
 			return false;
-		if (getClass() != st.getClass())
+		if (getClass() != obj.getClass())
 			return false;
+		Statement st = (Statement) obj;
 		if (location == null) {
 			if (st.location == null)
 				return true;

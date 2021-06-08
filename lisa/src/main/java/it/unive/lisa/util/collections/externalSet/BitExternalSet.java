@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -289,14 +290,8 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 		return result;
 	}
 
-	/**
-	 * Determines if this set is equal to the given one, that is, if they share
-	 * the cache (checked through reference equality) and contains the same
-	 * elements. <br>
-	 * <br>
-	 * {@inheritDoc}
-	 */
 	@Override
+	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
@@ -306,10 +301,10 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 		BitExternalSet<?> other = (BitExternalSet<?>) obj;
 		if (cache != other.cache)
-			return false;
-		if (!Arrays.equals(bits, other.bits))
-			return false;
-		return true;
+			// by recreating the set, we make it share the cache with this one
+			// at this point, we can just compare the bits
+			other = (BitExternalSet<?>) cache.mkSet((Iterable<T>) other);
+		return Arrays.equals(bits, other.bits);
 	}
 
 	@Override

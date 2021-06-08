@@ -92,7 +92,7 @@ public abstract class NativeCall extends Call {
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((constructName == null) ? 0 : constructName.hashCode());
@@ -100,20 +100,20 @@ public abstract class NativeCall extends Call {
 	}
 
 	@Override
-	public final boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		NativeCall other = (NativeCall) st;
+		NativeCall other = (NativeCall) obj;
 		if (constructName == null) {
 			if (other.constructName != null)
 				return false;
 		} else if (!constructName.equals(other.constructName))
 			return false;
-		return super.isEqualTo(other);
+		return true;
 	}
 
 	@Override

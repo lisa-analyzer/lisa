@@ -35,11 +35,6 @@ public class CallGraphEdge implements Edge<CallGraphNode, CallGraphEdge, BaseCal
 	}
 
 	@Override
-	public boolean isEqualTo(CallGraphEdge other) {
-		return equals(other);
-	}
-
-	@Override
 	public boolean canBeSimplified() {
 		return false;
 	}

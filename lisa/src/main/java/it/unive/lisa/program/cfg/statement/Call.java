@@ -78,39 +78,17 @@ public abstract class Call extends Expression {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		Call other = (Call) st;
-		if (!areEquals(parameters, other.parameters))
+		Call other = (Call) obj;
+		if (!Arrays.equals(parameters, other.parameters))
 			return false;
 		return true;
-	}
-
-	private static boolean areEquals(Expression[] params, Expression[] otherParams) {
-		if (params == otherParams)
-			return true;
-
-		if (params == null || otherParams == null)
-			return false;
-
-		int length = params.length;
-		if (otherParams.length != length)
-			return false;
-
-		for (int i = 0; i < length; i++)
-			if (!isEqualTo(params[i], otherParams[i]))
-				return false;
-
-		return true;
-	}
-
-	private static boolean isEqualTo(Expression a, Expression b) {
-		return (a == b) || (a != null && a.isEqualTo(b));
 	}
 
 	/**

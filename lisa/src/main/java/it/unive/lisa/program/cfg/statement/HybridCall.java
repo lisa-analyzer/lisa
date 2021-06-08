@@ -117,31 +117,37 @@ public class HybridCall extends Call {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
+		result = prime * result + ((nativeTargets == null) ? 0 : nativeTargets.hashCode());
 		result = prime * result + ((qualifiedName == null) ? 0 : qualifiedName.hashCode());
+		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		HybridCall other = (HybridCall) st;
-		if (targets == null) {
-			if (other.targets != null)
+		HybridCall other = (HybridCall) obj;
+		if (nativeTargets == null) {
+			if (other.nativeTargets != null)
 				return false;
-		} else if (!targets.equals(other.targets))
+		} else if (!nativeTargets.equals(other.nativeTargets))
 			return false;
 		if (qualifiedName == null) {
 			if (other.qualifiedName != null)
 				return false;
 		} else if (!qualifiedName.equals(other.qualifiedName))
 			return false;
-		return super.isEqualTo(other);
+		if (targets == null) {
+			if (other.targets != null)
+				return false;
+		} else if (!targets.equals(other.targets))
+			return false;
+		return true;
 	}
 
 	@Override

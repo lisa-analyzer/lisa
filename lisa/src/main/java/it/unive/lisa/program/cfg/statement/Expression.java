@@ -149,25 +149,29 @@ public abstract class Expression extends Statement {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
-		// we ignore the meta variables on purpose
+		// we ignore parent: just syntactic info...
+		// we ignore meta variables and runtime types: those might change during
+		// execution...
 		return result;
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (!super.isEqualTo(st))
+		if (!super.equals(obj))
 			return false;
-		if (getClass() != st.getClass())
+		if (getClass() != obj.getClass())
 			return false;
-		Expression other = (Expression) st;
+		Expression other = (Expression) obj;
 		if (staticType == null) {
 			if (other.staticType != null)
 				return false;
 		} else if (!staticType.equals(other.staticType))
 			return false;
-		// we ignore the meta variables on purpose
+		// we ignore parent: just syntactic info...
+		// we ignore meta variables and runtime types: those might change during
+		// execution...
 		return true;
 	}
 

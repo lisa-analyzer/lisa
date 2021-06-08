@@ -26,20 +26,6 @@ public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extend
 	N getDestination();
 
 	/**
-	 * Checks if this edge is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
-	 * This translates into comparing source and destination nodes with
-	 * {@link Node#isEqualTo(Node)} instead of using
-	 * {@link Object#equals(Object)}.
-	 * 
-	 * @param other the other edge
-	 * 
-	 * @return {@code true} if this edge and the given one are effectively
-	 *             equals
-	 */
-	boolean isEqualTo(E other);
-
-	/**
 	 * Yields {@code true} if and only if this edge could be simplified if one
 	 * of the nodes connected to it is simplified (i.e., removed from the
 	 * graph).
