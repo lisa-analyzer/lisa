@@ -1,5 +1,14 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -11,15 +20,7 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -240,7 +241,21 @@ extends FunctionalLattice<M, Identifier, T> implements SemanticDomain<M, E, Iden
 
 	@Override
 	public M pushScope(ScopeToken scope) throws SemanticException {
-		return liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+
+		M result = liftIdentifiers(id -> {
+			try {
+				return (Identifier) id.pushScope(scope);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
+			return null;
+		});
+
+		if (holder.get() != null)
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
 	}
 
 	@Override
