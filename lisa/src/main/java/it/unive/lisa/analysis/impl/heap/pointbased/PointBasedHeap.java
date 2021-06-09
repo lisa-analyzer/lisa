@@ -234,12 +234,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public PointBasedHeap popScope(ScopeToken scope) throws SemanticException {
-		return new PointBasedHeap(heapEnv.popScope(scope));
+		return from(new PointBasedHeap(heapEnv.popScope(scope)));
 	}
 
 	@Override
 	public PointBasedHeap pushScope(ScopeToken scope) throws SemanticException {
-		return new PointBasedHeap(heapEnv.pushScope(scope));
+		return from(new PointBasedHeap(heapEnv.pushScope(scope)));
 	}
 
 	/**
