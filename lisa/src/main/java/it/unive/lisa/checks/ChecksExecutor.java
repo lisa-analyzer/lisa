@@ -16,6 +16,10 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class ChecksExecutor {
+	
+	private ChecksExecutor() {
+		// this class is just a static holder
+	}
 
 	private static final Logger log = LogManager.getLogger(ChecksExecutor.class);
 

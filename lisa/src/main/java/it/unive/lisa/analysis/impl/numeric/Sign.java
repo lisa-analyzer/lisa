@@ -30,30 +30,24 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private static final Sign POS = new Sign(false, false);
-	private static final Sign NEG = new Sign(false, false);
-	private static final Sign ZERO = new Sign(false, false);
-	private static final Sign TOP = new Sign();
-	private static final Sign BOTTOM = new Sign(false, true);
+	private static final Sign POS = new Sign((byte) 4);
+	private static final Sign NEG = new Sign((byte) 3);
+	private static final Sign ZERO = new Sign((byte) 2);
+	private static final Sign TOP = new Sign((byte) 0);
+	private static final Sign BOTTOM = new Sign((byte) 1);
 
-	private final boolean isTop, isBottom;
+	private final byte sign;
 
 	/**
 	 * Builds the sign abstract domain, representing the top of the sign
 	 * abstract domain.
 	 */
 	public Sign() {
-		this(true, false);
+		this((byte) 0);
 	}
 
-	private Sign(boolean isTop, boolean isBottom) {
-		this.isTop = isTop;
-		this.isBottom = isBottom;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
+	private Sign(byte sign) {
+		this.sign = sign;
 	}
 
 	@Override
@@ -193,16 +187,10 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public int hashCode() {
-		if (this == ZERO)
-			return 0;
-		else if (this == POS)
-			return 1;
-		else if (this == NEG)
-			return 2;
-		else if (this == BOTTOM)
-			return 3;
-		else
-			return 4;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + sign;
+		return result;
 	}
 
 	@Override
@@ -214,11 +202,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		if (getClass() != obj.getClass())
 			return false;
 		Sign other = (Sign) obj;
-		if (isBottom != other.isBottom)
+		if (sign != other.sign)
 			return false;
-		if (isTop != other.isTop)
-			return false;
-		return isTop && other.isTop;
+		return true;
 	}
 
 	@Override

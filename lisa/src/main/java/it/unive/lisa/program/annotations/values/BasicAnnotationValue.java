@@ -6,6 +6,6 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public abstract class BasicAnnotationValue extends AnnotationValue {
+public interface BasicAnnotationValue extends AnnotationValue {
 
 }

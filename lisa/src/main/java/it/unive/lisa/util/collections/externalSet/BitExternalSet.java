@@ -286,12 +286,13 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + (cache == null ? 1 : cache.hashCode());
 		result = prime * result + Arrays.hashCode(bits);
 		return result;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public boolean equals(Object obj) {
 		if (obj == null)
 			return false;
@@ -299,11 +300,11 @@ public class BitExternalSet<T> implements ExternalSet<T> {
 			return true;
 		if (obj.getClass() != getClass())
 			return false;
-		BitExternalSet<?> other = (BitExternalSet<?>) obj;
-		if (cache != other.cache)
-			// by recreating the set, we make it share the cache with this one
-			// at this point, we can just compare the bits
-			other = (BitExternalSet<?>) cache.mkSet((Iterable<T>) other);
+		BitExternalSet other = (BitExternalSet) obj;
+		if (cache != other.cache) {
+			// we make them have the same cache
+			other = (BitExternalSet) cache.mkSet(other);
+		}
 		return Arrays.equals(bits, other.bits);
 	}
 

@@ -48,9 +48,9 @@ public class VariableTableEntry implements CodeElement {
 	/**
 	 * The location where this variable is defined.
 	 */
-	private CodeLocation location;
+	private final CodeLocation location;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * Builds an untyped variable table entry, identified by its index. Its type
@@ -234,12 +234,13 @@ public class VariableTableEntry implements CodeElement {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
+		int result = 1;
 		result = prime * result + index;
 		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((scopeStart == null) ? 0 : scopeStart.hashCode());
 		result = prime * result + ((scopeEnd == null) ? 0 : scopeEnd.hashCode());
+		result = prime * result + ((scopeStart == null) ? 0 : scopeStart.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
@@ -248,36 +249,42 @@ public class VariableTableEntry implements CodeElement {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		VariableTableEntry other = (VariableTableEntry) obj;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
 		if (index != other.index)
-			return false;
-		if (name == null) {
-			if (other.name != null)
-				return false;
-		} else if (!name.equals(other.name))
-			return false;
-		if (scopeEnd != other.scopeEnd)
-			return false;
-		if (scopeStart != other.scopeStart)
-			return false;
-		if (staticType == null) {
-			if (other.staticType != null)
-				return false;
-		} else if (!staticType.equals(other.staticType))
 			return false;
 		if (location == null) {
 			if (other.location != null)
 				return false;
 		} else if (!location.equals(other.location))
 			return false;
-		if (annotations == null) {
-			if (other.annotations != null)
+		if (name == null) {
+			if (other.name != null)
 				return false;
-		} else if (!annotations.equals(other.annotations))
+		} else if (!name.equals(other.name))
+			return false;
+		if (scopeEnd == null) {
+			if (other.scopeEnd != null)
+				return false;
+		} else if (!scopeEnd.equals(other.scopeEnd))
+			return false;
+		if (scopeStart == null) {
+			if (other.scopeStart != null)
+				return false;
+		} else if (!scopeStart.equals(other.scopeStart))
+			return false;
+		if (staticType == null) {
+			if (other.staticType != null)
+				return false;
+		} else if (!staticType.equals(other.staticType))
 			return false;
 		return true;
 	}

@@ -42,13 +42,28 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof TypeTokenType && types.equals(((TypeTokenType) other).types);
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((types == null) ? 0 : types.hashCode());
+		return result;
 	}
 
 	@Override
-	public int hashCode() {
-		return types.hashCode();
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		TypeTokenType other = (TypeTokenType) obj;
+		if (types == null) {
+			if (other.types != null)
+				return false;
+		} else if (!types.equals(other.types))
+			return false;
+		return true;
 	}
 
 	@Override

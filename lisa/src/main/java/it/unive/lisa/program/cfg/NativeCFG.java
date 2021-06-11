@@ -16,7 +16,10 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * <br>
  * NativeCFGs do not contain code, but they can be rewritten to a
  * {@link NativeCall} providing their semantics through
- * {@link #rewrite(Statement, Expression...)}.
+ * {@link #rewrite(Statement, Expression...)}.<br>
+ * <br>
+ * Note that this class does not implement {@link #equals(Object)} nor
+ * {@link #hashCode()} since all constructs are unique.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -51,17 +54,6 @@ public class NativeCFG implements CodeMember {
 					+ " to be used within native cfgs");
 		this.descriptor = descriptor;
 		this.construct = construct;
-	}
-
-	@Override
-	public int hashCode() {
-		// Note: no implementation of equals is provided since
-		// all constructs are unique. hashCode relies on the descriptor of
-		// the unit since it is the only identifier.
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
-		return result;
 	}
 
 	@Override

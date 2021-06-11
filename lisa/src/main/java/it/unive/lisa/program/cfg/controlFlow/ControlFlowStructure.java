@@ -157,6 +157,7 @@ public abstract class ControlFlowStructure {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((condition == null) ? 0 : condition.hashCode());
+		result = prime * result + ((cfgMatrix == null) ? 0 : cfgMatrix.hashCode());
 		result = prime * result + ((firstFollower == null) ? 0 : firstFollower.hashCode());
 		return result;
 	}
@@ -174,6 +175,11 @@ public abstract class ControlFlowStructure {
 			if (other.condition != null)
 				return false;
 		} else if (!condition.equals(other.condition))
+			return false;
+		if (cfgMatrix == null) {
+			if (other.cfgMatrix != null)
+				return false;
+		} else if (!cfgMatrix.equals(other.cfgMatrix))
 			return false;
 		if (firstFollower == null) {
 			if (other.firstFollower != null)

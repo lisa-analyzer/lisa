@@ -164,11 +164,6 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 	@Override
 	public int hashCode() {
-		if (isTop())
-			return 1;
-		else if (isBottom())
-			return 2;
-
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + (isBottom ? 1231 : 1237);

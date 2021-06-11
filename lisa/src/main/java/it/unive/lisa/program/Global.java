@@ -27,7 +27,7 @@ public class Global implements CodeElement {
 
 	private final CodeLocation location;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * Builds an untyped global variable, identified by its name. The location
@@ -99,9 +99,10 @@ public class Global implements CodeElement {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
-		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -114,6 +115,16 @@ public class Global implements CodeElement {
 		if (getClass() != obj.getClass())
 			return false;
 		Global other = (Global) obj;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -123,11 +134,6 @@ public class Global implements CodeElement {
 			if (other.staticType != null)
 				return false;
 		} else if (!staticType.equals(other.staticType))
-			return false;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
 			return false;
 		return true;
 	}

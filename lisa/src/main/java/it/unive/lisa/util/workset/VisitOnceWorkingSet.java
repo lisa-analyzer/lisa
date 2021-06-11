@@ -83,4 +83,35 @@ public class VisitOnceWorkingSet<E> implements WorkingSet<E> {
 	public Collection<E> getSeen() {
 		return seen;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((seen == null) ? 0 : seen.hashCode());
+		result = prime * result + ((ws == null) ? 0 : ws.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		VisitOnceWorkingSet<?> other = (VisitOnceWorkingSet<?>) obj;
+		if (seen == null) {
+			if (other.seen != null)
+				return false;
+		} else if (!seen.equals(other.seen))
+			return false;
+		if (ws == null) {
+			if (other.ws != null)
+				return false;
+		} else if (!ws.equals(other.ws))
+			return false;
+		return true;
+	}
 }

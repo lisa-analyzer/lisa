@@ -115,4 +115,29 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 	public ExternalSet<T> copy() {
 		return new BitExternalSet<>(cache, this);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((cache == null) ? 0 : cache.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		UniversalExternalSet<?> other = (UniversalExternalSet<?>) obj;
+		if (cache == null) {
+			if (other.cache != null)
+				return false;
+		} else if (!cache.equals(other.cache))
+			return false;
+		return true;
+	}
 }

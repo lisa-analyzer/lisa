@@ -12,7 +12,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IntType implements NumericType {
+public final class IntType implements NumericType {
 
 	/**
 	 * The singleton instance of this class.

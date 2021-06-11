@@ -1,5 +1,6 @@
 package it.unive.lisa.util.collections;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -24,6 +25,42 @@ public class IterableArray<E> implements Iterable<E> {
 	 */
 	public IterableArray(E[] array) {
 		this.array = array;
+	}
+
+	/**
+	 * Yields the size of this iterable, that is, the length of the array behind this iterable.
+	 * 
+	 * @return the size
+	 */
+	public int size() {
+		return array.length;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.deepHashCode(array);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IterableArray<?> other = (IterableArray<?>) obj;
+		if (!Arrays.deepEquals(array, other.array))
+			return false;
+		return true;
+	}
+
+	@Override
+	public String toString() {
+		return Arrays.toString(array);
 	}
 
 	@Override

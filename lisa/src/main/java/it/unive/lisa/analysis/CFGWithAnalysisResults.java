@@ -259,4 +259,41 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, id, labelGenerator);
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((entryStates == null) ? 0 : entryStates.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((results == null) ? 0 : results.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CFGWithAnalysisResults<?, ?, ?> other = (CFGWithAnalysisResults<?, ?, ?>) obj;
+		if (entryStates == null) {
+			if (other.entryStates != null)
+				return false;
+		} else if (!entryStates.equals(other.entryStates))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (results == null) {
+			if (other.results != null)
+				return false;
+		} else if (!results.equals(other.results))
+			return false;
+		return true;
+	}
 }

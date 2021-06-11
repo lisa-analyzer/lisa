@@ -46,7 +46,10 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
- * as edges.
+ * as edges.<br>
+ * <br>
+ * Note that this class does not implement {@link #equals(Object)} nor
+ * {@link #hashCode()} since all cfgs are unique.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -183,17 +186,6 @@ public class CFG extends FixpointGraph<CFG, Statement, Edge> implements CodeMemb
 		}
 
 		return cfStructs;
-	}
-
-	@Override
-	public int hashCode() {
-		// Note: no implementation of equals is provided since
-		// all cfg are unique. hashCode relies on the descriptor of
-		// the unit since it is the only identifier.
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((descriptor == null) ? 0 : descriptor.hashCode());
-		return result;
 	}
 
 	@Override

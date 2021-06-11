@@ -59,4 +59,29 @@ public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	public String toString() {
 		return ws.toString();
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((ws == null) ? 0 : ws.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		ConcurrentFIFOWorkingSet<?> other = (ConcurrentFIFOWorkingSet<?>) obj;
+		if (ws == null) {
+			if (other.ws != null)
+				return false;
+		} else if (!ws.equals(other.ws))
+			return false;
+		return true;
+	}
 }

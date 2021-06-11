@@ -45,6 +45,10 @@ import org.reflections.scanners.SubTypesScanner;
  */
 public class LiSAFactory {
 
+	private LiSAFactory() {
+		// this class is just a static holder
+	}
+
 	private static <T> T construct(Class<T> component, Class<?>[] argTypes, Object[] params)
 			throws AnalysisSetupException {
 		try {
@@ -300,6 +304,49 @@ public class LiSAFactory {
 		 */
 		public Collection<Class<? extends T>> getAlternatives() {
 			return alternatives;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
+			result = prime * result + ((component == null) ? 0 : component.hashCode());
+			result = prime * result + ((defaultInstance == null) ? 0 : defaultInstance.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ConfigurableComponent<?> other = (ConfigurableComponent<?>) obj;
+			if (alternatives == null) {
+				if (other.alternatives != null)
+					return false;
+			} else if (!alternatives.equals(other.alternatives))
+				return false;
+			if (component == null) {
+				if (other.component != null)
+					return false;
+			} else if (!component.equals(other.component))
+				return false;
+			if (defaultInstance == null) {
+				if (other.defaultInstance != null)
+					return false;
+			} else if (!defaultInstance.equals(other.defaultInstance))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return component.getName() + "(defaults to: '" + defaultInstance.getName() + "', alternatives: "
+					+ alternatives + ")";
 		}
 	}
 

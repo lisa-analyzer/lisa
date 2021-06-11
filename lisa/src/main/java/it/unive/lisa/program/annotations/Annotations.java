@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Annotations implements Iterable<Annotation> {
 
-	private Collection<Annotation> annotations;
+	private final Collection<Annotation> annotations;
 
 	/**
 	 * Builds an empty list of annotations.

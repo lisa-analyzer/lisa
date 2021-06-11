@@ -114,12 +114,19 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public int hashCode() {
-		return System.identityHashCode(this);
+		return MonolithicHeap.class.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return this == obj;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonolithicHeap other = (MonolithicHeap) obj;
+		return isTop() == other.isTop() && isBottom() == other.isBottom();
 	}
 
 	private static class Rewriter extends BaseHeapDomain.Rewriter {

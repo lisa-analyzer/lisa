@@ -27,34 +27,28 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
-	private static final Parity EVEN = new Parity(false, false);
-	private static final Parity ODD = new Parity(false, false);
-	private static final Parity TOP = new Parity();
-	private static final Parity BOTTOM = new Parity(false, true);
+	private static final Parity EVEN = new Parity((byte) 3);
+	private static final Parity ODD = new Parity((byte) 2);
+	private static final Parity TOP = new Parity((byte) 0);
+	private static final Parity BOTTOM = new Parity((byte) 1);
 
-	private final boolean isTop, isBottom;
+	private final byte parity;
 
 	/**
 	 * Builds the parity abstract domain, representing the top of the parity
 	 * abstract domain.
 	 */
 	public Parity() {
-		this(true, false);
+		this((byte) 0);
 	}
 
-	private Parity(boolean isTop, boolean isBottom) {
-		this.isTop = isTop;
-		this.isBottom = isBottom;
+	private Parity(byte parity) {
+		this.parity = parity;
 	}
 
 	@Override
 	public Parity top() {
 		return TOP;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
 	}
 
 	@Override
@@ -157,14 +151,10 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	public int hashCode() {
-		if (isBottom())
-			return 1;
-		else if (this == EVEN)
-			return 2;
-		else if (this == ODD)
-			return 3;
-		else
-			return 4;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + parity;
+		return result;
 	}
 
 	@Override
@@ -176,11 +166,9 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		if (getClass() != obj.getClass())
 			return false;
 		Parity other = (Parity) obj;
-		if (isBottom != other.isBottom)
+		if (parity != other.parity)
 			return false;
-		if (isTop != other.isTop)
-			return false;
-		return isTop && other.isTop;
+		return true;
 	}
 
 	@Override

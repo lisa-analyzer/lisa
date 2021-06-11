@@ -14,7 +14,10 @@ import java.util.stream.Collectors;
  * A unit of the program to analyze. A unit is a logical entity that groups a
  * set of {@link Global}s, a set of {@link CFG}s and a set of
  * {@link NativeCFG}s. The signature of each of these elements is unique within
- * the unit.
+ * the unit.<br>
+ * <br>
+ * Note that this class does not implement {@link #equals(Object)} nor
+ * {@link #hashCode()} since all units are unique.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -290,17 +293,6 @@ public abstract class Unit {
 	 */
 	public final boolean addConstruct(NativeCFG construct) {
 		return constructs.putIfAbsent(construct.getDescriptor().getSignature(), construct) == null;
-	}
-
-	@Override
-	public final int hashCode() {
-		// Note: no implementation of equals is provided since 
-		// all units are unique. hashCode relies on the name of 
-		// the unit since it is the only identifier.
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		return result;
 	}
 
 	@Override

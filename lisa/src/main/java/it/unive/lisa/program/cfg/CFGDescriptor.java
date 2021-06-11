@@ -61,7 +61,7 @@ public class CFGDescriptor implements CodeElement {
 
 	private final Collection<CodeMember> overrides;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * The location where the cfg described by this descriptor appear in the
@@ -320,14 +320,18 @@ public class CFGDescriptor implements CodeElement {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + Boolean.hashCode(overridable);
-		result = prime * result + Arrays.hashCode(args);
-		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
-		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
-		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
+		int result = 1;
 		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result + Arrays.hashCode(args);
+		result = prime * result + (instance ? 1231 : 1237);
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		result = prime * result + (overridable ? 1231 : 1237);
+		result = prime * result + ((overriddenBy == null) ? 0 : overriddenBy.hashCode());
+		result = prime * result + ((overrides == null) ? 0 : overrides.hashCode());
+		result = prime * result + ((returnType == null) ? 0 : returnType.hashCode());
+		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
+		result = prime * result + ((variables == null) ? 0 : variables.hashCode());
 		return result;
 	}
 
@@ -335,39 +339,56 @@ public class CFGDescriptor implements CodeElement {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!super.equals(obj))
+		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
 		CFGDescriptor other = (CFGDescriptor) obj;
-		if (overridable != other.overridable)
-			return false;
-		if (unit == null) {
-			if (other.unit != null)
+		if (annotations == null) {
+			if (other.annotations != null)
 				return false;
-		} else if (!unit.equals(other.unit))
+		} else if (!annotations.equals(other.annotations))
 			return false;
 		if (!Arrays.equals(args, other.args))
+			return false;
+		if (instance != other.instance)
+			return false;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
 			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
+		if (overridable != other.overridable)
+			return false;
+		if (overriddenBy == null) {
+			if (other.overriddenBy != null)
+				return false;
+		} else if (!overriddenBy.equals(other.overriddenBy))
+			return false;
+		if (overrides == null) {
+			if (other.overrides != null)
+				return false;
+		} else if (!overrides.equals(other.overrides))
+			return false;
 		if (returnType == null) {
 			if (other.returnType != null)
 				return false;
 		} else if (!returnType.equals(other.returnType))
 			return false;
+		if (unit == null) {
+			if (other.unit != null)
+				return false;
+		} else if (!unit.equals(other.unit))
+			return false;
 		if (variables == null) {
 			if (other.variables != null)
 				return false;
 		} else if (!variables.equals(other.variables))
-			return false;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
 			return false;
 		return true;
 	}

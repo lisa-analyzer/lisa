@@ -5,7 +5,7 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class EnumAnnotationValue extends BasicAnnotationValue {
+public class EnumAnnotationValue implements BasicAnnotationValue {
 
 	private final String name;
 	private final String field;

@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class ArrayAnnotationValue extends AnnotationValue {
+public class ArrayAnnotationValue implements AnnotationValue {
 
 	private final BasicAnnotationValue[] arr;
 

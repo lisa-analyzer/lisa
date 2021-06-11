@@ -134,6 +134,7 @@ public interface InferredValue<T extends InferredValue<T>>
 		public int hashCode() {
 			final int prime = 31;
 			int result = 1;
+			result = prime * result + ((domain == null) ? 0 : domain.hashCode());
 			result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
 			result = prime * result + ((state == null) ? 0 : state.hashCode());
 			return result;
@@ -148,6 +149,11 @@ public interface InferredValue<T extends InferredValue<T>>
 			if (getClass() != obj.getClass())
 				return false;
 			InferredPair<?> other = (InferredPair<?>) obj;
+			if (domain == null) {
+				if (other.domain != null)
+					return false;
+			} else if (!domain.equals(other.domain))
+				return false;
 			if (inferred == null) {
 				if (other.inferred != null)
 					return false;

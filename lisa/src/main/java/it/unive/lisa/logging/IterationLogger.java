@@ -8,6 +8,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
+import it.unive.lisa.util.collections.IterableArray;
+
 /**
  * An utility class that allows automatic logging while iterating over elements
  * of a collection, stream or array.
@@ -30,7 +32,7 @@ public class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the array
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, E[] array, String message, String objects) {
-		return iterate(logger, Level.INFO, new IterableFromArray<>(array), message, objects, array.length);
+		return iterate(logger, Level.INFO, new IterableArray<>(array), message, objects, array.length);
 	}
 
 	/**
@@ -47,7 +49,7 @@ public class IterationLogger {
 	 * @return an iterable that automatically logs while traversing the array
 	 */
 	public static <E> Iterable<E> iterate(Logger logger, Level level, E[] array, String message, String objects) {
-		return iterate(logger, level, new IterableFromArray<>(array), message, objects, array.length);
+		return iterate(logger, level, new IterableArray<>(array), message, objects, array.length);
 	}
 
 	/**
@@ -167,42 +169,5 @@ public class IterationLogger {
 	private static <E> Iterable<E> iterate(Logger logger, Level level, Iterable<E> it, String message, String objects,
 			int size) {
 		return new CountingIterable<>(it, new Counter(logger, level, message, objects, size, 0.025));
-	}
-
-	private static class IterableFromArray<E> implements Iterable<E> {
-
-		private final E[] array;
-
-		public IterableFromArray(E[] array) {
-			this.array = array;
-		}
-
-		@Override
-		public Iterator<E> iterator() {
-			return new IteratorFromArray();
-		}
-
-		private class IteratorFromArray implements Iterator<E> {
-
-			private int pos;
-
-			private IteratorFromArray() {
-			}
-
-			@Override
-			public boolean hasNext() {
-				return pos < array.length;
-			}
-
-			@Override
-			public E next() {
-				return array[pos++];
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-		}
 	}
 }

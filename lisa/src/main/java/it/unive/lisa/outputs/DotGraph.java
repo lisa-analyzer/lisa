@@ -235,7 +235,9 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		if (graph == null) {
 			if (other.graph != null)
 				return false;
-		} else if (!sameGraphs(graph, other.graph))
+		} else if (other.graph == null)
+			return false;
+		else if (!sameGraphs(graph, other.graph))
 			// there is no equals method implemented in graphstream
 			return false;
 		return true;

@@ -423,10 +423,11 @@ public class LiSAConfiguration {
 		result = prime * result + (dumpCFGs ? 1231 : 1237);
 		result = prime * result + (dumpTypeInference ? 1231 : 1237);
 		result = prime * result + (inferTypes ? 1231 : 1237);
+		result = prime * result + ((interproceduralAnalysis == null) ? 0 : interproceduralAnalysis.hashCode());
 		result = prime * result + (jsonOutput ? 1231 : 1237);
+		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
-		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
 		return result;
 	}
@@ -453,7 +454,17 @@ public class LiSAConfiguration {
 			return false;
 		if (inferTypes != other.inferTypes)
 			return false;
+		if (interproceduralAnalysis == null) {
+			if (other.interproceduralAnalysis != null)
+				return false;
+		} else if (!interproceduralAnalysis.equals(other.interproceduralAnalysis))
+			return false;
 		if (jsonOutput != other.jsonOutput)
+			return false;
+		if (semanticChecks == null) {
+			if (other.semanticChecks != null)
+				return false;
+		} else if (!semanticChecks.equals(other.semanticChecks))
 			return false;
 		if (state == null) {
 			if (other.state != null)
@@ -464,11 +475,6 @@ public class LiSAConfiguration {
 			if (other.syntacticChecks != null)
 				return false;
 		} else if (!syntacticChecks.equals(other.syntacticChecks))
-			return false;
-		if (semanticChecks == null) {
-			if (other.semanticChecks != null)
-				return false;
-		} else if (!semanticChecks.equals(other.semanticChecks))
 			return false;
 		if (workdir == null) {
 			if (other.workdir != null)

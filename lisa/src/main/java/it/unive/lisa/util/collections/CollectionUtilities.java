@@ -14,6 +14,10 @@ import java.util.function.BiPredicate;
  */
 public class CollectionUtilities {
 
+	private CollectionUtilities() {
+		// this class is just a static holder
+	}
+
 	/**
 	 * A {@code null}-safe comparison callback that invokes the given comparator
 	 * only if the given objects are both non-{@code null}.
