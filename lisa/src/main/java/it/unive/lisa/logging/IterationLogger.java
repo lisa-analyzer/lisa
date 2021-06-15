@@ -18,6 +18,10 @@ import it.unive.lisa.util.collections.IterableArray;
  */
 public class IterationLogger {
 
+	private IterationLogger() {
+		// this class is just a static holder
+	}
+
 	/**
 	 * Wraps the given array into an {@link Iterable} instance that
 	 * automatically logs at level {@link Level#INFO} while traversing the

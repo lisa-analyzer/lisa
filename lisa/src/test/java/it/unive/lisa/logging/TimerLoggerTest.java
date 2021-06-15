@@ -12,23 +12,12 @@ public class TimerLoggerTest {
 
 	@Test
 	public void testSupplier() {
-		Integer result = TimerLogger.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging",
+		Integer result = TimerLogger.execSupplier(logger, Level.INFO, "Test supplier logging",
 				this::supplier);
 		assertEquals(5, result.intValue());
-	}
-
-	@Test
-	public void testFunction() {
-		for (double d = 0; d < 3; d++) {
-			Integer result = TimerLogger.execFunction(logger, Level.INFO, TimeFormat.MILLIS, "Test function logging",
-					v -> function(v), d);
-			assertEquals(5 + (long) d, result.intValue());
-		}
-	}
-
-	private int function(double par) {
-		logAction();
-		return 5 + (int) par;
+		result = TimerLogger.execSupplier(logger, Level.INFO, TimeFormat.MILLIS, "Test supplier logging",
+				this::supplier);
+		assertEquals(5, result.intValue());
 	}
 
 	private int supplier() {
@@ -38,12 +27,13 @@ public class TimerLoggerTest {
 
 	private void logAction() {
 		TimerLogger.execAction(logger, Level.INFO, TimeFormat.MILLIS, "Test action logging", this::action);
+		TimerLogger.execAction(logger, Level.INFO, "Test action logging", this::action);
 	}
 
 	private void action() {
 		System.out.println("Going to sleep...");
 		try {
-			Thread.sleep(1000);
+			Thread.sleep(10);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
