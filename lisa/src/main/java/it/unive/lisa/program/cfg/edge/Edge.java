@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.edge;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -8,15 +10,13 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.SemanticEdge;
-import java.util.Objects;
 
 /**
  * An edge of a control flow graph, connecting two statements.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
+public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, CFG> {
 
 	/**
 	 * The source node.
@@ -86,7 +86,6 @@ public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 	@Override
 	public abstract String toString();
 
-	@Override
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(

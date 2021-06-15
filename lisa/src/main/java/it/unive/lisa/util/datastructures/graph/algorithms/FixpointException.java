@@ -1,4 +1,4 @@
-package it.unive.lisa.util.datastructures.graph;
+package it.unive.lisa.util.datastructures.graph.algorithms;
 
 /**
  * An exception raised during the fixpoint computation.
