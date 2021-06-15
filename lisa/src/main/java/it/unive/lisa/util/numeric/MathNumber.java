@@ -5,49 +5,50 @@ import java.math.RoundingMode;
 
 public class MathNumber implements Comparable<MathNumber> {
 
-	public static final MathNumber PLUS_INFINITY = new MathNumber(true);
-	public static final MathNumber MINUS_INFINITY = new MathNumber(false);
+	public static final MathNumber PLUS_INFINITY = new MathNumber((byte) 0);
+	public static final MathNumber MINUS_INFINITY = new MathNumber((byte) 1);
 	public static final MathNumber ZERO = new MathNumber(0);
 	public static final MathNumber ONE = new MathNumber(1);
 	public static final MathNumber MINUS_ONE = new MathNumber(-1);
+	public static final MathNumber NaN = new MathNumber((byte) 3);
 
 	private final BigDecimal number;
 
 	/**
 	 * True means this number is positive or zero
 	 */
-	private final boolean sign;
+	private final byte sign;
 
 	public MathNumber(long number) {
 		this.number = BigDecimal.valueOf(number);
-		this.sign = number >= 0;
+		this.sign = number >= 0 ? (byte) 0 : (byte) 1;
 	}
 
 	public MathNumber(double number) {
 		this.number = BigDecimal.valueOf(number);
-		this.sign = number >= 0;
+		this.sign = number >= 0 ? (byte) 0 : (byte) 1;
 	}
 
 	public MathNumber(BigDecimal number) {
 		this.number = number;
-		this.sign = number.signum() >= 0;
+		this.sign = number.signum() >= 0 ? (byte) 0 : (byte) 1;
 	}
 
-	private MathNumber(boolean sign) {
+	private MathNumber(byte sign) {
 		this.number = null;
 		this.sign = sign;
 	}
 
 	public boolean isMinusInfinity() {
-		return number == null && !sign;
+		return number == null && isNegative();
 	}
 
 	public boolean isPlusInfinity() {
-		return number == null && sign;
+		return number == null && isPositiveOrZero();
 	}
 
 	public boolean isInfinite() {
-		return this == PLUS_INFINITY || this == MINUS_INFINITY;
+		return isPlusInfinity() || isMinusInfinity();
 	}
 
 	public boolean isFinite() {
@@ -56,6 +57,18 @@ public class MathNumber implements Comparable<MathNumber> {
 
 	public boolean is(int n) {
 		return number != null && number.equals(new BigDecimal(n));
+	}
+
+	public boolean isPositiveOrZero() {
+		return sign == (byte) 0;
+	}
+
+	public boolean isNegative() {
+		return sign == (byte) 1;
+	}
+
+	public boolean isNaN() {
+		return number == null && sign == (byte) 3;
 	}
 
 	private static MathNumber cached(MathNumber i) {
@@ -69,6 +82,9 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	public MathNumber add(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (isPlusInfinity() || other.isPlusInfinity())
 			return PLUS_INFINITY;
 
@@ -79,6 +95,9 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	public MathNumber subtract(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (isPlusInfinity() || other.isPlusInfinity())
 			return PLUS_INFINITY;
 
@@ -89,36 +108,48 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	public MathNumber multiply(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (is(0) || other.is(0))
 			return ZERO;
 
-		if ((isPlusInfinity() && !other.sign)
-				|| (other.isPlusInfinity() && !sign)
-				|| (isMinusInfinity() && other.sign)
-				|| (other.isMinusInfinity() && sign))
+		if ((isPlusInfinity() && other.isNegative())
+				|| (other.isPlusInfinity() && isNegative())
+				|| (isMinusInfinity() && other.isPositiveOrZero())
+				|| (other.isMinusInfinity() && isPositiveOrZero()))
 			return MINUS_INFINITY;
 
-		if ((isMinusInfinity() && !other.sign)
-				|| (other.isMinusInfinity() && !sign)
-				|| (isPlusInfinity() && other.sign)
-				|| (other.isPlusInfinity() && sign))
+		if ((isMinusInfinity() && other.isNegative())
+				|| (other.isMinusInfinity() && isNegative())
+				|| (isPlusInfinity() && other.isPositiveOrZero())
+				|| (other.isPlusInfinity() && isPositiveOrZero()))
 			return PLUS_INFINITY;
 
 		return cached(new MathNumber(number.multiply(other.number)));
 	}
 
 	public MathNumber divide(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (other.is(0))
 			throw new ArithmeticException("MathInt divide by zero");
 
 		if (is(0))
 			return ZERO;
 
+		if (isInfinite() && other.isInfinite())
+			return NaN;
+
 		if (other.isPlusInfinity() || other.isMinusInfinity())
 			return ZERO;
 
 		if (isPlusInfinity() || isMinusInfinity())
-			return this;
+			if (isPositiveOrZero() == other.isPositiveOrZero())
+				return PLUS_INFINITY;
+			else
+				return MINUS_INFINITY;
 
 		return cached(new MathNumber(number.divide(other.number, 100, RoundingMode.HALF_UP).stripTrailingZeros()));
 	}
@@ -128,16 +159,28 @@ public class MathNumber implements Comparable<MathNumber> {
 		if (equals(other))
 			return 0;
 
-		if (isMinusInfinity() || other.isPlusInfinity() || (!sign && other.sign))
+		if (isNaN() && !other.isNaN())
 			return -1;
 
-		if (isPlusInfinity() || other.isMinusInfinity() || (sign && !other.sign))
+		if (!isNaN() && other.isNaN())
+			return 1;
+
+		if (isNaN())
+			return 0;
+
+		if (isMinusInfinity() || other.isPlusInfinity() || (isNegative() && other.isPositiveOrZero()))
+			return -1;
+
+		if (isPlusInfinity() || other.isMinusInfinity() || (isPositiveOrZero() && other.isNegative()))
 			return 1;
 
 		return number.compareTo(other.number);
 	}
 
 	public MathNumber min(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (isMinusInfinity() || other.isPlusInfinity())
 			return this;
 
@@ -148,6 +191,9 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	public MathNumber max(MathNumber other) {
+		if (isNaN() || other.isNaN())
+			return NaN;
+
 		if (other.isMinusInfinity() || isPlusInfinity())
 			return this;
 
@@ -158,13 +204,13 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	public MathNumber roundUp() {
-		if (isInfinite())
+		if (isInfinite() || isNaN())
 			return this;
 		return cached(new MathNumber(number.setScale(0, RoundingMode.CEILING)));
 	}
 
 	public MathNumber roundDown() {
-		if (isInfinite())
+		if (isInfinite() || isNaN())
 			return this;
 		return cached(new MathNumber(number.setScale(0, RoundingMode.FLOOR)));
 	}
@@ -174,7 +220,7 @@ public class MathNumber implements Comparable<MathNumber> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((number == null) ? 0 : number.hashCode());
-		result = prime * result + (sign ? 1231 : 1237);
+		result = prime * result + sign;
 		return result;
 	}
 
@@ -199,6 +245,6 @@ public class MathNumber implements Comparable<MathNumber> {
 
 	@Override
 	public String toString() {
-		return isMinusInfinity() ? "-Inf" : isPlusInfinity() ? "+Inf" : number.toString();
+		return isNaN() ? "NaN" : isMinusInfinity() ? "-Inf" : isPlusInfinity() ? "+Inf" : number.toString();
 	}
 }
