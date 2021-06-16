@@ -9,87 +9,16 @@ import static org.junit.Assert.fail;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import org.apache.commons.collections4.SetUtils;
 import org.junit.Test;
 
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.Node;
+import it.unive.lisa.util.datastructures.graph.TestGraph;
+import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
+import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 import it.unive.lisa.util.workset.FIFOWorkingSet;
 
 public class FixpointTest {
-
-	private static class TestNode implements Node<TestNode, TestEdge, TestGraph> {
-
-		private int offset = -1;
-		
-		@Override
-		public int setOffset(int offset) {
-			return this.offset = offset;
-		}
-
-		@Override
-		public <V> boolean accept(GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor, V tool) {
-			return false;
-		}
-
-		@Override
-		public String toString() {
-			return String.valueOf(offset);
-		}
-	}
-
-	private static class TestEdge implements Edge<TestNode, TestEdge, TestGraph> {
-
-		private final TestNode source, destination;
-
-		private TestEdge(TestNode source, TestNode destination) {
-			this.source = source;
-			this.destination = destination;
-		}
-
-		@Override
-		public TestNode getSource() {
-			return source;
-		}
-
-		@Override
-		public TestNode getDestination() {
-			return destination;
-		}
-
-		@Override
-		public boolean canBeSimplified() {
-			return false;
-		}
-
-		@Override
-		public TestEdge newInstance(TestNode source, TestNode destination) {
-			return new TestEdge(source, destination);
-		}
-
-		@Override
-		public <V> boolean accept(GraphVisitor<TestGraph, TestNode, TestEdge, V> visitor, V tool) {
-			return false;
-		}
-
-		@Override
-		public String toString() {
-			return source + "->" + destination;
-		}
-	}
-
-	private static class TestGraph extends Graph<TestGraph, TestNode, TestEdge> {
-
-		@Override
-		protected DotGraph<TestNode, TestEdge, TestGraph> toDot(Function<TestNode, String> labelGenerator) {
-			return null;
-		}
-	}
 
 	private static Set<TestNode> nodeSemantics(TestNode n, Set<TestNode> entry) {
 		Set<TestNode> res = new HashSet<>(entry);
