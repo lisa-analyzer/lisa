@@ -1,4 +1,4 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
 import java.util.Collection;
 import java.util.Collections;

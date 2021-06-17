@@ -1,16 +1,16 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
-import java.util.Stack;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 /**
- * A last-in, first-out working set. This implementation is <b>not</b>
- * thread-safe.
+ * A first-in, first-out working set. This implementation is thread-safe.
  * 
  * @author Luca Negrini
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class LIFOWorkingSet<E> implements WorkingSet<E> {
+public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 
 	/**
 	 * Yields a new, empty working set.
@@ -20,29 +20,29 @@ public class LIFOWorkingSet<E> implements WorkingSet<E> {
 	 * 
 	 * @return the new working set
 	 */
-	public static <E> LIFOWorkingSet<E> mk() {
-		return new LIFOWorkingSet<>();
+	public static <E> ConcurrentFIFOWorkingSet<E> mk() {
+		return new ConcurrentFIFOWorkingSet<>();
 	}
 
-	private final Stack<E> ws;
+	private final Deque<E> ws;
 
-	private LIFOWorkingSet() {
-		ws = new Stack<>();
+	private ConcurrentFIFOWorkingSet() {
+		ws = new ConcurrentLinkedDeque<>();
 	}
 
 	@Override
 	public void push(E e) {
-		ws.push(e);
+		ws.addLast(e);
 	}
 
 	@Override
 	public E pop() {
-		return ws.pop();
+		return ws.removeFirst();
 	}
 
 	@Override
 	public E peek() {
-		return ws.peek();
+		return ws.peekFirst();
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class LIFOWorkingSet<E> implements WorkingSet<E> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LIFOWorkingSet<?> other = (LIFOWorkingSet<?>) obj;
+		ConcurrentFIFOWorkingSet<?> other = (ConcurrentFIFOWorkingSet<?>) obj;
 		if (ws == null) {
 			if (other.ws != null)
 				return false;

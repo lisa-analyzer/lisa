@@ -1,4 +1,4 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
 /**
  * A working set, containing items to be processed.

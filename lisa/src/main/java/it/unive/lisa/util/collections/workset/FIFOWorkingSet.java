@@ -1,16 +1,17 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
 import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.LinkedList;
 
 /**
- * A first-in, first-out working set. This implementation is thread-safe.
+ * A first-in, first-out working set. This implementation is <b>not</b>
+ * thread-safe.
  * 
  * @author Luca Negrini
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
+public class FIFOWorkingSet<E> implements WorkingSet<E> {
 
 	/**
 	 * Yields a new, empty working set.
@@ -20,14 +21,14 @@ public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	 * 
 	 * @return the new working set
 	 */
-	public static <E> ConcurrentFIFOWorkingSet<E> mk() {
-		return new ConcurrentFIFOWorkingSet<>();
+	public static <E> FIFOWorkingSet<E> mk() {
+		return new FIFOWorkingSet<>();
 	}
 
 	private final Deque<E> ws;
 
-	private ConcurrentFIFOWorkingSet() {
-		ws = new ConcurrentLinkedDeque<>();
+	private FIFOWorkingSet() {
+		ws = new LinkedList<>();
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ConcurrentFIFOWorkingSet<?> other = (ConcurrentFIFOWorkingSet<?>) obj;
+		FIFOWorkingSet<?> other = (FIFOWorkingSet<?>) obj;
 		if (ws == null) {
 			if (other.ws != null)
 				return false;

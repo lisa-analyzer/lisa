@@ -1,4 +1,4 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;

@@ -19,9 +19,9 @@ import org.apache.commons.lang3.tuple.Pair;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
-import it.unive.lisa.util.workset.LIFOWorkingSet;
-import it.unive.lisa.util.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.workset.WorkingSet;
+import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and

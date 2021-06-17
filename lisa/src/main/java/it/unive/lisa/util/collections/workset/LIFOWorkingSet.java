@@ -1,17 +1,16 @@
-package it.unive.lisa.util.workset;
+package it.unive.lisa.util.collections.workset;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Stack;
 
 /**
- * A first-in, first-out working set. This implementation is <b>not</b>
+ * A last-in, first-out working set. This implementation is <b>not</b>
  * thread-safe.
  * 
  * @author Luca Negrini
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class FIFOWorkingSet<E> implements WorkingSet<E> {
+public class LIFOWorkingSet<E> implements WorkingSet<E> {
 
 	/**
 	 * Yields a new, empty working set.
@@ -21,29 +20,29 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 	 * 
 	 * @return the new working set
 	 */
-	public static <E> FIFOWorkingSet<E> mk() {
-		return new FIFOWorkingSet<>();
+	public static <E> LIFOWorkingSet<E> mk() {
+		return new LIFOWorkingSet<>();
 	}
 
-	private final Deque<E> ws;
+	private final Stack<E> ws;
 
-	private FIFOWorkingSet() {
-		ws = new LinkedList<>();
+	private LIFOWorkingSet() {
+		ws = new Stack<>();
 	}
 
 	@Override
 	public void push(E e) {
-		ws.addLast(e);
+		ws.push(e);
 	}
 
 	@Override
 	public E pop() {
-		return ws.removeFirst();
+		return ws.pop();
 	}
 
 	@Override
 	public E peek() {
-		return ws.peekFirst();
+		return ws.peek();
 	}
 
 	@Override
@@ -77,7 +76,7 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		FIFOWorkingSet<?> other = (FIFOWorkingSet<?>) obj;
+		LIFOWorkingSet<?> other = (LIFOWorkingSet<?>) obj;
 		if (ws == null) {
 			if (other.ws != null)
 				return false;

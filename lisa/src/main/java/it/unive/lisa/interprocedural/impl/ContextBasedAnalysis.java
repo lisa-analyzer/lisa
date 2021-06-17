@@ -29,9 +29,9 @@ import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import it.unive.lisa.util.workset.FIFOWorkingSet;
-import it.unive.lisa.util.workset.VisitOnceWorkingSet;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is

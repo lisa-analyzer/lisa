@@ -13,10 +13,10 @@ import java.util.Set;
 import org.apache.commons.collections4.SetUtils;
 import org.junit.Test;
 
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
-import it.unive.lisa.util.workset.FIFOWorkingSet;
 
 public class FixpointTest {
 
