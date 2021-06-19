@@ -92,7 +92,7 @@ public class StringIndexOf extends NativeCFG {
 
 			return rightState
 					.smallStepSemantics(
-							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF),
+							new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_INDEX_OF, getLocation()),
 							original);
 		}
 	}

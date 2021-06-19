@@ -70,8 +70,8 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		for (Parameter arg : cfg.getDescriptor().getArgs()) {
 			ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-			Variable id = new Variable(all, arg.getName(), arg.getAnnotations());
-			prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
+			Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
+			prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
 		}
 
 		// the stack has to be empty

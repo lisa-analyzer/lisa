@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -46,8 +47,8 @@ public class TernaryExpression extends ValueExpression {
 	 */
 	public TernaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression middle,
 			SymbolicExpression right,
-			TernaryOperator operator) {
-		super(types);
+			TernaryOperator operator, CodeLocation location) {
+		super(types, location);
 		this.left = left;
 		this.middle = middle;
 		this.right = right;
@@ -94,13 +95,13 @@ public class TernaryExpression extends ValueExpression {
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.pushScope(token), this.middle.pushScope(token),
-				this.right.pushScope(token), this.operator);
+				this.right.pushScope(token), this.operator, location);
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.popScope(token), this.middle.popScope(token),
-				this.right.popScope(token), this.operator);
+				this.right.popScope(token), this.operator, location);
 	}
 
 	@Override

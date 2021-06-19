@@ -51,6 +51,6 @@ public class IMPAssert extends UnaryStatement {
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());
 		if (!getExpression().getDynamicType().isBooleanType())
 			return result.bottom();
-		return result.smallStepSemantics(new Skip(), this);
+		return result.smallStepSemantics(new Skip(getLocation()), this);
 	}
 }

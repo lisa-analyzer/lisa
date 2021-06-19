@@ -42,6 +42,10 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		this(new HashSet<>(), true);
 	}
 
+	public AllocationSites(AllocationSite site) {
+		this(Collections.singleton(site), false);
+	}
+	
 	private AllocationSites(Set<AllocationSite> set, boolean isTop) {
 		super(set);
 		this.isTop = isTop;

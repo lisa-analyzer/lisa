@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -10,8 +11,8 @@ public class HeapDereference extends HeapExpression {
 
 	protected final SymbolicExpression toDeref;
 
-	public HeapDereference(ExternalSet<Type> types, SymbolicExpression toDeref) {
-		super(types);
+	public HeapDereference(ExternalSet<Type> types, SymbolicExpression toDeref, CodeLocation location) {
+		super(types, location);
 		this.toDeref = toDeref;
 	}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
@@ -24,8 +25,8 @@ public class AllocationSite extends HeapLocation {
 	 * @param id    the source code location string representation where this
 	 *                  allocation site has been allocated
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id) {
-		this(types, id, false);
+	public AllocationSite(ExternalSet<Type> types, String id, CodeLocation location) {
+		this(types, id, false, location);
 	}
 
 	/**
@@ -37,8 +38,8 @@ public class AllocationSite extends HeapLocation {
 	 *                   allocation site has been allocated
 	 * @param isWeak boolean value specifying if this allocation site is weak
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak) {
-		this(types, id, null, isWeak);
+	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak, CodeLocation location) {
+		this(types, id, null, isWeak, location);
 	}
 
 	/**
@@ -50,8 +51,8 @@ public class AllocationSite extends HeapLocation {
 	 *                  allocation site has been allocated
 	 * @param field the field of this allocation site
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field) {
-		this(types, id, field, false);
+	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, CodeLocation location) {
+		this(types, id, field, false, location);
 	}
 
 	/**
@@ -64,8 +65,8 @@ public class AllocationSite extends HeapLocation {
 	 * @param field  the field of this allocation site
 	 * @param isWeak boolean value specifying if this allocation site is weak
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak) {
-		super(types, "pp@" + id + (field == null ? "" : "[" + field + "]"), isWeak);
+	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak, CodeLocation location) {
+		super(types, "pp@" + id + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.id = id;
 	}
 

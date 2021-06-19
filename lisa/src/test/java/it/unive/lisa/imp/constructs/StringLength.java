@@ -85,7 +85,7 @@ public class StringLength extends NativeCFG {
 				return entryState.bottom();
 
 			return exprState
-					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH),
+					.smallStepSemantics(new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH, getLocation()),
 							original);
 		}
 

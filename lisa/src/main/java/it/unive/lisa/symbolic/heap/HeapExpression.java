@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
@@ -23,8 +24,8 @@ public abstract class HeapExpression extends SymbolicExpression {
 	 * 
 	 * @param types the runtime types of this expression
 	 */
-	protected HeapExpression(ExternalSet<Type> types) {
-		super(types);
+	protected HeapExpression(ExternalSet<Type> types, CodeLocation location) {
+		super(types, location);
 	}
 
 	// By default a heap expression does not change the scope.

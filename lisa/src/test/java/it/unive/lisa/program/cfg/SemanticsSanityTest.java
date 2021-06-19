@@ -91,7 +91,7 @@ public class SemanticsSanityTest {
 
 	@Before
 	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
-		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		SourceCodeLocation unknownLocation = SourceCodeLocation.UNKNOWN;
 		Program p = new Program();
 		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
@@ -126,7 +126,7 @@ public class SemanticsSanityTest {
 					V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 							InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 							throws SemanticException {
-				return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), "fake"), fake);
+				return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), "fake", SourceCodeLocation.UNKNOWN), fake);
 			}
 		};
 	}
@@ -145,7 +145,7 @@ public class SemanticsSanityTest {
 		if (param == boolean.class || param == Boolean.class)
 			return false;
 		if (param == Global.class)
-			return new Global(new SourceCodeLocation("fake", 0, 0), "foo");
+			return new Global(SourceCodeLocation.UNKNOWN, "foo");
 		if (param == Object.class)
 			return new Object();
 		if (param == Type.class)
@@ -159,7 +159,7 @@ public class SemanticsSanityTest {
 		if (param == Unit.class)
 			return unit;
 		if (param == CodeLocation.class)
-			return new SourceCodeLocation("fake", 0, 0);
+			return SourceCodeLocation.UNKNOWN;
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}
@@ -293,7 +293,7 @@ public class SemanticsSanityTest {
 			if (param == AbstractState.class)
 				return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()));
 			else if (param == SymbolicExpression.class)
-				return new Skip();
+				return new Skip(SourceCodeLocation.UNKNOWN);
 			else if (param == ExpressionSet.class)
 				return new ExpressionSet<>();
 		if (root == SimpleAbstractState.class)
@@ -393,7 +393,7 @@ public class SemanticsSanityTest {
 		for (SemanticDomain instance : instances)
 			try {
 				instance = (SemanticDomain) ((Lattice) instance).bottom();
-				instance = instance.assign(new Variable(bool, "b"), new PushAny(bool), fake);
+				instance = instance.assign(new Variable(bool, "b", SourceCodeLocation.UNKNOWN), new PushAny(bool, SourceCodeLocation.UNKNOWN), fake);
 				if (!((Lattice) instance).isBottom()) {
 					failures.add(instance.getClass().getName());
 					System.err.println("Assigning to the bottom instance of " + instance.getClass().getName()

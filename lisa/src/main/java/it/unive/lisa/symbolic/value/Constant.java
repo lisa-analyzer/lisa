@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -25,8 +26,8 @@ public class Constant extends ValueExpression {
 	 * @param type  the type of the constant
 	 * @param value the constant value
 	 */
-	public Constant(Type type, Object value) {
-		super(Caches.types().mkSingletonSet(type));
+	public Constant(Type type, Object value, CodeLocation location) {
+		super(Caches.types().mkSingletonSet(type), location);
 		this.value = value;
 	}
 

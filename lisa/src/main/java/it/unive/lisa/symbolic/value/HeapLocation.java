@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -23,8 +24,8 @@ public class HeapLocation extends Identifier {
 	 * @param weak  whether or not this identifier is weak, meaning that it
 	 *                  should only receive weak assignments
 	 */
-	public HeapLocation(ExternalSet<Type> types, String name, boolean weak) {
-		super(types, name, weak);
+	public HeapLocation(ExternalSet<Type> types, String name, boolean weak, CodeLocation location) {
+		super(types, name, weak, location);
 	}
 
 	@Override

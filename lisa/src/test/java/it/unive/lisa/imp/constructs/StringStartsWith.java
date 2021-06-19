@@ -91,7 +91,7 @@ public class StringStartsWith extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH),
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_STARTS_WITH, getLocation()),
 					original);
 		}
 	}

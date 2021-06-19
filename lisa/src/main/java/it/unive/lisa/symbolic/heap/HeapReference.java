@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -24,8 +25,8 @@ public class HeapReference extends HeapExpression {
 	 * @param types      the runtime types of this expression
 	 * @param expression the expression that this refers to
 	 */
-	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression) {
-		super(types);
+	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression, CodeLocation location) {
+		super(types, location);
 		this.expression = expression;
 	}
 

@@ -87,7 +87,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getRuntimeTypes(), "open_call_ret_value@" + getLocation());
+		return new Variable(getRuntimeTypes(), "open_call_ret_value@" + getLocation(), getLocation());
 	}
 
 	@Override
@@ -102,7 +102,7 @@ public class OpenCall extends Call implements MetaVariableCreator {
 		AnalysisState<A, H, V> poststate = entryState.top();
 
 		if (getStaticType().isVoidType())
-			return poststate.smallStepSemantics(new Skip(), this);
+			return poststate.smallStepSemantics(new Skip(getLocation()), this);
 		else
 			return poststate.smallStepSemantics(getMetaVariable(), this);
 	}

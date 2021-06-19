@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,10 +25,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -85,8 +86,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		for (ValueExpression exp : rewrittenExp) {
 			if (exp instanceof MemoryPointer) {
 				MemoryPointer pid = (MemoryPointer) exp;
-				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getLocation() : id;
-				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getLocation(), pp);
+				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getReferencedLocation() : id;
+				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getReferencedLocation(), pp);
 				result = result.lub(from(new PointBasedHeap(heap)));
 			} else
 				result = result.lub(sss);
@@ -111,6 +112,17 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		// we leave the decision to the value domain
 		return Satisfiability.UNKNOWN;
 	}
+
+	//	@Override
+	//	public DomainRepresentation representation() {
+	//		if (isTop())
+	//			return Lattice.TOP_REPR;
+	//
+	//		if (isBottom())
+	//			return Lattice.BOTTOM_REPR;
+	//
+	//		return heapEnv.representation();
+	//	}
 
 	@Override
 	public DomainRepresentation representation() {
@@ -197,7 +209,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return false;
 		return true;
 	}
-
+	
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
@@ -206,9 +218,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
-		if (expression instanceof HeapAllocation)
+		if (expression instanceof HeapAllocation) 
 			return this;
-
+		
 		if (expression instanceof HeapReference)
 			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
 
@@ -221,13 +233,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(new Rewriter());
 	}
 
 	private Set<ValueExpression> resolveIdentifier(Identifier v) {
 		Set<ValueExpression> result = new HashSet<>();
 		for (AllocationSite site : heapEnv.getState(v))
-			result.add(new MemoryPointer(site.getTypes(), site));
+			result.add(new MemoryPointer(site.getTypes(), site, site.getLocation()));
 
 		return result;
 	}
@@ -258,8 +270,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			for (ValueExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
-					AllocationSite site = (AllocationSite) pid.getLocation();
-					result.add(new AllocationSite(expression.getTypes(), site.getId(), true));
+					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
+					result.add(new AllocationSite(expression.getTypes(), site.getId(), true, expression.getLocation()));
 				}
 
 			return new ExpressionSet<>(result);
@@ -269,28 +281,28 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id = new AllocationSite(expression.getTypes(),
-					((ProgramPoint) params[0]).getLocation().getCodeLocation(), true);
+					expression.getLocation().getCodeLocation(), true, expression.getLocation());
 			return new ExpressionSet<>(id);
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> loc,
+		public ExpressionSet<ValueExpression> visit(HeapReference expression,ExpressionSet<ValueExpression> loc,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression locExp : loc)
-				if (locExp instanceof AllocationSite) {
-					AllocationSite l = (AllocationSite) locExp;
-					result.add(new MemoryPointer(l.getTypes(), l));
-				}
+				if (locExp instanceof AllocationSite) 
+					result.add(new MemoryPointer(locExp.getTypes(), (AllocationSite) locExp, locExp.getLocation()));
+				else
+					result.add(locExp);
 			return new ExpressionSet<>(result);
 		}
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> ref,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression refExp : ref) {
@@ -299,8 +311,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					if (heapEnv.getKeys().contains(id))
 						result.addAll(resolveIdentifier(id));
 				} else
-					for (ValueExpression rew : rewrite(expression.getExpression(), (ProgramPoint) params[0]))
-						result.add(rew);
+					result.add(refExp);
 			}
 
 			return new ExpressionSet<>(result);

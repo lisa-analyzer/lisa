@@ -14,6 +14,8 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SourceCodeLocation implements CodeLocation {
 
+	public static final SourceCodeLocation UNKNOWN = new SourceCodeLocation("unknown", 0, 0);
+	
 	/**
 	 * The source file where this code element happens. If it is unknown, this
 	 * field might contain {@code null}.

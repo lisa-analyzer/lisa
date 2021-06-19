@@ -1,6 +1,7 @@
 package it.unive.lisa.symbolic.heap;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -31,8 +32,8 @@ public class AccessChild extends HeapExpression {
 	 * @param container the expression representing the parent memory location
 	 * @param child     the expression representing the child memory location
 	 */
-	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child) {
-		super(types);
+	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child, CodeLocation location) {
+		super(types, location);
 		this.container = container;
 		this.child = child;
 	}

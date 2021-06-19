@@ -91,7 +91,7 @@ public class StringContains extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_CONTAINS),
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_CONTAINS, getLocation()),
 					original);
 		}
 	}

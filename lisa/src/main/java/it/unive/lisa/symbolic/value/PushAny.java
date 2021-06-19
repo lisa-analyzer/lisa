@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -20,8 +21,8 @@ public class PushAny extends ValueExpression {
 	 * 
 	 * @param types the runtime types of this expression
 	 */
-	public PushAny(ExternalSet<Type> types) {
-		super(types);
+	public PushAny(ExternalSet<Type> types, CodeLocation location) {
+		super(types, location);
 	}
 
 	@Override

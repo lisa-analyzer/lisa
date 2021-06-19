@@ -58,6 +58,6 @@ public class IMPDiv extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
-						BinaryOperator.NUMERIC_DIV), this);
+						BinaryOperator.NUMERIC_DIV, getLocation()), this);
 	}
 }

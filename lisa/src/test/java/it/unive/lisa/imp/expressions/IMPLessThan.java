@@ -58,6 +58,6 @@ public class IMPLessThan extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_LT), this);
+						BinaryOperator.COMPARISON_LT, getLocation()), this);
 	}
 }

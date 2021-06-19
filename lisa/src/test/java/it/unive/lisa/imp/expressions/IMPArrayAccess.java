@@ -55,7 +55,7 @@ public class IMPArrayAccess extends BinaryNativeCall {
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left);
-		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right), this);
+		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left, getLocation());
+		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
 	}
 }

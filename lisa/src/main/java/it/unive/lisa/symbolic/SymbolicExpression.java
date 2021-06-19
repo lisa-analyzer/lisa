@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -16,6 +17,11 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 public abstract class SymbolicExpression {
 
 	/**
+	 * The code location of the statement that has generated this symbolic expression
+	 */
+	protected final CodeLocation location;
+	
+	/**
 	 * The runtime types of this expression
 	 */
 	private final ExternalSet<Type> types;
@@ -25,8 +31,9 @@ public abstract class SymbolicExpression {
 	 * 
 	 * @param types the runtime types of this expression
 	 */
-	protected SymbolicExpression(ExternalSet<Type> types) {
+	protected SymbolicExpression(ExternalSet<Type> types, CodeLocation location) {
 		this.types = types;
+		this.location = location;
 	}
 
 	/**
@@ -97,6 +104,7 @@ public abstract class SymbolicExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+//		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
@@ -110,6 +118,11 @@ public abstract class SymbolicExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
+//		if (location == null) {
+//			if (other.location != null)
+//				return false;
+//		} else if (!location.equals(other.location))
+//			return false;
 		if (types == null) {
 			if (other.types != null)
 				return false;
@@ -118,6 +131,10 @@ public abstract class SymbolicExpression {
 		return true;
 	}
 
+	public CodeLocation getLocation() {
+		return location;
+	}
+	
 	@Override
 	public abstract String toString();
 }

@@ -59,6 +59,6 @@ public class IMPGreaterThan extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_GT), this);
+						BinaryOperator.COMPARISON_GT, getLocation()), this);
 	}
 }

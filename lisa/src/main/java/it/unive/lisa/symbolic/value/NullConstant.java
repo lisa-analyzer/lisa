@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.value;
 
+import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.type.NullType;
 
 /**
@@ -18,7 +19,7 @@ public class NullConstant extends Constant {
 	private static final Object NULL_CONST = new Object();
 
 	private NullConstant() {
-		super(NullType.INSTANCE, NULL_CONST);
+		super(NullType.INSTANCE, NULL_CONST, SourceCodeLocation.UNKNOWN);
 	}
 
 	@Override

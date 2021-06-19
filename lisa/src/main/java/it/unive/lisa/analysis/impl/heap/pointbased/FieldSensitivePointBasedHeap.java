@@ -58,7 +58,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new Rewriter(), pp);
+		return expression.accept(new Rewriter());
 	}
 
 	private class Rewriter extends PointBasedHeap.Rewriter {
@@ -71,9 +71,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			for (SymbolicExpression contRewritten : receiver)
 				if (contRewritten instanceof MemoryPointer) {
-					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getLocation();
+					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getReferencedLocation();
 					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak()));
+						result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak(), site.getLocation()));
 				}
 
 			return new ExpressionSet<>(result);
@@ -82,12 +82,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			String pp = ((ProgramPoint) params[0]).getLocation().getCodeLocation();
+			String pp = expression.getLocation().getCodeLocation();
 
 			if (alreadyAllocated(pp) != null)
-				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, true));
+				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, true, expression.getLocation()));
 			else
-				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, false));
+				return new ExpressionSet<>(new AllocationSite(expression.getTypes(), pp, false, expression.getLocation()));
 		}
 	}
 }

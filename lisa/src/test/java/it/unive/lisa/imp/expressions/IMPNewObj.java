@@ -56,7 +56,7 @@ public class IMPNewObj extends NativeCall {
 					AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
+		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
 
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
@@ -76,7 +76,7 @@ public class IMPNewObj extends NativeCall {
 
 		AnalysisState<A, H, V> result = entryState.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions())
-			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc), call));
+			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc, getLocation()), call));
 
 		return result;
 	}
