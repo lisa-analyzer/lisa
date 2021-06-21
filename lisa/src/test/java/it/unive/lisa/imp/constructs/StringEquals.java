@@ -89,9 +89,11 @@ public class StringEquals extends NativeCFG {
 				return entryState.bottom();
 			if (!rightExp.getDynamicType().isStringType() && !rightExp.getDynamicType().isUntyped())
 				return entryState.bottom();
-			
+
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_EQUALS, getLocation()), original);
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_EQUALS,
+							getLocation()),
+					original);
 		}
 	}
 

@@ -16,7 +16,9 @@ public class HeapAllocation extends HeapExpression {
 	/**
 	 * Builds the heap allocation.
 	 * 
-	 * @param types the runtime types of this expression
+	 * @param types    the runtime types of this expression
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public HeapAllocation(ExternalSet<Type> types, CodeLocation location) {
 		super(types, location);

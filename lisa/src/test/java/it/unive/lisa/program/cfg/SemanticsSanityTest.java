@@ -126,7 +126,8 @@ public class SemanticsSanityTest {
 					V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 							InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 							throws SemanticException {
-				return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), "fake", SourceCodeLocation.UNKNOWN), fake);
+				return entryState
+						.smallStepSemantics(new Variable(getRuntimeTypes(), "fake", SourceCodeLocation.UNKNOWN), fake);
 			}
 		};
 	}
@@ -393,7 +394,8 @@ public class SemanticsSanityTest {
 		for (SemanticDomain instance : instances)
 			try {
 				instance = (SemanticDomain) ((Lattice) instance).bottom();
-				instance = instance.assign(new Variable(bool, "b", SourceCodeLocation.UNKNOWN), new PushAny(bool, SourceCodeLocation.UNKNOWN), fake);
+				instance = instance.assign(new Variable(bool, "b", SourceCodeLocation.UNKNOWN),
+						new PushAny(bool, SourceCodeLocation.UNKNOWN), fake);
 				if (!((Lattice) instance).isBottom()) {
 					failures.add(instance.getClass().getName());
 					System.err.println("Assigning to the bottom instance of " + instance.getClass().getName()

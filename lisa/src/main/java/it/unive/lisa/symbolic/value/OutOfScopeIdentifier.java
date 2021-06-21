@@ -1,12 +1,11 @@
 package it.unive.lisa.symbolic.value;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Objects;
 
 /**
  * An identifier outside the current scope of the call, that is, in a method
@@ -21,8 +20,11 @@ public class OutOfScopeIdentifier extends Identifier {
 	/**
 	 * Builds the identifier outside the scope.
 	 *
-	 * @param id    the current identifier
-	 * @param scope the method call that caused the identifier to exit the scope
+	 * @param id       the current identifier
+	 * @param scope    the method call that caused the identifier to exit the
+	 *                     scope
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public OutOfScopeIdentifier(Identifier id, ScopeToken scope, CodeLocation location) {
 		super(id.getTypes(), scope.toString() + ":" + id.getName(), id.isWeak(), location);
@@ -44,7 +46,7 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, location);
+		return new OutOfScopeIdentifier(this, token, getLocation());
 	}
 
 	@Override

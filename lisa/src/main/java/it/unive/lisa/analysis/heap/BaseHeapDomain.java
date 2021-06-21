@@ -125,7 +125,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 				Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression expr : arg)
-				result.add(new UnaryExpression(expression.getTypes(), expr, expression.getOperator(), expression.getLocation()));
+				result.add(new UnaryExpression(expression.getTypes(), expr, expression.getOperator(),
+						expression.getLocation()));
 			return new ExpressionSet<>(result);
 		}
 
@@ -136,7 +137,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression l : left)
 				for (ValueExpression r : right)
-					result.add(new BinaryExpression(expression.getTypes(), l, r, expression.getOperator(), expression.getLocation()));
+					result.add(new BinaryExpression(expression.getTypes(), l, r, expression.getOperator(),
+							expression.getLocation()));
 			return new ExpressionSet<>(result);
 		}
 
@@ -149,7 +151,8 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			for (ValueExpression l : left)
 				for (ValueExpression m : middle)
 					for (ValueExpression r : right)
-						result.add(new TernaryExpression(expression.getTypes(), l, m, r, expression.getOperator(), expression.getLocation()));
+						result.add(new TernaryExpression(expression.getTypes(), l, m, r, expression.getOperator(),
+								expression.getLocation()));
 			return new ExpressionSet<>(result);
 		}
 

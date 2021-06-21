@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -25,6 +20,10 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -113,16 +112,16 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return Satisfiability.UNKNOWN;
 	}
 
-	//	@Override
-	//	public DomainRepresentation representation() {
-	//		if (isTop())
-	//			return Lattice.TOP_REPR;
+	// @Override
+	// public DomainRepresentation representation() {
+	// if (isTop())
+	// return Lattice.TOP_REPR;
 	//
-	//		if (isBottom())
-	//			return Lattice.BOTTOM_REPR;
+	// if (isBottom())
+	// return Lattice.BOTTOM_REPR;
 	//
-	//		return heapEnv.representation();
-	//	}
+	// return heapEnv.representation();
+	// }
 
 	@Override
 	public DomainRepresentation representation() {
@@ -209,7 +208,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
@@ -218,9 +217,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			return containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
-		if (expression instanceof HeapAllocation) 
+		if (expression instanceof HeapAllocation)
 			return this;
-		
+
 		if (expression instanceof HeapReference)
 			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
 
@@ -286,13 +285,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapReference expression,ExpressionSet<ValueExpression> loc,
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> loc,
 				Object... params)
-						throws SemanticException {
+				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression locExp : loc)
-				if (locExp instanceof AllocationSite) 
+				if (locExp instanceof AllocationSite)
 					result.add(new MemoryPointer(locExp.getTypes(), (AllocationSite) locExp, locExp.getLocation()));
 				else
 					result.add(locExp);
@@ -302,7 +301,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> ref,
 				Object... params)
-						throws SemanticException {
+				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression refExp : ref) {

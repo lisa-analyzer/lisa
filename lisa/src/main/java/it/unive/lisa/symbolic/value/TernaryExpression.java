@@ -44,6 +44,8 @@ public class TernaryExpression extends ValueExpression {
 	 * @param middle   the middle operand of this expression
 	 * @param right    the right-hand side operand of this expression
 	 * @param operator the operator to apply
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public TernaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression middle,
 			SymbolicExpression right,
@@ -95,13 +97,13 @@ public class TernaryExpression extends ValueExpression {
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.pushScope(token), this.middle.pushScope(token),
-				this.right.pushScope(token), this.operator, location);
+				this.right.pushScope(token), this.operator, getLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.popScope(token), this.middle.popScope(token),
-				this.right.popScope(token), this.operator, location);
+				this.right.popScope(token), this.operator, getLocation());
 	}
 
 	@Override

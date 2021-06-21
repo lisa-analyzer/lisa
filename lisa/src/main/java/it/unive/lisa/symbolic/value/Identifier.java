@@ -32,10 +32,12 @@ public abstract class Identifier extends ValueExpression {
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param types the runtime types of this expression
-	 * @param name  the name of the identifier
-	 * @param weak  whether or not this identifier is weak, meaning that it
-	 *                  should only receive weak assignments
+	 * @param types    the runtime types of this expression
+	 * @param name     the name of the identifier
+	 * @param weak     whether or not this identifier is weak, meaning that it
+	 *                     should only receive weak assignments
+	 * @param location the code location of the statement that has generated
+	 *                     this identifier
 	 */
 	protected Identifier(ExternalSet<Type> types, String name, boolean weak, CodeLocation location) {
 		this(types, name, weak, new Annotations(), location);
@@ -49,8 +51,11 @@ public abstract class Identifier extends ValueExpression {
 	 * @param weak        whether or not this identifier is weak, meaning that
 	 *                        it should only receive weak assignments
 	 * @param annotations the annotations of this identifier
+	 * @param location    the code location of the statement that has generated
+	 *                        this identifier
 	 */
-	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations, CodeLocation location) {
+	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations,
+			CodeLocation location) {
 		super(types, location);
 		this.name = name;
 		this.weak = weak;

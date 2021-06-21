@@ -21,9 +21,11 @@ public class AllocationSite extends HeapLocation {
 	 * Builds a strong allocation site from its source code location (without
 	 * field).
 	 * 
-	 * @param types the runtime types of this allocation site
-	 * @param id    the source code location string representation where this
-	 *                  allocation site has been allocated
+	 * @param types    the runtime types of this allocation site
+	 * @param id       the source code location string representation where this
+	 *                     allocation site has been allocated
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public AllocationSite(ExternalSet<Type> types, String id, CodeLocation location) {
 		this(types, id, false, location);
@@ -33,10 +35,12 @@ public class AllocationSite extends HeapLocation {
 	 * Builds an allocation site from its source code location (without field)
 	 * and specifying if it is weak.
 	 * 
-	 * @param types  the runtime types of this allocation site
-	 * @param id     the source code location string representation where this
-	 *                   allocation site has been allocated
-	 * @param isWeak boolean value specifying if this allocation site is weak
+	 * @param types    the runtime types of this allocation site
+	 * @param id       the source code location string representation where this
+	 *                     allocation site has been allocated
+	 * @param isWeak   boolean value specifying if this allocation site is weak
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak, CodeLocation location) {
 		this(types, id, null, isWeak, location);
@@ -46,10 +50,12 @@ public class AllocationSite extends HeapLocation {
 	 * Builds a strong allocation site from its source code location and its
 	 * field.
 	 * 
-	 * @param types the runtime types of this allocation site
-	 * @param id    the source code location string representation where this
-	 *                  allocation site has been allocated
-	 * @param field the field of this allocation site
+	 * @param types    the runtime types of this allocation site
+	 * @param id       the source code location string representation where this
+	 *                     allocation site has been allocated
+	 * @param field    the field of this allocation site
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, CodeLocation location) {
 		this(types, id, field, false, location);
@@ -59,23 +65,26 @@ public class AllocationSite extends HeapLocation {
 	 * Builds an allocation site from its source code location and its field and
 	 * specifying if it is weak.
 	 * 
-	 * @param types  the runtime types of this allocation site
-	 * @param id     the source code location string representation where this
-	 *                   allocation site has been allocated
-	 * @param field  the field of this allocation site
-	 * @param isWeak boolean value specifying if this allocation site is weak
+	 * @param types    the runtime types of this allocation site
+	 * @param id       the source code location string representation where this
+	 *                     allocation site has been allocated
+	 * @param field    the field of this allocation site
+	 * @param isWeak   boolean value specifying if this allocation site is weak
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak, CodeLocation location) {
+	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak,
+			CodeLocation location) {
 		super(types, "pp@" + id + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.id = id;
 	}
 
 	/**
-	 * Returns the source code location string representation where this
-	 * allocation site has been allocated.
+	 * Returns the code location string representation where this allocation
+	 * site has been allocated.
 	 * 
-	 * @return the source code location string representation where this
-	 *             allocation site has been allocated.
+	 * @return the code location string representation where this allocation
+	 *             site has been allocated.
 	 */
 	public String getId() {
 		return id;

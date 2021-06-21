@@ -97,16 +97,31 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 		return new AnalysisState<A, H, V>(s, new ExpressionSet<>(id));
 	}
 
-	public AnalysisState<A, H, V> assign(SymbolicExpression id, SymbolicExpression value, ProgramPoint pp)
+	/**
+	 * Yields a copy of this analysis state, where the symbolic expression
+	 * {@code id} has been assigned to {@code value}: if {@code id} is not an
+	 * {@code Identifier}, then it is rewritten before performing the
+	 * assignment.
+	 * 
+	 * @param id         the symbolic expression to be assigned
+	 * @param expression the expression to assign
+	 * @param pp         the program point that where this operation is being
+	 *                       evaluated
+	 * 
+	 * @return a copy of this analysis state, modified by the assignment
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public AnalysisState<A, H, V> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 
 		if (id instanceof Identifier)
-			return assign((Identifier) id, value, pp);
+			return assign((Identifier) id, expression, pp);
 
 		A s = (A) state.bottom();
 		ExpressionSet<SymbolicExpression> rewritten = rewrite(id, pp);
 		for (SymbolicExpression i : rewritten)
-			s = s.lub(state.assign((Identifier) i, value, pp));
+			s = s.lub(state.assign((Identifier) i, expression, pp));
 		return new AnalysisState<A, H, V>(s, rewritten);
 	}
 

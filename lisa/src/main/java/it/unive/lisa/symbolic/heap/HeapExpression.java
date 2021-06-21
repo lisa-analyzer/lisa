@@ -22,7 +22,9 @@ public abstract class HeapExpression extends SymbolicExpression {
 	/**
 	 * Builds the heap expression.
 	 * 
-	 * @param types the runtime types of this expression
+	 * @param types    the runtime types of this expression
+	 * @param location the code location of the statement that has generated
+	 *                     this heap expression
 	 */
 	protected HeapExpression(ExternalSet<Type> types, CodeLocation location) {
 		super(types, location);

@@ -19,8 +19,10 @@ public class Variable extends Identifier {
 	/**
 	 * Builds the variable.
 	 * 
-	 * @param types the runtime types of this variable
-	 * @param name  the name of the variable
+	 * @param types    the runtime types of this variable
+	 * @param name     the name of the variable
+	 * @param location the code location of the statement that has generated
+	 *                     this variable
 	 */
 	public Variable(ExternalSet<Type> types, String name, CodeLocation location) {
 		this(types, name, new Annotations(), location);
@@ -32,6 +34,8 @@ public class Variable extends Identifier {
 	 * @param types       the runtime types of this variable
 	 * @param name        the name of the variable
 	 * @param annotations the annotations of this variable
+	 * @param location    the code location of the statement that has generated
+	 *                        this variable
 	 */
 	public Variable(ExternalSet<Type> types, String name, Annotations annotations, CodeLocation location) {
 		super(types, name, false, annotations, location);
@@ -39,7 +43,7 @@ public class Variable extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, location);
+		return new OutOfScopeIdentifier(this, token, getLocation());
 	}
 
 	@Override

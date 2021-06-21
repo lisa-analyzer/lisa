@@ -125,7 +125,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return this == obj;
 	}
 
-	protected class Rewriter extends BaseHeapDomain.Rewriter {
+	private class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -133,7 +133,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
+			return new ExpressionSet<>(
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
 		}
 
 		@Override
@@ -142,7 +143,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
+			return new ExpressionSet<>(
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
 		}
 
 		@Override
@@ -153,7 +155,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()), expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()),
+					expression.getLocation()));
 		}
 
 		@Override
@@ -164,7 +167,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()), expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()),
+					expression.getLocation()));
 		}
 	}
 }

@@ -29,17 +29,20 @@ public class AccessChild extends HeapExpression {
 	 * Builds the child access.
 	 * 
 	 * @param types     the runtime types of this expression
-	 * @param container the expression representing the parent memory location
-	 * @param child     the expression representing the child memory location
+	 * @param container the expression representing the parent
+	 * @param child     the expression representing the child
+	 * @param location  the code location of the statement that has generated
+	 *                      this expression
 	 */
-	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child, CodeLocation location) {
+	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child,
+			CodeLocation location) {
 		super(types, location);
 		this.container = container;
 		this.child = child;
 	}
 
 	/**
-	 * Yields the expression representing the parent memory location.
+	 * Yields the expression representing the parent.
 	 * 
 	 * @return the container
 	 */
@@ -48,7 +51,7 @@ public class AccessChild extends HeapExpression {
 	}
 
 	/**
-	 * Yields the expression representing the child memory location.
+	 * Yields the expression representing the child.
 	 * 
 	 * @return the child
 	 */

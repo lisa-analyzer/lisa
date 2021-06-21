@@ -23,8 +23,10 @@ public class Constant extends ValueExpression {
 	/**
 	 * Builds the constant.
 	 * 
-	 * @param type  the type of the constant
-	 * @param value the constant value
+	 * @param type     the type of the constant
+	 * @param value    the constant value
+	 * @param location the code location of the statement that has generated
+	 *                     this constant
 	 */
 	public Constant(Type type, Object value, CodeLocation location) {
 		super(Caches.types().mkSingletonSet(type), location);

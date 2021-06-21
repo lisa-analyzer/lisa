@@ -20,7 +20,9 @@ public abstract class ValueExpression extends SymbolicExpression {
 	/**
 	 * Builds the heap expression.
 	 * 
-	 * @param types the runtime types of this expression
+	 * @param types    the runtime types of this expression
+	 * @param location the code location of the statement that has generated
+	 *                     this value expression
 	 */
 	protected ValueExpression(ExternalSet<Type> types, CodeLocation location) {
 		super(types, location);

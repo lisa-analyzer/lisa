@@ -106,9 +106,11 @@ public class LiSAFactoryTest {
 		// by getting top(), we know that whatever variable we ask for, we will
 		// be getting the top instance of the inner lattice
 		if (def instanceof ValueEnvironment<?>)
-			def = ((ValueEnvironment<?>) def).top().getState(new Variable(Caches.types().mkEmptySet(), "foo", SourceCodeLocation.UNKNOWN));
+			def = ((ValueEnvironment<?>) def).top()
+					.getState(new Variable(Caches.types().mkEmptySet(), "foo", SourceCodeLocation.UNKNOWN));
 		else if (def instanceof HeapEnvironment<?>)
-			def = ((HeapEnvironment<?>) def).top().getState(new Variable(Caches.types().mkEmptySet(), "foo", SourceCodeLocation.UNKNOWN));
+			def = ((HeapEnvironment<?>) def).top()
+					.getState(new Variable(Caches.types().mkEmptySet(), "foo", SourceCodeLocation.UNKNOWN));
 
 		return def.getClass();
 	}

@@ -80,7 +80,9 @@ public class AccessInstance extends Expression {
 		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations(), target.getLocation());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
-					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v, getLocation()), this);
+					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v,
+							getLocation()),
+					this);
 			result = result.lub(tmp);
 		}
 

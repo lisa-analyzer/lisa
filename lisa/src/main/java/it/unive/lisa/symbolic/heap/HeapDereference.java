@@ -7,10 +7,26 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
+/**
+ * A heap dereference expression.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class HeapDereference extends HeapExpression {
 
-	protected final SymbolicExpression toDeref;
+	/**
+	 * The symbolic expression to be dereferred.
+	 */
+	private final SymbolicExpression toDeref;
 
+	/**
+	 * Builds the heap dereference.
+	 * 
+	 * @param types    the runtime types of this expression
+	 * @param toDeref  the expression to be dereferred
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
+	 */
 	public HeapDereference(ExternalSet<Type> types, SymbolicExpression toDeref, CodeLocation location) {
 		super(types, location);
 		this.toDeref = toDeref;
@@ -47,6 +63,11 @@ public class HeapDereference extends HeapExpression {
 		return visitor.visit(this, deref, params);
 	}
 
+	/**
+	 * Yields the expression to be dereferred.
+	 * 
+	 * @return the expression to be dereferred
+	 */
 	public SymbolicExpression getExpression() {
 		return toDeref;
 	}

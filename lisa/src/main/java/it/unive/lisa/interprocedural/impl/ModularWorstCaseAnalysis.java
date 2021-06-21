@@ -99,7 +99,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value", call.getLocation()), call);
+		return entryState.top()
+				.smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value", call.getLocation()), call);
 	}
 
 	@Override

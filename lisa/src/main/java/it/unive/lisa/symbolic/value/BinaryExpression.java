@@ -38,6 +38,8 @@ public class BinaryExpression extends ValueExpression {
 	 * @param left     the left-hand side operand of this expression
 	 * @param right    the right-hand side operand of this expression
 	 * @param operator the operator to apply
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public BinaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression right,
 			BinaryOperator operator, CodeLocation location) {
@@ -77,12 +79,14 @@ public class BinaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator, location);
+		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator,
+				getLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator, location);
+		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator,
+				getLocation());
 	}
 
 	@Override

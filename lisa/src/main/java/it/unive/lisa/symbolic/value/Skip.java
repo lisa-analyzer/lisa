@@ -17,6 +17,9 @@ public class Skip extends ValueExpression {
 
 	/**
 	 * Builds the skip.
+	 * 
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public Skip(CodeLocation location) {
 		super(Caches.types().mkSingletonSet(VoidType.INSTANCE), location);

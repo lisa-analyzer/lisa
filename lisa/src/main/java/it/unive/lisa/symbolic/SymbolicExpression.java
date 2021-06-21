@@ -17,10 +17,11 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 public abstract class SymbolicExpression {
 
 	/**
-	 * The code location of the statement that has generated this symbolic expression
+	 * The code location of the statement that has generated this symbolic
+	 * expression
 	 */
-	protected final CodeLocation location;
-	
+	private final CodeLocation location;
+
 	/**
 	 * The runtime types of this expression
 	 */
@@ -29,7 +30,9 @@ public abstract class SymbolicExpression {
 	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param types the runtime types of this expression
+	 * @param types    the runtime types of this expression
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	protected SymbolicExpression(ExternalSet<Type> types, CodeLocation location) {
 		this.types = types;
@@ -131,10 +134,17 @@ public abstract class SymbolicExpression {
 		return true;
 	}
 
+	/**
+	 * Yields the code location of the statement that has generated this
+	 * symbolic expression.
+	 * 
+	 * @return the code location of the statement that has generated this
+	 *             symbolic expression
+	 */
 	public CodeLocation getLocation() {
 		return location;
 	}
-	
+
 	@Override
 	public abstract String toString();
 }

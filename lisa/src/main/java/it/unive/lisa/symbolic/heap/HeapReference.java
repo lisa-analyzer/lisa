@@ -24,6 +24,8 @@ public class HeapReference extends HeapExpression {
 	 * 
 	 * @param types      the runtime types of this expression
 	 * @param expression the expression that this refers to
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
 	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression, CodeLocation location) {
 		super(types, location);
@@ -43,6 +45,11 @@ public class HeapReference extends HeapExpression {
 		return result;
 	}
 
+	/**
+	 * Yields the referred expression.
+	 * 
+	 * @return the referred expression
+	 */
 	public SymbolicExpression getExpression() {
 		return expression;
 	}

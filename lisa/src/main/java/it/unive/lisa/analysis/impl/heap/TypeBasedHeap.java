@@ -40,7 +40,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap BOTTOM = new TypeBasedHeap();
 
-	protected final Set<String> names;
+	private final Set<String> names;
 
 	/**
 	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
@@ -173,7 +173,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		return true;
 	}
 
-	protected class Rewriter extends BaseHeapDomain.Rewriter {
+	private class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -229,10 +229,9 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					ExternalSet<Type> types = v.getTypes();
 					for (Type t : types)
 						if (t.isPointerType())
-							result.add(new MemoryPointer(types, new HeapLocation(types, t.toString(), true, v.getLocation()), v.getLocation()));
-				} else
-					for (ValueExpression rew : rewrite(expression.getExpression(), (ProgramPoint) params[0]))
-						result.add(rew);
+							result.add(new MemoryPointer(types,
+									new HeapLocation(types, t.toString(), true, v.getLocation()), v.getLocation()));
+				}
 			}
 
 			return new ExpressionSet<>(result);
