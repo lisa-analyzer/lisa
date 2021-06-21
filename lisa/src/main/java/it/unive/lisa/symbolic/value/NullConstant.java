@@ -1,25 +1,25 @@
 package it.unive.lisa.symbolic.value;
 
-import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.NullType;
 
 /**
- * A {@link Constant} that represent the {@code null} value. There is only one
- * instance of this class, that is available through field {@link #INSTANCE}.
+ * A {@link Constant} that represent the {@code null} value.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class NullConstant extends Constant {
 
-	/**
-	 * The singleton instance of {@link NullConstant}.
-	 */
-	public static final NullConstant INSTANCE = new NullConstant();
-
 	private static final Object NULL_CONST = new Object();
 
-	private NullConstant() {
-		super(NullType.INSTANCE, NULL_CONST, SourceCodeLocation.UNKNOWN);
+	/**
+	 * Builds a null constant.
+	 * 
+	 * @param location the location where the expression is defined within the
+	 *                     source file.
+	 */
+	public NullConstant(CodeLocation location) {
+		super(NullType.INSTANCE, NULL_CONST, location);
 	}
 
 	@Override
