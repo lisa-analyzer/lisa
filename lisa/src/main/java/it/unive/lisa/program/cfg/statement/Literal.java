@@ -94,7 +94,7 @@ public class Literal extends Expression {
 					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue()), this);
+		return entryState.smallStepSemantics(new Constant(getStaticType(), getValue(), getLocation()), this);
 	}
 
 	@Override

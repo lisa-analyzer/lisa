@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -18,11 +19,13 @@ public class Variable extends Identifier {
 	/**
 	 * Builds the variable.
 	 * 
-	 * @param types the runtime types of this variable
-	 * @param name  the name of the variable
+	 * @param types    the runtime types of this variable
+	 * @param name     the name of the variable
+	 * @param location the code location of the statement that has generated
+	 *                     this variable
 	 */
-	public Variable(ExternalSet<Type> types, String name) {
-		this(types, name, new Annotations());
+	public Variable(ExternalSet<Type> types, String name, CodeLocation location) {
+		this(types, name, new Annotations(), location);
 	}
 
 	/**
@@ -31,19 +34,21 @@ public class Variable extends Identifier {
 	 * @param types       the runtime types of this variable
 	 * @param name        the name of the variable
 	 * @param annotations the annotations of this variable
+	 * @param location    the code location of the statement that has generated
+	 *                        this variable
 	 */
-	public Variable(ExternalSet<Type> types, String name, Annotations annotations) {
-		super(types, name, false, annotations);
+	public Variable(ExternalSet<Type> types, String name, Annotations annotations, CodeLocation location) {
+		super(types, name, false, annotations, location);
 	}
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token);
+		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		throw new SemanticException("Cannot pop the scope of a non-scoped value identifier");
+		return null;
 	}
 
 	@Override

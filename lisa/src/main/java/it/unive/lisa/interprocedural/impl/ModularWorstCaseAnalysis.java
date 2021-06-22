@@ -77,8 +77,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 
 				for (Parameter arg : cfg.getDescriptor().getArgs()) {
 					ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-					Variable id = new Variable(all, arg.getName(), arg.getAnnotations());
-					prepared = prepared.assign(id, new PushAny(all), cfg.getGenericProgramPoint());
+					Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
+					prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
 				}
 
 				results.put(cfg, Optional.of(cfg.fixpoint(prepared, this)));
@@ -99,7 +99,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 		if (call.getStaticType().isVoidType())
 			return entryState.top();
 
-		return entryState.top().smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value"), call);
+		return entryState.top()
+				.smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value", call.getLocation()), call);
 	}
 
 	@Override

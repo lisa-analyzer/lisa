@@ -3,6 +3,8 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -56,6 +58,38 @@ public interface ExpressionVisitor<T> {
 	 * @throws SemanticException if an error occurs during the visit operation
 	 */
 	T visit(HeapAllocation expression, Object... params) throws SemanticException;
+
+	/**
+	 * Visits a {@link HeapReference}.
+	 * 
+	 * @param expression the heap reference
+	 * @param arg        the value produced by visiting the argument of the
+	 *                       expression
+	 * @param params     the additional parameters provided to
+	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                       if any
+	 * 
+	 * @return the value produced by visiting the heap reference
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(HeapReference expression, T arg, Object... params) throws SemanticException;
+
+	/**
+	 * Visits a {@link HeapDereference}.
+	 * 
+	 * @param expression the heap dereference
+	 * @param arg        the value produced by visiting the argument of the
+	 *                       expression
+	 * @param params     the additional parameters provided to
+	 *                       {@link SymbolicExpression#accept(ExpressionVisitor, Object...)},
+	 *                       if any
+	 * 
+	 * @return the value produced by visiting the heap dereference
+	 * 
+	 * @throws SemanticException if an error occurs during the visit operation
+	 */
+	T visit(HeapDereference expression, T arg, Object... params) throws SemanticException;
 
 	/**
 	 * Visits a {@link UnaryExpression}. This callback is invoked after the

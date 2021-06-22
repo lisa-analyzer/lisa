@@ -45,6 +45,6 @@ public class NullLiteral extends Literal {
 					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(NullConstant.INSTANCE, this);
+		return entryState.smallStepSemantics(new NullConstant(getLocation()), this);
 	}
 }

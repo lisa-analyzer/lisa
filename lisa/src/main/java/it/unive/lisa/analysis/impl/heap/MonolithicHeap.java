@@ -10,9 +10,12 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collections;
 import java.util.List;
@@ -42,7 +45,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new Rewriter());
+		return expression.accept(new Rewriter(), pp);
 	}
 
 	@Override
@@ -122,7 +125,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return this == obj;
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	private class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -130,7 +133,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
+			return new ExpressionSet<>(
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
 		}
 
 		@Override
@@ -139,7 +143,32 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new HeapLocation(expression.getTypes(), MONOLITH_NAME, true));
+			return new ExpressionSet<>(
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+				Object... params)
+				throws SemanticException {
+			// any expression accessing an area of the heap or instantiating a
+			// new
+			// one is modeled through the monolith
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
+					expression.getCodeLocation()));
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+				Object... params)
+				throws SemanticException {
+			// any expression accessing an area of the heap or instantiating a
+			// new
+			// one is modeled through the monolith
+			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
+					expression.getCodeLocation()));
 		}
 	}
 }

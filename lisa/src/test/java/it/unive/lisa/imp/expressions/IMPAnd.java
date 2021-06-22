@@ -59,6 +59,6 @@ public class IMPAnd extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.LOGICAL_AND), this);
+						BinaryOperator.LOGICAL_AND, getLocation()), this);
 	}
 }

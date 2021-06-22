@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -16,6 +17,13 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
 public abstract class SymbolicExpression {
 
 	/**
+	 * The code location of the statement that has generated this symbolic
+	 * expression. The code location is not used for the equality between two
+	 * symbolic expressions.
+	 */
+	private final CodeLocation location;
+
+	/**
 	 * The runtime types of this expression
 	 */
 	private final ExternalSet<Type> types;
@@ -23,10 +31,13 @@ public abstract class SymbolicExpression {
 	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param types the runtime types of this expression
+	 * @param types    the runtime types of this expression
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
-	protected SymbolicExpression(ExternalSet<Type> types) {
+	protected SymbolicExpression(ExternalSet<Type> types, CodeLocation location) {
 		this.types = types;
+		this.location = location;
 	}
 
 	/**
@@ -116,6 +127,18 @@ public abstract class SymbolicExpression {
 		} else if (!types.equals(other.types))
 			return false;
 		return true;
+	}
+
+	/**
+	 * Yields the code location of the statement that has generated this
+	 * symbolic expression. The code location is not used for the equality
+	 * between two symbolic expressions.
+	 * 
+	 * @return the code location of the statement that has generated this
+	 *             symbolic expression
+	 */
+	public CodeLocation getCodeLocation() {
+		return location;
 	}
 
 	@Override

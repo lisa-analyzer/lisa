@@ -152,7 +152,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation());
+		return new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation(), getLocation());
 	}
 
 	@Override
@@ -185,7 +185,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 						&& returned.getComputedExpressions().iterator().next() instanceof Skip))
 			// no need to add the meta variable since nothing has been pushed on
 			// the stack
-			return returned.smallStepSemantics(new Skip(), this);
+			return returned.smallStepSemantics(new Skip(getLocation()), this);
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())

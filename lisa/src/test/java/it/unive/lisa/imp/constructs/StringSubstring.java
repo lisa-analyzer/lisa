@@ -100,7 +100,7 @@ public class StringSubstring extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
-					TernaryOperator.STRING_SUBSTRING), original);
+					TernaryOperator.STRING_SUBSTRING, getLocation()), original);
 		}
 	}
 }

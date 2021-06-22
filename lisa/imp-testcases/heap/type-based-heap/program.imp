@@ -23,4 +23,20 @@ class A {
 		o1.a = 1;	
 		o1.b = 1;	
 	}
+	
+	f4() {
+		def o = new A(1,2);
+		def i = 0;
+		while(true) {
+			o.a = 0;
+			i = i + 1;
+		}
+	}
+	
+	f5() {
+		def x = new A(1,2);
+		def y = x;
+		x.a = 1;
+		def a = x.a + y.a;
+	}
 }

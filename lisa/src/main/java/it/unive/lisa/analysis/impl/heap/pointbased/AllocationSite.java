@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.type.Type;
@@ -14,69 +15,81 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  */
 public class AllocationSite extends HeapLocation {
 
-	private final String id;
+	private final String locationName;
 
 	/**
 	 * Builds a strong allocation site from its source code location (without
 	 * field).
 	 * 
-	 * @param types the runtime types of this allocation site
-	 * @param id    the source code location string representation where this
-	 *                  allocation site has been allocated
+	 * @param types        the runtime types of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id) {
-		this(types, id, false);
+	public AllocationSite(ExternalSet<Type> types, String locationName, CodeLocation location) {
+		this(types, locationName, false, location);
 	}
 
 	/**
 	 * Builds an allocation site from its source code location (without field)
 	 * and specifying if it is weak.
 	 * 
-	 * @param types  the runtime types of this allocation site
-	 * @param id     the source code location string representation where this
-	 *                   allocation site has been allocated
-	 * @param isWeak boolean value specifying if this allocation site is weak
+	 * @param types        the runtime types of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param isWeak       boolean value specifying if this allocation site is
+	 *                         weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, boolean isWeak) {
-		this(types, id, null, isWeak);
+	public AllocationSite(ExternalSet<Type> types, String locationName, boolean isWeak, CodeLocation location) {
+		this(types, locationName, null, isWeak, location);
 	}
 
 	/**
 	 * Builds a strong allocation site from its source code location and its
 	 * field.
 	 * 
-	 * @param types the runtime types of this allocation site
-	 * @param id    the source code location string representation where this
-	 *                  allocation site has been allocated
-	 * @param field the field of this allocation site
+	 * @param types        the runtime types of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the field of this allocation site
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field) {
-		this(types, id, field, false);
+	public AllocationSite(ExternalSet<Type> types, String locationName, SymbolicExpression field,
+			CodeLocation location) {
+		this(types, locationName, field, false, location);
 	}
 
 	/**
 	 * Builds an allocation site from its source code location and its field and
 	 * specifying if it is weak.
 	 * 
-	 * @param types  the runtime types of this allocation site
-	 * @param id     the source code location string representation where this
-	 *                   allocation site has been allocated
-	 * @param field  the field of this allocation site
-	 * @param isWeak boolean value specifying if this allocation site is weak
+	 * @param types        the runtime types of this allocation site
+	 * @param locationName the source code location string representation where
+	 *                         this allocation site has been allocated
+	 * @param field        the field of this allocation site
+	 * @param isWeak       boolean value specifying if this allocation site is
+	 *                         weak
+	 * @param location     the code location of the statement that has generated
+	 *                         this expression
 	 */
-	public AllocationSite(ExternalSet<Type> types, String id, SymbolicExpression field, boolean isWeak) {
-		super(types, "pp@" + id + (field == null ? "" : "[" + field + "]"), isWeak);
-		this.id = id;
+	public AllocationSite(ExternalSet<Type> types, String locationName, SymbolicExpression field, boolean isWeak,
+			CodeLocation location) {
+		super(types, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
+		this.locationName = locationName;
 	}
 
 	/**
-	 * Returns the source code location string representation where this
-	 * allocation site has been allocated.
+	 * Yields the code location string representation where this allocation site
+	 * has been allocated.
 	 * 
-	 * @return the source code location string representation where this
-	 *             allocation site has been allocated.
+	 * @return the code location string representation where this allocation
+	 *             site has been allocated.
 	 */
-	public String getId() {
-		return id;
+	public String getLocationName() {
+		return locationName;
 	}
 }

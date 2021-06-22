@@ -91,7 +91,9 @@ public class StringEquals extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_EQUALS), original);
+					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_EQUALS,
+							getLocation()),
+					original);
 		}
 	}
 

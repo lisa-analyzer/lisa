@@ -20,6 +20,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
@@ -113,6 +114,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	@Override
 	protected InferredPair<InferredTypes> evalIdentifier(Identifier id, InferenceSystem<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
+
 		InferredPair<InferredTypes> eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.getInferred().isTop() && !eval.getInferred().isBottom())
 			return eval;
@@ -459,7 +461,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		// Type analysis tracks information on any identifier
-		return true;
+		return !(id instanceof MemoryPointer);
 	}
 
 	@Override

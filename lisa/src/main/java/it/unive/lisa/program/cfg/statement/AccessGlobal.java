@@ -70,7 +70,8 @@ public class AccessGlobal extends Expression {
 					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		// unit globals are unique, we can directly access those
-		return entryState.smallStepSemantics(new Variable(getRuntimeTypes(), toString(), target.getAnnotations()),
+		return entryState.smallStepSemantics(
+				new Variable(getRuntimeTypes(), toString(), target.getAnnotations(), getLocation()),
 				this);
 	}
 }

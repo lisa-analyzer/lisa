@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -31,13 +32,15 @@ public abstract class Identifier extends ValueExpression {
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param types the runtime types of this expression
-	 * @param name  the name of the identifier
-	 * @param weak  whether or not this identifier is weak, meaning that it
-	 *                  should only receive weak assignments
+	 * @param types    the runtime types of this expression
+	 * @param name     the name of the identifier
+	 * @param weak     whether or not this identifier is weak, meaning that it
+	 *                     should only receive weak assignments
+	 * @param location the code location of the statement that has generated
+	 *                     this identifier
 	 */
-	protected Identifier(ExternalSet<Type> types, String name, boolean weak) {
-		this(types, name, weak, new Annotations());
+	protected Identifier(ExternalSet<Type> types, String name, boolean weak, CodeLocation location) {
+		this(types, name, weak, new Annotations(), location);
 	}
 
 	/**
@@ -48,9 +51,12 @@ public abstract class Identifier extends ValueExpression {
 	 * @param weak        whether or not this identifier is weak, meaning that
 	 *                        it should only receive weak assignments
 	 * @param annotations the annotations of this identifier
+	 * @param location    the code location of the statement that has generated
+	 *                        this identifier
 	 */
-	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations) {
-		super(types);
+	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations,
+			CodeLocation location) {
+		super(types, location);
 		this.name = name;
 		this.weak = weak;
 		this.annotations = annotations;

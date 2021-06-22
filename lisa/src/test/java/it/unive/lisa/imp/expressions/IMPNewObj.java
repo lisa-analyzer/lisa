@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import org.apache.commons.lang3.ArrayUtils;
@@ -55,7 +56,7 @@ public class IMPNewObj extends NativeCall {
 					AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		HeapAllocation created = new HeapAllocation(getRuntimeTypes());
+		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
 
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
@@ -67,8 +68,16 @@ public class IMPNewObj extends NativeCall {
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.inheritRuntimeTypesFrom(this);
 		AnalysisState<A, H, V> sem = call.callSemantics(entryState, interprocedural, computedStates, fullParams);
+
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
-		return sem.smallStepSemantics(created, this);
+
+		sem = sem.smallStepSemantics(created, this);
+
+		AnalysisState<A, H, V> result = entryState.bottom();
+		for (SymbolicExpression loc : sem.getComputedExpressions())
+			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc, getLocation()), call));
+
+		return result;
 	}
 }

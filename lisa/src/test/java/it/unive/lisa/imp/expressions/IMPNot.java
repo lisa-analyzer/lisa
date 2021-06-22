@@ -52,7 +52,8 @@ public class IMPNot extends UnaryNativeCall {
 			return entryState.bottom();
 
 		return exprState.smallStepSemantics(
-				new UnaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), expr, UnaryOperator.LOGICAL_NOT),
+				new UnaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), expr, UnaryOperator.LOGICAL_NOT,
+						getLocation()),
 				this);
 	}
 }

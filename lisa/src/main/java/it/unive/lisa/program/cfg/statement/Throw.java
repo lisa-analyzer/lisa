@@ -58,6 +58,6 @@ public class Throw extends UnaryStatement {
 		expressions.put(getExpression(), result);
 		if (!getExpression().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		return result.smallStepSemantics(new Skip(), this);
+		return result.smallStepSemantics(new Skip(getLocation()), this);
 	}
 }

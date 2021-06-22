@@ -8,6 +8,8 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -44,6 +46,16 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 
 		@Override
 		public T visit(HeapAllocation expression, Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+
+		@Override
+		public T visit(HeapReference expression, T arg, Object... params) throws SemanticException {
+			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+		}
+
+		@Override
+		public T visit(HeapDereference expression, T arg, Object... params) throws SemanticException {
 			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
 		}
 
