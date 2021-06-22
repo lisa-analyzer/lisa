@@ -68,6 +68,31 @@ public class MemoryPointer extends Identifier {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((loc == null) ? 0 : loc.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MemoryPointer other = (MemoryPointer) obj;
+		if (loc == null) {
+			if (other.loc != null)
+				return false;
+		} else if (!loc.equals(other.loc))
+			return false;
+		return true;
+	}
+
+	@Override
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		return visitor.visit(this, params);
 	}
