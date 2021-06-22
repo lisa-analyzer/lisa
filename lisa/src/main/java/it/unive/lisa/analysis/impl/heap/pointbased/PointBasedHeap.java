@@ -259,7 +259,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
-					result.add(new AllocationSite(expression.getTypes(), site.getId(), true,
+					result.add(new AllocationSite(expression.getTypes(), site.getLocationName(), true,
 							expression.getCodeLocation()));
 				}
 

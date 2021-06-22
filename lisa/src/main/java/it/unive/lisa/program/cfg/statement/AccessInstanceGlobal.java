@@ -23,7 +23,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstance extends Expression {
+public class AccessInstanceGlobal extends Expression {
 
 	/**
 	 * The receiver of the access
@@ -45,7 +45,7 @@ public class AccessInstance extends Expression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessInstance(CFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
 		super(cfg, location, target.getStaticType());
 		this.receiver = receiver;
 		this.target = target;

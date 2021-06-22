@@ -49,7 +49,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	private AllocationSite alreadyAllocated(String id) {
 		for (AllocationSites set : heapEnv.values())
 			for (AllocationSite site : set)
-				if (site.getId().equals(id))
+				if (site.getLocationName().equals(id))
 					return site;
 
 		return null;
@@ -73,7 +73,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				if (contRewritten instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getReferencedLocation();
 					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(access.getTypes(), site.getId(), childRewritten, site.isWeak(),
+						result.add(new AllocationSite(access.getTypes(), site.getLocationName(), childRewritten,
+								site.isWeak(),
 								site.getCodeLocation()));
 				}
 
