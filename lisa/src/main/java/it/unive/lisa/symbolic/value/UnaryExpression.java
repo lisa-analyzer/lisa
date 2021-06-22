@@ -69,7 +69,7 @@ public class UnaryExpression extends ValueExpression {
 			ValueExpression right = (ValueExpression) binary.getRight();
 			BinaryOperator op = binary.getOperator();
 			return new BinaryExpression(binary.getTypes(), left.removeNegations(), right.removeNegations(),
-					(BinaryOperator) op.opposite(), getLocation());
+					(BinaryOperator) op.opposite(), getCodeLocation());
 		}
 
 		return this;
@@ -77,12 +77,12 @@ public class UnaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new UnaryExpression(this.getTypes(), this.expression.pushScope(token), this.operator, getLocation());
+		return new UnaryExpression(this.getTypes(), this.expression.pushScope(token), this.operator, getCodeLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return new UnaryExpression(this.getTypes(), this.expression.popScope(token), this.operator, getLocation());
+		return new UnaryExpression(this.getTypes(), this.expression.popScope(token), this.operator, getCodeLocation());
 	}
 
 	@Override

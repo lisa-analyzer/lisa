@@ -187,7 +187,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					MemoryPointer pid = (MemoryPointer) rec;
 					for (Type t : pid.getTypes())
 						if (t.isPointerType())
-							result.add(new HeapLocation(types, t.toString(), true, expression.getLocation()));
+							result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
 				}
 			return new ExpressionSet<>(result);
 		}
@@ -199,7 +199,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 			for (Type t : types)
 				if (t.isPointerType())
-					result.add(new HeapLocation(types, t.toString(), true, expression.getLocation()));
+					result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
 			return new ExpressionSet<>(result);
 		}
 
@@ -211,7 +211,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression refExp : ref)
 				if (refExp instanceof HeapLocation)
-					result.add(new MemoryPointer(expression.getTypes(), (HeapLocation) refExp, refExp.getLocation()));
+					result.add(
+							new MemoryPointer(expression.getTypes(), (HeapLocation) refExp, refExp.getCodeLocation()));
 
 			return new ExpressionSet<>(result);
 		}
@@ -230,7 +231,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					for (Type t : types)
 						if (t.isPointerType())
 							result.add(new MemoryPointer(types,
-									new HeapLocation(types, t.toString(), true, v.getLocation()), v.getLocation()));
+									new HeapLocation(types, t.toString(), true, v.getCodeLocation()),
+									v.getCodeLocation()));
 				}
 			}
 

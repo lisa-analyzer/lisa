@@ -310,12 +310,12 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isNegative() || rightSign.isZero()) // x < 0/-
 					environment = environment.assign((Identifier) left,
-							new Constant(right.getDynamicType(), -1, right.getLocation()), pp);
+							new Constant(right.getDynamicType(), -1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isPositive() || leftSign.isZero()) // 0/+ < x
 					environment = environment.assign((Identifier) right,
-							new Constant(left.getDynamicType(), 1, left.getLocation()), pp);
+							new Constant(left.getDynamicType(), 1, left.getCodeLocation()), pp);
 			}
 			return environment;
 		case COMPARISON_GT:
@@ -323,12 +323,12 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isPositive() || rightSign.isZero()) // x > +/0
 					environment = environment.assign((Identifier) left,
-							new Constant(right.getDynamicType(), 1, right.getLocation()), pp);
+							new Constant(right.getDynamicType(), 1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isNegative() || leftSign.isZero()) // -/0 > x
 					environment = environment.assign((Identifier) right,
-							new Constant(left.getDynamicType(), -1, right.getLocation()), pp);
+							new Constant(left.getDynamicType(), -1, right.getCodeLocation()), pp);
 			}
 			return environment;
 		default:

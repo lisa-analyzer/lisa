@@ -46,7 +46,7 @@ public class OutOfScopeIdentifier extends Identifier {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) {
-		return new OutOfScopeIdentifier(this, token, getLocation());
+		return new OutOfScopeIdentifier(this, token, getCodeLocation());
 	}
 
 	@Override

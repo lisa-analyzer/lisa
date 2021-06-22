@@ -112,17 +112,6 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return Satisfiability.UNKNOWN;
 	}
 
-	// @Override
-	// public DomainRepresentation representation() {
-	// if (isTop())
-	// return Lattice.TOP_REPR;
-	//
-	// if (isBottom())
-	// return Lattice.BOTTOM_REPR;
-	//
-	// return heapEnv.representation();
-	// }
-
 	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
@@ -238,7 +227,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	private Set<ValueExpression> resolveIdentifier(Identifier v) {
 		Set<ValueExpression> result = new HashSet<>();
 		for (AllocationSite site : heapEnv.getState(v))
-			result.add(new MemoryPointer(site.getTypes(), site, site.getLocation()));
+			result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
 
 		return result;
 	}
@@ -270,7 +259,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
-					result.add(new AllocationSite(expression.getTypes(), site.getId(), true, expression.getLocation()));
+					result.add(new AllocationSite(expression.getTypes(), site.getId(), true,
+							expression.getCodeLocation()));
 				}
 
 			return new ExpressionSet<>(result);
@@ -280,7 +270,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id = new AllocationSite(expression.getTypes(),
-					expression.getLocation().getCodeLocation(), true, expression.getLocation());
+					expression.getCodeLocation().getCodeLocation(), true, expression.getCodeLocation());
 			return new ExpressionSet<>(id);
 		}
 
@@ -292,7 +282,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 			for (ValueExpression locExp : loc)
 				if (locExp instanceof AllocationSite)
-					result.add(new MemoryPointer(locExp.getTypes(), (AllocationSite) locExp, locExp.getLocation()));
+					result.add(new MemoryPointer(locExp.getTypes(), (AllocationSite) locExp, locExp.getCodeLocation()));
 				else
 					result.add(locExp);
 			return new ExpressionSet<>(result);

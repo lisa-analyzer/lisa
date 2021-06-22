@@ -18,7 +18,8 @@ public abstract class SymbolicExpression {
 
 	/**
 	 * The code location of the statement that has generated this symbolic
-	 * expression
+	 * expression. The code location is not used for the equality between two
+	 * symbolic expressions.
 	 */
 	private final CodeLocation location;
 
@@ -107,7 +108,6 @@ public abstract class SymbolicExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-//		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
@@ -121,11 +121,6 @@ public abstract class SymbolicExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
-//		if (location == null) {
-//			if (other.location != null)
-//				return false;
-//		} else if (!location.equals(other.location))
-//			return false;
 		if (types == null) {
 			if (other.types != null)
 				return false;
@@ -136,12 +131,13 @@ public abstract class SymbolicExpression {
 
 	/**
 	 * Yields the code location of the statement that has generated this
-	 * symbolic expression.
+	 * symbolic expression. The code location is not used for the equality
+	 * between two symbolic expressions.
 	 * 
 	 * @return the code location of the statement that has generated this
 	 *             symbolic expression
 	 */
-	public CodeLocation getLocation() {
+	public CodeLocation getCodeLocation() {
 		return location;
 	}
 

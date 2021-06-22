@@ -97,13 +97,13 @@ public class TernaryExpression extends ValueExpression {
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.pushScope(token), this.middle.pushScope(token),
-				this.right.pushScope(token), this.operator, getLocation());
+				this.right.pushScope(token), this.operator, getCodeLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return new TernaryExpression(this.getTypes(), this.left.popScope(token), this.middle.popScope(token),
-				this.right.popScope(token), this.operator, getLocation());
+				this.right.popScope(token), this.operator, getCodeLocation());
 	}
 
 	@Override

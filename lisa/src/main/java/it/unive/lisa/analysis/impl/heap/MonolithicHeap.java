@@ -134,7 +134,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
 		}
 
 		@Override
@@ -144,7 +144,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
 		}
 
 		@Override
@@ -155,8 +155,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()),
-					expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
+					expression.getCodeLocation()));
 		}
 
 		@Override
@@ -167,8 +167,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new
 			// one is modeled through the monolith
 			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getLocation()),
-					expression.getLocation()));
+					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
+					expression.getCodeLocation()));
 		}
 	}
 }

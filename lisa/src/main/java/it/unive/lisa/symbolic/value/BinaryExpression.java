@@ -80,13 +80,13 @@ public class BinaryExpression extends ValueExpression {
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator,
-				getLocation());
+				getCodeLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator,
-				getLocation());
+				getCodeLocation());
 	}
 
 	@Override
