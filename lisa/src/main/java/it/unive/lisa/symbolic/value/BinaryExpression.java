@@ -2,6 +2,7 @@ package it.unive.lisa.symbolic.value;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
@@ -37,10 +38,12 @@ public class BinaryExpression extends ValueExpression {
 	 * @param left     the left-hand side operand of this expression
 	 * @param right    the right-hand side operand of this expression
 	 * @param operator the operator to apply
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
 	public BinaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression right,
-			BinaryOperator operator) {
-		super(types);
+			BinaryOperator operator, CodeLocation location) {
+		super(types, location);
 		this.left = left;
 		this.right = right;
 		this.operator = operator;
@@ -76,12 +79,14 @@ public class BinaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator);
+		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator,
+				getCodeLocation());
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator);
+		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator,
+				getCodeLocation());
 	}
 
 	@Override

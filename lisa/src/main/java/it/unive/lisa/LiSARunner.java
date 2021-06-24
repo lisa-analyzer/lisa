@@ -34,6 +34,7 @@ import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -154,7 +155,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						interproc.fixpoint(new AnalysisState<>(state, new Skip()));
+						interproc.fixpoint(new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)));
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
@@ -189,7 +190,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		TimerLogger.execAction(log, "Computing type information",
 				() -> {
 					try {
-						typesInterproc.fixpoint(new AnalysisState<>(typesState, new Skip()));
+						typesInterproc.fixpoint(new AnalysisState<>(typesState, new Skip(SyntheticLocation.INSTANCE)));
 					} catch (FixpointException e) {
 						log.fatal("Exception during fixpoint computation", e);
 						throw new AnalysisExecutionException("Exception during fixpoint computation", e);

@@ -13,6 +13,7 @@ import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -24,12 +25,12 @@ public class EnvironmentTest {
 	// implementation possible
 	private static final ValueEnvironment<Sign> env = new ValueEnvironment<>(new Sign().bottom());
 
-	private static final Identifier varA = new Variable(null, "a");
-	private static final Identifier varB = new Variable(null, "b");
-	private static final Identifier heapA = new HeapLocation(null, "a", false);
-	private static final Identifier heapB = new HeapLocation(null, "b", false);
-	private static final Identifier heapAweak = new HeapLocation(null, "a", true);
-	private static final Identifier heapBweak = new HeapLocation(null, "b", true);
+	private static final Identifier varA = new Variable(null, "a", SyntheticLocation.INSTANCE);
+	private static final Identifier varB = new Variable(null, "b", SyntheticLocation.INSTANCE);
+	private static final Identifier heapA = new HeapLocation(null, "a", false, SyntheticLocation.INSTANCE);
+	private static final Identifier heapB = new HeapLocation(null, "b", false, SyntheticLocation.INSTANCE);
+	private static final Identifier heapAweak = new HeapLocation(null, "a", true, SyntheticLocation.INSTANCE);
+	private static final Identifier heapBweak = new HeapLocation(null, "b", true, SyntheticLocation.INSTANCE);
 
 	@Test
 	public void testLubKeys() throws SemanticException {

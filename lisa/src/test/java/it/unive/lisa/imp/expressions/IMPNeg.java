@@ -49,7 +49,8 @@ public class IMPNeg extends UnaryNativeCall {
 		if (!expr.getDynamicType().isNumericType() && !expr.getDynamicType().isUntyped())
 			return entryState.bottom();
 
-		return exprState.smallStepSemantics(new UnaryExpression(expr.getTypes(), expr, UnaryOperator.NUMERIC_NEG),
+		return exprState.smallStepSemantics(
+				new UnaryExpression(expr.getTypes(), expr, UnaryOperator.NUMERIC_NEG, getLocation()),
 				this);
 	}
 }

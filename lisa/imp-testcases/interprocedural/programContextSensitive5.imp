@@ -1,0 +1,18 @@
+class A {
+
+	build(a) {
+		def res = new int[1];
+		res[0] = a;
+		return this.plusOne(res);
+	}
+	
+	plusOne(x) {
+		x[0] = x[0] + 1;
+		return x;
+	}
+
+    main() {
+        def arr1 = this.build(1);
+    }
+    
+}

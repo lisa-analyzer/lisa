@@ -92,16 +92,13 @@ public abstract class BinaryNativeCall extends NativeCall {
 					InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = entryState.bottom();
 
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1]) {
 				AnalysisState<A, H, V> tmp = binarySemantics(entryState, interprocedural, computedStates[0], left,
 						computedStates[1], right);
-				if (result == null)
-					result = tmp;
-				else
-					result = result.lub(tmp);
+				result = result.lub(tmp);
 			}
 
 		return result;

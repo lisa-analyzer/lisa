@@ -10,11 +10,15 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collections;
@@ -53,7 +57,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new Rewriter());
+		return expression.accept(new Rewriter(), pp);
 	}
 
 	@Override
@@ -108,16 +112,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
 			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			TypeBasedHeap childState = containerState.smallStepSemantics(access.getChild(), pp);
-
-			Set<String> names = new HashSet<>(childState.names);
-
-			for (ValueExpression cont : containerState.rewrite(access.getContainer(), pp))
-				for (Type type : cont.getTypes())
-					if (type.isPointerType())
-						names.add(type.toString());
-
-			return new TypeBasedHeap(names);
+			return containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
 		if (expression instanceof HeapAllocation) {
@@ -128,6 +123,12 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			return new TypeBasedHeap(names);
 		}
+
+		if (expression instanceof HeapReference)
+			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
+
+		if (expression instanceof HeapDereference)
+			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
 
 		return top();
 	}
@@ -172,7 +173,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		return true;
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	private class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -180,10 +181,14 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			// we use the container because we are not field-sensitive
 			ExternalSet<Type> types = expression.getTypes();
 			Set<ValueExpression> result = new HashSet<>();
+
 			for (ValueExpression rec : receiver)
-				for (Type t : rec.getTypes())
-					if (t.isPointerType())
-						result.add(new HeapLocation(types, t.toString(), true));
+				if (rec instanceof MemoryPointer) {
+					MemoryPointer pid = (MemoryPointer) rec;
+					for (Type t : pid.getTypes())
+						if (t.isPointerType())
+							result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
+				}
 			return new ExpressionSet<>(result);
 		}
 
@@ -194,7 +199,43 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 			for (Type t : types)
 				if (t.isPointerType())
-					result.add(new HeapLocation(types, t.toString(), true));
+					result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> ref,
+				Object... params)
+				throws SemanticException {
+
+			Set<ValueExpression> result = new HashSet<>();
+			for (ValueExpression refExp : ref)
+				if (refExp instanceof HeapLocation)
+					result.add(
+							new MemoryPointer(expression.getTypes(), (HeapLocation) refExp, refExp.getCodeLocation()));
+
+			return new ExpressionSet<>(result);
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> deref,
+				Object... params)
+				throws SemanticException {
+
+			Set<ValueExpression> result = new HashSet<>();
+
+			for (ValueExpression derefExp : deref) {
+				if (derefExp instanceof Variable) {
+					Variable v = (Variable) derefExp;
+					ExternalSet<Type> types = v.getTypes();
+					for (Type t : types)
+						if (t.isPointerType())
+							result.add(new MemoryPointer(types,
+									new HeapLocation(types, t.toString(), true, v.getCodeLocation()),
+									v.getCodeLocation()));
+				}
+			}
+
 			return new ExpressionSet<>(result);
 		}
 	}

@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -240,7 +239,21 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	public M pushScope(ScopeToken scope) throws SemanticException {
-		return liftIdentifiers(id -> new OutOfScopeIdentifier(id, scope));
+		AtomicReference<SemanticException> holder = new AtomicReference<>();
+
+		M result = liftIdentifiers(id -> {
+			try {
+				return (Identifier) id.pushScope(scope);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
+			return null;
+		});
+
+		if (holder.get() != null)
+			throw new SemanticException("Pushing the scope '" + scope + "' raised an error", holder.get());
+
+		return result;
 	}
 
 	@Override
@@ -248,12 +261,11 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		AtomicReference<SemanticException> holder = new AtomicReference<>();
 
 		M result = liftIdentifiers(id -> {
-			if (id instanceof OutOfScopeIdentifier)
-				try {
-					return (Identifier) id.popScope(scope);
-				} catch (SemanticException e) {
-					holder.set(e);
-				}
+			try {
+				return (Identifier) id.popScope(scope);
+			} catch (SemanticException e) {
+				holder.set(e);
+			}
 			return null;
 		});
 
@@ -272,7 +284,11 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null)
-				function.put(lifted, getState(id));
+				if (!function.containsKey(lifted))
+					function.put(lifted, getState(id));
+				else
+					function.put(lifted, getState(id).lub(function.get(lifted)));
+
 		}
 
 		return mk(lattice, function);

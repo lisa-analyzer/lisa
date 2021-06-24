@@ -97,7 +97,7 @@ public class StringReplace extends NativeCFG {
 				return entryState.bottom();
 
 			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
-					TernaryOperator.STRING_REPLACE), original);
+					TernaryOperator.STRING_REPLACE, getLocation()), original);
 		}
 	}
 }

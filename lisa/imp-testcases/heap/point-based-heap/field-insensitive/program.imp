@@ -35,7 +35,7 @@ class A {
 		def o = new int[6];
 		def i = 0;
 		while (true) {
-			o.a = 0;
+			o[0] = 0;
 			i = i + 1;
 		}
 	}
@@ -48,5 +48,20 @@ class A {
 			o[0] = 0;
 			i = i + 1;
 		}
+	}
+	
+	f6() {
+		def x = new int[3];
+		def y = x;
+		x[0] = 1;
+		def a = x[0] + y[0];
+	}
+	
+	f7() {
+		def x = new int[3]; 
+		def y = new int[3]; 
+		def z = x;
+		z = y;  
+		z[0] =  1;
 	}
 }

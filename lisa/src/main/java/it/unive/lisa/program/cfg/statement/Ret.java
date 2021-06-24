@@ -71,7 +71,7 @@ public class Ret extends Statement {
 					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return entryState.smallStepSemantics(new Skip(), this);
+		return entryState.smallStepSemantics(new Skip(getLocation()), this);
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
+import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
@@ -22,7 +23,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessUnitGlobal extends Expression {
+public class AccessInstanceGlobal extends Expression {
 
 	/**
 	 * The receiver of the access
@@ -44,7 +45,7 @@ public class AccessUnitGlobal extends Expression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessUnitGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
 		super(cfg, location, target.getStaticType());
 		this.receiver = receiver;
 		this.target = target;
@@ -78,7 +79,7 @@ public class AccessUnitGlobal extends Expression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AccessUnitGlobal other = (AccessUnitGlobal) obj;
+		AccessInstanceGlobal other = (AccessInstanceGlobal) obj;
 		if (receiver == null) {
 			if (other.receiver != null)
 				return false;
@@ -106,19 +107,18 @@ public class AccessUnitGlobal extends Expression {
 		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
 		expressions.put(receiver, rec);
 
-		AnalysisState<A, H, V> result = null;
-		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations());
+		AnalysisState<A, H, V> result = entryState.bottom();
+		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations(), target.getLocation());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(new AccessChild(getRuntimeTypes(), expr, v), this);
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
+			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
+					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v,
+							getLocation()),
+					this);
+			result = result.lub(tmp);
 		}
 
 		if (!receiver.getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(receiver.getMetaVariables());
 		return result;
 	}
-
 }

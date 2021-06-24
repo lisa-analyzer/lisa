@@ -51,6 +51,6 @@ public class IMPEqual extends BinaryNativeCall {
 					throws SemanticException {
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.COMPARISON_EQ), this);
+						BinaryOperator.COMPARISON_EQ, getLocation()), this);
 	}
 }

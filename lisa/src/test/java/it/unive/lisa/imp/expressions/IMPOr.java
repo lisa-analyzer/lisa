@@ -58,6 +58,6 @@ public class IMPOr extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(Caches.types().mkSingletonSet(BoolType.INSTANCE), left, right,
-						BinaryOperator.LOGICAL_OR), this);
+						BinaryOperator.LOGICAL_OR, getLocation()), this);
 	}
 }

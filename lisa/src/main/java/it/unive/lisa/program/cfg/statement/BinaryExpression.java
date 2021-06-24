@@ -17,18 +17,6 @@ public abstract class BinaryExpression extends Expression {
 	private final Expression right;
 
 	/**
-	 * Builds the binary expression. The location where it happens is unknown
-	 * (e.g., no source file/line/column is available).
-	 * 
-	 * @param cfg   the cfg that this statement belongs to
-	 * @param left  the left hand-side of the expression
-	 * @param right the right hand-side of the expression
-	 */
-	protected BinaryExpression(CFG cfg, Expression left, Expression right) {
-		this(cfg, null, left, right);
-	}
-
-	/**
 	 * Builds the binary expression, happening at the given location in the
 	 * program.
 	 * 

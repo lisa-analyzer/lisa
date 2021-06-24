@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic.value;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.caches.Caches;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.VoidType;
@@ -16,9 +17,12 @@ public class Skip extends ValueExpression {
 
 	/**
 	 * Builds the skip.
+	 * 
+	 * @param location the code location of the statement that has generated
+	 *                     this expression
 	 */
-	public Skip() {
-		super(Caches.types().mkSingletonSet(VoidType.INSTANCE));
+	public Skip(CodeLocation location) {
+		super(Caches.types().mkSingletonSet(VoidType.INSTANCE), location);
 	}
 
 	@Override

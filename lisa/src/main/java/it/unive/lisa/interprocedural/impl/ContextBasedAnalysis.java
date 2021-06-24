@@ -176,7 +176,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				Parameter parameter = cfg.getDescriptor().getArgs()[i];
 				Identifier parid = new Variable(
 						Caches.types().mkSet(parameter.getStaticType().allInstances()),
-						parameter.getName(), parameter.getAnnotations());
+						parameter.getName(), parameter.getAnnotations(), parameter.getLocation());
 				for (SymbolicExpression exp : parameters[i])
 					temp = temp.lub(prepared.assign(parid, exp.pushScope(scope), cfg.getGenericProgramPoint()));
 				prepared = temp;

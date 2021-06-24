@@ -110,7 +110,7 @@ public class VariableRef extends Expression {
 	 * @return the expression representing the variable
 	 */
 	public Variable getVariable() {
-		Variable v = new Variable(getRuntimeTypes(), getName());
+		Variable v = new Variable(getRuntimeTypes(), getName(), getLocation());
 		for (Annotation ann : getAnnotations())
 			v.addAnnotation(ann);
 		return v;
