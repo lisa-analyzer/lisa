@@ -44,6 +44,7 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 
 /**
@@ -849,14 +850,10 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 
 		Fixpoint<CFG, Statement, Edge,
 				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> fix = new Fixpoint<>(this);
-		Map<Statement, Integer> lubs = new HashMap<>(getNodesCount());
 		Map<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> starting = new HashMap<>();
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
 		Map<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> fixpoint = fix.fixpoint(starting, ws,
-				(st, entrystate) -> semantics(st, interprocedural, entrystate),
-				(e, entrystate) -> edgeSemantics(e, entrystate),
-				(st, approx, old) -> join(widenAfter, lubs, st, approx, old),
-				(st, approx, old) -> lessOrEqual(approx, old));
+				new CFGFixpoint<>(widenAfter, interprocedural));
 
 		HashMap<Statement, AnalysisState<A, H, V>> finalResults = new HashMap<>(fixpoint.size());
 		for (Entry<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> e : fixpoint.entrySet()) {
@@ -865,81 +862,97 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
-		
 		return new CFGWithAnalysisResults<A, H, V>(this, singleton, startingPoints, finalResults);
 	}
 
-	private <A extends AbstractState<A, H, V>,
+	private class CFGFixpoint<A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> boolean lessOrEqual(Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
-		return approx.getLeft().lessOrEqual(old.getLeft()) && approx.getRight().lessOrEqual(old.getRight());
-	}
+			V extends ValueDomain<V>>
+			implements FixpointImplementation<Statement, Edge,
+					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> {
 
-	private <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> semantics(Statement st,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
-		StatementStore<A, H, V> expressions = new StatementStore<>(entrystate.getLeft().bottom());
-		AnalysisState<A, H, V> approx = st.semantics(entrystate.getLeft(), interprocedural, expressions);
-		return Pair.of(approx, expressions);
-	}
+		private final InterproceduralAnalysis<A, H, V> interprocedural;
+		private final int widenAfter;
+		private final Map<Statement, Integer> lubs;
 
-	private <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> edgeSemantics(Edge e,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
-		AnalysisState<A, H, V> approx = e.traverse(entrystate.getLeft());
-
-		// we remove out of scope variables here
-		List<VariableTableEntry> toRemove = new LinkedList<>();
-		for (VariableTableEntry entry : descriptor.getVariables())
-			if (entry.getScopeEnd() == e.getSource())
-				toRemove.add(entry);
-
-		Collection<Identifier> ids = new LinkedList<>();
-		for (VariableTableEntry entry : toRemove) {
-			SymbolicExpression v = entry.createReference(this).getVariable();
-			for (SymbolicExpression expr : approx.smallStepSemantics(v, e.getSource()).getComputedExpressions())
-				ids.add((Identifier) expr);
+		private CFGFixpoint(int widenAfter, InterproceduralAnalysis<A, H, V> interprocedural) {
+			this.widenAfter = widenAfter;
+			this.interprocedural = interprocedural;
+			this.lubs = new HashMap<>(CFG.this.getNodesCount());
 		}
 
-		if (!ids.isEmpty())
-			approx = approx.forgetIdentifiers(ids);
+		@Override
+		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> semantics(Statement node,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
+			StatementStore<A, H, V> expressions = new StatementStore<>(entrystate.getLeft().bottom());
+			AnalysisState<A, H, V> approx = node.semantics(entrystate.getLeft(), interprocedural, expressions);
+			return Pair.of(approx, expressions);
+		}
 
-		return Pair.of(approx, new StatementStore<>(approx.bottom()));
-	}
+		@Override
+		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> traverse(Edge edge,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
+			AnalysisState<A, H, V> approx = edge.traverse(entrystate.getLeft());
 
-	private <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> join(int widenAfter,
-					Map<Statement, Integer> lubs,
-					Statement current,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
-		AnalysisState<A, H, V> newApprox = approx.getLeft(), oldApprox = old.getLeft();
-		StatementStore<A, H, V> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
+			// we remove out of scope variables here
+			List<VariableTableEntry> toRemove = new LinkedList<>();
+			for (VariableTableEntry entry : CFG.this.descriptor.getVariables())
+				if (entry.getScopeEnd() == edge.getSource())
+					toRemove.add(entry);
 
-		if (widenAfter == 0) {
-			newApprox = newApprox.lub(oldApprox);
-			newIntermediate = newIntermediate.lub(oldIntermediate);
-		} else {
-			// we multiply by the number of predecessors since
-			// if we have more than one
-			// the threshold will be reached faster
-			int lub = lubs.computeIfAbsent(current, st -> widenAfter * predecessorsOf(st).size());
-			if (lub > 0) {
+			Collection<Identifier> ids = new LinkedList<>();
+			for (VariableTableEntry entry : toRemove) {
+				SymbolicExpression v = entry.createReference(CFG.this).getVariable();
+				for (SymbolicExpression expr : approx.smallStepSemantics(v, edge.getSource()).getComputedExpressions())
+					ids.add((Identifier) expr);
+			}
+
+			if (!ids.isEmpty())
+				approx = approx.forgetIdentifiers(ids);
+
+			return Pair.of(approx, new StatementStore<>(approx.bottom()));
+		}
+
+		@Override
+		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> union(Statement node,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> left,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> right) throws SemanticException {
+			return Pair.of(left.getLeft().lub(right.getLeft()), left.getRight().lub(right.getRight()));
+		}
+
+		@Override
+		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> join(Statement node,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
+			AnalysisState<A, H, V> newApprox = approx.getLeft(), oldApprox = old.getLeft();
+			StatementStore<A, H, V> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
+
+			if (widenAfter == 0) {
 				newApprox = newApprox.lub(oldApprox);
 				newIntermediate = newIntermediate.lub(oldIntermediate);
 			} else {
-				newApprox = oldApprox.widening(newApprox);
-				newIntermediate = oldIntermediate.widening(newIntermediate);
+				// we multiply by the number of predecessors since
+				// if we have more than one
+				// the threshold will be reached faster
+				int lub = lubs.computeIfAbsent(node, st -> widenAfter * predecessorsOf(st).size());
+				if (lub > 0) {
+					newApprox = newApprox.lub(oldApprox);
+					newIntermediate = newIntermediate.lub(oldIntermediate);
+				} else {
+					newApprox = oldApprox.widening(newApprox);
+					newIntermediate = oldIntermediate.widening(newIntermediate);
+				}
+				lubs.put(node, --lub);
 			}
-			lubs.put(current, --lub);
+
+			return Pair.of(newApprox, newIntermediate);
 		}
 
-		return Pair.of(newApprox, newIntermediate);
+		@Override
+		public boolean equality(Statement node, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
+				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
+			return approx.getLeft().lessOrEqual(old.getLeft()) && approx.getRight().lessOrEqual(old.getRight());
+		}
 	}
 
 	@Override

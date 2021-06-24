@@ -25,23 +25,20 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 		result = new HashMap<>(graph.getNodesCount());
 	}
 
-	@FunctionalInterface
-	public interface SemanticFunction<E, T> {
-		T compute(E element, T entrystate) throws Exception;
+	public interface FixpointImplementation<N, E, T> {
+		T semantics(N node, T entrystate) throws Exception;
+
+		T traverse(E edge, T entrystate) throws Exception;
+
+		T union(N node, T left, T right) throws Exception;
+
+		T join(N node, T approx, T old) throws Exception;
+		
+		boolean equality(N node, T approx, T old) throws Exception;
 	}
 
-	@FunctionalInterface
-	public interface SemanticBiFunction<E, T> {
-		T compute(E element, T first, T second) throws Exception;
-	}
-
-	@FunctionalInterface
-	public interface SemanticBiPredicate<E, T> {
-		boolean test(E element, T first, T second) throws Exception;
-	}
-
-	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws, SemanticFunction<N, T> nodeSemantics,
-			SemanticFunction<E, T> edgeSemantics, SemanticBiFunction<N, T> join, SemanticBiPredicate<N, T> equality)
+	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
+			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
 		result.clear();
 		startingPoints.keySet().forEach(ws::push);
@@ -55,27 +52,27 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 			if (!graph.getAdjacencyMatrix().containsNode(current))
 				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
 
-			T entrystate = getEntryState(current, startingPoints.get(current), edgeSemantics, join);
+			T entrystate = getEntryState(current, startingPoints.get(current), implementation);
 			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
 			T oldApprox = result.get(current);
 
 			try {
-				newApprox = nodeSemantics.compute(current, entrystate);
+				newApprox = implementation.semantics(current, entrystate);
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", current, graph), e);
 			}
 
 			if (oldApprox != null)
 				try {
-					newApprox = join.compute(current, newApprox, oldApprox);
+					newApprox = implementation.join(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
 
 			try {
-				if (oldApprox == null || !equality.test(current, newApprox, oldApprox)) {
+				if (oldApprox == null || !implementation.equality(current, newApprox, oldApprox)) {
 					result.put(current, newApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);
@@ -88,8 +85,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 		return result;
 	}
 
-	private T getEntryState(N current, T startstate, SemanticFunction<E, T> edgeSemantics,
-			SemanticBiFunction<N, T> join)
+	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
 		T entrystate = startstate;
 		Collection<N> preds = graph.predecessorsOf(current);
@@ -100,7 +96,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 				// this might not have been computed yet
 				E edge = graph.getEdgeConnecting(pred, current);
 				try {
-					states.add(edgeSemantics.compute(edge, result.get(pred)));
+					states.add(implementation.traverse(edge, result.get(pred)));
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "computing edge semantics", edge, graph), e);
 				}
@@ -111,7 +107,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 				if (entrystate == null)
 					entrystate = s;
 				else
-					entrystate = join.compute(current, entrystate, s);
+					entrystate = implementation.union(current, entrystate, s);
 		} catch (Exception e) {
 			throw new FixpointException(format(ERROR, "creating entry state", current, graph), e);
 		}

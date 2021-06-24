@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -17,25 +18,38 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 
 public class FixpointTest {
 
-	private static Set<TestNode> nodeSemantics(TestNode n, Set<TestNode> entry) {
-		Set<TestNode> res = new HashSet<>(entry);
-		res.add(n);
-		return res;
-	}
+	private static class FixpointTester implements FixpointImplementation<TestNode, TestEdge, Set<TestNode>> {
 
-	private static Set<TestNode> edgeSemantics(TestEdge e, Set<TestNode> entry) {
-		return entry;
-	}
+		@Override
+		public Set<TestNode> semantics(TestNode node, Set<TestNode> entrystate) throws Exception {
+			Set<TestNode> res = new HashSet<>(entrystate);
+			res.add(node);
+			return res;
+		}
 
-	private static Set<TestNode> join(TestNode n, Set<TestNode> first, Set<TestNode> second) {
-		return SetUtils.union(first, second);
-	}
+		@Override
+		public Set<TestNode> traverse(TestEdge edge, Set<TestNode> entrystate) throws Exception {
+			return entrystate;
+		}
 
-	private static boolean equality(TestNode n, Set<TestNode> first, Set<TestNode> second) {
-		return second.containsAll(first);
+		@Override
+		public Set<TestNode> union(TestNode node, Set<TestNode> left, Set<TestNode> right) throws Exception {
+			return SetUtils.union(left, right);
+		}
+
+		@Override
+		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+			return SetUtils.union(approx, old);
+		}
+
+		@Override
+		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+			return old.containsAll(approx);
+		}
 	}
 
 	@Test
@@ -45,15 +59,12 @@ public class FixpointTest {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph()).fixpoint(
 					Map.of(),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
-		
+
 		assertNotNull("Fixpoint failed", res);
 		assertTrue("Fixpoint returned wrong result", res.isEmpty());
 	}
@@ -69,28 +80,24 @@ public class FixpointTest {
 		graph.addNode(end);
 		graph.addEdge(new TestEdge(source, middle));
 		graph.addEdge(new TestEdge(middle, end));
-		
-		
+
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
-		
+
 		assertNotNull("Fixpoint failed", res);
 		assertEquals("Fixpoint returned wrong result",
-				Map.of(source, Set.of(source), 
-						middle, Set.of(source, middle), 
-						end, Set.of(source, middle, end))
-				, res);
+				Map.of(source, Set.of(source),
+						middle, Set.of(source, middle),
+						end, Set.of(source, middle, end)),
+				res);
 	}
 
 	@Test
@@ -111,30 +118,26 @@ public class FixpointTest {
 		graph.addEdge(new TestEdge(left, join));
 		graph.addEdge(new TestEdge(right, join));
 		graph.addEdge(new TestEdge(join, end));
-		
-		
+
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
-		
+
 		assertNotNull("Fixpoint failed", res);
 		assertEquals("Fixpoint returned wrong result",
-				Map.of(source, Set.of(source), 
-						left, Set.of(source, left), 
-						right, Set.of(source, right), 
-						join, Set.of(source, left, right, join), 
-						end, Set.of(source, left, right, join, end))
-				, res);
+				Map.of(source, Set.of(source),
+						left, Set.of(source, left),
+						right, Set.of(source, right),
+						join, Set.of(source, left, right, join),
+						end, Set.of(source, left, right, join, end)),
+				res);
 	}
 
 	@Test
@@ -155,46 +158,70 @@ public class FixpointTest {
 		graph.addEdge(new TestEdge(first, second));
 		graph.addEdge(new TestEdge(second, join));
 		graph.addEdge(new TestEdge(join, end));
-		
-		
+
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new FixpointTester());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
-		
+
 		assertNotNull("Fixpoint failed", res);
 		assertEquals("Fixpoint returned wrong result",
-				Map.of(source, Set.of(source), 
-						join, Set.of(source, join, first, second), 
-						first, Set.of(source, join, first, second), 
-						second, Set.of(source, join, first, second), 
-						end, Set.of(source, join, first, second, end))
-				, res);
-	}
-	
-	private static Set<TestNode> throwingNodeSemantics(TestNode n, Set<TestNode> entry) throws Exception {
-		throw new Exception();
+				Map.of(source, Set.of(source),
+						join, Set.of(source, join, first, second),
+						first, Set.of(source, join, first, second),
+						second, Set.of(source, join, first, second),
+						end, Set.of(source, join, first, second, end)),
+				res);
 	}
 
-	private static Set<TestNode> throwingEdgeSemantics(TestEdge e, Set<TestNode> entry) throws Exception {
-		throw new Exception();
-	}
+	private static class ExceptionalTester implements FixpointImplementation<TestNode, TestEdge, Set<TestNode>> {
 
-	private static Set<TestNode> throwingJoin(TestNode n, Set<TestNode> first, Set<TestNode> second) throws Exception {
-		throw new Exception();
-	}
+		private final int type;
 
-	private static boolean throwingEquality(TestNode n, Set<TestNode> first, Set<TestNode> second) throws Exception {
-		throw new Exception();
+		private ExceptionalTester(int type) {
+			this.type = type;
+		}
+
+		@Override
+		public Set<TestNode> semantics(TestNode node, Set<TestNode> entrystate) throws Exception {
+			if (type == 0)
+				throw new Exception();
+			return Collections.emptySet();
+		}
+
+		@Override
+		public Set<TestNode> traverse(TestEdge edge, Set<TestNode> entrystate) throws Exception {
+			if (type == 1)
+				throw new Exception();
+			return Collections.emptySet();
+		}
+
+		@Override
+		public Set<TestNode> union(TestNode node, Set<TestNode> left, Set<TestNode> right) throws Exception {
+			if (type == 2)
+				throw new Exception();
+			return Collections.emptySet();
+		}
+
+		@Override
+		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+			if (type == 3)
+				throw new Exception();
+			return Collections.emptySet();
+		}
+
+		@Override
+		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+			if (type == 4)
+				throw new Exception();
+			return true;
+		}
 	}
 
 	@Test
@@ -215,75 +242,77 @@ public class FixpointTest {
 		graph.addEdge(new TestEdge(first, second));
 		graph.addEdge(new TestEdge(second, join));
 		graph.addEdge(new TestEdge(join, end));
-		
-		
+
 		Map<TestNode, Set<TestNode>> res = null;
 		boolean fail = false;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::throwingNodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new ExceptionalTester(0));
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message", e.getMessage().contains("computing semantics"));
+			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing semantics"));
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
-		
+
 		fail = false;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::throwingEdgeSemantics,
-					FixpointTest::join,
-					FixpointTest::equality);
+					new ExceptionalTester(1));
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message", e.getMessage().contains("computing edge semantics"));
+			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("computing edge semantics"));
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
-		
+
 		fail = false;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::throwingJoin,
-					FixpointTest::equality);
+					new ExceptionalTester(2));
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message", e.getMessage().contains("creating entry state") || e.getMessage().contains("joining states"));
+			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("creating entry state"));
 		}
 
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
-		
+
 		fail = false;
 		try {
 			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
-					FixpointTest::nodeSemantics,
-					FixpointTest::edgeSemantics,
-					FixpointTest::join,
-					FixpointTest::throwingEquality);
+					new ExceptionalTester(3));
 		} catch (FixpointException e) {
 			fail = true;
-			assertTrue("Wrong message", e.getMessage().contains("updating result"));
+			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("joining states"));
+		}
+
+		if (!fail)
+			fail("The fixpoint computation hasn't thrown an exception");
+		assertNull("Fixpoint failed", res);
+
+		fail = false;
+		try {
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+					Map.of(source, Set.of()),
+					FIFOWorkingSet.mk(),
+					new ExceptionalTester(4));
+		} catch (FixpointException e) {
+			fail = true;
+			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("updating result"));
 		}
 
 		if (!fail)
