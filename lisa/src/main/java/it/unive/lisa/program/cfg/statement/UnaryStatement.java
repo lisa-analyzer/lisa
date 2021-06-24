@@ -16,17 +16,6 @@ public abstract class UnaryStatement extends Statement {
 	private final Expression expression;
 
 	/**
-	 * Builds the unary statement. The location where it happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param expression the argument of this statement
-	 */
-	public UnaryStatement(CFG cfg, Expression expression) {
-		this(cfg, null, expression);
-	}
-
-	/**
 	 * Builds the unary statement, happening at the given location in the
 	 * program.
 	 * 

@@ -21,39 +21,6 @@ import it.unive.lisa.type.Untyped;
 public abstract class TernaryNativeCall extends NativeCall {
 
 	/**
-	 * Builds the untyped native call. The location where this call happens is
-	 * unknown (i.e. no source file/line/column is available). The static type
-	 * of this call is {@link Untyped}.
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param left          the first parameter of this call
-	 * @param middle        the second parameter of this call
-	 * @param right         the third parameter of this call
-	 */
-	protected TernaryNativeCall(CFG cfg, String constructName, Expression left, Expression middle, Expression right) {
-		super(cfg, constructName, left, middle, right);
-	}
-
-	/**
-	 * Builds the native call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param staticType    the static type of this call
-	 * @param left          the first parameter of this call
-	 * @param middle        the second parameter of this call
-	 * @param right         the second parameter of this call
-	 */
-	protected TernaryNativeCall(CFG cfg, String constructName, Type staticType, Expression left, Expression middle,
-			Expression right) {
-		super(cfg, constructName, staticType, left, middle, right);
-	}
-
-	/**
 	 * Builds the untyped native call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 

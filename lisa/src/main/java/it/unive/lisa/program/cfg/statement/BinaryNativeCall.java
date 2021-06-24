@@ -21,36 +21,6 @@ import it.unive.lisa.type.Untyped;
 public abstract class BinaryNativeCall extends NativeCall {
 
 	/**
-	 * Builds the untyped native call. The location where this call happens is
-	 * unknown (i.e. no source file/line/column is available). The static type
-	 * of this call is {@link Untyped}.
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param left          the first parameter of this call
-	 * @param right         the second parameter of this call
-	 */
-	protected BinaryNativeCall(CFG cfg, String constructName, Expression left, Expression right) {
-		super(cfg, constructName, left, right);
-	}
-
-	/**
-	 * Builds the native call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param staticType    the static type of this call
-	 * @param left          the first parameter of this call
-	 * @param right         the second parameter of this call
-	 */
-	protected BinaryNativeCall(CFG cfg, String constructName, Type staticType, Expression left, Expression right) {
-		super(cfg, constructName, staticType, left, right);
-	}
-
-	/**
 	 * Builds the untyped native call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 

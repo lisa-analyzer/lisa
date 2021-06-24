@@ -21,34 +21,6 @@ public abstract class NativeCall extends Call {
 	private final String constructName;
 
 	/**
-	 * Builds the untyped native call. The location where this call happens is
-	 * unknown (i.e. no source file/line/column is available). The static type
-	 * of this call is {@link Untyped}.
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param parameters    the parameters of this call
-	 */
-	protected NativeCall(CFG cfg, String constructName, Expression... parameters) {
-		this(cfg, constructName, Untyped.INSTANCE, parameters);
-	}
-
-	/**
-	 * Builds the native call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param staticType    the static type of this call
-	 * @param parameters    the parameters of this call
-	 */
-	protected NativeCall(CFG cfg, String constructName, Type staticType, Expression... parameters) {
-		this(cfg, null, constructName, staticType, parameters);
-	}
-
-	/**
 	 * Builds the untyped native call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 
