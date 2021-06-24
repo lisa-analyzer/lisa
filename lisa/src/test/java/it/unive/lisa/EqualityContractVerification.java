@@ -55,6 +55,7 @@ import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.AnnotationMember;
@@ -216,7 +217,9 @@ public class EqualityContractVerification {
 				// identifiers use only their name for equality
 				verify(expr, verifier -> verifier.withOnlyTheseFields("name"));
 			else
-				verify(expr);
+				// location is excluded on purpose: it only brings syntactic
+				// information
+				verify(expr, verifier -> verifier.withIgnoredFields("location"));
 	}
 
 	@Test
@@ -290,17 +293,18 @@ public class EqualityContractVerification {
 		verify(CFGWithAnalysisResults.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
 	}
-	
+
 	@Test
 	public void testWarnings() {
 		// serialization requires non final fields
 		verify(JsonWarning.class, Warning.NONFINAL_FIELDS);
 		verify(it.unive.lisa.checks.warnings.Warning.class);
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
-		for (Class<? extends it.unive.lisa.checks.warnings.Warning> warning : scanner.getSubTypesOf(it.unive.lisa.checks.warnings.Warning.class))
+		for (Class<? extends it.unive.lisa.checks.warnings.Warning> warning : scanner
+				.getSubTypesOf(it.unive.lisa.checks.warnings.Warning.class))
 			verify(warning);
 	}
-	
+
 	@Test
 	public void testInterproceduralObjects() {
 		verify(CallGraphEdge.class);
@@ -314,18 +318,25 @@ public class EqualityContractVerification {
 			else
 				verify(token);
 	}
-	
+
 	@Test
 	public void testProgramStructure() {
 		verify(Global.class);
 		verify(Parameter.class);
-		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS); // 'overridable' is mutable
-		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS); // scope bounds are mutable
+		// 'overridable' is mutable
+		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS); 
+		// scope bounds are mutable
+		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS); 
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 		for (Class<? extends CodeLocation> loc : scanner.getSubTypesOf(CodeLocation.class))
-			verify(loc);
+			if (loc == SyntheticLocation.class)
+				// singleton instance
+				verify(loc, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
+			else
+				verify(loc);
 		for (Class<? extends ControlFlowStructure> struct : scanner.getSubTypesOf(ControlFlowStructure.class))
-			verify(struct, Warning.NONFINAL_FIELDS); // first follower is mutable
+			// first follower is mutable
+			verify(struct, Warning.NONFINAL_FIELDS); 
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))

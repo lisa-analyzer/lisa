@@ -299,24 +299,24 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			return environment.putState(id, eval);
 		case COMPARISON_GE:
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState((Identifier) left, low_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
 			else
-				return environment.putState((Identifier) right, inf_high);
+				return environment.putState(id, inf_high);
 		case COMPARISON_GT:
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState((Identifier) left, lowp1_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
 			else
-				return environment.putState((Identifier) right, lowIsMinusInfinity ? eval : inf_highm1);
+				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
 		case COMPARISON_LE:
 			if (rightIsExpr)
-				return environment.putState((Identifier) left, inf_high);
+				return environment.putState(id, inf_high);
 			else
-				return lowIsMinusInfinity ? environment : environment.putState((Identifier) right, low_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
 		case COMPARISON_LT:
 			if (rightIsExpr)
-				return environment.putState((Identifier) left, lowIsMinusInfinity ? eval : inf_highm1);
+				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
 			else
-				return lowIsMinusInfinity ? environment : environment.putState((Identifier) right, lowp1_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
 		default:
 			return environment;
 		}
