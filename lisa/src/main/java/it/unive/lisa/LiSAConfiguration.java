@@ -487,7 +487,7 @@ public class LiSAConfiguration {
 
 	@Override
 	public String toString() {
-		StringBuilder res = new StringBuilder(); 
+		StringBuilder res = new StringBuilder();
 		res.append("LiSA configuration:")
 				.append("\n  workdir: ")
 				.append(String.valueOf(workdir))

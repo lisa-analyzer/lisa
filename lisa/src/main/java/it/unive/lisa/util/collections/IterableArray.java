@@ -28,7 +28,8 @@ public class IterableArray<E> implements Iterable<E> {
 	}
 
 	/**
-	 * Yields the size of this iterable, that is, the length of the array behind this iterable.
+	 * Yields the size of this iterable, that is, the length of the array behind
+	 * this iterable.
 	 * 
 	 * @return the size
 	 */

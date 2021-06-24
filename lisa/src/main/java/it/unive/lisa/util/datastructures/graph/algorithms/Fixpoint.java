@@ -33,7 +33,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 		T union(N node, T left, T right) throws Exception;
 
 		T join(N node, T approx, T old) throws Exception;
-		
+
 		boolean equality(N node, T approx, T old) throws Exception;
 	}
 

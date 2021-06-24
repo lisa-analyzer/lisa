@@ -324,9 +324,9 @@ public class EqualityContractVerificationTest {
 		verify(Global.class);
 		verify(Parameter.class);
 		// 'overridable' is mutable
-		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS); 
+		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS);
 		// scope bounds are mutable
-		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS); 
+		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS);
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 		for (Class<? extends CodeLocation> loc : scanner.getSubTypesOf(CodeLocation.class))
 			if (loc == SyntheticLocation.class)
@@ -336,7 +336,7 @@ public class EqualityContractVerificationTest {
 				verify(loc);
 		for (Class<? extends ControlFlowStructure> struct : scanner.getSubTypesOf(ControlFlowStructure.class))
 			// first follower is mutable
-			verify(struct, Warning.NONFINAL_FIELDS); 
+			verify(struct, Warning.NONFINAL_FIELDS);
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))

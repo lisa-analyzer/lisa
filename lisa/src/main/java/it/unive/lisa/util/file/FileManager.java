@@ -81,9 +81,9 @@ public class FileManager {
 
 	@FunctionalInterface
 	public interface WriteAction {
-		void perform(Writer writer) throws IOException; 
+		void perform(Writer writer) throws IOException;
 	}
-	
+
 	/**
 	 * Creates a UTF-8 encoded file with the given name. If name is a path, all
 	 * missing directories will be created as well. The given name will be
@@ -119,7 +119,7 @@ public class FileManager {
 		result = result.replace("::", ".");
 		return result;
 	}
-	
+
 	public static void forceDeleteFolder(String path) throws IOException {
 		File workdir = new File(path);
 		if (workdir.exists())

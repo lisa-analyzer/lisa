@@ -70,7 +70,8 @@ public class IntIntervalTest {
 		mul(0, 0, 0, 0, 0, 0);
 	}
 
-	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2, boolean ignoreZero) {
+	private static void div(Integer x1, Integer x2, Integer y1, Integer y2, Integer e1, Integer e2,
+			boolean ignoreZero) {
 		test(x1, x2, y1, y2, e1, e2, "/", (l, r) -> l.div(r, ignoreZero, false));
 	}
 

@@ -93,7 +93,7 @@ public class ReachingDefinitions
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
-	
+
 	@Override
 	public Collection<ReachingDefinitions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
@@ -111,7 +111,7 @@ public class ReachingDefinitions
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
 	}
-	
+
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		return !id.getDynamicType().isPointerType();

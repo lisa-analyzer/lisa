@@ -32,7 +32,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	private static final Annotation LOW_CONFIDENTIALITY_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
-	
+
 	private static final Annotation HIGH_INTEGRITY_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
 
 	private static final byte NI_BOTTOM = 0;
@@ -264,7 +264,8 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		if (annots.isEmpty())
 			return mkHighLow();
 
-		boolean lowConf = annots.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY_ANNOTATION.getAnnotationName()));
+		boolean lowConf = annots
+				.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY_ANNOTATION.getAnnotationName()));
 		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY_ANNOTATION.getAnnotationName()));
 
 		if (lowConf && highInt)

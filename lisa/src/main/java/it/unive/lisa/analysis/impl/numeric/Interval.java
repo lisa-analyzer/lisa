@@ -211,7 +211,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 			if (glb.isBottom())
 				return Satisfiability.fromBoolean(left.interval.getHigh().compareTo(right.interval.getLow()) <= 0);
-			// we might have a singleton as glb if the two intervals share a bound
+			// we might have a singleton as glb if the two intervals share a
+			// bound
 			if (glb.interval.isSingleton() && left.interval.getHigh().compareTo(right.interval.getLow()) == 0)
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;

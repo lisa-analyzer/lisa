@@ -58,7 +58,6 @@ public class ControlFlowExtractor {
 	public Collection<ControlFlowStructure> extract() {
 		extracted.clear();
 
-
 		LinkedList<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
 

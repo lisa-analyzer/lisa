@@ -122,7 +122,7 @@ public class LiSA {
 
 	private void printStats() {
 		LOG.info("LiSA statistics:");
-		LOG.info("  %s warnings generated",  warnings.size());
+		LOG.info("  %s warnings generated", warnings.size());
 	}
 
 	/**

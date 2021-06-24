@@ -33,7 +33,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	private PossibleForwardDataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		super(domain, elements, isTop, isBottom);
 	}
-	
+
 	@Override
 	protected PossibleForwardDataflowDomain<E> mk(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		return new PossibleForwardDataflowDomain<>(domain, elements, isTop, isBottom);

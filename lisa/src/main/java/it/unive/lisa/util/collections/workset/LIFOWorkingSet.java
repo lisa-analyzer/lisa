@@ -18,7 +18,7 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	private LIFOWorkingSet() {
 		ws = new LinkedList<>();
 	}
-	
+
 	/**
 	 * Yields a new, empty working set.
 	 * 

@@ -12,7 +12,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public final class Caches {
-	
+
 	/**
 	 * The cache of types
 	 */

@@ -69,9 +69,9 @@ public class EnvironmentTest {
 		ValueEnvironment<Sign> actual = onlyA.pushScope(scoper);
 		assertEquals(onlyAscoped, actual);
 		assertEquals(onlyA, actual.popScope(scoper));
-		
-		
-		// TODO: this currently fails due to the errors in push/pop of environment and identifiers
+
+		// TODO: this currently fails due to the errors in push/pop of
+		// environment and identifiers
 		// enable and extend when we merge the branch about heap references
 //		ValueEnvironment<Sign> AandB = onlyA.putState(heapB, state);
 //		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper), state);

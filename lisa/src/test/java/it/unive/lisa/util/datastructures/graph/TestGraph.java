@@ -10,11 +10,11 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 	protected DotGraph<TestNode, TestEdge, TestGraph> toDot(Function<TestNode, String> labelGenerator) {
 		return null;
 	}
-	
+
 	public static class TestNode implements Node<TestNode, TestEdge, TestGraph> {
 
 		private int offset = -1;
-		
+
 		@Override
 		public int setOffset(int offset) {
 			return this.offset = offset;

@@ -112,7 +112,7 @@ public class AvailableExpressions
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public Collection<AvailableExpressions> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<AvailableExpressions> domain) {

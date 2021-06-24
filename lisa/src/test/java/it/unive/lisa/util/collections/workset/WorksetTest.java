@@ -41,7 +41,7 @@ public class WorksetTest {
 				skipped++;
 				continue;
 			}
-			
+
 			ws.push(elements[i]);
 			processed.add(elements[i]);
 			assertEquals("Incorrect size while populating the working set", i - skipped + 1, ws.size());
@@ -72,7 +72,8 @@ public class WorksetTest {
 
 			assertSame("pop() did not return the same element of peek()", peeked, popped);
 			if (lifo)
-				assertSame("pop() did not return the top-most element", processed.get(processed.size() - i - 1), popped);
+				assertSame("pop() did not return the top-most element", processed.get(processed.size() - i - 1),
+						popped);
 			else
 				assertSame("pop() did not return the bottom-most element", processed.get(i), popped);
 
@@ -110,10 +111,10 @@ public class WorksetTest {
 		linear(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 		random(ConcurrentFIFOWorkingSet.mk(), false, true, "a", "b", "c", "d", "e", "f", "g", "h", "i");
 	}
-	
+
 	interface Tester<T> {
 		@SuppressWarnings("unchecked")
-		void test(WorkingSet<T> ws, boolean lifo,  T... elements);
+		void test(WorkingSet<T> ws, boolean lifo, T... elements);
 	}
 
 	@SafeVarargs
@@ -122,32 +123,48 @@ public class WorksetTest {
 		Set<T> set = new HashSet<>();
 		List<T> list = new ArrayList<>();
 		Set<T> elementsSet = new HashSet<>(Arrays.asList(elements));
-		
+
 		tester.test(subject, lifo, elements);
-		
-		subject.getSeen().forEach(s -> { set.add(s); list.add(s); }); 
+
+		subject.getSeen().forEach(s -> {
+			set.add(s);
+			list.add(s);
+		});
 		assertEquals("Set of seen elements contains duplicates", set.size(), list.size());
-		assertTrue("Set of seen elements does not contain all elements", elementsSet.containsAll(set) && set.containsAll(elementsSet));
+		assertTrue("Set of seen elements does not contain all elements",
+				elementsSet.containsAll(set) && set.containsAll(elementsSet));
 	}
-	
+
 	@Test
 	public void VisitOnceWsTest() {
-		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d", "d", "f", "a", "b", null, "i");
-		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d", "d", "f", "a", "b", null, "i");
+		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f",
+				"a", "b", "i");
+		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d", "d", "f",
+				"a", "b", null, "i");
+		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f",
+				"a", "b", "i");
+		unique(FIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d", "d", "f",
+				"a", "b", null, "i");
 
 		// Concurrent version does not support null elements
-		unique(ConcurrentFIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(ConcurrentFIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		
-		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d", "d", "f", "a", "b", null, "i");
-		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d", "d", "f", "a", "b", null, "i");
+		unique(ConcurrentFIFOWorkingSet.mk(), false, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
+				"d", "f", "a", "b", "i");
+		unique(ConcurrentFIFOWorkingSet.mk(), false, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
+				"d", "f", "a", "b", "i");
+
+		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f",
+				"a", "b", "i");
+		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", null, "c", "d", "d", "f",
+				"a", "b", null, "i");
+		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f",
+				"a", "b", "i");
+		unique(LIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", null, "c", "d", "d", "f",
+				"a", "b", null, "i");
 
 		// Concurrent version does not support null elements
-		unique(ConcurrentLIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
-		unique(ConcurrentLIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d", "d", "f", "a", "b", "i");
+		unique(ConcurrentLIFOWorkingSet.mk(), true, (ws, lifo, el) -> linear(ws, lifo, false, el), "a", "b", "c", "d",
+				"d", "f", "a", "b", "i");
+		unique(ConcurrentLIFOWorkingSet.mk(), true, (ws, lifo, el) -> random(ws, lifo, false, el), "a", "b", "c", "d",
+				"d", "f", "a", "b", "i");
 	}
 }

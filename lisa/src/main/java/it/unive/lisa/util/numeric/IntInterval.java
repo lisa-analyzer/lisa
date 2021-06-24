@@ -174,7 +174,7 @@ public class IntInterval {
 	}
 
 	public boolean intersects(IntInterval other) {
-		return includes(other) || other.includes(this) 
+		return includes(other) || other.includes(this)
 				|| (high.compareTo(other.low) >= 0 && high.compareTo(other.high) <= 0)
 				|| (other.high.compareTo(low) >= 0 && other.high.compareTo(high) <= 0);
 	}

@@ -224,10 +224,10 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return left.eq(right).or(left.gt(right));
 		case COMPARISON_GT:
 			return left.gt(right);
-		case COMPARISON_LE: 
+		case COMPARISON_LE:
 			// e1 <= e2 same as !(e1 > e2)
 			return left.gt(right).negate();
-		case COMPARISON_LT: 
+		case COMPARISON_LT:
 			// e1 < e2 -> !(e1 >= e2) && !(e1 == e2)
 			return left.gt(right).negate().and(left.eq(right).negate());
 		case COMPARISON_NE:
@@ -300,13 +300,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		case COMPARISON_LT:
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
-				if (rightSign.isNegative() || rightSign.isZero()) 
+				if (rightSign.isNegative() || rightSign.isZero())
 					// x < 0/-
 					environment = environment.assign((Identifier) left,
 							new Constant(right.getDynamicType(), -1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
-				if (leftSign.isPositive() || leftSign.isZero()) 
+				if (leftSign.isPositive() || leftSign.isZero())
 					// 0/+ < x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), 1, left.getCodeLocation()), pp);
@@ -315,13 +315,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		case COMPARISON_GT:
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
-				if (rightSign.isPositive() || rightSign.isZero()) 
+				if (rightSign.isPositive() || rightSign.isZero())
 					// x > +/0
 					environment = environment.assign((Identifier) left,
 							new Constant(right.getDynamicType(), 1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
-				if (leftSign.isNegative() || leftSign.isZero()) 
+				if (leftSign.isNegative() || leftSign.isZero())
 					// -/0 > x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), -1, right.getCodeLocation()), pp);

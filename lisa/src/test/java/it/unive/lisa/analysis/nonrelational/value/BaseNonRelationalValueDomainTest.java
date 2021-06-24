@@ -36,7 +36,7 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 public class BaseNonRelationalValueDomainTest {
-	
+
 	private static class Sample extends BaseNonRelationalValueDomain<Sample> {
 
 		@Override
@@ -94,12 +94,12 @@ public class BaseNonRelationalValueDomainTest {
 					else if (mtd.getName().startsWith("satisfies"))
 						assertSame("Default implementation of " + mtd.getName() + " did not return UNKNOWN",
 								Satisfiability.UNKNOWN, ret);
-					else if (mtd.getName().startsWith("assume")) 
+					else if (mtd.getName().startsWith("assume"))
 						assertSame(
 								"Default implementation of " + mtd.getName()
 										+ " did not return an unchanged environment",
 								params[envPos.get()], ret);
-						
+
 				} catch (Exception e) {
 					e.printStackTrace();
 					fail(mtd + " failed due to " + e.getMessage());
@@ -131,39 +131,44 @@ public class BaseNonRelationalValueDomainTest {
 				// TODO Auto-generated method stub
 				return null;
 			}
-			
+
 		}
-		
+
 		if (param == ExternalSet.class)
 			return (R) Caches.types().mkEmptySet();
-		
+
 		if (param == PushAny.class)
 			return (R) new PushAny(null, SyntheticLocation.INSTANCE);
 		if (param == Constant.class || param == ValueExpression.class)
 			return (R) new Constant(IntType.INSTANCE, 5, SyntheticLocation.INSTANCE);
 		if (param == Identifier.class)
 			return (R) new Variable(provideParam(mtd, ExternalSet.class), "foo", SyntheticLocation.INSTANCE);
-		
+
 		if (param == TernaryOperator.class)
 			return (R) TernaryOperator.STRING_REPLACE;
 		if (param == BinaryOperator.class)
 			return (R) BinaryOperator.COMPARISON_EQ;
 		if (param == UnaryOperator.class)
 			return (R) UnaryOperator.LOGICAL_NOT;
-		
+
 		if (param == UnaryExpression.class)
-			return (R) new UnaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class), provideParam(mtd, UnaryOperator.class), SyntheticLocation.INSTANCE);
+			return (R) new UnaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+					provideParam(mtd, UnaryOperator.class), SyntheticLocation.INSTANCE);
 		if (param == BinaryExpression.class)
-			return (R) new BinaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class), provideParam(mtd, Constant.class), provideParam(mtd, BinaryOperator.class), SyntheticLocation.INSTANCE);
+			return (R) new BinaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+					provideParam(mtd, Constant.class), provideParam(mtd, BinaryOperator.class),
+					SyntheticLocation.INSTANCE);
 		if (param == TernaryExpression.class)
-			return (R) new TernaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class), provideParam(mtd, Constant.class), provideParam(mtd, Constant.class), provideParam(mtd, TernaryOperator.class), SyntheticLocation.INSTANCE);
+			return (R) new TernaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+					provideParam(mtd, Constant.class), provideParam(mtd, Constant.class),
+					provideParam(mtd, TernaryOperator.class), SyntheticLocation.INSTANCE);
 		if (param == ValueEnvironment.class)
 			return (R) new ValueEnvironment<>(new Sample());
 		if (param == Sample.class || param == BaseNonRelationalValueDomain.class)
 			return (R) new Sample();
 		if (param == ProgramPoint.class)
 			return (R) new FakePP();
-		
+
 		throw new UnsupportedOperationException(mtd + ": No default value for type " + param.getName());
 	}
 }

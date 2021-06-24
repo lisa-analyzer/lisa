@@ -368,7 +368,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens, AtomicBoolean mightFail) {
 		if (mightFail != null)
 			mightFail.set(false);
-		
+
 		ExternalSet<Type> result = Caches.types().mkEmptySet();
 		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
 			for (Type t : types)

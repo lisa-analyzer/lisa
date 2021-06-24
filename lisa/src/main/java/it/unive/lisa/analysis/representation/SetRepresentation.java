@@ -41,7 +41,7 @@ public class SetRepresentation extends DomainRepresentation {
 		else
 			this.elements = new TreeSet<>(elements);
 	}
-	
+
 	private static <E> SortedSet<DomainRepresentation> mapAndSort(Iterable<E> elements,
 			Function<E, DomainRepresentation> mapper) {
 		SortedSet<DomainRepresentation> result = new TreeSet<>();

@@ -131,10 +131,14 @@ public class SubstitutionTest {
 		}
 	};
 
-	private final Variable x = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "x", SyntheticLocation.INSTANCE);
-	private final Variable y = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "y", SyntheticLocation.INSTANCE);
-	private final Variable z = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "z", SyntheticLocation.INSTANCE);
-	private final Variable w = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "w", SyntheticLocation.INSTANCE);
+	private final Variable x = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "x",
+			SyntheticLocation.INSTANCE);
+	private final Variable y = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "y",
+			SyntheticLocation.INSTANCE);
+	private final Variable z = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "z",
+			SyntheticLocation.INSTANCE);
+	private final Variable w = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "w",
+			SyntheticLocation.INSTANCE);
 	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
 
 	private void check(List<HeapReplacement> sub,
@@ -172,7 +176,7 @@ public class SubstitutionTest {
 		HeapReplacement rep = new HeapReplacement();
 		rep.addSource(x);
 		rep.addTarget(y);
-		
+
 		check(Arrays.asList(rep), collect(y), collect(x));
 	}
 
@@ -182,7 +186,7 @@ public class SubstitutionTest {
 		rep.addSource(x);
 		rep.addTarget(x);
 		rep.addTarget(y);
-		
+
 		check(Arrays.asList(rep), collect(y, x), collect());
 	}
 
@@ -194,7 +198,7 @@ public class SubstitutionTest {
 		HeapReplacement rep2 = new HeapReplacement();
 		rep2.addSource(z);
 		rep2.addTarget(w);
-		
+
 		check(Arrays.asList(rep1, rep2), collect(y, w), collect(x, z));
 	}
 
@@ -206,10 +210,10 @@ public class SubstitutionTest {
 		HeapReplacement rep2 = new HeapReplacement();
 		rep2.addSource(w);
 		rep2.addTarget(x);
-		
+
 		check(Arrays.asList(rep1, rep2), collect(y, x), collect(x, w));
 	}
-	
+
 	@Test
 	public void testResettingSubstitution() throws SemanticException {
 		HeapReplacement rep1 = new HeapReplacement();
@@ -219,7 +223,7 @@ public class SubstitutionTest {
 		HeapReplacement rep3 = new HeapReplacement();
 		rep3.addSource(z);
 		rep3.addTarget(w);
-		
+
 		check(Arrays.asList(rep1, rep2, rep3), collect(y, w), collect(x, z));
 	}
 }

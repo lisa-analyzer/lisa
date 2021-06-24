@@ -95,7 +95,7 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<N, E, G>, E ext
 		for (N node : nodes) {
 			Set<N> doms = dominators.get(node);
 			// might not have been processed yet
-			if (doms != null) 
+			if (doms != null)
 				if (res == null)
 					res = new HashSet<>(doms);
 				else

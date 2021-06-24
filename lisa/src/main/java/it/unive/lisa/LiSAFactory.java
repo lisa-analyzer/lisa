@@ -76,7 +76,7 @@ public final class LiSAFactory {
 
 			List<Integer> toWrap = new ArrayList<>();
 			for (int i = 0; i < types.length; i++)
-				if (needsWrapping(params[i].getClass(), types[i])) 
+				if (needsWrapping(params[i].getClass(), types[i]))
 					toWrap.add(i);
 				else if (!types[i].isAssignableFrom(params[i].getClass()))
 					continue outer;

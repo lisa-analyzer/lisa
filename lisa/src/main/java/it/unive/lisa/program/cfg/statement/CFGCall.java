@@ -189,7 +189,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			//It might be the case it chose a
+			// It might be the case it chose a
 			// target with void return type
 			getMetaVariables().add((Identifier) expr);
 

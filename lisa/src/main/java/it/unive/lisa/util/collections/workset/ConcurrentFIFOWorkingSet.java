@@ -17,7 +17,7 @@ public final class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	private ConcurrentFIFOWorkingSet() {
 		ws = new ConcurrentLinkedDeque<>();
 	}
-	
+
 	/**
 	 * Yields a new, empty working set.
 	 * 

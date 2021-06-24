@@ -434,7 +434,7 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 		private BitSetIterator() {
 			this.bits = BitExternalSet.this.bits;
 			// we go back to the integer representation
-			this.totalBits = bits.length << 6; 
+			this.totalBits = bits.length << 6;
 			this.next = findNextBit();
 		}
 

@@ -24,40 +24,43 @@ public class IterationLoggerTest {
 		for (Integer i : IterationLogger.iterate(logger, array, "Iteration test - array", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
 		for (Integer i : IterationLogger.iterate(logger, Level.OFF, array, "Iteration test - array", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
 		List<Integer> list = List.of(array);
 		for (Integer i : IterationLogger.iterate(logger, list, "Iteration test - collection", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
 		for (Integer i : IterationLogger.iterate(logger, Level.OFF, list, "Iteration test - collection", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
-		for (Integer i : IterationLogger.iterate(logger, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
+		for (Integer i : IterationLogger.iterate(logger, (Iterable<Integer>) list, "Iteration test - iterable",
+				"integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
-		for (Integer i : IterationLogger.iterate(logger, Level.OFF, (Iterable<Integer>) list, "Iteration test - iterable", "integers"))
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, (Iterable<Integer>) list,
+				"Iteration test - iterable", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
 		for (Integer i : IterationLogger.iterate(logger, list.stream(), "Iteration test - stream", "integers"))
 			sum += i;
 		assertEquals(expected, sum);
-		
+
 		sum = 0;
-		for (Integer i : IterationLogger.iterate(logger, Level.OFF, list.stream(), "Iteration test - stream", "integers"))
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, list.stream(), "Iteration test - stream",
+				"integers"))
 			sum += i;
 		assertEquals(expected, sum);
 	}

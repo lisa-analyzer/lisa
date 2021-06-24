@@ -202,7 +202,8 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 
 		switch (operator) {
 		case COMPARISON_EQ:
-			return left.value.intValue() == right.value.intValue() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
+			return left.value.intValue() == right.value.intValue() ? Satisfiability.SATISFIED
+					: Satisfiability.NOT_SATISFIED;
 		case COMPARISON_GE:
 			return left.value >= right.value ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
 		case COMPARISON_GT:
@@ -212,7 +213,8 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 		case COMPARISON_LT:
 			return left.value < right.value ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
 		case COMPARISON_NE:
-			return left.value.intValue() != right.value.intValue() ? Satisfiability.SATISFIED : Satisfiability.NOT_SATISFIED;
+			return left.value.intValue() != right.value.intValue() ? Satisfiability.SATISFIED
+					: Satisfiability.NOT_SATISFIED;
 		default:
 			return Satisfiability.UNKNOWN;
 		}

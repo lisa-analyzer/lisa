@@ -2,8 +2,6 @@ package it.unive.lisa.checks;
 
 import static it.unive.lisa.logging.IterationLogger.iterate;
 
-import java.util.Collection;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,7 +18,7 @@ import it.unive.lisa.program.cfg.CFG;
 public final class ChecksExecutor {
 
 	private static final Logger LOG = LogManager.getLogger(ChecksExecutor.class);
-	
+
 	private ChecksExecutor() {
 		// this class is just a static holder
 	}

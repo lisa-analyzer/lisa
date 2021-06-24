@@ -42,15 +42,18 @@ public class IntervalTest {
 			return null;
 		}
 	};
-	private final Variable variable = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "x", pp.getLocation());
-	private final Variable varAux = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "aux", pp.getLocation());
+	private final Variable variable = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "x",
+			pp.getLocation());
+	private final Variable varAux = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "aux",
+			pp.getLocation());
 
 	@Test
 	public void testEvalConstant() {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
 			assertTrue("eval(" + val + ") did not return [" + val + ", " + val + "]",
-					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val, pp.getLocation()), pp).interval.is(val));
+					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val, pp.getLocation()), pp).interval
+							.is(val));
 		}
 	}
 
@@ -245,9 +248,11 @@ public class IntervalTest {
 	public void testAssumeGTOnSingleton() throws SemanticException {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 1, pp.getLocation()), pp);
+			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 1, pp.getLocation()),
+					pp);
 			// val + 1, +inf
-			aval = aval.widening(singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 2, pp.getLocation()), pp));
+			aval = aval.widening(
+					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 2, pp.getLocation()), pp));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " > " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, BinaryOperator.COMPARISON_GT,
@@ -261,7 +266,8 @@ public class IntervalTest {
 			int val = rand.nextInt();
 			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val, pp.getLocation()), pp);
 			// val, +inf
-			aval = aval.widening(singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 2, pp.getLocation()), pp));
+			aval = aval.widening(
+					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val + 2, pp.getLocation()), pp));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " >= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, BinaryOperator.COMPARISON_GE,
@@ -273,9 +279,11 @@ public class IntervalTest {
 	public void testAssumeLTOnSingleton() throws SemanticException {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val = rand.nextInt();
-			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 1, pp.getLocation()), pp);
+			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 1, pp.getLocation()),
+					pp);
 			// -inf, val - 1
-			aval = aval.widening(singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 2, pp.getLocation()), pp));
+			aval = aval.widening(
+					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 2, pp.getLocation()), pp));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " < " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, BinaryOperator.COMPARISON_LT,
@@ -289,7 +297,8 @@ public class IntervalTest {
 			int val = rand.nextInt();
 			Interval aval = singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val, pp.getLocation()), pp);
 			// -inf, val
-			aval = aval.widening(singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 2, pp.getLocation()), pp));
+			aval = aval.widening(
+					singleton.evalNonNullConstant(new Constant(IntType.INSTANCE, val - 2, pp.getLocation()), pp));
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " <= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, BinaryOperator.COMPARISON_LE,
