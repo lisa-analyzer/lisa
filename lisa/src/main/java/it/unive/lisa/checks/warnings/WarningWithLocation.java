@@ -53,7 +53,7 @@ public abstract class WarningWithLocation extends Warning {
 		WarningWithLocation other = (WarningWithLocation) o;
 		int cmp;
 
-		if ((cmp = location.compareTo(location)) != 0)
+		if ((cmp = location.compareTo(other.location)) != 0)
 			return cmp;
 
 		return super.compareTo(other);
