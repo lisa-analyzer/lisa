@@ -7,6 +7,7 @@ import it.unive.lisa.program.annotations.Annotation;
  *
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
+@FunctionalInterface
 public interface AnnotationMatcher {
 
 	/**
@@ -18,5 +19,5 @@ public interface AnnotationMatcher {
 	 * @return {@code true} if this matcher matches the input annotation,
 	 *             {@code false} otherwise
 	 */
-	public boolean matches(Annotation annotation);
+	boolean matches(Annotation annotation);
 }

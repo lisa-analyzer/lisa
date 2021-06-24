@@ -20,7 +20,7 @@ public interface SemanticEvaluator {
 	 * @return {@code true} if the domain tracks information on the identifier
 	 *             {@code id}, {@code false} otherwise
 	 */
-	public boolean tracksIdentifiers(Identifier id);
+	boolean tracksIdentifiers(Identifier id);
 
 	/**
 	 * Yields {@code true} if the domain can process {@code expression},
@@ -31,5 +31,5 @@ public interface SemanticEvaluator {
 	 * @return {@code true} if the domain can process {@code expression},
 	 *             {@code false} otherwise.
 	 */
-	public boolean canProcess(SymbolicExpression expression);
+	boolean canProcess(SymbolicExpression expression);
 }

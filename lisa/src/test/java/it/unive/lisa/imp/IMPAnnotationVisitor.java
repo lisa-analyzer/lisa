@@ -1,5 +1,8 @@
 package it.unive.lisa.imp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.AnnotationMember;
 import it.unive.lisa.program.annotations.Annotations;
@@ -19,8 +22,6 @@ import it.unive.lisa.test.antlr.IMPParser.AnnotationsContext;
 import it.unive.lisa.test.antlr.IMPParser.ArrayAnnotationValueContext;
 import it.unive.lisa.test.antlr.IMPParser.BasicAnnotationValueContext;
 import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
-import java.util.ArrayList;
-import java.util.List;
 
 public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 

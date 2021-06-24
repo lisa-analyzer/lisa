@@ -1,5 +1,13 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
@@ -12,14 +20,6 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
@@ -58,7 +58,6 @@ public class ControlFlowExtractor {
 	public Collection<ControlFlowStructure> extract() {
 		extracted.clear();
 
-		Map<Statement, ControlFlowStructure> result = new HashMap<>();
 
 		LinkedList<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
@@ -69,6 +68,7 @@ public class ControlFlowExtractor {
 		// first, we find the loops using back-edges:
 		// https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf
 		// http://pages.cs.wisc.edu/~fischer/cs701.f14/finding.loops.html
+		Map<Statement, ControlFlowStructure> result = new HashMap<>();
 		Map<Statement, Set<Statement>> dominators = new Dominators<CFG, Statement, Edge>().build(target);
 		for (Statement conditional : conditionals)
 			for (Statement pred : target.predecessorsOf(conditional))
@@ -84,7 +84,7 @@ public class ControlFlowExtractor {
 		return extracted;
 	}
 
-	private class LoopReconstructor {
+	private final class LoopReconstructor {
 		private final Statement conditional;
 		private final Statement tail;
 
@@ -137,7 +137,7 @@ public class ControlFlowExtractor {
 		}
 	}
 
-	private class IfReconstructor {
+	private final class IfReconstructor {
 		private final Statement conditional;
 
 		private final Edge trueEdgeStartingEdge;

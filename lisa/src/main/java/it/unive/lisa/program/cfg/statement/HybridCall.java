@@ -1,5 +1,11 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,10 +20,6 @@ import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more {@link CFG}s or {@link NativeCFG}s under analysis.

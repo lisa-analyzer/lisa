@@ -2,6 +2,14 @@ package it.unive.lisa;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -9,13 +17,6 @@ import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -27,7 +28,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class LiSA {
 
-	private static final Logger log = LogManager.getLogger(LiSA.class);
+	private static final Logger LOG = LogManager.getLogger(LiSA.class);
 
 	/**
 	 * The collection of warnings that will be filled with the results of all
@@ -75,7 +76,7 @@ public class LiSA {
 		try {
 			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
 			if (conf.getCallGraph() == null)
-				log.warn("No call graph set for this analysis, defaulting to " + callGraph.getClass().getSimpleName());
+				LOG.warn("No call graph set for this analysis, defaulting to %s", callGraph.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default call graph", e);
 		}
@@ -85,8 +86,8 @@ public class LiSA {
 			interproc = conf.getInterproceduralAnalysis() == null ? getDefaultFor(InterproceduralAnalysis.class)
 					: conf.getInterproceduralAnalysis();
 			if (conf.getInterproceduralAnalysis() == null)
-				log.warn("No interprocedural analysis set for this analysis, defaulting to "
-						+ interproc.getClass().getSimpleName());
+				LOG.warn("No interprocedural analysis set for this analysis, defaulting to %s",
+						interproc.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
 		}
@@ -94,7 +95,7 @@ public class LiSA {
 		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getState());
 
 		try {
-			warnings.addAll(TimerLogger.execSupplier(log, "Analysis time", () -> runner.run(program, fileManager)));
+			warnings.addAll(TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(program, fileManager)));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
@@ -102,24 +103,26 @@ public class LiSA {
 		printStats();
 
 		if (conf.isJsonOutput()) {
-			log.info("Dumping reported warnings to 'report.json'");
+			LOG.info("Dumping reported warnings to 'report.json'");
 			JsonReport report = new JsonReport(warnings, fileManager.createdFiles());
-			try (Writer writer = fileManager.mkOutputFile("report.json")) {
-				report.dump(writer);
-				log.info("Report file dumped to report.json");
+			try {
+				fileManager.mkOutputFile("report.json", writer -> {
+					report.dump(writer);
+					LOG.info("Report file dumped to report.json");
+				});
 			} catch (IOException e) {
-				log.error("Unable to dump report file", e);
+				LOG.error("Unable to dump report file", e);
 			}
 		}
 	}
 
 	private void printConfig() {
-		log.info(conf.toString());
+		LOG.info(conf.toString());
 	}
 
 	private void printStats() {
-		log.info("LiSA statistics:");
-		log.info("  " + warnings.size() + " warnings generated");
+		LOG.info("LiSA statistics:");
+		LOG.info("  %s warnings generated",  warnings.size());
 	}
 
 	/**

@@ -1,8 +1,9 @@
 package it.unive.lisa.cron.typeInference;
 
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
-import org.junit.Test;
 
 public class TypesCollectionTest extends AnalysisTestExecutor {
 	@Test

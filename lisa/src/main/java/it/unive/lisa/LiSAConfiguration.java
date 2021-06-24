@@ -1,5 +1,10 @@
 package it.unive.lisa;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
@@ -8,10 +13,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -486,21 +487,35 @@ public class LiSAConfiguration {
 
 	@Override
 	public String toString() {
-		String res = "LiSA configuration:" +
-				"\n  workdir: " + String.valueOf(workdir) +
-				"\n  dump input cfgs: " + dumpCFGs +
-				"\n  infer types: " + inferTypes +
-				"\n  dump inferred types: " + dumpTypeInference +
-				"\n  dump analysis results: " + dumpAnalysis +
-				"\n  dump json report: " + jsonOutput +
-				"\n  " + syntacticChecks.size() + " syntactic checks to execute"
-				+ (syntacticChecks.isEmpty() ? "" : ":");
+		StringBuilder res = new StringBuilder(); 
+		res.append("LiSA configuration:")
+				.append("\n  workdir: ")
+				.append(String.valueOf(workdir))
+				.append("\n  dump input cfgs: ")
+				.append(dumpCFGs)
+				.append("\n  infer types: ")
+				.append(inferTypes)
+				.append("\n  dump inferred types: ")
+				.append(dumpTypeInference)
+				.append("\n  dump analysis results: ")
+				.append(dumpAnalysis)
+				.append("\n  dump json report: ")
+				.append(jsonOutput)
+				.append("\n  ")
+				.append(syntacticChecks.size())
+				.append(" syntactic checks to execute")
+				.append((syntacticChecks.isEmpty() ? "" : ":"));
+
 		for (SyntacticCheck check : syntacticChecks)
-			res += "\n      " + check.getClass().getSimpleName();
-		res += "\n  " + semanticChecks.size() + " semantic checks to execute"
-				+ (semanticChecks.isEmpty() ? "" : ":");
+			res.append("\n      ")
+					.append(check.getClass().getSimpleName());
+		res.append("\n  ")
+				.append(semanticChecks.size())
+				.append(" semantic checks to execute")
+				.append((semanticChecks.isEmpty() ? "" : ":"));
 		for (SemanticCheck check : semanticChecks)
-			res += "\n      " + check.getClass().getSimpleName();
-		return res;
+			res.append("\n      ")
+					.append(check.getClass().getSimpleName());
+		return res.toString();
 	}
 }

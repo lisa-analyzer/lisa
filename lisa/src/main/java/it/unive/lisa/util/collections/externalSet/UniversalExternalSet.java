@@ -13,6 +13,7 @@ import java.util.Iterator;
  */
 public class UniversalExternalSet<T> implements ExternalSet<T> {
 
+	private static final String CANNOT_PERFORM_ERROR = "Cannot remove elements from a universal view of an external set";
 	/**
 	 * The cache that generated this set and that contains the elements of this
 	 * set.
@@ -66,12 +67,12 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	public boolean add(T e) {
-		throw new UnsupportedOperationException("Cannot add an element from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "add"));
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		throw new UnsupportedOperationException("Cannot remove an element from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
 	@Override
@@ -81,22 +82,22 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	@Override
 	public boolean addAll(Collection<? extends T> c) {
-		throw new UnsupportedOperationException("Cannot add elements from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "add"));
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		throw new UnsupportedOperationException("Cannot remove elements from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		throw new UnsupportedOperationException("Cannot remove elements from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 	}
 
 	@Override
 	public void clear() {
-		throw new UnsupportedOperationException("Cannot remove elements from a universal view of an external set");
+		throw new UnsupportedOperationException(String.format(CANNOT_PERFORM_ERROR, "remove"));
 
 	}
 

@@ -4,7 +4,6 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.Writer;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,8 +51,8 @@ public class FileManagerTest {
 	@Test
 	public void testCreateFile() {
 		FileManager manager = new FileManager(TESTDIR);
-		try (Writer w = manager.mkOutputFile("foo.txt")) {
-			w.write("foo");
+		try {
+			manager.mkOutputFile("foo.txt", w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -71,8 +70,8 @@ public class FileManagerTest {
 	@Test
 	public void testCreateFileWithBom() {
 		FileManager manager = new FileManager(TESTDIR);
-		try (Writer w = manager.mkOutputFile("foo.txt", true)) {
-			w.write("foo");
+		try {
+			manager.mkOutputFile("foo.txt", true, w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -90,8 +89,8 @@ public class FileManagerTest {
 	@Test
 	public void testCreateFileInSubfolder() {
 		FileManager manager = new FileManager(TESTDIR);
-		try (Writer w = manager.mkOutputFile("sub/foo.txt")) {
-			w.write("foo");
+		try {
+			manager.mkOutputFile("sub/foo.txt", w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -113,8 +112,8 @@ public class FileManagerTest {
 	@Test
 	public void testDotFileNameSanitization() {
 		FileManager manager = new FileManager(TESTDIR);
-		try (Writer w = manager.mkDotFile("foo()  bar::jar")) {
-			w.write("foo");
+		try {
+			manager.mkDotFile("foo()  bar::jar", w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");

@@ -2,6 +2,24 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -20,7 +38,6 @@ import it.unive.lisa.analysis.impl.dataflow.AvailableExpressions;
 import it.unive.lisa.analysis.impl.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
 import it.unive.lisa.analysis.impl.numeric.Sign;
-import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
@@ -29,6 +46,7 @@ import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -59,22 +77,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import org.junit.Before;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 public class SemanticsSanityTest {
 

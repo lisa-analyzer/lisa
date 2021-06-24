@@ -40,6 +40,8 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>>
 		implements Iterable<Map.Entry<N, Pair<ExternalSet<E>, ExternalSet<E>>>> {
 
+	private static final String EDGE_SIMPLIFY_ERROR = "Cannot simplify an edge with class ";
+
 	/**
 	 * The factory where edges are stored.
 	 */
@@ -228,35 +230,37 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	/**
 	 * Yields the collection of the nodes that are followers of the given one,
 	 * that is, all nodes such that there exist an edge in this matrix going
-	 * from the given node to such node. Yields {@code null} if the node is not
-	 * in this matrix.
+	 * from the given node to such node.
 	 * 
 	 * @param node the node
 	 * 
-	 * @return the collection of followers, or {@code null}
+	 * @return the collection of followers
+	 * 
+	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
 	public final Collection<N> followersOf(N node) {
 		if (!matrix.containsKey(node))
-			return null;
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		return matrix.get(node).getRight().collect().stream().map(e -> e.getDestination()).collect(Collectors.toSet());
+		return matrix.get(node).getRight().collect().stream().map(Edge::getDestination).collect(Collectors.toSet());
 	}
 
 	/**
 	 * Yields the collection of the nodes that are predecessors of the given
 	 * vertex, that is, all nodes such that there exist an edge in this matrix
-	 * going from such node to the given one. Yields {@code null} if the node is
-	 * not in this matrix.
+	 * going from such node to the given one.
 	 * 
 	 * @param node the node
 	 * 
-	 * @return the collection of predecessors, or {@code null}
+	 * @return the collection of predecessors
+	 * 
+	 * @throws IllegalArgumentException if the node is not in the graph
 	 */
 	public final Collection<N> predecessorsOf(N node) {
 		if (!matrix.containsKey(node))
-			return null;
+			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		return matrix.get(node).getLeft().collect().stream().map(e -> e.getSource()).collect(Collectors.toSet());
+		return matrix.get(node).getLeft().collect().stream().map(Edge::getSource).collect(Collectors.toSet());
 	}
 
 	/**
@@ -285,7 +289,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	public synchronized void simplify(Set<N> targets, Collection<N> entrypoints, Collection<E> removedEdges,
+	public void simplify(Iterable<N> targets, Collection<N> entrypoints, Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
 		removedEdges.clear();
 		replacedEdges.clear();
@@ -299,8 +303,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 				// this is a entry node
 				for (E out : outgoing) {
 					if (!out.canBeSimplified())
-						throw new UnsupportedOperationException(
-								"Cannot simplify an edge with class " + out.getClass().getSimpleName());
+						throw new UnsupportedOperationException(EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 					// remove the edge
 					removedEdges.add(out);
@@ -312,8 +315,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 				// this is an exit node
 				for (E in : ingoing) {
 					if (!in.canBeSimplified())
-						throw new UnsupportedOperationException(
-								"Cannot simplify an edge with class " + in.getClass().getSimpleName());
+						throw new UnsupportedOperationException(EDGE_SIMPLIFY_ERROR + in.getClass().getSimpleName());
 
 					// remove the edge
 					removedEdges.add(in);
@@ -325,7 +327,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 					for (E out : outgoing) {
 						if (!out.canBeSimplified())
 							throw new UnsupportedOperationException(
-									"Cannot simplify an edge with class " + out.getClass().getSimpleName());
+									EDGE_SIMPLIFY_ERROR + out.getClass().getSimpleName());
 
 						// replicate the edge from ingoing.source to
 						// outgoing.dest
@@ -445,7 +447,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			// find new successors
 			check.clear();
 			for (N node : add)
-				matrix.get(node).getRight().stream().map(e -> e.getDestination()).forEach(check::add);
+				matrix.get(node).getRight().stream().map(Edge::getDestination).forEach(check::add);
 
 			// compute the ones that need to be added
 			add.clear();

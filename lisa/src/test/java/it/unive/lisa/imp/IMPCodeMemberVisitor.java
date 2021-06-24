@@ -3,6 +3,19 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import it.unive.lisa.imp.constructs.StringConcat;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -97,17 +110,6 @@ import it.unive.lisa.test.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or

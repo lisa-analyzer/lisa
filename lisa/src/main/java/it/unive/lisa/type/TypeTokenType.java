@@ -1,10 +1,11 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * The type of type tokens, used as reference to types in code.

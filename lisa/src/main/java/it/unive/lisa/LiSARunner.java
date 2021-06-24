@@ -3,7 +3,6 @@ package it.unive.lisa;
 import static it.unive.lisa.LiSAFactory.getInstance;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -62,7 +61,9 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> {
 
-	private static final Logger log = LogManager.getLogger(LiSARunner.class);
+	private static final String FIXPOINT_EXCEPTION_MESSAGE = "Exception during fixpoint computation";
+
+	private static final Logger LOG = LogManager.getLogger(LiSARunner.class);
 
 	private final LiSAConfiguration conf;
 
@@ -102,26 +103,26 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
 		if (conf.isDumpCFGs())
-			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping input CFGs", "cfgs"))
+			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG(fileManager, "", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty())
 			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
 		else
-			log.warn("Skipping syntactic checks execution since none have been provided");
+			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
 		try {
 			callGraph.init(program);
 		} catch (CallGraphConstructionException e) {
-			log.fatal("Exception while building the call graph for the input program", e);
+			LOG.fatal("Exception while building the call graph for the input program", e);
 			throw new AnalysisExecutionException("Exception while building the call graph for the input program", e);
 		}
 
 		try {
 			interproc.init(program, callGraph);
 		} catch (InterproceduralAnalysisException e) {
-			log.fatal("Exception while building the interprocedural analysis for the input program", e);
+			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisExecutionException(
 					"Exception while building the interprocedural analysis for the input program", e);
 		}
@@ -129,7 +130,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		if (conf.isInferTypes())
 			inferTypes(fileManager, program, allCFGs);
 		else
-			log.warn("Type inference disabled: dynamic type information will not be available for following analysis");
+			LOG.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
 		if (state != null) {
 			analyze(allCFGs, fileManager);
@@ -143,27 +144,27 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 				tool = toolWithResults;
 				ChecksExecutor.executeAll(toolWithResults, program, conf.getSemanticChecks());
 			} else
-				log.warn("Skipping semantic checks execution since none have been provided");
+				LOG.warn("Skipping semantic checks execution since none have been provided");
 		} else
-			log.warn("Skipping analysis execution since no abstract sate has been provided");
+			LOG.warn("Skipping analysis execution since no abstract sate has been provided");
 
 		return tool.getWarnings();
 	}
 
 	private void analyze(Collection<CFG> allCFGs, FileManager fileManager) {
 		A state = this.state.top();
-		TimerLogger.execAction(log, "Computing fixpoint over the whole program",
+		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
 					try {
 						interproc.fixpoint(new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)));
 					} catch (FixpointException e) {
-						log.fatal("Exception during fixpoint computation", e);
-						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
+						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
 					}
 				});
 
 		if (conf.isDumpAnalysis())
-			for (CFG cfg : IterationLogger.iterate(log, allCFGs, "Dumping analysis results", "cfgs")) {
+			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs")) {
 				for (CFGWithAnalysisResults<A, H, V> result : interproc.getAnalysisResultsOf(cfg))
 					dumpCFG(fileManager,
 							"analysis___" + (result.getId() == null ? "" : result.getId().hashCode() + "_"), result,
@@ -187,24 +188,24 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			throw new AnalysisExecutionException("Unable to initialize type inference", e);
 		}
 
-		TimerLogger.execAction(log, "Computing type information",
+		TimerLogger.execAction(LOG, "Computing type information",
 				() -> {
 					try {
 						typesInterproc.fixpoint(new AnalysisState<>(typesState, new Skip(SyntheticLocation.INSTANCE)));
 					} catch (FixpointException e) {
-						log.fatal("Exception during fixpoint computation", e);
-						throw new AnalysisExecutionException("Exception during fixpoint computation", e);
+						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
+						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
 					}
 				});
 
 		String message = conf.isDumpTypeInference()
 				? "Dumping type analysis and propagating it to cfgs"
 				: "Propagating type information to cfgs";
-		for (CFG cfg : IterationLogger.iterate(log, allCFGs, message, "cfgs")) {
+		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, message, "cfgs")) {
 			Collection<CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 					InferenceSystem<InferredTypes>>> results = typesInterproc.getAnalysisResultsOf(cfg);
 			if (results.isEmpty()) {
-				log.warn("No type information computed for '" + cfg + "': it is unreachable");
+				LOG.warn("No type information computed for '%s': it is unreachable", cfg);
 				continue;
 			}
 
@@ -255,14 +256,14 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		}
 	}
 
-	private void finalizeProgram(Program program) {
+	private static void finalizeProgram(Program program) {
 		// fill up the types cache by side effect on an external set
 		Caches.types().clear();
 		ExternalSet<Type> types = Caches.types().mkEmptySet();
 		program.getRegisteredTypes().forEach(types::add);
 		types = null;
 
-		TimerLogger.execAction(log, "Finalizing input program", () -> {
+		TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 			try {
 				program.validateAndFinalize();
 			} catch (ProgramValidationException e) {
@@ -271,13 +272,14 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		});
 	}
 
-	private void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
+	private static void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
 			Function<Statement, String> labelGenerator) {
-		try (Writer file = fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames())) {
-			cfg.dump(file, st -> labelGenerator.apply(st));
+		try {
+			fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
+					writer -> cfg.dump(writer, labelGenerator::apply));
 		} catch (IOException e) {
-			log.error("Exception while dumping the analysis results on " + cfg.getDescriptor().getFullSignature(),
-					e);
+			LOG.error("Exception while dumping the analysis results on %s", cfg.getDescriptor().getFullSignature());
+			LOG.error(e);
 		}
 	}
 }

@@ -68,7 +68,7 @@ public class IterableArray<E> implements Iterable<E> {
 		return new IteratorFromArray();
 	}
 
-	private class IteratorFromArray implements Iterator<E> {
+	private final class IteratorFromArray implements Iterator<E> {
 
 		private int pos;
 

@@ -1,10 +1,11 @@
 package it.unive.lisa.imp.types;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * The signed 64-bit floating point {@link it.unive.lisa.type.NumericType} of

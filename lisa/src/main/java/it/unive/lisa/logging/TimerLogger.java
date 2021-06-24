@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TimerLogger {
+public final class TimerLogger {
 
 	private TimerLogger() {
 		// this class is just a static holder
@@ -113,10 +113,9 @@ public class TimerLogger {
 	private static void execAux(Logger logger, Level logLevel, TimeFormat formatter, String message,
 			LoggableAction action) {
 		long startTime = System.nanoTime();
-		logger.log(logLevel, message + " [start]");
+		logger.log(logLevel, "%s [start]", message);
 		action.run();
-		logger.log(logLevel,
-				message + " [stop] [completed in " + formatter.format(System.nanoTime() - startTime) + "]");
+		logger.log(logLevel, "%s [stop] [completed in %s]", message, formatter.format(System.nanoTime() - startTime));
 	}
 
 	private static class Wrapper<T> {

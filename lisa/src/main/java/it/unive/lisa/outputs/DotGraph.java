@@ -1,8 +1,5 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,11 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
+
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
 
 /**
  * An auxiliary graph built from a {@link Graph} that can be dumped in dot
@@ -107,19 +109,13 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 */
 	protected static final String CONDITIONAL_EDGE_STYLE = "dashed";
 
-	private static String dotEscape(String extraLabel) {
-		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
-		String replace = escapeHtml4.replaceAll("\\n", "<BR/>");
-		return replace.replace("\\", "\\\\");
-	}
-
 	private final org.graphstream.graph.Graph graph, legend;
 
 	private final String title;
 
 	private final Map<N, Long> codes = new IdentityHashMap<>();
 
-	private long nextCode = 0;
+	private long nextCode;
 
 	/**
 	 * Builds a graph.
@@ -131,6 +127,12 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		this.graph = new MultiGraph("graph");
 		this.legend = legend;
 		this.title = title;
+	}
+
+	private static String dotEscape(String extraLabel) {
+		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
+		String replace = escapeHtml4.replace("\n", "<BR/>");
+		return replace.replace("\\", "\\\\");
 	}
 
 	/**
@@ -165,7 +167,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		n.setAttribute(LABEL, "<" + label + extraLabel + ">");
 	}
 
-	private String nodeName(long id) {
+	private static String nodeName(long id) {
 		return "node" + id;
 	}
 
@@ -343,10 +345,10 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		String replacement = LABEL + "=\"<";
 		String ending = ">];";
 		String endingReplacement = ">\"];";
-		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter();) {
+		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter()) {
 			String line;
 			while ((line = br.readLine()) != null) {
-				if (line.trim().startsWith("label"))
+				if (line.trim().startsWith(LABEL))
 					// skip graph title
 					continue;
 
@@ -374,6 +376,8 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		source.addSink(graph.graph);
 		try (StringReader sr = new StringReader(content)) {
 			source.readAll(sr);
+		} catch (Exception e) {
+			System.out.println();
 		}
 		return graph;
 	}
@@ -400,7 +404,8 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 				// so no need to quote them
 				quote = false;
 
-			return String.format("%s%s=%s%s%s", first ? "" : ",", key, quote ? "\"" : "", value, quote ? "\"" : "");
+			Object quoting = quote ? "\"" : "";
+			return String.format("%s%s=%s%s%s", first ? "" : ",", key, quoting, value, quoting);
 		}
 
 		@Override

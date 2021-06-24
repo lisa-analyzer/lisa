@@ -56,14 +56,13 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
-			T oldApprox = result.get(current);
-
 			try {
 				newApprox = implementation.semantics(current, entrystate);
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", current, graph), e);
 			}
 
+			T oldApprox = result.get(current);
 			if (oldApprox != null)
 				try {
 					newApprox = implementation.join(current, newApprox, oldApprox);
@@ -87,7 +86,6 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 
 	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
-		T entrystate = startstate;
 		Collection<N> preds = graph.predecessorsOf(current);
 		List<T> states = new ArrayList<>(preds.size());
 
@@ -102,6 +100,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 				}
 			}
 
+		T entrystate = startstate;
 		try {
 			for (T s : states)
 				if (entrystate == null)

@@ -43,7 +43,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	protected DefiniteForwardDataflowDomain<E> lubAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
 		Set<E> intersection = SetUtils.intersection(this.getDataflowElements(), other.getDataflowElements());
-		return new DefiniteForwardDataflowDomain<E>(domain, intersection, false, false);
+		return new DefiniteForwardDataflowDomain<>(domain, intersection, false, false);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class ExternalSetCache<T> {
 	/**
 	 * The next index available for new elements
 	 */
-	private int nextIndex;
+	private int nextIndex = 0;
 
 	/**
 	 * The index assigned to the {@code null} key, if any.
@@ -43,7 +43,7 @@ public class ExternalSetCache<T> {
 	 * @return the empty set
 	 */
 	public ExternalSet<T> mkEmptySet() {
-		return new BitExternalSet<T>(this);
+		return new BitExternalSet<>(this);
 	}
 
 	/**
@@ -55,7 +55,7 @@ public class ExternalSetCache<T> {
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSet(Iterable<T> iterable) {
-		return new BitExternalSet<T>(this, iterable);
+		return new BitExternalSet<>(this, iterable);
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class ExternalSetCache<T> {
 	 * @return the set
 	 */
 	public ExternalSet<T> mkSingletonSet(T element) {
-		return new BitExternalSet<T>(this, element);
+		return new BitExternalSet<>(this, element);
 	}
 
 	/**
@@ -77,7 +77,7 @@ public class ExternalSetCache<T> {
 	 * @return the set
 	 */
 	public ExternalSet<T> mkUniversalSet() {
-		return new UniversalExternalSet<T>(this);
+		return new UniversalExternalSet<>(this);
 	}
 
 	/**
@@ -87,7 +87,7 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}, or {@code -1}
 	 */
-	protected synchronized final int indexOf(T e) {
+	protected final synchronized int indexOf(T e) {
 		if (e == null)
 			return indexOfNull;
 
@@ -103,7 +103,7 @@ public class ExternalSetCache<T> {
 	 * 
 	 * @return the index of {@code e}
 	 */
-	protected synchronized final int indexOfOrAdd(T e) {
+	protected final synchronized int indexOfOrAdd(T e) {
 		if (e == null) {
 			if (indexOfNull == -1) {
 				elements.add(null);

@@ -103,7 +103,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
 
-public class EqualityContractVerification {
+public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
 	private static final CompilationUnit unit1 = new CompilationUnit(loc, "fake1", false);
@@ -345,7 +345,7 @@ public class EqualityContractVerification {
 	}
 
 	@Test
-	@Ignore
+	@Ignore("This serves as a quick way to check the whole codebase, including algorithms and other classes where equals/hashcode don't make sense")
 	public void testEqualsAndHashCode() throws ClassNotFoundException {
 		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner(false));
 		Set<String> all = scanner.getAllTypes();

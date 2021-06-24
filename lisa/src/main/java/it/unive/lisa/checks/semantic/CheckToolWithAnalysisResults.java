@@ -1,13 +1,14 @@
 package it.unive.lisa.checks.semantic;
 
+import java.util.Collection;
+import java.util.Map;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.program.cfg.CFG;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * An extension of {@link CheckTool} that also contains the results of the

@@ -101,7 +101,7 @@ public class AvailableExpressions
 		return result;
 	}
 
-	private boolean filter(ValueExpression expression) {
+	private static boolean filter(ValueExpression expression) {
 		if (expression instanceof Identifier)
 			return false;
 		if (expression instanceof Constant)

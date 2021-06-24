@@ -6,13 +6,14 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
 
 /**
  * Utility methods for operations on {@link Collection}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CollectionUtilities {
+public final class CollectionUtilities {
 
 	private CollectionUtilities() {
 		// this class is just a static holder
@@ -109,7 +110,7 @@ public class CollectionUtilities {
 	 *                         elements
 	 */
 	public static <T, C extends Collection<T>> void join(C first, C second, C result, BiPredicate<T, T> equalityTest,
-			BiFunction<T, T, T> joiner) {
+			BinaryOperator<T> joiner) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		boolean found;

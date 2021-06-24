@@ -16,7 +16,16 @@ import java.util.IdentityHashMap;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class VisitOnceWorkingSet<E> implements WorkingSet<E> {
+public final class VisitOnceWorkingSet<E> implements WorkingSet<E> {
+
+	private final WorkingSet<E> ws;
+
+	private final Collection<E> seen;
+
+	private VisitOnceWorkingSet(WorkingSet<E> ws) {
+		this.ws = ws;
+		this.seen = Collections.newSetFromMap(new IdentityHashMap<>());
+	}
 
 	/**
 	 * Yields a new, empty working set.
@@ -29,15 +38,6 @@ public class VisitOnceWorkingSet<E> implements WorkingSet<E> {
 	 */
 	public static <E> VisitOnceWorkingSet<E> mk(WorkingSet<E> ws) {
 		return new VisitOnceWorkingSet<>(ws);
-	}
-
-	private final WorkingSet<E> ws;
-
-	private final Collection<E> seen;
-
-	private VisitOnceWorkingSet(WorkingSet<E> ws) {
-		this.ws = ws;
-		this.seen = Collections.newSetFromMap(new IdentityHashMap<>());
 	}
 
 	@Override

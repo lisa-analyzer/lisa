@@ -1,5 +1,24 @@
 package it.unive.lisa;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
@@ -14,23 +33,6 @@ import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 /**
  * An utility class for instantiating analysis components, that is, modular
@@ -43,7 +45,9 @@ import org.reflections.scanners.SubTypesScanner;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAFactory {
+public final class LiSAFactory {
+
+	private static final Map<Class<?>, Class<?>> CUSTOM_DEFAULTS = new HashMap<>();
 
 	private LiSAFactory() {
 		// this class is just a static holder
@@ -53,7 +57,7 @@ public class LiSAFactory {
 			throws AnalysisSetupException {
 		try {
 			Constructor<T> constructor = component.getConstructor(argTypes);
-			return (T) constructor.newInstance(params);
+			return constructor.newInstance(params);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
 				| IllegalArgumentException
 				| InvocationTargetException e) {
@@ -72,12 +76,9 @@ public class LiSAFactory {
 
 			List<Integer> toWrap = new ArrayList<>();
 			for (int i = 0; i < types.length; i++)
-				if (types[i].isAssignableFrom(params[i].getClass()))
-					continue;
-				else if (needsWrapping(params[i].getClass(), types[i])) {
+				if (needsWrapping(params[i].getClass(), types[i])) 
 					toWrap.add(i);
-					continue;
-				} else
+				else if (!types[i].isAssignableFrom(params[i].getClass()))
 					continue outer;
 
 			candidates.put(constructor, toWrap);
@@ -86,12 +87,12 @@ public class LiSAFactory {
 		if (candidates.isEmpty())
 			throw new AnalysisSetupException(
 					"No suitable constructor of " + component.getSimpleName() + " found for argument types "
-							+ Arrays.toString(Arrays.stream(params).map(p -> p.getClass()).toArray(Class[]::new)));
+							+ Arrays.toString(Arrays.stream(params).map(Object::getClass).toArray(Class[]::new)));
 
 		if (candidates.size() > 1)
 			throw new AnalysisSetupException(
 					"Constructor call of " + component.getSimpleName() + " is ambiguous for argument types "
-							+ Arrays.toString(Arrays.stream(params).map(p -> p.getClass()).toArray(Class[]::new)));
+							+ Arrays.toString(Arrays.stream(params).map(Object::getClass).toArray(Class[]::new)));
 
 		for (int p : candidates.values().iterator().next())
 			params[p] = wrapParam(params[p]);
@@ -161,23 +162,21 @@ public class LiSAFactory {
 	public static <T> T getInstance(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
 			if (params != null && params.length != 0)
-				return (T) construct(component, findConstructorSignature(component, params), params);
+				return construct(component, findConstructorSignature(component, params), params);
 
 			DefaultParameters defaultParams = component.getAnnotation(DefaultParameters.class);
 			if (defaultParams == null)
-				return (T) construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
+				return construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
 
 			Object[] defaults = new Object[defaultParams.value().length];
 			for (int i = 0; i < defaults.length; i++)
 				defaults[i] = getInstance(defaultParams.value()[i]);
 
-			return (T) construct(component, findConstructorSignature(component, defaults), defaults);
+			return construct(component, findConstructorSignature(component, defaults), defaults);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}
 	}
-
-	private static final Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
 
 	/**
 	 * Registers a default implementation for {@code component}, taking
@@ -191,13 +190,13 @@ public class LiSAFactory {
 	 *                                  {@code component}
 	 */
 	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
-		customDefaults.put(component, defaultImplementation);
+		CUSTOM_DEFAULTS.put(component, defaultImplementation);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> Class<? extends T> getDefaultClassFor(Class<T> component) {
-		if (customDefaults.containsKey(component))
-			return (Class<? extends T>) customDefaults.get(component);
+		if (CUSTOM_DEFAULTS.containsKey(component))
+			return (Class<? extends T>) CUSTOM_DEFAULTS.get(component);
 		DefaultImplementation defaultImpl = component.getAnnotation(DefaultImplementation.class);
 		if (defaultImpl == null)
 			return null;
@@ -255,7 +254,7 @@ public class LiSAFactory {
 	 * 
 	 * @param <T> the type of the component
 	 */
-	public static class ConfigurableComponent<T> {
+	public static final class ConfigurableComponent<T> {
 		private static final Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 
 		private final Class<T> component;

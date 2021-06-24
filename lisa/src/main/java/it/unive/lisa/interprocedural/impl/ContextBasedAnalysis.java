@@ -45,7 +45,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> extends CallGraphBasedAnalysis<A, H, V> {
 
-	private static final Logger log = LogManager.getLogger(ContextBasedAnalysis.class);
+	private static final Logger LOG = LogManager.getLogger(ContextBasedAnalysis.class);
 
 	/**
 	 * The cache of the fixpoints' results. {@link Map#keySet()} will contain
@@ -84,7 +84,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		if (program.getEntryPoints().isEmpty())
 			throw new FixpointException("The program contains no entrypoints");
 
-		TimerLogger.execAction(log, "Computing fixpoint over the whole program", () -> this.fixpointAux(entryState));
+		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> this.fixpointAux(entryState));
 	}
 
 	private static String ordinal(int i) {
@@ -105,9 +105,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		this.results = null;
 		int iter = 0;
 		do {
-			log.info("Performing " + ordinal(iter + 1) + " fixpoint iteration");
+			LOG.info("Performing %s fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (CFG cfg : IterationLogger.iterate(log, program.getEntryPoints(), "Processing entrypoints", "entries"))
+			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
@@ -192,7 +192,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				CFGWithAnalysisResults<A, H, V> fixpointResult = null;
 				try {
 					fixpointResult = computeFixpoint(cfg, token, prepared);
-				} catch (FixpointException | InterproceduralAnalysisException e) {
+				} catch (FixpointException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}
 
@@ -216,11 +216,11 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
-			throws FixpointException, InterproceduralAnalysisException, SemanticException {
+			throws FixpointException, SemanticException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
 		fixpointResult.setId(localToken.toString());
 		Pair<Boolean, CFGWithAnalysisResults<A, H, V>> res = results.putResult(cfg, localToken, fixpointResult);
-		if (res.getLeft())
+		if (Boolean.TRUE.equals(res.getLeft()))
 			fixpointTriggers.add(cfg);
 		return res.getRight();
 	}

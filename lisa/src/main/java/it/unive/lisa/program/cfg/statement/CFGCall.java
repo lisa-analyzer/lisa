@@ -1,5 +1,12 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,11 +23,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -176,8 +178,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, callState, params);
-		// the lub will include the metavariable inside the state
-		// AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
@@ -189,7 +189,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			// if(! (expr instanceof Skip)) //It might be the case it chose a
+			//It might be the case it chose a
 			// target with void return type
 			getMetaVariables().add((Identifier) expr);
 
@@ -202,10 +202,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = returned.bottom();
-		for (SymbolicExpression expr : returned.getComputedExpressions())
-		// if(! (expr instanceof Skip))
-		{
-			AnalysisState<A, H, V> tmp = returned.assign((Identifier) meta, expr, this);
+		for (SymbolicExpression expr : returned.getComputedExpressions()) {
+			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
 			result = result.lub(tmp.smallStepSemantics(meta, this));
 			// We need to perform this evaluation of the identifier not pushed
 			// with the scope since otherwise

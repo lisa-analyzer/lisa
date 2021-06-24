@@ -42,7 +42,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	@Override
 	protected PossibleForwardDataflowDomain<E> lubAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
 		Set<E> union = SetUtils.union(this.getDataflowElements(), other.getDataflowElements());
-		return new PossibleForwardDataflowDomain<E>(domain, union, false, false);
+		return new PossibleForwardDataflowDomain<>(domain, union, false, false);
 	}
 
 	@Override

@@ -126,7 +126,7 @@ public class WorksetTest {
 		tester.test(subject, lifo, elements);
 		
 		subject.getSeen().forEach(s -> { set.add(s); list.add(s); }); 
-		assertTrue("Set of seen elements contains duplicates", set.size() == list.size());
+		assertEquals("Set of seen elements contains duplicates", set.size(), list.size());
 		assertTrue("Set of seen elements does not contain all elements", elementsSet.containsAll(set) && set.containsAll(elementsSet));
 	}
 	

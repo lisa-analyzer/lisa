@@ -1,5 +1,8 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,8 +17,6 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Arrays;
-import java.util.Objects;
 
 /**
  * A call to another procedure. This concrete instance of this class determines

@@ -1,5 +1,14 @@
 package it.unive.lisa.analysis.nonrelational;
 
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -12,13 +21,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -190,7 +192,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
 			return glbAux(other.lattice, other.function, other);
 
-		M lift = functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		M lift = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 		return glbAux(lift.lattice, lift.function, other);
 	}
 
@@ -276,7 +278,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private M liftIdentifiers(Function<Identifier, Identifier> lifter) throws SemanticException {
+	private M liftIdentifiers(UnaryOperator<Identifier> lifter) throws SemanticException {
 		if (isBottom() || isTop())
 			return (M) this;
 

@@ -10,8 +10,14 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
+public final class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 
+	private final Deque<E> ws;
+
+	private ConcurrentLIFOWorkingSet() {
+		ws = new ConcurrentLinkedDeque<>();
+	}
+	
 	/**
 	 * Yields a new, empty working set.
 	 * 
@@ -22,12 +28,6 @@ public class ConcurrentLIFOWorkingSet<E> implements WorkingSet<E> {
 	 */
 	public static <E> ConcurrentLIFOWorkingSet<E> mk() {
 		return new ConcurrentLIFOWorkingSet<>();
-	}
-
-	private final Deque<E> ws;
-
-	private ConcurrentLIFOWorkingSet() {
-		ws = new ConcurrentLinkedDeque<>();
 	}
 
 	@Override

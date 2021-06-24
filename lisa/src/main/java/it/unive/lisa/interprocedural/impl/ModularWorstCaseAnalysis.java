@@ -47,8 +47,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> implements InterproceduralAnalysis<A, H, V> {
 
-	private static final Logger log = LogManager
-			.getLogger(it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis.class);
+	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
 	/**
 	 * The program.
@@ -72,7 +71,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public final void fixpoint(AnalysisState<A, H, V> entryState) throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
+		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				AnalysisState<A, H, V> prepared = entryState;

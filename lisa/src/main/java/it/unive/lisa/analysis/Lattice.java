@@ -17,23 +17,23 @@ public interface Lattice<L extends Lattice<L>> {
 	/**
 	 * A string constant that can be used to represent top values.
 	 */
-	public static final String TOP_STRING = "#TOP#";
+	String TOP_STRING = "#TOP#";
 
 	/**
 	 * A {@link DomainRepresentation} that can be used to represent top values.
 	 */
-	public static final DomainRepresentation TOP_REPR = new StringRepresentation(TOP_STRING);
+	DomainRepresentation TOP_REPR = new StringRepresentation(TOP_STRING);
 
 	/**
 	 * A string constant that can be used to represent bottom values.
 	 */
-	public static final String BOTTOM_STRING = "_|_";
+	String BOTTOM_STRING = "_|_";
 
 	/**
 	 * A {@link DomainRepresentation} that can be used to represent bottom
 	 * values.
 	 */
-	public static final DomainRepresentation BOTTOM_REPR = new StringRepresentation(BOTTOM_STRING);
+	DomainRepresentation BOTTOM_REPR = new StringRepresentation(BOTTOM_STRING);
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and
@@ -103,7 +103,7 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @return {@code true} if this is the top of the lattice
 	 */
-	public default boolean isTop() {
+	default boolean isTop() {
 		return this == top();
 	}
 
@@ -117,7 +117,7 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @return {@code true} if this is the bottom of the lattice
 	 */
-	public default boolean isBottom() {
+	default boolean isBottom() {
 		return this == bottom();
 	}
 }

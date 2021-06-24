@@ -10,8 +10,14 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
+public final class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 
+	private final Deque<E> ws;
+
+	private ConcurrentFIFOWorkingSet() {
+		ws = new ConcurrentLinkedDeque<>();
+	}
+	
 	/**
 	 * Yields a new, empty working set.
 	 * 
@@ -22,12 +28,6 @@ public class ConcurrentFIFOWorkingSet<E> implements WorkingSet<E> {
 	 */
 	public static <E> ConcurrentFIFOWorkingSet<E> mk() {
 		return new ConcurrentFIFOWorkingSet<>();
-	}
-
-	private final Deque<E> ws;
-
-	private ConcurrentFIFOWorkingSet() {
-		ws = new ConcurrentLinkedDeque<>();
 	}
 
 	@Override

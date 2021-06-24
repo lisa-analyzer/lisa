@@ -11,16 +11,16 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Caches {
-
-	private Caches() {
-		// this class is just a static holder
-	}
-
+public final class Caches {
+	
 	/**
 	 * The cache of types
 	 */
 	private static final ExternalSetCache<Type> types = new ExternalSetCache<>();
+
+	private Caches() {
+		// this class is just a static holder
+	}
 
 	/**
 	 * Yields the globally defined cache for {@link ExternalSet}s containing

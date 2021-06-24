@@ -58,7 +58,7 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  */
 public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 
-	private static final Logger log = LogManager.getLogger(CFG.class);
+	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
 	/**
 	 * The default number of fixpoint iteration on a given node after which
@@ -838,7 +838,7 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public <A extends AbstractState<A, H, V>,
+	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
 					AnalysisState<A, H, V> singleton,
@@ -862,10 +862,10 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
-		return new CFGWithAnalysisResults<A, H, V>(this, singleton, startingPoints, finalResults);
+		return new CFGWithAnalysisResults<>(this, singleton, startingPoints, finalResults);
 	}
 
-	private class CFGFixpoint<A extends AbstractState<A, H, V>,
+	private final class CFGFixpoint<A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>>
 			implements FixpointImplementation<Statement, Edge,
@@ -980,8 +980,9 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 					else
 						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
 				else {
-					log.warn(node + " is the first follower of a control flow structure, it is being"
-							+ " simplified but has multiple followers: the first follower of the conditional structure will be lost");
+					LOG.warn(
+							"%s is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+							node);
 					cfs.setFirstFollower(null);
 				}
 	}
@@ -1012,8 +1013,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 		Collection<Statement> followers = followersOf(node);
 
 		if (predecessors.isEmpty() && followers.isEmpty()) {
-			log.warn("Simplifying the only statement of '" + this
-					+ "': all variables will be made visible for the entire cfg");
+			LOG.warn("Simplifying the only statement of '%s': all variables will be made visible for the entire cfg",
+					this);
 			starting.forEach(v -> v.setScopeStart(null));
 			ending.forEach(v -> v.setScopeEnd(null));
 			return;
@@ -1026,8 +1027,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				// no predecessors: move the starting scope forward
 				Statement follow;
 				if (followers.size() > 1) {
-					log.warn(String.format(format, "starting", "no predecessors and multiple followers", starting,
-							"from the start"));
+					LOG.warn(format, "starting", "no predecessors and multiple followers", starting,
+							"from the start");
 					follow = null;
 				} else
 					follow = followers.iterator().next();
@@ -1036,7 +1037,7 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				// move the starting scope backward
 				Statement pred;
 				if (predecessors.size() > 1) {
-					log.warn(String.format(format, "starting", "multiple predecessors", starting, "from the start"));
+					LOG.warn(format, "starting", "multiple predecessors", starting, "from the start");
 					pred = null;
 				} else
 					pred = predecessors.iterator().next();
@@ -1048,8 +1049,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				// no followers: move the ending scope backward
 				Statement pred;
 				if (predecessors.size() > 1) {
-					log.warn(String.format(format, "ending", "no followers and multiple predecessors", ending,
-							"until the end"));
+					LOG.warn(format, "ending", "no followers and multiple predecessors", ending,
+							"until the end");
 					pred = null;
 				} else
 					pred = predecessors.iterator().next();
@@ -1058,7 +1059,7 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				// move the ending scope forward
 				Statement follow;
 				if (followers.size() > 1) {
-					log.warn(String.format(format, "ending", "multiple followers", ending, "until the end"));
+					LOG.warn(format, "ending", "multiple followers", ending, "until the end");
 					follow = null;
 				} else
 					follow = followers.iterator().next();
@@ -1274,15 +1275,14 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 		Statement recent = null;
 		int min = Integer.MAX_VALUE, m;
 		for (ControlFlowStructure cf : cfs)
-			if (!filter.test(cf))
-				continue;
-			else if (recent == null) {
-				recent = cf.getCondition();
-				min = cf.distance(st);
-			} else if ((m = cf.distance(st)) < min || min == -1) {
-				recent = cf.getCondition();
-				min = m;
-			}
+			if (filter.test(cf))
+				if (recent == null) {
+					recent = cf.getCondition();
+					min = cf.distance(st);
+				} else if ((m = cf.distance(st)) < min || min == -1) {
+					recent = cf.getCondition();
+					min = m;
+				}
 
 		if (min == -1)
 			throw new IllegalStateException("Conditional flow structures containing " + pp

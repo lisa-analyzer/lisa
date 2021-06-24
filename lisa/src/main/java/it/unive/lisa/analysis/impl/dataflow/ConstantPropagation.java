@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.impl.dataflow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
@@ -15,10 +20,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An implementation of the constant propagation dataflow analysis, that focuses
@@ -30,7 +31,7 @@ public class ConstantPropagation
 		implements DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
 
 	private final Identifier id;
-	private final Integer v;
+	private final Integer constant;
 
 	/**
 	 * Builds an empty constant propagation object.
@@ -41,7 +42,7 @@ public class ConstantPropagation
 
 	private ConstantPropagation(Identifier id, Integer v) {
 		this.id = id;
-		this.v = v;
+		this.constant = v;
 	}
 
 	@Override
@@ -54,7 +55,7 @@ public class ConstantPropagation
 		return Collections.singleton(id);
 	}
 
-	private Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+	private static Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 
 		if (e instanceof Constant) {
 			Constant c = (Constant) e;
@@ -64,7 +65,7 @@ public class ConstantPropagation
 		if (e instanceof Identifier) {
 			for (ConstantPropagation cp : domain.getDataflowElements())
 				if (cp.id.equals(e))
-					return cp.v;
+					return cp.constant;
 
 			return null;
 		}
@@ -153,7 +154,7 @@ public class ConstantPropagation
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((v == null) ? 0 : v.hashCode());
+		result = prime * result + ((constant == null) ? 0 : constant.hashCode());
 		return result;
 	}
 
@@ -171,10 +172,10 @@ public class ConstantPropagation
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (v == null) {
-			if (other.v != null)
+		if (constant == null) {
+			if (other.constant != null)
 				return false;
-		} else if (!v.equals(other.v))
+		} else if (!constant.equals(other.constant))
 			return false;
 		return true;
 	}
@@ -191,12 +192,12 @@ public class ConstantPropagation
 
 	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(v));
+		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}
 
 	@Override
 	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
-		return new ConstantPropagation((Identifier) id.pushScope(scope), v);
+		return new ConstantPropagation((Identifier) id.pushScope(scope), constant);
 	}
 
 	@Override
@@ -204,6 +205,6 @@ public class ConstantPropagation
 		if (!(id instanceof OutOfScopeIdentifier))
 			return this;
 
-		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), v);
+		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), constant);
 	}
 }

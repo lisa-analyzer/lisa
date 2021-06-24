@@ -1,6 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.outputs.DotGraph;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -10,7 +9,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.outputs.DotGraph;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.<br>

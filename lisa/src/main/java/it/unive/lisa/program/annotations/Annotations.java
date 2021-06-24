@@ -1,12 +1,14 @@
 package it.unive.lisa.program.annotations;
 
-import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 
 /**
  * A collection of annotations.
@@ -114,7 +116,7 @@ public class Annotations implements Iterable<Annotation> {
 	 *             annotations, {@code false} otherwise
 	 */
 	public final boolean contains(AnnotationMatcher m) {
-		return annotations.stream().anyMatch(ann -> m.matches(ann));
+		return annotations.stream().anyMatch(m::matches);
 	}
 
 	/**
@@ -125,7 +127,7 @@ public class Annotations implements Iterable<Annotation> {
 	 * @return the annotations that are matched by the matcher {@code m}
 	 */
 	public final Annotations getAnnotations(AnnotationMatcher m) {
-		return new Annotations(annotations.stream().filter(ann -> m.matches(ann)).collect(Collectors.toList()));
+		return new Annotations(annotations.stream().filter(m::matches).collect(Collectors.toList()));
 	}
 
 	/**

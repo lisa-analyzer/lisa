@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.impl.nonInterference;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
@@ -17,8 +20,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.IdentityHashMap;
-import java.util.Map;
 
 /**
  * The type-system based implementation of the non interference analysis.
@@ -29,6 +30,10 @@ import java.util.Map;
  *          "https://en.wikipedia.org/wiki/Non-interference_(security)">Non-interference</a>
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
+
+	private static final Annotation LOW_CONFIDENTIALITY_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
+	
+	private static final Annotation HIGH_INTEGRITY_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
 
 	private static final byte NI_BOTTOM = 0;
 
@@ -200,15 +205,15 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return res;
 	}
 
-	private NonInterference mkLowHigh() {
+	private static NonInterference mkLowHigh() {
 		return new NonInterference(NI_LOW, NI_HIGH);
 	}
 
-	private NonInterference mkLowLow() {
+	private static NonInterference mkLowLow() {
 		return new NonInterference(NI_LOW, NI_LOW);
 	}
 
-	private NonInterference mkHighHigh() {
+	private static NonInterference mkHighHigh() {
 		return new NonInterference(NI_HIGH, NI_HIGH);
 	}
 
@@ -253,17 +258,14 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
 	}
 
-	private static final Annotation LOW_CONFIDENTIALITY = new Annotation("lisa.ni.LowConfidentiality");
-	private static final Annotation HIGH_INTEGRITY = new Annotation("lisa.ni.HighIntegrity");
-
 	@Override
 	public NonInterference variable(Identifier id, ProgramPoint pp) {
 		Annotations annots = id.getAnnotations();
 		if (annots.isEmpty())
 			return mkHighLow();
 
-		boolean lowConf = annots.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY.getAnnotationName()));
-		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY.getAnnotationName()));
+		boolean lowConf = annots.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY_ANNOTATION.getAnnotationName()));
+		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY_ANNOTATION.getAnnotationName()));
 
 		if (lowConf && highInt)
 			return mkLowHigh();

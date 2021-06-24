@@ -1,7 +1,8 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.program.cfg.CFGDescriptor;
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.CFGDescriptor;
 
 /**
  * A warning reported by LiSA on the descriptor of one of the CFGs under

@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.impl.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,10 +25,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -50,7 +51,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
 	public PointBasedHeap() {
-		this(new HeapEnvironment<AllocationSites>(new AllocationSites()));
+		this(new HeapEnvironment<>(new AllocationSites()));
 	}
 
 	/**
@@ -224,14 +225,6 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return expression.accept(new Rewriter());
 	}
 
-	private Set<ValueExpression> resolveIdentifier(Identifier v) {
-		Set<ValueExpression> result = new HashSet<>();
-		for (AllocationSite site : heapEnv.getState(v))
-			result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
-
-		return result;
-	}
-
 	@Override
 	public PointBasedHeap popScope(ScopeToken scope) throws SemanticException {
 		return from(new PointBasedHeap(heapEnv.popScope(scope)));
@@ -309,11 +302,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer))
-				if (heapEnv.getKeys().contains(expression))
-					return new ExpressionSet<>(resolveIdentifier(expression));
+			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
+				return new ExpressionSet<>(resolveIdentifier(expression));
 
 			return new ExpressionSet<>(expression);
+		}
+
+		private Set<ValueExpression> resolveIdentifier(Identifier v) {
+			Set<ValueExpression> result = new HashSet<>();
+			for (AllocationSite site : heapEnv.getState(v))
+				result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
+
+			return result;
 		}
 	}
 }

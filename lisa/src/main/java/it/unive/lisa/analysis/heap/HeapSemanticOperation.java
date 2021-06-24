@@ -1,11 +1,13 @@
 package it.unive.lisa.analysis.heap;
 
-import it.unive.lisa.symbolic.value.Identifier;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.symbolic.value.Identifier;
 
 /**
  * A semantic operation on the heap state of the program, that provides a
@@ -13,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FunctionalInterface
 public interface HeapSemanticOperation {
 
 	/**
@@ -38,7 +41,7 @@ public interface HeapSemanticOperation {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static final class HeapReplacement {
+	final class HeapReplacement {
 
 		/**
 		 * The set of identifiers that are the sources of the replacement

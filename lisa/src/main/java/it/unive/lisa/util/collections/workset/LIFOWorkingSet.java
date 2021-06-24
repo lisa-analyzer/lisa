@@ -1,6 +1,7 @@
 package it.unive.lisa.util.collections.workset;
 
-import java.util.Stack;
+import java.util.Deque;
+import java.util.LinkedList;
 
 /**
  * A last-in, first-out working set. This implementation is <b>not</b>
@@ -10,8 +11,14 @@ import java.util.Stack;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class LIFOWorkingSet<E> implements WorkingSet<E> {
+public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 
+	private final Deque<E> ws;
+
+	private LIFOWorkingSet() {
+		ws = new LinkedList<>();
+	}
+	
 	/**
 	 * Yields a new, empty working set.
 	 * 
@@ -22,12 +29,6 @@ public class LIFOWorkingSet<E> implements WorkingSet<E> {
 	 */
 	public static <E> LIFOWorkingSet<E> mk() {
 		return new LIFOWorkingSet<>();
-	}
-
-	private final Stack<E> ws;
-
-	private LIFOWorkingSet() {
-		ws = new Stack<>();
 	}
 
 	@Override

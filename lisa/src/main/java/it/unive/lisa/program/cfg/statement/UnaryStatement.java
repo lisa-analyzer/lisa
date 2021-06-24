@@ -1,10 +1,11 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A unary statement.
@@ -24,7 +25,7 @@ public abstract class UnaryStatement extends Statement {
 	 *                       source file. If unknown, use {@code null}
 	 * @param expression the argument of this statement
 	 */
-	public UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {
+	protected UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location);
 		Objects.requireNonNull(expression, "The argument of a unary statement cannot be null");
 		this.expression = expression;

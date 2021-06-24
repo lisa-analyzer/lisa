@@ -1,15 +1,16 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.function.Function;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -28,6 +29,10 @@ import java.util.function.Function;
  */
 public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
 		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V>> {
+
+	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
+
+	private static final String CANNOT_LUB_ERROR = "Cannot perform the least upper bound of two graphs with different descriptor";
 
 	/**
 	 * The map storing the analysis results
@@ -177,7 +182,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 */
 	public CFGWithAnalysisResults<A, H, V> join(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
 				results.lub(other.results));
@@ -186,7 +191,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public CFGWithAnalysisResults<A, H, V> lub(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		CFGWithAnalysisResults<A, H, V> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
 				results.lub(other.results));
@@ -197,7 +202,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public CFGWithAnalysisResults<A, H, V> widening(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		CFGWithAnalysisResults<A, H,
 				V> widen = new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
@@ -212,17 +217,14 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 			if (other.id == null)
 				return null;
 
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 		}
 
 		if (other.id == null)
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 
 		if (!id.equals(other.id))
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 
 		return id;
 	}
@@ -230,7 +232,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
 	}

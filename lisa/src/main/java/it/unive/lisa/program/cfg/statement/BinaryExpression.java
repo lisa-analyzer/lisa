@@ -1,9 +1,10 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A binary expression.
@@ -26,7 +27,7 @@ public abstract class BinaryExpression extends Expression {
 	 * @param left     the left hand-side of the expression
 	 * @param right    the right hand-side of the expression
 	 */
-	public BinaryExpression(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	protected BinaryExpression(CFG cfg, CodeLocation location, Expression left, Expression right) {
 		super(cfg, location);
 		Objects.requireNonNull(left, "The left-handside of a binary expression cannot be null");
 		Objects.requireNonNull(right, "The right-handside of a binary expression cannot be null");

@@ -21,7 +21,7 @@ public abstract class WarningWithLocation extends Warning {
 	 *                     located. If unknown, use {@code, null}
 	 * @param message  the message of this warning
 	 */
-	public WarningWithLocation(CodeLocation location, String message) {
+	protected WarningWithLocation(CodeLocation location, String message) {
 		super(message);
 		this.location = location;
 	}

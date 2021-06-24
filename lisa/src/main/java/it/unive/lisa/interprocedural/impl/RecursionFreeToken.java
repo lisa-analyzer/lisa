@@ -1,16 +1,17 @@
 package it.unive.lisa.interprocedural.impl;
 
-import it.unive.lisa.analysis.ScopeToken;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import it.unive.lisa.analysis.ScopeToken;
+
 /**
  * A context sensitive token representing an entire call chain up until a
  * recursion.
  */
-public class RecursionFreeToken implements ContextSensitivityToken {
+public final class RecursionFreeToken implements ContextSensitivityToken {
 
 	private static final RecursionFreeToken singleton = new RecursionFreeToken(null);
 

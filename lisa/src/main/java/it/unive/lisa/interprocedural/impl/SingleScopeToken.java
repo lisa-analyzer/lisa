@@ -1,12 +1,13 @@
 package it.unive.lisa.interprocedural.impl;
 
-import it.unive.lisa.analysis.ScopeToken;
 import java.util.Objects;
+
+import it.unive.lisa.analysis.ScopeToken;
 
 /**
  * A context sensitive token representing a single {@link ScopeToken}.
  */
-public class SingleScopeToken implements ContextSensitivityToken {
+public final class SingleScopeToken implements ContextSensitivityToken {
 
 	private static final SingleScopeToken singleton = new SingleScopeToken(null);
 

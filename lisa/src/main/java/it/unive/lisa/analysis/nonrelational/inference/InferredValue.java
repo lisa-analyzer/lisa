@@ -41,7 +41,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException;
 
 	/**
@@ -53,7 +53,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @param <T> the type of {@link InferredValue}
 	 */
-	public static class InferredPair<T extends InferredValue<T>> extends BaseLattice<InferredPair<T>> {
+	class InferredPair<T extends InferredValue<T>> extends BaseLattice<InferredPair<T>> {
 
 		private final T domain;
 
@@ -188,7 +188,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	static class InferredPairRepresentation extends PairRepresentation {
+	class InferredPairRepresentation extends PairRepresentation {
 
 		/**
 		 * Builds a new representation.

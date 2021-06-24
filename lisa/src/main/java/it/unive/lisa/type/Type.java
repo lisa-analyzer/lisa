@@ -17,7 +17,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isNumericType() {
+	default boolean isNumericType() {
 		return this instanceof NumericType;
 	}
 
@@ -28,7 +28,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link NumericType}, or {@code null}
 	 */
-	public default NumericType asNumericType() {
+	default NumericType asNumericType() {
 		return isNumericType() ? (NumericType) this : null;
 	}
 
@@ -38,7 +38,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isBooleanType() {
+	default boolean isBooleanType() {
 		return this instanceof BooleanType;
 	}
 
@@ -49,7 +49,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link BooleanType}, or {@code null}
 	 */
-	public default BooleanType asBooleanType() {
+	default BooleanType asBooleanType() {
 		return isBooleanType() ? (BooleanType) this : null;
 	}
 
@@ -59,7 +59,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isStringType() {
+	default boolean isStringType() {
 		return this instanceof StringType;
 	}
 
@@ -70,7 +70,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link StringType}, or {@code null}
 	 */
-	public default StringType asStringType() {
+	default StringType asStringType() {
 		return isStringType() ? (StringType) this : null;
 	}
 
@@ -80,7 +80,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isUntyped() {
+	default boolean isUntyped() {
 		return this instanceof Untyped;
 	}
 
@@ -91,7 +91,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link Untyped}, or {@code null}
 	 */
-	public default Untyped asUntyped() {
+	default Untyped asUntyped() {
 		return isUntyped() ? (Untyped) this : null;
 	}
 
@@ -101,7 +101,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isVoidType() {
+	default boolean isVoidType() {
 		return this instanceof VoidType;
 	}
 
@@ -112,7 +112,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link VoidType}, or {@code null}
 	 */
-	public default VoidType asVoidType() {
+	default VoidType asVoidType() {
 		return isVoidType() ? (VoidType) this : null;
 	}
 
@@ -122,7 +122,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isPointerType() {
+	default boolean isPointerType() {
 		return this instanceof PointerType;
 	}
 
@@ -133,7 +133,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link PointerType}, or {@code null}
 	 */
-	public default PointerType asPointerType() {
+	default PointerType asPointerType() {
 		return isPointerType() ? (PointerType) this : null;
 	}
 
@@ -143,7 +143,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isArrayType() {
+	default boolean isArrayType() {
 		return this instanceof ArrayType;
 	}
 
@@ -154,7 +154,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link ArrayType}, or {@code null}
 	 */
-	public default ArrayType asArrayType() {
+	default ArrayType asArrayType() {
 		return isArrayType() ? (ArrayType) this : null;
 	}
 
@@ -164,7 +164,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isNullType() {
+	default boolean isNullType() {
 		return this instanceof NullType;
 	}
 
@@ -175,7 +175,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link NullType}, or {@code null}
 	 */
-	public default NullType asNullType() {
+	default NullType asNullType() {
 		return isNullType() ? (NullType) this : null;
 	}
 
@@ -185,7 +185,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isUnitType() {
+	default boolean isUnitType() {
 		return this instanceof UnitType;
 	}
 
@@ -196,7 +196,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link UnitType}, or {@code null}
 	 */
-	public default UnitType asUnitType() {
+	default UnitType asUnitType() {
 		return isUnitType() ? (UnitType) this : null;
 	}
 
@@ -206,7 +206,7 @@ public interface Type {
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public default boolean isTypeTokenType() {
+	default boolean isTypeTokenType() {
 		return this instanceof TypeTokenType;
 	}
 
@@ -217,7 +217,7 @@ public interface Type {
 	 * 
 	 * @return this type casted as {@link TypeTokenType}, or {@code null}
 	 */
-	public default TypeTokenType asTypeTokenType() {
+	default TypeTokenType asTypeTokenType() {
 		return isTypeTokenType() ? (TypeTokenType) this : null;
 	}
 

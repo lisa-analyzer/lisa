@@ -2,6 +2,8 @@ package it.unive.lisa.cron.interprocedural;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
@@ -13,7 +15,6 @@ import it.unive.lisa.analysis.impl.numeric.Sign;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.impl.RecursionFreeToken;
-import org.junit.Test;
 
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 

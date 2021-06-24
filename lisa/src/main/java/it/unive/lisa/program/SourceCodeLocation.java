@@ -1,9 +1,11 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Objects;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A location of an element in the source code represented by the path to the

@@ -1,5 +1,7 @@
 package it.unive.lisa.interprocedural.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,7 +9,6 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link CFG}s to {@link CFGResults}s. This

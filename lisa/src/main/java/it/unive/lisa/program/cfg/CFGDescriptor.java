@@ -1,18 +1,20 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.program.CodeElement;
-import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.annotations.Annotation;
-import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
  * A descriptor of a CFG, containing the debug informations (source file, line,

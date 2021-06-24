@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import it.unive.lisa.analysis.BaseLattice;
@@ -77,11 +78,11 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@SuppressWarnings("unchecked")
-	private D update(Supplier<Boolean> guard, Supplier<Collection<E>> gen, Supplier<Collection<E>> kill) {
+	private D update(BooleanSupplier guard, Supplier<Collection<E>> gen, Supplier<Collection<E>> kill) {
 		if (isBottom())
 			return (D) this;
 
-		if (guard.get())
+		if (guard.getAsBoolean())
 			return (D) this;
 
 		Set<E> updated = new HashSet<>(getDataflowElements());

@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.value;
 
+import java.util.List;
+
 import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -11,7 +13,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import java.util.List;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
@@ -42,7 +43,7 @@ public interface ValueDomain<D extends ValueDomain<D>>
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public default D applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp) throws SemanticException {
+	default D applySubstitution(List<HeapReplacement> substitution, ProgramPoint pp) throws SemanticException {
 		if (isTop() || isBottom() || substitution == null || substitution.isEmpty())
 			return (D) this;
 

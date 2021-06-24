@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 
@@ -16,7 +17,7 @@ import it.unive.lisa.util.collections.IterableArray;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IterationLogger {
+public final class IterationLogger {
 
 	private IterationLogger() {
 		// this class is just a static holder

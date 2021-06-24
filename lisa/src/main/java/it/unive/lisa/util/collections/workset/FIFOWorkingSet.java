@@ -11,7 +11,13 @@ import java.util.LinkedList;
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public class FIFOWorkingSet<E> implements WorkingSet<E> {
+public final class FIFOWorkingSet<E> implements WorkingSet<E> {
+
+	private final Deque<E> ws;
+
+	private FIFOWorkingSet() {
+		ws = new LinkedList<>();
+	}
 
 	/**
 	 * Yields a new, empty working set.
@@ -23,12 +29,6 @@ public class FIFOWorkingSet<E> implements WorkingSet<E> {
 	 */
 	public static <E> FIFOWorkingSet<E> mk() {
 		return new FIFOWorkingSet<>();
-	}
-
-	private final Deque<E> ws;
-
-	private FIFOWorkingSet() {
-		ws = new LinkedList<>();
 	}
 
 	@Override

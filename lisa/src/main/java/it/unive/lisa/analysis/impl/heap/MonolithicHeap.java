@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.impl.heap;
 
+import java.util.Collections;
+import java.util.List;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
@@ -17,8 +20,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -35,12 +36,6 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	private static final String MONOLITH_NAME = "heap";
 
 	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
-
-	/**
-	 * Builds a new instance.
-	 */
-	public MonolithicHeap() {
-	}
 
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
@@ -132,7 +127,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return isTop() == other.isTop() && isBottom() == other.isBottom();
 	}
 
-	private class Rewriter extends BaseHeapDomain.Rewriter {
+	private static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,

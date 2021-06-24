@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
@@ -9,8 +13,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -110,14 +112,14 @@ public class InferenceSystem<T extends InferredValue<T>>
 	public InferenceSystem<T> top() {
 		// we do not redefine isTop() since we can ignore 'inferred':
 		// we can infer a non-top value even with a top environment
-		return new InferenceSystem<T>(lattice.top(), null, inferred.top());
+		return new InferenceSystem<>(lattice.top(), null, inferred.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
 		// we do not redefine isBottom() since we can ignore 'inferred':
 		// we can infer a non-bottom value even with a top environment
-		return new InferenceSystem<T>(lattice.bottom(), null, inferred.bottom());
+		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
 	}
 
 	@Override

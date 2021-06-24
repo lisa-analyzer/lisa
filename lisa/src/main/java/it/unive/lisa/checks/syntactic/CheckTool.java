@@ -1,5 +1,9 @@
 package it.unive.lisa.checks.syntactic;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -9,9 +13,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An auxiliary tool that can be used by checks during their execution. It

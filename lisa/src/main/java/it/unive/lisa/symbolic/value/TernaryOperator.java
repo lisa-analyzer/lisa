@@ -36,7 +36,7 @@ public enum TernaryOperator implements Operator {
 
 	private final String representation;
 
-	private TernaryOperator(String representation) {
+	TernaryOperator(String representation) {
 		this.representation = representation;
 	}
 

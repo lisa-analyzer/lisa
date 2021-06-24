@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -7,8 +11,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalValueDomain}, that maps
@@ -81,11 +83,11 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 
 	@Override
 	public ValueEnvironment<T> top() {
-		return isTop() ? this : new ValueEnvironment<T>(lattice.top(), null);
+		return isTop() ? this : new ValueEnvironment<>(lattice.top(), null);
 	}
 
 	@Override
 	public ValueEnvironment<T> bottom() {
-		return isBottom() ? this : new ValueEnvironment<T>(lattice.bottom(), null);
+		return isBottom() ? this : new ValueEnvironment<>(lattice.bottom(), null);
 	}
 }

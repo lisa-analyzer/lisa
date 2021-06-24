@@ -1,5 +1,17 @@
 package it.unive.lisa.outputs.compare;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
@@ -7,12 +19,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Collection;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -177,27 +183,27 @@ public class JsonReportComparer {
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
-			File right = new File(secondFileRoot, pair.getRight());
-
 			if (!left.exists())
 				throw new FileNotFoundException(
 						pair.getLeft() + " declared as output in the first report does not exist");
+
+			File right = new File(secondFileRoot, pair.getRight());
 			if (!right.exists())
 				throw new FileNotFoundException(
 						pair.getRight() + " declared as output in the second report does not exist");
 
-			if (left.getName().endsWith(".dot"))
-				if (!matchDotGraphs(left, right)) {
-					reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
-					diffFound = true;
-				}
+			if (left.getName().endsWith(".dot") && !matchDotGraphs(left, right)) {
+				reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
+				diffFound = true;
+			}
 		}
 
 		return !diffFound;
 	}
 
 	private static boolean matchDotGraphs(File left, File right) throws IOException {
-		try (FileReader l = new FileReader(left); FileReader r = new FileReader(right)) {
+		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
+				Reader r = new InputStreamReader(new FileInputStream(right), StandardCharsets.UTF_8)) {
 			DotGraph<Statement, Edge, CFG> lDot = DotGraph.readDot(l);
 			DotGraph<Statement, Edge, CFG> rDot = DotGraph.readDot(r);
 			return lDot.equals(rDot);

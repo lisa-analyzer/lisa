@@ -1,5 +1,6 @@
 package it.unive.lisa.util.collections.externalSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
@@ -310,7 +312,7 @@ public class BitExternalSetTest {
 		tmp = new HashSet<>(set1);
 		tmp.retainAll(set2);
 		verify(Set::equals, Pair.of(tmp, eset1.intersection(eset2)));
-		assertTrue(tmp.isEmpty() == !eset1.intersects(eset2));
+		assertEquals(tmp.isEmpty(), !eset1.intersects(eset2));
 
 		tmp = new HashSet<>(set1);
 		tmp.removeAll(set2);
