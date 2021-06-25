@@ -41,16 +41,18 @@ public class UnitWarning extends WarningWithLocation {
 
 	@Override
 	public int compareTo(Warning o) {
-		if (!(o instanceof UnitWarning))
-			return super.compareTo(o);
-
-		UnitWarning other = (UnitWarning) o;
 		int cmp;
-
+		if ((cmp = super.compareTo(o)) != 0)
+			return cmp;
+		
+		if (!(o instanceof UnitWarning))
+			return getClass().getName().compareTo(o.getClass().getName());
+		
+		UnitWarning other = (UnitWarning) o;
 		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
 			return cmp;
 
-		return super.compareTo(other);
+		return 0;
 	}
 
 	@Override

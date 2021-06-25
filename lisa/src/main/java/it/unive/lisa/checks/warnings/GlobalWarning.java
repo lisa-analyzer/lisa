@@ -56,25 +56,27 @@ public class GlobalWarning extends WarningWithLocation {
 
 	@Override
 	public int compareTo(Warning o) {
-		if (!(o instanceof GlobalWarning))
-			return super.compareTo(o);
-
-		GlobalWarning other = (GlobalWarning) o;
 		int cmp;
-
-		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
+		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
 
+		if (!(o instanceof GlobalWarning))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		GlobalWarning other = (GlobalWarning) o;
+		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
+			return cmp;
 		if ((cmp = StringUtils.compare(global.getName(), other.global.getName())) != 0)
 			return cmp;
 
-		return super.compareTo(other);
+		return 0;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((unit == null) ? 0 : unit.hashCode());
 		result = prime * result + ((global == null) ? 0 : global.hashCode());
 		return result;
 	}
@@ -88,6 +90,11 @@ public class GlobalWarning extends WarningWithLocation {
 		if (getClass() != obj.getClass())
 			return false;
 		GlobalWarning other = (GlobalWarning) obj;
+		if (unit == null) {
+			if (other.unit != null)
+				return false;
+		} else if (!unit.equals(other.unit))
+			return false;
 		if (global == null) {
 			if (other.global != null)
 				return false;
