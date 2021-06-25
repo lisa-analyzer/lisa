@@ -32,25 +32,24 @@ public class Global implements CodeElement {
 
 	/**
 	 * Builds an untyped global variable, identified by its name. The location
-	 * where this parameter reference happens is unknown (i.e. no source
-	 * file/line/column is available) as well as its type (i.e. it is {#link
-	 * Untyped#INSTANCE}).
+	 * where this global happens is unknown (i.e. no source file/line/column is
+	 * available) as well as its type (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
 	 * @param location the location of this global variable
-	 * @param name     the name of this parameter
+	 * @param name     the name of this global
 	 */
 	public Global(CodeLocation location, String name) {
 		this(location, name, Untyped.INSTANCE);
 	}
 
 	/**
-	 * Builds the parameter reference, identified by its name and its type,
+	 * Builds the global reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location   the location where this parameter is defined within the
+	 * @param location   the location where this global is defined within the
 	 *                       source file. If unknown, use {@code null}
-	 * @param name       the name of this parameter
-	 * @param staticType the type of this parameter. If unknown, use
+	 * @param name       the name of this global
+	 * @param staticType the type of this global. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Global(CodeLocation location, String name, Type staticType) {
@@ -58,13 +57,13 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Builds the parameter reference, identified by its name and its type,
+	 * Builds the global reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location    the location where this parameter is defined within
-	 *                        the source file. If unknown, use {@code null}
-	 * @param name        the name of this parameter
-	 * @param staticType  the type of this parameter. If unknown, use
+	 * @param location    the location where this global is defined within the
+	 *                        source file. If unknown, use {@code null}
+	 * @param name        the name of this global
+	 * @param staticType  the type of this global. If unknown, use
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this global variable
 	 */
@@ -79,18 +78,18 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Yields the name of this parameter.
+	 * Yields the name of this global.
 	 * 
-	 * @return the name of this parameter
+	 * @return the name of this global
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Yields the static type of this parameter.
+	 * Yields the static type of this global.
 	 * 
-	 * @return the static type of this parameter
+	 * @return the static type of this global
 	 */
 	public Type getStaticType() {
 		return staticType;

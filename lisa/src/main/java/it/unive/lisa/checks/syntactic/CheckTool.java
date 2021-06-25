@@ -7,8 +7,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
+import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
+import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -55,6 +59,29 @@ public class CheckTool {
 	 */
 	public void warn(String message) {
 		warnings.add(new Warning(message));
+	}
+
+	/**
+	 * Reports a new warning with the given message on the declaration of the
+	 * given unit.
+	 * 
+	 * @param unit    the unit to warn on
+	 * @param message the message of the warning
+	 */
+	public void warnOn(Unit unit, String message) {
+		warnings.add(new UnitWarning(unit, message));
+	}
+
+	/**
+	 * Reports a new warning with the given message on the declaration of the
+	 * given global.
+	 * 
+	 * @param unit    the unit containing the global to warn on
+	 * @param global  the global to warn on
+	 * @param message the message of the warning
+	 */
+	public void warnOn(Unit unit, Global global, String message) {
+		warnings.add(new GlobalWarning(unit, global, message));
 	}
 
 	/**

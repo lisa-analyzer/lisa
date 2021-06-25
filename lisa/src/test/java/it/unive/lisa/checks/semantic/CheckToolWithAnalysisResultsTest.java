@@ -22,10 +22,14 @@ import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
+import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
+import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -38,6 +42,7 @@ public class CheckToolWithAnalysisResultsTest {
 
 	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("fake", 1, 0), "fake",
 			false);
+	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), "fake");
 	private static final CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation("fake", 2, 0), unit, false,
 			"foo");
 	private static final CFG cfg = new CFG(descriptor);
@@ -50,6 +55,12 @@ public class CheckToolWithAnalysisResultsTest {
 		if (target == null) {
 			tool.warn(message);
 			return new Warning(message);
+		} else if (target instanceof Unit) {
+			tool.warnOn((Unit) target, message);
+			return new UnitWarning((Unit) target, message);
+		} else if (target instanceof Global) {
+			tool.warnOn(unit, (Global) target, message);
+			return new GlobalWarning(unit, (Global) target, message);
 		} else if (target instanceof CFG) {
 			tool.warnOn((CFG) target, message);
 			return new CFGWarning((CFG) target, message);
@@ -75,6 +86,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
 		exp.add(build(tool, descriptor, "foo"));
+		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -103,6 +115,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, null, "foo"));
 		exp.add(build(tool, cfg, "foo"));
 		exp.add(build(tool, descriptor, "foo"));
+		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
 
