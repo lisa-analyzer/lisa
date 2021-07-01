@@ -58,7 +58,14 @@ tasks.register('cron', Test) {
 	}
 }
 
+tasks.register('allTests') {
+    description = 'Runs unit tests and cron tests'
+    group = 'verification'
+	dependsOn test, cron
+}
+
 jacocoTestReport {
+	// TODO: depend also on cron
     dependsOn test // tests are required to run before generating the report
     afterEvaluate {
     	// this will effectively hide exception classes from the report
