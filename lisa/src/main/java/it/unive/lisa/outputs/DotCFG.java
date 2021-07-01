@@ -106,30 +106,5 @@ public final class DotCFG extends DotGraph<Statement, Edge, CFG> {
 			builder.append(">");
 			l.setAttribute("label", builder.toString());
 		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((graph == null) ? 0 : graph.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			CFGLegend other = (CFGLegend) obj;
-			if (graph == null) {
-				if (other.graph != null)
-					return false;
-			} else if (!graph.equals(other.graph))
-				return false;
-			return true;
-		}
 	}
 }

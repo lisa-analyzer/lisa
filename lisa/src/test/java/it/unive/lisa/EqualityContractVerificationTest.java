@@ -1,6 +1,20 @@
 package it.unive.lisa;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -14,25 +28,17 @@ import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.checks.ChecksExecutor;
-import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
-import it.unive.lisa.checks.syntactic.CheckTool;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
 import it.unive.lisa.interprocedural.impl.CFGResults;
 import it.unive.lisa.interprocedural.impl.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.impl.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.impl.FixpointResults;
-import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.DotCFG;
+import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
-import it.unive.lisa.outputs.compare.JsonReportComparer;
-import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -49,20 +55,16 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
-import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
-import it.unive.lisa.util.collections.CollectionUtilities;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.collections.externalSet.BitExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
@@ -72,12 +74,7 @@ import it.unive.lisa.util.collections.workset.ConcurrentLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
-import it.unive.lisa.util.file.FileManager;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.lang.reflect.Modifier;
@@ -117,10 +114,43 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 
+	private static final Collection<Class<?>> tested = new HashSet<>();
+
 	@BeforeClass
 	public static void setup() {
 		adj1.addNode(new Ret(cfg1, loc));
 		g1.addNode("a");
+	}
+
+	@AfterClass
+	public static void ensureAllTested() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
+		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner(false));
+		Set<String> all = scanner.getAllTypes();
+		Class<?> clazz;
+		Collection<Class<?>> notTested = new HashSet<>();
+		for (String cls : all) {
+			clazz = Class.forName(cls);
+			if (!clazz.isAnonymousClass()
+					&& !clazz.isEnum()
+					&& !Modifier.isAbstract(clazz.getModifiers())
+					&& !Modifier.isInterface(clazz.getModifiers())
+					&& !tested.contains(clazz)
+					&& definesEqualsHashcode(clazz))
+				notTested.add(clazz);
+		}
+
+		if (!notTested.isEmpty())
+			System.err.println("The following equals/hashcode implementations have not been tested: " + notTested);
+
+		assertTrue("Not all equals/hashcode have been tested", notTested.isEmpty());
+	}
+
+	private static boolean definesEqualsHashcode(Class<?> clazz) throws NoSuchMethodException, SecurityException {
+		Class<?> equals = clazz.getMethod("equals", Object.class).getDeclaringClass();
+		Class<?> hashcode = clazz.getMethod("hashCode").getDeclaringClass();
+		// we want to test our implementations, not the one coming from
+		// libraries
+		return equals.getName().startsWith("it.unive.lisa") || hashcode.getName().startsWith("it.unive.lisa");
 	}
 
 	private static <T> void verify(Class<T> clazz, Warning... suppressions) {
@@ -159,6 +189,7 @@ public class EqualityContractVerificationTest {
 		if (extra != null)
 			extra.accept(verifier);
 
+		tested.add(clazz);
 		verifier.verify();
 	}
 
@@ -343,107 +374,11 @@ public class EqualityContractVerificationTest {
 	}
 
 	@Test
-	@Ignore("This serves as a quick way to check the whole codebase, including algorithms and other classes where equals/hashcode don't make sense")
-	public void testEqualsAndHashCode() throws ClassNotFoundException {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner(false));
-		Set<String> all = scanner.getAllTypes();
-		Class<?> clazz;
-		Map<Class<?>, AssertionError> failing = new HashMap<>();
-		for (String cls : all) {
-			clazz = Class.forName(cls);
-			if (!clazz.isAnonymousClass() && !Modifier.isAbstract(clazz.getModifiers())
-					&& !Modifier.isInterface(clazz.getModifiers()))
-				try {
-					System.out.println(clazz.getName());
-					EqualsVerifier.simple().forClass(clazz)
-							.usingGetClass()
-							.suppress(priovideSuppressions(clazz))
-							.withIgnoredFields(provideIgnoredFields(clazz))
-							.withPrefabValues(CFG.class, cfg1, cfg2)
-							.withPrefabValues(CFGDescriptor.class, descr1, descr2)
-							.withPrefabValues(CompilationUnit.class, unit1, unit2)
-							.withPrefabValues(AdjacencyMatrix.class, adj1, adj2)
-							.withPrefabValues(DomainRepresentation.class, dr1, dr2)
-							.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
-							.withPrefabValues(NonInterference.class, new NonInterference().top(),
-									new NonInterference().bottom())
-							.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
-							.verify();
-				} catch (AssertionError e) {
-					failing.put(clazz, e);
-				}
-		}
-
-		for (Class<?> failed : failing.keySet())
-			System.err.println(failed + " failed due to: " + failing.get(failed).getMessage() + "\n");
-
-		if (!failing.isEmpty())
-			fail(failing.size() + " classes failed the check. See standard error for details.");
-	}
-
-	private static String[] provideIgnoredFields(Class<?> cls) {
-		List<String> fields = new ArrayList<>();
-
-		if (Expression.class.isAssignableFrom(cls))
-			fields.addAll(List.of("runtimeTypes", "parent", "metaVariables"));
-
-		if (Statement.class.isAssignableFrom(cls))
-			fields.addAll(List.of("cfg", "offset"));
-
-		if (cls == InferredPair.class)
-			fields.addAll(List.of("domain"));
-
-		if (cls == CallGraphNode.class)
-			fields.addAll(List.of("graph"));
-
-		if (cls == AdjacencyMatrix.class)
-			fields.addAll(List.of("edgeFactory", "nextOffset"));
-
-		if (DotGraph.class.isAssignableFrom(cls))
-			fields.addAll(List.of("legend", "title", "codes", "nextCode"));
-
-		return fields.toArray(String[]::new);
-	}
-
-	private static Warning[] priovideSuppressions(Class<?> cls) {
-		List<Warning> suppressed = new ArrayList<>();
-		// the pattern generated by eclipse uses == for checking against null
-		suppressed.add(Warning.REFERENCE_EQUALITY);
-
-		if (cls == LiSA.class
-				|| cls == LiSAFactory.class
-				|| cls == LiSARunner.class
-				|| cls == Caches.class
-				|| cls == FileManager.class
-				|| cls == ChecksExecutor.class
-				|| cls == ContextInsensitiveToken.class
-				|| cls == CheckTool.class
-				|| cls == CheckToolWithAnalysisResults.class
-				|| cls == ControlFlowExtractor.class
-				|| cls == Dominators.class
-				|| cls == JsonReportComparer.class
-				|| cls == CollectionUtilities.class
-				|| cls == CollectionsDiffBuilder.class
-				|| cls == ExternalSetCache.class
-				|| cls.getName().startsWith(ControlFlowExtractor.class.getName() + "$")
-				|| CodeMember.class.isAssignableFrom(cls)
-				|| Unit.class.isAssignableFrom(cls)
-				|| Graph.class.isAssignableFrom(cls)
-				|| WorkingSet.class.isAssignableFrom(cls)
-				|| InterproceduralAnalysis.class.isAssignableFrom(cls)
-				|| CallGraph.class.isAssignableFrom(cls)
-				|| ExpressionVisitor.class.isAssignableFrom(cls)
-				|| DiffReporter.class.isAssignableFrom(cls)
-				|| GraphVisitor.class.isAssignableFrom(cls)
-				|| Iterator.class.isAssignableFrom(cls)
-				|| cls.getPackageName().startsWith("it.unive.lisa.logging"))
-			suppressed.addAll(List.of(Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED));
-		else if (cls == BitExternalSet.class
-				|| Statement.class.isAssignableFrom(cls))
-			suppressed.add(Warning.NULL_FIELDS);
-		else if (Identifier.class.isAssignableFrom(cls))
-			suppressed.add(Warning.ALL_FIELDS_SHOULD_BE_USED);
-
-		return suppressed.toArray(Warning[]::new);
+	public void testOutputs() {
+		verify(JsonReport.class);
+		// the fields are ignored since they are only used to build up the
+		// underlying graph, and equality testing the graph will take them into
+		// account
+		verify(DotCFG.class, verifier -> verifier.withIgnoredFields("legend", "title", "codes", "nextCode"));
 	}
 }
