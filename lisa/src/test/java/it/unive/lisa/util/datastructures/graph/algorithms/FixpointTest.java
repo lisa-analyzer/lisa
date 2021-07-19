@@ -70,9 +70,9 @@ public class FixpointTest {
 	@Test
 	public void testLinearGraph() {
 		TestGraph graph = new TestGraph();
-		TestNode source = new TestNode();
-		TestNode middle = new TestNode();
-		TestNode end = new TestNode();
+		TestNode source = new TestNode(1);
+		TestNode middle = new TestNode(2);
+		TestNode end = new TestNode(3);
 		graph.addNode(source, true);
 		graph.addNode(middle);
 		graph.addNode(end);
@@ -101,11 +101,11 @@ public class FixpointTest {
 	@Test
 	public void testBranchingGraph() {
 		TestGraph graph = new TestGraph();
-		TestNode source = new TestNode();
-		TestNode left = new TestNode();
-		TestNode right = new TestNode();
-		TestNode join = new TestNode();
-		TestNode end = new TestNode();
+		TestNode source = new TestNode(1);
+		TestNode left = new TestNode(2);
+		TestNode right = new TestNode(3);
+		TestNode join = new TestNode(4);
+		TestNode end = new TestNode(5);
 		graph.addNode(source, true);
 		graph.addNode(left);
 		graph.addNode(right);
@@ -141,11 +141,11 @@ public class FixpointTest {
 	@Test
 	public void testCyclicGraph() {
 		TestGraph graph = new TestGraph();
-		TestNode source = new TestNode();
-		TestNode first = new TestNode();
-		TestNode second = new TestNode();
-		TestNode join = new TestNode();
-		TestNode end = new TestNode();
+		TestNode source = new TestNode(1);
+		TestNode first = new TestNode(2);
+		TestNode second = new TestNode(3);
+		TestNode join = new TestNode(4);
+		TestNode end = new TestNode(5);
 		graph.addNode(source, true);
 		graph.addNode(first);
 		graph.addNode(second);
@@ -225,11 +225,11 @@ public class FixpointTest {
 	@Test
 	public void testExceptionalImplementations() {
 		TestGraph graph = new TestGraph();
-		TestNode source = new TestNode();
-		TestNode first = new TestNode();
-		TestNode second = new TestNode();
-		TestNode join = new TestNode();
-		TestNode end = new TestNode();
+		TestNode source = new TestNode(1);
+		TestNode first = new TestNode(2);
+		TestNode second = new TestNode(3);
+		TestNode join = new TestNode(4);
+		TestNode end = new TestNode(5);
 		graph.addNode(source, true);
 		graph.addNode(first);
 		graph.addNode(second);

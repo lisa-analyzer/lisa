@@ -12,11 +12,15 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 
 	public static class TestNode implements Node<TestNode, TestEdge, TestGraph> {
 
-		private int offset = -1;
+		private final int id;
+		
+		public TestNode(int id) {
+			this.id = id;
+		}
 
 		@Override
 		public int setOffset(int offset) {
-			return this.offset = offset;
+			return offset;
 		}
 
 		@Override
@@ -26,7 +30,29 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 
 		@Override
 		public String toString() {
-			return String.valueOf(offset);
+			return String.valueOf(id);
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + id;
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TestNode other = (TestNode) obj;
+			if (id != other.id)
+				return false;
+			return true;
 		}
 	}
 
@@ -67,6 +93,37 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 		@Override
 		public String toString() {
 			return source + "->" + destination;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((destination == null) ? 0 : destination.hashCode());
+			result = prime * result + ((source == null) ? 0 : source.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			TestEdge other = (TestEdge) obj;
+			if (destination == null) {
+				if (other.destination != null)
+					return false;
+			} else if (!destination.equals(other.destination))
+				return false;
+			if (source == null) {
+				if (other.source != null)
+					return false;
+			} else if (!source.equals(other.source))
+				return false;
+			return true;
 		}
 	}
 }

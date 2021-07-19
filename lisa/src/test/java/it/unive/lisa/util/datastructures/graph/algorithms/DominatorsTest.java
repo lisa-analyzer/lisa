@@ -15,12 +15,12 @@ public class DominatorsTest {
 	@Test
 	public void testGraph1() {
 		TestGraph graph = new TestGraph();
-		TestNode one = new TestNode();
-		TestNode two = new TestNode();
-		TestNode three = new TestNode();
-		TestNode four = new TestNode();
-		TestNode five = new TestNode();
-		TestNode six = new TestNode();
+		TestNode one = new TestNode(1);
+		TestNode two = new TestNode(2);
+		TestNode three = new TestNode(3);
+		TestNode four = new TestNode(4);
+		TestNode five = new TestNode(5);
+		TestNode six = new TestNode(6);
 		graph.addNode(one, true);
 		graph.addNode(two);
 		graph.addNode(three);
@@ -49,19 +49,19 @@ public class DominatorsTest {
 	@Test
 	public void testGraph2() {
 		TestGraph graph = new TestGraph();
-		TestNode r = new TestNode();
-		TestNode a = new TestNode();
-		TestNode b = new TestNode();
-		TestNode c = new TestNode();
-		TestNode d = new TestNode();
-		TestNode e = new TestNode();
-		TestNode f = new TestNode();
-		TestNode g = new TestNode();
-		TestNode h = new TestNode();
-		TestNode i = new TestNode();
-		TestNode j = new TestNode();
-		TestNode k = new TestNode();
-		TestNode l = new TestNode();
+		TestNode r = new TestNode(0);
+		TestNode a = new TestNode(1);
+		TestNode b = new TestNode(2);
+		TestNode c = new TestNode(3);
+		TestNode d = new TestNode(4);
+		TestNode e = new TestNode(5);
+		TestNode f = new TestNode(6);
+		TestNode g = new TestNode(7);
+		TestNode h = new TestNode(8);
+		TestNode i = new TestNode(9);
+		TestNode j = new TestNode(10);
+		TestNode k = new TestNode(11);
+		TestNode l = new TestNode(12);
 		graph.addNode(r, true);
 		graph.addNode(a);
 		graph.addNode(b);

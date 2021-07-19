@@ -213,7 +213,7 @@ public class EqualityContractVerificationTest {
 		verify(BitExternalSet.class, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
 		verify(UniversalExternalSet.class);
 
-		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("edgeFactory", "nextOffset"));
+		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
 		verify(ConcurrentFIFOWorkingSet.class);
 		verify(ConcurrentLIFOWorkingSet.class);
 		verify(FIFOWorkingSet.class);

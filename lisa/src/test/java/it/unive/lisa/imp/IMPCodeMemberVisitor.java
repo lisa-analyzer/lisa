@@ -197,7 +197,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, Pair<VariableRef,
 				Annotations>> backup = new HashMap<>(visibleIds);
-		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		AdjacencyMatrix<Statement, Edge, CFG> block = new AdjacencyMatrix<>();
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
@@ -269,13 +269,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
 
-		AdjacencyMatrix<Statement, Edge, CFG> adj = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		AdjacencyMatrix<Statement, Edge, CFG> adj = new AdjacencyMatrix<>();
 		adj.addNode(st);
 		return Triple.of(st, adj, st);
 	}
 
 	private Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitIf(StatementContext ctx) {
-		AdjacencyMatrix<Statement, Edge, CFG> ite = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		AdjacencyMatrix<Statement, Edge, CFG> ite = new AdjacencyMatrix<>();
 
 		Statement condition = visitParExpr(ctx.parExpr());
 		ite.addNode(condition);
@@ -336,7 +336,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitWhileLoop(WhileLoopContext ctx) {
-		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>();
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
 
@@ -357,7 +357,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Triple<Statement, AdjacencyMatrix<Statement, Edge, CFG>, Statement> visitForLoop(ForLoopContext ctx) {
-		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>(matrix.getEdgeFactory());
+		AdjacencyMatrix<Statement, Edge, CFG> loop = new AdjacencyMatrix<>();
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
 		ExpressionContext cond = ctx.forDeclaration().condition;
