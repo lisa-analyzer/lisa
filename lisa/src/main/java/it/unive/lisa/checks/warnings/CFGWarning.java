@@ -1,8 +1,7 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.cfg.CFG;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on one of the CFGs under analysis.
@@ -41,7 +40,7 @@ public class CFGWarning extends WarningWithLocation {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
-		
+
 		if (!(o instanceof CFGWarning))
 			return getClass().getName().compareTo(o.getClass().getName());
 

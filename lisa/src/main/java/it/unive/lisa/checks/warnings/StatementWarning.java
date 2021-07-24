@@ -39,10 +39,10 @@ public class StatementWarning extends WarningWithLocation {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
-		
+
 		if (!(o instanceof StatementWarning))
 			return getClass().getName().compareTo(o.getClass().getName());
-		
+
 		StatementWarning other = (StatementWarning) o;
 		if ((cmp = statement.compareTo(other.statement)) != 0)
 			return cmp;

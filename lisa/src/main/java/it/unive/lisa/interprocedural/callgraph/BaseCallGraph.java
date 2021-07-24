@@ -1,10 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
@@ -19,6 +14,10 @@ import it.unive.lisa.program.cfg.statement.OpenCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve

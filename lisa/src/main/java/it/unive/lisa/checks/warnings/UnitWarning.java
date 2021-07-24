@@ -1,10 +1,9 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on one of the Units under analysis.
@@ -44,10 +43,10 @@ public class UnitWarning extends WarningWithLocation {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
-		
+
 		if (!(o instanceof UnitWarning))
 			return getClass().getName().compareTo(o.getClass().getName());
-		
+
 		UnitWarning other = (UnitWarning) o;
 		if ((cmp = StringUtils.compare(unit.getName(), other.unit.getName())) != 0)
 			return cmp;

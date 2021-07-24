@@ -1,8 +1,7 @@
 package it.unive.lisa.interprocedural.impl;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
+import java.util.Objects;
 
 /**
  * A context sensitive token representing a single {@link ScopeToken}.

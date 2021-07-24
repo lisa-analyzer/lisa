@@ -3,7 +3,6 @@ package it.unive.lisa.util.numeric;
 import static org.junit.Assert.assertEquals;
 
 import java.util.function.BiFunction;
-
 import org.junit.Test;
 
 public class IntIntervalTest {

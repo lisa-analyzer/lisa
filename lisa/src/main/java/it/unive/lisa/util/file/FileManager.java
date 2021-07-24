@@ -9,7 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
 
 /**

@@ -4,10 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
-import org.junit.Test;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -18,6 +14,8 @@ import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.types.IntType;
+import java.util.List;
+import org.junit.Test;
 
 public class WarningsTest {
 
@@ -140,10 +138,13 @@ public class WarningsTest {
 			for (int j = 0; j < warns.size(); j++)
 				if (i != j) {
 					Warning w1 = warns.get(i), w2 = warns.get(j);
-					assertNotEquals(w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(), 0, w1.compareTo(w2));
-					assertNotEquals(w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(), 0, w2.compareTo(w1));
-					
-					// these are here just to ensure that they don't throw exceptions
+					assertNotEquals(w1.getClass().getSimpleName() + " == " + w2.getClass().getSimpleName(), 0,
+							w1.compareTo(w2));
+					assertNotEquals(w2.getClass().getSimpleName() + " == " + w1.getClass().getSimpleName(), 0,
+							w2.compareTo(w1));
+
+					// these are here just to ensure that they don't throw
+					// exceptions
 					w1.toString();
 					w2.toString();
 				}

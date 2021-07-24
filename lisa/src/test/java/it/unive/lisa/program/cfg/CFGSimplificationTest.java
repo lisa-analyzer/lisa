@@ -3,8 +3,6 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -32,6 +30,7 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import org.junit.Test;
 
 public class CFGSimplificationTest {
 

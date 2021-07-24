@@ -1,15 +1,14 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A unit of the program to analyze. A unit is a logical entity that groups a

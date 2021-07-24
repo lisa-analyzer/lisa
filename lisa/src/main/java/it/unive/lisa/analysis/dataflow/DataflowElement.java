@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticEvaluator;
@@ -10,6 +8,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
 
 /**
  * An element of the dataflow domain, that contains a collection of

@@ -1,8 +1,7 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on the descriptor of one of the CFGs under
@@ -42,10 +41,10 @@ public final class CFGDescriptorWarning extends WarningWithLocation {
 		int cmp;
 		if ((cmp = super.compareTo(o)) != 0)
 			return cmp;
-		
+
 		if (!(o instanceof CFGDescriptorWarning))
 			return getClass().getName().compareTo(o.getClass().getName());
-		
+
 		CFGDescriptorWarning other = (CFGDescriptorWarning) o;
 		if ((cmp = StringUtils.compare(descriptor.toString(), other.descriptor.toString())) != 0)
 			return cmp;

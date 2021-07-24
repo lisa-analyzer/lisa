@@ -1,15 +1,13 @@
 package it.unive.lisa.logging;
 
+import it.unive.lisa.util.collections.IterableArray;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
-
-import it.unive.lisa.util.collections.IterableArray;
 
 /**
  * An utility class that allows automatic logging while iterating over elements

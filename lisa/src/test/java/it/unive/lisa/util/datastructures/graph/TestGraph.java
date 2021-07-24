@@ -1,8 +1,7 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import java.util.function.Function;
-
 import it.unive.lisa.outputs.DotGraph;
+import java.util.function.Function;
 
 public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
 

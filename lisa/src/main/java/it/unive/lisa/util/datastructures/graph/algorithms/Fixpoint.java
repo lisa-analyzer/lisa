@@ -2,16 +2,15 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 
 import static java.lang.String.format;
 
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
 
 public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>, T> {
 
