@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.types.IntType;
@@ -14,10 +15,14 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -61,11 +66,13 @@ public class PointBasedHeapTest {
 		}
 	};
 
+	private final CodeLocation fakeLocation = new SourceCodeLocation("fake", 0, 0);
+
 	private final ProgramPoint fakeProgramPoint = new ProgramPoint() {
 
 		@Override
 		public CodeLocation getLocation() {
-			return new SourceCodeLocation("fake", 0, 0);
+			return fakeLocation;
 		}
 
 		@Override
@@ -292,8 +299,20 @@ public class PointBasedHeapTest {
 
 		assertEquals(topHeap.pushScope(token), topHeap);
 		assertEquals(bottomHeap.pushScope(token), bottomHeap);
+		assertEquals(emptyHeap.pushScope(token), emptyHeap);
 
-		// TODO missing cases
+		PointBasedHeap xAssign = emptyHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), loc1),
+				pp1);
+		PointBasedHeap xPushedScopeAssign = emptyHeap.assign(
+				new OutOfScopeIdentifier(x, token, loc1),
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), loc1),
+				pp1);
+
+		// x -> pp1 pushScope = [out-of-scope-id]x -> pp1
+		assertEquals(xAssign.pushScope(token), xPushedScopeAssign);
 	}
 
 	@Test
@@ -308,6 +327,7 @@ public class PointBasedHeapTest {
 
 		assertEquals(topHeap.popScope(token), topHeap);
 		assertEquals(bottomHeap.popScope(token), bottomHeap);
+		assertEquals(emptyHeap.popScope(token), emptyHeap);
 
 		PointBasedHeap xAssign = emptyHeap.assign(x,
 				new HeapReference(untyped,
@@ -322,6 +342,40 @@ public class PointBasedHeapTest {
 		// [scoped]x -> pp1 popScope = x -> pp1
 		assertEquals(xScopedAssign.popScope(token), xAssign);
 
-		// TODO missing cases
+		// x -> pp1 popScope = empty environment
+		assertEquals(xAssign.popScope(token), emptyHeap);
+	}
+
+	@Test
+	public void testAccessChildRewrite() throws SemanticException {
+		PointBasedHeap xAssign = emptyHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), loc1),
+				pp1);
+		// x.y rewritten in x -> pp1 = pp1
+		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
+
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(alloc1);
+		assertEquals(xAssign.rewrite(accessChild, fakeProgramPoint), expectedRewritten);
+
+		// y.x rewritten in x -> pp1 = empty set
+		accessChild = new AccessChild(untyped, y, x, loc1);
+		assertEquals(xAssign.rewrite(accessChild, fakeProgramPoint), new ExpressionSet<ValueExpression>());
+	}
+
+	@Test
+	public void testIdentifierRewrite() throws SemanticException {
+		PointBasedHeap xAssign = emptyHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), fakeLocation),
+				pp1);
+		// x rewritten in x -> pp1 = pp1
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(
+				new MemoryPointer(untyped, alloc1, fakeLocation));
+		assertEquals(xAssign.rewrite(x, fakeProgramPoint), expectedRewritten);
+
+		// y rewritten in x -> pp1 = {y}
+		// TODO to verify
+		assertEquals(xAssign.rewrite(y, fakeProgramPoint), new ExpressionSet<ValueExpression>(y));
 	}
 }
