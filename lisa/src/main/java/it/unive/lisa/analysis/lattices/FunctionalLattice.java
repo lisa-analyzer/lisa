@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,10 +11,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -112,7 +111,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	public final F putState(K key, V state) {
 		F result = mk(lattice, mkNewFunction(null));
-		
+
 		result.function.put(key, state);
 		for (K k : getKeys())
 			if (!k.equals(key))
@@ -121,7 +120,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	/**
-	 * Builds a instance of this class from the given lattice instance and the given mapping.
+	 * Builds a instance of this class from the given lattice instance and the
+	 * given mapping.
 	 * 
 	 * @param lattice  an instance of lattice to be used during semantic
 	 *                     operations to retrieve top and bottom values
@@ -131,7 +131,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return a new instance of this class
 	 */
 	protected abstract F mk(V lattice, Map<K, V> function);
-	
+
 	@Override
 	public F lubAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));

@@ -7,9 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
-
 import java.util.Map;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -39,7 +37,7 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	public FixpointResults(CFGResults<A, H, V> lattice) {
 		super(lattice);
 	}
-	
+
 	private FixpointResults(CFGResults<A, H, V> lattice, Map<CFG, CFGResults<A, H, V>> function) {
 		super(lattice, function);
 	}

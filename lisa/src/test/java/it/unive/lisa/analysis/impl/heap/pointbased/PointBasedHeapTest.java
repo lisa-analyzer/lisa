@@ -89,52 +89,53 @@ public class PointBasedHeapTest {
 	private final PointBasedHeap bottomHeap = new PointBasedHeap().bottom();
 
 	private HeapEnvironment<
-			AllocationSites> emptyHeapEnv = new HeapEnvironment<AllocationSites>(new AllocationSites().bottom());
+			AllocationSites> emptyHeapEnv = new HeapEnvironment<AllocationSites>(new AllocationSites());
 
 	@Test
 	public void testAssign() throws SemanticException {
-		PointBasedHeap assignResult = emptyHeap.assign(x,
+		PointBasedHeap assignResult = topHeap.assign(x,
 				new Constant(IntType.INSTANCE, 1, loc1), fakeProgramPoint);
 
 		// value expressions do not affect heap abstract domain
-		assertEquals(assignResult, emptyHeap);
+		assertEquals(assignResult, topHeap);
 
 		// from empty environment, assignment x = *(pp1)
 		// expected: x -> pp1
-		// TODO: tests failing, to check underlying lattice
-//		PointBasedHeap xAssign = emptyHeap.assign(x, 
-//				new HeapReference(untyped, 
-//						new HeapAllocation(untyped, loc1), loc1), pp1);
-//		
-//		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1), false);
-//		HeapEnvironment<AllocationSites> expectedEnv = emptyHeapEnv.putState(x, xSites);
-//		assertEquals(xAssign, new PointBasedHeap(expectedEnv));
-//		
-//		// from x -> pp1, assignment x = *(pp2)
-//		// expected: x -> pp2
-//		PointBasedHeap actual = xAssign.assign(x, 
-//				new HeapReference(untyped, 
-//						new HeapAllocation(untyped, loc2), loc2), pp2);
-//
-//		xSites = new AllocationSites(Collections.singleton(alloc2), false);
-//		expectedEnv = emptyHeapEnv.putState(x, xSites);
-//
-//		assertEquals(actual, new PointBasedHeap(expectedEnv));
-	}
-
-	@Test
-	public void testLub() throws SemanticException {
-		PointBasedHeap xToLoc1 = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
 
-		PointBasedHeap xToLoc2 = emptyHeap.assign(x,
+		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1), false);
+		HeapEnvironment<AllocationSites> expectedEnv = emptyHeapEnv.putState(x, xSites);
+		assertEquals(xAssign, new PointBasedHeap(expectedEnv));
+
+		// from x -> pp1, assignment x = *(pp2)
+		// expected: x -> pp2
+		PointBasedHeap actual = xAssign.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc2), loc2),
 				pp2);
 
-		PointBasedHeap yToLoc2 = emptyHeap.assign(y,
+		xSites = new AllocationSites(Collections.singleton(alloc2), false);
+		expectedEnv = emptyHeapEnv.putState(x, xSites);
+
+		assertEquals(actual, new PointBasedHeap(expectedEnv));
+	}
+
+	@Test
+	public void testLub() throws SemanticException {
+		PointBasedHeap xToLoc1 = topHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), loc1),
+				pp1);
+
+		PointBasedHeap xToLoc2 = topHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc2), loc2),
+				pp2);
+
+		PointBasedHeap yToLoc2 = topHeap.assign(y,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc2), loc2),
 				pp2);
@@ -173,17 +174,17 @@ public class PointBasedHeapTest {
 
 	@Test
 	public void testWidening() throws SemanticException {
-		PointBasedHeap xToLoc1 = emptyHeap.assign(x,
+		PointBasedHeap xToLoc1 = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
 
-		PointBasedHeap xToLoc2 = emptyHeap.assign(x,
+		PointBasedHeap xToLoc2 = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc2), loc2),
 				pp2);
 
-		PointBasedHeap yToLoc2 = emptyHeap.assign(y,
+		PointBasedHeap yToLoc2 = topHeap.assign(y,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc2), loc2),
 				pp2);
@@ -223,12 +224,12 @@ public class PointBasedHeapTest {
 	@Test
 	public void testLessOrEquals() throws SemanticException {
 
-		PointBasedHeap xAssign = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
 
-		PointBasedHeap yAssign = emptyHeap.assign(y,
+		PointBasedHeap yAssign = topHeap.assign(y,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc2), loc2),
 				pp2);
@@ -261,7 +262,7 @@ public class PointBasedHeapTest {
 
 	@Test
 	public void testForgetIdentifier() throws SemanticException {
-		PointBasedHeap result = emptyHeap.assign(x,
+		PointBasedHeap result = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
@@ -279,7 +280,7 @@ public class PointBasedHeapTest {
 		assertEquals(bottomHeap.representation().toString(), "_|_");
 		assertEquals(emptyHeap.representation().toString(), "[]");
 
-		PointBasedHeap result = emptyHeap.assign(x,
+		PointBasedHeap result = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
@@ -299,13 +300,12 @@ public class PointBasedHeapTest {
 
 		assertEquals(topHeap.pushScope(token), topHeap);
 		assertEquals(bottomHeap.pushScope(token), bottomHeap);
-		assertEquals(emptyHeap.pushScope(token), emptyHeap);
 
-		PointBasedHeap xAssign = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
-		PointBasedHeap xPushedScopeAssign = emptyHeap.assign(
+		PointBasedHeap xPushedScopeAssign = topHeap.assign(
 				new OutOfScopeIdentifier(x, token, loc1),
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
@@ -327,14 +327,13 @@ public class PointBasedHeapTest {
 
 		assertEquals(topHeap.popScope(token), topHeap);
 		assertEquals(bottomHeap.popScope(token), bottomHeap);
-		assertEquals(emptyHeap.popScope(token), emptyHeap);
 
-		PointBasedHeap xAssign = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
 
-		PointBasedHeap xScopedAssign = emptyHeap.assign((Identifier) x.pushScope(token),
+		PointBasedHeap xScopedAssign = topHeap.assign((Identifier) x.pushScope(token),
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
@@ -348,7 +347,7 @@ public class PointBasedHeapTest {
 
 	@Test
 	public void testAccessChildRewrite() throws SemanticException {
-		PointBasedHeap xAssign = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), loc1),
 				pp1);
@@ -365,7 +364,7 @@ public class PointBasedHeapTest {
 
 	@Test
 	public void testIdentifierRewrite() throws SemanticException {
-		PointBasedHeap xAssign = emptyHeap.assign(x,
+		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
 						new HeapAllocation(untyped, loc1), fakeLocation),
 				pp1);
