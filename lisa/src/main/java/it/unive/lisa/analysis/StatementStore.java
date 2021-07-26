@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -26,6 +28,15 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	 */
 	public StatementStore(AnalysisState<A, H, V> state) {
 		super(state);
+	}
+	
+	/**
+	 * Builds the store.
+	 * 
+	 * @param state an instance of the underlying lattice
+	 */
+	private StatementStore(AnalysisState<A, H, V> state, Map<Statement, AnalysisState<A, H, V>> function) {
+		super(state, function);
 	}
 
 	/**
@@ -60,5 +71,11 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	@Override
 	public boolean isBottom() {
 		return lattice.isBottom() && (function == null || function.isEmpty());
+	}
+
+	@Override
+	protected StatementStore<A, H, V> mk(AnalysisState<A, H, V> lattice,
+			Map<Statement, AnalysisState<A, H, V>> function) {
+		return new StatementStore<>(lattice, function);
 	}
 }

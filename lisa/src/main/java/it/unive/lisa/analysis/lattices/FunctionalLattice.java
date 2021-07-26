@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.lattices;
 
-import it.unive.lisa.analysis.BaseLattice;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +8,10 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import it.unive.lisa.analysis.BaseLattice;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
 
 /**
  * A generic functional abstract domain that performs the functional lifting of
@@ -33,7 +34,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	/**
 	 * The underlying lattice.
 	 */
-	protected final V lattice;
+	public final V lattice;
 
 	/**
 	 * Builds the lattice.
@@ -110,9 +111,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the new instance of this class with the updated mapping
 	 */
 	public final F putState(K key, V state) {
-		F result = bottom();
-		result.function = mkNewFunction(null);
-
+		F result = mk(lattice, mkNewFunction(null));
+		
 		result.function.put(key, state);
 		for (K k : getKeys())
 			if (!k.equals(key))
@@ -120,6 +120,18 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return result;
 	}
 
+	/**
+	 * Builds a instance of this class from the given lattice instance and the given mapping.
+	 * 
+	 * @param lattice  an instance of lattice to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * 
+	 * @return a new instance of this class
+	 */
+	protected abstract F mk(V lattice, Map<K, V> function);
+	
 	@Override
 	public F lubAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
@@ -192,8 +204,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	protected final F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
 			throws SemanticException {
-		F result = bottom();
-		result.function = mkNewFunction(null);
+		F result = mk(lattice.lub(other.lattice), mkNewFunction(null));
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {

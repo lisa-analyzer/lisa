@@ -294,21 +294,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		return mk(lattice, function);
 	}
 
-	/**
-	 * Builds an environment containing the given mapping. If function is
-	 * {@code null}, the new environment is the top environment if
-	 * {@code lattice.isTop()} holds, and it is the bottom environment if
-	 * {@code lattice.isBottom()} holds.
-	 * 
-	 * @param lattice  a singleton instance to be used during semantic
-	 *                     operations to retrieve top and bottom values
-	 * @param function the function representing the mapping contained in the
-	 *                     new environment; can be {@code null}
-	 * 
-	 * @return a new instance of this environment
-	 */
-	protected abstract M mk(T lattice, Map<Identifier, T> function);
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public final M forgetIdentifier(Identifier id) throws SemanticException {
