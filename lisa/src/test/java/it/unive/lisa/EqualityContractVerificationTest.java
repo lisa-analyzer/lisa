@@ -75,28 +75,12 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
-import org.apache.commons.lang3.tuple.Pair;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 public class EqualityContractVerificationTest {
 
@@ -214,6 +198,8 @@ public class EqualityContractVerificationTest {
 		verify(UniversalExternalSet.class);
 
 		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
+		verify(NodeEdges.class);
+		
 		verify(ConcurrentFIFOWorkingSet.class);
 		verify(ConcurrentLIFOWorkingSet.class);
 		verify(FIFOWorkingSet.class);

@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -46,20 +45,6 @@ import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -1141,9 +1126,9 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 							+ ") that contains a node not in the graph: " + st);
 		}
 
-		for (Entry<Statement, Pair<Set<Edge>, Set<Edge>>> st : adjacencyMatrix)
+		for (Entry<Statement, AdjacencyMatrix.NodeEdges<Statement, Edge, CFG>> st : adjacencyMatrix)
 			// no outgoing edges in execution-terminating statements
-			if (st.getKey().stopsExecution() && !st.getValue().getRight().isEmpty())
+			if (st.getKey().stopsExecution() && !st.getValue().getOutgoing().isEmpty())
 				throw new ProgramValidationException(
 						this + " contains an execution-stopping node that has followers: " + st.getKey());
 

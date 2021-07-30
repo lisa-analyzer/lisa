@@ -1,11 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
-import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,6 +14,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -29,9 +24,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and
  * {@link Edge}s as edges. It is represented as a map between a node and a
- * {@link Pair} of set of edges, where the {@link Pair#getLeft()} yields the set
- * of ingoing edges and {@link Pair#getRight()} yields the set of outgoing
- * edges.
+ * {@link NodeEdges}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -40,7 +33,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
  * @param <G> the type of the {@link Graph}s this matrix can be used in
  */
 public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>>
-		implements Iterable<Map.Entry<N, Pair<Set<E>, Set<E>>>> {
+		implements Iterable<Entry<N, AdjacencyMatrix.NodeEdges<N, E, G>>> {
 
 	private static final String EDGE_SIMPLIFY_ERROR = "Cannot simplify an edge with class ";
 
@@ -48,7 +41,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * The matrix. The left set in the mapped value is the set of ingoing edges,
 	 * while the right one is the set of outgoing edges.
 	 */
-	private final Map<N, Pair<Set<E>, Set<E>>> matrix;
+	private final Map<N, NodeEdges<N, E, G>> matrix;
 
 	/**
 	 * The next available offset to be assigned to the next node
@@ -72,8 +65,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 */
 	public AdjacencyMatrix(AdjacencyMatrix<N, E, G> other) {
 		matrix = new ConcurrentHashMap<>();
-		for (Map.Entry<N, Pair<Set<E>, Set<E>>> entry : other.matrix.entrySet())
-			matrix.put(entry.getKey(), Pair.of(new HashSet<>(entry.getValue().getLeft()), new HashSet<>(entry.getValue().getRight())));
+		for (Map.Entry<N, NodeEdges<N, E, G>> entry : other.matrix.entrySet())
+			matrix.put(entry.getKey(), new NodeEdges<>(entry.getValue()));
 		nextOffset = other.nextOffset;
 	}
 
@@ -84,7 +77,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @param node the node to add
 	 */
 	public void addNode(N node) {
-		if (matrix.putIfAbsent(node, Pair.of(new HashSet<>(), new HashSet<>())) == null)
+		if (matrix.putIfAbsent(node, new NodeEdges<>()) == null)
 			nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
@@ -98,9 +91,10 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!containsNode(node))
 			return;
 
-		Pair<Set<E>, Set<E>> edges = matrix.get(node);
-		edges.getLeft().forEach(this::removeEdge);
-		edges.getRight().forEach(this::removeEdge);
+		NodeEdges<N, E, G> edges = matrix.get(node);
+		Set<E> union = new HashSet<>(edges.ingoing);
+		union.addAll(edges.outgoing);
+		union.forEach(this::removeEdge);
 		matrix.remove(node);
 	}
 
@@ -129,8 +123,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!matrix.containsKey(e.getDestination()))
 			throw new UnsupportedOperationException("The destination node is not in the graph");
 
-		matrix.get(e.getSource()).getRight().add(e);
-		matrix.get(e.getDestination()).getLeft().add(e);
+		matrix.get(e.getSource()).outgoing.add(e);
+		matrix.get(e.getDestination()).ingoing.add(e);
 	}
 
 	/**
@@ -142,8 +136,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!matrix.containsKey(e.getSource()) || !matrix.containsKey(e.getDestination()))
 			return;
 
-		matrix.get(e.getSource()).getRight().remove(e);
-		matrix.get(e.getDestination()).getLeft().remove(e);
+		matrix.get(e.getSource()).outgoing.remove(e);
+		matrix.get(e.getDestination()).ingoing.remove(e);
 	}
 
 	/**
@@ -161,7 +155,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!matrix.containsKey(source))
 			return null;
 
-		for (E e : matrix.get(source).getRight())
+		for (E e : matrix.get(source).outgoing)
 			if (e.getDestination().equals(destination))
 				return e;
 
@@ -176,7 +170,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @return the collection of ingoing edges
 	 */
 	public final Collection<E> getIngoingEdges(N node) {
-		return matrix.get(node).getLeft();
+		return matrix.get(node).ingoing;
 	}
 
 	/**
@@ -187,7 +181,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @return the collection of outgoing edges
 	 */
 	public final Collection<E> getOutgoingEdges(N node) {
-		return matrix.get(node).getRight();
+		return matrix.get(node).outgoing;
 	}
 
 	/**
@@ -197,7 +191,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 */
 	public final Collection<E> getEdges() {
 		return matrix.values().stream()
-				.flatMap(c -> Stream.concat(c.getLeft().stream(), c.getRight().stream()))
+				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
 				.distinct()
 				.collect(Collectors.toSet());
 	}
@@ -217,7 +211,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!matrix.containsKey(node))
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		return matrix.get(node).getRight().stream().map(Edge::getDestination).collect(Collectors.toSet());
+		return matrix.get(node).outgoing.stream().map(Edge::getDestination).collect(Collectors.toSet());
 	}
 
 	/**
@@ -235,7 +229,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		if (!matrix.containsKey(node))
 			throw new IllegalArgumentException("'" + node + "' is not in the graph");
 
-		return matrix.get(node).getLeft().stream().map(Edge::getSource).collect(Collectors.toSet());
+		return matrix.get(node).ingoing.stream().map(Edge::getSource).collect(Collectors.toSet());
 	}
 
 	/**
@@ -270,8 +264,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		replacedEdges.clear();
 
 		for (N t : targets) {
-			Set<E> ingoing = matrix.get(t).getLeft();
-			Set<E> outgoing = matrix.get(t).getRight();
+			Set<E> ingoing = matrix.get(t).ingoing;
+			Set<E> outgoing = matrix.get(t).outgoing;
 			boolean entry = entrypoints.contains(t);
 
 			if (ingoing.isEmpty() && !outgoing.isEmpty())
@@ -282,7 +276,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 
 					// remove the edge
 					removedEdges.add(out);
-					matrix.get(out.getDestination()).getLeft().remove(out);
+					matrix.get(out.getDestination()).ingoing.remove(out);
 					if (entry)
 						entrypoints.add(out.getDestination());
 				}
@@ -294,7 +288,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 
 					// remove the edge
 					removedEdges.add(in);
-					matrix.get(in.getSource()).getRight().remove(in);
+					matrix.get(in.getSource()).outgoing.remove(in);
 				}
 			else
 				// normal intermediate edge
@@ -310,12 +304,12 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 						replacedEdges.put(Pair.of(in, out), _new);
 
 						// swap the ingoing edge
-						matrix.get(in.getSource()).getRight().remove(in);
-						matrix.get(in.getSource()).getRight().add(_new);
+						matrix.get(in.getSource()).outgoing.remove(in);
+						matrix.get(in.getSource()).outgoing.add(_new);
 
 						// swap the outgoing edge
-						matrix.get(out.getDestination()).getLeft().remove(out);
-						matrix.get(out.getDestination()).getLeft().add(_new);
+						matrix.get(out.getDestination()).ingoing.remove(out);
+						matrix.get(out.getDestination()).ingoing.add(_new);
 					}
 
 			// remove the simplified node
@@ -344,8 +338,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @return {@code true} if the edge is in this matrix
 	 */
 	public boolean containsEdge(E edge) {
-		for (Pair<Set<E>, Set<E>> pair : matrix.values())
-			for (E e : pair.getRight())
+		for (NodeEdges<N, E, G> edges : matrix.values())
+			for (E e : edges.outgoing)
 				if (e == edge || e.equals(edge))
 					return true;
 
@@ -353,7 +347,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	}
 
 	@Override
-	public Iterator<Entry<N, Pair<Set<E>, Set<E>>>> iterator() {
+	public Iterator<Entry<N, NodeEdges<N, E, G>>> iterator() {
 		return matrix.entrySet().iterator();
 	}
 
@@ -385,11 +379,11 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		for (Entry<N, Pair<Set<E>, Set<E>>> entry : this) {
+		for (Entry<N, NodeEdges<N, E, G>> entry : this) {
 			res.append("\"").append(entry.getKey()).append("\" -> [\n\tingoing: ");
-			res.append(StringUtils.join(entry.getValue().getLeft(), ", "));
+			res.append(StringUtils.join(entry.getValue().ingoing, ", "));
 			res.append("\n\toutgoing: ");
-			res.append(StringUtils.join(entry.getValue().getRight(), ", "));
+			res.append(StringUtils.join(entry.getValue().outgoing, ", "));
 			res.append("\n]\n");
 		}
 		return res.toString();
@@ -422,7 +416,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			// find new successors
 			check.clear();
 			for (N node : add)
-				matrix.get(node).getRight().stream().map(Edge::getDestination).forEach(check::add);
+				matrix.get(node).outgoing.stream().map(Edge::getDestination).forEach(check::add);
 
 			// compute the ones that need to be added
 			add.clear();
@@ -440,8 +434,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @return the entries nodes
 	 */
 	public Collection<N> getEntries() {
-		return matrix.entrySet().stream().filter(e -> e.getValue().getLeft().isEmpty()).map(Entry::getKey)
-				.collect(Collectors.toList());
+		return matrix.entrySet().stream().filter(e -> e.getValue().ingoing.isEmpty()).map(Entry::getKey)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -451,8 +445,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @return the exit nodes
 	 */
 	public Collection<N> getExits() {
-		return matrix.entrySet().stream().filter(e -> e.getValue().getRight().isEmpty()).map(Entry::getKey)
-				.collect(Collectors.toList());
+		return matrix.entrySet().stream().filter(e -> e.getValue().outgoing.isEmpty()).map(Entry::getKey)
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -490,7 +484,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 				queue.add(follower);
 			}
 		}
-		
+
 		return distances.getOrDefault(to, -1);
 	}
 
@@ -529,15 +523,15 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		Collection<N> nodes = getNodes();
 
 		// all edges should be connected to statements inside the matrix
-		for (Entry<N, Pair<Set<E>, Set<E>>> st : matrix.entrySet()) {
-			for (E in : st.getValue().getLeft())
+		for (Entry<N, NodeEdges<N, E, G>> st : matrix.entrySet()) {
+			for (E in : st.getValue().ingoing)
 				validateEdge(nodes, in);
 
-			for (E out : st.getValue().getRight())
+			for (E out : st.getValue().outgoing)
 				validateEdge(nodes, out);
 
 			// no deadcode
-			if (st.getValue().getLeft().isEmpty() && !entrypoints.contains(st.getKey()))
+			if (st.getValue().ingoing.isEmpty() && !entrypoints.contains(st.getKey()))
 				throw new ProgramValidationException(
 						"Unreachable node that is not marked as entrypoint: " + st.getKey());
 		}
@@ -550,5 +544,64 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		else if (!nodes.contains(edge.getDestination()))
 			throw new ProgramValidationException("Invalid edge: '" + edge
 					+ "' reaches a node that is not part of the graph");
+	}
+
+	public static class NodeEdges<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
+		private final Set<E> ingoing;
+		private final Set<E> outgoing;
+
+		private NodeEdges() {
+			ingoing = new HashSet<>();
+			outgoing = new HashSet<>();
+		}
+
+		private NodeEdges(NodeEdges<N, E, G> other) {
+			ingoing = new HashSet<>(other.ingoing);
+			outgoing = new HashSet<>(other.outgoing);
+		}
+		
+		public Set<E> getIngoing() {
+			return ingoing;
+		}
+		
+		public Set<E> getOutgoing() {
+			return outgoing;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((ingoing == null) ? 0 : ingoing.hashCode());
+			result = prime * result + ((outgoing == null) ? 0 : outgoing.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			NodeEdges<?, ?, ?> other = (NodeEdges<?, ?, ?>) obj;
+			if (ingoing == null) {
+				if (other.ingoing != null)
+					return false;
+			} else if (!ingoing.equals(other.ingoing))
+				return false;
+			if (outgoing == null) {
+				if (other.outgoing != null)
+					return false;
+			} else if (!outgoing.equals(other.outgoing))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return "ins: " + ingoing + ", outs: " + outgoing;
+		}
 	}
 }
