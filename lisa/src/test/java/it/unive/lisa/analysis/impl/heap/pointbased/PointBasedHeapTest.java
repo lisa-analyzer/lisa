@@ -17,7 +17,11 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -33,6 +37,7 @@ import org.junit.Test;
 
 public class PointBasedHeapTest {
 	private final ExternalSet<Type> untyped = Caches.types().mkSingletonSet(Untyped.INSTANCE);
+	private final ExternalSet<Type> intType = Caches.types().mkSingletonSet(IntType.INSTANCE);
 
 	private final CodeLocation loc1 = new SourceCodeLocation("fake", 1, 1);
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);
@@ -93,10 +98,18 @@ public class PointBasedHeapTest {
 
 	@Test
 	public void testAssign() throws SemanticException {
+		Constant one = new Constant(IntType.INSTANCE, 1, loc1);
+		Constant zero = new Constant(IntType.INSTANCE, 0, loc1);
 		PointBasedHeap assignResult = topHeap.assign(x,
-				new Constant(IntType.INSTANCE, 1, loc1), fakeProgramPoint);
+				one, fakeProgramPoint);
 
-		// value expressions do not affect heap abstract domain
+		// constants do not affect heap abstract domain
+		assertEquals(assignResult, topHeap);
+
+		assignResult = topHeap.assign(x,
+				new BinaryExpression(intType, one, zero, BinaryOperator.NUMERIC_ADD, fakeLocation), fakeProgramPoint);
+
+		// binary expressions do not affect heap abstract domain
 		assertEquals(assignResult, topHeap);
 
 		// from empty environment, assignment x = *(pp1)
@@ -121,6 +134,80 @@ public class PointBasedHeapTest {
 		expectedEnv = emptyHeapEnv.putState(x, xSites);
 
 		assertEquals(actual, new PointBasedHeap(expectedEnv));
+	}
+
+	@Test
+	public void testSmallStepSemantic() throws SemanticException {
+		// The current implementation of semanticsOf returns this;
+		// we test the method checking that rewriting a heap expression
+		// in this and in its semanticsOf results produced the same
+		// result.
+
+		// 1. Heap allocation
+		HeapExpression heapExpression = new HeapAllocation(untyped, loc1);
+
+		// from topState
+		PointBasedHeap sss = topHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), topHeap.rewrite(heapExpression, pp1));
+
+		// from bottomState
+		sss = bottomHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), bottomHeap.rewrite(heapExpression, pp1));
+
+		// from x -> pp1
+		PointBasedHeap xToLoc1 = topHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), loc1),
+				pp1);
+		sss = xToLoc1.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), xToLoc1.rewrite(heapExpression, pp1));
+
+		// 2. Heap reference
+		heapExpression = new HeapReference(untyped,
+				new HeapAllocation(untyped, loc1), loc1);
+
+		// from topState
+		sss = topHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), topHeap.rewrite(heapExpression, pp1));
+
+		// from bottomState
+		sss = bottomHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), bottomHeap.rewrite(heapExpression, pp1));
+
+		// from x -> pp1
+		sss = xToLoc1.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), xToLoc1.rewrite(heapExpression, pp1));
+
+		// 3. Access child
+		heapExpression = new AccessChild(untyped, x, y, loc1);
+
+		// from topState
+		sss = topHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), topHeap.rewrite(heapExpression, pp1));
+
+		// from bottomState
+		sss = bottomHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), bottomHeap.rewrite(heapExpression, pp1));
+
+		// from x -> pp1
+		sss = xToLoc1.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), xToLoc1.rewrite(heapExpression, pp1));
+
+		// 4. Heap dereference
+		heapExpression = new HeapDereference(untyped, new HeapReference(untyped,
+				new HeapAllocation(untyped, loc1), loc1), loc1);
+
+		// from topState
+		sss = topHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), topHeap.rewrite(heapExpression, pp1));
+
+		// from bottomState
+		sss = bottomHeap.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), bottomHeap.rewrite(heapExpression, pp1));
+
+		// from x -> pp1
+		sss = xToLoc1.semanticsOf(heapExpression, pp1);
+		assertEquals(sss.rewrite(heapExpression, pp1), xToLoc1.rewrite(heapExpression, pp1));
 	}
 
 	@Test
