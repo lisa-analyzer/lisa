@@ -464,4 +464,30 @@ public class PointBasedHeapTest {
 		// TODO to verify
 		assertEquals(xAssign.rewrite(y, fakeProgramPoint), new ExpressionSet<ValueExpression>(y));
 	}
+
+	@Test
+	public void testHeapDereferenceRewrite() throws SemanticException {
+		// *(&(new loc(pp1)) rewritten in top -> pp1
+		HeapDereference deref = new HeapDereference(untyped, new HeapReference(untyped,
+				new HeapAllocation(untyped, loc1), loc1), loc1);
+
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(
+				new MemoryPointer(untyped, alloc1, fakeLocation));
+		assertEquals(topHeap.rewrite(deref, fakeProgramPoint), expectedRewritten);
+
+		// *(x) rewritten in x -> pp1 -> pp1
+		PointBasedHeap xAssign = topHeap.assign(x,
+				new HeapReference(untyped,
+						new HeapAllocation(untyped, loc1), fakeLocation),
+				pp1);
+		deref = new HeapDereference(untyped, x, loc1);
+		expectedRewritten = new ExpressionSet<ValueExpression>(
+				new MemoryPointer(untyped, alloc1, fakeLocation));
+		assertEquals(xAssign.rewrite(deref, fakeProgramPoint), expectedRewritten);
+
+		// *(y) rewritten in x -> pp1 -> empty set
+		deref = new HeapDereference(untyped, y, loc1);
+		expectedRewritten = new ExpressionSet<ValueExpression>();
+		assertEquals(xAssign.rewrite(deref, fakeProgramPoint), expectedRewritten);
+	}
 }
