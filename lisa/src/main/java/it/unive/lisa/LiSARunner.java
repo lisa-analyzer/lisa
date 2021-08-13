@@ -203,7 +203,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			Collection<CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
 					InferenceSystem<InferredTypes>>> results = typesInterproc.getAnalysisResultsOf(cfg);
 			if (results.isEmpty()) {
-				LOG.warn("No type information computed for '%s': it is unreachable", cfg);
+				LOG.warn("No type information computed for '{}': it is unreachable", cfg);
 				continue;
 			}
 
@@ -276,7 +276,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
 					writer -> cfg.dump(writer, labelGenerator::apply));
 		} catch (IOException e) {
-			LOG.error("Exception while dumping the analysis results on %s", cfg.getDescriptor().getFullSignature());
+			LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
 			LOG.error(e);
 		}
 	}

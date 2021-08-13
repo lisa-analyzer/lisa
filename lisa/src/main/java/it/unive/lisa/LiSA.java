@@ -74,7 +74,7 @@ public class LiSA {
 		try {
 			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
 			if (conf.getCallGraph() == null)
-				LOG.warn("No call graph set for this analysis, defaulting to %s", callGraph.getClass().getSimpleName());
+				LOG.warn("No call graph set for this analysis, defaulting to {}", callGraph.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default call graph", e);
 		}
@@ -84,7 +84,7 @@ public class LiSA {
 			interproc = conf.getInterproceduralAnalysis() == null ? getDefaultFor(InterproceduralAnalysis.class)
 					: conf.getInterproceduralAnalysis();
 			if (conf.getInterproceduralAnalysis() == null)
-				LOG.warn("No interprocedural analysis set for this analysis, defaulting to %s",
+				LOG.warn("No interprocedural analysis set for this analysis, defaulting to {}",
 						interproc.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
@@ -120,7 +120,7 @@ public class LiSA {
 
 	private void printStats() {
 		LOG.info("LiSA statistics:");
-		LOG.info("  %s warnings generated", warnings.size());
+		LOG.info("  {} warnings generated", warnings.size());
 	}
 
 	/**

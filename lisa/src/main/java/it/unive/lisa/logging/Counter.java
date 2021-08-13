@@ -100,7 +100,7 @@ public final class Counter {
 			throw new IllegalStateException("This counter is already logging");
 		logging = true;
 		startTime = System.nanoTime();
-		logger.log(level, "%s [start]", message);
+		logger.log(level, "{} [start]", message);
 	}
 
 	/**
@@ -129,7 +129,7 @@ public final class Counter {
 			return;
 
 		logging = false;
-		logger.log(level, "%s [stop] [%s %s in %s]", message, count, objects,
+		logger.log(level, "{} [stop] [{} {} in {}]", message, count, objects,
 				TimeFormat.UP_TO_SECONDS.format(System.nanoTime() - startTime));
 	}
 

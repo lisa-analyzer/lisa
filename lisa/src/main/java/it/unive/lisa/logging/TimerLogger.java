@@ -112,9 +112,9 @@ public final class TimerLogger {
 	private static void execAux(Logger logger, Level logLevel, TimeFormat formatter, String message,
 			LoggableAction action) {
 		long startTime = System.nanoTime();
-		logger.log(logLevel, "%s [start]", message);
+		logger.log(logLevel, "{} [start]", message);
 		action.run();
-		logger.log(logLevel, "%s [stop] [completed in %s]", message, formatter.format(System.nanoTime() - startTime));
+		logger.log(logLevel, "{} [stop] [completed in {}]", message, formatter.format(System.nanoTime() - startTime));
 	}
 
 	private static class Wrapper<T> {

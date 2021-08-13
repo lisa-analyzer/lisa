@@ -980,7 +980,7 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 						cfs.setFirstFollower(firstNonNoOpDeterministicFollower(candidate));
 				else {
 					LOG.warn(
-							"%s is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
+							"{} is the first follower of a control flow structure, it is being simplified but has multiple followers: the first follower of the conditional structure will be lost",
 							node);
 					cfs.setFirstFollower(null);
 				}
@@ -1012,15 +1012,15 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 		Collection<Statement> followers = followersOf(node);
 
 		if (predecessors.isEmpty() && followers.isEmpty()) {
-			LOG.warn("Simplifying the only statement of '%s': all variables will be made visible for the entire cfg",
+			LOG.warn("Simplifying the only statement of '{}': all variables will be made visible for the entire cfg",
 					this);
 			starting.forEach(v -> v.setScopeStart(null));
 			ending.forEach(v -> v.setScopeEnd(null));
 			return;
 		}
 
-		String format = "Simplifying the scope-%s statement of a variable with %s "
-				+ "is not supported: %s will be made visible %s of '" + this + "'";
+		String format = "Simplifying the scope-{} statement of a variable with {} "
+				+ "is not supported: {} will be made visible {} of '" + this + "'";
 		if (!starting.isEmpty())
 			if (predecessors.isEmpty()) {
 				// no predecessors: move the starting scope forward
