@@ -25,11 +25,11 @@ import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 
 public class AdjacencyMatrixTest {
-	
-	private <T> String msg(String objs, Collection<T> exp, Collection<T> act) {
+
+	private <T> String msg(String objs, String extra, Collection<T> exp, Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
 		Set<T> ac = act instanceof Set ? (Set<T>) act : new HashSet<>(act);
-		return "Set of " + objs +" is different"
+		return "Set of " + objs + " is different " + extra
 				+ "\nonly expected: " + SetUtils.difference(ex, ac)
 				+ "\nonly actual: " + SetUtils.difference(ac, ex);
 	}
@@ -37,15 +37,22 @@ public class AdjacencyMatrixTest {
 	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
 			AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix, Collection<TestNode> entries,
 			Collection<TestNode> exits) {
+		verify(adj, nodes, edges, matrix, entries, exits, "");
+	}
+
+	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
+			AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix, Collection<TestNode> entries,
+			Collection<TestNode> exits, String extra) {
 		TestNode externalNode = new TestNode(-1);
 		TestEdge externalEdge = new TestEdge(externalNode, externalNode);
 
 		// we use isEqualCollection instead of equals since we are ok if the
 		// concrete collection used is different, we just want the same elements
-		assertTrue(msg("nodes", nodes, matrix.getNodes()), isEqualCollection(nodes, matrix.getNodes()));
-		assertTrue(msg("edges", edges, matrix.getEdges()), isEqualCollection(edges, matrix.getEdges()));
-		assertTrue(msg("entries", entries, matrix.getEntries()), isEqualCollection(entries, matrix.getEntries()));
-		assertTrue(msg("exits", exits, matrix.getExits()), isEqualCollection(exits, matrix.getExits()));
+		assertTrue(msg("nodes", extra, nodes, matrix.getNodes()), isEqualCollection(nodes, matrix.getNodes()));
+		assertTrue(msg("edges", extra, edges, matrix.getEdges()), isEqualCollection(edges, matrix.getEdges()));
+		assertTrue(msg("entries", extra, entries, matrix.getEntries()),
+				isEqualCollection(entries, matrix.getEntries()));
+		assertTrue(msg("exits", extra, exits, matrix.getExits()), isEqualCollection(exits, matrix.getExits()));
 
 		for (TestNode node : nodes) {
 			assertTrue("matrix does not contain " + node, matrix.containsNode(node));
@@ -53,24 +60,30 @@ public class AdjacencyMatrixTest {
 			Collection<TestEdge> outs = new HashSet<>();
 
 			if (adj.containsKey(node))
-				for (TestNode dest : adj.get(node)) 
+				for (TestNode dest : adj.get(node))
 					outs.add(new TestEdge(node, dest));
 			for (Entry<TestNode, Collection<TestNode>> entry : adj.entrySet())
 				if (entry.getValue().contains(node))
 					ins.add(new TestEdge(entry.getKey(), node));
 
-			assertTrue(msg("ingoing edges", ins, matrix.getIngoingEdges(node)), isEqualCollection(ins, matrix.getIngoingEdges(node)));
-			assertTrue(msg("outgoing edges", outs, matrix.getOutgoingEdges(node)), isEqualCollection(outs, matrix.getOutgoingEdges(node)));
+			assertTrue(msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
+					isEqualCollection(ins, matrix.getIngoingEdges(node)));
+			assertTrue(msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
+					isEqualCollection(outs, matrix.getOutgoingEdges(node)));
 
 			Set<TestNode> follows = outs.stream().map(Edge::getDestination).collect(Collectors.toSet());
 			Set<TestNode> preds = ins.stream().map(Edge::getSource).collect(Collectors.toSet());
-			assertTrue(msg("followers", follows, matrix.followersOf(node)), isEqualCollection(follows, matrix.followersOf(node)));
-			assertTrue(msg("predecessors", preds, matrix.predecessorsOf(node)), isEqualCollection(preds, matrix.predecessorsOf(node)));
+			assertTrue(msg("followers", extra, follows, matrix.followersOf(node)),
+					isEqualCollection(follows, matrix.followersOf(node)));
+			assertTrue(msg("predecessors", extra, preds, matrix.predecessorsOf(node)),
+					isEqualCollection(preds, matrix.predecessorsOf(node)));
 
 			// we check that re-adding the node does not clear the edges
 			matrix.addNode(node);
-			assertTrue(msg("ingoing edges", ins, matrix.getIngoingEdges(node)), isEqualCollection(ins, matrix.getIngoingEdges(node)));
-			assertTrue(msg("outgoing edges", outs, matrix.getOutgoingEdges(node)), isEqualCollection(outs, matrix.getOutgoingEdges(node)));
+			assertTrue(msg("ingoing edges", extra, ins, matrix.getIngoingEdges(node)),
+					isEqualCollection(ins, matrix.getIngoingEdges(node)));
+			assertTrue(msg("outgoing edges", extra, outs, matrix.getOutgoingEdges(node)),
+					isEqualCollection(outs, matrix.getOutgoingEdges(node)));
 			boolean failed = false;
 			try {
 				matrix.addEdge(new TestEdge(externalNode, node));
@@ -89,7 +102,8 @@ public class AdjacencyMatrixTest {
 
 		for (TestEdge edge : edges) {
 			assertTrue("matrix does not contain " + edge, matrix.containsEdge(edge));
-			assertSame(edge + " is not connecting its endpoints", edge, matrix.getEdgeConnecting(edge.getSource(), edge.getDestination()));
+			assertSame(edge + " is not connecting its endpoints", edge,
+					matrix.getEdgeConnecting(edge.getSource(), edge.getDestination()));
 		}
 
 		assertEquals("matrix cloning failed", matrix, new AdjacencyMatrix<>(matrix));
@@ -112,7 +126,7 @@ public class AdjacencyMatrixTest {
 			failed = true;
 		}
 		assertTrue("Asking for the predecessor of an external node succeded", failed);
-		
+
 		// just to ensure it does not throw exceptions
 		matrix.toString();
 	}
@@ -188,7 +202,7 @@ public class AdjacencyMatrixTest {
 			adj1.computeIfAbsent(entry.getKey(), k -> new HashSet<>()).addAll(entry.getValue());
 		verify(adj1, nodes1, edges1, matrix1, entries1, exits1);
 	}
-	
+
 	@Test
 	public void testBaseDistances() {
 		Collection<TestNode> nodes = new HashSet<>();
@@ -198,17 +212,17 @@ public class AdjacencyMatrixTest {
 		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
-		
+
 		for (Entry<TestNode, Collection<TestNode>> entry : adj.entrySet()) {
 			TestNode node = entry.getKey();
 			// self-loops don't count: this is the min distance
 			assertEquals(0, matrix.distance(node, node));
-			for (TestNode dest : entry.getValue()) 
+			for (TestNode dest : entry.getValue())
 				if (node != dest)
 					assertEquals(1, matrix.distance(node, dest));
 		}
 	}
-	
+
 	@Test
 	public void testGraph1() {
 		TestGraph graph = new TestGraph();
@@ -362,7 +376,7 @@ public class AdjacencyMatrixTest {
 		assertEquals(7, graph.adjacencyMatrix.distance(b, j));
 		assertEquals(3, graph.adjacencyMatrix.distance(b, k));
 		assertEquals(2, graph.adjacencyMatrix.distance(b, l));
-		
+
 		assertEquals(4, graph.adjacencyMatrix.distance(c, r));
 		assertEquals(5, graph.adjacencyMatrix.distance(c, a));
 		assertEquals(5, graph.adjacencyMatrix.distance(c, b));
@@ -503,7 +517,7 @@ public class AdjacencyMatrixTest {
 		assertEquals(2, graph.adjacencyMatrix.distance(l, k));
 		assertEquals(0, graph.adjacencyMatrix.distance(l, l));
 	}
-	
+
 	@Test
 	public void testRemoval() {
 		Collection<TestNode> nodes = new HashSet<>();
@@ -513,28 +527,36 @@ public class AdjacencyMatrixTest {
 		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
-		
+
 		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
 		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
-		Collection<TestNode> entriesCopy = new HashSet<>(entries);
-		Collection<TestNode> exitsCopy = new HashSet<>(exits);
 		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrixCopy = new AdjacencyMatrix<>(matrix);
 		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy);
-		
+		// entries and exits stay the same, they are re-evaluated at the end
+		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
+
+		Collection<TestNode> removed = new HashSet<>();
 		for (int i = 0; i < nodes.size() / 4; i++) {
 			TestNode n = random(nodesCopy);
+			removed.add(n);
 			nodesCopy.remove(n);
-			entriesCopy.remove(n);
-			exitsCopy.remove(n);
 			edgesCopy.removeIf(e -> e.getSource() == n || e.getDestination() == n);
 			adjCopy.remove(n);
 			adjCopy.forEach((nn, follows) -> follows.remove(n));
 			matrixCopy.removeNode(n);
 		}
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy);
+
+		Collection<TestNode> entriesCopy = new HashSet<>(nodesCopy);
+		Collection<TestNode> exitsCopy = new HashSet<>(nodesCopy);
+		for (TestEdge e : edgesCopy) {
+			entriesCopy.remove(e.getDestination());
+			exitsCopy.remove(e.getSource());
+		}
+
+		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
+				"after removing " + removed.toString());
 	}
-	
+
 	private static <T> T random(Collection<T> elements) {
 		int idx = (int) (Math.random() * elements.size());
 		for (T e : elements)
