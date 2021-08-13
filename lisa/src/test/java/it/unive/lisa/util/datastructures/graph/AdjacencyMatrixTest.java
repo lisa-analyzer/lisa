@@ -519,7 +519,7 @@ public class AdjacencyMatrixTest {
 	}
 
 	@Test
-	public void testRemoval() {
+	public void testNodeRemoval() {
 		Collection<TestNode> nodes = new HashSet<>();
 		Collection<TestEdge> edges = new HashSet<>();
 		Collection<TestNode> entries = new HashSet<>();
@@ -563,5 +563,42 @@ public class AdjacencyMatrixTest {
 			if (--idx < 0)
 				return e;
 		throw new AssertionError("No more elements");
+	}
+
+	@Test
+	public void testEdgeRemoval() {
+		Collection<TestNode> nodes = new HashSet<>();
+		Collection<TestEdge> edges = new HashSet<>();
+		Collection<TestNode> entries = new HashSet<>();
+		Collection<TestNode> exits = new HashSet<>();
+		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
+		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
+		verify(adj, nodes, edges, matrix, entries, exits);
+
+		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
+		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
+		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrixCopy = new AdjacencyMatrix<>(matrix);
+		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
+		// entries and exits stay the same, they are re-evaluated at the end
+		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
+
+		Collection<TestEdge> removed = new HashSet<>();
+		for (int i = 0; i < edges.size() / 4; i++) {
+			TestEdge e = random(edgesCopy);
+			removed.add(e);
+			edgesCopy.remove(e);
+			adjCopy.get(e.getSource()).remove(e.getDestination());
+			matrixCopy.removeEdge(e);
+		}
+
+		Collection<TestNode> entriesCopy = new HashSet<>(nodesCopy);
+		Collection<TestNode> exitsCopy = new HashSet<>(nodesCopy);
+		for (TestEdge e : edgesCopy) {
+			entriesCopy.remove(e.getDestination());
+			exitsCopy.remove(e.getSource());
+		}
+
+		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
+				"after removing " + removed.toString());
 	}
 }
