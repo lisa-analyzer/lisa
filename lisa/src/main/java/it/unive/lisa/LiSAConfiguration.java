@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -117,7 +116,7 @@ public class LiSAConfiguration {
 	 * <li>the results of the analysis will not be dumped</li>
 	 * <li>the json report will not be dumped</li>
 	 * <li>the default warning threshold ({@value #DEFAULT_WIDENING_THRESHOLD})
-	 * will be used</i>
+	 * will be used</li>
 	 * </ul>
 	 */
 	public LiSAConfiguration() {
