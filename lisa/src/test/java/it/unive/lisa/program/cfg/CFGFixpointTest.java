@@ -15,6 +15,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
 import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import org.junit.Test;
 
@@ -43,7 +44,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p));
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {
 			System.err.println(e);
 			fail("The fixpoint computation has thrown an exception");
@@ -56,7 +57,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p));
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -69,7 +70,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p));
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");

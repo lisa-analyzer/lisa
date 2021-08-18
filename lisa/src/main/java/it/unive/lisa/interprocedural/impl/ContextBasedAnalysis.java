@@ -1,6 +1,7 @@
 package it.unive.lisa.interprocedural.impl;
 
 import it.unive.lisa.AnalysisExecutionException;
+import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -15,11 +16,13 @@ import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
@@ -56,6 +59,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private final Collection<CFG> fixpointTriggers;
 
+	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
+
+	private int wideningThreshold;
+
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
 	 */
@@ -76,12 +83,19 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public final void fixpoint(
-			AnalysisState<A, H, V> entryState)
+			AnalysisState<A, H, V> entryState,
+			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
+			int wideningThreshold)
 			throws FixpointException {
+		this.results = null;
+		this.fixpointWorkingSet = fixpointWorkingSet;
+		this.wideningThreshold = wideningThreshold;
+
 		if (program.getEntryPoints().isEmpty())
 			throw new FixpointException("The program contains no entrypoints");
 
-		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> this.fixpointAux(entryState));
+		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
+				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold));
 	}
 
 	private static String ordinal(int i) {
@@ -98,8 +112,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		return i + "rd";
 	}
 
-	private void fixpointAux(AnalysisState<A, H, V> entryState) throws AnalysisExecutionException {
-		this.results = null;
+	private void fixpointAux(AnalysisState<A, H, V> entryState,
+			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
+			int wideningThreshold) throws AnalysisExecutionException {
 		int iter = 0;
 		do {
 			LOG.info("Performing %s fixpoint iteration", ordinal(iter + 1));
@@ -110,8 +125,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 					AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 					if (results == null)
 						this.results = new FixpointResults<>(value.top());
-					results.putResult(cfg, token.empty(), cfg.fixpoint(entryStateCFG, this));
-				} catch (SemanticException e) {
+					results.putResult(cfg, token.empty(),
+							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), wideningThreshold));
+				} catch (SemanticException | AnalysisSetupException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 				} catch (FixpointException e) {
 					throw new AnalysisExecutionException("Error while computing fixpoint for entrypoint " + cfg, e);
@@ -189,7 +205,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 				CFGWithAnalysisResults<A, H, V> fixpointResult = null;
 				try {
 					fixpointResult = computeFixpoint(cfg, token, prepared);
-				} catch (FixpointException e) {
+				} catch (FixpointException | AnalysisSetupException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}
 
@@ -213,8 +229,9 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
-			throws FixpointException, SemanticException {
-		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this);
+			throws FixpointException, SemanticException, AnalysisSetupException {
+		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this,
+				WorkingSet.of(fixpointWorkingSet), wideningThreshold);
 		fixpointResult.setId(localToken.toString());
 		Pair<Boolean, CFGWithAnalysisResults<A, H, V>> res = results.putResult(cfg, localToken, fixpointResult);
 		if (Boolean.TRUE.equals(res.getLeft()))

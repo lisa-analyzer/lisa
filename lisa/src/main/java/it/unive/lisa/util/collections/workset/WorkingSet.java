@@ -1,5 +1,9 @@
 package it.unive.lisa.util.collections.workset;
 
+import java.lang.reflect.InvocationTargetException;
+
+import it.unive.lisa.AnalysisSetupException;
+
 /**
  * A working set, containing items to be processed.
  * 
@@ -8,6 +12,19 @@ package it.unive.lisa.util.collections.workset;
  * @param <E> the type of the elements that this working set contains
  */
 public interface WorkingSet<E> {
+
+	@SuppressWarnings("unchecked")
+	public static <E> WorkingSet<E> of(Class<? extends WorkingSet<E>> clazz) throws AnalysisSetupException {
+		if (!WorkingSet.class.isAssignableFrom(clazz))
+			throw new IllegalArgumentException(clazz + " is not a working set");
+
+		try {
+			return (WorkingSet<E>) clazz.getMethod("mk").invoke(null);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| SecurityException e) {
+			throw new AnalysisSetupException("Unable to create an instance of " + clazz.getName(), e);
+		}
+	}
 
 	/**
 	 * Pushes a new element into this working set.
