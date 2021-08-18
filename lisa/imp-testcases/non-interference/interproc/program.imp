@@ -1,0 +1,31 @@
+class Integrity {
+	
+	[lisa.ni.LowConfidentiality] 
+	declassify(y) {
+		return y;
+	}
+	
+	confidentiality_lec5ex1_declassified() {
+		def h = 5;
+		[lisa.ni.LowConfidentiality] def l = h; // VIOLATION - confidentiality by assignment
+		l = this.declassify(h);
+	}
+
+	confidentiality_lec6_declassified() {
+		def h = 5;
+		[lisa.ni.LowConfidentiality] def l = 0;
+		if (h > 5000)
+			l = 0; // VIOLATION - confidentiality by state
+		else
+			l = 1; // VIOLATION - confidentiality by state
+		if (this.declassify(h) > 5000)
+			l = 0;
+		else
+			l = 1;
+	}
+	
+	main() {
+		this.confidentiality_lec5ex1_declassified();
+		this.confidentiality_lec6_declassified();
+	}
+}

@@ -14,6 +14,13 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 	/**
 	 * Builds the matcher from the name of the annotation.
 	 * 
+	 * @param annotation the annotation whose name is to be matched
+	 */
+	public BasicAnnotationMatcher(Annotation annotation) {
+		this.annotationName = annotation.getAnnotationName();
+	}/**
+	 * Builds the matcher from the name of the annotation.
+	 * 
 	 * @param annotationName the name of the annotation
 	 */
 	public BasicAnnotationMatcher(String annotationName) {

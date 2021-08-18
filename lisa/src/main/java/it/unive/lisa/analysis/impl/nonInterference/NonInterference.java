@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -30,9 +31,13 @@ import java.util.Map;
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	private static final Annotation LOW_CONFIDENTIALITY_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
+	private static final Annotation LOW_CONF_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
 
-	private static final Annotation HIGH_INTEGRITY_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
+	private static final AnnotationMatcher LOW_CONF_MATCHER = new BasicAnnotationMatcher(LOW_CONF_ANNOTATION);
+
+	private static final Annotation HIGH_INT_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
+
+	private static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
 
 	private static final byte NI_BOTTOM = 0;
 
@@ -263,9 +268,8 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		if (annots.isEmpty())
 			return mkHighLow();
 
-		boolean lowConf = annots
-				.contains(new BasicAnnotationMatcher(LOW_CONFIDENTIALITY_ANNOTATION.getAnnotationName()));
-		boolean highInt = annots.contains(new BasicAnnotationMatcher(HIGH_INTEGRITY_ANNOTATION.getAnnotationName()));
+		boolean lowConf = annots.contains(LOW_CONF_MATCHER);
+		boolean highInt = annots.contains(HIGH_INT_MATCHER);
 
 		if (lowConf && highInt)
 			return mkLowHigh();

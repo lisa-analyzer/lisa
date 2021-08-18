@@ -12,6 +12,9 @@ import it.unive.lisa.analysis.impl.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
+import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
+import it.unive.lisa.interprocedural.impl.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.impl.RecursionFreeToken;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
@@ -41,7 +44,18 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/integrity", "program.imp", conf);
 	}
-
+	
+	@Test
+	public void testDeclassification() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class), new NonInterference()))
+				.setCallGraph(new RTACallGraph())
+				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
+				.addSemanticCheck(new NICheck());
+		perform("non-interference/interproc", "program.imp", conf);
+	}
+	
 	private static class NICheck implements SemanticCheck {
 
 		@Override
