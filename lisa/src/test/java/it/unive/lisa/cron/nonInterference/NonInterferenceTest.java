@@ -44,7 +44,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/integrity", "program.imp", conf);
 	}
-	
+
 	@Test
 	public void testDeclassification() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
@@ -55,7 +55,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/interproc", "program.imp", conf);
 	}
-	
+
 	private static class NICheck implements SemanticCheck {
 
 		@Override

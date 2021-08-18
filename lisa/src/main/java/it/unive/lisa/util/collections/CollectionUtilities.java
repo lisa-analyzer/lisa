@@ -132,6 +132,14 @@ public final class CollectionUtilities {
 		copy.forEach(result::add);
 	}
 
+	/**
+	 * Stores the given objects into a collection and returns it.
+	 * 
+	 * @param <T>  the type of objects
+	 * @param objs the objects to store
+	 * 
+	 * @return a (modifiable) collection containing the given objects
+	 */
 	@SafeVarargs
 	public static <T> Collection<T> collect(T... objs) {
 		ArrayList<T> res = new ArrayList<>(objs.length);

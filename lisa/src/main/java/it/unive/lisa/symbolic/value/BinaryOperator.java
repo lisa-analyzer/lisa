@@ -239,7 +239,7 @@ public enum BinaryOperator implements Operator {
 
 	private final String representation;
 
-	BinaryOperator(String representation) {
+	private BinaryOperator(String representation) {
 		this.representation = representation;
 	}
 

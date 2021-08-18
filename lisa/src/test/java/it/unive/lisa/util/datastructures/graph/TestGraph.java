@@ -13,7 +13,7 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 	public static class TestNode implements Node<TestNode, TestEdge, TestGraph> {
 
 		private final int id;
-		
+
 		public TestNode(int id) {
 			this.id = id;
 		}

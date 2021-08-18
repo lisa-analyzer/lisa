@@ -41,7 +41,7 @@ public enum UnaryOperator implements Operator {
 
 	private final String representation;
 
-	UnaryOperator(String representation) {
+	private UnaryOperator(String representation) {
 		this.representation = representation;
 	}
 

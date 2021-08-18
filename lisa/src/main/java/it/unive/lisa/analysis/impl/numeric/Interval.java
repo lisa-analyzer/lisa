@@ -35,6 +35,9 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	private static final Interval TOP = new Interval(IntInterval.INFINITY);
 	private static final Interval BOTTOM = new Interval(null);
 
+	/**
+	 * The interval represented by this domain element.
+	 */
 	final IntInterval interval;
 
 	private Interval(IntInterval interval) {

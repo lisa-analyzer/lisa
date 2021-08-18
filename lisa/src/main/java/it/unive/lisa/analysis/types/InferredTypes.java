@@ -297,6 +297,25 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		}
 	}
 
+	/**
+	 * Checks whether or not the two given set of type tokens intersects,
+	 * meaning that there exists at least one type token {@code t1} from
+	 * {@code lfiltered} and one type token {@code t2} from {@code rfiltered}
+	 * such that {@code t1.getTypes().intersects(t2.getTypes())}.<br>
+	 * <br>
+	 * Note that all types in both sets received as parameters are assumed to be
+	 * {@link TypeTokenType}s, hence no type check is performed before
+	 * converting them.
+	 * 
+	 * @param lfiltered the first set of type tokens
+	 * @param rfiltered the second set of type tokens
+	 * 
+	 * @return {@code true} if the sets of tokens intersect
+	 * 
+	 * @throws NullPointerException if one of the types is not a
+	 *                                  {@link TypeTokenType} (this is due to
+	 *                                  the conversion)
+	 */
 	static boolean typeTokensIntersect(ExternalSet<Type> lfiltered, ExternalSet<Type> rfiltered) {
 		for (Type l : lfiltered)
 			for (Type r : rfiltered)

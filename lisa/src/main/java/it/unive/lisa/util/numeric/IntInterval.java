@@ -1,10 +1,30 @@
 package it.unive.lisa.util.numeric;
 
+/**
+ * An interval with integer bounds.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class IntInterval {
 
+	/**
+	 * The interval {@code [-Inf, +Inf]}.
+	 */
 	public static final IntInterval INFINITY = new IntInterval();
+
+	/**
+	 * The interval {@code [0, 0]}.
+	 */
 	public static final IntInterval ZERO = new IntInterval(0, 0);
+
+	/**
+	 * The interval {@code [1, 1]}.
+	 */
 	public static final IntInterval ONE = new IntInterval(1, 1);
+
+	/**
+	 * The interval {@code [-1, -1]}.
+	 */
 	public static final IntInterval MINUS_ONE = new IntInterval(-1, -1);
 
 	private final MathNumber low;
@@ -15,15 +35,39 @@ public class IntInterval {
 		this(MathNumber.MINUS_INFINITY, MathNumber.PLUS_INFINITY);
 	}
 
+	/**
+	 * Builds a new interval.
+	 * 
+	 * @param low  the lower bound
+	 * @param high the upper bound
+	 * 
+	 * @throws IllegalArgumentException if {@code low > high}
+	 */
 	public IntInterval(int low, int high) {
 		this(new MathNumber(low), new MathNumber(high));
 	}
 
+	/**
+	 * Builds a new interval.
+	 * 
+	 * @param low  the lower bound
+	 * @param high the upper bound
+	 * 
+	 * @throws IllegalArgumentException if {@code low > high}
+	 */
 	public IntInterval(Integer low, Integer high) {
 		this(low == null ? MathNumber.MINUS_INFINITY : new MathNumber(low),
 				high == null ? MathNumber.PLUS_INFINITY : new MathNumber(high));
 	}
 
+	/**
+	 * Builds a new interval.
+	 * 
+	 * @param low  the lower bound
+	 * @param high the upper bound
+	 * 
+	 * @throws IllegalArgumentException if {@code low > high}
+	 */
 	public IntInterval(MathNumber low, MathNumber high) {
 		if (low.compareTo(high) > 0)
 			throw new IllegalArgumentException("Lower bound is bigger than higher bound");
@@ -33,47 +77,91 @@ public class IntInterval {
 	}
 
 	/**
-	 * Yields the high bound of this interval.
+	 * Yields the upper bound of this interval.
 	 * 
-	 * @return the high bound of this interval.
+	 * @return the upper bound of this interval
 	 */
 	public MathNumber getHigh() {
 		return high;
 	}
 
 	/**
-	 * Yields the low bound of this interval.
+	 * Yields the lower bound of this interval.
 	 * 
-	 * @return the low bound of this interval.
+	 * @return the lower bound of this interval
 	 */
 	public MathNumber getLow() {
 		return low;
 	}
 
+	/**
+	 * Yields {@code true} if the lower bound of this interval is set to minus
+	 * infinity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean lowIsMinusInfinity() {
 		return low.isMinusInfinity();
 	}
 
+	/**
+	 * Yields {@code true} if the upper bound of this interval is set to plus
+	 * infinity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean highIsPlusInfinity() {
 		return high.isPlusInfinity();
 	}
 
+	/**
+	 * Yields {@code true} if this is interval is not finite, that is, if at
+	 * least one bound is set to infinity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isInfinite() {
 		return this == INFINITY || (highIsPlusInfinity() || lowIsMinusInfinity());
 	}
 
+	/**
+	 * Yields {@code true} if this is interval is finite, that is, if neither
+	 * bound is set to infinity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isFinite() {
 		return !isInfinite();
 	}
 
+	/**
+	 * Yields {@code true} if this is the interval representing infinity, that
+	 * is, {@code [-Inf, +Inf]}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isInfinity() {
 		return this == INFINITY;
 	}
 
+	/**
+	 * Yields {@code true} if this is a singleton interval, that is, if the
+	 * lower bound and the upper bound are the same.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isSingleton() {
 		return isFinite() && low.equals(high);
 	}
 
+	/**
+	 * Yields {@code true} if this is a singleton interval containing only
+	 * {@code n}.
+	 *
+	 * @param n the integer to test
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean is(int n) {
 		return isSingleton() && low.is(n);
 	}
@@ -88,6 +176,13 @@ public class IntInterval {
 		return new IntInterval(i.low.roundDown(), i.high.roundUp());
 	}
 
+	/**
+	 * Performs the interval addition between {@code this} and {@code other}.
+	 * 
+	 * @param other the other interval
+	 * 
+	 * @return {@code this + other}
+	 */
 	public IntInterval plus(IntInterval other) {
 		if (isInfinity() || other.isInfinity())
 			return INFINITY;
@@ -95,6 +190,13 @@ public class IntInterval {
 		return cacheAndRound(new IntInterval(low.add(other.low), high.add(other.high)));
 	}
 
+	/**
+	 * Performs the interval subtraction between {@code this} and {@code other}.
+	 * 
+	 * @param other the other interval
+	 * 
+	 * @return {@code this - other}
+	 */
 	public IntInterval diff(IntInterval other) {
 		if (isInfinity() || other.isInfinity())
 			return INFINITY;
@@ -124,6 +226,14 @@ public class IntInterval {
 		return max;
 	}
 
+	/**
+	 * Performs the interval multiplication between {@code this} and
+	 * {@code other}.
+	 * 
+	 * @param other the other interval
+	 * 
+	 * @return {@code this * other}
+	 */
 	public IntInterval mul(IntInterval other) {
 		if (is(0) || other.is(0))
 			return ZERO;
@@ -140,6 +250,23 @@ public class IntInterval {
 		return cacheAndRound(new IntInterval(min(ll, lh, hl, hh), max(ll, lh, hl, hh)));
 	}
 
+	/**
+	 * Performs the interval division between {@code this} and {@code other}.
+	 * 
+	 * @param other       the other interval
+	 * @param ignoreZero  if {@code true}, causes the division to ignore the
+	 *                        fact that {@code other} might contain 0, producing
+	 *                        a smaller result
+	 * @param errorOnZero whether or not an {@link ArithmeticException} should
+	 *                        be thrown immediately if {@code other} contains
+	 *                        zero
+	 * 
+	 * @return {@code this / other}
+	 * 
+	 * @throws ArithmeticException if {@code other} contains 0 and
+	 *                                 {@code errorOnZero} is set to
+	 *                                 {@code true}
+	 */
 	public IntInterval div(IntInterval other, boolean ignoreZero, boolean errorOnZero) {
 		if (errorOnZero && (other.is(0) || other.includes(ZERO)))
 			throw new ArithmeticException("IntInterval divide by zero");
@@ -169,10 +296,24 @@ public class IntInterval {
 		}
 	}
 
+	/**
+	 * Yields {@code true} if this interval includes the given one.
+	 * 
+	 * @param other the other interval
+	 * 
+	 * @return {@code true} if it is included, {@code false} otherwise
+	 */
 	public boolean includes(IntInterval other) {
 		return low.compareTo(other.low) <= 0 && high.compareTo(other.high) >= 0;
 	}
 
+	/**
+	 * Yields {@code true} if this interval intersects with the given one.
+	 * 
+	 * @param other the other interval
+	 * 
+	 * @return {@code true} if those intersects, {@code false} otherwise
+	 */
 	public boolean intersects(IntInterval other) {
 		return includes(other) || other.includes(this)
 				|| (high.compareTo(other.low) >= 0 && high.compareTo(other.high) <= 0)

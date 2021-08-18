@@ -78,8 +78,21 @@ public class FileManager {
 		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
 	}
 
+	/**
+	 * A functional interface for a write operation that can throw
+	 * {@link IOException}s.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	@FunctionalInterface
 	public interface WriteAction {
+		/**
+		 * Performs the operation on the given writer.
+		 * 
+		 * @param writer the object to use for writing
+		 * 
+		 * @throws IOException if an error happens while writing
+		 */
 		void perform(Writer writer) throws IOException;
 	}
 
@@ -119,6 +132,13 @@ public class FileManager {
 		return result;
 	}
 
+	/**
+	 * Deletes a folder with all of its contents if it exists.
+	 * 
+	 * @param path the path to the folder
+	 * 
+	 * @throws IOException if an error happens while deleting
+	 */
 	public static void forceDeleteFolder(String path) throws IOException {
 		File workdir = new File(path);
 		if (workdir.exists())

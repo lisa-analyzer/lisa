@@ -18,7 +18,9 @@ public class BasicAnnotationMatcher implements AnnotationMatcher {
 	 */
 	public BasicAnnotationMatcher(Annotation annotation) {
 		this.annotationName = annotation.getAnnotationName();
-	}/**
+	}
+
+	/**
 	 * Builds the matcher from the name of the annotation.
 	 * 
 	 * @param annotationName the name of the annotation

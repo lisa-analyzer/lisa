@@ -195,26 +195,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 					return BOTTOM;
 				return this;
 			}
-
-			@Override
-			public boolean mightBeTrue() {
-				return true;
-			}
-
-			@Override
-			public boolean mightBeFalse() {
-				return false;
-			}
-
-			@Override
-			public boolean definitelyTrue() {
-				return true;
-			}
-
-			@Override
-			public boolean definitelyFalse() {
-				return false;
-			}
 		},
 
 		/**
@@ -258,26 +238,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 				if (other == BOTTOM || other == SATISFIED)
 					return BOTTOM;
 				return this;
-			}
-
-			@Override
-			public boolean mightBeTrue() {
-				return false;
-			}
-
-			@Override
-			public boolean mightBeFalse() {
-				return true;
-			}
-
-			@Override
-			public boolean definitelyTrue() {
-				return false;
-			}
-
-			@Override
-			public boolean definitelyFalse() {
-				return true;
 			}
 		},
 
@@ -326,26 +286,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			public Satisfiability glb(Satisfiability other) {
 				return other;
 			}
-
-			@Override
-			public boolean mightBeTrue() {
-				return true;
-			}
-
-			@Override
-			public boolean mightBeFalse() {
-				return true;
-			}
-
-			@Override
-			public boolean definitelyTrue() {
-				return false;
-			}
-
-			@Override
-			public boolean definitelyFalse() {
-				return false;
-			}
 		},
 
 		/**
@@ -387,26 +327,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			public Satisfiability glb(Satisfiability other) {
 				return this;
 			}
-
-			@Override
-			public boolean mightBeTrue() {
-				return false;
-			}
-
-			@Override
-			public boolean mightBeFalse() {
-				return false;
-			}
-
-			@Override
-			public boolean definitelyTrue() {
-				return false;
-			}
-
-			@Override
-			public boolean definitelyFalse() {
-				return false;
-			}
 		};
 
 		/**
@@ -443,14 +363,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		 * @return the result of the greatest lower bound
 		 */
 		public abstract Satisfiability glb(Satisfiability other);
-
-		public abstract boolean mightBeTrue();
-
-		public abstract boolean mightBeFalse();
-
-		public abstract boolean definitelyTrue();
-
-		public abstract boolean definitelyFalse();
 
 		/**
 		 * Transforms a boolean value to a {@link Satisfiability} instance.

@@ -1,5 +1,7 @@
 package it.unive.lisa.util.datastructures.graph;
 
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -14,12 +16,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and
@@ -546,6 +544,17 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 					+ "' reaches a node that is not part of the graph");
 	}
 
+	/**
+	 * Utility class for representing the edges tied to a node, split into two
+	 * sets: ingoing and outgoing.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <N> the type of the {@link Node}s in the containing matrix
+	 * @param <E> the type of the {@link Edge}s in the containing matrix
+	 * @param <G> the type of the {@link Graph}s the containing matrix can be
+	 *                used in
+	 */
 	public static class NodeEdges<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
 		private final Set<E> ingoing;
 		private final Set<E> outgoing;
@@ -559,11 +568,21 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 			ingoing = new HashSet<>(other.ingoing);
 			outgoing = new HashSet<>(other.outgoing);
 		}
-		
+
+		/**
+		 * Yields the ingoing edges.
+		 * 
+		 * @return the set of ingoing edges
+		 */
 		public Set<E> getIngoing() {
 			return ingoing;
 		}
-		
+
+		/**
+		 * Yields the outgoing edges.
+		 * 
+		 * @return the set of outgoing edges
+		 */
 		public Set<E> getOutgoing() {
 			return outgoing;
 		}

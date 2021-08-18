@@ -36,6 +36,9 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	private final Set<E> elements;
 
+	/**
+	 * The underlying domain.
+	 */
 	protected final E domain;
 
 	/**
@@ -55,6 +58,19 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		this.isBottom = isBottom;
 	}
 
+	/**
+	 * Utility for creating a concrete instance of {@link DataflowDomain} given
+	 * its core fields.
+	 * 
+	 * @param domain   the underlying domain
+	 * @param elements the elements contained in the instance to be created
+	 * @param isTop    whether the created domain is the top element of the
+	 *                     lattice
+	 * @param isBottom whether the created domain is the bottom element of the
+	 *                     lattice
+	 * 
+	 * @return the concrete instance of domain
+	 */
 	protected abstract D mk(E domain, Set<E> elements, boolean isTop, boolean isBottom);
 
 	@Override
@@ -187,6 +203,11 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		return elements.isEmpty() && isBottom;
 	}
 
+	/**
+	 * Yields the {@link DataflowElement}s contained in this domain instance.
+	 * 
+	 * @return the elements
+	 */
 	public final Set<E> getDataflowElements() {
 		return elements;
 	}

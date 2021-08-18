@@ -85,6 +85,20 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	@Override
 	public abstract String toString();
 
+	/**
+	 * Traverses this edge, optionally modifying the given {@code sourceState}
+	 * by applying semantic assumptions.
+	 * 
+	 * @param <A>         the concrete {@link AbstractState} instance
+	 * @param <H>         the concrete {@link HeapDomain} instance
+	 * @param <V>         the concrete {@link ValueDomain} instance
+	 * @param sourceState the {@link AnalysisState} computed at the source of
+	 *                        this edge
+	 * 
+	 * @return the {@link AnalysisState} after traversing this edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
