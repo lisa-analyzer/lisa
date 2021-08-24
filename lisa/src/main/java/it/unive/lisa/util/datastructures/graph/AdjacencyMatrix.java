@@ -262,8 +262,8 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		replacedEdges.clear();
 
 		for (N t : targets) {
-			Set<E> ingoing = matrix.get(t).ingoing;
-			Set<E> outgoing = matrix.get(t).outgoing;
+			Set<E> ingoing = new HashSet<>(matrix.get(t).ingoing);
+			Set<E> outgoing = new HashSet<>(matrix.get(t).outgoing);
 			boolean entry = entrypoints.contains(t);
 
 			if (ingoing.isEmpty() && !outgoing.isEmpty())
