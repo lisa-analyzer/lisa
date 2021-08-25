@@ -27,29 +27,28 @@ public class Global implements CodeElement {
 
 	private final CodeLocation location;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * Builds an untyped global variable, identified by its name. The location
-	 * where this parameter reference happens is unknown (i.e. no source
-	 * file/line/column is available) as well as its type (i.e. it is {#link
-	 * Untyped#INSTANCE}).
+	 * where this global happens is unknown (i.e. no source file/line/column is
+	 * available) as well as its type (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
 	 * @param location the location of this global variable
-	 * @param name     the name of this parameter
+	 * @param name     the name of this global
 	 */
 	public Global(CodeLocation location, String name) {
 		this(location, name, Untyped.INSTANCE);
 	}
 
 	/**
-	 * Builds the parameter reference, identified by its name and its type,
+	 * Builds the global reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location   the location where this parameter is defined within the
+	 * @param location   the location where this global is defined within the
 	 *                       source file. If unknown, use {@code null}
-	 * @param name       the name of this parameter
-	 * @param staticType the type of this parameter. If unknown, use
+	 * @param name       the name of this global
+	 * @param staticType the type of this global. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Global(CodeLocation location, String name, Type staticType) {
@@ -57,13 +56,13 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Builds the parameter reference, identified by its name and its type,
+	 * Builds the global reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location    the location where this parameter is defined within
-	 *                        the source file. If unknown, use {@code null}
-	 * @param name        the name of this parameter
-	 * @param staticType  the type of this parameter. If unknown, use
+	 * @param location    the location where this global is defined within the
+	 *                        source file. If unknown, use {@code null}
+	 * @param name        the name of this global
+	 * @param staticType  the type of this global. If unknown, use
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this global variable
 	 */
@@ -78,18 +77,18 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Yields the name of this parameter.
+	 * Yields the name of this global.
 	 * 
-	 * @return the name of this parameter
+	 * @return the name of this global
 	 */
 	public String getName() {
 		return name;
 	}
 
 	/**
-	 * Yields the static type of this parameter.
+	 * Yields the static type of this global.
 	 * 
-	 * @return the static type of this parameter
+	 * @return the static type of this global
 	 */
 	public Type getStaticType() {
 		return staticType;
@@ -99,9 +98,10 @@ public class Global implements CodeElement {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
-		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
 		return result;
 	}
 
@@ -114,6 +114,16 @@ public class Global implements CodeElement {
 		if (getClass() != obj.getClass())
 			return false;
 		Global other = (Global) obj;
+		if (annotations == null) {
+			if (other.annotations != null)
+				return false;
+		} else if (!annotations.equals(other.annotations))
+			return false;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -123,11 +133,6 @@ public class Global implements CodeElement {
 			if (other.staticType != null)
 				return false;
 		} else if (!staticType.equals(other.staticType))
-			return false;
-		if (annotations == null) {
-			if (other.annotations != null)
-				return false;
-		} else if (!annotations.equals(other.annotations))
 			return false;
 		return true;
 	}

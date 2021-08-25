@@ -26,7 +26,7 @@ public abstract class BinaryExpression extends Expression {
 	 * @param left     the left hand-side of the expression
 	 * @param right    the right hand-side of the expression
 	 */
-	public BinaryExpression(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	protected BinaryExpression(CFG cfg, CodeLocation location, Expression left, Expression right) {
 		super(cfg, location);
 		Objects.requireNonNull(left, "The left-handside of a binary expression cannot be null");
 		Objects.requireNonNull(right, "The right-handside of a binary expression cannot be null");
@@ -70,23 +70,23 @@ public abstract class BinaryExpression extends Expression {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		BinaryExpression other = (BinaryExpression) st;
-		if (right == null) {
-			if (other.right != null)
-				return false;
-		} else if (!right.isEqualTo(other.right))
-			return false;
+		BinaryExpression other = (BinaryExpression) obj;
 		if (left == null) {
 			if (other.left != null)
 				return false;
-		} else if (!left.isEqualTo(other.left))
+		} else if (!left.equals(other.left))
+			return false;
+		if (right == null) {
+			if (other.right != null)
+				return false;
+		} else if (!right.equals(other.right))
 			return false;
 		return true;
 	}

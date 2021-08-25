@@ -16,7 +16,7 @@ import org.graphstream.graph.implementations.MultiGraph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotCFG extends DotGraph<Statement, Edge, CFG> {
+public final class DotCFG extends DotGraph<Statement, Edge, CFG> {
 
 	private DotCFG(String title) {
 		super(title, new CFGLegend().graph);
@@ -59,7 +59,7 @@ public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 		return graph;
 	}
 
-	private static class CFGLegend {
+	private static final class CFGLegend {
 		private final org.graphstream.graph.Graph graph;
 
 		private CFGLegend() {

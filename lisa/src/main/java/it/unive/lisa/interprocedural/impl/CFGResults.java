@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.ValueDomain;
 import java.util.Collection;
+import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -36,6 +37,17 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 */
 	public CFGResults(CFGWithAnalysisResults<A, H, V> lattice) {
 		super(lattice);
+	}
+
+	/**
+	 * Builds a new result.
+	 * 
+	 * @param lattice a singleton instance used for retrieving top and bottom
+	 *                    values
+	 */
+	private CFGResults(CFGWithAnalysisResults<A, H, V> lattice,
+			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> function) {
+		super(lattice, function);
 	}
 
 	/**
@@ -134,5 +146,11 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	@Override
 	public boolean isBottom() {
 		return lattice.isBottom() && (function == null || function.isEmpty());
+	}
+
+	@Override
+	protected CFGResults<A, H, V> mk(CFGWithAnalysisResults<A, H, V> lattice,
+			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> function) {
+		return new CFGResults<>(lattice, function);
 	}
 }

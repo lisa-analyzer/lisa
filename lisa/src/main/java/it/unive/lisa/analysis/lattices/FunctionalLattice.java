@@ -33,7 +33,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	/**
 	 * The underlying lattice.
 	 */
-	protected final V lattice;
+	public final V lattice;
 
 	/**
 	 * Builds the lattice.
@@ -100,14 +100,46 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return lattice.bottom();
 	}
 
+	/**
+	 * Yields an instance of this class equal to the receiver of the call, but
+	 * with {@code key} mapped to {@code state}.
+	 * 
+	 * @param key   the key
+	 * @param state the state
+	 * 
+	 * @return the new instance of this class with the updated mapping
+	 */
+	public final F putState(K key, V state) {
+		F result = mk(lattice, mkNewFunction(null));
+
+		result.function.put(key, state);
+		for (K k : getKeys())
+			if (!k.equals(key))
+				result.function.put(k, getState(k));
+		return result;
+	}
+
+	/**
+	 * Builds a instance of this class from the given lattice instance and the
+	 * given mapping.
+	 * 
+	 * @param lattice  an instance of lattice to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * 
+	 * @return a new instance of this class
+	 */
+	protected abstract F mk(V lattice, Map<K, V> function);
+
 	@Override
 	public F lubAux(F other) throws SemanticException {
-		return functionalLift(other, (f1, f2) -> lubKeys(f1, f2), (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
 	public F wideningAux(F other) throws SemanticException {
-		return functionalLift(other, (f1, f2) -> lubKeys(f1, f2), (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
 	/**
@@ -117,6 +149,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 *
 	 * @param <V> {@link Lattice} type of the values
 	 */
+	@FunctionalInterface
 	protected interface FunctionalLift<V extends Lattice<V>> {
 
 		/**
@@ -140,6 +173,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 *
 	 * @param <K> the key type
 	 */
+	@FunctionalInterface
 	protected interface KeyFunctionalLift<K> {
 
 		/**
@@ -170,8 +204,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	protected final F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
 			throws SemanticException {
-		F result = bottom();
-		result.function = mkNewFunction(null);
+		F result = mk(lattice.lub(other.lattice), mkNewFunction(null));
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
@@ -278,21 +311,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @return the values of this functional lattice
 	 */
-	public Collection<V> values() {
+	public Collection<V> getValues() {
 		if (function == null)
 			return Collections.emptySet();
 		return function.values();
-	}
-
-	/**
-	 * Yields the keys of this functional lattice.
-	 * 
-	 * @return the keys of this functional lattice
-	 */
-	public Set<K> keys() {
-		if (function == null)
-			return Collections.emptySet();
-		return function.keySet();
 	}
 
 	/**

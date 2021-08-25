@@ -50,12 +50,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
 	public PointBasedHeap() {
-		this(new HeapEnvironment<AllocationSites>(new AllocationSites()));
+		this(new HeapEnvironment<>(new AllocationSites()));
 	}
 
 	/**
 	 * Builds a new instance of field-insensitive point-based heap from its heap
-	 * environment and substitutions.
+	 * environment.
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
@@ -200,36 +200,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
-		if (expression instanceof AccessChild) {
-			AccessChild access = (AccessChild) expression;
-			PointBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
-			return containerState.smallStepSemantics(access.getChild(), pp);
-		}
-
-		if (expression instanceof HeapAllocation)
-			return this;
-
-		if (expression instanceof HeapReference)
-			return smallStepSemantics(((HeapReference) expression).getExpression(), pp);
-
-		if (expression instanceof HeapDereference)
-			return smallStepSemantics(((HeapDereference) expression).getExpression(), pp);
-
-		return top();
+		return this;
 	}
 
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new Rewriter());
-	}
-
-	private Set<ValueExpression> resolveIdentifier(Identifier v) {
-		Set<ValueExpression> result = new HashSet<>();
-		for (AllocationSite site : heapEnv.getState(v))
-			result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
-
-		return result;
 	}
 
 	@Override
@@ -309,11 +286,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer))
-				if (heapEnv.getKeys().contains(expression))
-					return new ExpressionSet<>(resolveIdentifier(expression));
+			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
+				return new ExpressionSet<>(resolveIdentifier(expression));
 
 			return new ExpressionSet<>(expression);
+		}
+
+		private Set<ValueExpression> resolveIdentifier(Identifier v) {
+			Set<ValueExpression> result = new HashSet<>();
+			for (AllocationSite site : heapEnv.getState(v))
+				result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
+
+			return result;
 		}
 	}
 }

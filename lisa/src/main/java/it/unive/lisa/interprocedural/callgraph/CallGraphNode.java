@@ -49,11 +49,6 @@ public class CallGraphNode implements Node<CallGraphNode, CallGraphEdge, BaseCal
 	}
 
 	@Override
-	public boolean isEqualTo(CallGraphNode other) {
-		return equals(other);
-	}
-
-	@Override
 	public <V> boolean accept(GraphVisitor<BaseCallGraph, CallGraphNode, CallGraphEdge, V> visitor, V tool) {
 		return visitor.visit(tool, graph, this);
 	}

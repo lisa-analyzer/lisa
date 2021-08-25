@@ -12,7 +12,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BoolType implements BooleanType {
+public final class BoolType implements BooleanType {
 
 	/**
 	 * The singleton instance of this class.

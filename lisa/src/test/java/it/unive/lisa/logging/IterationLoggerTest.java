@@ -1,5 +1,8 @@
 package it.unive.lisa.logging;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.List;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,12 +15,53 @@ public class IterationLoggerTest {
 	@Test
 	public void testIterations() {
 		Integer[] array = generateArray();
+		int expected = 0;
+		for (int i : array)
+			expected += i;
 
 		int sum = 0;
-		for (Integer i : IterationLogger.iterate(logger, array, "Iteration test", "integers"))
+		for (Integer i : IterationLogger.iterate(logger, array, "Iteration test - array", "integers"))
 			sum += i;
+		assertEquals(expected, sum);
 
-		logger.info("SUM THROUGH ITERATION: " + sum);
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, array, "Iteration test - array", "integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		List<Integer> list = List.of(array);
+		for (Integer i : IterationLogger.iterate(logger, list, "Iteration test - collection", "integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, list, "Iteration test - collection", "integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, (Iterable<Integer>) list, "Iteration test - iterable",
+				"integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, (Iterable<Integer>) list,
+				"Iteration test - iterable", "integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, list.stream(), "Iteration test - stream", "integers"))
+			sum += i;
+		assertEquals(expected, sum);
+
+		sum = 0;
+		for (Integer i : IterationLogger.iterate(logger, Level.OFF, list.stream(), "Iteration test - stream",
+				"integers"))
+			sum += i;
+		assertEquals(expected, sum);
 	}
 
 	@Test

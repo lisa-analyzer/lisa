@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -409,18 +409,18 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * @return the collection of matching code members
 	 */
 	@SuppressWarnings("unchecked")
-	private <T extends CodeMember> Collection<T> searchCodeMembers(Function<CodeMember, Boolean> filter, boolean cfgs,
+	private <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter, boolean cfgs,
 			boolean constructs, boolean traverseHierarchy) {
 		Collection<T> result = new HashSet<>();
 
 		if (cfgs)
 			for (CFG cfg : instanceCfgs.values())
-				if (filter.apply(cfg))
+				if (filter.test(cfg))
 					result.add((T) cfg);
 
 		if (constructs)
 			for (NativeCFG construct : instanceConstructs.values())
-				if (filter.apply(construct))
+				if (filter.test(construct))
 					result.add((T) construct);
 
 		if (!traverseHierarchy)
@@ -428,12 +428,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 
 		for (CompilationUnit cu : superUnits)
 			for (CodeMember sup : cu.searchCodeMembers(filter, cfgs, constructs, true))
-				if (result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
+				if (!result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
 					// we skip the ones that are overridden by code members that
 					// are already in the set, since they are "hidden" from the
 					// point of view of this unit
-					continue;
-				else
 					result.add((T) sup);
 
 		return result;
@@ -450,10 +448,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @return the collection of matching globals
 	 */
-	private Collection<Global> searchGlobals(Function<Global, Boolean> filter, boolean traverseHierarchy) {
+	private Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
 		Map<String, Global> result = new HashMap<>();
 		for (Global g : instanceGlobals.values())
-			if (filter.apply(g))
+			if (filter.test(g))
 				result.put(g.getName(), g);
 
 		if (!traverseHierarchy)
@@ -461,12 +459,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 
 		for (CompilationUnit cu : superUnits)
 			for (Global sup : cu.searchGlobals(filter, true))
-				if (result.containsKey(sup.getName()))
+				if (!result.containsKey(sup.getName()))
 					// we skip the ones that are hidden by globals that
 					// are already in the set, since they are "hidden" from the
 					// point of view of this unit
-					continue;
-				else
 					result.put(sup.getName(), sup);
 
 		return result.values();

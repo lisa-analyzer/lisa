@@ -5,7 +5,7 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class DoubleAnnotationValue extends BasicAnnotationValue {
+public class DoubleAnnotationValue implements BasicAnnotationValue {
 
 	private final double d;
 

@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Collection;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -90,7 +89,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public default D forgetIdentifiers(Collection<Identifier> ids) throws SemanticException {
+	default D forgetIdentifiers(Iterable<Identifier> ids) throws SemanticException {
 		@SuppressWarnings("unchecked")
 		D result = (D) this;
 		for (Identifier id : ids)

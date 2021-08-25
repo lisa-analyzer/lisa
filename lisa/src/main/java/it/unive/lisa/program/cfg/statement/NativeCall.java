@@ -21,34 +21,6 @@ public abstract class NativeCall extends Call {
 	private final String constructName;
 
 	/**
-	 * Builds the untyped native call. The location where this call happens is
-	 * unknown (i.e. no source file/line/column is available). The static type
-	 * of this call is {@link Untyped}.
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param parameters    the parameters of this call
-	 */
-	protected NativeCall(CFG cfg, String constructName, Expression... parameters) {
-		this(cfg, constructName, Untyped.INSTANCE, parameters);
-	}
-
-	/**
-	 * Builds the native call. The location where this call happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param constructName the name of the construct invoked by this native
-	 *                          call
-	 * @param staticType    the static type of this call
-	 * @param parameters    the parameters of this call
-	 */
-	protected NativeCall(CFG cfg, String constructName, Type staticType, Expression... parameters) {
-		this(cfg, null, constructName, staticType, parameters);
-	}
-
-	/**
 	 * Builds the untyped native call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 
@@ -92,7 +64,7 @@ public abstract class NativeCall extends Call {
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((constructName == null) ? 0 : constructName.hashCode());
@@ -100,20 +72,20 @@ public abstract class NativeCall extends Call {
 	}
 
 	@Override
-	public final boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		NativeCall other = (NativeCall) st;
+		NativeCall other = (NativeCall) obj;
 		if (constructName == null) {
 			if (other.constructName != null)
 				return false;
 		} else if (!constructName.equals(other.constructName))
 			return false;
-		return super.isEqualTo(other);
+		return true;
 	}
 
 	@Override

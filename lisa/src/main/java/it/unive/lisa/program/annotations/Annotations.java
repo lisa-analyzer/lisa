@@ -2,6 +2,7 @@ package it.unive.lisa.program.annotations;
 
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Annotations implements Iterable<Annotation> {
 
-	private List<Annotation> annotations;
+	private final Collection<Annotation> annotations;
 
 	/**
 	 * Builds an empty list of annotations.
@@ -24,11 +25,29 @@ public class Annotations implements Iterable<Annotation> {
 	}
 
 	/**
-	 * Builds a list of annotations from a given list.
+	 * Builds a collection of annotations containing only the given one.
 	 * 
-	 * @param annotations the list of annotations
+	 * @param annotation the annotation
 	 */
-	public Annotations(List<Annotation> annotations) {
+	public Annotations(Annotation annotation) {
+		this(List.of(annotation));
+	}
+
+	/**
+	 * Builds a collection of annotations from an array of annotations.
+	 * 
+	 * @param annotations the array of annotations
+	 */
+	public Annotations(Annotation... annotations) {
+		this(List.of(annotations));
+	}
+
+	/**
+	 * Builds a collection of annotations from a given collection.
+	 * 
+	 * @param annotations the collection of annotations
+	 */
+	public Annotations(Collection<Annotation> annotations) {
 		this.annotations = annotations;
 	}
 
@@ -37,7 +56,7 @@ public class Annotations implements Iterable<Annotation> {
 	 * 
 	 * @return the list of annotations
 	 */
-	public List<Annotation> getAnnotations() {
+	public Collection<Annotation> getAnnotations() {
 		return annotations;
 	}
 
@@ -95,7 +114,7 @@ public class Annotations implements Iterable<Annotation> {
 	 *             annotations, {@code false} otherwise
 	 */
 	public final boolean contains(AnnotationMatcher m) {
-		return annotations.stream().anyMatch(ann -> m.matches(ann));
+		return annotations.stream().anyMatch(m::matches);
 	}
 
 	/**
@@ -106,7 +125,7 @@ public class Annotations implements Iterable<Annotation> {
 	 * @return the annotations that are matched by the matcher {@code m}
 	 */
 	public final Annotations getAnnotations(AnnotationMatcher m) {
-		return new Annotations(annotations.stream().filter(ann -> m.matches(ann)).collect(Collectors.toList()));
+		return new Annotations(annotations.stream().filter(m::matches).collect(Collectors.toList()));
 	}
 
 	/**

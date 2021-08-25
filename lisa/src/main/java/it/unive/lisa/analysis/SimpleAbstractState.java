@@ -203,7 +203,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	/**
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	private static class StateRepresentation extends DomainRepresentation {
+	private static final class StateRepresentation extends DomainRepresentation {
 		private final DomainRepresentation heap;
 		private final DomainRepresentation value;
 

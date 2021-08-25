@@ -13,7 +13,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A generic graph, backed by an {@link AdjacencyMatrix}.
+ * A generic graph, backed by an {@link AdjacencyMatrix}.<br>
+ * <br>
+ * Note that this class does not define {@link #equals(Object)} nor
+ * {@link #hashCode()}, since we leave the decision to be unique instances to
+ * implementers.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -267,28 +271,6 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 */
 	protected abstract DotGraph<N, E, G> toDot(Function<N, String> labelGenerator);
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((adjacencyMatrix == null) ? 0 : adjacencyMatrix.hashCode());
-		result = prime * result + ((entrypoints == null) ? 0 : entrypoints.hashCode());
-		return result;
-	}
-
-	/**
-	 * Graph instances use reference equality for equality checks, under the
-	 * assumption that every graph is unique. For checking if two graphs are
-	 * effectively equal (that is, they are different object with the same
-	 * structure) use {@link #isEqualTo(Graph)}. <br>
-	 * <br>
-	 * {@inheritDoc}
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		return this == obj;
-	}
-
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if
 	 * they have the same structure while potentially being different instances.
@@ -308,38 +290,12 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		if (entrypoints == null) {
 			if (graph.entrypoints != null)
 				return false;
-		} else if (entrypoints.size() != graph.entrypoints.size())
+		} else if (!entrypoints.equals(graph.entrypoints))
 			return false;
-		else {
-			// nodes use reference equality, thus
-			// entrypoint.equals(graph.entrypoints) won't
-			// achieve content comparison. Need to do this manually.
-
-			// the following keeps track of the unmatched nodes in
-			// graph.entrypoints
-			Collection<N> copy = new HashSet<>(graph.entrypoints);
-			boolean found;
-			for (N s : entrypoints) {
-				found = false;
-				for (N ss : graph.entrypoints)
-					if (copy.contains(ss) && s.isEqualTo(ss)) {
-						copy.remove(ss);
-						found = true;
-						break;
-					}
-				if (!found)
-					return false;
-			}
-
-			if (!copy.isEmpty())
-				// we also have to match all of the entrypoints in
-				// graph.entrypoints
-				return false;
-		}
 		if (adjacencyMatrix == null) {
 			if (graph.adjacencyMatrix != null)
 				return false;
-		} else if (!adjacencyMatrix.isEqualTo(graph.adjacencyMatrix))
+		} else if (!adjacencyMatrix.equals(graph.adjacencyMatrix))
 			return false;
 		return true;
 	}

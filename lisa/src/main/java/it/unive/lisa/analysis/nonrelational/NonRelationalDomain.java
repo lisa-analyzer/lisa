@@ -41,5 +41,5 @@ public interface NonRelationalDomain<T extends NonRelationalDomain<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public T eval(E expression, F environment, ProgramPoint pp) throws SemanticException;
+	T eval(E expression, F environment, ProgramPoint pp) throws SemanticException;
 }

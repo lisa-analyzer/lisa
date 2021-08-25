@@ -8,6 +8,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FunctionalInterface
 public interface Operator {
 
 	/**

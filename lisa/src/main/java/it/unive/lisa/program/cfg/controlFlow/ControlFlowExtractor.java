@@ -6,12 +6,12 @@ import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
-import it.unive.lisa.util.workset.FIFOWorkingSet;
-import it.unive.lisa.util.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.workset.WorkingSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -57,8 +57,6 @@ public class ControlFlowExtractor {
 	public Collection<ControlFlowStructure> extract() {
 		extracted.clear();
 
-		Map<Statement, ControlFlowStructure> result = new HashMap<>();
-
 		LinkedList<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
 
@@ -68,6 +66,7 @@ public class ControlFlowExtractor {
 		// first, we find the loops using back-edges:
 		// https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf
 		// http://pages.cs.wisc.edu/~fischer/cs701.f14/finding.loops.html
+		Map<Statement, ControlFlowStructure> result = new HashMap<>();
 		Map<Statement, Set<Statement>> dominators = new Dominators<CFG, Statement, Edge>().build(target);
 		for (Statement conditional : conditionals)
 			for (Statement pred : target.predecessorsOf(conditional))
@@ -83,7 +82,7 @@ public class ControlFlowExtractor {
 		return extracted;
 	}
 
-	private class LoopReconstructor {
+	private final class LoopReconstructor {
 		private final Statement conditional;
 		private final Statement tail;
 
@@ -127,7 +126,7 @@ public class ControlFlowExtractor {
 				// in empty loops, the conditional is a follower of itself
 				// and it is not in the body of the loop, so we have to
 				// manually exclude it
-				if (out.getDestination() != conditional && !body.containsNode(out.getDestination(), false)) {
+				if (out.getDestination() != conditional && !body.containsNode(out.getDestination())) {
 					exit = out;
 					break;
 				}
@@ -136,7 +135,7 @@ public class ControlFlowExtractor {
 		}
 	}
 
-	private class IfReconstructor {
+	private final class IfReconstructor {
 		private final Statement conditional;
 
 		private final Edge trueEdgeStartingEdge;
@@ -283,14 +282,14 @@ public class ControlFlowExtractor {
 		}
 
 		private ControlFlowStructure tryClose(Statement trueNext, Statement falseNext) {
-			if (falseBranch.containsNode(trueNext, false)) {
+			if (falseBranch.containsNode(trueNext)) {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
 				return new IfThenElse(target.getAdjacencyMatrix(), conditional, trueNext, trueBranch.getNodes(),
 						falseBranch.getNodes());
 			}
 
-			if (trueBranch.containsNode(falseNext, false)) {
+			if (trueBranch.containsNode(falseNext)) {
 				// need to cut the extra part from the false branch
 				trueBranch.removeFrom(falseNext);
 				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),

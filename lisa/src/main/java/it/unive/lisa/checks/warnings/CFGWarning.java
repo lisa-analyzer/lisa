@@ -37,16 +37,18 @@ public class CFGWarning extends WarningWithLocation {
 
 	@Override
 	public int compareTo(Warning o) {
+		int cmp;
+		if ((cmp = super.compareTo(o)) != 0)
+			return cmp;
+
 		if (!(o instanceof CFGWarning))
-			return super.compareTo(o);
+			return getClass().getName().compareTo(o.getClass().getName());
 
 		CFGWarning other = (CFGWarning) o;
-		int cmp;
-
 		if ((cmp = StringUtils.compare(cfg.getDescriptor().toString(), other.cfg.getDescriptor().toString())) != 0)
 			return cmp;
 
-		return super.compareTo(other);
+		return 0;
 	}
 
 	@Override

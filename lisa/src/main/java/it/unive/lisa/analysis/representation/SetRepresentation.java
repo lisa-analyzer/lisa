@@ -29,14 +29,6 @@ public class SetRepresentation extends DomainRepresentation {
 		this(mapAndSort(elements, mapper));
 	}
 
-	private static <E> SortedSet<DomainRepresentation> mapAndSort(Iterable<E> elements,
-			Function<E, DomainRepresentation> mapper) {
-		SortedSet<DomainRepresentation> result = new TreeSet<>();
-		for (E e : elements)
-			result.add(mapper.apply(e));
-		return result;
-	}
-
 	/**
 	 * Builds a new representation containing the given set.
 	 * 
@@ -47,6 +39,14 @@ public class SetRepresentation extends DomainRepresentation {
 			this.elements = (SortedSet<DomainRepresentation>) elements;
 		else
 			this.elements = new TreeSet<>(elements);
+	}
+
+	private static <E> SortedSet<DomainRepresentation> mapAndSort(Iterable<E> elements,
+			Function<E, DomainRepresentation> mapper) {
+		SortedSet<DomainRepresentation> result = new TreeSet<>();
+		for (E e : elements)
+			result.add(mapper.apply(e));
+		return result;
 	}
 
 	@Override

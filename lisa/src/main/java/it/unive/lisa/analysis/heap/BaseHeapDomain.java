@@ -117,7 +117,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	protected static abstract class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
+	protected abstract static class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
 
 		@Override
 		public final ExpressionSet<ValueExpression> visit(UnaryExpression expression,

@@ -66,14 +66,14 @@ public class Literal extends Expression {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		Literal other = (Literal) st;
+		Literal other = (Literal) obj;
 		if (value == null) {
 			if (other.value != null)
 				return false;

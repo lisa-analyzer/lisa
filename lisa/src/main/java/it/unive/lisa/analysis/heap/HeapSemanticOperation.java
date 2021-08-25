@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FunctionalInterface
 public interface HeapSemanticOperation {
 
 	/**
@@ -38,7 +39,7 @@ public interface HeapSemanticOperation {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static final class HeapReplacement {
+	final class HeapReplacement {
 
 		/**
 		 * The set of identifiers that are the sources of the replacement
@@ -65,15 +66,8 @@ public interface HeapSemanticOperation {
 		 * sources of this replacement.
 		 * 
 		 * @param id the identifier to add
-		 * 
-		 * @throws IllegalArgumentException if the given identifier is already
-		 *                                      in the set of target identifiers
 		 */
 		public void addSource(Identifier id) {
-			if (targets.contains(id))
-				throw new IllegalArgumentException(
-						"The given identifier has already been considered as target of this replacement");
-
 			sources.add(id);
 		}
 
@@ -82,15 +76,8 @@ public interface HeapSemanticOperation {
 		 * targets of this replacement.
 		 * 
 		 * @param id the identifier to add
-		 * 
-		 * @throws IllegalArgumentException if the given identifier is already
-		 *                                      in the set of source identifiers
 		 */
 		public void addTarget(Identifier id) {
-			if (sources.contains(id))
-				throw new IllegalArgumentException(
-						"The given identifier has already been considered as source of this replacement");
-
 			targets.add(id);
 		}
 

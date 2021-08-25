@@ -39,24 +39,26 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	@SuppressWarnings("unchecked")
 	private class EvaluationVisitor implements ExpressionVisitor<T> {
 
+		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational value domain";
+
 		@Override
 		public T visit(AccessChild expression, T receiver, T child, Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public T visit(HeapAllocation expression, Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public T visit(HeapReference expression, T arg, Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public T visit(HeapDereference expression, T arg, Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with a non-relational value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
@@ -624,7 +626,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			return (T) this;
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
-			return (T) other;
+			return other;
 
 		return glbAux(other);
 	}
@@ -646,7 +648,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * 
 	 * @return the greatest lower bound between this domain element and other
 	 */
-	public T glbAux(T other) {
+	protected T glbAux(T other) {
 		return bottom();
 	}
 }

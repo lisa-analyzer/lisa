@@ -30,30 +30,24 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private static final Sign POS = new Sign(false, false);
-	private static final Sign NEG = new Sign(false, false);
-	private static final Sign ZERO = new Sign(false, false);
-	private static final Sign TOP = new Sign();
-	private static final Sign BOTTOM = new Sign(false, true);
+	private static final Sign POS = new Sign((byte) 4);
+	private static final Sign NEG = new Sign((byte) 3);
+	private static final Sign ZERO = new Sign((byte) 2);
+	private static final Sign TOP = new Sign((byte) 0);
+	private static final Sign BOTTOM = new Sign((byte) 1);
 
-	private final boolean isTop, isBottom;
+	private final byte sign;
 
 	/**
 	 * Builds the sign abstract domain, representing the top of the sign
 	 * abstract domain.
 	 */
 	public Sign() {
-		this(true, false);
+		this((byte) 0);
 	}
 
-	private Sign(boolean isTop, boolean isBottom) {
-		this.isTop = isTop;
-		this.isBottom = isBottom;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
+	private Sign(byte sign) {
+		this.sign = sign;
 	}
 
 	@Override
@@ -161,7 +155,11 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			else if (left.isZero())
 				return ZERO;
 			else if (left.equals(right))
-				return top();
+				// top/top = top
+				// +/+ = +
+				// -/- = +
+				return left.isTop() ? left : POS;
+			return top();
 		case NUMERIC_MOD:
 			return top();
 		case NUMERIC_MUL:
@@ -193,16 +191,10 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	public int hashCode() {
-		if (this == ZERO)
-			return 0;
-		else if (this == POS)
-			return 1;
-		else if (this == NEG)
-			return 2;
-		else if (this == BOTTOM)
-			return 3;
-		else
-			return 4;
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + sign;
+		return result;
 	}
 
 	@Override
@@ -214,11 +206,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		if (getClass() != obj.getClass())
 			return false;
 		Sign other = (Sign) obj;
-		if (isBottom != other.isBottom)
+		if (sign != other.sign)
 			return false;
-		if (isTop != other.isTop)
-			return false;
-		return isTop && other.isTop;
+		return true;
 	}
 
 	@Override
@@ -234,9 +224,11 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return left.eq(right).or(left.gt(right));
 		case COMPARISON_GT:
 			return left.gt(right);
-		case COMPARISON_LE: // e1 <= e2 same as !(e1 > e2)
+		case COMPARISON_LE:
+			// e1 <= e2 same as !(e1 > e2)
 			return left.gt(right).negate();
-		case COMPARISON_LT: // e1 < e2 -> !(e1 >= e2) && !(e1 == e2)
+		case COMPARISON_LT:
+			// e1 < e2 -> !(e1 >= e2) && !(e1 == e2)
 			return left.gt(right).negate().and(left.eq(right).negate());
 		case COMPARISON_NE:
 			return left.eq(right).negate();
@@ -308,12 +300,14 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		case COMPARISON_LT:
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
-				if (rightSign.isNegative() || rightSign.isZero()) // x < 0/-
+				if (rightSign.isNegative() || rightSign.isZero())
+					// x < 0/-
 					environment = environment.assign((Identifier) left,
 							new Constant(right.getDynamicType(), -1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
-				if (leftSign.isPositive() || leftSign.isZero()) // 0/+ < x
+				if (leftSign.isPositive() || leftSign.isZero())
+					// 0/+ < x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), 1, left.getCodeLocation()), pp);
 			}
@@ -321,12 +315,14 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		case COMPARISON_GT:
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
-				if (rightSign.isPositive() || rightSign.isZero()) // x > +/0
+				if (rightSign.isPositive() || rightSign.isZero())
+					// x > +/0
 					environment = environment.assign((Identifier) left,
 							new Constant(right.getDynamicType(), 1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
-				if (leftSign.isNegative() || leftSign.isZero()) // -/0 > x
+				if (leftSign.isNegative() || leftSign.isZero())
+					// -/0 > x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), -1, right.getCodeLocation()), pp);
 			}

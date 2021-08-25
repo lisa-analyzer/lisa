@@ -189,25 +189,31 @@ public class UnresolvedCall extends Call {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + (instanceCall ? 1231 : 1237);
+		result = prime * result + ((strategy == null) ? 0 : strategy.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		UnresolvedCall other = (UnresolvedCall) st;
+		UnresolvedCall other = (UnresolvedCall) obj;
+		if (instanceCall != other.instanceCall)
+			return false;
+		if (strategy != other.strategy)
+			return false;
 		if (targetName == null) {
 			if (other.targetName != null)
 				return false;
 		} else if (!targetName.equals(other.targetName))
 			return false;
-		return super.isEqualTo(other);
+		return true;
 	}
 
 	@Override

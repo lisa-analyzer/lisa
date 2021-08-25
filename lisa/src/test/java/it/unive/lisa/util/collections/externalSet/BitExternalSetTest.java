@@ -1,5 +1,6 @@
 package it.unive.lisa.util.collections.externalSet;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -310,7 +311,7 @@ public class BitExternalSetTest {
 		tmp = new HashSet<>(set1);
 		tmp.retainAll(set2);
 		verify(Set::equals, Pair.of(tmp, eset1.intersection(eset2)));
-		assertTrue(tmp.isEmpty() == !eset1.intersects(eset2));
+		assertEquals(tmp.isEmpty(), !eset1.intersects(eset2));
 
 		tmp = new HashSet<>(set1);
 		tmp.removeAll(set2);

@@ -8,6 +8,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FunctionalInterface
 public interface CodeElement {
 
 	/**
@@ -15,5 +16,5 @@ public interface CodeElement {
 	 * 
 	 * @return the location where this code element apperars in the source file
 	 */
-	public CodeLocation getLocation();
+	CodeLocation getLocation();
 }

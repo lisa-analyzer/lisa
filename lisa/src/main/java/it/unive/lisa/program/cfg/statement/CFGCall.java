@@ -118,31 +118,31 @@ public class CFGCall extends Call implements MetaVariableCreator {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
 		result = prime * result + ((qualifiedName == null) ? 0 : qualifiedName.hashCode());
+		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
 		return result;
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		CFGCall other = (CFGCall) st;
-		if (targets == null) {
-			if (other.targets != null)
-				return false;
-		} else if (!targets.equals(other.targets))
-			return false;
+		CFGCall other = (CFGCall) obj;
 		if (qualifiedName == null) {
 			if (other.qualifiedName != null)
 				return false;
 		} else if (!qualifiedName.equals(other.qualifiedName))
 			return false;
-		return super.isEqualTo(other);
+		if (targets == null) {
+			if (other.targets != null)
+				return false;
+		} else if (!targets.equals(other.targets))
+			return false;
+		return true;
 	}
 
 	@Override
@@ -176,8 +176,6 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		// this will contain only the information about the returned
 		// metavariable
 		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, callState, params);
-		// the lub will include the metavariable inside the state
-		// AnalysisState<A, H, V> lub = lastPostState.lub(returned);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
@@ -189,7 +187,7 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 		Identifier meta = getMetaVariable();
 		for (SymbolicExpression expr : returned.getComputedExpressions())
-			// if(! (expr instanceof Skip)) //It might be the case it chose a
+			// It might be the case it chose a
 			// target with void return type
 			getMetaVariables().add((Identifier) expr);
 
@@ -202,10 +200,8 @@ public class CFGCall extends Call implements MetaVariableCreator {
 		getMetaVariables().add(meta);
 
 		AnalysisState<A, H, V> result = returned.bottom();
-		for (SymbolicExpression expr : returned.getComputedExpressions())
-		// if(! (expr instanceof Skip))
-		{
-			AnalysisState<A, H, V> tmp = returned.assign((Identifier) meta, expr, this);
+		for (SymbolicExpression expr : returned.getComputedExpressions()) {
+			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
 			result = result.lub(tmp.smallStepSemantics(meta, this));
 			// We need to perform this evaluation of the identifier not pushed
 			// with the scope since otherwise

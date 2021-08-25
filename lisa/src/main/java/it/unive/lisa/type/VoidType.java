@@ -10,7 +10,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class VoidType implements Type {
+public final class VoidType implements Type {
 
 	/**
 	 * Unique instance of {@link VoidType}.
@@ -32,7 +32,7 @@ public class VoidType implements Type {
 
 	@Override
 	public int hashCode() {
-		return System.identityHashCode(this);
+		return VoidType.class.hashCode();
 	}
 
 	@Override

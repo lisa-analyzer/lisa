@@ -6,7 +6,6 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
-import java.util.Collection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,9 +14,13 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ChecksExecutor {
+public final class ChecksExecutor {
 
-	private static final Logger log = LogManager.getLogger(ChecksExecutor.class);
+	private static final Logger LOG = LogManager.getLogger(ChecksExecutor.class);
+
+	private ChecksExecutor() {
+		// this class is just a static holder
+	}
 
 	/**
 	 * Executes all the given checks on the given inputs cfgs.
@@ -29,16 +32,16 @@ public class ChecksExecutor {
 	 * @param checks  the checks to execute
 	 */
 	public static <C extends Check<T>, T> void executeAll(T tool, Program program,
-			Collection<C> checks) {
+			Iterable<C> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
 
-		for (Global global : iterate(log, program.getGlobals(), "Analyzing program globals...", "Globals"))
+		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
 			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
 
-		for (CFG cfg : iterate(log, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
+		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 
-		for (CompilationUnit unit : iterate(log, program.getUnits(), "Analyzing compilation units...", "Units"))
+		for (CompilationUnit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
 			checks.forEach(c -> visitUnit(tool, unit, c));
 
 		checks.forEach(c -> c.afterExecution(tool));

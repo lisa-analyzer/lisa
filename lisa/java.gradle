@@ -37,6 +37,13 @@ test {
 		includeTestsMatching "it.unive.lisa.*"
 		excludeTestsMatching "it.unive.lisa.cron.*"
 	}
+	
+	jacoco {
+		// we don't care about coverage of excpetion classes
+		// most of the times they only define constructors
+		// that invoke super constructors...
+        excludes = ['**/*Exception*']
+    }
 }
 
 tasks.register('cron', Test) {
@@ -51,6 +58,19 @@ tasks.register('cron', Test) {
 	}
 }
 
+tasks.register('allTests') {
+    description = 'Runs unit tests and cron tests'
+    group = 'verification'
+	dependsOn test, cron
+}
+
 jacocoTestReport {
+	// TODO: depend also on cron
     dependsOn test // tests are required to run before generating the report
+    afterEvaluate {
+    	// this will effectively hide exception classes from the report
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: '**/*Exception*')
+        }))
+    }
 }

@@ -29,7 +29,7 @@ public class Parameter implements CodeElement {
 
 	private final CodeLocation location;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The type

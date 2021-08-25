@@ -26,5 +26,6 @@ dependencies {
 	antlr 'org.antlr:antlr4:4.8-1'
 
 	// testing
+	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
     testImplementation 'junit:junit:4.12'
 }

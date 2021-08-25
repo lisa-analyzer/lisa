@@ -21,7 +21,7 @@ public abstract class WarningWithLocation extends Warning {
 	 *                     located. If unknown, use {@code, null}
 	 * @param message  the message of this warning
 	 */
-	public WarningWithLocation(CodeLocation location, String message) {
+	protected WarningWithLocation(CodeLocation location, String message) {
 		super(message);
 		this.location = location;
 	}
@@ -53,10 +53,35 @@ public abstract class WarningWithLocation extends Warning {
 		WarningWithLocation other = (WarningWithLocation) o;
 		int cmp;
 
-		if ((cmp = location.compareTo(location)) != 0)
+		if ((cmp = location.compareTo(other.location)) != 0)
 			return cmp;
 
 		return super.compareTo(other);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		WarningWithLocation other = (WarningWithLocation) obj;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
+		return true;
 	}
 
 	@Override

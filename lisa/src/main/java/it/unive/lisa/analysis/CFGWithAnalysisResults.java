@@ -29,6 +29,10 @@ import java.util.function.Function;
 public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
 		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V>> {
 
+	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
+
+	private static final String CANNOT_LUB_ERROR = "Cannot perform the least upper bound of two graphs with different descriptor";
+
 	/**
 	 * The map storing the analysis results
 	 */
@@ -177,7 +181,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 */
 	public CFGWithAnalysisResults<A, H, V> join(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		return new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
 				results.lub(other.results));
@@ -186,7 +190,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public CFGWithAnalysisResults<A, H, V> lub(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		CFGWithAnalysisResults<A, H, V> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
 				results.lub(other.results));
@@ -197,7 +201,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public CFGWithAnalysisResults<A, H, V> widening(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		CFGWithAnalysisResults<A, H,
 				V> widen = new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
@@ -212,17 +216,14 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 			if (other.id == null)
 				return null;
 
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 		}
 
 		if (other.id == null)
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 
 		if (!id.equals(other.id))
-			throw new SemanticException("Cannot join graphs with different IDs: '" + String.valueOf(id) + "' and '"
-					+ String.valueOf(other.id) + "'");
+			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
 
 		return id;
 	}
@@ -230,7 +231,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException("Cannot perform the least upper bound of two graphs with different descriptor");
+			throw new SemanticException(CANNOT_LUB_ERROR);
 
 		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
 	}
@@ -258,5 +259,42 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	@Override
 	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, id, labelGenerator);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((entryStates == null) ? 0 : entryStates.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((results == null) ? 0 : results.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		CFGWithAnalysisResults<?, ?, ?> other = (CFGWithAnalysisResults<?, ?, ?>) obj;
+		if (entryStates == null) {
+			if (other.entryStates != null)
+				return false;
+		} else if (!entryStates.equals(other.entryStates))
+			return false;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (results == null) {
+			if (other.results != null)
+				return false;
+		} else if (!results.equals(other.results))
+			return false;
+		return true;
 	}
 }

@@ -16,7 +16,10 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * <br>
  * NativeCFGs do not contain code, but they can be rewritten to a
  * {@link NativeCall} providing their semantics through
- * {@link #rewrite(Statement, Expression...)}.
+ * {@link #rewrite(Statement, Expression...)}.<br>
+ * <br>
+ * Note that this class does not implement {@link #equals(Object)} nor
+ * {@link #hashCode()} since all constructs are unique.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

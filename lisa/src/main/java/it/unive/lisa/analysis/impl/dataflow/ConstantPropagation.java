@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,7 +30,7 @@ public class ConstantPropagation
 		implements DataflowElement<DefiniteForwardDataflowDomain<ConstantPropagation>, ConstantPropagation> {
 
 	private final Identifier id;
-	private final Integer v;
+	private final Integer constant;
 
 	/**
 	 * Builds an empty constant propagation object.
@@ -40,7 +41,7 @@ public class ConstantPropagation
 
 	private ConstantPropagation(Identifier id, Integer v) {
 		this.id = id;
-		this.v = v;
+		this.constant = v;
 	}
 
 	@Override
@@ -49,11 +50,11 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Identifier getIdentifier() {
-		return id;
+	public Collection<Identifier> getInvolvedIdentifiers() {
+		return Collections.singleton(id);
 	}
 
-	private Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+	private static Integer eval(SymbolicExpression e, DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
 
 		if (e instanceof Constant) {
 			Constant c = (Constant) e;
@@ -62,8 +63,8 @@ public class ConstantPropagation
 
 		if (e instanceof Identifier) {
 			for (ConstantPropagation cp : domain.getDataflowElements())
-				if (cp.getIdentifier().equals(e))
-					return cp.v;
+				if (cp.id.equals(e))
+					return cp.constant;
 
 			return null;
 		}
@@ -124,11 +125,27 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public Collection<Identifier> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+	public Collection<ConstantPropagation> gen(ValueExpression expression, ProgramPoint pp,
 			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
-		Set<Identifier> set = new HashSet<>();
-		set.add(id);
-		return set;
+		return Collections.emptyList();
+	}
+
+	@Override
+	public Collection<ConstantPropagation> kill(Identifier id, ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+		Collection<ConstantPropagation> result = new HashSet<>();
+
+		for (ConstantPropagation cp : domain.getDataflowElements())
+			if (cp.id.equals(id))
+				result.add(cp);
+
+		return result;
+	}
+
+	@Override
+	public Collection<ConstantPropagation> kill(ValueExpression expression, ProgramPoint pp,
+			DefiniteForwardDataflowDomain<ConstantPropagation> domain) {
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -136,7 +153,7 @@ public class ConstantPropagation
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((v == null) ? 0 : v.hashCode());
+		result = prime * result + ((constant == null) ? 0 : constant.hashCode());
 		return result;
 	}
 
@@ -154,10 +171,10 @@ public class ConstantPropagation
 				return false;
 		} else if (!id.equals(other.id))
 			return false;
-		if (v == null) {
-			if (other.v != null)
+		if (constant == null) {
+			if (other.constant != null)
 				return false;
-		} else if (!v.equals(other.v))
+		} else if (!constant.equals(other.constant))
 			return false;
 		return true;
 	}
@@ -174,12 +191,12 @@ public class ConstantPropagation
 
 	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(v));
+		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}
 
 	@Override
 	public ConstantPropagation pushScope(ScopeToken scope) throws SemanticException {
-		return new ConstantPropagation((Identifier) id.pushScope(scope), v);
+		return new ConstantPropagation((Identifier) id.pushScope(scope), constant);
 	}
 
 	@Override
@@ -187,6 +204,6 @@ public class ConstantPropagation
 		if (!(id instanceof OutOfScopeIdentifier))
 			return this;
 
-		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), v);
+		return new ConstantPropagation(((OutOfScopeIdentifier) id).popScope(scope), constant);
 	}
 }

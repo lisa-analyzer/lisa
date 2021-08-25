@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.SemanticEdge;
 import java.util.Objects;
 
 /**
@@ -16,7 +15,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
+public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, CFG> {
 
 	/**
 	 * The source node.
@@ -84,30 +83,22 @@ public abstract class Edge implements SemanticEdge<Statement, Edge, CFG> {
 	}
 
 	@Override
-	public boolean isEqualTo(Edge other) {
-		if (this == other)
-			return true;
-		if (other == null)
-			return false;
-		if (getClass() != other.getClass())
-			return false;
-		if (destination == null) {
-			if (other.destination != null)
-				return false;
-		} else if (!destination.isEqualTo(other.destination))
-			return false;
-		if (source == null) {
-			if (other.source != null)
-				return false;
-		} else if (!source.isEqualTo(other.source))
-			return false;
-		return true;
-	}
-
-	@Override
 	public abstract String toString();
 
-	@Override
+	/**
+	 * Traverses this edge, optionally modifying the given {@code sourceState}
+	 * by applying semantic assumptions.
+	 * 
+	 * @param <A>         the concrete {@link AbstractState} instance
+	 * @param <H>         the concrete {@link HeapDomain} instance
+	 * @param <V>         the concrete {@link ValueDomain} instance
+	 * @param sourceState the {@link AnalysisState} computed at the source of
+	 *                        this edge
+	 * 
+	 * @return the {@link AnalysisState} after traversing this edge
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(

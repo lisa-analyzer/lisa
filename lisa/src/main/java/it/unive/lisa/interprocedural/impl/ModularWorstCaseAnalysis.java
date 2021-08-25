@@ -1,5 +1,6 @@
 package it.unive.lisa.interprocedural.impl;
 
+import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -19,13 +20,15 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.CFGCall;
 import it.unive.lisa.program.cfg.statement.Call;
 import it.unive.lisa.program.cfg.statement.OpenCall;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.datastructures.graph.FixpointException;
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -45,8 +48,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> implements InterproceduralAnalysis<A, H, V> {
 
-	private static final Logger log = LogManager
-			.getLogger(it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis.class);
+	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
 	/**
 	 * The program.
@@ -69,8 +71,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final void fixpoint(AnalysisState<A, H, V> entryState) throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(log, program.getAllCFGs(), "Computing fixpoint over the whole program",
+	public final void fixpoint(AnalysisState<A, H, V> entryState,
+			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
+			int wideningThreshold) throws FixpointException {
+		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				AnalysisState<A, H, V> prepared = entryState;
@@ -81,8 +85,9 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 					prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
 				}
 
-				results.put(cfg, Optional.of(cfg.fixpoint(prepared, this)));
-			} catch (SemanticException e) {
+				results.put(cfg, Optional
+						.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), wideningThreshold)));
+			} catch (SemanticException | AnalysisSetupException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
 	}

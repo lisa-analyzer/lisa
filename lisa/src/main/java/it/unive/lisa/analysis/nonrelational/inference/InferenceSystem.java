@@ -110,14 +110,14 @@ public class InferenceSystem<T extends InferredValue<T>>
 	public InferenceSystem<T> top() {
 		// we do not redefine isTop() since we can ignore 'inferred':
 		// we can infer a non-top value even with a top environment
-		return new InferenceSystem<T>(lattice.top(), null, inferred.top());
+		return new InferenceSystem<>(lattice.top(), null, inferred.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
 		// we do not redefine isBottom() since we can ignore 'inferred':
 		// we can infer a non-bottom value even with a top environment
-		return new InferenceSystem<T>(lattice.bottom(), null, inferred.bottom());
+		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
 	}
 
 	@Override

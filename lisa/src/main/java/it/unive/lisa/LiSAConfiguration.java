@@ -1,6 +1,7 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
@@ -8,6 +9,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +22,13 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSAConfiguration {
+
+	/**
+	 * The default number of fixpoint iteration on a given node after which
+	 * calls to {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}.
+	 */
+	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
 
 	/**
 	 * The collection of syntactic checks to execute
@@ -81,6 +91,18 @@ public class LiSAConfiguration {
 	private String workdir;
 
 	/**
+	 * The number of fixpoint iteration on a given node after which calls to
+	 * {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}.
+	 */
+	private int wideningThreshold;
+
+	/**
+	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
+	 */
+	private Class<?> fixpointWorkingSet;
+
+	/**
 	 * Builds a new configuration object, with default settings. By default:
 	 * <ul>
 	 * <li>no syntactic check is executed</li>
@@ -93,12 +115,16 @@ public class LiSAConfiguration {
 	 * <li>the type inference will not be dumped</li>
 	 * <li>the results of the analysis will not be dumped</li>
 	 * <li>the json report will not be dumped</li>
+	 * <li>the default warning threshold ({@value #DEFAULT_WIDENING_THRESHOLD})
+	 * will be used</li>
 	 * </ul>
 	 */
 	public LiSAConfiguration() {
 		this.syntacticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.semanticChecks = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
+		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
+		this.fixpointWorkingSet = FIFOWorkingSet.class;
 	}
 
 	/**
@@ -306,6 +332,32 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Sets the concrete class of {@link WorkingSet} to be used in fixpoints.
+	 * 
+	 * @param fixpointWorkingSet the class
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setFixpointWorkingSet(Class<? extends WorkingSet<Statement>> fixpointWorkingSet) {
+		this.fixpointWorkingSet = fixpointWorkingSet;
+		return this;
+	}
+
+	/**
+	 * Sets the number of fixpoint iteration on a given node after which calls
+	 * to {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}.
+	 * 
+	 * @param wideningThreshold the threshold
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setWideningThreshold(int wideningThreshold) {
+		this.wideningThreshold = wideningThreshold;
+		return this;
+	}
+
+	/**
 	 * Yields the {@link CallGraph} for the analysis. Might be {@code null} if
 	 * none was set.
 	 * 
@@ -414,6 +466,27 @@ public class LiSAConfiguration {
 		return workdir;
 	}
 
+	/**
+	 * Yields the concrete class of {@link WorkingSet} to be used in fixpoints.
+	 * 
+	 * @return the working set class
+	 */
+	@SuppressWarnings("unchecked")
+	public Class<? extends WorkingSet<Statement>> getFixpointWorkingSet() {
+		return (Class<? extends WorkingSet<Statement>>) fixpointWorkingSet;
+	}
+
+	/**
+	 * Yields the number of fixpoint iteration on a given node after which calls
+	 * to {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}.
+	 * 
+	 * @return the widening threshold
+	 */
+	public int getWideningThreshold() {
+		return wideningThreshold;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -422,11 +495,14 @@ public class LiSAConfiguration {
 		result = prime * result + (dumpAnalysis ? 1231 : 1237);
 		result = prime * result + (dumpCFGs ? 1231 : 1237);
 		result = prime * result + (dumpTypeInference ? 1231 : 1237);
+		result = prime * result + ((fixpointWorkingSet == null) ? 0 : fixpointWorkingSet.hashCode());
 		result = prime * result + (inferTypes ? 1231 : 1237);
+		result = prime * result + ((interproceduralAnalysis == null) ? 0 : interproceduralAnalysis.hashCode());
 		result = prime * result + (jsonOutput ? 1231 : 1237);
+		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
 		result = prime * result + ((state == null) ? 0 : state.hashCode());
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
-		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
+		result = prime * result + wideningThreshold;
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
 		return result;
 	}
@@ -451,9 +527,24 @@ public class LiSAConfiguration {
 			return false;
 		if (dumpTypeInference != other.dumpTypeInference)
 			return false;
+		if (fixpointWorkingSet == null) {
+			if (other.fixpointWorkingSet != null)
+				return false;
+		} else if (!fixpointWorkingSet.equals(other.fixpointWorkingSet))
+			return false;
 		if (inferTypes != other.inferTypes)
 			return false;
+		if (interproceduralAnalysis == null) {
+			if (other.interproceduralAnalysis != null)
+				return false;
+		} else if (!interproceduralAnalysis.equals(other.interproceduralAnalysis))
+			return false;
 		if (jsonOutput != other.jsonOutput)
+			return false;
+		if (semanticChecks == null) {
+			if (other.semanticChecks != null)
+				return false;
+		} else if (!semanticChecks.equals(other.semanticChecks))
 			return false;
 		if (state == null) {
 			if (other.state != null)
@@ -465,10 +556,7 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!syntacticChecks.equals(other.syntacticChecks))
 			return false;
-		if (semanticChecks == null) {
-			if (other.semanticChecks != null)
-				return false;
-		} else if (!semanticChecks.equals(other.semanticChecks))
+		if (wideningThreshold != other.wideningThreshold)
 			return false;
 		if (workdir == null) {
 			if (other.workdir != null)
@@ -480,21 +568,35 @@ public class LiSAConfiguration {
 
 	@Override
 	public String toString() {
-		String res = "LiSA configuration:" +
-				"\n  workdir: " + String.valueOf(workdir) +
-				"\n  dump input cfgs: " + dumpCFGs +
-				"\n  infer types: " + inferTypes +
-				"\n  dump inferred types: " + dumpTypeInference +
-				"\n  dump analysis results: " + dumpAnalysis +
-				"\n  dump json report: " + jsonOutput +
-				"\n  " + syntacticChecks.size() + " syntactic checks to execute"
-				+ (syntacticChecks.isEmpty() ? "" : ":");
+		StringBuilder res = new StringBuilder();
+		res.append("LiSA configuration:")
+				.append("\n  workdir: ")
+				.append(String.valueOf(workdir))
+				.append("\n  dump input cfgs: ")
+				.append(dumpCFGs)
+				.append("\n  infer types: ")
+				.append(inferTypes)
+				.append("\n  dump inferred types: ")
+				.append(dumpTypeInference)
+				.append("\n  dump analysis results: ")
+				.append(dumpAnalysis)
+				.append("\n  dump json report: ")
+				.append(jsonOutput)
+				.append("\n  ")
+				.append(syntacticChecks.size())
+				.append(" syntactic checks to execute")
+				.append((syntacticChecks.isEmpty() ? "" : ":"));
+
 		for (SyntacticCheck check : syntacticChecks)
-			res += "\n      " + check.getClass().getSimpleName();
-		res += "\n  " + semanticChecks.size() + " semantic checks to execute"
-				+ (semanticChecks.isEmpty() ? "" : ":");
+			res.append("\n      ")
+					.append(check.getClass().getSimpleName());
+		res.append("\n  ")
+				.append(semanticChecks.size())
+				.append(" semantic checks to execute")
+				.append((semanticChecks.isEmpty() ? "" : ":"));
 		for (SemanticCheck check : semanticChecks)
-			res += "\n      " + check.getClass().getSimpleName();
-		return res;
+			res.append("\n      ")
+					.append(check.getClass().getSimpleName());
+		return res.toString();
 	}
 }

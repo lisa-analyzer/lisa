@@ -1,17 +1,22 @@
 package it.unive.lisa.util.collections;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
 
 /**
  * Utility methods for operations on {@link Collection}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CollectionUtilities {
+public final class CollectionUtilities {
+
+	private CollectionUtilities() {
+		// this class is just a static holder
+	}
 
 	/**
 	 * A {@code null}-safe comparison callback that invokes the given comparator
@@ -104,7 +109,7 @@ public class CollectionUtilities {
 	 *                         elements
 	 */
 	public static <T, C extends Collection<T>> void join(C first, C second, C result, BiPredicate<T, T> equalityTest,
-			BiFunction<T, T, T> joiner) {
+			BinaryOperator<T> joiner) {
 		// the following keeps track of the unmatched nodes in second
 		Collection<T> copy = new HashSet<>(second);
 		boolean found;
@@ -125,5 +130,21 @@ public class CollectionUtilities {
 
 		// unmatched in other
 		copy.forEach(result::add);
+	}
+
+	/**
+	 * Stores the given objects into a collection and returns it.
+	 * 
+	 * @param <T>  the type of objects
+	 * @param objs the objects to store
+	 * 
+	 * @return a (modifiable) collection containing the given objects
+	 */
+	@SafeVarargs
+	public static <T> Collection<T> collect(T... objs) {
+		ArrayList<T> res = new ArrayList<>(objs.length);
+		for (T o : objs)
+			res.add(o);
+		return res;
 	}
 }

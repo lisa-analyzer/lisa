@@ -42,7 +42,13 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 		this(new HashSet<>(), true);
 	}
 
-	private AllocationSites(Set<AllocationSite> set, boolean isTop) {
+	/**
+	 * Builds an instance of this class to hold the given sites.
+	 * 
+	 * @param set   the set of {@link AllocationSite}s
+	 * @param isTop whether this instance is the top of the lattice
+	 */
+	AllocationSites(Set<AllocationSite> set, boolean isTop) {
 		super(set);
 		this.isTop = isTop;
 	}

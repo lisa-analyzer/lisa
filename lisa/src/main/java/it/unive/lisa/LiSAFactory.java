@@ -43,13 +43,19 @@ import org.reflections.scanners.SubTypesScanner;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAFactory {
+public final class LiSAFactory {
+
+	private static final Map<Class<?>, Class<?>> CUSTOM_DEFAULTS = new HashMap<>();
+
+	private LiSAFactory() {
+		// this class is just a static holder
+	}
 
 	private static <T> T construct(Class<T> component, Class<?>[] argTypes, Object[] params)
 			throws AnalysisSetupException {
 		try {
 			Constructor<T> constructor = component.getConstructor(argTypes);
-			return (T) constructor.newInstance(params);
+			return constructor.newInstance(params);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
 				| IllegalArgumentException
 				| InvocationTargetException e) {
@@ -68,12 +74,9 @@ public class LiSAFactory {
 
 			List<Integer> toWrap = new ArrayList<>();
 			for (int i = 0; i < types.length; i++)
-				if (types[i].isAssignableFrom(params[i].getClass()))
-					continue;
-				else if (needsWrapping(params[i].getClass(), types[i])) {
+				if (needsWrapping(params[i].getClass(), types[i]))
 					toWrap.add(i);
-					continue;
-				} else
+				else if (!types[i].isAssignableFrom(params[i].getClass()))
 					continue outer;
 
 			candidates.put(constructor, toWrap);
@@ -82,12 +85,12 @@ public class LiSAFactory {
 		if (candidates.isEmpty())
 			throw new AnalysisSetupException(
 					"No suitable constructor of " + component.getSimpleName() + " found for argument types "
-							+ Arrays.toString(Arrays.stream(params).map(p -> p.getClass()).toArray(Class[]::new)));
+							+ Arrays.toString(Arrays.stream(params).map(Object::getClass).toArray(Class[]::new)));
 
 		if (candidates.size() > 1)
 			throw new AnalysisSetupException(
 					"Constructor call of " + component.getSimpleName() + " is ambiguous for argument types "
-							+ Arrays.toString(Arrays.stream(params).map(p -> p.getClass()).toArray(Class[]::new)));
+							+ Arrays.toString(Arrays.stream(params).map(Object::getClass).toArray(Class[]::new)));
 
 		for (int p : candidates.values().iterator().next())
 			params[p] = wrapParam(params[p]);
@@ -157,23 +160,21 @@ public class LiSAFactory {
 	public static <T> T getInstance(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
 			if (params != null && params.length != 0)
-				return (T) construct(component, findConstructorSignature(component, params), params);
+				return construct(component, findConstructorSignature(component, params), params);
 
 			DefaultParameters defaultParams = component.getAnnotation(DefaultParameters.class);
 			if (defaultParams == null)
-				return (T) construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
+				return construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
 
 			Object[] defaults = new Object[defaultParams.value().length];
 			for (int i = 0; i < defaults.length; i++)
 				defaults[i] = getInstance(defaultParams.value()[i]);
 
-			return (T) construct(component, findConstructorSignature(component, defaults), defaults);
+			return construct(component, findConstructorSignature(component, defaults), defaults);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}
 	}
-
-	private static final Map<Class<?>, Class<?>> customDefaults = new HashMap<>();
 
 	/**
 	 * Registers a default implementation for {@code component}, taking
@@ -187,13 +188,13 @@ public class LiSAFactory {
 	 *                                  {@code component}
 	 */
 	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
-		customDefaults.put(component, defaultImplementation);
+		CUSTOM_DEFAULTS.put(component, defaultImplementation);
 	}
 
 	@SuppressWarnings("unchecked")
 	private static <T> Class<? extends T> getDefaultClassFor(Class<T> component) {
-		if (customDefaults.containsKey(component))
-			return (Class<? extends T>) customDefaults.get(component);
+		if (CUSTOM_DEFAULTS.containsKey(component))
+			return (Class<? extends T>) CUSTOM_DEFAULTS.get(component);
 		DefaultImplementation defaultImpl = component.getAnnotation(DefaultImplementation.class);
 		if (defaultImpl == null)
 			return null;
@@ -251,7 +252,7 @@ public class LiSAFactory {
 	 * 
 	 * @param <T> the type of the component
 	 */
-	public static class ConfigurableComponent<T> {
+	public static final class ConfigurableComponent<T> {
 		private static final Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 
 		private final Class<T> component;
@@ -300,6 +301,49 @@ public class LiSAFactory {
 		 */
 		public Collection<Class<? extends T>> getAlternatives() {
 			return alternatives;
+		}
+
+		@Override
+		public int hashCode() {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((alternatives == null) ? 0 : alternatives.hashCode());
+			result = prime * result + ((component == null) ? 0 : component.hashCode());
+			result = prime * result + ((defaultInstance == null) ? 0 : defaultInstance.hashCode());
+			return result;
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null)
+				return false;
+			if (getClass() != obj.getClass())
+				return false;
+			ConfigurableComponent<?> other = (ConfigurableComponent<?>) obj;
+			if (alternatives == null) {
+				if (other.alternatives != null)
+					return false;
+			} else if (!alternatives.equals(other.alternatives))
+				return false;
+			if (component == null) {
+				if (other.component != null)
+					return false;
+			} else if (!component.equals(other.component))
+				return false;
+			if (defaultInstance == null) {
+				if (other.defaultInstance != null)
+					return false;
+			} else if (!defaultInstance.equals(other.defaultInstance))
+				return false;
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return component.getName() + "(defaults to: '" + defaultInstance.getName() + "', alternatives: "
+					+ alternatives + ")";
 		}
 	}
 

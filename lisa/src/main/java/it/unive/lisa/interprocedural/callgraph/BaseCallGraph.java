@@ -87,19 +87,19 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		resolved.setOffset(call.getOffset());
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
-		if (!adjacencyMatrix.containsNode(source, false))
+		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
 		for (CFG target : targets) {
 			CallGraphNode t = new CallGraphNode(this, target);
-			if (!adjacencyMatrix.containsNode(t, false))
+			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, program.getEntryPoints().contains(call.getCFG()));
 			addEdge(new CallGraphEdge(source, t));
 		}
 
 		for (NativeCFG target : nativeTargets) {
 			CallGraphNode t = new CallGraphNode(this, target);
-			if (!adjacencyMatrix.containsNode(t, false))
+			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, false);
 			addEdge(new CallGraphEdge(source, t));
 		}

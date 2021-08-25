@@ -10,7 +10,7 @@ import java.util.Objects;
  * A context sensitive token representing an entire call chain up until a
  * recursion.
  */
-public class RecursionFreeToken implements ContextSensitivityToken {
+public final class RecursionFreeToken implements ContextSensitivityToken {
 
 	private static final RecursionFreeToken singleton = new RecursionFreeToken(null);
 

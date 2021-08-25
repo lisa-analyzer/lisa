@@ -81,7 +81,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	protected HeapEnvironment<T> copy() {
-		return new HeapEnvironment<T>(lattice, mkNewFunction(function), new ArrayList<>(substitution));
+		return new HeapEnvironment<>(lattice, mkNewFunction(function), new ArrayList<>(substitution));
 	}
 
 	@Override

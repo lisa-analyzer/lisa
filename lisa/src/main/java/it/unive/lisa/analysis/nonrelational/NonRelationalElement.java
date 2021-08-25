@@ -49,7 +49,7 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	public Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
+	Satisfiability satisfies(E expression, F environment, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Yields the environment {@code environment} on which the expression
@@ -64,7 +64,7 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
+	F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Performs the greatest lower bound operation between this domain element
@@ -76,7 +76,7 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T glb(T other) throws SemanticException;
+	T glb(T other) throws SemanticException;
 
 	/**
 	 * Yields a fixed abstraction of the given variable. The abstraction does

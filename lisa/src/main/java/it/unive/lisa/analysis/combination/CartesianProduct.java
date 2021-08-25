@@ -38,12 +38,12 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	/**
 	 * The left-hand side abstract domain.
 	 */
-	protected T1 left;
+	protected final T1 left;
 
 	/**
 	 * The right-hand side abstract domain.
 	 */
-	protected T2 right;
+	protected final T2 right;
 
 	/**
 	 * Builds the Cartesian product abstract domain.
@@ -92,17 +92,26 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 		if (left instanceof Environment && right instanceof Environment) {
 			Environment<?, ?, ?, ?> leftEnv = (Environment<?, ?, ?, ?>) left;
 			Environment<?, ?, ?, ?> rightEnv = (Environment<?, ?, ?, ?>) right;
-			String result = "";
 			if (!leftEnv.isTop() && !leftEnv.isBottom()) {
+				StringBuilder result = new StringBuilder();
 				for (Identifier x : leftEnv.getKeys())
-					result += x + ": (" + leftEnv.getState(x).representation() + ", "
-							+ rightEnv.getState(x).representation() + ")\n";
-				return result;
+					result.append(x)
+							.append(": (")
+							.append(leftEnv.getState(x).representation())
+							.append(", ")
+							.append(rightEnv.getState(x).representation())
+							.append(")\n");
+				return result.toString();
 			} else if (!rightEnv.isTop() && !rightEnv.isBottom()) {
+				StringBuilder result = new StringBuilder();
 				for (Identifier x : rightEnv.getKeys())
-					result += x + ": (" + leftEnv.getState(x).representation() + ", "
-							+ rightEnv.getState(x).representation() + ")\n";
-				return result;
+					result.append(x)
+							.append(": (")
+							.append(leftEnv.getState(x).representation())
+							.append(", ")
+							.append(rightEnv.getState(x).representation())
+							.append(")\n");
+				return result.toString();
 			}
 		}
 

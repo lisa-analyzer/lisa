@@ -38,27 +38,29 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@SuppressWarnings("unchecked")
 	private class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
 
+		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with an inferred value domain";
+
 		@Override
 		public InferredPair<T> visit(AccessChild expression, InferredPair<T> receiver, InferredPair<T> child,
 				Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with an inferred value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public InferredPair<T> visit(HeapAllocation expression, Object... params) throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with an inferred value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public InferredPair<T> visit(HeapReference expression, InferredPair<T> arg, Object... params)
 				throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with an inferred value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
 		public InferredPair<T> visit(HeapDereference expression, InferredPair<T> arg, Object... params)
 				throws SemanticException {
-			throw new SemanticException("Cannot process a heap expression with an inferred value domain");
+			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
 		@Override
@@ -583,7 +585,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			return (T) this;
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
-			return (T) other;
+			return other;
 
 		return glbAux(other);
 	}

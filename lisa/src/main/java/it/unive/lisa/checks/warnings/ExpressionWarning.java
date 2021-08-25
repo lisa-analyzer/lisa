@@ -24,7 +24,7 @@ public final class ExpressionWarning extends StatementWarning {
 	 * 
 	 * @return the expression
 	 */
-	public final Expression getExpression() {
+	public Expression getExpression() {
 		return (Expression) getStatement();
 	}
 

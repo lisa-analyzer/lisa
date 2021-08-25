@@ -56,7 +56,7 @@ public class ScopeToken {
 		} else if (!(scoper instanceof Statement) || !(other.scoper instanceof Statement)) {
 			if (!scoper.equals(other.scoper))
 				return false;
-		} else if (!((Statement) scoper).isEqualTo((Statement) other.scoper))
+		} else if (!((Statement) scoper).equals((Statement) other.scoper))
 			return false;
 		return true;
 	}

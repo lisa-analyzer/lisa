@@ -80,7 +80,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			return (S) this;
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((S) this))
-			return (S) other;
+			return other;
 
 		Set<E> glb = new HashSet<>(elements);
 		glb.retainAll(other.elements);

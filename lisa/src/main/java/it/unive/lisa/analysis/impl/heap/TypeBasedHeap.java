@@ -173,7 +173,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		return true;
 	}
 
-	private class Rewriter extends BaseHeapDomain.Rewriter {
+	private static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,

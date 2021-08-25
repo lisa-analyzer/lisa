@@ -5,9 +5,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 
 /**
  * A set of elements that are stored externally from this set. Elements are
@@ -46,7 +47,6 @@ public interface ExternalSet<T> extends Set<T> {
 
 		for (T element : other)
 			add(element);
-		return;
 	}
 
 	/**
@@ -263,7 +263,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	public default ExternalSet<T> transform(Function<T, T> transformer) {
+	default ExternalSet<T> transform(UnaryOperator<T> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.add(transformer.apply(t));
@@ -280,7 +280,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the transformed set
 	 */
-	public default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
+	default ExternalSet<T> multiTransform(Function<T, Collection<T>> transformer) {
 		ExternalSet<T> result = getCache().mkEmptySet();
 		for (T t : this)
 			result.addAll(transformer.apply(t));
@@ -297,7 +297,7 @@ public interface ExternalSet<T> extends Set<T> {
 	 * 
 	 * @return the reduced element
 	 */
-	default T reduce(T base, BiFunction<T, T, T> reducer) {
+	default T reduce(T base, BinaryOperator<T> reducer) {
 		T result = base;
 		for (T t : this)
 			result = reducer.apply(result, t);

@@ -16,17 +16,6 @@ public abstract class UnaryStatement extends Statement {
 	private final Expression expression;
 
 	/**
-	 * Builds the unary statement. The location where it happens is unknown
-	 * (i.e. no source file/line/column is available).
-	 * 
-	 * @param cfg        the cfg that this statement belongs to
-	 * @param expression the argument of this statement
-	 */
-	public UnaryStatement(CFG cfg, Expression expression) {
-		this(cfg, null, expression);
-	}
-
-	/**
 	 * Builds the unary statement, happening at the given location in the
 	 * program.
 	 * 
@@ -35,7 +24,7 @@ public abstract class UnaryStatement extends Statement {
 	 *                       source file. If unknown, use {@code null}
 	 * @param expression the argument of this statement
 	 */
-	public UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {
+	protected UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location);
 		Objects.requireNonNull(expression, "The argument of a unary statement cannot be null");
 		this.expression = expression;
@@ -66,16 +55,18 @@ public abstract class UnaryStatement extends Statement {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		UnaryStatement other = (UnaryStatement) st;
+		if (getClass() != obj.getClass())
+			return false;
+		UnaryStatement other = (UnaryStatement) obj;
 		if (expression == null) {
 			if (other.expression != null)
 				return false;
-		} else if (!expression.isEqualTo(other.expression))
+		} else if (!expression.equals(other.expression))
 			return false;
 		return true;
 	}

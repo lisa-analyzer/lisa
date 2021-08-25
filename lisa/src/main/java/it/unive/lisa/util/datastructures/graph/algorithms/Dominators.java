@@ -1,10 +1,10 @@
 package it.unive.lisa.util.datastructures.graph.algorithms;
 
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.Node;
-import it.unive.lisa.util.workset.FIFOWorkingSet;
-import it.unive.lisa.util.workset.WorkingSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -93,7 +93,8 @@ public class Dominators<G extends Graph<G, N, E>, N extends Node<N, E, G>, E ext
 		Set<N> res = null;
 		for (N node : nodes) {
 			Set<N> doms = dominators.get(node);
-			if (doms != null) // might not have been processed yet
+			// might not have been processed yet
+			if (doms != null)
 				if (res == null)
 					res = new HashSet<>(doms);
 				else

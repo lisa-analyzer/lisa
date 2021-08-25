@@ -1,21 +1,21 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(b, 0)] ]]<BR/>}} -&gt; [b]>];
-	"node1" [shape="rect",color="gray",label=<z = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(b, 0), (c, 0), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [z]>];
-	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(c, 0), (x, a + b), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [skip]>];
-	"node3" [shape="rect",color="gray",label=<y = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(b, 0), (c, 0), (y, 0)] ]]<BR/>}} -&gt; [y]>];
-	"node4" [shape="rect",color="gray",label=<b = +(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(b, x + y), (c, 0), (x, y - z), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [b]>];
-	"node5" [shape="rect",color="gray",label=<c = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(b, 0), (c, 0)] ]]<BR/>}} -&gt; [c]>];
-	"node6" [shape="rect",color="gray",label=<x = +(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(c, 0), (x, a + b), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [x]>];
-	"node7" [shape="rect",color="gray",label=<x = -(y, z)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(a, b + c), (b, 0), (c, 0), (x, y - z), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [x]>];
-	"node8" [shape="rect",color="gray",label=<a = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [(a, b + c), (b, 0), (c, 0), (y, 0), (z, 0)] ]]<BR/>}} -&gt; [a]>];
-	"node1" -> "node8" [color="black"];
-	"node3" -> "node1" [color="black"];
-	"node4" -> "node6" [color="black"];
-	"node5" -> "node3" [color="black"];
-	"node6" -> "node2" [color="black"];
-	"node0" -> "node5" [color="black"];
-	"node7" -> "node4" [color="black"];
-	"node8" -> "node7" [color="black"];
+	"node0" [shape="rect",color="black",label=<b = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [] ]]<BR/>}} -&gt; [b]>];
+	"node1" [shape="rect",color="gray",label=<a = +(b, c)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [b + c] ]]<BR/>}} -&gt; [a]>];
+	"node2" [shape="rect",color="gray",label=<c = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [] ]]<BR/>}} -&gt; [c]>];
+	"node3" [shape="rect",color="gray",label=<b = +(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [x + y, y - z] ]]<BR/>}} -&gt; [b]>];
+	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [a + b, y - z] ]]<BR/>}} -&gt; [skip]>];
+	"node5" [shape="rect",color="gray",label=<x = +(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [a + b, y - z] ]]<BR/>}} -&gt; [x]>];
+	"node6" [shape="rect",color="gray",label=<z = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [] ]]<BR/>}} -&gt; [z]>];
+	"node7" [shape="rect",color="gray",label=<x = -(y, z)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [b + c, y - z] ]]<BR/>}} -&gt; [x]>];
+	"node8" [shape="rect",color="gray",label=<y = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ [] ]]<BR/>}} -&gt; [y]>];
+	"node1" -> "node7" [color="black"];
+	"node2" -> "node8" [color="black"];
+	"node3" -> "node5" [color="black"];
+	"node5" -> "node4" [color="black"];
+	"node0" -> "node2" [color="black"];
+	"node6" -> "node1" [color="black"];
+	"node7" -> "node3" [color="black"];
+	"node8" -> "node6" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

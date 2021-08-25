@@ -1,5 +1,6 @@
 package it.unive.lisa.program.cfg;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.AbstractState;
@@ -70,16 +71,15 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testDoubleSimplification() throws ProgramValidationException {
-		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknown,
-				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
-		NoOp noop1 = new NoOp(first, unknown);
-		NoOp noop2 = new NoOp(first, unknown);
-		Return ret = new Return(first, unknown,
-				new VariableRef(first, unknown, "x"));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		NoOp noop1 = new NoOp(first, unknownLocation);
+		NoOp noop2 = new NoOp(first, unknownLocation2);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(assign, true);
 		first.addNode(noop1);
 		first.addNode(noop2);
@@ -88,11 +88,11 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
-		assign = new Assignment(second, unknown,
-				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
-		ret = new Return(second, unknown, new VariableRef(second, unknown, "x"));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation,
+				new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(ret);
@@ -141,19 +141,18 @@ public class CFGSimplificationTest {
 
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
-		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
-		Assignment assign = new Assignment(first, unknown,
-				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
-		GT gt = new GT(first, new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 2, Untyped.INSTANCE));
-		Print print = new Print(first, new Literal(first, unknown, "f", Untyped.INSTANCE));
-		NoOp noop1 = new NoOp(first, unknown);
-		NoOp noop2 = new NoOp(first, unknown);
-		Return ret = new Return(first, unknown,
-				new VariableRef(first, unknown, "x", Untyped.INSTANCE));
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+		GT gt = new GT(first, new VariableRef(first, unknownLocation, "x"),
+				new Literal(first, unknownLocation, 2, Untyped.INSTANCE));
+		Print print = new Print(first, new Literal(first, unknownLocation, "f", Untyped.INSTANCE));
+		NoOp noop1 = new NoOp(first, unknownLocation);
+		NoOp noop2 = new NoOp(first, unknownLocation2);
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x", Untyped.INSTANCE));
 		first.addNode(assign, true);
 		first.addNode(gt);
 		first.addNode(print);
@@ -174,15 +173,15 @@ public class CFGSimplificationTest {
 		first.addControlFlowStructure(
 				new IfThenElse(first.getAdjacencyMatrix(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
-		assign = new Assignment(second, unknown,
-				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
-		gt = new GT(second, new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 2, Untyped.INSTANCE));
-		print = new Print(second, new Literal(second, unknown, "f", Untyped.INSTANCE));
-		ret = new Return(second, unknown,
-				new VariableRef(second, unknown, "x", Untyped.INSTANCE));
+		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		assign = new Assignment(second, unknownLocation,
+				new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+		gt = new GT(second, new VariableRef(second, unknownLocation, "x"),
+				new Literal(second, unknownLocation, 2, Untyped.INSTANCE));
+		print = new Print(second, new Literal(second, unknownLocation, "f", Untyped.INSTANCE));
+		ret = new Return(second, unknownLocation,
+				new VariableRef(second, unknownLocation, "x", Untyped.INSTANCE));
 
 		second.addNode(assign, true);
 		second.addNode(gt);
@@ -207,7 +206,7 @@ public class CFGSimplificationTest {
 		assertTrue("Different CFGs", second.isEqualTo(first));
 		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
-		assertTrue("Simplification did not update control flow structures", exp.isEqualTo(act));
+		assertEquals("Simplification did not update control flow structures", exp, act);
 	}
 
 	@Test
@@ -379,6 +378,6 @@ public class CFGSimplificationTest {
 		assertTrue("Different CFGs", second.isEqualTo(first));
 		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
-		assertTrue("Simplification did not update control flow structures", exp.isEqualTo(act));
+		assertEquals("Simplification did not update control flow structures", exp, act);
 	}
 }

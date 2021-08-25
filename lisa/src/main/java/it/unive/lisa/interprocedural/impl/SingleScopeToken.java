@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * A context sensitive token representing a single {@link ScopeToken}.
  */
-public class SingleScopeToken implements ContextSensitivityToken {
+public final class SingleScopeToken implements ContextSensitivityToken {
 
 	private static final SingleScopeToken singleton = new SingleScopeToken(null);
 

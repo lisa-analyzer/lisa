@@ -36,14 +36,7 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		super(domain);
 	}
 
-	/**
-	 * Builds an environment from a given map.
-	 * 
-	 * @param domain   a singleton instance to be used during semantic
-	 *                     operations to retrieve top and bottom values
-	 * @param function the starting map
-	 */
-	public ValueEnvironment(T domain, Map<Identifier, T> function) {
+	private ValueEnvironment(T domain, Map<Identifier, T> function) {
 		super(domain, function);
 	}
 
@@ -88,11 +81,11 @@ public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 
 	@Override
 	public ValueEnvironment<T> top() {
-		return isTop() ? this : new ValueEnvironment<T>(lattice.top(), null);
+		return isTop() ? this : new ValueEnvironment<>(lattice.top(), null);
 	}
 
 	@Override
 	public ValueEnvironment<T> bottom() {
-		return isBottom() ? this : new ValueEnvironment<T>(lattice.bottom(), null);
+		return isBottom() ? this : new ValueEnvironment<>(lattice.bottom(), null);
 	}
 }

@@ -36,12 +36,6 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
 
-	/**
-	 * Builds a new instance.
-	 */
-	public MonolithicHeap() {
-	}
-
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
@@ -117,15 +111,22 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public int hashCode() {
-		return System.identityHashCode(this);
+		return MonolithicHeap.class.hashCode();
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return this == obj;
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		MonolithicHeap other = (MonolithicHeap) obj;
+		return isTop() == other.isTop() && isBottom() == other.isBottom();
 	}
 
-	private class Rewriter extends BaseHeapDomain.Rewriter {
+	private static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,

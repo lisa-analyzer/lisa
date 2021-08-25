@@ -1,5 +1,6 @@
 package it.unive.lisa.program.cfg;
 
+import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -19,7 +20,6 @@ import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,14 +30,6 @@ public class ConditionalsExtractionTest {
 
 	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
 			false);
-
-	@SafeVarargs
-	private static <T> Collection<T> collect(T... objs) {
-		ArrayList<T> res = new ArrayList<>(objs.length);
-		for (T o : objs)
-			res.add(o);
-		return res;
-	}
 
 	private static void checkMatrix(String label, Collection<Statement> nodes,
 			Collection<Statement> expected) {

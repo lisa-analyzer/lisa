@@ -23,17 +23,6 @@ public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extend
 	int setOffset(int offset);
 
 	/**
-	 * Checks if this node is effectively equal to the given one, that is, if
-	 * they have the same structure while potentially being different instances.
-	 * 
-	 * @param other the other node
-	 * 
-	 * @return {@code true} if this node and the given one are effectively
-	 *             equals
-	 */
-	boolean isEqualTo(N other);
-
-	/**
 	 * Accepts the given {@link GraphVisitor}. Implementors of this method are
 	 * responsible for invoking {@link GraphVisitor#visit(Object, Graph, Node)}
 	 * on this node after {@link #accept(GraphVisitor, Object)} has been invoked

@@ -9,6 +9,7 @@ import it.unive.lisa.symbolic.value.Identifier;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FunctionalInterface
 public interface MetaVariableCreator {
 
 	/**

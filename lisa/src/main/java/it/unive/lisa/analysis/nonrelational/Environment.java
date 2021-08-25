@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -190,7 +190,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
 			return glbAux(other.lattice, other.function, other);
 
-		M lift = functionalLift(other, (k1, k2) -> glbKeys(k1, k2), (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		M lift = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 		return glbAux(lift.lattice, lift.function, other);
 	}
 
@@ -276,7 +276,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private M liftIdentifiers(Function<Identifier, Identifier> lifter) throws SemanticException {
+	private M liftIdentifiers(UnaryOperator<Identifier> lifter) throws SemanticException {
 		if (isBottom() || isTop())
 			return (M) this;
 
@@ -293,21 +293,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 		return mk(lattice, function);
 	}
-
-	/**
-	 * Builds an environment containing the given mapping. If function is
-	 * {@code null}, the new environment is the top environment if
-	 * {@code lattice.isTop()} holds, and it is the bottom environment if
-	 * {@code lattice.isBottom()} holds.
-	 * 
-	 * @param lattice  a singleton instance to be used during semantic
-	 *                     operations to retrieve top and bottom values
-	 * @param function the function representing the mapping contained in the
-	 *                     new environment; can be {@code null}
-	 * 
-	 * @return a new instance of this environment
-	 */
-	protected abstract M mk(T lattice, Map<Identifier, T> function);
 
 	@Override
 	@SuppressWarnings("unchecked")

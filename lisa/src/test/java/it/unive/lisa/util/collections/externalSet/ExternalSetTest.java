@@ -14,7 +14,7 @@ public class ExternalSetTest {
 	public void testMkEmpty() {
 		ExternalSetCache<Object> cache = new ExternalSetCache<Object>();
 		ExternalSet<Object> emptySet = cache.mkEmptySet();
-		assertEquals(emptySet.size(), 0);
+		assertEquals(0, emptySet.size());
 		assertTrue(emptySet.isEmpty());
 	}
 
@@ -26,7 +26,7 @@ public class ExternalSetTest {
 		set.add(new Object());
 		ExternalSet<Object> eset = cache.mkSet(set);
 
-		assertEquals(eset.size(), 2);
+		assertEquals(2, eset.size());
 		assertTrue(eset.contains("foo"));
 		assertFalse(eset.contains(new Object()));
 	}
@@ -39,7 +39,7 @@ public class ExternalSetTest {
 		eset.add(new Object());
 		ExternalSet<Object> copy = cache.mkSet(eset);
 
-		assertEquals(copy.size(), 2);
+		assertEquals(2, copy.size());
 		assertTrue(copy.contains("foo"));
 		assertFalse(copy.contains(new Object()));
 	}
@@ -52,7 +52,7 @@ public class ExternalSetTest {
 		eset.add(new Object());
 		ExternalSet<Object> copy = eset.copy();
 
-		assertEquals(copy.size(), 2);
+		assertEquals(2, copy.size());
 		assertTrue(copy.contains("foo"));
 		assertFalse(copy.contains(new Object()));
 	}
@@ -62,7 +62,7 @@ public class ExternalSetTest {
 		ExternalSetCache<Object> cache = new ExternalSetCache<Object>();
 		ExternalSet<Object> singleton = cache.mkSingletonSet("foo");
 
-		assertEquals(singleton.size(), 1);
+		assertEquals(1, singleton.size());
 		assertTrue(singleton.contains("foo"));
 	}
 
@@ -74,7 +74,7 @@ public class ExternalSetTest {
 		eset.add("foo");
 		eset.add(new Object());
 
-		assertEquals(universal.size(), 2);
+		assertEquals(2, universal.size());
 		assertTrue(universal.contains("foo"));
 		assertFalse(universal.contains(new Object()));
 	}

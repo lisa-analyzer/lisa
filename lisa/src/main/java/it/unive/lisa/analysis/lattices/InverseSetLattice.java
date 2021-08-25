@@ -79,7 +79,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 			return (S) this;
 
 		if (other.isBottom() || this.isTop() || other.lessOrEqual((S) this))
-			return (S) other;
+			return other;
 
 		Set<E> glb = new HashSet<>(elements);
 		glb.addAll(other.elements);

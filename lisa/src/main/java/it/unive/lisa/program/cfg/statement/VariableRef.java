@@ -83,14 +83,14 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public boolean isEqualTo(Statement st) {
-		if (this == st)
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if (getClass() != st.getClass())
+		if (!super.equals(obj))
 			return false;
-		if (!super.isEqualTo(st))
+		if (getClass() != obj.getClass())
 			return false;
-		VariableRef other = (VariableRef) st;
+		VariableRef other = (VariableRef) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;

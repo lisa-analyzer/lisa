@@ -64,7 +64,7 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 
 	@Override
 	public ExpressionSet<T> top() {
-		return new ExpressionSet<T>(true);
+		return new ExpressionSet<>(true);
 	}
 
 	@Override
@@ -74,12 +74,12 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 
 	@Override
 	public ExpressionSet<T> bottom() {
-		return new ExpressionSet<T>();
+		return new ExpressionSet<>();
 	}
 
 	@Override
 	protected ExpressionSet<T> mk(Set<T> set) {
-		return new ExpressionSet<T>(set);
+		return new ExpressionSet<>(set);
 	}
 
 	@Override
@@ -118,13 +118,13 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		// identifiers are added after lubbing the ones with the same name
 		Set<Identifier> idlub = new HashSet<>();
 		CollectionUtilities.join(onlyIds(), other.onlyIds(), idlub, (id1, id2) -> id1.getName().equals(id2.getName()),
-				(id1, id2) -> wrapper(id1, id2));
+				ExpressionSet::wrapper);
 		idlub.stream().map(i -> (T) i).forEach(lub::add);
 
 		return new ExpressionSet<>(lub);
 	}
 
-	private Identifier wrapper(Identifier id1, Identifier id2) {
+	private static Identifier wrapper(Identifier id1, Identifier id2) {
 		try {
 			return id1.lub(id2);
 		} catch (SemanticException e) {

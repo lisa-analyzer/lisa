@@ -4,7 +4,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import java.util.Collection;
 import java.util.HashSet;
@@ -77,23 +76,6 @@ public class Loop extends ControlFlowStructure {
 			if (other.body != null)
 				return false;
 		} else if (!body.equals(other.body))
-			return false;
-		return true;
-	}
-
-	@Override
-	public boolean isEqualTo(ControlFlowStructure obj) {
-		if (this == obj)
-			return true;
-		if (!super.isEqualTo(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Loop other = (Loop) obj;
-		if (body == null) {
-			if (other.body != null)
-				return false;
-		} else if (!CollectionUtilities.equals(body, other.body, Statement::isEqualTo))
 			return false;
 		return true;
 	}

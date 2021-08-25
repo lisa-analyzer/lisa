@@ -38,16 +38,18 @@ public final class CFGDescriptorWarning extends WarningWithLocation {
 
 	@Override
 	public int compareTo(Warning o) {
+		int cmp;
+		if ((cmp = super.compareTo(o)) != 0)
+			return cmp;
+
 		if (!(o instanceof CFGDescriptorWarning))
-			return super.compareTo(o);
+			return getClass().getName().compareTo(o.getClass().getName());
 
 		CFGDescriptorWarning other = (CFGDescriptorWarning) o;
-		int cmp;
-
 		if ((cmp = StringUtils.compare(descriptor.toString(), other.descriptor.toString())) != 0)
 			return cmp;
 
-		return super.compareTo(other);
+		return 0;
 	}
 
 	@Override

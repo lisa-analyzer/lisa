@@ -13,6 +13,8 @@ import org.junit.Test;
 
 public class BitLogicTest {
 
+	private static final int LIMIT = 99999;
+
 	@Test
 	public void testBitmask() {
 		for (int i = 0; i < 63; i++) {
@@ -28,7 +30,7 @@ public class BitLogicTest {
 	@Test
 	public void testBitvectorIndex() {
 		Random random = new Random();
-		for (int i = 0; i < 9999999; i++) {
+		for (int i = 0; i < LIMIT; i++) {
 			int test = Math.abs(random.nextInt());
 			int index = BitExternalSet.bitvector_index(test);
 			int div = test / 64;
@@ -41,7 +43,7 @@ public class BitLogicTest {
 		final int length = 5;
 		long[] bits = new long[length];
 		Random random = new Random();
-		for (int i = 0; i < 9999999; i++) {
+		for (int i = 0; i < LIMIT; i++) {
 			// length * 64 is the maximum number of positions that can be
 			// represented by the bitvector
 			int test = random.nextInt(length * 64);
