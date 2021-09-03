@@ -1,0 +1,14 @@
+plugins {
+    id 'java-library'
+    
+    // magic for getting eclipse to work with gradle
+    id 'eclipse'
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+}
