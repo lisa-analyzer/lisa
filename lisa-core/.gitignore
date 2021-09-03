@@ -45,3 +45,4 @@ diagrams/
 
 # tests
 test-outputs/
+/bin/
