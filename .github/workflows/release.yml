@@ -15,7 +15,7 @@ jobs:
       with:
         java-version: 11
     - name: 'Grant execute permission for gradlew'
-      run: chmod +x lisa/gradlew
+      run: chmod +x lisa-core/gradlew
     - name: 'Gradle: build and publish'
       env:
         SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
@@ -23,4 +23,4 @@ jobs:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cd lisa && ./gradlew publish
+      run: cd lisa-core && ./gradlew publish
