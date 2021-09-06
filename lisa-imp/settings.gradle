@@ -1,1 +1,3 @@
 rootProject.name = 'lisa-imp'
+include 'lisa-sdk'
+project(':lisa-sdk').projectDir = file('../lisa-sdk')

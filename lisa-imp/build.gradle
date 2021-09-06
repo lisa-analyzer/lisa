@@ -3,6 +3,9 @@ plugins {
     
     // magic for getting eclipse to work with gradle
     id 'eclipse'
+    
+    // antlr plugin for the generation of the IMP parser
+    id 'antlr'
 }
 
 repositories {
@@ -11,4 +14,22 @@ repositories {
 }
 
 dependencies {
+	api project(':lisa-sdk')
+
+	// parser generation
+	antlr 'org.antlr:antlr4:4.8-1'
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-no-listener"]
+    
+    doLast {
+    	copy {
+      		from 'build/generated-src/antlr/main/'
+      		include '*.*'
+      		into 'build/generated-src/antlr/main/it/unive/lisa/imp/antlr'
+    	}
+   		project.delete fileTree('build/generated-src/antlr/main').include('*.*')
+  	}
 }
