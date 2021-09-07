@@ -1,4 +1,4 @@
-package it.unive.lisa.interprocedural.impl;
+package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.ScopeToken;
 

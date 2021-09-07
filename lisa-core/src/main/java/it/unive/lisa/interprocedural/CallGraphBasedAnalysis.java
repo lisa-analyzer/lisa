@@ -1,4 +1,4 @@
-package it.unive.lisa.interprocedural.impl;
+package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -7,8 +7,6 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Program;

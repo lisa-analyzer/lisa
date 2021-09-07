@@ -1,26 +1,5 @@
 package it.unive.lisa;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
-import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
-import it.unive.lisa.analysis.impl.numeric.Interval;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
-import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
-import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -34,11 +13,33 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.SimpleAbstractState;
+import it.unive.lisa.analysis.dataflow.DataflowElement;
+import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 
 /**
  * An utility class for instantiating analysis components, that is, modular

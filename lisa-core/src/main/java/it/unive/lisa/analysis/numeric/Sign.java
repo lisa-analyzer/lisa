@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.impl.numeric;
+package it.unive.lisa.analysis.numeric;
 
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;

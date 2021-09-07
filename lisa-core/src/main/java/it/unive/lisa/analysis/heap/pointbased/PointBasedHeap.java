@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.impl.heap.pointbased;
+package it.unive.lisa.analysis.heap.pointbased;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;

@@ -1,9 +1,9 @@
-package it.unive.lisa.interprocedural.callgraph.impl;
+package it.unive.lisa.interprocedural.callgraph;
 
-import it.unive.lisa.interprocedural.callgraph.BaseCallGraph;
+import java.util.Collection;
+
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.type.Type;
-import java.util.Collection;
 
 /**
  * A call graph constructed following the Class Hierarchy Analysis as defined
