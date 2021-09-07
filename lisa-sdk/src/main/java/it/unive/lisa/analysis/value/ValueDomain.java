@@ -1,17 +1,16 @@
 package it.unive.lisa.analysis.value;
 
-import it.unive.lisa.DefaultImplementation;
+import java.util.List;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
-import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import java.util.List;
 
 /**
  * A semantic domain that can evaluate the semantic of statements that operate
@@ -23,7 +22,6 @@ import java.util.List;
  * 
  * @param <D> the concrete type of the {@link ValueDomain}
  */
-@DefaultImplementation(Interval.class)
 public interface ValueDomain<D extends ValueDomain<D>>
 		extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
 

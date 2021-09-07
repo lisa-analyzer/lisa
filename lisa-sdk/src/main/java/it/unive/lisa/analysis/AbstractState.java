@@ -1,6 +1,5 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.DefaultImplementation;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -17,7 +16,6 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
  */
-@DefaultImplementation(SimpleAbstractState.class)
 public interface AbstractState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
 		extends Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
 

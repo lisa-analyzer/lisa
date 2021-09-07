@@ -1,9 +1,6 @@
 package it.unive.lisa.analysis;
 
-import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
-import it.unive.lisa.analysis.impl.numeric.Interval;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -22,7 +19,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
  */
-@DefaultParameters({ MonolithicHeap.class, Interval.class })
 public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<V>>
 		extends BaseLattice<SimpleAbstractState<H, V>>
 		implements AbstractState<SimpleAbstractState<H, V>, H, V> {

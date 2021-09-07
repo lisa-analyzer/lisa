@@ -1,6 +1,7 @@
 package it.unive.lisa.interprocedural;
 
-import it.unive.lisa.DefaultImplementation;
+import java.util.Collection;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -11,7 +12,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.CFGCall;
@@ -23,7 +23,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
 
 /**
  * The definition of interprocedural analyses.
@@ -35,7 +34,6 @@ import java.util.Collection;
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
  */
-@DefaultImplementation(ModularWorstCaseAnalysis.class)
 public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> {
