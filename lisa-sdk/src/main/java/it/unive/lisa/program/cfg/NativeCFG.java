@@ -1,7 +1,8 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.AnalysisSetupException;
-import it.unive.lisa.LiSAFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
@@ -78,18 +79,14 @@ public class NativeCFG implements CodeMember {
 	 */
 	public NativeCall rewrite(Statement original, Expression... params)
 			throws CallResolutionException {
-		// the extra 2 are cfg, location
-		Object[] pars = new Object[params.length + 2];
-		pars[0] = original.getCFG();
-		pars[1] = original.getLocation();
-		for (int i = 0; i < params.length; i++)
-			pars[i + 2] = params[i];
 
 		try {
-			NativeCall instance = LiSAFactory.getInstance(construct, pars);
+			Method builder = construct.getDeclaredMethod("build", CFG.class, CodeLocation.class, Expression[].class);
+			NativeCall instance = (NativeCall) builder.invoke(null, original.getCFG(), original.getLocation(), params);
 			((PluggableStatement) instance).setOriginatingStatement(original);
 			return instance;
-		} catch (AnalysisSetupException e) {
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new CallResolutionException("Unable to create call to native construct " + construct.getName(), e);
 		}
 	}
