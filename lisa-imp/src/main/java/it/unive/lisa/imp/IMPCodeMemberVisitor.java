@@ -11,11 +11,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.antlr.v4.runtime.misc.Triple;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.graalvm.compiler.lir.StandardOp.NoOp;
-
-import com.sun.tools.javac.util.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 
 import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
@@ -26,6 +25,7 @@ import it.unive.lisa.imp.antlr.IMPParser.BasicExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BinaryStringExprContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockContext;
 import it.unive.lisa.imp.antlr.IMPParser.BlockOrStatementContext;
+import it.unive.lisa.imp.antlr.IMPParser.ExpressionContext;
 import it.unive.lisa.imp.antlr.IMPParser.FieldAccessContext;
 import it.unive.lisa.imp.antlr.IMPParser.ForLoopContext;
 import it.unive.lisa.imp.antlr.IMPParser.IndexContext;
@@ -81,29 +81,35 @@ import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.imp.types.IntType;
+import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.AccessInstanceGlobal;
+import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Literal;
+import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.NullLiteral;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Return;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import jdk.nashorn.internal.ir.Assignment;
-import jdk.nashorn.internal.objects.Global;
-import sun.tools.jstat.Literal;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or

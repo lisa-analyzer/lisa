@@ -1,6 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.function.BinaryOperator;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -11,8 +10,11 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import sun.tools.tree.BinaryExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.type.NumericType;
 
 /**
  * An expression modeling the subtraction operation ({@code -}). Both operands'

@@ -5,6 +5,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
 /**

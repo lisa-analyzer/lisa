@@ -1,4 +1,4 @@
-package it.unive.lisa.imp.test;
+package it.unive.lisa.imp;
 
 import static org.junit.Assert.fail;
 

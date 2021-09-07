@@ -15,7 +15,11 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
@@ -55,6 +59,10 @@ public class StringSubstring extends NativeCFG {
 	 */
 	public static class IMPStringSubstring extends TernaryNativeCall implements PluggableStatement {
 
+		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+			return new IMPStringSubstring(cfg, location, params[0], params[1], params[2]);
+		}
+
 		private Statement original;
 
 		@Override
@@ -76,8 +84,21 @@ public class StringSubstring extends NativeCFG {
 		 */
 		public IMPStringSubstring(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression middle, Expression right) {
-			super(cfg, new SourceCodeLocation(sourceFile, line, col), "substring", StringType.INSTANCE, left, middle,
-					right);
+			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, middle, right);
+		}
+
+		/**
+		 * Builds the substring.
+		 * 
+		 * @param cfg      the {@link CFG} where this operation lies
+		 * @param location the code location where this operation is defined
+		 * @param left     the left-hand side of this operation
+		 * @param middle   the middle operand of this operation
+		 * @param right    the right-hand side of this operation
+		 */
+		public IMPStringSubstring(CFG cfg, CodeLocation location, Expression left, Expression middle,
+				Expression right) {
+			super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
 		}
 
 		@Override

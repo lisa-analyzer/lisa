@@ -3,7 +3,7 @@ package it.unive.lisa.imp.expressions;
 import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import sun.tools.jstat.Literal;
+import it.unive.lisa.program.cfg.statement.Literal;
 
 /**
  * An IMP {@link Literal} representing a constant floating point value.

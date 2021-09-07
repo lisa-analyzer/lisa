@@ -1,7 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import java.util.function.BinaryOperator;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,10 +14,15 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import sun.tools.tree.BinaryExpression;
+import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.BinaryOperator;
 
 /**
  * The native construct representing the indexOf operation. This construct can
@@ -51,6 +54,10 @@ public class StringIndexOf extends NativeCFG {
 	 */
 	public static class IMPStringIndexOf extends BinaryNativeCall implements PluggableStatement {
 
+		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+			return new IMPStringIndexOf(cfg, location, params[0], params[1]);
+		}
+
 		private Statement original;
 
 		@Override
@@ -71,7 +78,19 @@ public class StringIndexOf extends NativeCFG {
 		 */
 		public IMPStringIndexOf(CFG cfg, String sourceFile, int line, int col,
 				Expression left, Expression right) {
-			super(cfg, new SourceCodeLocation(sourceFile, line, col), "indexOf", StringType.INSTANCE, left, right);
+			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
+		}
+
+		/**
+		 * Builds the indexOf.
+		 * 
+		 * @param cfg      the {@link CFG} where this operation lies
+		 * @param location the code location where this operation is defined
+		 * @param left     the left-hand side of this operation
+		 * @param right    the right-hand side of this operation
+		 */
+		public IMPStringIndexOf(CFG cfg, CodeLocation location, Expression left, Expression right) {
+			super(cfg, location, "indexOf", StringType.INSTANCE, left, right);
 		}
 
 		@Override

@@ -8,6 +8,8 @@ import java.util.Objects;
 import java.util.Set;
 
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.type.PointerType;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;

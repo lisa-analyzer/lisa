@@ -1,6 +1,6 @@
 package it.unive.lisa.imp.expressions;
 
-import com.sun.tools.javac.util.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -12,12 +12,14 @@ import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 
 /**

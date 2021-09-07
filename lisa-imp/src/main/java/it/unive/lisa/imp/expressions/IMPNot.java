@@ -1,6 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.function.UnaryOperator;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -12,9 +11,12 @@ import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import sun.tools.tree.UnaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.type.BooleanType;
 
 /**
  * An expression modeling the logical not operation ({@code !}). The operand's

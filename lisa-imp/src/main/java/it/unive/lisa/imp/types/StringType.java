@@ -3,6 +3,7 @@ package it.unive.lisa.imp.types;
 import java.util.Collection;
 import java.util.Collections;
 
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
 /**

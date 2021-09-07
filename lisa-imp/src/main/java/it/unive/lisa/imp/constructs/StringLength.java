@@ -1,7 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import java.util.function.UnaryOperator;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,10 +14,15 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import sun.tools.tree.UnaryExpression;
+import it.unive.lisa.symbolic.value.UnaryExpression;
+import it.unive.lisa.symbolic.value.UnaryOperator;
 
 /**
  * The native construct representing the length operation. This construct can be
@@ -49,6 +52,10 @@ public class StringLength extends NativeCFG {
 	 */
 	public static class IMPStringLength extends UnaryNativeCall implements PluggableStatement {
 
+		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+			return new IMPStringLength(cfg, location, params[0]);
+		}
+
 		private Statement original;
 
 		@Override
@@ -69,6 +76,17 @@ public class StringLength extends NativeCFG {
 		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
 			super(cfg, new SourceCodeLocation(sourceFile, line, col), "len", IntType.INSTANCE, parameter);
+		}
+
+		/**
+		 * Builds the length.
+		 * 
+		 * @param cfg       the {@link CFG} where this operation lies
+		 * @param location  the code location where this operation is defined
+		 * @param parameter the operand of this operation
+		 */
+		public IMPStringLength(CFG cfg, CodeLocation location, Expression parameter) {
+			super(cfg, location, "len", IntType.INSTANCE, parameter);
 		}
 
 		@Override
