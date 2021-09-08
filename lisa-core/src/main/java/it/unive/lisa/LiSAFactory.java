@@ -55,13 +55,15 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 public final class LiSAFactory {
 
 	private static final Map<Class<?>, Pair<Class<?>, Class<?>[]>> ANALYSIS_DEFAULTS = new HashMap<>();
-	
+
 	static {
-		ANALYSIS_DEFAULTS.put(InterproceduralAnalysis.class, Pair.of(ModularWorstCaseAnalysis.class, ArrayUtils.EMPTY_CLASS_ARRAY));
+		ANALYSIS_DEFAULTS.put(InterproceduralAnalysis.class,
+				Pair.of(ModularWorstCaseAnalysis.class, ArrayUtils.EMPTY_CLASS_ARRAY));
 		ANALYSIS_DEFAULTS.put(CallGraph.class, Pair.of(RTACallGraph.class, ArrayUtils.EMPTY_CLASS_ARRAY));
 		ANALYSIS_DEFAULTS.put(HeapDomain.class, Pair.of(MonolithicHeap.class, ArrayUtils.EMPTY_CLASS_ARRAY));
 		ANALYSIS_DEFAULTS.put(ValueDomain.class, Pair.of(Interval.class, ArrayUtils.EMPTY_CLASS_ARRAY));
-		ANALYSIS_DEFAULTS.put(AbstractState.class, Pair.of(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class }));
+		ANALYSIS_DEFAULTS.put(AbstractState.class,
+				Pair.of(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class }));
 	}
 
 	private LiSAFactory() {
@@ -256,12 +258,12 @@ public final class LiSAFactory {
 	/**
 	 * An analysis component that can be configured, that is, it has more than
 	 * one implementation that can be modularly integrated into the analysis.
-	 * {@link #getComponentName()} yields the name of the component itself, i.e.
-	 * the interface or abstract class that defines the analysis components.
-	 * {@link #getDefaultInstanceName()} yields the name of the default
-	 * implementation of the component that will be used if no specific
-	 * implementation is requested. {@link #getAlternatives()} yields all the
-	 * concrete implementations of the components.
+	 * {@link #getComponent()} yields the component itself, i.e. the interface
+	 * or abstract class that defines the analysis components.
+	 * {@link #getDefaultInstance()} yields the default implementation of the
+	 * component that will be used if no specific implementation is requested.
+	 * {@link #getAlternatives()} yields all the concrete implementations of the
+	 * components.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 * 
@@ -270,76 +272,76 @@ public final class LiSAFactory {
 	public static final class ConfigurableComponent<T> {
 		private static final Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
 
-		private final String component;
-		private final String defaultInstance;
-		private final String[] defaultParameters;
-		private final Collection<String> alternatives;
+		private final Class<T> component;
+		private final Class<? extends T> defaultInstance;
+		private final Class<?>[] defaultParameters;
+		private final Collection<Class<? extends T>> alternatives;
 
+		@SuppressWarnings("unchecked")
 		private ConfigurableComponent(Class<T> component) {
-			this.component = component.getName();
+			this.component = component;
 
 			Pair<Class<?>, Class<?>[]> def = ANALYSIS_DEFAULTS.get(component);
 			if (def == null) {
 				defaultInstance = null;
 				defaultParameters = null;
 			} else {
-				defaultInstance = def.getLeft().getName();
-				defaultParameters = Arrays.stream(def.getRight()).map(c -> c.getName()).toArray(String[]::new);
+				defaultInstance = (Class<? extends T>) def.getLeft();
+				defaultParameters = def.getRight();
 			}
 
 			this.alternatives = scanner.getSubTypesOf(component)
 					.stream()
 					.map(c -> Pair.of(c, c.getModifiers()))
 					.filter(p -> !Modifier.isAbstract(p.getRight()) && !Modifier.isInterface(p.getRight()))
-					.map(p -> p.getLeft().getName())
+					.map(p -> p.getLeft())
 					.collect(Collectors.toList());
 		}
 
 		/**
-		 * Yields the name of the component represented by this
+		 * Yields the component represented by this
 		 * {@link ConfigurableComponent}.
 		 * 
-		 * @return the name of the analysis component
+		 * @return the analysis component
 		 */
-		public String getComponentName() {
+		public Class<T> getComponent() {
 			return component;
 		}
 
 		/**
-		 * Yields the name of the default implementation for this component,
-		 * that is, the concrete class that implements it and that will be used
-		 * if the component is requested but the user did not specify which
+		 * Yields the default implementation for this component, that is, the
+		 * concrete class that implements it and that will be used if the
+		 * component is requested but the user did not specify which
 		 * implementation to use (among the ones offered by
 		 * {@link #getAlternatives()}. Might be {@code null} if no default is
 		 * set.
 		 * 
-		 * @return the name of the default implementation for this component
+		 * @return the default implementation for this component
 		 */
-		public String getDefaultInstanceName() {
+		public Class<? extends T> getDefaultInstance() {
 			return defaultInstance;
 		}
 
 		/**
-		 * Yields the names of the classes of the parameters passed by-default
-		 * to the constructor of the default implementation for this component.
-		 * Might be {@code null} if no default is set, or might be an empty
-		 * array if the default implementation does not require parameters.
+		 * Yields the classes of the parameters passed by-default to the
+		 * constructor of the default implementation for this component. Might
+		 * be {@code null} if no default is set, or might be an empty array if
+		 * the default implementation does not require parameters.
 		 * 
-		 * @return the names of the classes of the parameters for the
-		 *             construction of the default implementation for this
-		 *             component
+		 * @return the classes of the parameters for the construction of the
+		 *             default implementation for this component
 		 */
-		public String[] getDefaultParameters() {
+		public Class<?>[] getDefaultParameters() {
 			return defaultParameters;
 		}
 
 		/**
-		 * Yields the name of the alternatives for this component, that is, the
-		 * concrete classes that implements it.
+		 * Yields the alternatives for this component, that is, the concrete
+		 * classes that implements it.
 		 * 
-		 * @return the name of the alternatives for this component
+		 * @return the alternatives for this component
 		 */
-		public Collection<String> getAlternatives() {
+		public Collection<Class<? extends T>> getAlternatives() {
 			return alternatives;
 		}
 
@@ -388,13 +390,16 @@ public final class LiSAFactory {
 
 		@Override
 		public String toString() {
-			String result = component;
+			String result = component.getName();
 			if (defaultInstance != null) {
-				result += " (defaults to: '" + defaultInstance + "'";
-				if (defaultParameters != null && defaultParameters.length != 0)
-					result += " with parameters [" + StringUtils.join(defaultParameters, ", ") + "]";
+				result += " (defaults to: '" + defaultInstance.getName() + "'";
+				if (defaultParameters != null && defaultParameters.length != 0) {
+					String[] paramNames = Arrays.stream(defaultParameters).map(c -> c.getName()).toArray(String[]::new);
+					result += " with parameters [" + StringUtils.join(paramNames, ", ") + "]";
+				}
 				result += ")";
 			}
+			String[] alternatives = this.alternatives.stream().map(c -> c.getName()).toArray(String[]::new);
 			result += " possible implementations: " + alternatives;
 			return result;
 		}
