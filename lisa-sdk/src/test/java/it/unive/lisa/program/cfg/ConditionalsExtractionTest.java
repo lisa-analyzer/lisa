@@ -5,8 +5,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.imp.expressions.IMPIntLiteral;
-import it.unive.lisa.imp.expressions.IMPNotEqual;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.junit.Test;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
@@ -17,14 +28,14 @@ import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Assignment;
+import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import org.junit.Test;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.types.IntType;
 
 public class ConditionalsExtractionTest {
 
@@ -60,15 +71,30 @@ public class ConditionalsExtractionTest {
 		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
 		checkMatrix("loop body", loop.getBody(), nodes);
 	}
+	
+	class IMPNotEqual extends BinaryNativeCall {
+
+		protected IMPNotEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {
+			super(cfg, location, "!=", left, right);
+		}
+
+		@Override
+		protected <A extends AbstractState<A, H, V>,
+				H extends HeapDomain<H>,
+				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(AnalysisState<A, H, V> entryState,
+						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
+						SymbolicExpression leftExp, AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
+						throws SemanticException {
+			return null;
+		}
+	}
 
 	@Test
 	public void testSimpleIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleIf"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 5, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -97,10 +123,8 @@ public class ConditionalsExtractionTest {
 	public void testEmptyIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 5, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(ret);
@@ -121,10 +145,8 @@ public class ConditionalsExtractionTest {
 	public void testIfWithEmptyBranch() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyBranch"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 5, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -153,10 +175,8 @@ public class ConditionalsExtractionTest {
 	public void testAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "asymmetricIf"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 10);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 10, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -189,10 +209,8 @@ public class ConditionalsExtractionTest {
 	public void testBigAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "bigAsymmetricIf"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 15);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 15, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -237,10 +255,8 @@ public class ConditionalsExtractionTest {
 	public void testSimpleLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 5, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -269,10 +285,8 @@ public class ConditionalsExtractionTest {
 	public void testEmptyLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyLoop"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 5, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -300,10 +314,8 @@ public class ConditionalsExtractionTest {
 	public void testLongLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "longLoop"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 15);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 15, IntType.INSTANCE);
+		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -348,20 +360,16 @@ public class ConditionalsExtractionTest {
 	public void testNestedConditionals() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "nested"));
-		IMPIntLiteral constant = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 10);
-		IMPIntLiteral constant1 = new IMPIntLiteral(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), 100);
-		IMPNotEqual loop_condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant);
+		Literal constant = new Literal(cfg, unknown, 10, IntType.INSTANCE);
+		Literal constant1 = new Literal(cfg, unknown, 100, IntType.INSTANCE);
+		IMPNotEqual loop_condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment loop_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a1"),
 				constant);
 		Assignment loop_a2 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a2"),
 				constant);
-		IMPNotEqual if_condition = new IMPNotEqual(cfg, unknown.getSourceFile(),
-				unknown.getLine(), unknown.getCol(), constant, constant1);
+		IMPNotEqual if_condition = new IMPNotEqual(cfg, unknown, constant, constant1);
 		Assignment if_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "if_a1"),
 				constant);

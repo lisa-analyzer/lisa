@@ -11,13 +11,12 @@ import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
+import it.unive.lisa.TestAbstractState;
+import it.unive.lisa.TestHeapDomain;
+import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
@@ -79,8 +78,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testCopy() {
-		CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> tool = new CheckToolWithAnalysisResults<>(Map.of());
+		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -108,8 +107,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> tool = new CheckToolWithAnalysisResults<>(Map.of());
+		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -124,8 +123,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> tool = new CheckToolWithAnalysisResults<>(Map.of());
+		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -138,8 +137,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> tool = new CheckToolWithAnalysisResults<>(Map.of());
+		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -155,24 +154,23 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testResultRetrieval() {
-		AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> singleton = new AnalysisState<>(
-						new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
+		AnalysisState<TestAbstractState, TestHeapDomain,
+				TestValueDomain> singleton = new AnalysisState<>(
+						new TestAbstractState(new TestHeapDomain(), new TestValueDomain()),
 						new ExpressionSet<>());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
-		CFGWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
+		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
-		CFGWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<Sign>> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
+		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
-		CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-				ValueEnvironment<
-						Sign>> tool = new CheckToolWithAnalysisResults<>(
-								Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)));
+		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(
+						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)));
 
 		assertEquals(res1, tool.getResultOf(cfg).iterator().next());
 		assertEquals(res2, tool.getResultOf(cfg2).iterator().next());
