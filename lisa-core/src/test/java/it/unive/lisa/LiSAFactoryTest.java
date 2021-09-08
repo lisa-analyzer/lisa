@@ -5,19 +5,23 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.LiSAFactory.ConfigurableComponent;
-import it.unive.lisa.analysis.impl.numeric.Sign;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.symbolic.value.Variable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
+
+import it.unive.lisa.LiSAFactory.ConfigurableComponent;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
+import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.symbolic.value.Variable;
 
 public class LiSAFactoryTest {
 
@@ -27,8 +31,8 @@ public class LiSAFactoryTest {
 	public void ensureDefaultsConsistency() {
 		Collection<ConfigurableComponent<?>> getDefault = new ArrayList<>();
 		Collection<ConfigurableComponent<?>> getInstanceOfDefault = new ArrayList<>();
-		Map<Class<?>, ConfigurableComponent<?>> getInstanceWithDefaultParams = new HashMap<>();
-		for (ConfigurableComponent<?> comp : components) {
+		Map<Class<?>, Class<?>[]> getInstanceWithDefaultParams = new HashMap<>();
+		for (ConfigurableComponent<?> comp : components)
 			if (comp.getDefaultInstance() != null) {
 				try {
 					LiSAFactory.getDefaultFor(comp.getComponent());
@@ -43,14 +47,17 @@ public class LiSAFactoryTest {
 				}
 			}
 
-			for (Class<?> alt : comp.getAlternatives())
-				if (alt.isAnnotationPresent(DefaultParameters.class))
-					try {
-						LiSAFactory.getInstance(alt);
-					} catch (AnalysisSetupException e) {
-						getInstanceWithDefaultParams.put(alt, comp);
-					}
-		}
+		for (Pair<Class<?>, Class<?>[]> impl : LiSAFactory.ANALYSIS_DEFAULTS.values())
+			if (impl.getRight() != null && impl.getRight().length != 0)
+				try {
+					LiSAFactory.getInstance(impl.getLeft());
+					Object[] params = new Object[impl.getRight().length];
+					for (int i = 0; i < params.length; i++)
+						params[i] = LiSAFactory.getInstance(impl.getRight()[i]);
+					LiSAFactory.getInstance(impl.getLeft(), params);
+				} catch (AnalysisSetupException e) {
+					getInstanceWithDefaultParams.put(impl.getLeft(), impl.getRight());
+				}
 
 		if (!getDefault.isEmpty()) {
 			System.err.println(
@@ -70,10 +77,10 @@ public class LiSAFactoryTest {
 
 		if (!getInstanceWithDefaultParams.isEmpty()) {
 			System.err.println(
-					"The following alternatives that are annotated with @DefaultParameters cannot be created through LiSAFactory.getInstance(...) relying on the information from the annotation: ");
+					"The following implementations have default parameters in LiSAFactory.ANALYSIS_DEFAULTS and cannot be created through LiSAFactory.getInstance(...) using those parameters: ");
 			for (Class<?> alt : getInstanceWithDefaultParams.keySet())
-				System.err.println("  - " + alt.getName() + " (alternative for: "
-						+ getInstanceWithDefaultParams.get(alt).getComponent().getName() + ")");
+				System.err.println("  - " + alt.getName() + " (with params: "
+						+ StringUtils.join(getInstanceWithDefaultParams.get(alt), ", ") + ")");
 		}
 
 		assertTrue("Problems creating instances",

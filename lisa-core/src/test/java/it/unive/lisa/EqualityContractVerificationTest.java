@@ -2,6 +2,20 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.Lattice;
@@ -9,19 +23,19 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
-import it.unive.lisa.analysis.impl.nonInterference.NonInterference;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.interprocedural.CFGResults;
+import it.unive.lisa.interprocedural.ContextInsensitiveToken;
+import it.unive.lisa.interprocedural.ContextSensitivityToken;
+import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
-import it.unive.lisa.interprocedural.impl.CFGResults;
-import it.unive.lisa.interprocedural.impl.ContextInsensitiveToken;
-import it.unive.lisa.interprocedural.impl.ContextSensitivityToken;
-import it.unive.lisa.interprocedural.impl.FixpointResults;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
@@ -64,21 +78,9 @@ import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
-import org.apache.commons.lang3.tuple.Pair;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 public class EqualityContractVerificationTest {
 

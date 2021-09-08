@@ -54,7 +54,7 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
  */
 public final class LiSAFactory {
 
-	private static final Map<Class<?>, Pair<Class<?>, Class<?>[]>> ANALYSIS_DEFAULTS = new HashMap<>();
+	static final Map<Class<?>, Pair<Class<?>, Class<?>[]>> ANALYSIS_DEFAULTS = new HashMap<>();
 
 	static {
 		ANALYSIS_DEFAULTS.put(InterproceduralAnalysis.class,

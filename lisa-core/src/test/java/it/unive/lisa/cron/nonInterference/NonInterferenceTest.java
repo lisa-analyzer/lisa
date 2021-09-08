@@ -2,19 +2,23 @@ package it.unive.lisa.cron.nonInterference;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.impl.nonInterference.NonInterference;
+import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
-import it.unive.lisa.interprocedural.impl.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.impl.RecursionFreeToken;
+import it.unive.lisa.interprocedural.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.RecursionFreeToken;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
@@ -22,8 +26,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 

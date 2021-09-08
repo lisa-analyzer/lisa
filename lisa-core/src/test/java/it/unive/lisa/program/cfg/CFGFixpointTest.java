@@ -2,22 +2,23 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
+import org.junit.Test;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.impl.heap.MonolithicHeap;
-import it.unive.lisa.analysis.impl.numeric.Sign;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
-import it.unive.lisa.interprocedural.callgraph.impl.RTACallGraph;
-import it.unive.lisa.interprocedural.impl.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import org.junit.Test;
 
 public class CFGFixpointTest {
 
