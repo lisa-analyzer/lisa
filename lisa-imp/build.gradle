@@ -18,6 +18,9 @@ dependencies {
 
 	// parser generation
 	antlr 'org.antlr:antlr4:4.8-1'
+	
+	// testing
+    testImplementation 'junit:junit:4.12'
 }
 
 generateGrammarSource {
