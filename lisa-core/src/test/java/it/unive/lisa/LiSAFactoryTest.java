@@ -9,9 +9,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
@@ -47,17 +47,16 @@ public class LiSAFactoryTest {
 				}
 			}
 
-		for (Pair<Class<?>, Class<?>[]> impl : LiSAFactory.ANALYSIS_DEFAULTS.values())
-			if (impl.getRight() != null && impl.getRight().length != 0)
-				try {
-					LiSAFactory.getInstance(impl.getLeft());
-					Object[] params = new Object[impl.getRight().length];
-					for (int i = 0; i < params.length; i++)
-						params[i] = LiSAFactory.getInstance(impl.getRight()[i]);
-					LiSAFactory.getInstance(impl.getLeft(), params);
-				} catch (AnalysisSetupException e) {
-					getInstanceWithDefaultParams.put(impl.getLeft(), impl.getRight());
-				}
+		for (Entry<Class<?>, Class<?>[]> impl : LiSAFactory.DEFAULT_PARAMETERS.entrySet())
+			try {
+				LiSAFactory.getInstance(impl.getKey());
+				Object[] params = new Object[impl.getValue().length];
+				for (int i = 0; i < params.length; i++)
+					params[i] = LiSAFactory.getInstance(impl.getValue()[i]);
+				LiSAFactory.getInstance(impl.getKey(), params);
+			} catch (AnalysisSetupException e) {
+				getInstanceWithDefaultParams.put(impl.getKey(), impl.getValue());
+			}
 
 		if (!getDefault.isEmpty()) {
 			System.err.println(

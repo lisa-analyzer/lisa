@@ -48,22 +48,22 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
  * {@link #getDefaultFor(Class, Object...)}, while a specific instance can be
  * retrieved through {@link #getInstance(Class, Object...)}. Note that custom
  * defaults for each component can be defined through
- * {@link #registerDefaultFor(Class, Class, Class...)}.
+ * {@link #registerDefaultFor(Class, Class)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public final class LiSAFactory {
 
-	static final Map<Class<?>, Pair<Class<?>, Class<?>[]>> ANALYSIS_DEFAULTS = new HashMap<>();
+	static final Map<Class<?>, Class<?>> DEFAULT_IMPLEMENTATIONS = new HashMap<>();
+	static final Map<Class<?>, Class<?>[]> DEFAULT_PARAMETERS = new HashMap<>();
 
 	static {
-		ANALYSIS_DEFAULTS.put(InterproceduralAnalysis.class,
-				Pair.of(ModularWorstCaseAnalysis.class, ArrayUtils.EMPTY_CLASS_ARRAY));
-		ANALYSIS_DEFAULTS.put(CallGraph.class, Pair.of(RTACallGraph.class, ArrayUtils.EMPTY_CLASS_ARRAY));
-		ANALYSIS_DEFAULTS.put(HeapDomain.class, Pair.of(MonolithicHeap.class, ArrayUtils.EMPTY_CLASS_ARRAY));
-		ANALYSIS_DEFAULTS.put(ValueDomain.class, Pair.of(Interval.class, ArrayUtils.EMPTY_CLASS_ARRAY));
-		ANALYSIS_DEFAULTS.put(AbstractState.class,
-				Pair.of(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class }));
+		DEFAULT_IMPLEMENTATIONS.put(InterproceduralAnalysis.class, ModularWorstCaseAnalysis.class);
+		DEFAULT_IMPLEMENTATIONS.put(CallGraph.class, RTACallGraph.class);
+		DEFAULT_IMPLEMENTATIONS.put(HeapDomain.class, MonolithicHeap.class);
+		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
+		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
+		DEFAULT_PARAMETERS.put(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class });
 	}
 
 	private LiSAFactory() {
@@ -160,12 +160,11 @@ public final class LiSAFactory {
 	/**
 	 * Creates an instance of the given {@code component}. If {@code params} are
 	 * provided, a suitable (and not ambiguous) constructor must exist in
-	 * {@code component}'s class. Otherwise, {@code component}'s class is
-	 * checked for a default implementation, either predefined or set through
-	 * {@link #registerDefaultFor(Class, Class, Class...)}. If found, the
-	 * instance will be created by passing to the constructor instances of those
-	 * parameters obtained through {@link #getInstance(Class, Object...)}
-	 * without passing any {@code params}. Otherwise, the nullary constructor of
+	 * {@code component}'s class. If no {@code params} have been provided but
+	 * default parameters have been registered through
+	 * {@link #registerDefaultParametersFor(Class, Class...)},
+	 * {@link #getInstance(Class, Object...)} will be used to create such
+	 * parameters and those will be used. Otherwise, the nullary constructor of
 	 * {@code component} is invoked.
 	 * 
 	 * @param <T>       the type of the component
@@ -181,8 +180,10 @@ public final class LiSAFactory {
 			if (params != null && params.length != 0)
 				return construct(component, findConstructorSignature(component, params), params);
 
-			Class<?>[] defaultParams = ANALYSIS_DEFAULTS.get(component).getRight();
-			if (defaultParams.length == 0)
+			Class<?>[] defaultParams;
+			if (!DEFAULT_PARAMETERS.containsKey(component)
+					|| (defaultParams = DEFAULT_PARAMETERS.get(component)) == null
+					|| defaultParams.length == 0)
 				return construct(component, ArrayUtils.EMPTY_CLASS_ARRAY, ArrayUtils.EMPTY_OBJECT_ARRAY);
 
 			Object[] defaults = new Object[defaultParams.length];
@@ -205,20 +206,40 @@ public final class LiSAFactory {
 	 * @param defaultImplementation the new default implementation for
 	 *                                  {@code component}
 	 */
-	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation,
-			Class<?>... defaultParameters) {
-		ANALYSIS_DEFAULTS.put(component, Pair.of(defaultImplementation, defaultParameters));
+	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
+		DEFAULT_IMPLEMENTATIONS.put(component, defaultImplementation);
+	}
+
+	/**
+	 * Registers the types (i.e. implementations) of the parameters to use for
+	 * the creation of the given component. These will be used whenever
+	 * {@link #getInstance(Class, Object...)} or
+	 * {@link #getDefaultFor(Class, Object...)} are invoked without specifying
+	 * parameters but a default exist. Any previous default for
+	 * {@code component} introduced by calling this method is removed.
+	 * 
+	 * @param component         the component whose default parameters are to be
+	 *                              registered
+	 * @param defaultParameters the new parameters for the creation of
+	 *                              {@code component}
+	 */
+	public static void registerDefaultParametersFor(Class<?> component, Class<?>... defaultParameters) {
+		DEFAULT_PARAMETERS.put(component, defaultParameters);
 	}
 
 	/**
 	 * Builds the default instance of the specified analysis component. The
 	 * instance to create is retrieved by first looking into the custom defaults
-	 * provided through {@link #registerDefaultFor(Class, Class, Class...)} If
-	 * no entry for {@code component} has been provided, then the instance is
-	 * looked up in the predefined defaults. If {@code component} does not have
-	 * a predefined default, then an {@link AnalysisSetupException} is thrown.
+	 * provided through {@link #registerDefaultFor(Class, Class)}. If no entry
+	 * for {@code component} has been provided, then the instance is looked up
+	 * in the predefined defaults. If {@code component} does not have a
+	 * predefined default, then an {@link AnalysisSetupException} is thrown.
 	 * Then, {@link #getInstance(Class, Object...)} is invoked on the retrieved
-	 * instance, using the given {@code params}. If the default instance is a
+	 * instance, using the given {@code params}. If no {@code params} have been
+	 * provided but default parameters have been registered through
+	 * {@link #registerDefaultParametersFor(Class, Class...)},
+	 * {@link #getInstance(Class, Object...)} will be used to create such
+	 * parameters and those will be used. If the default instance is a
 	 * {@link NonRelationalDomain} and the component is a {@link HeapDomain} or
 	 * {@link ValueDomain}, then the instance is wrapped into the appropriate
 	 * environment (either {@link HeapEnvironment} or {@link ValueEnvironment})
@@ -236,20 +257,21 @@ public final class LiSAFactory {
 	@SuppressWarnings("unchecked")
 	public static <T> T getDefaultFor(Class<T> component, Object... params) throws AnalysisSetupException {
 		try {
-			Pair<Class<?>, Class<?>[]> def = ANALYSIS_DEFAULTS.get(component);
+			Class<?> def = DEFAULT_IMPLEMENTATIONS.get(component);
 			if (def == null)
 				throw new AnalysisSetupException("No registered default for " + component);
 
-			if (params.length == 0 && def.getRight().length > 0) {
-				params = new Object[def.getRight().length];
+			Class<?>[] defParams = DEFAULT_PARAMETERS.getOrDefault(def, ArrayUtils.EMPTY_CLASS_ARRAY);
+			if (params.length == 0 && defParams.length > 0) {
+				params = new Object[defParams.length];
 				for (int i = 0; i < params.length; i++)
-					params[i] = getInstance(def.getRight()[i]);
+					params[i] = getInstance(defParams[i]);
 			}
 
-			if (needsWrapping(def.getLeft(), component))
-				return (T) wrapParam(getInstance(def.getLeft(), params));
+			if (needsWrapping(def, component))
+				return (T) wrapParam(getInstance(def, params));
 			else
-				return (T) getInstance(def.getLeft(), params);
+				return (T) getInstance(def, params);
 		} catch (NullPointerException e) {
 			throw new AnalysisSetupException("Unable to instantiate default " + component.getSimpleName(), e);
 		}
@@ -281,13 +303,15 @@ public final class LiSAFactory {
 		private ConfigurableComponent(Class<T> component) {
 			this.component = component;
 
-			Pair<Class<?>, Class<?>[]> def = ANALYSIS_DEFAULTS.get(component);
-			if (def == null) {
+			if (DEFAULT_IMPLEMENTATIONS.containsKey(component)) {
+				defaultInstance = (Class<? extends T>) DEFAULT_IMPLEMENTATIONS.get(component);
+				if (DEFAULT_PARAMETERS.containsKey(defaultInstance))
+					defaultParameters = DEFAULT_PARAMETERS.get(defaultInstance);
+				else
+					defaultParameters = null;
+			} else {
 				defaultInstance = null;
 				defaultParameters = null;
-			} else {
-				defaultInstance = (Class<? extends T>) def.getLeft();
-				defaultParameters = def.getRight();
 			}
 
 			this.alternatives = scanner.getSubTypesOf(component)
