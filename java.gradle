@@ -4,7 +4,7 @@ plugins.withType(JavaPlugin) {
 			println('Injecting custom information into manifest')
 			manifest {
 				 attributes(
-					'Implementation-Title': rootProject.name,
+					'Implementation-Title': project.name,
 					'Implementation-Version': project.version,
 					'Implementation-Vendor': 'Ca\' Foscari University of Venice',
 					'Created-By': "Gradle ${gradle.gradleVersion}",

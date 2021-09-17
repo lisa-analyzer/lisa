@@ -18,34 +18,24 @@ buildscript {
 }
 
 plugins {
-	// telling gradle that we are building a library
     id 'java-library'
-    
-    // magic for getting eclipse to work with gradle
     id 'eclipse'
-    
-    // antlr plugin for the generation of the IMP parser
-    id 'antlr'
     
     // automatic generation of plantuml files from the source code
     // for visualizing them: https://www.planttext.com/
     id 'com.github.roroche.plantuml' version '1.0.2'
-    
-    // this can generate images from plantuml files
-	// it requires graphviz to be installed 
-	id "org.fmiw.plantuml" version "0.1"
+	id 'org.fmiw.plantuml' version '0.1'
     
     // parse git information during the build
     id 'org.ajoberstar.grgit' version '4.0.2'
     
     // code formatting task -- spotlessCheck for checking, spotlessApply for applying
-    id "com.diffplug.spotless" version "5.8.2"
-    
     // javadoc checking - coding conventions
+    id 'com.diffplug.spotless' version '5.8.2'
     id 'checkstyle'
     
     // this enables './gradlew <task> taskTree' to show task dependencies
-    id "com.dorongold.task-tree" version "1.5"
+    id 'com.dorongold.task-tree' version '1.5'
     
     // publication on maven central
     id 'maven-publish'
@@ -55,41 +45,61 @@ plugins {
     id 'jacoco'
 }
 
-// the code reading data from the git repo has to be placed in the same file where its
-// plugin is applied, otherwise it will fail to load the classes from it. We export the
-// properties that we read for using them later in the appropriate gradle files
-def ready = false
-def cid = ''
-def tag = ''
-def branch = ''
-def is_clean = ''
-try {
-	def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
-	ready = true
-	cid = repo.head().abbreviatedId
-	tag = repo.describe(tags: true, always: true)
-	branch = repo.branch.current().getName()
-	is_clean = repo.status().isClean()
-} catch (Exception e) {
-	// this means we are building from outside of LiSA, probably from an outer model
-	// we can skip the manifest attributes injection here
-	println("Skipping manifest attriubtes injection because we are not directly building LiSA")
-	println(e)
+allprojects {
+	repositories {
+	    jcenter()
+	    mavenCentral()
+	}
+	
+	// the code reading data from the git repo has to be placed in the same file where its
+	// plugin is applied, otherwise it will fail to load the classes from it. We export the
+	// properties that we read for using them later in the appropriate gradle files
+	def ready = false
+	def cid = ''
+	def tag = ''
+	def branch = ''
+	def is_clean = ''
+	try {
+		def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
+		ready = true
+		cid = repo.head().abbreviatedId
+		tag = repo.describe(tags: true, always: true)
+		branch = repo.branch.current().getName()
+		is_clean = repo.status().isClean()
+	} catch (Exception e) {
+		// this means we are building from outside of LiSA, probably from an outer model
+		// we can skip the manifest attributes injection here
+		println('Skipping manifest attriubtes injection because we are not directly building LiSA')
+		println(e)
+	}
+	
+	ext {
+		git_ready = ready
+		git_cid = cid
+		git_tag = tag
+		git_branch = branch
+		git_is_clean = is_clean
+	}
+	
+	group = 'it.unive'
+	version = '0.1b1'
 }
 
-ext {
-	git_ready = ready
-	git_cid = cid
-	git_tag = tag
-	git_branch = branch
-	git_is_clean = is_clean
+dependencies {
+	// internal
+	api project(':lisa-sdk')
+	testImplementation project(':lisa-imp')
+
+    // utils
+	api 'org.reflections:reflections:0.9.12'
+
+	// testing
+	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+    testImplementation 'junit:junit:4.12'
 }
 
-group = 'it.unive'
-version = '0.1b1'
+apply from: '../code-style.gradle'
+apply from: '../doc-extra.gradle'
+apply from: '../java.gradle'
+apply from: '../publishing.gradle'
 
-apply from: 'dependencies.gradle'
-apply from: 'java.gradle'
-apply from: 'code-style.gradle'
-apply from: 'doc-extra.gradle'
-apply from: 'publishing.gradle'

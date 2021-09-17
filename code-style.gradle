@@ -1,5 +1,5 @@
 checkstyle {
-	configFile = file("checkstyle-config.xml")
+	configFile = file(new File(rootProject.projectDir, '../checkstyle-config.xml'))
 	sourceSets = []
 	showViolations = true
 	toolVersion '8.38' 
@@ -13,21 +13,9 @@ checkstyleMain {
     }
 }
 
-checkstyleTest {
-	finalizedBy 'checkstyleErrorMessage'
-    reports {
-        xml.enabled false
-        html.enabled false
-    }
-    
-    // only included files will be checked
-    include 'it/unive/lisa/test/imp/**/*.java'
-    exclude '**/*Test.java'
-}
-
 task checkstyleErrorMessage {
 	onlyIf {
-		checkstyleMain.state.failure != null || checkstyleTest.state.failure != null 
+		checkstyleMain.state.failure != null
 	}
 	doLast {
 		logger.error('Checkstyle plugin thrown an error. This means that the javadoc is not correctly setup. Inspect console output to find problematic javadocs.')
@@ -48,7 +36,7 @@ spotless {
     	removeUnusedImports()
     
     	// use the eclipse formatting with the one provided with the project
-    	eclipse().configFile('spotless-formatting.xml')
+    	eclipse().configFile(new File(rootProject.projectDir, '../spotless-formatting.xml'))
     
     	// ignore generated code
     	target project.fileTree(project.projectDir) {

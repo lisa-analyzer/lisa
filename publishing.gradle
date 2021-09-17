@@ -1,11 +1,11 @@
 publishing {
     publications {
         mavenJava(MavenPublication) {
-        	artifactId = 'lisa'
+        	artifactId = project.name 
         	groupId = 'com.github.unive-ssv'
         	from components.java
             pom {
-                name = 'LiSA'
+                name = 'LiSA (' + project.name + ')' 
                 description = 'A library for static analysis'
                 url = 'https://unive-ssv.github.io/lisa/'
                 packaging = 'jar'

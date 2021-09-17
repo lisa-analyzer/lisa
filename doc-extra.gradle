@@ -48,30 +48,3 @@ generateDiagramUml {
 		delete "${projectDir}/diagrams/uml.png"
 	}
 }
-
-tasks.register('copyJavadocToPages') {
-    group = 'documentation'
-	description 'Copies the generated javadoc in the github pages website, and also updates the files listing the available versions'
-	dependsOn 'javadoc'
-	doLast{
-		mkdir "../docs/javadoc/${project.version}"
-		copy {
-			from "build/docs/javadoc/"
-      		into "../docs/javadoc/${project.version}/"
-		}
-		
-		def f = new File('../docs/_data/sitemap.yml')
-		f.withWriterAppend { out ->
-			out.println "      - page: ${project.version}"
-			out.println "        url: javadoc/${project.version}/"
-		}
-		
-		f = new File('../docs/javadoc/index.md')
-		f.withWriterAppend { out ->
-		
-		out.println "\n### ${project.version}\n"
-
-		out.println "[Release](https://github.com/UniVE-SSV/lisa/releases/tag/v${project.version}) - [Javadoc](${project.version}/)"
-		}
-	}
-}

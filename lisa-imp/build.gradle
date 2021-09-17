@@ -1,16 +1,30 @@
 plugins {
-    id 'java-library'
-    
-    // magic for getting eclipse to work with gradle
+	id 'java-library'
     id 'eclipse'
-    
-    // antlr plugin for the generation of the IMP parser
     id 'antlr'
-}
-
-repositories {
-    jcenter()
-    mavenCentral()
+    
+    // automatic generation of plantuml files from the source code
+    // for visualizing them: https://www.planttext.com/
+    id 'com.github.roroche.plantuml'
+	id 'org.fmiw.plantuml'
+    
+    // parse git information during the build
+    id 'org.ajoberstar.grgit'
+    
+    // code formatting task -- spotlessCheck for checking, spotlessApply for applying
+    // javadoc checking - coding conventions
+    id 'com.diffplug.spotless'
+    id 'checkstyle'
+    
+    // this enables './gradlew <task> taskTree' to show task dependencies
+    id 'com.dorongold.task-tree'
+    
+    // publication on maven central
+    id 'maven-publish'
+    id 'signing'
+    
+    // coverage reports
+    id 'jacoco'
 }
 
 dependencies {
@@ -36,3 +50,9 @@ generateGrammarSource {
    		project.delete fileTree('build/generated-src/antlr/main').include('*.*')
   	}
 }
+
+apply from: '../code-style.gradle'
+apply from: '../doc-extra.gradle'
+apply from: '../java.gradle'
+apply from: '../publishing.gradle'
+
