@@ -4,18 +4,17 @@ import static it.unive.lisa.outputs.compare.JsonReportComparer.compare;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.util.file.FileManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import it.unive.lisa.imp.IMPFrontend;
-import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.util.file.FileManager;
 
 public abstract class AnalysisTestExecutor {
 

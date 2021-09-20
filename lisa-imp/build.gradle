@@ -25,3 +25,7 @@ generateGrammarSource {
    		project.delete fileTree('build/generated-src/antlr/main').include('*.*')
   	}
 }
+
+checkstyleMain {
+    exclude 'it/unive/lisa/imp/antlr/*.java'
+}

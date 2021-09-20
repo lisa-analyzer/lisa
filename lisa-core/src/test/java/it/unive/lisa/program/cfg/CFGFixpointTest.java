@@ -2,8 +2,6 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
@@ -19,6 +17,7 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import org.junit.Test;
 
 public class CFGFixpointTest {
 

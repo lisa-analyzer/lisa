@@ -54,6 +54,7 @@ tasks.register('cron', Test) {
     classpath = sourceSets.test.runtimeClasspath
     
     filter {
+    	failOnNoMatchingTests false
 		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
 }

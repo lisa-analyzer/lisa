@@ -1,11 +1,10 @@
 package it.unive.lisa.imp.types;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * The {@link it.unive.lisa.type.BooleanType} of the IMP language. The only

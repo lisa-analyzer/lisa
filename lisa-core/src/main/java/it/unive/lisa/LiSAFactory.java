@@ -1,25 +1,5 @@
 package it.unive.lisa;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
@@ -40,6 +20,24 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 /**
  * An utility class for instantiating analysis components, that is, modular
@@ -54,7 +52,21 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
  */
 public final class LiSAFactory {
 
+	/**
+	 * Default implementation for analysis components. Keys of this map are the
+	 * class objects of the analysis components (e.g.
+	 * {@link CallGraph}{@code .class}) while values are the key's default
+	 * implementation's class object (e.g. {@link RTACallGraph}{@code .class}).
+	 */
 	static final Map<Class<?>, Class<?>> DEFAULT_IMPLEMENTATIONS = new HashMap<>();
+
+	/**
+	 * Default parameters types for analysis components' implementations. Keys
+	 * of this map are the class objects of the analysis components (e.g.
+	 * {@link SimpleAbstractState}{@code .class}) while values are arrays
+	 * containing the key's default parameters' class objects (e.g.
+	 * {@code [}{@link MonolithicHeap}{@code .class, }{@link Interval}{@code .class]}).
+	 */
 	static final Map<Class<?>, Class<?>[]> DEFAULT_PARAMETERS = new HashMap<>();
 
 	static {

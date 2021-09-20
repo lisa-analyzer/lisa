@@ -37,6 +37,7 @@ public class StringReplace extends NativeCFG {
 	/**
 	 * Builds the construct.
 	 * 
+	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
 	public StringReplace(CodeLocation location, CompilationUnit stringUnit) {
@@ -56,6 +57,16 @@ public class StringReplace extends NativeCFG {
 	 */
 	public static class IMPStringReplace extends TernaryNativeCall implements PluggableStatement {
 
+		/**
+		 * Builds a new instance of this native call, according to the
+		 * {@link PluggableStatement} contract.
+		 * 
+		 * @param cfg      the cfg where the native call happens
+		 * @param location the location where the native call happens
+		 * @param params   the parameters of the native call
+		 * 
+		 * @return the newly-built call
+		 */
 		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringReplace(cfg, location, params[0], params[1], params[2]);
 		}

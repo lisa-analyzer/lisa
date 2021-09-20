@@ -5,13 +5,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import org.junit.Test;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -36,6 +29,11 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.types.IntType;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
@@ -71,7 +69,7 @@ public class ConditionalsExtractionTest {
 		assertEquals("Wrong follower: " + loop.getFirstFollower(), follower, loop.getFirstFollower());
 		checkMatrix("loop body", loop.getBody(), nodes);
 	}
-	
+
 	class IMPNotEqual extends BinaryNativeCall {
 
 		protected IMPNotEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {

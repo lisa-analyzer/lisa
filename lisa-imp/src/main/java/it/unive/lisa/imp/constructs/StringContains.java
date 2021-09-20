@@ -37,6 +37,7 @@ public class StringContains extends NativeCFG {
 	/**
 	 * Builds the construct.
 	 * 
+	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
 	public StringContains(CodeLocation location, CompilationUnit stringUnit) {
@@ -55,6 +56,16 @@ public class StringContains extends NativeCFG {
 	 */
 	public static class IMPStringContains extends BinaryNativeCall implements PluggableStatement {
 
+		/**
+		 * Builds a new instance of this native call, according to the
+		 * {@link PluggableStatement} contract.
+		 * 
+		 * @param cfg      the cfg where the native call happens
+		 * @param location the location where the native call happens
+		 * @param params   the parameters of the native call
+		 * 
+		 * @return the newly-built call
+		 */
 		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringContains(cfg, location, params[0], params[1]);
 		}

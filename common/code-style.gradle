@@ -5,6 +5,8 @@ checkstyle {
     toolVersion '8.38' 
 }
 
+checkstyleTest.enabled = false
+
 checkstyleMain {
     finalizedBy 'checkstyleErrorMessage'
     reports {
@@ -19,7 +21,7 @@ task checkstyleErrorMessage {
     }
     doLast {
         logger.error('Checkstyle plugin thrown an error. This means that the javadoc is not correctly setup. Inspect console output to find problematic javadocs.')
-        logger.error('To reproduce locally, execute \'./gradlew checkstyleMain checkstyleTest\'')
+        logger.error('To reproduce locally, execute \'./gradlew checkstyleMain\'')
     }
 }
 

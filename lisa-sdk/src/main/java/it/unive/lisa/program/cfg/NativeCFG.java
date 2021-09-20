@@ -1,13 +1,12 @@
 package it.unive.lisa.program.cfg;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 /**
  * A native cfg, representing a cfg that is usually provided by the runtime of
