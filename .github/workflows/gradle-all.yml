@@ -18,12 +18,12 @@ jobs:
       with:
         java-version: 11
     - name: 'Grant execute permission for gradlew'
-      run: chmod +x lisa-core/gradlew
+      run: chmod +x common/gradlew
     - name: 'Gradle: compile and run unit tests'
-      run: cd lisa-core && ./gradlew test
+      run: cd common && ./gradlew test
     - name: 'Publish unit test results'
       uses: EnricoMi/publish-unit-test-result-action@v1.6
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: lisa-core/build/test-results/**/TEST-*.xml
+        files: lisa-*/build/test-results/**/TEST-*.xml

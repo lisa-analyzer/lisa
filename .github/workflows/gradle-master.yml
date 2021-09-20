@@ -17,13 +17,13 @@ jobs:
       with:
         java-version: 11
     - name: 'Grant execute permission for gradlew'
-      run: chmod +x lisa-core/gradlew
+      run: chmod +x common/gradlew
     - name: 'Gradle: full build and run cron tests'
-      run: cd lisa-core && ./gradlew build cron
+      run: cd common && ./gradlew build cron
     - name: 'Publish unit test results'
       uses: EnricoMi/publish-unit-test-result-action@v1.6
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         check_name: 'All Test Results (unit + cron)'
-        files: lisa-core/build/test-results/**/TEST-*.xml
+        files: lisa-*/build/test-results/**/TEST-*.xml
