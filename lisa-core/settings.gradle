@@ -1,4 +1,1 @@
 rootProject.name = 'lisa-core'
-include 'lisa-sdk', 'lisa-imp'
-project(':lisa-sdk').projectDir = file('../lisa-sdk')
-project(':lisa-imp').projectDir = file('../lisa-imp')

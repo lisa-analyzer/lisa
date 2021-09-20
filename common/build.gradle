@@ -1,0 +1,86 @@
+/*
+ * This file contains the general configuration of the build script and the list of plugins to apply.
+ * Anything else, with very few exceptions, should be placed into a separate gradle file that has to
+ * be applied at the end of this file, or in project-specific build files. 
+ * 
+ * When defining a custom task, use 'tasks.register('taskname')', specifying also group and description,
+ * to help others understand the purpose of that task. 
+ */
+
+allprojects {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    
+    group = 'it.unive'
+    version = '0.1b1'
+
+    // the code reading data from the git repo has to be placed in the same file where its
+    // plugin is applied, otherwise it will fail to load the classes from it. We export the
+    // properties that we read for using them later in the appropriate gradle files
+    def ready = false
+    def cid = ''
+    def tag = ''
+    def branch = ''
+    def is_clean = ''
+    try {
+        def repo = org.ajoberstar.grgit.Grgit.open(dir: rootProject.projectDir.getParent())
+        ready = true
+        cid = repo.head().abbreviatedId
+        tag = repo.describe(tags: true, always: true)
+        branch = repo.branch.current().getName()
+        is_clean = repo.status().isClean()
+    } catch (Exception e) {
+        // this means we are building from outside of LiSA, probably from an outer model
+        // we can skip the manifest attributes injection here
+        println('Skipping manifest attriubtes injection because we are not directly building LiSA')
+        println(e)
+    }
+    
+    ext {
+        git_ready = ready
+        git_cid = cid
+        git_tag = tag
+        git_branch = branch
+        git_is_clean = is_clean
+    }
+}
+
+buildscript {
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+    }
+    
+    dependencies {
+        classpath 'org.ajoberstar.grgit:grgit-core:4.0.2'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:4.0.2'
+        
+        classpath 'com.github.roroche:plantuml-gradle-plugin:1.0.2'
+        classpath 'gradle.plugin.org.fmiw:plantuml-gradle-plugin:0.1'
+        
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.15.0'
+    }
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'eclipse'
+    apply plugin: 'com.github.roroche.plantuml' // generation of plantuml from source code (visualization: https://www.planttext.com/)
+    apply plugin: 'org.fmiw.plantuml' // plantuml to png
+    apply plugin: 'org.ajoberstar.grgit' // parse git information during the build
+    apply plugin: 'com.diffplug.spotless' // code formatting task
+    apply plugin: 'checkstyle' // javadoc checking - coding conventions
+    apply plugin: 'maven-publish' // publication on maven central
+    apply plugin: 'signing' // artifact signing
+    apply plugin: 'jacoco' // coverage reports
+    
+    apply from: "${project.rootDir}/code-style.gradle"
+    apply from: "${project.rootDir}/doc-extra.gradle"
+    apply from: "${project.rootDir}/java.gradle"
+    apply from: "${project.rootDir}/publishing.gradle"
+}
