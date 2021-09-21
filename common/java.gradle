@@ -1,7 +1,6 @@
 plugins.withType(JavaPlugin) {
 	if (git_ready) {
 		jar.doFirst {
-			println('Injecting custom information into manifest')
 			manifest {
 				 attributes(
 					'Implementation-Title': project.name,
