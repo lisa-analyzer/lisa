@@ -15,15 +15,11 @@ dependencies {
 generateGrammarSource {
     maxHeapSize = "64m"
     arguments += ["-visitor", "-no-listener"]
-    
-    doLast {
-    	copy {
-      		from 'build/generated-src/antlr/main/'
-      		include '*.*'
-      		into 'build/generated-src/antlr/main/it/unive/lisa/imp/antlr'
-    	}
-   		project.delete fileTree('build/generated-src/antlr/main').include('*.*')
-  	}
+    outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/it/unive/lisa/imp/antlr") // to match package declaration
+}
+
+sourcesJar {
+	dependsOn generateGrammarSource
 }
 
 checkstyleMain {

@@ -10,8 +10,8 @@ checkstyleTest.enabled = false
 checkstyleMain {
     finalizedBy 'checkstyleErrorMessage'
     reports {
-        xml.enabled false
-        html.enabled false
+        xml.required = false
+        html.required = false
     }
 }
 
