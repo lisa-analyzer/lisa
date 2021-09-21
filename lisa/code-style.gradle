@@ -54,6 +54,11 @@ spotless {
     }
 }
 
+spotlessJava {
+	// declaring explicit dependencies
+	dependsOn 'compileJava', 'compileTestJava', 'processTestResources', 'spotlessAntlr4'
+}
+
 spotlessJavaCheck { 
     finalizedBy 'spotlessErrorMessage'
 }
