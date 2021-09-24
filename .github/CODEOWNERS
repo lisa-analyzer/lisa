@@ -2,8 +2,8 @@
 LICENSE                         @lucaneg
 *.md                            @lucaneg
 logo.png                        @lucaneg
-/lisa/*.gradle                  @lucaneg
-/lisa/checkstyle-config.xml     @lucaneg
-/lisa/spotless-formatting.xml   @lucaneg
-/lisa/gradle/*                  @lucaneg
+*.gradle                		@lucaneg
+checkstyle-config.xml     		@lucaneg
+spotless-formatting.xml   		@lucaneg
+**/gradle/*                  	@lucaneg
 *                               @lucaneg @VincenzoArceri

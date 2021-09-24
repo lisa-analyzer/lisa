@@ -1,0 +1,27 @@
+plugins {
+	id 'antlr'
+}
+
+dependencies {
+	api project(':lisa-sdk')
+
+	// parser generation
+	antlr 'org.antlr:antlr4:4.8-1'
+	
+	// testing
+    testImplementation 'junit:junit:4.12'
+}
+
+generateGrammarSource {
+    maxHeapSize = "64m"
+    arguments += ["-visitor", "-no-listener"]
+    outputDirectory = new File("${project.buildDir}/generated-src/antlr/main/it/unive/lisa/imp/antlr") // to match package declaration
+}
+
+sourcesJar {
+	dependsOn generateGrammarSource
+}
+
+checkstyleMain {
+    exclude 'it/unive/lisa/imp/antlr/*.java'
+}

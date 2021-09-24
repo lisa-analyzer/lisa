@@ -17,8 +17,6 @@ jobs:
       uses: actions/checkout@v2
       with:
         ref: 'gh-pages'
-    - name: 'Grant execute permission for check-links.sh'
-      run: chmod +x .github/scripts/check-links.sh
     - name: 'Execute the script'
       shell: '/bin/bash {0}'
       run: |

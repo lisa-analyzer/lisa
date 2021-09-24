@@ -1,10 +1,9 @@
 plugins.withType(JavaPlugin) {
 	if (git_ready) {
 		jar.doFirst {
-			println('Injecting custom information into manifest')
 			manifest {
 				 attributes(
-					'Implementation-Title': rootProject.name,
+					'Implementation-Title': project.name,
 					'Implementation-Version': project.version,
 					'Implementation-Vendor': 'Ca\' Foscari University of Venice',
 					'Created-By': "Gradle ${gradle.gradleVersion}",
@@ -34,8 +33,8 @@ javadoc {
 
 test {
 	filter {
-		includeTestsMatching "it.unive.lisa.*"
-		excludeTestsMatching "it.unive.lisa.cron.*"
+		includeTestsMatching 'it.unive.lisa.*'
+		excludeTestsMatching 'it.unive.lisa.cron.*'
 	}
 	
 	jacoco {
@@ -54,7 +53,8 @@ tasks.register('cron', Test) {
     classpath = sourceSets.test.runtimeClasspath
     
     filter {
-		includeTestsMatching "it.unive.lisa.cron.*"
+    	failOnNoMatchingTests false
+		includeTestsMatching 'it.unive.lisa.cron.*'
 	}
 }
 

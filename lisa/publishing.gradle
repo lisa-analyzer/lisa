@@ -1,11 +1,11 @@
 publishing {
     publications {
         mavenJava(MavenPublication) {
-        	artifactId = 'lisa'
-        	groupId = 'com.github.unive-ssv'
-        	from components.java
+            artifactId = project.name 
+            groupId = 'com.github.unive-ssv'
+            from components.java
             pom {
-                name = 'LiSA'
+                name = 'LiSA (' + project.name + ')' 
                 description = 'A library for static analysis'
                 url = 'https://unive-ssv.github.io/lisa/'
                 packaging = 'jar'
@@ -51,27 +51,27 @@ publishing {
     }
     repositories {
         maven {
-            name = "OSSRH"
-	        url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-	        credentials {
-	        	username = System.getenv("MAVEN_USERNAME")
-	          	password = System.getenv("MAVEN_PASSWORD")
-	      	}
+            name = 'OSSRH'
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = System.getenv('MAVEN_USERNAME')
+                password = System.getenv('MAVEN_PASSWORD')
+            }
         }
         maven {
-		    name = "GitHubPackages"
-		    url = "https://maven.pkg.github.com/UniVE-SSV/lisa"
-		    credentials {
-		      	username = System.getenv("GITHUB_ACTOR")
-		      	password = System.getenv("GITHUB_TOKEN")
-		    }
-	    }
+            name = 'GitHubPackages'
+            url = 'https://maven.pkg.github.com/UniVE-SSV/lisa'
+            credentials {
+                username = System.getenv('GITHUB_ACTOR')
+                password = System.getenv('GITHUB_TOKEN')
+            }
+        }
     }
 }
 
 signing {
-	def signingKey = System.getenv("SIGN_KEY")
-    def signingPassword = System.getenv("SIGN_PW")
+    def signingKey = System.getenv('SIGN_KEY')
+    def signingPassword = System.getenv('SIGN_PW')
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }

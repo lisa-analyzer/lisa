@@ -26,4 +26,4 @@ jobs:
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         check_name: 'All Test Results (unit + cron)'
-        files: lisa/build/test-results/**/TEST-*.xml
+        files: lisa/lisa-*/build/test-results/**/TEST-*.xml

@@ -26,4 +26,4 @@ jobs:
       if: always()
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        files: lisa/build/test-results/**/TEST-*.xml
+        files: lisa/lisa-*/build/test-results/**/TEST-*.xml

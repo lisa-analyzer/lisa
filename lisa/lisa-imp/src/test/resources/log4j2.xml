@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" name="DefaultLoggingConf">
+	<Appenders>
+		<Console name="console">
+			<PatternLayout pattern="%d %5level %c - %m %ex%n"/>
+		</Console>
+	</Appenders>
+
+	<Loggers>
+		<Logger name="it.unive.lisa" level="DEBUG" />
+		<Logger name="org.reflections" level="WARN" />
+		
+		<Root level="DEBUG">
+			<AppenderRef ref="console" level="DEBUG"/>
+		</Root>
+	</Loggers>
+</Configuration>
