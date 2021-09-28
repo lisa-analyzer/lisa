@@ -41,7 +41,6 @@ import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
-import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -53,6 +52,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -202,7 +202,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 			// register all possible types
 			p.registerType(BoolType.INSTANCE);
-			p.registerType(FloatType.INSTANCE);
+			p.registerType(Float32.INSTANCE);
 			p.registerType(Int32.INSTANCE);
 			p.registerType(StringType.INSTANCE);
 			ClassType.all().forEach(p::registerType);

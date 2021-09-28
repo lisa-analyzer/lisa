@@ -27,6 +27,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -46,7 +47,7 @@ public class InferredTypesTest {
 	private static final InferredTypes bool_or_string = new InferredTypes(
 			TYPES.mkSet(List.of(BoolType.INSTANCE, StringType.INSTANCE)));
 	private static final InferredTypes integer = new InferredTypes(Int32.INSTANCE);
-	private static final InferredTypes floating = new InferredTypes(FloatType.INSTANCE);
+	private static final InferredTypes floating = new InferredTypes(Float32.INSTANCE);
 	private static final InferredTypes numeric;
 	private static final InferredTypes all;
 
@@ -54,7 +55,7 @@ public class InferredTypesTest {
 
 	static {
 		ExternalSet<Type> nums = TYPES.mkSingletonSet(Int32.INSTANCE);
-		nums.add(FloatType.INSTANCE);
+		nums.add(Float32.INSTANCE);
 		numeric = new InferredTypes(nums);
 		ExternalSet<Type> full = nums.copy();
 		full.add(StringType.INSTANCE);
