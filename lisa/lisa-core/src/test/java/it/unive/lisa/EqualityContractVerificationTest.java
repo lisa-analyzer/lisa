@@ -105,9 +105,9 @@ public class EqualityContractVerificationTest {
 		adj1.addNode(new Ret(cfg1, loc));
 		g1.addNode("a");
 	}
-	
+
 	private static Reflections mkReflections() {
-		return new Reflections(LiSA.class, IMPFrontend.class,  AnalysisException.class, new SubTypesScanner(false));
+		return new Reflections(LiSA.class, IMPFrontend.class, AnalysisException.class, new SubTypesScanner(false));
 	}
 
 	@AfterClass
@@ -126,7 +126,7 @@ public class EqualityContractVerificationTest {
 					&& definesEqualsHashcode(clazz))
 				notTested.add(clazz);
 		}
-		
+
 		System.out.println(tested);
 
 		if (!notTested.isEmpty())
