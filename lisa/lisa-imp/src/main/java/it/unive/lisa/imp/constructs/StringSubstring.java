@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -24,6 +23,7 @@ import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.StringType;
 
 /**
  * The native construct representing the substring operation. This construct can

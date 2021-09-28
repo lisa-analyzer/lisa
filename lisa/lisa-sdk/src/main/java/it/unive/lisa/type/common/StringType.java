@@ -1,22 +1,24 @@
-package it.unive.lisa.imp.types;
+package it.unive.lisa.type.common;
 
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
 /**
- * The {@link it.unive.lisa.type.StringType} of the IMP language. The only
- * singleton instance of this class can be retrieved trough field
- * {@link #INSTANCE}. Instances of this class are equal to all other classes
- * that implement the {@link it.unive.lisa.type.StringType} interface.
+ * An implementation of the {@link it.unive.lisa.type.StringType}. The only singleton
+ * instance of this class can be retrieved trough field {@link #INSTANCE}. <br>
+ * <br>
+ * Instances of this class are equal to all other classes that implement the
+ * {@link it.unive.lisa.type.StringType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringType implements it.unive.lisa.type.StringType {
+public final class StringType implements it.unive.lisa.type.StringType {
 
 	/**
-	 * The unique singleton instance of this type.
+	 * The singleton instance of this class.
 	 */
 	public static final StringType INSTANCE = new StringType();
 

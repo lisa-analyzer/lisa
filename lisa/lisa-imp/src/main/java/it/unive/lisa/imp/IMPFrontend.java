@@ -42,7 +42,6 @@ import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
-import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -55,6 +54,7 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.StringType;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a

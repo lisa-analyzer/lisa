@@ -1,9 +1,9 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
+import it.unive.lisa.type.common.StringType;
 
 /**
  * An IMP {@link Literal} representing a constant string value. Instances of
