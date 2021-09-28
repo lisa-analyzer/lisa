@@ -3,6 +3,14 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestValueDomain;
@@ -27,13 +35,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.types.IntType;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
+import it.unive.lisa.type.common.Int32;
 
 public class CheckToolWithAnalysisResultsTest {
 
@@ -85,7 +87,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
+		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
@@ -114,7 +116,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
+		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 	}

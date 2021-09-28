@@ -2,6 +2,12 @@ package it.unive.lisa.checks.syntactic;
 
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.HashSet;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -19,11 +25,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.types.IntType;
-import java.util.Collection;
-import java.util.HashSet;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
+import it.unive.lisa.type.common.Int32;
 
 public class CheckToolTest {
 
@@ -71,7 +73,7 @@ public class CheckToolTest {
 		exp.add(build(tool, unit, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
+		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
@@ -98,7 +100,7 @@ public class CheckToolTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, IntType.INSTANCE), "foo"));
+		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 	}

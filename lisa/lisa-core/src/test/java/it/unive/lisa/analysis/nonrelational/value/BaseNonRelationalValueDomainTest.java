@@ -4,6 +4,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.junit.Test;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,7 +21,6 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -26,12 +32,8 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.concurrent.atomic.AtomicReference;
-import org.junit.Test;
 
 public class BaseNonRelationalValueDomainTest {
 
@@ -120,13 +122,11 @@ public class BaseNonRelationalValueDomainTest {
 
 			@Override
 			public CodeLocation getLocation() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
 			@Override
 			public CFG getCFG() {
-				// TODO Auto-generated method stub
 				return null;
 			}
 
@@ -138,7 +138,7 @@ public class BaseNonRelationalValueDomainTest {
 		if (param == PushAny.class)
 			return (R) new PushAny(null, SyntheticLocation.INSTANCE);
 		if (param == Constant.class || param == ValueExpression.class)
-			return (R) new Constant(IntType.INSTANCE, 5, SyntheticLocation.INSTANCE);
+			return (R) new Constant(Int32.INSTANCE, 5, SyntheticLocation.INSTANCE);
 		if (param == Identifier.class)
 			return (R) new Variable(provideParam(mtd, ExternalSet.class), "foo", SyntheticLocation.INSTANCE);
 

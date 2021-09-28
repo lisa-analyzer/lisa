@@ -3,6 +3,19 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayAccessContext;
@@ -67,7 +80,6 @@ import it.unive.lisa.imp.expressions.IMPTrueLiteral;
 import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -96,18 +108,8 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -626,7 +628,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.BOOLEAN() != null)
 			return BoolType.INSTANCE;
 		else if (ctx.INT() != null)
-			return IntType.INSTANCE;
+			return Int32.INSTANCE;
 		else
 			return FloatType.INSTANCE;
 	}

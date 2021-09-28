@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
@@ -23,6 +22,7 @@ import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.type.common.Int32;
 
 /**
  * The native construct representing the length operation. This construct can be
@@ -39,7 +39,7 @@ public class StringLength extends NativeCFG {
 	 * @param stringUnit the unit where this construct is defined
 	 */
 	public StringLength(CodeLocation location, CompilationUnit stringUnit) {
-		super(new CFGDescriptor(location, stringUnit, true, "len", IntType.INSTANCE,
+		super(new CFGDescriptor(location, stringUnit, true, "len", Int32.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE)),
 				IMPStringLength.class);
 	}
@@ -47,7 +47,7 @@ public class StringLength extends NativeCFG {
 	/**
 	 * An expression modeling the string length operation. The type of the
 	 * operand must be {@link StringType}. The type of this expression is the
-	 * {@link IntType}.
+	 * {@link Int32}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -86,7 +86,7 @@ public class StringLength extends NativeCFG {
 		 */
 		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
-			super(cfg, new SourceCodeLocation(sourceFile, line, col), "len", IntType.INSTANCE, parameter);
+			super(cfg, new SourceCodeLocation(sourceFile, line, col), "len", Int32.INSTANCE, parameter);
 		}
 
 		/**
@@ -97,7 +97,7 @@ public class StringLength extends NativeCFG {
 		 * @param parameter the operand of this operation
 		 */
 		public IMPStringLength(CFG cfg, CodeLocation location, Expression parameter) {
-			super(cfg, location, "len", IntType.INSTANCE, parameter);
+			super(cfg, location, "len", Int32.INSTANCE, parameter);
 		}
 
 		@Override

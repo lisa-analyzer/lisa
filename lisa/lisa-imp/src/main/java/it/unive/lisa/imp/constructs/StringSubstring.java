@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.BoolType;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
@@ -24,6 +23,7 @@ import it.unive.lisa.program.cfg.statement.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.TernaryOperator;
+import it.unive.lisa.type.common.Int32;
 
 /**
  * The native construct representing the substring operation. This construct can
@@ -45,15 +45,15 @@ public class StringSubstring extends NativeCFG {
 	public StringSubstring(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "substring", BoolType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "start", IntType.INSTANCE),
-				new Parameter(location, "end", IntType.INSTANCE)),
+				new Parameter(location, "start", Int32.INSTANCE),
+				new Parameter(location, "end", Int32.INSTANCE)),
 				IMPStringSubstring.class);
 	}
 
 	/**
 	 * An expression modeling the string substring operation. The type of the
 	 * first operand must be {@link StringType}, while the other two operands'
-	 * types must be {@link IntType}. The type of this expression is the
+	 * types must be {@link Int32}. The type of this expression is the
 	 * {@link StringType}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

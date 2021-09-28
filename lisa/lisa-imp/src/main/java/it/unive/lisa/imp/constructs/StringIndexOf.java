@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
@@ -23,6 +22,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.type.common.Int32;
 
 /**
  * The native construct representing the indexOf operation. This construct can
@@ -49,7 +49,7 @@ public class StringIndexOf extends NativeCFG {
 	/**
 	 * An expression modeling the string indexOf operation. The type of both
 	 * operands must be {@link StringType}. The type of this expression is the
-	 * {@link IntType}.
+	 * {@link Int32}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
@@ -101,7 +101,7 @@ public class StringIndexOf extends NativeCFG {
 		 * @param right    the right-hand side of this operation
 		 */
 		public IMPStringIndexOf(CFG cfg, CodeLocation location, Expression left, Expression right) {
-			super(cfg, location, "indexOf", StringType.INSTANCE, left, right);
+			super(cfg, location, "indexOf", Int32.INSTANCE, left, right);
 		}
 
 		@Override

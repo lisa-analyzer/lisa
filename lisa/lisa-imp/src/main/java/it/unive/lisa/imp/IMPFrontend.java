@@ -3,6 +3,24 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.imp.antlr.IMPLexer;
 import it.unive.lisa.imp.antlr.IMPParser;
 import it.unive.lisa.imp.antlr.IMPParser.ConstructorDeclarationContext;
@@ -25,7 +43,6 @@ import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.imp.types.StringType;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -37,22 +54,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.type.Untyped;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import it.unive.lisa.type.common.Int32;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -201,7 +203,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			// register all possible types
 			p.registerType(BoolType.INSTANCE);
 			p.registerType(FloatType.INSTANCE);
-			p.registerType(IntType.INSTANCE);
+			p.registerType(Int32.INSTANCE);
 			p.registerType(StringType.INSTANCE);
 			ClassType.all().forEach(p::registerType);
 			ArrayType.all().forEach(p::registerType);

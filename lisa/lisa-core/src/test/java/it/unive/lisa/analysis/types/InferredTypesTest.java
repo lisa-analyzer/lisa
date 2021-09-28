@@ -4,6 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Test;
+
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
@@ -12,7 +21,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.types.BoolType;
-import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.TernaryOperator;
@@ -20,15 +28,9 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
 
 public class InferredTypesTest {
 
@@ -43,7 +45,7 @@ public class InferredTypesTest {
 	private static final InferredTypes string = new InferredTypes(StringType.INSTANCE);
 	private static final InferredTypes bool_or_string = new InferredTypes(
 			TYPES.mkSet(List.of(BoolType.INSTANCE, StringType.INSTANCE)));
-	private static final InferredTypes integer = new InferredTypes(IntType.INSTANCE);
+	private static final InferredTypes integer = new InferredTypes(Int32.INSTANCE);
 	private static final InferredTypes floating = new InferredTypes(FloatType.INSTANCE);
 	private static final InferredTypes numeric;
 	private static final InferredTypes all;
@@ -51,7 +53,7 @@ public class InferredTypesTest {
 	private static final Map<String, InferredTypes> combos = new HashMap<>();
 
 	static {
-		ExternalSet<Type> nums = TYPES.mkSingletonSet(IntType.INSTANCE);
+		ExternalSet<Type> nums = TYPES.mkSingletonSet(Int32.INSTANCE);
 		nums.add(FloatType.INSTANCE);
 		numeric = new InferredTypes(nums);
 		ExternalSet<Type> full = nums.copy();
@@ -393,7 +395,7 @@ public class InferredTypesTest {
 
 	@Test
 	public void testSatisfies() {
-		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)));
+		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, left, Satisfiability.SATISFIED);
 		satisfies(BinaryOperator.COMPARISON_NE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, integer, left, Satisfiability.SATISFIED);
@@ -411,7 +413,7 @@ public class InferredTypesTest {
 		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(IntType.INSTANCE, StringType.INSTANCE))));
+		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(Int32.INSTANCE, StringType.INSTANCE))));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.TYPE_CHECK, integer, right, Satisfiability.UNKNOWN);
@@ -420,7 +422,7 @@ public class InferredTypesTest {
 		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)),
+		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)),
 				new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)))));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);

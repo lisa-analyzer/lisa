@@ -1,13 +1,13 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
+import it.unive.lisa.type.common.Int32;
 
 /**
  * An IMP {@link Literal} representing a constant integer value. Instances of
- * this literal have a {@link IntType} static type.
+ * this literal have a {@link Int32} static type.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -23,6 +23,6 @@ public class IMPIntLiteral extends Literal {
 	 * @param value      the constant value represented by this literal
 	 */
 	public IMPIntLiteral(CFG cfg, String sourceFile, int line, int col, int value) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), value, IntType.INSTANCE);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), value, Int32.INSTANCE);
 	}
 }
