@@ -26,7 +26,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float64 implements NumericType {
+public final class Float64 implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.

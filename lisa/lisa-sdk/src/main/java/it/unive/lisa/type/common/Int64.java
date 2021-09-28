@@ -27,7 +27,7 @@ import it.unive.lisa.type.Untyped;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int64 implements NumericType {
+public final class Int64 implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.

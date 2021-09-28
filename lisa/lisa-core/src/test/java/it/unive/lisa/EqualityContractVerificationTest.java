@@ -16,6 +16,7 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.ContextSensitivityToken;
@@ -44,6 +45,7 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -103,10 +105,14 @@ public class EqualityContractVerificationTest {
 		adj1.addNode(new Ret(cfg1, loc));
 		g1.addNode("a");
 	}
+	
+	private static Reflections mkReflections() {
+		return new Reflections(LiSA.class, IMPFrontend.class,  AnalysisException.class, new SubTypesScanner(false));
+	}
 
 	@AfterClass
 	public static void ensureAllTested() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner(false));
+		Reflections scanner = mkReflections();
 		Set<String> all = scanner.getAllTypes();
 		Class<?> clazz;
 		Collection<Class<?>> notTested = new HashSet<>();
@@ -120,6 +126,8 @@ public class EqualityContractVerificationTest {
 					&& definesEqualsHashcode(clazz))
 				notTested.add(clazz);
 		}
+		
+		System.out.println(tested);
 
 		if (!notTested.isEmpty())
 			System.err.println("The following equals/hashcode implementations have not been tested: " + notTested);
@@ -213,7 +221,7 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testTypes() {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
 			// type token is the only one with an eclipse-like equals
 			verify(type, type == TypeTokenType.class);
@@ -221,7 +229,7 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testSymbolicExpressions() {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends SymbolicExpression> expr : scanner.getSubTypesOf(SymbolicExpression.class))
 			if (HeapLocation.class.isAssignableFrom(expr))
 				// heap locations use only their name and weakness for equality
@@ -240,19 +248,23 @@ public class EqualityContractVerificationTest {
 		// suppress nullity: the verifier will try to pass in a code location
 		// with null fields (not possible) and this would cause warnings
 
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
 			// the ignored fields are either mutable or auxiliary
 			if (Expression.class.isAssignableFrom(st))
-				verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
-						"metaVariables"), Warning.NULL_FIELDS);
+				if (PluggableStatement.class.isAssignableFrom(st))
+					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
+							"metaVariables", "original"), Warning.NULL_FIELDS);
+				else
+					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
+							"metaVariables"), Warning.NULL_FIELDS);
 			else
 				verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset"), Warning.NULL_FIELDS);
 	}
 
 	@Test
 	public void testEdges() {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends Edge> edge : scanner.getSubTypesOf(Edge.class))
 			verify(edge);
 	}
@@ -263,7 +275,7 @@ public class EqualityContractVerificationTest {
 		verify(Annotations.class);
 		verify(AnnotationMember.class);
 
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends AnnotationValue> value : scanner.getSubTypesOf(AnnotationValue.class))
 			verify(value);
 		for (Class<? extends AnnotationMatcher> matcher : scanner.getSubTypesOf(AnnotationMatcher.class))
@@ -272,14 +284,14 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testRepresentations() {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends DomainRepresentation> repr : scanner.getSubTypesOf(DomainRepresentation.class))
 			verify(repr);
 	}
 
 	@Test
 	public void testDomainsAndLattices() {
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		Collection<Class<?>> testable = new HashSet<>();
 		testable.addAll(scanner.getSubTypesOf(Lattice.class));
 		testable.addAll(scanner.getSubTypesOf(SemanticDomain.class));
@@ -312,7 +324,7 @@ public class EqualityContractVerificationTest {
 		// serialization requires non final fields
 		verify(JsonWarning.class, Warning.NONFINAL_FIELDS);
 		verify(it.unive.lisa.checks.warnings.Warning.class);
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends it.unive.lisa.checks.warnings.Warning> warning : scanner
 				.getSubTypesOf(it.unive.lisa.checks.warnings.Warning.class))
 			verify(warning);
@@ -324,7 +336,7 @@ public class EqualityContractVerificationTest {
 		verify(CallGraphNode.class, verifier -> verifier.withIgnoredFields("graph"));
 		verify(CFGResults.class, Warning.NONFINAL_FIELDS);
 		verify(FixpointResults.class, Warning.NONFINAL_FIELDS);
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends ContextSensitivityToken> token : scanner.getSubTypesOf(ContextSensitivityToken.class))
 			if (token == ContextInsensitiveToken.class)
 				verify(token, Warning.INHERITED_DIRECTLY_FROM_OBJECT);
@@ -340,7 +352,7 @@ public class EqualityContractVerificationTest {
 		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS);
 		// scope bounds are mutable
 		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS);
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = mkReflections();
 		for (Class<? extends CodeLocation> loc : scanner.getSubTypesOf(CodeLocation.class))
 			if (loc == SyntheticLocation.class)
 				// singleton instance
