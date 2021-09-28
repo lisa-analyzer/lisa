@@ -1,9 +1,9 @@
 package it.unive.lisa.imp.expressions;
 
-import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Literal;
+import it.unive.lisa.type.common.BoolType;
 
 /**
  * The IMP {@link Literal} representing the {@code true} boolean value.

@@ -15,7 +15,6 @@ import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.types.BoolType;
 import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
@@ -30,6 +29,7 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 

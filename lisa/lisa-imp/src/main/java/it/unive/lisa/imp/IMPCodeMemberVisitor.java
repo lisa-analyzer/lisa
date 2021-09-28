@@ -77,7 +77,6 @@ import it.unive.lisa.imp.expressions.IMPOr;
 import it.unive.lisa.imp.expressions.IMPStringLiteral;
 import it.unive.lisa.imp.expressions.IMPSub;
 import it.unive.lisa.imp.expressions.IMPTrueLiteral;
-import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.FloatType;
 import it.unive.lisa.program.Global;
@@ -108,6 +107,7 @@ import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 

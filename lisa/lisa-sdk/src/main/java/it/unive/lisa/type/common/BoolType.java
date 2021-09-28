@@ -1,14 +1,18 @@
-package it.unive.lisa.symbolic.types;
+package it.unive.lisa.type.common;
+
+import java.util.Collection;
+import java.util.Collections;
 
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
- * An internal implementation of the {@link BooleanType} interface that can be
- * used by domains that need a concrete instance of that interface.
+ * An internal implementation of the {@link BooleanType}. The only singleton
+ * instance of this class can be retrieved trough field {@link #INSTANCE}. <br>
+ * <br>
+ * Instances of this class are equal to all other classes that implement the
+ * {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
