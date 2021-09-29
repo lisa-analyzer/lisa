@@ -56,13 +56,8 @@ import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAdd;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
-import it.unive.lisa.imp.expressions.IMPDiv;
-import it.unive.lisa.imp.expressions.IMPMod;
-import it.unive.lisa.imp.expressions.IMPMul;
-import it.unive.lisa.imp.expressions.IMPNeg;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
-import it.unive.lisa.imp.expressions.IMPSub;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -104,6 +99,11 @@ import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.program.cfg.statement.logic.And;
 import it.unive.lisa.program.cfg.statement.logic.Not;
 import it.unive.lisa.program.cfg.statement.logic.Or;
+import it.unive.lisa.program.cfg.statement.numeric.Division;
+import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
+import it.unive.lisa.program.cfg.statement.numeric.Negation;
+import it.unive.lisa.program.cfg.statement.numeric.Remainder;
+import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
@@ -496,18 +496,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			if (ctx.NOT() != null)
 				return new Not(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 			else
-				return new IMPNeg(cfg, file, line, col, visitExpression(ctx.nested));
+				return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
-				return new IMPMul(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.DIV() != null)
-				return new IMPDiv(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.MOD() != null)
-				return new IMPMod(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.ADD() != null)
 				return new IMPAdd(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.SUB() != null)
-				return new IMPSub(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.GT() != null)
 				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));

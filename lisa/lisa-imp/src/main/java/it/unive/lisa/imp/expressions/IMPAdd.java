@@ -18,8 +18,10 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
- * An expression modeling the addition operation ({@code +}). If both operands'
- * dynamic type (according to {@link SymbolicExpression#getDynamicType()}) is a
+ * An expression modeling the plus operation ({@code +}) that, in some
+ * languages, represents either the string concatenation or the numeric addition
+ * depending on the types of its operands. If both operands' dynamic type
+ * (according to {@link SymbolicExpression#getDynamicType()}) is a
  * {@link it.unive.lisa.type.StringType} (according to
  * {@link Type#isStringType()}), then this operation translates to a string
  * concatenation of its operands, and its type is {@link StringType}. Otherwise,
