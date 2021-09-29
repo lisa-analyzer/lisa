@@ -1,9 +1,11 @@
 package it.unive.lisa.util.file;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,8 +52,9 @@ public class FileManagerTest {
 	@Test
 	public void testCreateFile() {
 		FileManager manager = new FileManager(TESTDIR);
+		String name = "foo.txt";
 		try {
-			manager.mkOutputFile("foo.txt", w -> w.write("foo"));
+			manager.mkOutputFile(name, w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -61,16 +64,20 @@ public class FileManagerTest {
 		if (!dir.exists())
 			fail("The working directory has not been created");
 
-		File file = new File(dir, "foo.txt");
+		File file = new File(dir, name);
 		if (!file.exists())
 			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(), name);
 	}
 
 	@Test
 	public void testCreateFileWithBom() {
 		FileManager manager = new FileManager(TESTDIR);
+		String name = "foo.txt";
 		try {
-			manager.mkOutputFile("foo.txt", true, w -> w.write("foo"));
+			manager.mkOutputFile(name, true, w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -80,16 +87,19 @@ public class FileManagerTest {
 		if (!dir.exists())
 			fail("The working directory has not been created");
 
-		File file = new File(dir, "foo.txt");
+		File file = new File(dir, name);
 		if (!file.exists())
 			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(), name);
 	}
 
 	@Test
 	public void testCreateFileInSubfolder() {
 		FileManager manager = new FileManager(TESTDIR);
 		try {
-			manager.mkOutputFile("sub/foo.txt", w -> w.write("foo"));
+			manager.mkOutputFile("sub", "foo.txt", w -> w.write("foo"));
 		} catch (IOException e) {
 			e.printStackTrace();
 			fail("The file has not been created");
@@ -106,6 +116,10 @@ public class FileManagerTest {
 		File file = new File(sub, "foo.txt");
 		if (!file.exists())
 			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+				"sub" + File.separatorChar + "foo.txt");
 	}
 
 	@Test
@@ -125,5 +139,55 @@ public class FileManagerTest {
 		File file = new File(dir, "foo()__bar.jar.dot");
 		if (!file.exists())
 			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+				file.getName());
+	}
+
+	@Test
+	public void testFileNameWithUnixSlashes() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkOutputFile("foo/bar.txt", w -> w.write("foo"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		File dir = new File(TESTDIR);
+		if (!dir.exists())
+			fail("The working directory has not been created");
+
+		File file = new File(dir, "foo_bar.txt");
+		if (!file.exists())
+			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+				file.getName());
+	}
+
+	@Test
+	public void testFileNameWithWindowsSlashes() {
+		FileManager manager = new FileManager(TESTDIR);
+		try {
+			manager.mkOutputFile("foo\\bar.txt", w -> w.write("foo"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("The file has not been created");
+		}
+
+		File dir = new File(TESTDIR);
+		if (!dir.exists())
+			fail("The working directory has not been created");
+
+		File file = new File(dir, "foo_bar.txt");
+		if (!file.exists())
+			fail("The file has not been created");
+
+		assertEquals("FileManager did not track the correct number of files", manager.createdFiles().size(), 1);
+		assertEquals("FileManager did not track the created file", manager.createdFiles().iterator().next(),
+				file.getName());
 	}
 }
