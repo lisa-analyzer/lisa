@@ -17,9 +17,7 @@ import it.unive.lisa.type.NullType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NullLiteral extends Literal {
-
-	private static final Object NULL_CONST = new Object();
+public class NullLiteral extends Literal<Object> {
 
 	/**
 	 * Builds the null literal, happening at the given location in the program.
@@ -30,12 +28,7 @@ public class NullLiteral extends Literal {
 	 *                     source file. If unknown, use {@code null}
 	 */
 	public NullLiteral(CFG cfg, CodeLocation location) {
-		super(cfg, location, NULL_CONST, NullType.INSTANCE);
-	}
-
-	@Override
-	public String toString() {
-		return "null";
+		super(cfg, location, null, NullType.INSTANCE);
 	}
 
 	@Override

@@ -15,19 +15,20 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A literal, representing a constant value.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the type of constant represented by this literal
  */
-public class Literal extends Expression {
+public abstract class Literal<T> extends Expression {
 
 	/**
 	 * The value of this literal
 	 */
-	private final Object value;
+	private final T value;
 
 	/**
 	 * Builds a typed literal, consisting of a constant value, happening at the
@@ -39,9 +40,8 @@ public class Literal extends Expression {
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */
-	public Literal(CFG cfg, CodeLocation location, Object value, Type staticType) {
+	public Literal(CFG cfg, CodeLocation location, T value, Type staticType) {
 		super(cfg, location, staticType);
-		Objects.requireNonNull(value, "The value of a literal cannot be null");
 		this.value = value;
 	}
 
@@ -50,7 +50,7 @@ public class Literal extends Expression {
 	 * 
 	 * @return the value of this literal
 	 */
-	public Object getValue() {
+	public T getValue() {
 		return value;
 	}
 
@@ -75,7 +75,7 @@ public class Literal extends Expression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Literal other = (Literal) obj;
+		Literal<?> other = (Literal<?>) obj;
 		if (value == null) {
 			if (other.value != null)
 				return false;

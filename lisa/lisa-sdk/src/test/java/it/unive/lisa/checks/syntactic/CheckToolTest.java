@@ -18,8 +18,7 @@ import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.literal.Literal;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.collections4.CollectionUtils;
@@ -71,7 +70,7 @@ public class CheckToolTest {
 		exp.add(build(tool, unit, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
+		exp.add(build(tool, new Int32Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
@@ -98,7 +97,7 @@ public class CheckToolTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5, Int32.INSTANCE), "foo"));
+		exp.add(build(tool, new Int32Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5), "foo"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 	}

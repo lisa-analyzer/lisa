@@ -26,9 +26,8 @@ import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
-import it.unive.lisa.program.cfg.statement.literal.Literal;
+import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.type.common.Int32;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -91,7 +90,7 @@ public class ConditionalsExtractionTest {
 	public void testSimpleIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleIf"));
-		Literal constant = new Literal(cfg, unknown, 5, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -121,7 +120,7 @@ public class ConditionalsExtractionTest {
 	public void testEmptyIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
-		Literal constant = new Literal(cfg, unknown, 5, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
@@ -143,7 +142,7 @@ public class ConditionalsExtractionTest {
 	public void testIfWithEmptyBranch() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyBranch"));
-		Literal constant = new Literal(cfg, unknown, 5, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -173,7 +172,7 @@ public class ConditionalsExtractionTest {
 	public void testAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "asymmetricIf"));
-		Literal constant = new Literal(cfg, unknown, 10, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -207,7 +206,7 @@ public class ConditionalsExtractionTest {
 	public void testBigAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "bigAsymmetricIf"));
-		Literal constant = new Literal(cfg, unknown, 15, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -253,7 +252,7 @@ public class ConditionalsExtractionTest {
 	public void testSimpleLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
-		Literal constant = new Literal(cfg, unknown, 5, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -283,7 +282,7 @@ public class ConditionalsExtractionTest {
 	public void testEmptyLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyLoop"));
-		Literal constant = new Literal(cfg, unknown, 5, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -312,7 +311,7 @@ public class ConditionalsExtractionTest {
 	public void testLongLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "longLoop"));
-		Literal constant = new Literal(cfg, unknown, 15, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
 		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
@@ -358,8 +357,8 @@ public class ConditionalsExtractionTest {
 	public void testNestedConditionals() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "nested"));
-		Literal constant = new Literal(cfg, unknown, 10, Int32.INSTANCE);
-		Literal constant1 = new Literal(cfg, unknown, 100, Int32.INSTANCE);
+		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
+		Int32Literal constant1 = new Int32Literal(cfg, unknown, 100);
 		IMPNotEqual loop_condition = new IMPNotEqual(cfg, unknown, constant, constant);
 		Assignment loop_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a1"),

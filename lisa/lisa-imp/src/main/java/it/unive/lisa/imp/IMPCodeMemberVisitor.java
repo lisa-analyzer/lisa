@@ -46,11 +46,8 @@ import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.imp.expressions.IMPDiv;
 import it.unive.lisa.imp.expressions.IMPEqual;
-import it.unive.lisa.imp.expressions.IMPFalseLiteral;
-import it.unive.lisa.imp.expressions.IMPFloatLiteral;
 import it.unive.lisa.imp.expressions.IMPGreaterOrEqual;
 import it.unive.lisa.imp.expressions.IMPGreaterThan;
-import it.unive.lisa.imp.expressions.IMPIntLiteral;
 import it.unive.lisa.imp.expressions.IMPLessOrEqual;
 import it.unive.lisa.imp.expressions.IMPLessThan;
 import it.unive.lisa.imp.expressions.IMPMod;
@@ -61,9 +58,7 @@ import it.unive.lisa.imp.expressions.IMPNewObj;
 import it.unive.lisa.imp.expressions.IMPNot;
 import it.unive.lisa.imp.expressions.IMPNotEqual;
 import it.unive.lisa.imp.expressions.IMPOr;
-import it.unive.lisa.imp.expressions.IMPStringLiteral;
 import it.unive.lisa.imp.expressions.IMPSub;
-import it.unive.lisa.imp.expressions.IMPTrueLiteral;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -89,8 +84,13 @@ import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.global.AccessInstanceGlobal;
+import it.unive.lisa.program.cfg.statement.literal.FalseLiteral;
+import it.unive.lisa.program.cfg.statement.literal.Float32Literal;
+import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.program.cfg.statement.literal.Literal;
 import it.unive.lisa.program.cfg.statement.literal.NullLiteral;
+import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
+import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
@@ -378,7 +378,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (cond != null)
 			condition = visitExpression(cond);
 		else
-			condition = new IMPTrueLiteral(cfg, file, getLine(ctx), getCol(ctx));
+			condition = new TrueLiteral(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		loop.addNode(condition);
 		if (first == null)
 			first = condition;
@@ -476,7 +476,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.IDENTIFIER() != null)
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
-			return new IMPIntLiteral(cfg, file, getLine(ctx), getCol(ctx),
+			return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 	}
 
@@ -690,31 +690,31 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Literal visitLiteral(LiteralContext ctx) {
+	public Literal<?> visitLiteral(LiteralContext ctx) {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		if (ctx.LITERAL_NULL() != null)
 			return new NullLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_BOOL() != null)
 			if (ctx.LITERAL_BOOL().getText().equals("true"))
-				return new IMPTrueLiteral(cfg, file, line, col);
+				return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
 			else
-				return new IMPFalseLiteral(cfg, file, line, col);
+				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_STRING() != null)
-			return new IMPStringLiteral(cfg, file, line, col, ctx.LITERAL_STRING().getText());
+			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
-				return new IMPFloatLiteral(cfg, file, line, col,
+				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 			else
-				return new IMPFloatLiteral(cfg, file, line, col,
+				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
-				return new IMPIntLiteral(cfg, file, line, col,
+				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 			else
-				return new IMPIntLiteral(cfg, file, line, col,
+				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
