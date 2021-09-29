@@ -15,7 +15,8 @@ import java.lang.reflect.Method;
  * results. <br>
  * <br>
  * NativeCFGs do not contain code, but they can be rewritten to a
- * {@link NativeCall} providing their semantics through
+ * {@link NativeCall} (that <b>must</b> implement {@link PluggableStatement})
+ * providing their semantics through
  * {@link #rewrite(Statement, Expression...)}.<br>
  * <br>
  * Note that this class does not implement {@link #equals(Object)} nor

@@ -127,8 +127,6 @@ public class EqualityContractVerificationTest {
 				notTested.add(clazz);
 		}
 
-		System.out.println(tested);
-
 		if (!notTested.isEmpty())
 			System.err.println("The following equals/hashcode implementations have not been tested: " + notTested);
 
@@ -252,9 +250,11 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
 			// the ignored fields are either mutable or auxiliary
 			if (Expression.class.isAssignableFrom(st))
-				if (PluggableStatement.class.isAssignableFrom(st))
+				if (PluggableStatement.class.isAssignableFrom(st)
+						// string statements are already pluggable-friendly
+						|| st.getPackageName().equals("it.unive.lisa.program.cfg.statement.string"))
 					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
-							"metaVariables", "original"), Warning.NULL_FIELDS);
+							"metaVariables", "originating"), Warning.NULL_FIELDS);
 				else
 					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
 							"metaVariables"), Warning.NULL_FIELDS);

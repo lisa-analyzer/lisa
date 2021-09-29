@@ -1,11 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -16,11 +10,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
-import it.unive.lisa.program.cfg.statement.call.TernaryNativeCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
+import it.unive.lisa.program.cfg.statement.string.Substring;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
@@ -58,7 +48,7 @@ public class StringSubstring extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringSubstring extends TernaryNativeCall implements PluggableStatement {
+	public static class IMPStringSubstring extends Substring implements PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -70,15 +60,13 @@ public class StringSubstring extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringSubstring build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringSubstring(cfg, location, params[0], params[1], params[2]);
 		}
 
-		private Statement original;
-
 		@Override
 		public void setOriginatingStatement(Statement st) {
-			original = st;
+			originating = st;
 		}
 
 		/**
@@ -109,27 +97,7 @@ public class StringSubstring extends NativeCFG {
 		 */
 		public IMPStringSubstring(CFG cfg, CodeLocation location, Expression left, Expression middle,
 				Expression right) {
-			super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> ternarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
-						SymbolicExpression leftExp,
-						AnalysisState<A, H, V> middleState, SymbolicExpression middleExp,
-						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
-			// we allow untyped for the type inference phase
-			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-			if (!middleExp.getDynamicType().isNumericType() && !middleExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-			if (!rightExp.getDynamicType().isNumericType() && !rightExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-
-			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
-					TernaryOperator.STRING_SUBSTRING, getLocation()), original);
+			super(cfg, location, left, middle, right);
 		}
 	}
 }

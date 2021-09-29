@@ -1,11 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -16,11 +10,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.program.cfg.statement.string.EndsWith;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.StringType;
 
@@ -54,7 +44,7 @@ public class StringEndsWith extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringEndsWith extends BinaryNativeCall implements PluggableStatement {
+	public static class IMPStringEndsWith extends EndsWith implements PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -66,15 +56,13 @@ public class StringEndsWith extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringEndsWith build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringEndsWith(cfg, location, params[0], params[1]);
 		}
 
-		private Statement original;
-
 		@Override
 		public void setOriginatingStatement(Statement st) {
-			original = st;
+			originating = st;
 		}
 
 		/**
@@ -90,7 +78,7 @@ public class StringEndsWith extends NativeCFG {
 		 */
 		public IMPStringEndsWith(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression right) {
-			super(cfg, new SourceCodeLocation(sourceFile, line, col), "endsWith", BoolType.INSTANCE, left, right);
+			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
 		}
 
 		/**
@@ -102,26 +90,7 @@ public class StringEndsWith extends NativeCFG {
 		 * @param right    the right-hand side of this operation
 		 */
 		public IMPStringEndsWith(CFG cfg, CodeLocation location, Expression left, Expression right) {
-			super(cfg, location, "endsWith", BoolType.INSTANCE, left, right);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
-						SymbolicExpression leftExp,
-						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
-			// we allow untyped for the type inference phase
-			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-			if (!rightExp.getDynamicType().isStringType() && !rightExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-
-			return rightState.smallStepSemantics(
-					new BinaryExpression(getRuntimeTypes(), leftExp, rightExp, BinaryOperator.STRING_ENDS_WITH,
-							getLocation()),
-					original);
+			super(cfg, location, left, right);
 		}
 	}
 }

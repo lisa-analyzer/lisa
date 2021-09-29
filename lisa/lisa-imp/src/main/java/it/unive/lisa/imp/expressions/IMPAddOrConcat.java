@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -31,7 +32,7 @@ import it.unive.lisa.type.common.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAdd extends BinaryNativeCall {
+public class IMPAddOrConcat extends BinaryNativeCall {
 
 	/**
 	 * Builds the addition.
@@ -43,7 +44,7 @@ public class IMPAdd extends BinaryNativeCall {
 	 * @param left       the left-hand side of this operation
 	 * @param right      the right-hand side of this operation
 	 */
-	public IMPAdd(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
+	public IMPAddOrConcat(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "+", left, right);
 	}
 
@@ -51,23 +52,55 @@ public class IMPAdd extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> leftState,
 					SymbolicExpression left,
 					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
-
 					throws SemanticException {
+		AnalysisState<A, H, V> result = entryState.bottom();
 		BinaryOperator op;
-		if (left.getDynamicType().isStringType() && right.getDynamicType().isStringType())
-			op = BinaryOperator.STRING_CONCAT;
-		else if ((left.getDynamicType().isNumericType() || left.getDynamicType().isUntyped())
-				&& (right.getDynamicType().isNumericType() || right.getDynamicType().isUntyped()))
-			op = BinaryOperator.NUMERIC_ADD;
-		else
-			return entryState.bottom();
 
-		return rightState
-				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right, op, getLocation()), this);
+		for (Type tleft : left.getTypes())
+			for (Type tright : right.getTypes()) {
+				if (tleft.isStringType())
+					if (tright.isStringType() || tright.isUntyped())
+						op = BinaryOperator.STRING_CONCAT;
+					else
+						op = null;
+				else if (tleft.isNumericType())
+					if (tright.isNumericType() || tright.isUntyped())
+						op = BinaryOperator.NUMERIC_ADD;
+					else
+						op = null;
+				else if (tleft.isUntyped())
+					if (tright.isStringType())
+						op = BinaryOperator.STRING_CONCAT;
+					else if (tright.isNumericType() || tright.isUntyped())
+						// arbitrary choice: if both are untyped, we consider it
+						// as a numeric sum
+						op = BinaryOperator.NUMERIC_ADD;
+					else
+						op = null;
+				else
+					op = null;
+
+				if (op == null)
+					continue;
+
+				result = result.lub(rightState.smallStepSemantics(
+						new BinaryExpression(
+								op == BinaryOperator.STRING_CONCAT
+										? Caches.types().mkSingletonSet(StringType.INSTANCE)
+										: getRuntimeTypes(),
+								left,
+								right,
+								op,
+								getLocation()),
+						this));
+			}
+
+		return result;
 	}
 }

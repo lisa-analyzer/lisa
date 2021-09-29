@@ -1,11 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -16,11 +10,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
-import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.program.cfg.statement.string.Length;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -51,7 +41,7 @@ public class StringLength extends NativeCFG {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringLength extends UnaryNativeCall implements PluggableStatement {
+	public static class IMPStringLength extends Length implements PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -63,15 +53,13 @@ public class StringLength extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringLength build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringLength(cfg, location, params[0]);
 		}
 
-		private Statement original;
-
 		@Override
 		public void setOriginatingStatement(Statement st) {
-			original = st;
+			originating = st;
 		}
 
 		/**
@@ -86,7 +74,7 @@ public class StringLength extends NativeCFG {
 		 */
 		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
-			super(cfg, new SourceCodeLocation(sourceFile, line, col), "len", Int32.INSTANCE, parameter);
+			this(cfg, new SourceCodeLocation(sourceFile, line, col), parameter);
 		}
 
 		/**
@@ -97,26 +85,7 @@ public class StringLength extends NativeCFG {
 		 * @param parameter the operand of this operation
 		 */
 		public IMPStringLength(CFG cfg, CodeLocation location, Expression parameter) {
-			super(cfg, location, "len", Int32.INSTANCE, parameter);
+			super(cfg, location, parameter);
 		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> exprState,
-						SymbolicExpression expr)
-						throws SemanticException {
-			// we allow untyped for the type inference phase
-			if (!expr.getDynamicType().isStringType() && !expr.getDynamicType().isUntyped())
-				return entryState.bottom();
-
-			return exprState
-					.smallStepSemantics(
-							new UnaryExpression(getRuntimeTypes(), expr, UnaryOperator.STRING_LENGTH, getLocation()),
-							original);
-		}
-
 	}
-
 }
