@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.statement;
+package it.unive.lisa.program.cfg.statement.global;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -7,28 +7,27 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 
 /**
- * An access to an instance {@link Global} of a {@link CompilationUnit}.
+ * An access to a {@link Global} of a {@link Unit}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstanceGlobal extends Expression {
+public class AccessGlobal extends Expression {
 
 	/**
 	 * The receiver of the access
 	 */
-	private final Expression receiver;
+	private final Unit container;
 
 	/**
 	 * The global being accessed
@@ -39,17 +38,16 @@ public class AccessInstanceGlobal extends Expression {
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
-	 * @param cfg      the cfg that this expression belongs to
-	 * @param location the location where the expression is defined within the
-	 *                     source file, if unknown use {@code null}
-	 * @param receiver the expression that determines the accessed instance
-	 * @param target   the accessed global
+	 * @param cfg       the cfg that this expression belongs to
+	 * @param location  the location where the expression is defined within the
+	 *                      source file. If unknown, use {@code null}
+	 * @param container the unit containing the accessed global
+	 * @param target    the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessGlobal(CFG cfg, CodeLocation location, Unit container, Global target) {
 		super(cfg, location, target.getStaticType());
-		this.receiver = receiver;
+		this.container = container;
 		this.target = target;
-		receiver.setParentStatement(this);
 	}
 
 	@Override
@@ -66,7 +64,7 @@ public class AccessInstanceGlobal extends Expression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((receiver == null) ? 0 : receiver.hashCode());
+		result = prime * result + ((container == null) ? 0 : container.hashCode());
 		result = prime * result + ((target == null) ? 0 : target.hashCode());
 		return result;
 	}
@@ -79,11 +77,11 @@ public class AccessInstanceGlobal extends Expression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AccessInstanceGlobal other = (AccessInstanceGlobal) obj;
-		if (receiver == null) {
-			if (other.receiver != null)
+		AccessGlobal other = (AccessGlobal) obj;
+		if (container == null) {
+			if (other.container != null)
 				return false;
-		} else if (!receiver.equals(other.receiver))
+		} else if (!container.equals(other.container))
 			return false;
 		if (target == null) {
 			if (other.target != null)
@@ -95,7 +93,7 @@ public class AccessInstanceGlobal extends Expression {
 
 	@Override
 	public String toString() {
-		return receiver + "::" + target.getName();
+		return container.getName() + "::" + target.getName();
 	}
 
 	@Override
@@ -104,21 +102,9 @@ public class AccessInstanceGlobal extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
-		expressions.put(receiver, rec);
-
-		AnalysisState<A, H, V> result = entryState.bottom();
-		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations(), target.getLocation());
-		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
-					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v,
-							getLocation()),
-					this);
-			result = result.lub(tmp);
-		}
-
-		if (!receiver.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(receiver.getMetaVariables());
-		return result;
+		// unit globals are unique, we can directly access those
+		return entryState.smallStepSemantics(
+				new Variable(getRuntimeTypes(), toString(), target.getAnnotations(), getLocation()),
+				this);
 	}
 }

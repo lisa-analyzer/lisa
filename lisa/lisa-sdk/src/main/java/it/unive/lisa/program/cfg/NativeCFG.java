@@ -2,9 +2,9 @@ package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 

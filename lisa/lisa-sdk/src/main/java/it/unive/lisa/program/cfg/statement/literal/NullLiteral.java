@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.statement;
+package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;

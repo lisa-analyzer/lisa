@@ -46,7 +46,7 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.UnresolvedCall.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall.ResolutionStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;

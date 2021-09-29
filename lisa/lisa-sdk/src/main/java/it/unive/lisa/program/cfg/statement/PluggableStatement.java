@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.statement.call.NativeCall;
 
 /**
  * A {@link Statement} that can be dynamically plugged into a {@link CFG} in
