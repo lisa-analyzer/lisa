@@ -6,10 +6,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
-import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.checks.ChecksExecutor;
@@ -48,16 +45,25 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <A> the type of {@link AbstractState} contained into the analysis
- *                state that will be used in the fixpoints
- * @param <H> the type of {@link HeapDomain} contained into the computed
- *                abstract state that will be used in the fixpoints
- * @param <V> the type of {@link ValueDomain} contained into the computed
- *                abstract state that will be used in the fixpoints
+ * @param <A>  the type of {@link AbstractState} contained into the analysis
+ *                 state that will be used in the analysis fixpoint
+ * @param <H>  the type of {@link HeapDomain} contained into the abstract state
+ *                 that will be used in the analysis fixpoint
+ * @param <V>  the type of {@link ValueDomain} contained into the abstract state
+ *                 that will be used in the analysis fixpoint
+ * @param <T>  the type of {@link AbstractState} contained into the analysis
+ *                 state that will be used in the type inference fixpoint
+ * @param <HT> the type of {@link HeapDomain} contained into the abstract state
+ *                 that will be used in the type inference fixpoint
+ * @param <VT> the type of {@link ValueDomain} contained into the abstract state
+ *                 that will be used in the type inference fixpoint
  */
 public class LiSARunner<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> {
+		V extends ValueDomain<V>,
+		T extends AbstractState<T, HT, VT>,
+		HT extends HeapDomain<HT>,
+		VT extends ValueDomain<VT>> {
 
 	private static final String FIXPOINT_EXCEPTION_MESSAGE = "Exception during fixpoint computation";
 
@@ -71,20 +77,30 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 
 	private final A state;
 
+	private final T typeState;
+
+	private final Function<T, ExternalSet<Type>> typeExtractor;
+
 	/**
 	 * Builds the runner.
 	 * 
-	 * @param conf      the configuration of the analysis
-	 * @param interproc the interprocedural analysis to use
-	 * @param callGraph the call graph to use
-	 * @param state     the abstract state to use
+	 * @param conf          the configuration of the analysis
+	 * @param interproc     the interprocedural analysis to use
+	 * @param callGraph     the call graph to use
+	 * @param state         the abstract state to use for the analysis
+	 * @param typeState     the abstract state to use for type inference
+	 * @param typeExtractor the abstract state to use the function that can
+	 *                          extract runtime types from {@code typeState}
+	 *                          instances
 	 */
 	LiSARunner(LiSAConfiguration conf, InterproceduralAnalysis<A, H, V> interproc, CallGraph callGraph,
-			A state) {
+			A state, T typeState, Function<T, ExternalSet<Type>> typeExtractor) {
 		this.conf = conf;
 		this.interproc = interproc;
 		this.callGraph = callGraph;
 		this.state = state;
+		this.typeState = typeState;
+		this.typeExtractor = typeExtractor;
 	}
 
 	/**
@@ -173,14 +189,9 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 
 	@SuppressWarnings("unchecked")
 	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs) {
-		SimpleAbstractState<H, InferenceSystem<InferredTypes>> typesState;
-		InterproceduralAnalysis<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-				InferenceSystem<InferredTypes>> typesInterproc;
+		T typesState = this.typeState.top();
+		InterproceduralAnalysis<T, HT, VT> typesInterproc;
 		try {
-			// type inference is executed with the simplest abstract state
-			InferenceSystem<InferredTypes> types = new InferenceSystem<>(new InferredTypes());
-			HeapDomain<?> heap = state == null ? LiSAFactory.getDefaultFor(HeapDomain.class) : state.getHeapState();
-			typesState = getInstance(SimpleAbstractState.class, heap, types).top();
 			typesInterproc = getInstance(interproc.getClass());
 			typesInterproc.init(program, callGraph);
 		} catch (AnalysisSetupException | InterproceduralAnalysisException e) {
@@ -202,18 +213,15 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 				? "Dumping type analysis and propagating it to cfgs"
 				: "Propagating type information to cfgs";
 		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, message, "cfgs")) {
-			Collection<CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-					InferenceSystem<InferredTypes>>> results = typesInterproc.getAnalysisResultsOf(cfg);
+			Collection<CFGWithAnalysisResults<T, HT, VT>> results = typesInterproc.getAnalysisResultsOf(cfg);
 			if (results.isEmpty()) {
 				LOG.warn("No type information computed for '{}': it is unreachable", cfg);
 				continue;
 			}
 
-			CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-					InferenceSystem<InferredTypes>> result = null;
+			CFGWithAnalysisResults<T, HT, VT> result = null;
 			try {
-				for (CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-						InferenceSystem<InferredTypes>> res : results)
+				for (CFGWithAnalysisResults<T, HT, VT> res : results)
 					if (result == null)
 						result = res;
 					else
@@ -222,36 +230,33 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 				throw new AnalysisExecutionException("Unable to compute type information for " + cfg, e);
 			}
 
-			cfg.accept(new TypesPropagator<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H>(), result);
+			cfg.accept(new TypesPropagator(), result);
 
-			CFGWithAnalysisResults<SimpleAbstractState<H, InferenceSystem<InferredTypes>>, H,
-					InferenceSystem<InferredTypes>> r = result;
+			CFGWithAnalysisResults<T, HT, VT> r = result;
 			if (conf.isDumpTypeInference())
 				dumpCFG(fileManager, "typing___", r, st -> r.getAnalysisStateAfter(st).toString());
 		}
 	}
 
-	private static class TypesPropagator<A extends AbstractState<A, H, InferenceSystem<InferredTypes>>,
-			H extends HeapDomain<H>>
+	private class TypesPropagator
 			implements
-			GraphVisitor<CFG, Statement, Edge, CFGWithAnalysisResults<A, H, InferenceSystem<InferredTypes>>> {
+			GraphVisitor<CFG, Statement, Edge, CFGWithAnalysisResults<T, HT, VT>> {
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<A, H, InferenceSystem<InferredTypes>> tool, CFG graph) {
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<A, H, InferenceSystem<InferredTypes>> tool, CFG graph, Edge edge) {
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph, Edge edge) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<A, H, InferenceSystem<InferredTypes>> tool, CFG graph,
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph,
 				Statement node) {
 			if (tool != null && node instanceof Expression)
-				((Expression) node).setRuntimeTypes(tool.getAnalysisStateAfter(node).getState().getValueState()
-						.getInferredValue().getRuntimeTypes());
+				((Expression) node).setRuntimeTypes(typeExtractor.apply(tool.getAnalysisStateAfter(node).getState()));
 			return true;
 		}
 	}
