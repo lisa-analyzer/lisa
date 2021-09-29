@@ -57,17 +57,11 @@ import it.unive.lisa.imp.expressions.IMPAdd;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
 import it.unive.lisa.imp.expressions.IMPDiv;
-import it.unive.lisa.imp.expressions.IMPEqual;
-import it.unive.lisa.imp.expressions.IMPGreaterOrEqual;
-import it.unive.lisa.imp.expressions.IMPGreaterThan;
-import it.unive.lisa.imp.expressions.IMPLessOrEqual;
-import it.unive.lisa.imp.expressions.IMPLessThan;
 import it.unive.lisa.imp.expressions.IMPMod;
 import it.unive.lisa.imp.expressions.IMPMul;
 import it.unive.lisa.imp.expressions.IMPNeg;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
-import it.unive.lisa.imp.expressions.IMPNotEqual;
 import it.unive.lisa.imp.expressions.IMPSub;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.program.Global;
@@ -93,6 +87,12 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.comparison.Equal;
+import it.unive.lisa.program.cfg.statement.comparison.GreaterOrEqual;
+import it.unive.lisa.program.cfg.statement.comparison.GreaterThan;
+import it.unive.lisa.program.cfg.statement.comparison.LessOrEqual;
+import it.unive.lisa.program.cfg.statement.comparison.LessThan;
+import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.global.AccessInstanceGlobal;
 import it.unive.lisa.program.cfg.statement.literal.FalseLiteral;
 import it.unive.lisa.program.cfg.statement.literal.Float32Literal;
@@ -509,21 +509,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			else if (ctx.SUB() != null)
 				return new IMPSub(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.GT() != null)
-				return new IMPGreaterThan(cfg, file, line, col, visitExpression(ctx.left),
+				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GE() != null)
-				return new IMPGreaterOrEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LT() != null)
-				return new IMPLessThan(cfg, file, line, col, visitExpression(ctx.left),
+				return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LE() != null)
-				return new IMPLessOrEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.EQUAL() != null)
-				return new IMPEqual(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.NOTEQUAL() != null)
-				return new IMPNotEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.AND() != null)
 				return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
