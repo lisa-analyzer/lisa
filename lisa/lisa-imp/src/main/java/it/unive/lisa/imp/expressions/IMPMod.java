@@ -56,6 +56,6 @@ public class IMPMod extends BinaryNativeCall {
 
 		return rightState
 				.smallStepSemantics(new BinaryExpression(getRuntimeTypes(), left, right,
-						BinaryOperator.NUMERIC_MOD, getLocation()), this);
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_MOD, getLocation()), this);
 	}
 }

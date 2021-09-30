@@ -61,7 +61,7 @@ public class IMPAdd extends BinaryNativeCall {
 			op = BinaryOperator.STRING_CONCAT;
 		else if ((left.getDynamicType().isNumericType() || left.getDynamicType().isUntyped())
 				&& (right.getDynamicType().isNumericType() || right.getDynamicType().isUntyped()))
-			op = BinaryOperator.NUMERIC_ADD;
+			op = BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD;
 		else
 			return entryState.bottom();
 

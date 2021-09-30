@@ -18,57 +18,305 @@ public enum BinaryOperator implements Operator {
 	/**
 	 * Given two expressions that both evaluate to numeric values, a
 	 * {@link BinaryExpression} using this operator computes the arithmetic
-	 * subtraction of those values.<br>
+	 * subtraction of those values. This operation does never
+	 * overflows/underflows.<br>
 	 * <br>
 	 * First argument expression type: {@link NumericType}<br>
 	 * Second argument expression type: {@link NumericType}<br>
 	 * Computed expression type: {@link NumericType}
 	 */
-	NUMERIC_SUB("-"),
+	NUMERIC_NON_OVERFLOWING_SUB("-"),
 
 	/**
 	 * Given two expressions that both evaluate to numeric values, a
 	 * {@link BinaryExpression} using this operator computes the arithmetic
-	 * addition of those values.<br>
+	 * subtraction of those values. Both arguments and results are expected to
+	 * be 8-bits numbers, and this operation thus can overflow/underflow.<br>
 	 * <br>
-	 * First argument expression type: {@link NumericType}<br>
-	 * Second argument expression type: {@link NumericType}<br>
-	 * Computed expression type: {@link NumericType}
+	 * First argument expression type: {@link NumericType} (8-bit)<br>
+	 * Second argument expression type: {@link NumericType} (8-bit)<br>
+	 * Computed expression type: {@link NumericType} (8-bit)
 	 */
-	NUMERIC_ADD("+"),
+	NUMERIC_8BIT_SUB("-"),
 
 	/**
 	 * Given two expressions that both evaluate to numeric values, a
 	 * {@link BinaryExpression} using this operator computes the arithmetic
-	 * division of those values.<br>
+	 * subtraction of those values. Both arguments and results are expected to
+	 * be 16-bits numbers, and this operation thus can overflow/underflow.<br>
 	 * <br>
-	 * First argument expression type: {@link NumericType}<br>
-	 * Second argument expression type: {@link NumericType}<br>
-	 * Computed expression type: {@link NumericType}
+	 * First argument expression type: {@link NumericType} (16-bit)<br>
+	 * Second argument expression type: {@link NumericType} (16-bit)<br>
+	 * Computed expression type: {@link NumericType} (16-bit)
 	 */
-	NUMERIC_DIV("/"),
+	NUMERIC_16BIT_SUB("-"),
 
 	/**
 	 * Given two expressions that both evaluate to numeric values, a
 	 * {@link BinaryExpression} using this operator computes the arithmetic
-	 * multiplication of those values.<br>
+	 * subtraction of those values. Both arguments and results are expected to
+	 * be 32-bits numbers, and this operation thus can overflow/underflow.<br>
 	 * <br>
-	 * First argument expression type: {@link NumericType}<br>
-	 * Second argument expression type: {@link NumericType}<br>
-	 * Computed expression type: {@link NumericType}
+	 * First argument expression type: {@link NumericType} (32-bit)<br>
+	 * Second argument expression type: {@link NumericType} (32-bit)<br>
+	 * Computed expression type: {@link NumericType} (32-bit)
 	 */
-	NUMERIC_MUL("*"),
+	NUMERIC_32BIT_SUB("-"),
 
 	/**
 	 * Given two expressions that both evaluate to numeric values, a
 	 * {@link BinaryExpression} using this operator computes the arithmetic
-	 * remainder of those values.<br>
+	 * subtraction of those values. Both arguments and results are expected to
+	 * be 64-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (64-bit)<br>
+	 * Second argument expression type: {@link NumericType} (64-bit)<br>
+	 * Computed expression type: {@link NumericType} (64-bit)
+	 */
+	NUMERIC_64BIT_SUB("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * addition of those values. This operation does never
+	 * overflows/underflows.<br>
 	 * <br>
 	 * First argument expression type: {@link NumericType}<br>
 	 * Second argument expression type: {@link NumericType}<br>
 	 * Computed expression type: {@link NumericType}
 	 */
-	NUMERIC_MOD("%"),
+	NUMERIC_NON_OVERFLOWING_ADD("+"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * addition of those values. Both arguments and results are expected to be
+	 * 8-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (8-bit)<br>
+	 * Second argument expression type: {@link NumericType} (8-bit)<br>
+	 * Computed expression type: {@link NumericType} (8-bit)
+	 */
+	NUMERIC_8BIT_ADD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * addition of those values. Both arguments and results are expected to be
+	 * 16-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (16-bit)<br>
+	 * Second argument expression type: {@link NumericType} (16-bit)<br>
+	 * Computed expression type: {@link NumericType} (16-bit)
+	 */
+	NUMERIC_16BIT_ADD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * addition of those values. Both arguments and results are expected to be
+	 * 32-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (32-bit)<br>
+	 * Second argument expression type: {@link NumericType} (32-bit)<br>
+	 * Computed expression type: {@link NumericType} (32-bit)
+	 */
+	NUMERIC_32BIT_ADD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * addition of those values. Both arguments and results are expected to be
+	 * 64-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (64-bit)<br>
+	 * Second argument expression type: {@link NumericType} (64-bit)<br>
+	 * Computed expression type: {@link NumericType} (64-bit)
+	 */
+	NUMERIC_64BIT_ADD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * division of those values. This operation does never
+	 * overflows/underflows.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType}<br>
+	 * Second argument expression type: {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	NUMERIC_NON_OVERFLOWING_DIV("/"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * division of those values. Both arguments and results are expected to be
+	 * 8-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (8-bit)<br>
+	 * Second argument expression type: {@link NumericType} (8-bit)<br>
+	 * Computed expression type: {@link NumericType} (8-bit)
+	 */
+	NUMERIC_8BIT_DIV("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * division of those values. Both arguments and results are expected to be
+	 * 16-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (16-bit)<br>
+	 * Second argument expression type: {@link NumericType} (16-bit)<br>
+	 * Computed expression type: {@link NumericType} (16-bit)
+	 */
+	NUMERIC_16BIT_DIV("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * division of those values. Both arguments and results are expected to be
+	 * 32-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (32-bit)<br>
+	 * Second argument expression type: {@link NumericType} (32-bit)<br>
+	 * Computed expression type: {@link NumericType} (32-bit)
+	 */
+	NUMERIC_32BIT_DIV("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * division of those values. Both arguments and results are expected to be
+	 * 64-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (64-bit)<br>
+	 * Second argument expression type: {@link NumericType} (64-bit)<br>
+	 * Computed expression type: {@link NumericType} (64-bit)
+	 */
+	NUMERIC_64BIT_DIV("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * multiplication of those values. This operation does never
+	 * overflows/underflows.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType}<br>
+	 * Second argument expression type: {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	NUMERIC_NON_OVERFLOWING_MUL("*"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * multiplication of those values. Both arguments and results are expected
+	 * to be 8-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (8-bit)<br>
+	 * Second argument expression type: {@link NumericType} (8-bit)<br>
+	 * Computed expression type: {@link NumericType} (8-bit)
+	 */
+	NUMERIC_8BIT_MUL("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * multiplication of those values. Both arguments and results are expected
+	 * to be 16-bits numbers, and this operation thus can
+	 * overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (16-bit)<br>
+	 * Second argument expression type: {@link NumericType} (16-bit)<br>
+	 * Computed expression type: {@link NumericType} (16-bit)
+	 */
+	NUMERIC_16BIT_MUL("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * multiplication of those values. Both arguments and results are expected
+	 * to be 32-bits numbers, and this operation thus can
+	 * overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (32-bit)<br>
+	 * Second argument expression type: {@link NumericType} (32-bit)<br>
+	 * Computed expression type: {@link NumericType} (32-bit)
+	 */
+	NUMERIC_32BIT_MUL("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * multiplication of those values. Both arguments and results are expected
+	 * to be 64-bits numbers, and this operation thus can
+	 * overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (64-bit)<br>
+	 * Second argument expression type: {@link NumericType} (64-bit)<br>
+	 * Computed expression type: {@link NumericType} (64-bit)
+	 */
+	NUMERIC_64BIT_MUL("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * remainder of those values. This operation does never
+	 * overflows/underflows.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType}<br>
+	 * Second argument expression type: {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	NUMERIC_NON_OVERFLOWING_MOD("%"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * remainder of those values. Both arguments and results are expected to be
+	 * 8-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (8-bit)<br>
+	 * Second argument expression type: {@link NumericType} (8-bit)<br>
+	 * Computed expression type: {@link NumericType} (8-bit)
+	 */
+	NUMERIC_8BIT_MOD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * remainder of those values. Both arguments and results are expected to be
+	 * 16-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (16-bit)<br>
+	 * Second argument expression type: {@link NumericType} (16-bit)<br>
+	 * Computed expression type: {@link NumericType} (16-bit)
+	 */
+	NUMERIC_16BIT_MOD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * remainder of those values. Both arguments and results are expected to be
+	 * 32-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (32-bit)<br>
+	 * Second argument expression type: {@link NumericType} (32-bit)<br>
+	 * Computed expression type: {@link NumericType} (32-bit)
+	 */
+	NUMERIC_32BIT_MOD("-"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the arithmetic
+	 * remainder of those values. Both arguments and results are expected to be
+	 * 64-bits numbers, and this operation thus can overflow/underflow.<br>
+	 * <br>
+	 * First argument expression type: {@link NumericType} (64-bit)<br>
+	 * Second argument expression type: {@link NumericType} (64-bit)<br>
+	 * Computed expression type: {@link NumericType} (64-bit)
+	 */
+	NUMERIC_64BIT_MOD("-"),
 
 	/**
 	 * Given two expressions that both evaluate to Boolean values, a

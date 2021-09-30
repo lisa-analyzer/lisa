@@ -107,7 +107,7 @@ public class PointBasedHeapTest {
 		assertEquals(assignResult, topHeap);
 
 		assignResult = topHeap.assign(x,
-				new BinaryExpression(intType, one, zero, BinaryOperator.NUMERIC_ADD, fakeLocation), fakeProgramPoint);
+				new BinaryExpression(intType, one, zero, BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD, fakeLocation), fakeProgramPoint);
 
 		// binary expressions do not affect heap abstract domain
 		assertEquals(assignResult, topHeap);
