@@ -319,7 +319,84 @@ public enum BinaryOperator implements Operator {
 	 * Second argument expression type: {@link TypeTokenType}<br>
 	 * Computed expression type: {@link BooleanType}
 	 */
-	TYPE_CHECK("is");
+	TYPE_CHECK("is"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the AND operation
+	 * (i.e., setting each bit to {@code 1} only if the corresponding bits of
+	 * both operands are {@code 1}) on the arguments.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_AND("&"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the OR operation
+	 * (i.e., setting each bit to {@code 1} only if at least one of the
+	 * corresponding bits of the operands are {@code 1}) on the arguments.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_OR("|"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes the XOR operation
+	 * (i.e., setting each bit to {@code 1} only the corresponding bits of the
+	 * operands are different) on the arguments.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_XOR("^"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes a new number built
+	 * with the bits of the first argument's value shifted to the left by an
+	 * amount specified by the second argument's value. Excess bits on the left
+	 * are dropped, while new bits on the right are set to {@code 0}.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_SHIFT_LEFT("<<"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes a new number built
+	 * with the bits of the first argument's value shifted to the right by an
+	 * amount specified by the second argument's value. Excess bits on the right
+	 * are dropped, while new bits on the left preserve the sign of the original
+	 * first argument's value: if it was negative, bits are set to {@code 1},
+	 * otherwise they are set to {@code 0}.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_SHIFT_RIGHT(">>"),
+
+	/**
+	 * Given two expressions that both evaluate to numeric values, a
+	 * {@link BinaryExpression} using this operator computes a new number built
+	 * with the bits of the first argument's value shifted to the right by an
+	 * amount specified by the second argument's value. Excess bits on the right
+	 * are dropped, while new bits on the left are set to {@code 0}.<br>
+	 * <br>
+	 * First argument expression type: any {@link NumericType}<br>
+	 * Second argument expression type: any {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType}
+	 */
+	BITWISE_UNSIGNED_SHIFT_RIGHT(">>>");
 
 	private final String representation;
 

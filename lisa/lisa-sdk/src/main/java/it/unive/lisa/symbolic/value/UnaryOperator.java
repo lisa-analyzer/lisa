@@ -32,7 +32,8 @@ public enum UnaryOperator implements Operator {
 	 * negation (i.e., multiplication by {@code -1}) of that value.<br>
 	 * <br>
 	 * Argument expression type: {@link NumericType}<br>
-	 * Computed expression type: {@link NumericType} (same of the argument, but signed)
+	 * Computed expression type: {@link NumericType} (same of the argument, but
+	 * signed)
 	 */
 	NUMERIC_NEG("-"),
 
@@ -51,9 +52,20 @@ public enum UnaryOperator implements Operator {
 	 * computes the type(s) of that expression.<br>
 	 * <br>
 	 * Argument expression type: any {@link Type}<br>
-	 * Computed expression type: {@link TypeTokenType} containing all types of argument
+	 * Computed expression type: {@link TypeTokenType} containing all types of
+	 * argument
 	 */
-	TYPEOF("typeof");
+	TYPEOF("typeof"),
+
+	/**
+	 * Given an expression that evaluates to a numeric value, a
+	 * {@link UnaryExpression} using this operator computes the bitwise negation
+	 * (i.e., flipping every single bit independently) of that value.<br>
+	 * <br>
+	 * Argument expression type: {@link NumericType}<br>
+	 * Computed expression type: {@link NumericType} (same as argument)
+	 */
+	BITWISE_NEGATION("~");
 
 	private final String representation;
 
