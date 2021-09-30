@@ -15,13 +15,13 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
- * The Parity abstract domain, tracking if a numeric value is even or odd,
- * implemented as a {@link BaseNonRelationalValueDomain}, handling top and
- * bottom values for the expression evaluation and bottom values for the
- * expression satisfiability. Top and bottom cases for least upper bound,
- * widening and less or equals operations are handled by {@link BaseLattice} in
- * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
- * {@link BaseLattice#lessOrEqual} methods, respectively.
+ * The overflow-insensitive Parity abstract domain, tracking if a numeric value
+ * is even or odd, implemented as a {@link BaseNonRelationalValueDomain},
+ * handling top and bottom values for the expression evaluation and bottom
+ * values for the expression satisfiability. Top and bottom cases for least
+ * upper bound, widening and less or equals operations are handled by
+ * {@link BaseLattice} in {@link BaseLattice#lub}, {@link BaseLattice#widening}
+ * and {@link BaseLattice#lessOrEqual} methods, respectively.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
@@ -111,23 +111,43 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 			return top();
 
 		switch (operator) {
-		case NUMERIC_ADD:
-		case NUMERIC_SUB:
+		case NUMERIC_NON_OVERFLOWING_ADD:
+		case NUMERIC_8BIT_ADD:
+		case NUMERIC_16BIT_ADD:
+		case NUMERIC_32BIT_ADD:
+		case NUMERIC_64BIT_ADD:
+		case NUMERIC_NON_OVERFLOWING_SUB:
+		case NUMERIC_8BIT_SUB:
+		case NUMERIC_16BIT_SUB:
+		case NUMERIC_32BIT_SUB:
+		case NUMERIC_64BIT_SUB:
 			if (right.equals(left))
 				return EVEN;
 			else
 				return ODD;
-		case NUMERIC_MUL:
+		case NUMERIC_NON_OVERFLOWING_MUL:
+		case NUMERIC_8BIT_MUL:
+		case NUMERIC_16BIT_MUL:
+		case NUMERIC_32BIT_MUL:
+		case NUMERIC_64BIT_MUL:
 			if (left.isEven() || right.isEven())
 				return EVEN;
 			else
 				return ODD;
-		case NUMERIC_DIV:
+		case NUMERIC_NON_OVERFLOWING_DIV:
+		case NUMERIC_8BIT_DIV:
+		case NUMERIC_16BIT_DIV:
+		case NUMERIC_32BIT_DIV:
+		case NUMERIC_64BIT_DIV:
 			if (left.isOdd())
 				return right.isOdd() ? ODD : EVEN;
 			else
 				return right.isOdd() ? EVEN : TOP;
-		case NUMERIC_MOD:
+		case NUMERIC_NON_OVERFLOWING_MOD:
+		case NUMERIC_8BIT_MOD:
+		case NUMERIC_16BIT_MOD:
+		case NUMERIC_32BIT_MOD:
+		case NUMERIC_64BIT_MOD:
 			return TOP;
 		default:
 			return TOP;

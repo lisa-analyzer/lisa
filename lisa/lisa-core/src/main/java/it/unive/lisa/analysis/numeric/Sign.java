@@ -17,8 +17,8 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
- * The basic Sign abstract domain, tracking zero, strictly positive and strictly
- * negative integer values, implemented as a
+ * The basic overflow-insensitive Sign abstract domain, tracking zero, strictly
+ * positive and strictly negative integer values, implemented as a
  * {@link BaseNonRelationalValueDomain}, handling top and bottom values for the
  * expression evaluation and bottom values for the expression satisfiability.
  * Top and bottom cases for least upper bounds, widening and less or equals
@@ -131,7 +131,11 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	@Override
 	protected Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
 		switch (operator) {
-		case NUMERIC_ADD:
+		case NUMERIC_NON_OVERFLOWING_ADD:
+		case NUMERIC_8BIT_ADD:
+		case NUMERIC_16BIT_ADD:
+		case NUMERIC_32BIT_ADD:
+		case NUMERIC_64BIT_ADD:
 			if (left.isZero())
 				return right;
 			else if (right.isZero())
@@ -140,7 +144,11 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return left;
 			else
 				return top();
-		case NUMERIC_SUB:
+		case NUMERIC_NON_OVERFLOWING_SUB:
+		case NUMERIC_8BIT_SUB:
+		case NUMERIC_16BIT_SUB:
+		case NUMERIC_32BIT_SUB:
+		case NUMERIC_64BIT_SUB:
 			if (left.isZero())
 				return right.opposite();
 			else if (right.isZero())
@@ -149,7 +157,11 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return top();
 			else
 				return left;
-		case NUMERIC_DIV:
+		case NUMERIC_NON_OVERFLOWING_DIV:
+		case NUMERIC_8BIT_DIV:
+		case NUMERIC_16BIT_DIV:
+		case NUMERIC_32BIT_DIV:
+		case NUMERIC_64BIT_DIV:
 			if (right.isZero())
 				return bottom();
 			else if (left.isZero())
@@ -160,9 +172,17 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				// -/- = +
 				return left.isTop() ? left : POS;
 			return top();
-		case NUMERIC_MOD:
+		case NUMERIC_NON_OVERFLOWING_MOD:
+		case NUMERIC_8BIT_MOD:
+		case NUMERIC_16BIT_MOD:
+		case NUMERIC_32BIT_MOD:
+		case NUMERIC_64BIT_MOD:
 			return top();
-		case NUMERIC_MUL:
+		case NUMERIC_NON_OVERFLOWING_MUL:
+		case NUMERIC_8BIT_MUL:
+		case NUMERIC_16BIT_MUL:
+		case NUMERIC_32BIT_MUL:
+		case NUMERIC_64BIT_MUL:
 			if (left.isZero() || right.isZero())
 				return ZERO;
 			else if (left.equals(right))

@@ -18,14 +18,14 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 
 /**
- * The interval abstract domain, approximating integer values as the minimum
- * integer interval containing them. It is implemented as a
- * {@link BaseNonRelationalValueDomain}, handling top and bottom values for the
- * expression evaluation and bottom values for the expression satisfiability.
- * Top and bottom cases for least upper bounds, widening and less or equals
- * operations are handled by {@link BaseLattice} in {@link BaseLattice#lub},
- * {@link BaseLattice#widening} and {@link BaseLattice#lessOrEqual} methods,
- * respectively.
+ * The overflow-insensitive interval abstract domain, approximating integer
+ * values as the minimum integer interval containing them. It is implemented as
+ * a {@link BaseNonRelationalValueDomain}, handling top and bottom values for
+ * the expression evaluation and bottom values for the expression
+ * satisfiability. Top and bottom cases for least upper bounds, widening and
+ * less or equals operations are handled by {@link BaseLattice} in
+ * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
+ * {@link BaseLattice#lessOrEqual} methods, respectively.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
@@ -113,21 +113,37 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
-		if (operator != BinaryOperator.NUMERIC_DIV && (left.isTop() || right.isTop()))
+		if (operator != BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
 			return top();
 
 		switch (operator) {
-		case NUMERIC_ADD:
+		case NUMERIC_NON_OVERFLOWING_ADD:
+		case NUMERIC_8BIT_ADD:
+		case NUMERIC_16BIT_ADD:
+		case NUMERIC_32BIT_ADD:
+		case NUMERIC_64BIT_ADD:
 			return new Interval(left.interval.plus(right.interval));
-		case NUMERIC_SUB:
+		case NUMERIC_NON_OVERFLOWING_SUB:
+		case NUMERIC_8BIT_SUB:
+		case NUMERIC_16BIT_SUB:
+		case NUMERIC_32BIT_SUB:
+		case NUMERIC_64BIT_SUB:
 			return new Interval(left.interval.diff(right.interval));
-		case NUMERIC_MUL:
+		case NUMERIC_NON_OVERFLOWING_MUL:
+		case NUMERIC_8BIT_MUL:
+		case NUMERIC_16BIT_MUL:
+		case NUMERIC_32BIT_MUL:
+		case NUMERIC_64BIT_MUL:
 			if (left.is(0) || right.is(0))
 				return ZERO;
 			return new Interval(left.interval.mul(right.interval));
-		case NUMERIC_DIV:
+		case NUMERIC_NON_OVERFLOWING_DIV:
+		case NUMERIC_8BIT_DIV:
+		case NUMERIC_16BIT_DIV:
+		case NUMERIC_32BIT_DIV:
+		case NUMERIC_64BIT_DIV:
 			if (right.is(0))
 				return bottom();
 			if (left.is(0))
