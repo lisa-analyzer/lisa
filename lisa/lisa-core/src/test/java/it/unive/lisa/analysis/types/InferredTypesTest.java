@@ -11,15 +11,16 @@ import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.types.BoolType;
-import it.unive.lisa.symbolic.types.IntType;
-import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Float32;
+import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.StringType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collections;
@@ -43,16 +44,16 @@ public class InferredTypesTest {
 	private static final InferredTypes string = new InferredTypes(StringType.INSTANCE);
 	private static final InferredTypes bool_or_string = new InferredTypes(
 			TYPES.mkSet(List.of(BoolType.INSTANCE, StringType.INSTANCE)));
-	private static final InferredTypes integer = new InferredTypes(IntType.INSTANCE);
-	private static final InferredTypes floating = new InferredTypes(FloatType.INSTANCE);
+	private static final InferredTypes integer = new InferredTypes(Int32.INSTANCE);
+	private static final InferredTypes floating = new InferredTypes(Float32.INSTANCE);
 	private static final InferredTypes numeric;
 	private static final InferredTypes all;
 
 	private static final Map<String, InferredTypes> combos = new HashMap<>();
 
 	static {
-		ExternalSet<Type> nums = TYPES.mkSingletonSet(IntType.INSTANCE);
-		nums.add(FloatType.INSTANCE);
+		ExternalSet<Type> nums = TYPES.mkSingletonSet(Int32.INSTANCE);
+		nums.add(Float32.INSTANCE);
 		numeric = new InferredTypes(nums);
 		ExternalSet<Type> full = nums.copy();
 		full.add(StringType.INSTANCE);
@@ -393,7 +394,7 @@ public class InferredTypesTest {
 
 	@Test
 	public void testSatisfies() {
-		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)));
+		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, left, Satisfiability.SATISFIED);
 		satisfies(BinaryOperator.COMPARISON_NE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, integer, left, Satisfiability.SATISFIED);
@@ -411,7 +412,7 @@ public class InferredTypesTest {
 		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(IntType.INSTANCE, StringType.INSTANCE))));
+		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(Int32.INSTANCE, StringType.INSTANCE))));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.TYPE_CHECK, integer, right, Satisfiability.UNKNOWN);
@@ -420,7 +421,7 @@ public class InferredTypesTest {
 		satisfies(BinaryOperator.TYPE_CHECK, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(BinaryOperator.TYPE_CHECK, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(IntType.INSTANCE)),
+		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)),
 				new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)))));
 		satisfies(BinaryOperator.COMPARISON_EQ, left, right, Satisfiability.UNKNOWN);
 		satisfies(BinaryOperator.COMPARISON_NE, left, right, Satisfiability.UNKNOWN);

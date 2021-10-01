@@ -19,16 +19,17 @@ import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Assignment;
-import it.unive.lisa.program.cfg.statement.BinaryNativeCall;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.UnaryNativeCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
+import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
+import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import org.junit.Test;
 
@@ -41,7 +42,7 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		NoOp noop = new NoOp(first, unknown);
 		Return ret = new Return(first, unknown,
 				new VariableRef(first, unknown, "x"));
@@ -54,7 +55,7 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknown, 5));
 		ret = new Return(second, unknown, new VariableRef(second, unknown, "x"));
 
 		second.addNode(assign, true);
@@ -76,7 +77,7 @@ public class CFGSimplificationTest {
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
-				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknownLocation, 5));
 		NoOp noop1 = new NoOp(first, unknownLocation);
 		NoOp noop2 = new NoOp(first, unknownLocation2);
 		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
@@ -91,7 +92,7 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
-				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknownLocation, 5));
 		ret = new Return(second, unknownLocation, new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
@@ -146,13 +147,13 @@ public class CFGSimplificationTest {
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
-				new Literal(first, unknownLocation, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknownLocation, 5));
 		GT gt = new GT(first, new VariableRef(first, unknownLocation, "x"),
-				new Literal(first, unknownLocation, 2, Untyped.INSTANCE));
-		Print print = new Print(first, new Literal(first, unknownLocation, "f", Untyped.INSTANCE));
+				new Int32Literal(first, unknownLocation, 2));
+		Print print = new Print(first, new StringLiteral(first, unknownLocation, "f"));
 		NoOp noop1 = new NoOp(first, unknownLocation);
 		NoOp noop2 = new NoOp(first, unknownLocation2);
-		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x", Untyped.INSTANCE));
+		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
 		first.addNode(assign, true);
 		first.addNode(gt);
 		first.addNode(print);
@@ -176,12 +177,12 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
-				new Literal(second, unknownLocation, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknownLocation, 5));
 		gt = new GT(second, new VariableRef(second, unknownLocation, "x"),
-				new Literal(second, unknownLocation, 2, Untyped.INSTANCE));
-		print = new Print(second, new Literal(second, unknownLocation, "f", Untyped.INSTANCE));
+				new Int32Literal(second, unknownLocation, 2));
+		print = new Print(second, new StringLiteral(second, unknownLocation, "f"));
 		ret = new Return(second, unknownLocation,
-				new VariableRef(second, unknownLocation, "x", Untyped.INSTANCE));
+				new VariableRef(second, unknownLocation, "x"));
 
 		second.addNode(assign, true);
 		second.addNode(gt);
@@ -216,7 +217,7 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		NoOp noop = new NoOp(first, unknown);
 		Return ret = new Return(first, unknown,
 				new VariableRef(first, unknown, "x"));
@@ -229,7 +230,7 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknown, 5));
 		ret = new Return(second, unknown, new VariableRef(first, unknown, "x"));
 
 		second.addNode(assign, true);
@@ -252,7 +253,7 @@ public class CFGSimplificationTest {
 		NoOp start = new NoOp(first, unknown);
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		Return ret = new Return(first, unknown,
 				new VariableRef(first, unknown, "x"));
 		first.addNode(start, true);
@@ -264,7 +265,7 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknown, 5));
 		ret = new Return(second, unknown, new VariableRef(first, unknown, "x"));
 
 		second.addNode(assign, true);
@@ -286,10 +287,10 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		Assignment assign2 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "y"),
-				new Literal(first, unknown, 50, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 50));
 		NoOp end = new NoOp(first, unknown);
 		first.addNode(assign1, true);
 		first.addNode(assign2);
@@ -300,10 +301,10 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(second, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		assign2 = new Assignment(second, unknown,
 				new VariableRef(first, unknown, "y"),
-				new Literal(first, unknown, 50, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 50));
 
 		second.addNode(assign1, true);
 		second.addNode(assign2);
@@ -324,13 +325,13 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "b"),
-				new Literal(first, unknown, true, Untyped.INSTANCE));
+				new TrueLiteral(first, unknown));
 		Assignment assign2 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
-				new Literal(first, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 5));
 		Assignment assign3 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "y"),
-				new Literal(first, unknown, 50, Untyped.INSTANCE));
+				new Int32Literal(first, unknown, 50));
 		NoOp end = new NoOp(first, unknown);
 		first.addNode(end);
 		first.addNode(assign1, true);
@@ -351,13 +352,13 @@ public class CFGSimplificationTest {
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "b"),
-				new Literal(second, unknown, true, Untyped.INSTANCE));
+				new TrueLiteral(second, unknown));
 		assign2 = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
-				new Literal(second, unknown, 5, Untyped.INSTANCE));
+				new Int32Literal(second, unknown, 5));
 		assign3 = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "y"),
-				new Literal(second, unknown, 50, Untyped.INSTANCE));
+				new Int32Literal(second, unknown, 50));
 		second.addNode(assign1, true);
 		second.addNode(assign2);
 		second.addNode(assign3);
