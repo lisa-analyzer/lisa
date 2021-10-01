@@ -40,34 +40,12 @@ import it.unive.lisa.imp.constructs.StringLength;
 import it.unive.lisa.imp.constructs.StringReplace;
 import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
-import it.unive.lisa.imp.expressions.IMPAdd;
-import it.unive.lisa.imp.expressions.IMPAnd;
+import it.unive.lisa.imp.expressions.IMPAddOrConcat;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
-import it.unive.lisa.imp.expressions.IMPDiv;
-import it.unive.lisa.imp.expressions.IMPEqual;
-import it.unive.lisa.imp.expressions.IMPFalseLiteral;
-import it.unive.lisa.imp.expressions.IMPFloatLiteral;
-import it.unive.lisa.imp.expressions.IMPGreaterOrEqual;
-import it.unive.lisa.imp.expressions.IMPGreaterThan;
-import it.unive.lisa.imp.expressions.IMPIntLiteral;
-import it.unive.lisa.imp.expressions.IMPLessOrEqual;
-import it.unive.lisa.imp.expressions.IMPLessThan;
-import it.unive.lisa.imp.expressions.IMPMod;
-import it.unive.lisa.imp.expressions.IMPMul;
-import it.unive.lisa.imp.expressions.IMPNeg;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
-import it.unive.lisa.imp.expressions.IMPNot;
-import it.unive.lisa.imp.expressions.IMPNotEqual;
-import it.unive.lisa.imp.expressions.IMPOr;
-import it.unive.lisa.imp.expressions.IMPStringLiteral;
-import it.unive.lisa.imp.expressions.IMPSub;
-import it.unive.lisa.imp.expressions.IMPTrueLiteral;
-import it.unive.lisa.imp.types.BoolType;
 import it.unive.lisa.imp.types.ClassType;
-import it.unive.lisa.imp.types.FloatType;
-import it.unive.lisa.imp.types.IntType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -81,21 +59,43 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
-import it.unive.lisa.program.cfg.statement.AccessInstanceGlobal;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Literal;
 import it.unive.lisa.program.cfg.statement.NoOp;
-import it.unive.lisa.program.cfg.statement.NullLiteral;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.Throw;
-import it.unive.lisa.program.cfg.statement.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.comparison.Equal;
+import it.unive.lisa.program.cfg.statement.comparison.GreaterOrEqual;
+import it.unive.lisa.program.cfg.statement.comparison.GreaterThan;
+import it.unive.lisa.program.cfg.statement.comparison.LessOrEqual;
+import it.unive.lisa.program.cfg.statement.comparison.LessThan;
+import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
+import it.unive.lisa.program.cfg.statement.global.AccessInstanceGlobal;
+import it.unive.lisa.program.cfg.statement.literal.FalseLiteral;
+import it.unive.lisa.program.cfg.statement.literal.Float32Literal;
+import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.program.cfg.statement.literal.Literal;
+import it.unive.lisa.program.cfg.statement.literal.NullLiteral;
+import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
+import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
+import it.unive.lisa.program.cfg.statement.logic.And;
+import it.unive.lisa.program.cfg.statement.logic.Not;
+import it.unive.lisa.program.cfg.statement.logic.Or;
+import it.unive.lisa.program.cfg.statement.numeric.Division;
+import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
+import it.unive.lisa.program.cfg.statement.numeric.Negation;
+import it.unive.lisa.program.cfg.statement.numeric.Remainder;
+import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Float32;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import java.util.Collection;
 import java.util.Collections;
@@ -378,7 +378,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (cond != null)
 			condition = visitExpression(cond);
 		else
-			condition = new IMPTrueLiteral(cfg, file, getLine(ctx), getCol(ctx));
+			condition = new TrueLiteral(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
 		loop.addNode(condition);
 		if (first == null)
 			first = condition;
@@ -476,7 +476,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.IDENTIFIER() != null)
 			return visitVar(ctx.IDENTIFIER(), true);
 		else
-			return new IMPIntLiteral(cfg, file, getLine(ctx), getCol(ctx),
+			return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 	}
 
@@ -492,41 +492,48 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return visitBasicExpr(ctx.basicExpr());
 		else if (ctx.nested != null)
 			if (ctx.NOT() != null)
-				return new IMPNot(cfg, file, line, col, visitExpression(ctx.nested));
+				return new Not(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 			else
-				return new IMPNeg(cfg, file, line, col, visitExpression(ctx.nested));
+				return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
 		else if (ctx.left != null && ctx.right != null)
 			if (ctx.MUL() != null)
-				return new IMPMul(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.DIV() != null)
-				return new IMPDiv(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.MOD() != null)
-				return new IMPMod(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.ADD() != null)
-				return new IMPAdd(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
 			else if (ctx.SUB() != null)
-				return new IMPSub(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.GT() != null)
-				return new IMPGreaterThan(cfg, file, line, col, visitExpression(ctx.left),
+				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.GE() != null)
-				return new IMPGreaterOrEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LT() != null)
-				return new IMPLessThan(cfg, file, line, col, visitExpression(ctx.left),
+				return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.LE() != null)
-				return new IMPLessOrEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.EQUAL() != null)
-				return new IMPEqual(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else if (ctx.NOTEQUAL() != null)
-				return new IMPNotEqual(cfg, file, line, col, visitExpression(ctx.left),
+				return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
 						visitExpression(ctx.right));
 			else if (ctx.AND() != null)
-				return new IMPAnd(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 			else
-				return new IMPOr(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+				return new Or(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+						visitExpression(ctx.right));
 		else if (ctx.NEW() != null)
 			if (ctx.newBasicArrayExpr() != null)
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
@@ -626,9 +633,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.BOOLEAN() != null)
 			return BoolType.INSTANCE;
 		else if (ctx.INT() != null)
-			return IntType.INSTANCE;
+			return Int32.INSTANCE;
 		else
-			return FloatType.INSTANCE;
+			return Float32.INSTANCE;
 	}
 
 	@Override
@@ -690,31 +697,31 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Literal visitLiteral(LiteralContext ctx) {
+	public Literal<?> visitLiteral(LiteralContext ctx) {
 		int line = getLine(ctx);
 		int col = getCol(ctx);
 		if (ctx.LITERAL_NULL() != null)
 			return new NullLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_BOOL() != null)
 			if (ctx.LITERAL_BOOL().getText().equals("true"))
-				return new IMPTrueLiteral(cfg, file, line, col);
+				return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
 			else
-				return new IMPFalseLiteral(cfg, file, line, col);
+				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_STRING() != null)
-			return new IMPStringLiteral(cfg, file, line, col, ctx.LITERAL_STRING().getText());
+			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
-				return new IMPFloatLiteral(cfg, file, line, col,
+				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 			else
-				return new IMPFloatLiteral(cfg, file, line, col,
+				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
 		else if (ctx.LITERAL_DECIMAL() != null)
 			if (ctx.SUB() != null)
-				return new IMPIntLiteral(cfg, file, line, col,
+				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 			else
-				return new IMPIntLiteral(cfg, file, line, col,
+				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);

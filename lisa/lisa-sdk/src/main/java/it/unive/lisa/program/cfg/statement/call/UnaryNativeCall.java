@@ -1,0 +1,103 @@
+package it.unive.lisa.program.cfg.statement.call;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+
+/**
+ * A {@link NativeCall} with a single argument.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public abstract class UnaryNativeCall extends NativeCall {
+
+	/**
+	 * Builds the untyped native call, happening at the given location in the
+	 * program. The static type of this call is {@link Untyped}.
+	 * 
+	 * @param cfg           the cfg that this expression belongs to
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
+	 * @param constructName the name of the construct invoked by this native
+	 *                          call
+	 * @param parameter     the parameter of this call
+	 */
+	protected UnaryNativeCall(CFG cfg, CodeLocation location, String constructName,
+			Expression parameter) {
+		super(cfg, location, constructName, parameter);
+	}
+
+	/**
+	 * Builds the native call, happening at the given location in the program.
+	 * 
+	 * @param cfg           the cfg that this expression belongs to
+	 * @param location      the location where the expression is defined within
+	 *                          the source file. If unknown, use {@code null}
+	 * @param constructName the name of the construct invoked by this native
+	 *                          call
+	 * @param staticType    the static type of this call
+	 * @param parameter     the parameter of this call
+	 */
+	protected UnaryNativeCall(CFG cfg, CodeLocation location, String constructName, Type staticType,
+			Expression parameter) {
+		super(cfg, location, constructName, staticType, parameter);
+	}
+
+	@Override
+	public final <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V>[] computedStates,
+					ExpressionSet<SymbolicExpression>[] params)
+					throws SemanticException {
+		AnalysisState<A, H, V> result = null;
+		for (SymbolicExpression expr : params[0]) {
+			AnalysisState<A, H, V> tmp = unarySemantics(entryState, interprocedural, computedStates[0], expr);
+			if (result == null)
+				result = tmp;
+			else
+				result = result.lub(tmp);
+		}
+		return result;
+	}
+
+	/**
+	 * Computes the semantics of the call, after the semantics of the parameter
+	 * has been computed. Meta variables from the parameter will be forgotten
+	 * after this call returns.
+	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param <H>             the type of the {@link HeapDomain}
+	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param entryState      the entry state of this unary call
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param exprState       the state obtained by evaluating {@code expr} in
+	 *                            {@code entryState}
+	 * @param expr            the symbolic expressions representing the computed
+	 *                            value of the parameter of this call
+	 * 
+	 * @return the {@link AnalysisState} representing the abstract result of the
+	 *             execution of this call
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	protected abstract <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> exprState,
+					SymbolicExpression expr)
+					throws SemanticException;
+}

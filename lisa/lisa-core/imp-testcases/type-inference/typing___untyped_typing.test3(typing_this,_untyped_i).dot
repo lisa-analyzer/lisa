@@ -1,7 +1,7 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [bool, float, int, int[], string, typing, void]<BR/>this: [typing]<BR/>[inferred: [bool], state: _|_] ]]<BR/>}} -&gt; [i &gt; 5]>];
-	"node1" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [bool, float, int, int[], string, typing, void]<BR/>ret_value@test3: [bool, float, int, int[], string, typing, void]<BR/>this: [typing]<BR/>[inferred: [bool, float, int, int[], string, typing, void], state: _|_] ]]<BR/>}} -&gt; [ret_value@test3]>];
-	"node2" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [float, int]<BR/>this: [typing]<BR/>[inferred: [float, int], state: _|_] ]]<BR/>}} -&gt; [i]>];
+	"node0" [shape="rect",color="black",label=<&gt;(i, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [bool, float32, int32, int32[], string, typing, void]<BR/>this: [typing]<BR/>[inferred: [bool], state: _|_] ]]<BR/>}} -&gt; [i &gt; 5]>];
+	"node1" [shape="rect",color="black",peripheries="2",label=<return i<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [bool, float32, int32, int32[], string, typing, void]<BR/>ret_value@test3: [bool, float32, int32, int32[], string, typing, void]<BR/>this: [typing]<BR/>[inferred: [bool, float32, int32, int32[], string, typing, void], state: _|_] ]]<BR/>}} -&gt; [ret_value@test3]>];
+	"node2" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [float32, int32]<BR/>this: [typing]<BR/>[inferred: [float32, int32], state: _|_] ]]<BR/>}} -&gt; [i]>];
 	"node0" -> "node1" [color="red",style="dashed"];
 	"node0" -> "node2" [color="blue",style="dashed"];
 	"node2" -> "node0" [color="black"];

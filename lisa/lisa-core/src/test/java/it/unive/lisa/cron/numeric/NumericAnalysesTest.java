@@ -31,7 +31,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testInterval() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true).setDumpAnalysis(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval()));
 		perform("interval", "program.imp", conf);
 	}

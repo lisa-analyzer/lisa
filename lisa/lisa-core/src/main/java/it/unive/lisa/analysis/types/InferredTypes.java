@@ -13,9 +13,6 @@ import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.types.BoolType;
-import it.unive.lisa.symbolic.types.IntType;
-import it.unive.lisa.symbolic.types.StringType;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
@@ -29,6 +26,9 @@ import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.StringType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -151,7 +151,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		case STRING_LENGTH:
 			if (arg.elements.noneMatch(Type::isStringType))
 				return BOTTOM_PAIR;
-			return mk(new InferredTypes(IntType.INSTANCE));
+			return mk(new InferredTypes(Int32.INSTANCE));
 		case TYPEOF:
 			return mk(new InferredTypes(new TypeTokenType(arg.elements.copy())));
 		default:
@@ -200,7 +200,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		case STRING_INDEX_OF:
 			if (left.elements.noneMatch(Type::isStringType) || right.elements.noneMatch(Type::isStringType))
 				return BOTTOM_PAIR;
-			return mk(new InferredTypes(IntType.INSTANCE));
+			return mk(new InferredTypes(Int32.INSTANCE));
 		case STRING_CONTAINS:
 		case STRING_ENDS_WITH:
 		case STRING_EQUALS:
