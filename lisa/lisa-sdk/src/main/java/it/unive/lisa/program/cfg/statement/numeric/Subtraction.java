@@ -59,7 +59,7 @@ public class Subtraction extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_SUB,
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_SUB,
 						getLocation()),
 				this);
 	}

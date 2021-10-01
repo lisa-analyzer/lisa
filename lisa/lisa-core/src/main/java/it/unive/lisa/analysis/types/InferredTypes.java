@@ -31,6 +31,7 @@ import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -145,6 +146,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 				return BOTTOM_PAIR;
 			return mk(new InferredTypes(BoolType.INSTANCE));
 		case NUMERIC_NEG:
+		case BITWISE_NEGATION:
 			if (arg.elements.noneMatch(Type::isNumericType))
 				return BOTTOM_PAIR;
 			return mk(new InferredTypes(arg.elements.filter(Type::isNumericType)));
@@ -182,14 +184,68 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 			if (left.elements.noneMatch(Type::isBooleanType) || right.elements.noneMatch(Type::isBooleanType))
 				return BOTTOM_PAIR;
 			return mk(new InferredTypes(BoolType.INSTANCE));
-		case NUMERIC_ADD:
-		case NUMERIC_DIV:
-		case NUMERIC_MOD:
-		case NUMERIC_MUL:
-		case NUMERIC_SUB:
+		case NUMERIC_NON_OVERFLOWING_ADD:
+		case NUMERIC_NON_OVERFLOWING_DIV:
+		case NUMERIC_NON_OVERFLOWING_MOD:
+		case NUMERIC_NON_OVERFLOWING_MUL:
+		case NUMERIC_NON_OVERFLOWING_SUB:
+		case BITWISE_AND:
+		case BITWISE_OR:
+		case BITWISE_XOR:
+		case BITWISE_SHIFT_LEFT:
+		case BITWISE_SHIFT_RIGHT:
+		case BITWISE_UNSIGNED_SHIFT_RIGHT:
 			if (left.elements.noneMatch(Type::isNumericType) || right.elements.noneMatch(Type::isNumericType))
 				return BOTTOM_PAIR;
 			set = commonNumericalType(left.elements, right.elements);
+			if (set.isEmpty())
+				return BOTTOM_PAIR;
+			return mk(new InferredTypes(set));
+		case NUMERIC_8BIT_ADD:
+		case NUMERIC_8BIT_DIV:
+		case NUMERIC_8BIT_MOD:
+		case NUMERIC_8BIT_MUL:
+		case NUMERIC_8BIT_SUB:
+			Predicate<Type> test = type -> type.isNumericType() && type.asNumericType().is8Bits();
+			if (left.elements.noneMatch(test) || right.elements.noneMatch(test))
+				return BOTTOM_PAIR;
+			set = commonNumericalType(left.elements, right.elements).filter(test);
+			if (set.isEmpty())
+				return BOTTOM_PAIR;
+			return mk(new InferredTypes(set));
+		case NUMERIC_16BIT_ADD:
+		case NUMERIC_16BIT_DIV:
+		case NUMERIC_16BIT_MOD:
+		case NUMERIC_16BIT_MUL:
+		case NUMERIC_16BIT_SUB:
+			test = type -> type.isNumericType() && type.asNumericType().is16Bits();
+			if (left.elements.noneMatch(test) || right.elements.noneMatch(test))
+				return BOTTOM_PAIR;
+			set = commonNumericalType(left.elements, right.elements).filter(test);
+			if (set.isEmpty())
+				return BOTTOM_PAIR;
+			return mk(new InferredTypes(set));
+		case NUMERIC_32BIT_ADD:
+		case NUMERIC_32BIT_DIV:
+		case NUMERIC_32BIT_MOD:
+		case NUMERIC_32BIT_MUL:
+		case NUMERIC_32BIT_SUB:
+			test = type -> type.isNumericType() && type.asNumericType().is32Bits();
+			if (left.elements.noneMatch(test) || right.elements.noneMatch(test))
+				return BOTTOM_PAIR;
+			set = commonNumericalType(left.elements, right.elements).filter(test);
+			if (set.isEmpty())
+				return BOTTOM_PAIR;
+			return mk(new InferredTypes(set));
+		case NUMERIC_64BIT_ADD:
+		case NUMERIC_64BIT_DIV:
+		case NUMERIC_64BIT_MOD:
+		case NUMERIC_64BIT_MUL:
+		case NUMERIC_64BIT_SUB:
+			test = type -> type.isNumericType() && type.asNumericType().is64Bits();
+			if (left.elements.noneMatch(test) || right.elements.noneMatch(test))
+				return BOTTOM_PAIR;
+			set = commonNumericalType(left.elements, right.elements).filter(test);
 			if (set.isEmpty())
 				return BOTTOM_PAIR;
 			return mk(new InferredTypes(set));

@@ -19,8 +19,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * An implementation of the constant propagation dataflow analysis, that focuses
- * only on integers.
+ * An implementation of the overflow-insensitive constant propagation dataflow
+ * analysis, that focuses only on integers.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -91,15 +91,35 @@ public class ConstantPropagation
 				return null;
 
 			switch (binary.getOperator()) {
-			case NUMERIC_ADD:
+			case NUMERIC_NON_OVERFLOWING_ADD:
+			case NUMERIC_8BIT_ADD:
+			case NUMERIC_16BIT_ADD:
+			case NUMERIC_32BIT_ADD:
+			case NUMERIC_64BIT_ADD:
 				return left + right;
-			case NUMERIC_DIV:
+			case NUMERIC_NON_OVERFLOWING_DIV:
+			case NUMERIC_8BIT_DIV:
+			case NUMERIC_16BIT_DIV:
+			case NUMERIC_32BIT_DIV:
+			case NUMERIC_64BIT_DIV:
 				return left == 0 ? null : (int) left / right;
-			case NUMERIC_MOD:
+			case NUMERIC_NON_OVERFLOWING_MOD:
+			case NUMERIC_8BIT_MOD:
+			case NUMERIC_16BIT_MOD:
+			case NUMERIC_32BIT_MOD:
+			case NUMERIC_64BIT_MOD:
 				return right == 0 ? null : left % right;
-			case NUMERIC_MUL:
+			case NUMERIC_NON_OVERFLOWING_MUL:
+			case NUMERIC_8BIT_MUL:
+			case NUMERIC_16BIT_MUL:
+			case NUMERIC_32BIT_MUL:
+			case NUMERIC_64BIT_MUL:
 				return left * right;
-			case NUMERIC_SUB:
+			case NUMERIC_NON_OVERFLOWING_SUB:
+			case NUMERIC_8BIT_SUB:
+			case NUMERIC_16BIT_SUB:
+			case NUMERIC_32BIT_SUB:
+			case NUMERIC_64BIT_SUB:
 				return left - right;
 			default:
 				break;

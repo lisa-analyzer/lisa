@@ -333,11 +333,11 @@ public class InferredTypesTest {
 				return domain.bottom();
 			return new InferredTypes(set);
 		};
-		binaryTransform(BinaryOperator.NUMERIC_ADD, commonNumbers, excluded);
-		binaryTransform(BinaryOperator.NUMERIC_DIV, commonNumbers, excluded);
-		binaryTransform(BinaryOperator.NUMERIC_MUL, commonNumbers, excluded);
-		binaryTransform(BinaryOperator.NUMERIC_SUB, commonNumbers, excluded);
-		binaryTransform(BinaryOperator.NUMERIC_MOD, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_NON_OVERFLOWING_MUL, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_NON_OVERFLOWING_SUB, commonNumbers, excluded);
+		binaryTransform(BinaryOperator.NUMERIC_NON_OVERFLOWING_MOD, commonNumbers, excluded);
 
 		binaryTransformSecond(BinaryOperator.TYPE_CAST, (l, r) -> {
 			ExternalSet<Type> set = domain.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);

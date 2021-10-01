@@ -17,14 +17,14 @@ import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
- * The basic integer constant propagation abstract domain, tracking if a certain
- * integer value has constant value or not, implemented as a
- * {@link BaseNonRelationalValueDomain}, handling top and bottom values for the
- * expression evaluation and bottom values for the expression satisfiability.
- * Top and bottom cases for least upper bounds, widening and less or equals
- * operations are handled by {@link BaseLattice} in {@link BaseLattice#lub},
- * {@link BaseLattice#widening} and {@link BaseLattice#lessOrEqual},
- * respectively.
+ * The overflow-insensitive basic integer constant propagation abstract domain,
+ * tracking if a certain integer value has constant value or not, implemented as
+ * a {@link BaseNonRelationalValueDomain}, handling top and bottom values for
+ * the expression evaluation and bottom values for the expression
+ * satisfiability. Top and bottom cases for least upper bounds, widening and
+ * less or equals operations are handled by {@link BaseLattice} in
+ * {@link BaseLattice#lub}, {@link BaseLattice#widening} and
+ * {@link BaseLattice#lessOrEqual}, respectively.
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
@@ -118,9 +118,17 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 			IntegerConstantPropagation right, ProgramPoint pp) {
 
 		switch (operator) {
-		case NUMERIC_ADD:
+		case NUMERIC_NON_OVERFLOWING_ADD:
+		case NUMERIC_8BIT_ADD:
+		case NUMERIC_16BIT_ADD:
+		case NUMERIC_32BIT_ADD:
+		case NUMERIC_64BIT_ADD:
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value + right.value);
-		case NUMERIC_DIV:
+		case NUMERIC_NON_OVERFLOWING_DIV:
+		case NUMERIC_8BIT_DIV:
+		case NUMERIC_16BIT_DIV:
+		case NUMERIC_32BIT_DIV:
+		case NUMERIC_64BIT_DIV:
 			if (!left.isTop() && left.value == 0)
 				return new IntegerConstantPropagation(0);
 			else if (!right.isTop() && right.value == 0)
@@ -129,11 +137,22 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 				return top();
 			else
 				return new IntegerConstantPropagation(left.value / right.value);
-		case NUMERIC_MOD:
+		case NUMERIC_NON_OVERFLOWING_MOD:
+		case NUMERIC_8BIT_MOD:
+		case NUMERIC_16BIT_MOD:
+		case NUMERIC_32BIT_MOD:
+		case NUMERIC_64BIT_MOD:
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value % right.value);
-		case NUMERIC_MUL:
+		case NUMERIC_NON_OVERFLOWING_MUL:
+		case NUMERIC_8BIT_MUL:
+		case NUMERIC_16BIT_MUL:
+		case NUMERIC_32BIT_MUL:
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value * right.value);
-		case NUMERIC_SUB:
+		case NUMERIC_NON_OVERFLOWING_SUB:
+		case NUMERIC_8BIT_SUB:
+		case NUMERIC_16BIT_SUB:
+		case NUMERIC_32BIT_SUB:
+		case NUMERIC_64BIT_SUB:
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value - right.value);
 		default:
 			return top();

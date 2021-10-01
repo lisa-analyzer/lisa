@@ -59,7 +59,7 @@ public class Multiplication extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_MUL,
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_MUL,
 						getLocation()),
 				this);
 	}

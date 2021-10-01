@@ -74,7 +74,8 @@ public class IntervalTest {
 			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32.INSTANCE, val2, pp.getLocation()), pp);
 			IntInterval exp = aval1.interval.plus(aval2.interval);
 			assertEquals("eval(" + val1 + " + " + val2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_ADD, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -87,7 +88,8 @@ public class IntervalTest {
 			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32.INSTANCE, val2, pp.getLocation()), pp);
 			IntInterval exp = aval1.interval.diff(aval2.interval);
 			assertEquals("eval(" + val1 + " - " + val2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_SUB, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_SUB, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -100,7 +102,8 @@ public class IntervalTest {
 			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32.INSTANCE, val2, pp.getLocation()), pp);
 			IntInterval exp = aval1.interval.mul(aval2.interval);
 			assertEquals("eval(" + val1 + " * " + val2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_MUL, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_MUL, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -113,7 +116,8 @@ public class IntervalTest {
 			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32.INSTANCE, val2, pp.getLocation()), pp);
 			IntInterval exp = aval1.interval.div(aval2.interval, false, false);
 			assertEquals("eval(" + val1 + " / " + val2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_DIV, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -333,7 +337,8 @@ public class IntervalTest {
 			Interval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.interval.plus(aval2.interval);
 			assertEquals("eval(" + aval1 + " + " + aval2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_ADD, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -348,7 +353,8 @@ public class IntervalTest {
 			Interval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.interval.diff(aval2.interval);
 			assertEquals("eval(" + aval1 + " - " + aval2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_SUB, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_SUB, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -363,7 +369,8 @@ public class IntervalTest {
 			Interval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.interval.mul(aval2.interval);
 			assertEquals("eval(" + aval1 + " * " + aval2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_MUL, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_MUL, aval1, aval2,
+							pp).interval);
 		}
 	}
 
@@ -378,7 +385,8 @@ public class IntervalTest {
 			Interval aval2 = mk(val3, val4);
 			IntInterval exp = aval1.interval.div(aval2.interval, false, false);
 			assertEquals("eval(" + aval1 + " / " + aval2 + ") did not return " + exp, exp,
-					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_DIV, aval1, aval2, pp).interval);
+					singleton.evalBinaryExpression(BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV, aval1, aval2,
+							pp).interval);
 		}
 	}
 

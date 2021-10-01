@@ -59,7 +59,7 @@ public class Addition extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_ADD,
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD,
 						getLocation()),
 				this);
 	}

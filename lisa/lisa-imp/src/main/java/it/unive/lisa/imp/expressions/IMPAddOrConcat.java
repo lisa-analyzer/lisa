@@ -71,7 +71,7 @@ public class IMPAddOrConcat extends BinaryNativeCall {
 						op = null;
 				else if (tleft.isNumericType())
 					if (tright.isNumericType() || tright.isUntyped())
-						op = BinaryOperator.NUMERIC_ADD;
+						op = BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD;
 					else
 						op = null;
 				else if (tleft.isUntyped())
@@ -80,7 +80,7 @@ public class IMPAddOrConcat extends BinaryNativeCall {
 					else if (tright.isNumericType() || tright.isUntyped())
 						// arbitrary choice: if both are untyped, we consider it
 						// as a numeric sum
-						op = BinaryOperator.NUMERIC_ADD;
+						op = BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD;
 					else
 						op = null;
 				else

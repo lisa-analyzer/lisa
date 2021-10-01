@@ -59,7 +59,7 @@ public class Division extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_DIV,
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV,
 						getLocation()),
 				this);
 	}

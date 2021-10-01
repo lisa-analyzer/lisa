@@ -59,7 +59,7 @@ public class Remainder extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_MOD,
+						BinaryOperator.NUMERIC_NON_OVERFLOWING_MOD,
 						getLocation()),
 				this);
 	}
