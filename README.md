@@ -6,8 +6,8 @@
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/UniVE-SSV/lisa/Gradle%20Build/master)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/UniVE-SSV/lisa?include_prereleases&sort=semver&color=brightgreen)
 ![GitHub last commit](https://img.shields.io/github/last-commit/UniVE-SSV/lisa)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.unive-ssv/lisa?color=brightgreen)](https://search.maven.org/artifact/com.github.unive-ssv/lisa)
-[![Javadoc](https://javadoc.io/badge2/com.github.unive-ssv/lisa/javadoc.svg)](https://javadoc.io/doc/com.github.unive-ssv/lisa)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.unive-ssv/lisa-sdk?color=brightgreen)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk)
+[![Javadoc](https://javadoc.io/badge2/com.github.unive-ssv/lisa/javadoc.svg)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk)
 
 LiSA (Library for Static Analysis) aims to ease the creation and implementation of static analyzers based on the Abstract Interpretation theory.
 LiSA provides an analysis engine that works on a generic and extensible control flow graph representation of the program to analyze. Abstract interpreters in LiSA are built 
@@ -30,11 +30,12 @@ We foresee at least five alpha releases that are meant as intermediate building 
 
 | Version | Release date | Contents |
 | --- | --- | --- |
-| [0.1a1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a1) | Oct. 19, 2020 | First draft of the prototype of the structure of the library, with syntactic checkers (no lattices, semantic domain, call graphs, …) |
-| [0.1a2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a2) | Dec. 11, 2020 | Complete prototype of the structure of the library, including the definition of call graphs and heap abstractions, type hierarchy, and type inference |
-| [0.1a3](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a3) | Feb. 16, 2021 | Program structure, inference systems, dataflow analysis |
-| [0.1a4](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a4) | Apr. 8, 2021 | Heap analyses: type-based, program point-based, field sensitive program point-based |
+| [0.1b2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b2) | Oct. 1, 2021 | Project splitting, default statement and types, more symbolic operators |
 | [0.1b1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b1) | Aug. 25, 2021 | Interprocedural analyses, annotations |
+| [0.1a4](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a4) | Apr. 8, 2021 | Heap analyses: type-based, program point-based, field sensitive program point-based |
+| [0.1a3](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a3) | Feb. 16, 2021 | Program structure, inference systems, dataflow analysis |
+| [0.1a2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a2) | Dec. 11, 2020 | Complete prototype of the structure of the library, including the definition of call graphs and heap abstractions, type hierarchy, and type inference |
+| [0.1a1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a1) | Oct. 19, 2020 | First draft of the prototype of the structure of the library, with syntactic checkers (no lattices, semantic domain, call graphs, …) |
 
 ### Next steps
 

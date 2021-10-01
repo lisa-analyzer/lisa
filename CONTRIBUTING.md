@@ -26,7 +26,7 @@ Contributions to LiSA are always welcome! Thank you for taking time to make LiSA
 	+ Commit related to an issue should start with the issue identifier: `#issuenbr fixing ...`.
 	+ The commit message should be short and intuitive. If you feel the need for a longer explaination, separate the title of the commit from the full description with an empty line, and the fully elaborate your commit message.
 + Make sure you have added the necessary tests for your changes under in `src/test/java`.
-+ Run a complete build with `gradle build` before creating a pull request! This will ensure that LiSA still builds fine and that all of the tests are passing.
++ Run a complete build with `gradle completeBuild` before creating a pull request! This will ensure that LiSA still builds fine and that all of the tests are passing.
 
 ## Submitting Changes ##
 
