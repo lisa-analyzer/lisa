@@ -1,6 +1,6 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import it.unive.lisa.program.cfg.statement.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 
 /**
  * An exception that occurred while resolving an {@link UnresolvedCall}.

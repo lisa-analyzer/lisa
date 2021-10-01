@@ -1,14 +1,5 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.imp.types.BoolType;
-import it.unive.lisa.imp.types.IntType;
-import it.unive.lisa.imp.types.StringType;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -17,13 +8,12 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.NativeCall;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.TernaryNativeCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
+import it.unive.lisa.program.cfg.statement.string.Substring;
+import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.StringType;
 
 /**
  * The native construct representing the substring operation. This construct can
@@ -45,20 +35,20 @@ public class StringSubstring extends NativeCFG {
 	public StringSubstring(CodeLocation location, CompilationUnit stringUnit) {
 		super(new CFGDescriptor(location, stringUnit, true, "substring", BoolType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "start", IntType.INSTANCE),
-				new Parameter(location, "end", IntType.INSTANCE)),
+				new Parameter(location, "start", Int32.INSTANCE),
+				new Parameter(location, "end", Int32.INSTANCE)),
 				IMPStringSubstring.class);
 	}
 
 	/**
 	 * An expression modeling the string substring operation. The type of the
 	 * first operand must be {@link StringType}, while the other two operands'
-	 * types must be {@link IntType}. The type of this expression is the
+	 * types must be {@link Int32}. The type of this expression is the
 	 * {@link StringType}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public static class IMPStringSubstring extends TernaryNativeCall implements PluggableStatement {
+	public static class IMPStringSubstring extends Substring implements PluggableStatement {
 
 		/**
 		 * Builds a new instance of this native call, according to the
@@ -70,15 +60,13 @@ public class StringSubstring extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static NativeCall build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringSubstring build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringSubstring(cfg, location, params[0], params[1], params[2]);
 		}
 
-		private Statement original;
-
 		@Override
 		public void setOriginatingStatement(Statement st) {
-			original = st;
+			originating = st;
 		}
 
 		/**
@@ -109,27 +97,7 @@ public class StringSubstring extends NativeCFG {
 		 */
 		public IMPStringSubstring(CFG cfg, CodeLocation location, Expression left, Expression middle,
 				Expression right) {
-			super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> ternarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
-						SymbolicExpression leftExp,
-						AnalysisState<A, H, V> middleState, SymbolicExpression middleExp,
-						AnalysisState<A, H, V> rightState, SymbolicExpression rightExp) throws SemanticException {
-			// we allow untyped for the type inference phase
-			if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-			if (!middleExp.getDynamicType().isNumericType() && !middleExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-			if (!rightExp.getDynamicType().isNumericType() && !rightExp.getDynamicType().isUntyped())
-				return entryState.bottom();
-
-			return rightState.smallStepSemantics(new TernaryExpression(getRuntimeTypes(), leftExp, middleExp, rightExp,
-					TernaryOperator.STRING_SUBSTRING, getLocation()), original);
+			super(cfg, location, left, middle, right);
 		}
 	}
 }

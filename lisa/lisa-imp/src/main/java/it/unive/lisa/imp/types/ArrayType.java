@@ -17,7 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ArrayType implements it.unive.lisa.type.ArrayType {
+public final class ArrayType implements it.unive.lisa.type.ArrayType {
 
 	private static final Map<Pair<Type, Integer>, ArrayType> types = new HashMap<>();
 

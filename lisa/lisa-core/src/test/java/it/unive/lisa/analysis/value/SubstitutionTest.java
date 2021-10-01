@@ -13,10 +13,10 @@ import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.types.IntType;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -129,13 +129,13 @@ public class SubstitutionTest {
 		}
 	};
 
-	private final Variable x = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "x",
+	private final Variable x = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "x",
 			SyntheticLocation.INSTANCE);
-	private final Variable y = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "y",
+	private final Variable y = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "y",
 			SyntheticLocation.INSTANCE);
-	private final Variable z = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "z",
+	private final Variable z = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "z",
 			SyntheticLocation.INSTANCE);
-	private final Variable w = new Variable(Caches.types().mkSingletonSet(IntType.INSTANCE), "w",
+	private final Variable w = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "w",
 			SyntheticLocation.INSTANCE);
 	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
 

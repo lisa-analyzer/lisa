@@ -1,5 +1,5 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<o = new int[](6)<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
+	"node0" [shape="rect",color="black",label=<o = new int32[](6)<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
 	"node1" [shape="rect",color="gray",label=<[](o, 0) = 0<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19: [0, 0]<BR/>i: [0, +Inf] ]]<BR/>}} -&gt; [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19]>];
 	"node2" [shape="rect",color="gray",label=<i = 0<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19] ]]<BR/>value [[ i: [0, 0] ]]<BR/>}} -&gt; [i]>];
 	"node3" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/heap/point-based-heap/field-insensitive/program.imp':35:19: [0, 0]<BR/>i: [0, +Inf] ]]<BR/>}} -&gt; [true]>];

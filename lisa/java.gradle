@@ -64,6 +64,12 @@ tasks.register('allTests') {
 	dependsOn test, cron
 }
 
+tasks.register('completeBuild') {
+    description = 'build + cron + checkCodeStyle'
+    group = 'build'
+	dependsOn build, cron, checkCodeStyle
+}
+
 jacocoTestReport {
 	// TODO: depend also on cron
     dependsOn test // tests are required to run before generating the report
