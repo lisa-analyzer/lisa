@@ -246,8 +246,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *                    evaluated
 	 * 
 	 * @return the evaluation of the push-any expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) {
+	protected InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -347,9 +349,12 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *                  evaluated
 	 * 
 	 * @return the evaluation of the type conversion expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp) {
+	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
+			throws SemanticException {
 		T bot = bottom();
 		return conv.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
@@ -367,9 +372,12 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *                  evaluated
 	 * 
 	 * @return the evaluation of the type cast expression
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp) {
+	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
+			throws SemanticException {
 		T bot = bottom();
 		return cast.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
@@ -417,8 +425,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) {
+	protected Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -434,8 +444,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesPushAny(PushAny pushAny, T state) {
+	protected Satisfiability satisfiesPushAny(PushAny pushAny, T state) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -453,8 +465,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) {
+	protected Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -473,8 +487,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp) {
+	protected Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp)
+			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -498,8 +515,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp) {
+	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
+			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -528,9 +548,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right, T state,
-			ProgramPoint pp) {
+			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -560,9 +582,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 *             either impossible to determine if it satisfied, or if it is
 	 *             satisfied by some values and not by some others (this is
 	 *             equivalent to a TOP boolean value)
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
-			ProgramPoint pp) {
+			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -608,8 +632,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @param other the other inferred value
 	 * 
 	 * @return the greatest lower bound between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected T glbAux(T other) {
+	protected T glbAux(T other) throws SemanticException {
 		return bottom();
 	}
 }

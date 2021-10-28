@@ -14,7 +14,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A
@@ -92,8 +91,13 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 				() -> domain.kill(expression, pp, (D) this));
 	}
 
+	private interface SemanticElementsSupplier<E> {
+		Collection<E> get() throws SemanticException;
+	}
+
 	@SuppressWarnings("unchecked")
-	private D update(BooleanSupplier guard, Supplier<Collection<E>> gen, Supplier<Collection<E>> kill) {
+	private D update(BooleanSupplier guard, SemanticElementsSupplier<E> gen, SemanticElementsSupplier<E> kill)
+			throws SemanticException {
 		if (isBottom())
 			return (D) this;
 
