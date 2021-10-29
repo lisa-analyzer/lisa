@@ -30,6 +30,7 @@ We foresee at least five alpha releases that are meant as intermediate building 
 
 | Version | Release date | Contents |
 | --- | --- | --- |
+| [0.1b3](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b3) | Oct. 29, 2021 | Additions of missing accessors and constructors, exposing call resolution information to semantic checks |
 | [0.1b2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b2) | Oct. 1, 2021 | Project splitting, default statement and types, more symbolic operators |
 | [0.1b1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b1) | Aug. 25, 2021 | Interprocedural analyses, annotations |
 | [0.1a4](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a4) | Apr. 8, 2021 | Heap analyses: type-based, program point-based, field sensitive program point-based |

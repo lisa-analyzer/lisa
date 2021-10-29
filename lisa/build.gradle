@@ -13,7 +13,7 @@ allprojects {
     }
     
     group = 'it.unive'
-    version = '0.1b2'
+    version = '0.1b3'
 
     // the code reading data from the git repo has to be placed in the same file where its
     // plugin is applied, otherwise it will fail to load the classes from it. We export the
