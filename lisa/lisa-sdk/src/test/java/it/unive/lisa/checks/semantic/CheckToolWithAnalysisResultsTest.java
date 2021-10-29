@@ -17,15 +17,23 @@ import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
+import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Collection;
 import java.util.Collections;
@@ -46,6 +54,36 @@ public class CheckToolWithAnalysisResultsTest {
 			false,
 			"faa");
 	private static final CFG cfg2 = new CFG(descriptor2);
+
+	private static final CallGraph fakeCallGraph = new CallGraph() {
+		@Override
+		public Call resolve(UnresolvedCall call) throws CallResolutionException {
+			return null;
+		}
+
+		@Override
+		public void registerCall(CFGCall call) {
+		}
+
+		@Override
+		public void init(Program program) throws CallGraphConstructionException {
+		}
+
+		@Override
+		public Collection<CodeMember> getCallers(CodeMember cm) {
+			return null;
+		}
+
+		@Override
+		public Collection<CodeMember> getCallees(CodeMember cm) {
+			return null;
+		}
+
+		@Override
+		public Collection<Call> getCallSites(CodeMember cm) {
+			return null;
+		}
+	};
 
 	private static Warning build(CheckTool tool, Object target, String message) {
 		if (target == null) {
@@ -76,7 +114,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testCopy() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -99,13 +137,13 @@ public class CheckToolWithAnalysisResultsTest {
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp,
-				new CheckToolWithAnalysisResults<>(tool, Map.of()).getWarnings()));
+				new CheckToolWithAnalysisResults<>(tool, Map.of(), fakeCallGraph).getWarnings()));
 	}
 
 	@Test
 	public void testSimpleFill() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -121,7 +159,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testDisjointWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -135,7 +173,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testDuplicateWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of());
+				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -167,7 +205,7 @@ public class CheckToolWithAnalysisResultsTest {
 
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
 				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(
-						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)));
+						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)), fakeCallGraph);
 
 		assertEquals(res1, tool.getResultOf(cfg).iterator().next());
 		assertEquals(res2, tool.getResultOf(cfg2).iterator().next());
