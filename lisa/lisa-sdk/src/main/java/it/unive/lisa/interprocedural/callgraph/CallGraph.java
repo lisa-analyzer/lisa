@@ -2,6 +2,7 @@ package it.unive.lisa.interprocedural.callgraph;
 
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import java.util.Collection;
