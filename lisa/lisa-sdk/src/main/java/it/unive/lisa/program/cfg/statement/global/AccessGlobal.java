@@ -50,6 +50,25 @@ public class AccessGlobal extends Expression {
 		this.target = target;
 	}
 
+	/**
+	 * Yields the {@link Unit} where the global targeted by this access is
+	 * defined.
+	 * 
+	 * @return the container of the global
+	 */
+	public Unit getContainer() {
+		return container;
+	}
+
+	/**
+	 * Yields the {@link Global} targeted by this expression.
+	 * 
+	 * @return the global
+	 */
+	public Global getTarget() {
+		return target;
+	}
+
 	@Override
 	public int setOffset(int offset) {
 		return this.offset = offset;
