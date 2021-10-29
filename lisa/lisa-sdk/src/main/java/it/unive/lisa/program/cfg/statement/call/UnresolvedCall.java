@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -150,7 +151,28 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
 			boolean instanceCall, String targetName, Expression... parameters) {
-		super(cfg, location, Untyped.INSTANCE, parameters);
+		this(cfg, location, strategy, instanceCall, targetName, Untyped.INSTANCE, parameters);
+	}
+
+	/**
+	 * Builds the CFG call, happening at the given location in the program. The
+	 * static type of this CFGCall is the one return type of the descriptor of
+	 * {@code target}.
+	 * 
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param location     the location where the expression is defined within
+	 *                         the source file. If unknown, use {@code null}
+	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
+	 *                         this call
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not.
+	 * @param targetName   the name of the target of this call
+	 * @param staticType   the static type of this call
+	 * @param parameters   the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
+			boolean instanceCall, String targetName, Type staticType, Expression... parameters) {
+		super(cfg, location, staticType, parameters);
 		Objects.requireNonNull(targetName, "The target's name of an unresolved call cannot be null");
 		this.strategy = strategy;
 		this.targetName = targetName;
