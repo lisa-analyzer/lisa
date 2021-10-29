@@ -142,9 +142,11 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @return a new instance of this environment containing the given function,
 	 *             obtained by assigning {@code id} to {@code eval}
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected abstract M assignAux(Identifier id, E expression, Map<Identifier, T> function, T value, V eval,
-			ProgramPoint pp);
+			ProgramPoint pp) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -167,8 +169,10 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 *                 satisfied
 	 * 
 	 * @return the (possibly) updated environment
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract M assumeSatisfied(V eval);
+	protected abstract M assumeSatisfied(V eval) throws SemanticException;
 
 	/**
 	 * Performs the greatest lower bound between this environment and
@@ -206,8 +210,10 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * @param other    the other environment
 	 * 
 	 * @return the final instance of the glb
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract M glbAux(T lattice, Map<Identifier, T> function, M other);
+	protected abstract M glbAux(T lattice, Map<Identifier, T> function, M other) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")

@@ -91,8 +91,10 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return the fixed abstraction of the variable
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
 	 */
-	default T variable(Identifier id, ProgramPoint pp) {
+	default T variable(Identifier id, ProgramPoint pp) throws SemanticException {
 		return bottom();
 	}
 
