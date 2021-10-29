@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,6 +39,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	private Program program;
 
 	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
+
+	private final Map<UnresolvedCall, Call> resolvedCache = new IdentityHashMap<>();
 
 	@Override
 	public final void init(Program program) throws CallGraphConstructionException {
@@ -62,6 +65,10 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	public final Call resolve(UnresolvedCall call) throws CallResolutionException {
+		Call cached = resolvedCache.get(call);
+		if (cached != null)
+			return cached;
+
 		Collection<CFG> targets = new ArrayList<>();
 		Collection<NativeCFG> nativeTargets = new ArrayList<>();
 
@@ -126,6 +133,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
+
+		resolvedCache.put(call, resolved);
 
 		return resolved;
 	}

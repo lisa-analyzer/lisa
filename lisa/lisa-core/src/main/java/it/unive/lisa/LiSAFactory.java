@@ -16,12 +16,16 @@ import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -76,14 +80,30 @@ public final class LiSAFactory {
 		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
 		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
 		DEFAULT_PARAMETERS.put(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class });
+		DEFAULT_PARAMETERS.put(ContextBasedAnalysis.class, new Class[] { RecursionFreeToken.class });
 	}
 
 	private LiSAFactory() {
 		// this class is just a static holder
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <T> T construct(Class<T> component, Class<?>[] argTypes, Object[] params)
 			throws AnalysisSetupException {
+		if (ContextSensitivityToken.class.isAssignableFrom(component)) {
+			// tokens use the getSingleton() pattern for construction
+			try {
+				Method method = component.getMethod("getSingleton");
+				if (!Modifier.isStatic(method.getModifiers()))
+					throw new AnalysisSetupException(
+							"Unable to instantiate " + component.getSimpleName() + ": getSingleton() is not static");
+				return (T) method.invoke(null);
+			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+					| InvocationTargetException e) {
+				throw new AnalysisSetupException("Unable to instantiate " + component.getSimpleName(), e);
+			}
+		}
+
 		try {
 			Constructor<T> constructor = component.getConstructor(argTypes);
 			return constructor.newInstance(params);

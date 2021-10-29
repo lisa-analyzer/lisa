@@ -194,10 +194,13 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs) {
 		T typesState = this.typeState.top();
 		InterproceduralAnalysis<T, HT, VT> typesInterproc;
+		CallGraph typesCg;
 		try {
+			typesCg = getInstance(callGraph.getClass());
 			typesInterproc = getInstance(interproc.getClass());
-			typesInterproc.init(program, callGraph);
-		} catch (AnalysisSetupException | InterproceduralAnalysisException e) {
+			typesCg.init(program);
+			typesInterproc.init(program, typesCg);
+		} catch (AnalysisSetupException | InterproceduralAnalysisException | CallGraphConstructionException e) {
 			throw new AnalysisExecutionException("Unable to initialize type inference", e);
 		}
 

@@ -6,9 +6,11 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import java.util.Collection;
 import java.util.Map;
 
@@ -105,5 +107,22 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 	 */
 	public Collection<Call> getCallSites(CodeMember cm) {
 		return callgraph.getCallSites(cm);
+	}
+
+	/**
+	 * Yields the resolved version of the given call, according to the
+	 * {@link CallGraph} that has been built during the analysis. Yields
+	 * {@code null} if the call cannot be resolved (i.e. an exception happened).
+	 * 
+	 * @param call the call to resolve
+	 * 
+	 * @return the resolved version of the given call, or {@code null}
+	 */
+	public Call getResolvedVersion(UnresolvedCall call) {
+		try {
+			return callgraph.resolve(call);
+		} catch (CallResolutionException e) {
+			return null;
+		}
 	}
 }
