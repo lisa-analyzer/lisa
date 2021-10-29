@@ -133,12 +133,12 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	protected abstract F mk(V lattice, Map<K, V> function);
 
 	@Override
-	public F lubAux(F other) throws SemanticException {
+	protected F lubAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
-	public F wideningAux(F other) throws SemanticException {
+	protected F wideningAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
@@ -249,7 +249,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
-	public boolean lessOrEqualAux(F other) throws SemanticException {
+	protected boolean lessOrEqualAux(F other) throws SemanticException {
 		for (K key : function.keySet())
 			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
 				return false;

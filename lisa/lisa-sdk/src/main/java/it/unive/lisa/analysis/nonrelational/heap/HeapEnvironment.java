@@ -127,7 +127,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> lubAux(HeapEnvironment<T> other) throws SemanticException {
+	protected HeapEnvironment<T> lubAux(HeapEnvironment<T> other) throws SemanticException {
 		HeapEnvironment<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
@@ -136,7 +136,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> wideningAux(HeapEnvironment<T> other) throws SemanticException {
+	protected HeapEnvironment<T> wideningAux(HeapEnvironment<T> other) throws SemanticException {
 		HeapEnvironment<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
@@ -145,7 +145,7 @@ public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
+	protected boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 		// TODO how do we check the substitutions?

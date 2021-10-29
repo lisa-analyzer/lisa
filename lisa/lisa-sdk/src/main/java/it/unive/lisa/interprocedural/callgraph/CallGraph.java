@@ -1,11 +1,8 @@
 package it.unive.lisa.interprocedural.callgraph;
 
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import java.util.Collection;
 
@@ -29,15 +26,7 @@ public interface CallGraph {
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
-	 * of the given {@link UnresolvedCall}. This method will return:
-	 * <ul>
-	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
-	 * {@link UnresolvedCall#getTargetName()} is found. The returned
-	 * {@link CFGCall} will be linked to all the possible runtime targets
-	 * matching {@link UnresolvedCall#getTargetName()};</li>
-	 * <li>an {@link OpenCall}, if no {@link CFG} matching
-	 * {@link UnresolvedCall#getTargetName()} is found.</li>
-	 * </ul>
+	 * of the given {@link UnresolvedCall}.
 	 * 
 	 * @param call the call to resolve
 	 * 

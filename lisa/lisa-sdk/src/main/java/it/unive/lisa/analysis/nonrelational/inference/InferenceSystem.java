@@ -121,7 +121,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> lubAux(InferenceSystem<T> other) throws SemanticException {
+	protected InferenceSystem<T> lubAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
@@ -129,7 +129,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
+	protected InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
@@ -137,7 +137,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public boolean lessOrEqualAux(InferenceSystem<T> other) throws SemanticException {
+	protected boolean lessOrEqualAux(InferenceSystem<T> other) throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 

@@ -147,8 +147,10 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * @param receiver an expression
 	 * 
 	 * @return the possible types of the given expression
+	 * 
+	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver);
+	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver) throws CallResolutionException;
 
 	@Override
 	public Collection<CodeMember> getCallees(CodeMember cm) {
