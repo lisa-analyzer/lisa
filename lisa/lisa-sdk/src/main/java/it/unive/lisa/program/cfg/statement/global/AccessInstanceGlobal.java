@@ -54,6 +54,25 @@ public class AccessInstanceGlobal extends Expression {
 		receiver.setParentStatement(this);
 	}
 
+	/**
+	 * Yields the expression that determines the receiver of the global access
+	 * defined by this expression.
+	 * 
+	 * @return the receiver of the access
+	 */
+	public Expression getReceiver() {
+		return receiver;
+	}
+
+	/**
+	 * Yields the instance {@link Global} targeted by this expression.
+	 * 
+	 * @return the global
+	 */
+	public Global getTarget() {
+		return target;
+	}
+
 	@Override
 	public int setOffset(int offset) {
 		return this.offset = offset;
