@@ -15,7 +15,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -90,7 +89,10 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * computes an analysis state that abstracts the execution of the possible
 	 * targets considering that they were given {@code parameters} as actual
 	 * parameters. The abstract value of each parameter is computed on
-	 * {@code entryState}.
+	 * {@code entryState}.<br>
+	 * <br>
+	 * Note that the interprocedural analysis is also responsible for
+	 * registering the call to the {@link CallGraph}, if needed.
 	 *
 	 * @param call       the call to resolve and evaluate
 	 * @param entryState the abstract analysis state when the call is reached
@@ -111,15 +113,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
-	 * of the given {@link UnresolvedCall}. This method will return:
-	 * <ul>
-	 * <li>a {@link CFGCall}, if at least one {@link CFG} that matches
-	 * {@link UnresolvedCall#getTargetName()} is found. The returned
-	 * {@link CFGCall} will be linked to all the possible runtime targets
-	 * matching {@link UnresolvedCall#getTargetName()};</li>
-	 * <li>an {@link OpenCall}, if no {@link CFG} matching
-	 * {@link UnresolvedCall#getTargetName()} is found.</li>
-	 * </ul>
+	 * of the given {@link UnresolvedCall}. This method will forward the call to
+	 * {@link CallGraph#resolve(UnresolvedCall)} if needed.
 	 *
 	 * @param unresolvedCall the call to resolve
 	 *

@@ -43,7 +43,7 @@ public class LiSAConfiguration {
 	/**
 	 * The collection of semantic checks to execute
 	 */
-	private final Collection<SemanticCheck> semanticChecks;
+	private final Collection<SemanticCheck<?, ?, ?>> semanticChecks;
 
 	/**
 	 * The callgraph to use during the analysis
@@ -179,7 +179,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration addSemanticCheck(SemanticCheck check) {
+	public LiSAConfiguration addSemanticCheck(SemanticCheck<?, ?, ?> check) {
 		semanticChecks.add(check);
 		return this;
 	}
@@ -192,7 +192,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration addSemanticChecks(Collection<SemanticCheck> checks) {
+	public LiSAConfiguration addSemanticChecks(Collection<SemanticCheck<?, ?, ?>> checks) {
 		semanticChecks.addAll(checks);
 		return this;
 	}
@@ -469,7 +469,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the semantic checks
 	 */
-	public Collection<SemanticCheck> getSemanticChecks() {
+	public Collection<SemanticCheck<?, ?, ?>> getSemanticChecks() {
 		return semanticChecks;
 	}
 
@@ -672,7 +672,7 @@ public class LiSAConfiguration {
 				.append(semanticChecks.size())
 				.append(" semantic checks to execute")
 				.append((semanticChecks.isEmpty() ? "" : ":"));
-		for (SemanticCheck check : semanticChecks)
+		for (SemanticCheck<?, ?, ?> check : semanticChecks)
 			res.append("\n      ")
 					.append(check.getClass().getSimpleName());
 		return res.toString();

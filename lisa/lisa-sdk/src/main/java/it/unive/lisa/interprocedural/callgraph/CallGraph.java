@@ -49,6 +49,13 @@ public interface CallGraph {
 	Call resolve(UnresolvedCall call) throws CallResolutionException;
 
 	/**
+	 * Registers an already resolved {@link CFGCall} in this {@link CallGraph}.
+	 * 
+	 * @param call the call to register
+	 */
+	void registerCall(CFGCall call);
+
+	/**
 	 * Yields all the {@link CodeMember}s that call the given one. The returned
 	 * collection might contain partial results if this call graph is not fully
 	 * built.
@@ -69,4 +76,15 @@ public interface CallGraph {
 	 * @return the collection of called code members
 	 */
 	Collection<CodeMember> getCallees(CodeMember cm);
+
+	/**
+	 * Yields all the {@link Call}s that targets the given {@link CodeMember}.
+	 * The returned collection might contain partial results if this call graph
+	 * is not fully built.
+	 * 
+	 * @param cm the target code member
+	 * 
+	 * @return the collection of calls that target the code member
+	 */
+	Collection<Call> getCallSites(CodeMember cm);
 }

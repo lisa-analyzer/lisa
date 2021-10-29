@@ -1,13 +1,11 @@
 package it.unive.lisa.cron.nonInterference;
 
-import static it.unive.lisa.LiSAFactory.getDefaultFor;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
-import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.SimpleAbstractState;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
@@ -30,8 +28,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	@Test
 	public void testConfidentialityNI() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class), new NonInterference()))
+				.setAbstractState(
+						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/confidentiality", "program.imp", conf);
 	}
@@ -39,8 +37,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	@Test
 	public void testIntegrityNI() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class), new NonInterference()))
+				.setAbstractState(
+						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/integrity", "program.imp", conf);
 	}
@@ -48,42 +46,60 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	@Test
 	public void testDeclassification() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class), new NonInterference()))
+				.setAbstractState(
+						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
 				.setCallGraph(new RTACallGraph())
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/interproc", "program.imp", conf);
 	}
 
-	private static class NICheck implements SemanticCheck {
+	private static class NICheck
+			implements SemanticCheck<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+					MonolithicHeap, InferenceSystem<NonInterference>> {
 
 		@Override
-		public void beforeExecution(CheckToolWithAnalysisResults<?, ?, ?> tool) {
+		public void beforeExecution(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool) {
 		}
 
 		@Override
-		public void afterExecution(CheckToolWithAnalysisResults<?, ?, ?> tool) {
+		public void afterExecution(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool) {
 		}
 
 		@Override
-		public boolean visitCompilationUnit(CheckToolWithAnalysisResults<?, ?, ?> tool, CompilationUnit unit) {
+		public boolean visitCompilationUnit(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CompilationUnit unit) {
 			return true;
 		}
 
 		@Override
-		public void visitGlobal(CheckToolWithAnalysisResults<?, ?, ?> tool, Unit unit, Global global,
+		public void visitGlobal(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				Unit unit, Global global,
 				boolean instance) {
 		}
 
 		@Override
-		public boolean visit(CheckToolWithAnalysisResults<?, ?, ?> tool, CFG graph) {
+		public boolean visit(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CFG graph) {
 			return true;
 		}
 
 		@Override
 		@SuppressWarnings({ "unchecked" })
-		public boolean visit(CheckToolWithAnalysisResults<?, ?, ?> tool, CFG graph, Statement node) {
+		public boolean visit(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
@@ -119,7 +135,10 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		}
 
 		@Override
-		public boolean visit(CheckToolWithAnalysisResults<?, ?, ?> tool, CFG graph, Edge edge) {
+		public boolean visit(
+				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
+						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CFG graph, Edge edge) {
 			return true;
 		}
 

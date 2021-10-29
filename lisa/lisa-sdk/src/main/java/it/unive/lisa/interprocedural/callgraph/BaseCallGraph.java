@@ -16,6 +16,9 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,9 +37,27 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	private Program program;
 
+	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
+
 	@Override
 	public final void init(Program program) throws CallGraphConstructionException {
 		this.program = program;
+	}
+
+	@Override
+	public void registerCall(CFGCall call) {
+		CallGraphNode source = new CallGraphNode(this, call.getCFG());
+		if (!adjacencyMatrix.containsNode(source))
+			addNode(source, program.getEntryPoints().contains(call.getCFG()));
+
+		for (CFG cfg : call.getTargets()) {
+			callsites.computeIfAbsent(cfg, cm -> new HashSet<>()).add(call);
+
+			CallGraphNode t = new CallGraphNode(this, cfg);
+			if (!adjacencyMatrix.containsNode(t))
+				addNode(t, program.getEntryPoints().contains(call.getCFG()));
+			addEdge(new CallGraphEdge(source, t));
+		}
 	}
 
 	@Override
@@ -95,6 +116,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, program.getEntryPoints().contains(call.getCFG()));
 			addEdge(new CallGraphEdge(source, t));
+			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
 		for (NativeCFG target : nativeTargets) {
@@ -102,6 +124,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, false);
 			addEdge(new CallGraphEdge(source, t));
+			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
 		return resolved;
@@ -128,6 +151,11 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	public Collection<CodeMember> getCallers(CodeMember cm) {
 		return predecessorsOf(new CallGraphNode(this, cm)).stream().map(CallGraphNode::getCodeMember)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Collection<Call> getCallSites(CodeMember cm) {
+		return callsites.get(cm);
 	}
 
 	@Override

@@ -224,6 +224,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		token = token.popToken();
 
+		callgraph.registerCall(call);
+
 		return result;
 	}
 
