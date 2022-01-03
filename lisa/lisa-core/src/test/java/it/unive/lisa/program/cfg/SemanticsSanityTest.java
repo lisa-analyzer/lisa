@@ -30,6 +30,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -54,6 +55,7 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.StringType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -129,7 +131,7 @@ public class SemanticsSanityTest {
 							throws SemanticException {
 				return entryState
 						.smallStepSemantics(
-								new Variable(getRuntimeTypes(), "fake", new SourceCodeLocation("unknown", 0, 0)), fake);
+								new Variable(Caches.types().mkSingletonSet(Untyped.INSTANCE), "fake", new SourceCodeLocation("unknown", 0, 0)), fake);
 			}
 		};
 	}
