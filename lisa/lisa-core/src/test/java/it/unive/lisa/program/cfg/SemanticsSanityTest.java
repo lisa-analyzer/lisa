@@ -131,7 +131,9 @@ public class SemanticsSanityTest {
 							throws SemanticException {
 				return entryState
 						.smallStepSemantics(
-								new Variable(Caches.types().mkSingletonSet(Untyped.INSTANCE), "fake", new SourceCodeLocation("unknown", 0, 0)), fake);
+								new Variable(Caches.types().mkSingletonSet(Untyped.INSTANCE), "fake",
+										new SourceCodeLocation("unknown", 0, 0)),
+								fake);
 			}
 		};
 	}
