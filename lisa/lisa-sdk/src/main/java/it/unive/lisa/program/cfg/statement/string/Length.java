@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -74,7 +74,7 @@ public class Length extends UnaryNativeCall {
 				new UnaryExpression(
 						Caches.types().mkSingletonSet(Int32.INSTANCE),
 						expr,
-						UnaryOperator.STRING_LENGTH,
+						StringLength.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

@@ -5,6 +5,10 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.operator.NegatableOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -63,13 +67,16 @@ public class UnaryExpression extends ValueExpression {
 
 	@Override
 	public ValueExpression removeNegations() {
-		if (operator == UnaryOperator.LOGICAL_NOT && expression instanceof BinaryExpression) {
+		if (operator instanceof LogicalNegation && expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 			ValueExpression left = (ValueExpression) binary.getLeft();
 			ValueExpression right = (ValueExpression) binary.getRight();
 			BinaryOperator op = binary.getOperator();
+			BinaryOperator oppositeOp = op instanceof NegatableOperator
+					? (BinaryOperator) ((NegatableOperator) op).opposite()
+					: op;
 			return new BinaryExpression(binary.getTypes(), left.removeNegations(), right.removeNegations(),
-					(BinaryOperator) op.opposite(), getCodeLocation());
+					oppositeOp, getCodeLocation());
 		}
 
 		return this;

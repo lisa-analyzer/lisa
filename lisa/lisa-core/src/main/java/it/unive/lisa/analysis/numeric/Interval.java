@@ -9,11 +9,23 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.AdditionOperator;
+import it.unive.lisa.symbolic.value.operator.DivisionOperator;
+import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
+import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 
@@ -95,16 +107,15 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
-		switch (operator) {
-		case NUMERIC_NEG:
+		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
-			return new Interval(arg.interval.mul(IntInterval.MINUS_ONE));
-		case STRING_LENGTH:
+			else
+				return new Interval(arg.interval.mul(IntInterval.MINUS_ONE));
+		else if (operator == StringLength.INSTANCE)
 			return new Interval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
-		default:
+		else
 			return top();
-		}
 	}
 
 	private boolean is(int n) {
@@ -113,48 +124,30 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 	@Override
 	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
-		if (operator != BinaryOperator.NUMERIC_NON_OVERFLOWING_DIV && (left.isTop() || right.isTop()))
+		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
 			return top();
 
-		switch (operator) {
-		case NUMERIC_NON_OVERFLOWING_ADD:
-		case NUMERIC_8BIT_ADD:
-		case NUMERIC_16BIT_ADD:
-		case NUMERIC_32BIT_ADD:
-		case NUMERIC_64BIT_ADD:
+		if (operator instanceof AdditionOperator)
 			return new Interval(left.interval.plus(right.interval));
-		case NUMERIC_NON_OVERFLOWING_SUB:
-		case NUMERIC_8BIT_SUB:
-		case NUMERIC_16BIT_SUB:
-		case NUMERIC_32BIT_SUB:
-		case NUMERIC_64BIT_SUB:
+		else if (operator instanceof SubtractionOperator)
 			return new Interval(left.interval.diff(right.interval));
-		case NUMERIC_NON_OVERFLOWING_MUL:
-		case NUMERIC_8BIT_MUL:
-		case NUMERIC_16BIT_MUL:
-		case NUMERIC_32BIT_MUL:
-		case NUMERIC_64BIT_MUL:
+		else if (operator instanceof Multiplication)
 			if (left.is(0) || right.is(0))
 				return ZERO;
-			return new Interval(left.interval.mul(right.interval));
-		case NUMERIC_NON_OVERFLOWING_DIV:
-		case NUMERIC_8BIT_DIV:
-		case NUMERIC_16BIT_DIV:
-		case NUMERIC_32BIT_DIV:
-		case NUMERIC_64BIT_DIV:
+			else
+				return new Interval(left.interval.mul(right.interval));
+		else if (operator instanceof DivisionOperator)
 			if (right.is(0))
 				return bottom();
-			if (left.is(0))
+			else if (left.is(0))
 				return ZERO;
-			if (left.isTop() || right.isTop())
+			else if (left.isTop() || right.isTop())
 				return top();
-
-			return new Interval(left.interval.div(right.interval, false, false));
-		default:
-			return top();
-		}
+			else
+				return new Interval(left.interval.div(right.interval, false, false));
+		return top();
 	}
 
 	@Override
@@ -202,8 +195,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
-		switch (operator) {
-		case COMPARISON_EQ:
+		if (operator == ComparisonEq.INSTANCE) {
 			Interval glb = null;
 			try {
 				glb = left.glb(right);
@@ -216,12 +208,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			else if (left.interval.isSingleton() && left.equals(right))
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
-		case COMPARISON_GE:
-			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LE, right, left, pp);
-		case COMPARISON_GT:
-			return satisfiesBinaryExpression(BinaryOperator.COMPARISON_LT, right, left, pp);
-		case COMPARISON_LE:
-			glb = null;
+		} else if (operator == ComparisonGe.INSTANCE)
+			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
+		else if (operator == ComparisonGt.INSTANCE)
+			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp);
+		else if (operator == ComparisonLe.INSTANCE) {
+			Interval glb = null;
 			try {
 				glb = left.glb(right);
 			} catch (SemanticException e) {
@@ -235,8 +227,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			if (glb.interval.isSingleton() && left.interval.getHigh().compareTo(right.interval.getLow()) == 0)
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
-		case COMPARISON_LT:
-			glb = null;
+		} else if (operator == ComparisonLt.INSTANCE) {
+			Interval glb = null;
 			try {
 				glb = left.glb(right);
 			} catch (SemanticException e) {
@@ -246,8 +238,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			if (glb.isBottom())
 				return Satisfiability.fromBoolean(left.interval.getHigh().compareTo(right.interval.getLow()) < 0);
 			return Satisfiability.UNKNOWN;
-		case COMPARISON_NE:
-			glb = null;
+		} else if (operator == ComparisonNe.INSTANCE) {
+			Interval glb = null;
 			try {
 				glb = left.glb(right);
 			} catch (SemanticException e) {
@@ -256,9 +248,8 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			if (glb.isBottom())
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
-		default:
-			return Satisfiability.UNKNOWN;
 		}
+		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
@@ -314,31 +305,29 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		Interval inf_high = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh());
 		Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, eval.interval.getHigh().subtract(MathNumber.ONE));
 
-		switch (operator) {
-		case COMPARISON_EQ:
+		if (operator == ComparisonEq.INSTANCE)
 			return environment.putState(id, eval);
-		case COMPARISON_GE:
+		else if (operator == ComparisonGe.INSTANCE)
 			if (rightIsExpr)
 				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
 			else
 				return environment.putState(id, inf_high);
-		case COMPARISON_GT:
+		else if (operator == ComparisonGt.INSTANCE)
 			if (rightIsExpr)
 				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
 			else
 				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
-		case COMPARISON_LE:
+		else if (operator == ComparisonLe.INSTANCE)
 			if (rightIsExpr)
 				return environment.putState(id, inf_high);
 			else
 				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
-		case COMPARISON_LT:
+		else if (operator == ComparisonLt.INSTANCE)
 			if (rightIsExpr)
 				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
 			else
 				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
-		default:
+		else
 			return environment;
-		}
 	}
 }

@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -88,7 +88,7 @@ public class Substring extends TernaryNativeCall {
 						leftExp,
 						middleExp,
 						rightExp,
-						TernaryOperator.STRING_SUBSTRING,
+						StringSubstring.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

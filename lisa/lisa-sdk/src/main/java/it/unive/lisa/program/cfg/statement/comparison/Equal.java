@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
 import it.unive.lisa.type.common.BoolType;
 
 /**
@@ -52,7 +52,7 @@ public class Equal extends BinaryNativeCall {
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						left,
 						right,
-						BinaryOperator.COMPARISON_EQ,
+						ComparisonEq.INSTANCE,
 						getLocation()),
 				this);
 	}

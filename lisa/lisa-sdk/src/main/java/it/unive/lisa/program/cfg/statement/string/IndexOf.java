@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -82,7 +82,7 @@ public class IndexOf extends BinaryNativeCall {
 						Caches.types().mkSingletonSet(Int32.INSTANCE),
 						leftExp,
 						rightExp,
-						BinaryOperator.STRING_INDEX_OF,
+						StringIndexOf.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

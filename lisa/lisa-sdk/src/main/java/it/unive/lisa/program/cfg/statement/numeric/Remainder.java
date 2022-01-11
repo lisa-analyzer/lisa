@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingMod;
 import it.unive.lisa.type.NumericType;
 
 /**
@@ -59,7 +59,7 @@ public class Remainder extends BinaryNativeCall {
 						getRuntimeTypes(),
 						left,
 						right,
-						BinaryOperator.NUMERIC_NON_OVERFLOWING_MOD,
+						NumericNonOverflowingMod.INSTANCE,
 						getLocation()),
 				this);
 	}
