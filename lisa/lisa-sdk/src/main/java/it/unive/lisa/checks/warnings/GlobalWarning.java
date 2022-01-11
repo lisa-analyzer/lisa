@@ -40,7 +40,7 @@ public class GlobalWarning extends WarningWithLocation {
 	 * 
 	 * @return the global
 	 */
-	public final Unit getUnit() {
+	public Unit getUnit() {
 		return unit;
 	}
 
@@ -49,7 +49,7 @@ public class GlobalWarning extends WarningWithLocation {
 	 * 
 	 * @return the global
 	 */
-	public final Global getGlobal() {
+	public Global getGlobal() {
 		return global;
 	}
 

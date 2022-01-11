@@ -74,7 +74,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public final S glb(S other) throws SemanticException {
+	public S glb(S other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
 			return (S) this;

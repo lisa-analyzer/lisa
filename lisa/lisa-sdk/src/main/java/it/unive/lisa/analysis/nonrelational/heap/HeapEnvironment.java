@@ -28,7 +28,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <T> the concrete instance of the {@link NonRelationalHeapDomain} whose
  *                instances are mapped in this environment
  */
-public final class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
+public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		extends Environment<HeapEnvironment<T>, SymbolicExpression, T, T> implements HeapDomain<HeapEnvironment<T>> {
 
 	/**

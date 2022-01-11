@@ -116,7 +116,7 @@ public abstract class ControlFlowStructure {
 	 * @return the minimum distance, in terms of number of edges to traverse,
 	 *             between the condition and the given node
 	 */
-	public final int distance(Statement st) {
+	public int distance(Statement st) {
 		if (st == condition)
 			return 0;
 
@@ -133,7 +133,7 @@ public abstract class ControlFlowStructure {
 	 * 
 	 * @return the matrix containing the full structure
 	 */
-	public final AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
+	public AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
 		AdjacencyMatrix<Statement, Edge, CFG> complete = new AdjacencyMatrix<>();
 
 		// add all nodes

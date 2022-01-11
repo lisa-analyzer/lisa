@@ -15,7 +15,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class BoolType implements BooleanType {
+public class BoolType implements BooleanType {
 
 	/**
 	 * The singleton instance of this class.
@@ -41,12 +41,12 @@ public final class BoolType implements BooleanType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		return other instanceof BooleanType;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return BooleanType.class.getName().hashCode();
 	}
 

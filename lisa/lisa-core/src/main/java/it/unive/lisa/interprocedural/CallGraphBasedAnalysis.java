@@ -41,13 +41,13 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	protected Program program;
 
 	@Override
-	public final void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
+	public void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.program = program;
 	}
 
 	@Override
-	public final Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException {
+	public Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException {
 		return callgraph.resolve(unresolvedCall);
 	}
 
@@ -62,7 +62,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	protected final AnalysisState<A, H, V> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V> entryState, CFG cfg)
+	protected AnalysisState<A, H, V> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V> entryState, CFG cfg)
 			throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
 

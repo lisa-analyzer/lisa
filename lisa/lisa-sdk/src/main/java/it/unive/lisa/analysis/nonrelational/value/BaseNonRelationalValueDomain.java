@@ -123,7 +123,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	}
 
 	@Override
-	public final Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment,
+	public Satisfiability satisfies(ValueExpression expression, ValueEnvironment<T> environment,
 			ProgramPoint pp) throws SemanticException {
 		if (expression instanceof Identifier)
 			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp);
@@ -192,7 +192,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	}
 
 	@Override
-	public final T eval(ValueExpression expression, ValueEnvironment<T> environment, ProgramPoint pp)
+	public T eval(ValueExpression expression, ValueEnvironment<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new EvaluationVisitor(), environment, pp);
 	}
@@ -533,7 +533,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	}
 
 	@Override
-	public final ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
+	public ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
 			ProgramPoint pp) throws SemanticException {
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;

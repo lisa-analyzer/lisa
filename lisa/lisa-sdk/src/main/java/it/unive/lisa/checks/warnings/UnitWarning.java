@@ -34,7 +34,7 @@ public class UnitWarning extends WarningWithLocation {
 	 * 
 	 * @return the unit
 	 */
-	public final Unit getUnit() {
+	public Unit getUnit() {
 		return unit;
 	}
 

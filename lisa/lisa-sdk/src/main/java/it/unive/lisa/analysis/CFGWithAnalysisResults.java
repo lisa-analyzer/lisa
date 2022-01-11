@@ -118,7 +118,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public final AnalysisState<A, H, V> getAnalysisStateBefore(Statement st) throws SemanticException {
+	public AnalysisState<A, H, V> getAnalysisStateBefore(Statement st) throws SemanticException {
 		if (getEntrypoints().contains(st))
 			return entryStates.getState(st);
 		return lub(predecessorsOf(st), false);
@@ -131,7 +131,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public final AnalysisState<A, H, V> getAnalysisStateAfter(Statement st) {
+	public AnalysisState<A, H, V> getAnalysisStateAfter(Statement st) {
 		return results.getState(st);
 	}
 
@@ -142,7 +142,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public final AnalysisState<A, H, V> getEntryState() throws SemanticException {
+	public AnalysisState<A, H, V> getEntryState() throws SemanticException {
 		return lub(this.getEntrypoints(), true);
 	}
 
@@ -153,7 +153,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public final AnalysisState<A, H, V> getExitState() throws SemanticException {
+	public AnalysisState<A, H, V> getExitState() throws SemanticException {
 		return lub(this.getNormalExitpoints(), false);
 	}
 

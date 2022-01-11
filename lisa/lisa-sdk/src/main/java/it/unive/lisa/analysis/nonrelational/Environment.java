@@ -78,7 +78,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
+	public M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
 		if (isBottom())
 			return (M) this;
 
@@ -150,7 +150,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M assume(E expression, ProgramPoint pp) throws SemanticException {
+	public M assume(E expression, ProgramPoint pp) throws SemanticException {
 		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
@@ -186,7 +186,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public final M glb(M other) throws SemanticException {
+	public M glb(M other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
 			return glbAux(lattice, function, other);
@@ -217,7 +217,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 
@@ -228,7 +228,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * {@code isTop()} holds and its function is {@code null}.
 	 */
 	@Override
-	public final boolean isTop() {
+	public boolean isTop() {
 		return lattice.isTop() && function == null;
 	}
 
@@ -239,7 +239,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * {@code isBottom()} holds and its function is {@code null}.
 	 */
 	@Override
-	public final boolean isBottom() {
+	public boolean isBottom() {
 		return lattice.isBottom() && function == null;
 	}
 
@@ -302,7 +302,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final M forgetIdentifier(Identifier id) throws SemanticException {
+	public M forgetIdentifier(Identifier id) throws SemanticException {
 		if (isTop() || isBottom())
 			return (M) this;
 

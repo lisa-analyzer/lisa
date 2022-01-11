@@ -14,7 +14,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final L lub(L other) throws SemanticException {
+	public L lub(L other) throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -46,7 +46,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final L widening(L other) throws SemanticException {
+	public L widening(L other) throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -77,7 +77,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	protected abstract L wideningAux(L other) throws SemanticException;
 
 	@Override
-	public final boolean lessOrEqual(L other) throws SemanticException {
+	public boolean lessOrEqual(L other) throws SemanticException {
 		if (other == null)
 			return false;
 

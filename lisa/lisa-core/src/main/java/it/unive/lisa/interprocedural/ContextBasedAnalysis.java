@@ -82,7 +82,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final void fixpoint(
+	public void fixpoint(
 			AnalysisState<A, H, V> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold)
@@ -150,7 +150,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
 		if (results.contains(cfg))
 			return results.getState(cfg).getAll();
 		else
@@ -169,7 +169,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
+	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException {
 		ScopeToken scope = new ScopeToken(call);

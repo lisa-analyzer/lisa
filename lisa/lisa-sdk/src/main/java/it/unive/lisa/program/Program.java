@@ -184,7 +184,7 @@ public class Program extends Unit {
 	 * shrink the memory fingerprint of the program.
 	 */
 	@Override
-	public final void validateAndFinalize() throws ProgramValidationException {
+	public void validateAndFinalize() throws ProgramValidationException {
 		// shrink memory fingerprint
 		types = null;
 

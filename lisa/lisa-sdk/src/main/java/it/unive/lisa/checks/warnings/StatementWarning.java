@@ -30,7 +30,7 @@ public class StatementWarning extends WarningWithLocation {
 	 * 
 	 * @return the statement
 	 */
-	public final Statement getStatement() {
+	public Statement getStatement() {
 		return statement;
 	}
 
