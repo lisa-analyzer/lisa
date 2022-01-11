@@ -50,7 +50,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	public void registerCall(CFGCall call) {
-		if (call.getOriginating() != null)
+		if (call.getSource() != null)
 			// this call has been generated through the resolution of an
 			// UnresolvedCall, and that one has already been registered
 			return;
@@ -119,7 +119,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					call.getParameters());
 
 		resolved.setOffset(call.getOffset());
-		resolved.setOriginating(call);
+		resolved.setSource(call);
 		resolvedCache.put(call, resolved);
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());

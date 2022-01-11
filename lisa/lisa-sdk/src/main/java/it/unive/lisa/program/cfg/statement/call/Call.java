@@ -38,7 +38,7 @@ public abstract class Call extends Expression {
 	/**
 	 * The original {@link UnresolvedCall} that has been resolved to this one
 	 */
-	private UnresolvedCall originating = null;
+	private UnresolvedCall source = null;
 
 	/**
 	 * Builds a call happening at the given source location.
@@ -81,8 +81,8 @@ public abstract class Call extends Expression {
 	 * 
 	 * @return the call that this one originated from
 	 */
-	public final UnresolvedCall getOriginating() {
-		return originating;
+	public final UnresolvedCall getSource() {
+		return source;
 	}
 
 	/**
@@ -96,10 +96,10 @@ public abstract class Call extends Expression {
 	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
 	 * </ul>
 	 * 
-	 * @param originating the call that this one originated from
+	 * @param source the call that this one originated from
 	 */
-	public final void setOriginating(UnresolvedCall originating) {
-		this.originating = originating;
+	public final void setSource(UnresolvedCall source) {
+		this.source = source;
 	}
 
 	@Override
