@@ -54,7 +54,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			// this call has been generated through the resolution of an
 			// UnresolvedCall, and that one has already been registered
 			return;
-		
+
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
@@ -141,7 +141,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
-		
+
 		return resolved;
 	}
 
