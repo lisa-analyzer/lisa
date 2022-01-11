@@ -23,7 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <T> the concrete instance of the {@link NonRelationalValueDomain}
  *                whose instances are mapped in this environment
  */
-public final class ValueEnvironment<T extends NonRelationalValueDomain<T>>
+public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		extends Environment<ValueEnvironment<T>, ValueExpression, T, T> implements ValueDomain<ValueEnvironment<T>> {
 
 	/**

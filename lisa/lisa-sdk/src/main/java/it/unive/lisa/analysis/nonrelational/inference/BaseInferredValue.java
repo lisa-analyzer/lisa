@@ -142,7 +142,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	}
 
 	@Override
-	public final Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	public Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		if (expression instanceof Identifier) {
 			InferredPair<T> eval = evalIdentifier((Identifier) expression, environment, pp);
@@ -219,7 +219,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	}
 
 	@Override
-	public final InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	public InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new EvaluationVisitor(), environment, pp);
 	}
@@ -607,7 +607,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final T glb(T other) throws SemanticException {
+	public T glb(T other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
 			return (T) this;

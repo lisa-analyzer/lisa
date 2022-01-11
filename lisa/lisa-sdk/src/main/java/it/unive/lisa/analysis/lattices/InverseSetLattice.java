@@ -56,7 +56,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	protected abstract S mk(Set<E> set);
 
 	@Override
-	protected final S lubAux(S other) throws SemanticException {
+	protected S lubAux(S other) throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
 		lub.retainAll(other.elements);
 		return mk(lub);
@@ -73,7 +73,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public final S glb(S other) throws SemanticException {
+	public S glb(S other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
 				|| this.lessOrEqual(other))
 			return (S) this;
@@ -97,7 +97,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	}
 
 	@Override
-	protected final boolean lessOrEqualAux(S other) throws SemanticException {
+	protected boolean lessOrEqualAux(S other) throws SemanticException {
 		return elements.containsAll(other.elements);
 	}
 

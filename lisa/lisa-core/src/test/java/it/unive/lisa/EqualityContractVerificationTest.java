@@ -48,6 +48,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesResolution;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -69,11 +72,14 @@ import it.unive.lisa.util.numeric.MathNumber;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.junit.AfterClass;
@@ -97,6 +103,10 @@ public class EqualityContractVerificationTest {
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
+	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, StaticTypesResolution.INSTANCE, false,
+			"foo");
+	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, StaticTypesResolution.INSTANCE, false,
+			"bar");
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
@@ -169,6 +179,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
+				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
 
 		if (getClass)
@@ -246,20 +257,28 @@ public class EqualityContractVerificationTest {
 		// suppress nullity: the verifier will try to pass in a code location
 		// with null fields (not possible) and this would cause warnings
 
+		List<String> statementFields = List.of("cfg", "offset");
+		List<String> expressionFields = ListUtils.union(statementFields,
+				List.of("runtimeTypes", "parent", "metaVariables"));
+
 		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
 			// the ignored fields are either mutable or auxiliary
-			if (Expression.class.isAssignableFrom(st))
+			if (Expression.class.isAssignableFrom(st)) {
+				List<String> extra = new LinkedList<>();
 				if (PluggableStatement.class.isAssignableFrom(st)
 						// string statements are already pluggable-friendly
 						|| st.getPackageName().equals("it.unive.lisa.program.cfg.statement.string"))
-					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
-							"metaVariables", "originating"), Warning.NULL_FIELDS);
-				else
-					verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset", "runtimeTypes", "parent",
-							"metaVariables"), Warning.NULL_FIELDS);
-			else
-				verify(st, verifier -> verifier.withIgnoredFields("cfg", "offset"), Warning.NULL_FIELDS);
+					extra.add("originating");
+				if (Call.class.isAssignableFrom(st))
+					extra.add("source");
+				verify(st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
+						Warning.NULL_FIELDS);
+			} else
+				verify(st, verifier -> verifier.withIgnoredFields(statementFields.toArray(String[]::new)),
+						Warning.NULL_FIELDS);
 	}
 
 	@Test

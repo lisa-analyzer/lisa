@@ -170,6 +170,7 @@ public class HybridCall extends Call {
 		if (!targets.isEmpty()) {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), qualifiedName, getTargets(), getParameters());
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
+			cfgcall.setSource(getSource());
 			result = cfgcall.callSemantics(entryState, interprocedural, computedStates, params);
 			getMetaVariables().addAll(cfgcall.getMetaVariables());
 		}
@@ -177,6 +178,7 @@ public class HybridCall extends Call {
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NativeCall rewritten = nat.rewrite(this, getParameters());
+				rewritten.setSource(getSource());
 				result = result.lub(rewritten.callSemantics(entryState, interprocedural, computedStates, params));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {

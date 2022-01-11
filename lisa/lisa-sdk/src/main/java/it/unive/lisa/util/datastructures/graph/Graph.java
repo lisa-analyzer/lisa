@@ -330,7 +330,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	protected final Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
+	protected Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
 		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());

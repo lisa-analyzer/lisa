@@ -15,7 +15,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class StringType implements it.unive.lisa.type.StringType {
+public class StringType implements it.unive.lisa.type.StringType {
 
 	/**
 	 * The singleton instance of this class.
@@ -41,12 +41,12 @@ public final class StringType implements it.unive.lisa.type.StringType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		return other instanceof it.unive.lisa.type.StringType;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return it.unive.lisa.type.StringType.class.getName().hashCode();
 	}
 

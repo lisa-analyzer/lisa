@@ -16,6 +16,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -43,12 +44,17 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	private final Map<UnresolvedCall, Call> resolvedCache = new IdentityHashMap<>();
 
 	@Override
-	public final void init(Program program) throws CallGraphConstructionException {
+	public void init(Program program) throws CallGraphConstructionException {
 		this.program = program;
 	}
 
 	@Override
 	public void registerCall(CFGCall call) {
+		if (call.getSource() != null)
+			// this call has been generated through the resolution of an
+			// UnresolvedCall, and that one has already been registered
+			return;
+
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
@@ -64,7 +70,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	@Override
-	public final Call resolve(UnresolvedCall call) throws CallResolutionException {
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
 		if (cached != null)
 			return cached;
@@ -113,6 +119,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					call.getParameters());
 
 		resolved.setOffset(call.getOffset());
+		resolved.setSource(call);
+		resolvedCache.put(call, resolved);
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
@@ -133,8 +141,6 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
-
-		resolvedCache.put(call, resolved);
 
 		return resolved;
 	}
@@ -166,7 +172,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
-		return callsites.get(cm);
+		return callsites.getOrDefault(cm, Collections.emptyList());
 	}
 
 	@Override

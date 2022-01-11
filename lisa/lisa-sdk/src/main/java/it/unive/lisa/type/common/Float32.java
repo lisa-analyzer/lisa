@@ -26,7 +26,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class Float32 implements NumericType {
+public class Float32 implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
@@ -85,7 +85,7 @@ public final class Float32 implements NumericType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		if (!(other instanceof NumericType))
 			return false;
 
@@ -93,7 +93,7 @@ public final class Float32 implements NumericType {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return Float32.class.getName().hashCode();
 	}
 

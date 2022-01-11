@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -35,6 +36,11 @@ public abstract class Call extends Expression {
 	private final Expression[] parameters;
 
 	/**
+	 * The original {@link UnresolvedCall} that has been resolved to this one
+	 */
+	private UnresolvedCall source = null;
+
+	/**
 	 * Builds a call happening at the given source location.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
@@ -60,6 +66,40 @@ public abstract class Call extends Expression {
 	 */
 	public final Expression[] getParameters() {
 		return parameters;
+	}
+
+	/**
+	 * Yields the call that this call originated from, if any. A call <i>r</i>
+	 * originates from a call <i>u</i> if:
+	 * <ul>
+	 * <li><i>u</i> is an {@link UnresolvedCall}, while <i>r</i> is not,
+	 * and</li>
+	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
+	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
+	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * </ul>
+	 * 
+	 * @return the call that this one originated from
+	 */
+	public final UnresolvedCall getSource() {
+		return source;
+	}
+
+	/**
+	 * Sets the call that this call originated from. A call <i>r</i> originates
+	 * from a call <i>u</i> if:
+	 * <ul>
+	 * <li><i>u</i> is an {@link UnresolvedCall}, while <i>r</i> is not,
+	 * and</li>
+	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
+	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
+	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * </ul>
+	 * 
+	 * @param source the call that this one originated from
+	 */
+	public final void setSource(UnresolvedCall source) {
+		this.source = source;
 	}
 
 	@Override

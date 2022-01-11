@@ -69,7 +69,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final void fixpoint(AnalysisState<A, H, V> entryState,
+	public void fixpoint(AnalysisState<A, H, V> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(), "Computing fixpoint over the whole program",
@@ -91,12 +91,12 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public final Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
 		return Collections.singleton(results.get(cfg).orElse(null));
 	}
 
 	@Override
-	public final AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
+	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException {
 		if (call.getStaticType().isVoidType())

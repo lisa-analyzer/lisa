@@ -13,7 +13,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public final class NullType implements PointerType {
+public class NullType implements PointerType {
 
 	/**
 	 * Unique instance of {@link NullType}.
@@ -29,12 +29,12 @@ public final class NullType implements PointerType {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		return other instanceof NullType;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return NullType.class.hashCode();
 	}
 

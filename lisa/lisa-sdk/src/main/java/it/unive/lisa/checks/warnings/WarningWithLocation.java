@@ -31,13 +31,13 @@ public abstract class WarningWithLocation extends Warning {
 	 * 
 	 * @return the location of this warning
 	 */
-	public final String getLocation() {
-		return location.toString();
+	public final CodeLocation getLocation() {
+		return location;
 	}
 
 	/**
-	 * Yields the location where this warning was reported, surrounded by square
-	 * brackets.
+	 * Yields the string representation of the location where this warning was
+	 * reported, surrounded by square brackets.
 	 * 
 	 * @return the location of this warning surrounded by brackets
 	 */

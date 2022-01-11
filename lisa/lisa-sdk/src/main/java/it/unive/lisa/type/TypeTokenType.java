@@ -11,7 +11,7 @@ import java.util.TreeSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class TypeTokenType implements Type {
+public class TypeTokenType implements Type {
 
 	private final ExternalSet<Type> types;
 
@@ -42,7 +42,7 @@ public final class TypeTokenType implements Type {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
@@ -50,7 +50,7 @@ public final class TypeTokenType implements Type {
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

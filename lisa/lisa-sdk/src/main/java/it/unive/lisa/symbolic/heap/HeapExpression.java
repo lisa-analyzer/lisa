@@ -32,13 +32,13 @@ public abstract class HeapExpression extends SymbolicExpression {
 
 	// By default a heap expression does not change the scope.
 	@Override
-	public final SymbolicExpression pushScope(ScopeToken token) {
+	public SymbolicExpression pushScope(ScopeToken token) {
 		return this;
 	}
 
 	// By default a heap expression does not change the scope.
 	@Override
-	public final SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		return this;
 	}
 }

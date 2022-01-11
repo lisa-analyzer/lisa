@@ -12,7 +12,7 @@ import java.util.Collection;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public final class Untyped implements Type {
+public class Untyped implements Type {
 
 	/**
 	 * Unique instance of Untyped type.
@@ -28,12 +28,12 @@ public final class Untyped implements Type {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public final boolean equals(Object other) {
 		return other instanceof Untyped;
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		return Untyped.class.hashCode();
 	}
 

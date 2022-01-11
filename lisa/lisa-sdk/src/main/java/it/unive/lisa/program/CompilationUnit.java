@@ -560,7 +560,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * {@link CFGDescriptor#overrides()}.
 	 */
 	@Override
-	public final void validateAndFinalize() throws ProgramValidationException {
+	public void validateAndFinalize() throws ProgramValidationException {
 		if (hierarchyComputed)
 			return;
 

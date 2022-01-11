@@ -38,7 +38,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public final H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof HeapExpression)
 			return semanticsOf((HeapExpression) expression, pp);
 
@@ -120,7 +120,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	protected abstract static class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(UnaryExpression expression,
+		public ExpressionSet<ValueExpression> visit(UnaryExpression expression,
 				ExpressionSet<ValueExpression> arg,
 				Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
@@ -131,7 +131,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(BinaryExpression expression,
+		public ExpressionSet<ValueExpression> visit(BinaryExpression expression,
 				ExpressionSet<ValueExpression> left,
 				ExpressionSet<ValueExpression> right, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
@@ -143,7 +143,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(TernaryExpression expression,
+		public ExpressionSet<ValueExpression> visit(TernaryExpression expression,
 				ExpressionSet<ValueExpression> left,
 				ExpressionSet<ValueExpression> middle, ExpressionSet<ValueExpression> right, Object... params)
 				throws SemanticException {
@@ -157,18 +157,18 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Skip expression, Object... params) throws SemanticException {
+		public ExpressionSet<ValueExpression> visit(Skip expression, Object... params) throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
 				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Constant expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(Constant expression, Object... params)
 				throws SemanticException {
 			return new ExpressionSet<>(expression);
 		}

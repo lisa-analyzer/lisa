@@ -88,7 +88,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public final String toString() {
+	public String toString() {
 		if (left instanceof Environment && right instanceof Environment) {
 			Environment<?, ?, ?, ?> leftEnv = (Environment<?, ?, ?, ?>) left;
 			Environment<?, ?, ?, ?> rightEnv = (Environment<?, ?, ?, ?>) right;
@@ -129,33 +129,33 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	protected abstract C mk(T1 left, T2 right);
 
 	@Override
-	public final DomainRepresentation representation() {
+	public DomainRepresentation representation() {
 		return new PairRepresentation(left.representation(), right.representation());
 	}
 
 	@Override
-	public final C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
+	public C assign(I id, E expression, ProgramPoint pp) throws SemanticException {
 		T1 newLeft = left.assign(id, expression, pp);
 		T2 newRight = right.assign(id, expression, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public final C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
+	public C smallStepSemantics(E expression, ProgramPoint pp) throws SemanticException {
 		T1 newLeft = left.smallStepSemantics(expression, pp);
 		T2 newRight = right.smallStepSemantics(expression, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public final C assume(E expression, ProgramPoint pp) throws SemanticException {
+	public C assume(E expression, ProgramPoint pp) throws SemanticException {
 		T1 newLeft = left.assume(expression, pp);
 		T2 newRight = right.assume(expression, pp);
 		return mk(newLeft, newRight);
 	}
 
 	@Override
-	public final C forgetIdentifier(Identifier id) throws SemanticException {
+	public C forgetIdentifier(Identifier id) throws SemanticException {
 		T1 newLeft = left.forgetIdentifier(id);
 		T2 newRight = right.forgetIdentifier(id);
 		return mk(newLeft, newRight);
@@ -177,27 +177,27 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public final Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
 		return left.satisfies(expression, pp).and(right.satisfies(expression, pp));
 	}
 
 	@Override
-	public final C lub(C other) throws SemanticException {
+	public C lub(C other) throws SemanticException {
 		return mk(left.lub(other.left), right.lub(other.right));
 	}
 
 	@Override
-	public final C widening(C other) throws SemanticException {
+	public C widening(C other) throws SemanticException {
 		return mk(left.widening(other.left), right.widening(other.right));
 	}
 
 	@Override
-	public final boolean lessOrEqual(C other) throws SemanticException {
+	public boolean lessOrEqual(C other) throws SemanticException {
 		return left.lessOrEqual(other.left) && right.lessOrEqual(other.right);
 	}
 
 	@Override
-	public final C top() {
+	public C top() {
 		return mk(left.top(), right.top());
 	}
 
@@ -207,7 +207,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public final C bottom() {
+	public C bottom() {
 		return mk(left.bottom(), right.bottom());
 	}
 
