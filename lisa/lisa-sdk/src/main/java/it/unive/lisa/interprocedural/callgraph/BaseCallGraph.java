@@ -16,6 +16,7 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -49,6 +50,11 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	public void registerCall(CFGCall call) {
+		if (call.getOriginating() != null)
+			// this call has been generated through the resolution of an
+			// UnresolvedCall, and that one has already been registered
+			return;
+		
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
@@ -113,6 +119,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					call.getParameters());
 
 		resolved.setOffset(call.getOffset());
+		resolved.setOriginating(call);
+		resolvedCache.put(call, resolved);
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
@@ -133,9 +141,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
-
-		resolvedCache.put(call, resolved);
-
+		
 		return resolved;
 	}
 
@@ -166,7 +172,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
-		return callsites.get(cm);
+		return callsites.getOrDefault(cm, Collections.emptyList());
 	}
 
 	@Override
