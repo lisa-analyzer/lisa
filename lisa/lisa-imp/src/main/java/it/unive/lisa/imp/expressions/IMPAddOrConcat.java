@@ -1,3 +1,4 @@
+
 package it.unive.lisa.imp.expressions;
 
 import it.unive.lisa.analysis.AbstractState;
@@ -13,7 +14,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.StringType;
@@ -66,21 +69,21 @@ public class IMPAddOrConcat extends BinaryNativeCall {
 			for (Type tright : right.getTypes()) {
 				if (tleft.isStringType())
 					if (tright.isStringType() || tright.isUntyped())
-						op = BinaryOperator.STRING_CONCAT;
+						op = StringConcat.INSTANCE;
 					else
 						op = null;
 				else if (tleft.isNumericType())
 					if (tright.isNumericType() || tright.isUntyped())
-						op = BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD;
+						op = NumericNonOverflowingAdd.INSTANCE;
 					else
 						op = null;
 				else if (tleft.isUntyped())
 					if (tright.isStringType())
-						op = BinaryOperator.STRING_CONCAT;
+						op = StringConcat.INSTANCE;
 					else if (tright.isNumericType() || tright.isUntyped())
 						// arbitrary choice: if both are untyped, we consider it
 						// as a numeric sum
-						op = BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD;
+						op = NumericNonOverflowingAdd.INSTANCE;
 					else
 						op = null;
 				else
@@ -91,7 +94,7 @@ public class IMPAddOrConcat extends BinaryNativeCall {
 
 				result = result.lub(rightState.smallStepSemantics(
 						new BinaryExpression(
-								op == BinaryOperator.STRING_CONCAT
+								op == StringConcat.INSTANCE
 										? Caches.types().mkSingletonSet(StringType.INSTANCE)
 										: getRuntimeTypes(),
 								left,

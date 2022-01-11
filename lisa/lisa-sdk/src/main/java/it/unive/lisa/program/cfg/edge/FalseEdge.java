@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 
 /**
  * An edge connecting two statements, that is traversed when the condition
@@ -45,7 +45,7 @@ public class FalseEdge extends Edge {
 		AnalysisState<A, H, V> result = null;
 		for (SymbolicExpression expr : exprs) {
 			AnalysisState<A, H, V> tmp = sourceState
-					.assume(new UnaryExpression(expr.getTypes(), expr, UnaryOperator.LOGICAL_NOT,
+					.assume(new UnaryExpression(expr.getTypes(), expr, LogicalNegation.INSTANCE,
 							expr.getCodeLocation()),
 							getSource());
 			if (result == null)

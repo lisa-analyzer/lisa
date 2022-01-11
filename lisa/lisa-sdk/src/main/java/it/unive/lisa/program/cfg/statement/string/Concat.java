@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -81,7 +81,7 @@ public class Concat extends BinaryNativeCall {
 						Caches.types().mkSingletonSet(StringType.INSTANCE),
 						leftExp,
 						rightExp,
-						BinaryOperator.STRING_CONCAT,
+						StringConcat.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

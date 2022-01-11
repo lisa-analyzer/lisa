@@ -11,17 +11,22 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
+import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 /**
  * Base implementation for {@link NonRelationalValueDomain}s. This class extends
@@ -76,10 +81,10 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			if (right.isBottom())
 				return right;
 
-			if (expression.getOperator() == BinaryOperator.TYPE_CAST)
+			if (expression.getOperator() == TypeCast.INSTANCE)
 				return evalTypeCast(expression, left, right, (ProgramPoint) params[1]);
 
-			if (expression.getOperator() == BinaryOperator.TYPE_CONV)
+			if (expression.getOperator() == TypeConv.INSTANCE)
 				return evalTypeConv(expression, left, right, (ProgramPoint) params[1]);
 
 			return evalBinaryExpression(expression.getOperator(), left, right, (ProgramPoint) params[1]);
@@ -137,7 +142,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 
-			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT)
+			if (unary.getOperator() == LogicalNegation.INSTANCE)
 				return satisfies((ValueExpression) unary.getExpression(), environment, pp).negate();
 			else {
 				T arg = eval((ValueExpression) unary.getExpression(), environment, pp);
@@ -151,10 +156,10 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
+			if (binary.getOperator() == LogicalAnd.INSTANCE)
 				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
 						.and(satisfies((ValueExpression) binary.getRight(), environment, pp));
-			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
+			else if (binary.getOperator() == LogicalOr.INSTANCE)
 				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
 						.or(satisfies((ValueExpression) binary.getRight(), environment, pp));
 			else {
@@ -329,8 +334,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * {@code operator} to two expressions whose abstract value are {@code left}
 	 * and {@code right}, respectively. It is guaranteed that both {@code left}
 	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
-	 * neither {@link BinaryOperator#TYPE_CAST} nor
-	 * {@link BinaryOperator#TYPE_CONV}.
+	 * neither {@link TypeCast} nor {@link TypeConv}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract
@@ -439,8 +443,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the satisfiability of a {@link UnaryExpression} applying
 	 * {@code operator} to an expression whose abstract value is {@code arg},
 	 * returning an instance of {@link Satisfiability}. It is guaranteed that
-	 * {@code operator} is not {@link UnaryOperator#LOGICAL_NOT} and {@code arg}
-	 * is not {@link #bottom()}.
+	 * {@code operator} is not {@link LogicalNegation} and {@code arg} is not
+	 * {@link #bottom()}.
 	 * 
 	 * @param operator the unary operator applied by the expression
 	 * @param arg      an instance of this abstract domain representing the
@@ -467,8 +471,8 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * {@code operator} to two expressions whose abstract values are
 	 * {@code left}, and {@code right}. This method returns an instance of
 	 * {@link Satisfiability}. It is guaranteed that {@code operator} is neither
-	 * {@link BinaryOperator#LOGICAL_AND} nor {@link BinaryOperator#LOGICAL_OR},
-	 * and that both {@code left} and {@code right} are not {@link #bottom()}.
+	 * {@link LogicalAnd} nor {@link LogicalOr}, and that both {@code left} and
+	 * {@code right} are not {@link #bottom()}.
 	 * 
 	 * @param operator the binary operator applied by the expression
 	 * @param left     an instance of this abstract domain representing the
@@ -538,7 +542,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 
-			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT) {
+			if (unary.getOperator() == LogicalNegation.INSTANCE) {
 				ValueExpression rewritten = unary.removeNegations();
 				// It is possible that the expression cannot be rewritten (e.g.,
 				// !true) hence we recursively call assume iff something changed
@@ -552,10 +556,10 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
+			if (binary.getOperator() == LogicalAnd.INSTANCE)
 				return assume(environment, (ValueExpression) binary.getLeft(), pp)
 						.glb(assume(environment, (ValueExpression) binary.getRight(), pp));
-			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
+			else if (binary.getOperator() == LogicalOr.INSTANCE)
 				return assume(environment, (ValueExpression) binary.getLeft(), pp)
 						.lub(assume(environment, (ValueExpression) binary.getRight(), pp));
 			else
@@ -604,8 +608,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * Yields the environment {@code environment} assuming that a binary
 	 * expression with operator {@code operator}, left argument {@code left},
 	 * and right argument {@code right} holds. The binary expression with binary
-	 * operator {@link BinaryOperator#LOGICAL_AND} and
-	 * {@link BinaryOperator#LOGICAL_OR} are already handled by
+	 * operator {@link LogicalAnd} and {@link LogicalOr} are already handled by
 	 * {@link BaseNonRelationalValueDomain#assume}.
 	 * 
 	 * @param environment the environment on which the expression must be

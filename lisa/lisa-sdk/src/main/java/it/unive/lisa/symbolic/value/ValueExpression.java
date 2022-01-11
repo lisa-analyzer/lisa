@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -30,8 +31,7 @@ public abstract class ValueExpression extends SymbolicExpression {
 
 	/**
 	 * Yields the same value expression removing any negation, namely the
-	 * {@link UnaryOperator#LOGICAL_NOT} operator, preserving its semantics, if
-	 * possible.
+	 * {@link LogicalNegation} operator, preserving its semantics, if possible.
 	 * 
 	 * @return the same value expression removing any negation, preserving its
 	 *             semantics

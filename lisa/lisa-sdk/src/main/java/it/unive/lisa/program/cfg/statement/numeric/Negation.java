@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.type.NumericType;
 
 /**
@@ -52,7 +52,7 @@ public class Negation extends UnaryNativeCall {
 				new UnaryExpression(
 						expr.getTypes(),
 						expr,
-						UnaryOperator.NUMERIC_NEG,
+						NumericNegation.INSTANCE,
 						getLocation()),
 				this);
 	}

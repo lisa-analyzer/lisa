@@ -10,17 +10,22 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalAnd;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
+import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
+import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 /**
  * Base implementation for {@link InferredValue}s. This class extends
@@ -81,11 +86,11 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			if (right.getInferred().isBottom())
 				return right;
 
-			if (expression.getOperator() == BinaryOperator.TYPE_CAST)
+			if (expression.getOperator() == TypeCast.INSTANCE)
 				return evalTypeCast(expression, left.getInferred(), right.getInferred(),
 						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 
-			if (expression.getOperator() == BinaryOperator.TYPE_CONV)
+			if (expression.getOperator() == TypeConv.INSTANCE)
 				return evalTypeConv(expression, left.getInferred(), right.getInferred(),
 						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 
@@ -156,7 +161,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 
-			if (unary.getOperator() == UnaryOperator.LOGICAL_NOT)
+			if (unary.getOperator() == LogicalNegation.INSTANCE)
 				return satisfies((ValueExpression) unary.getExpression(), environment, pp).negate();
 			else {
 				InferredPair<T> arg = eval((ValueExpression) unary.getExpression(), environment, pp);
@@ -171,10 +176,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
-			if (binary.getOperator() == BinaryOperator.LOGICAL_AND)
+			if (binary.getOperator() == LogicalAnd.INSTANCE)
 				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
 						.and(satisfies((ValueExpression) binary.getRight(), environment, pp));
-			else if (binary.getOperator() == BinaryOperator.LOGICAL_OR)
+			else if (binary.getOperator() == LogicalOr.INSTANCE)
 				return satisfies((ValueExpression) binary.getLeft(), environment, pp)
 						.or(satisfies((ValueExpression) binary.getRight(), environment, pp));
 			else {
@@ -315,8 +320,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * {@code operator} to two expressions whose abstract value are {@code left}
 	 * and {@code right}, respectively. It is guaranteed that both {@code left}
 	 * and {@code right} are not {@link #bottom()} and that {@code operator} is
-	 * neither {@link BinaryOperator#TYPE_CAST} nor
-	 * {@link BinaryOperator#TYPE_CONV}.
+	 * neither {@link TypeCast} nor {@link TypeConv}.
 	 * 
 	 * @param operator the operator applied by the expression
 	 * @param left     the instance of this domain representing the abstract
@@ -499,8 +503,8 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * Yields the satisfiability of a {@link UnaryExpression} applying
 	 * {@code operator} to an expression whose abstract value is {@code arg},
 	 * returning an instance of {@link Satisfiability}. It is guaranteed that
-	 * {@code operator} is not {@link UnaryOperator#LOGICAL_NOT} and {@code arg}
-	 * is not {@link #bottom()}.
+	 * {@code operator} is not {@link LogicalNegation} and {@code arg} is not
+	 * {@link #bottom()}.
 	 * 
 	 * @param operator the unary operator applied by the expression
 	 * @param arg      an instance of this abstract domain representing the
@@ -528,8 +532,8 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * {@code operator} to two expressions whose abstract values are
 	 * {@code left}, and {@code right}. This method returns an instance of
 	 * {@link Satisfiability}. It is guaranteed that {@code operator} is neither
-	 * {@link BinaryOperator#LOGICAL_AND} nor {@link BinaryOperator#LOGICAL_OR},
-	 * and that both {@code left} and {@code right} are not {@link #bottom()}.
+	 * {@link LogicalAnd} nor {@link LogicalOr}, and that both {@code left} and
+	 * {@code right} are not {@link #bottom()}.
 	 * 
 	 * @param operator the binary operator applied by the expression
 	 * @param left     an instance of this abstract domain representing the

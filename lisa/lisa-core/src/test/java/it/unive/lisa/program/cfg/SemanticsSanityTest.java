@@ -47,7 +47,8 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesResolution;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
@@ -162,7 +163,7 @@ public class SemanticsSanityTest {
 		if (param == Collection.class)
 			return Collections.emptyList();
 		if (param == ResolutionStrategy.class)
-			return ResolutionStrategy.STATIC_TYPES;
+			return StaticTypesResolution.INSTANCE;
 		if (param == Unit.class)
 			return unit;
 		if (param == CodeLocation.class)
@@ -187,6 +188,8 @@ public class SemanticsSanityTest {
 						for (int i = 0; i < params.length; i++)
 							params[i] = valueFor(types[i]);
 						Statement st = (Statement) c.newInstance(params);
+						if (st instanceof Expression)
+							((Expression) st).setRuntimeTypes(Caches.types().mkSingletonSet(Untyped.INSTANCE));
 						st.semantics(as, interprocedural, store);
 					} catch (Exception e) {
 						failures.computeIfAbsent(statement, s -> new HashMap<>())

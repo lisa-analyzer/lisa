@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.StringType;
 
@@ -82,7 +82,7 @@ public class StartsWith extends BinaryNativeCall {
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						leftExp,
 						rightExp,
-						BinaryOperator.STRING_STARTS_WITH,
+						StringStartsWith.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

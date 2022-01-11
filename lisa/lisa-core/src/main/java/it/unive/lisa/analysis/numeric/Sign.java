@@ -9,12 +9,22 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.TernaryOperator;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.AdditionOperator;
+import it.unive.lisa.symbolic.value.operator.DivisionOperator;
+import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 /**
  * The basic overflow-insensitive Sign abstract domain, tracking zero, strictly
@@ -113,8 +123,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
 	@Override
 	protected Sign evalUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
-		switch (operator) {
-		case NUMERIC_NEG:
+		if (operator == NumericNegation.INSTANCE)
 			if (arg.isPositive())
 				return NEG;
 			else if (arg.isNegative())
@@ -123,19 +132,12 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return ZERO;
 			else
 				return TOP;
-		default:
-			return TOP;
-		}
+		return TOP;
 	}
 
 	@Override
 	protected Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
-		switch (operator) {
-		case NUMERIC_NON_OVERFLOWING_ADD:
-		case NUMERIC_8BIT_ADD:
-		case NUMERIC_16BIT_ADD:
-		case NUMERIC_32BIT_ADD:
-		case NUMERIC_64BIT_ADD:
+		if (operator instanceof AdditionOperator)
 			if (left.isZero())
 				return right;
 			else if (right.isZero())
@@ -144,11 +146,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return left;
 			else
 				return top();
-		case NUMERIC_NON_OVERFLOWING_SUB:
-		case NUMERIC_8BIT_SUB:
-		case NUMERIC_16BIT_SUB:
-		case NUMERIC_32BIT_SUB:
-		case NUMERIC_64BIT_SUB:
+		else if (operator instanceof SubtractionOperator)
 			if (left.isZero())
 				return right.opposite();
 			else if (right.isZero())
@@ -157,11 +155,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return top();
 			else
 				return left;
-		case NUMERIC_NON_OVERFLOWING_DIV:
-		case NUMERIC_8BIT_DIV:
-		case NUMERIC_16BIT_DIV:
-		case NUMERIC_32BIT_DIV:
-		case NUMERIC_64BIT_DIV:
+		else if (operator instanceof DivisionOperator)
 			if (right.isZero())
 				return bottom();
 			else if (left.isZero())
@@ -171,27 +165,19 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				// +/+ = +
 				// -/- = +
 				return left.isTop() ? left : POS;
+			else
+				return top();
+		else if (operator instanceof it.unive.lisa.symbolic.value.operator.Module)
 			return top();
-		case NUMERIC_NON_OVERFLOWING_MOD:
-		case NUMERIC_8BIT_MOD:
-		case NUMERIC_16BIT_MOD:
-		case NUMERIC_32BIT_MOD:
-		case NUMERIC_64BIT_MOD:
-			return top();
-		case NUMERIC_NON_OVERFLOWING_MUL:
-		case NUMERIC_8BIT_MUL:
-		case NUMERIC_16BIT_MUL:
-		case NUMERIC_32BIT_MUL:
-		case NUMERIC_64BIT_MUL:
+		else if (operator instanceof Multiplication)
 			if (left.isZero() || right.isZero())
 				return ZERO;
 			else if (left.equals(right))
 				return POS;
 			else
 				return NEG;
-		default:
+		else
 			return TOP;
-		}
 	}
 
 	@Override
@@ -237,24 +223,22 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
-		switch (operator) {
-		case COMPARISON_EQ:
+		if (operator == ComparisonEq.INSTANCE)
 			return left.eq(right);
-		case COMPARISON_GE:
+		else if (operator == ComparisonGe.INSTANCE)
 			return left.eq(right).or(left.gt(right));
-		case COMPARISON_GT:
+		else if (operator == ComparisonGt.INSTANCE)
 			return left.gt(right);
-		case COMPARISON_LE:
+		else if (operator == ComparisonLe.INSTANCE)
 			// e1 <= e2 same as !(e1 > e2)
 			return left.gt(right).negate();
-		case COMPARISON_LT:
+		else if (operator == ComparisonLt.INSTANCE)
 			// e1 < e2 -> !(e1 >= e2) && !(e1 == e2)
 			return left.gt(right).negate().and(left.eq(right).negate());
-		case COMPARISON_NE:
+		else if (operator == ComparisonLe.INSTANCE)
 			return left.eq(right).negate();
-		default:
+		else
 			return Satisfiability.UNKNOWN;
-		}
 	}
 
 	private Satisfiability eq(Sign other) {
@@ -287,14 +271,14 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	protected ValueEnvironment<Sign> assumeBinaryExpression(
 			ValueEnvironment<Sign> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
-		switch (operator) {
-		case COMPARISON_EQ:
+		if (operator == ComparisonEq.INSTANCE)
 			if (left instanceof Identifier)
 				environment = environment.assign((Identifier) left, right, pp);
 			else if (right instanceof Identifier)
 				environment = environment.assign((Identifier) right, left, pp);
-			return environment;
-		case COMPARISON_GE:
+			else
+				return environment;
+		else if (operator == ComparisonGe.INSTANCE)
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isPositive())
@@ -303,9 +287,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isNegative())
 					environment = environment.assign((Identifier) right, left, pp);
-			}
-			return environment;
-		case COMPARISON_LE:
+			} else
+				return environment;
+		else if (operator == ComparisonLe.INSTANCE)
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isNegative())
@@ -314,10 +298,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isPositive())
 					environment = environment.assign((Identifier) right, left, pp);
-			}
-			return environment;
-
-		case COMPARISON_LT:
+			} else
+				return environment;
+		else if (operator == ComparisonLt.INSTANCE)
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isNegative() || rightSign.isZero())
@@ -330,9 +313,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 					// 0/+ < x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), 1, left.getCodeLocation()), pp);
-			}
-			return environment;
-		case COMPARISON_GT:
+			} else
+				return environment;
+		else if (operator == ComparisonGt.INSTANCE)
 			if (left instanceof Identifier) {
 				Sign rightSign = eval(right, environment, pp);
 				if (rightSign.isPositive() || rightSign.isZero())
@@ -345,10 +328,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 					// -/0 > x
 					environment = environment.assign((Identifier) right,
 							new Constant(left.getDynamicType(), -1, right.getCodeLocation()), pp);
-			}
-			return environment;
-		default:
-			return environment;
-		}
+			} else
+				return environment;
+
+		return environment;
 	}
 }
