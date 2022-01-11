@@ -17,8 +17,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 public interface ResolutionStrategy {
 
 	/**
-	 * Yields {@code true} if and only if the parameter list of a cfg
-	 * is matched by the given actual parameters, according to this strategy.
+	 * Yields {@code true} if and only if the parameter list of a cfg is matched
+	 * by the given actual parameters, according to this strategy.
 	 * 
 	 * @param formals the parameters definition of the cfg
 	 * @param actuals the expression that are used as call parameters
