@@ -31,7 +31,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.FirstRuntimeThenStaticStaticResolution;
+import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
@@ -69,7 +70,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	/**
 	 * The resolution strategy for IMP calling expressions.
 	 */
-	public static final ResolutionStrategy CALL_STRATEGY = ResolutionStrategy.FIRST_DYNAMIC_THEN_STATIC;
+	public static final ResolutionStrategy CALL_STRATEGY = FirstRuntimeThenStaticStaticResolution.INSTANCE;
 
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}

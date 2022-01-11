@@ -13,6 +13,12 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.AdditionOperator;
+import it.unive.lisa.symbolic.value.operator.DivisionOperator;
+import it.unive.lisa.symbolic.value.operator.Module;
+import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
+import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -74,12 +80,8 @@ public class ConstantPropagation
 			if (i == null)
 				return i;
 
-			switch (unary.getOperator()) {
-			case NUMERIC_NEG:
+			if (unary.getOperator() == NumericNegation.INSTANCE)
 				return -i;
-			default:
-				break;
-			}
 		}
 
 		if (e instanceof BinaryExpression) {
@@ -90,41 +92,16 @@ public class ConstantPropagation
 			if (right == null || left == null)
 				return null;
 
-			switch (binary.getOperator()) {
-			case NUMERIC_NON_OVERFLOWING_ADD:
-			case NUMERIC_8BIT_ADD:
-			case NUMERIC_16BIT_ADD:
-			case NUMERIC_32BIT_ADD:
-			case NUMERIC_64BIT_ADD:
+			if (binary.getOperator() instanceof AdditionOperator)
 				return left + right;
-			case NUMERIC_NON_OVERFLOWING_DIV:
-			case NUMERIC_8BIT_DIV:
-			case NUMERIC_16BIT_DIV:
-			case NUMERIC_32BIT_DIV:
-			case NUMERIC_64BIT_DIV:
+			if (binary.getOperator() instanceof DivisionOperator)
 				return left == 0 ? null : (int) left / right;
-			case NUMERIC_NON_OVERFLOWING_MOD:
-			case NUMERIC_8BIT_MOD:
-			case NUMERIC_16BIT_MOD:
-			case NUMERIC_32BIT_MOD:
-			case NUMERIC_64BIT_MOD:
+			if (binary.getOperator() instanceof Module)
 				return right == 0 ? null : left % right;
-			case NUMERIC_NON_OVERFLOWING_MUL:
-			case NUMERIC_8BIT_MUL:
-			case NUMERIC_16BIT_MUL:
-			case NUMERIC_32BIT_MUL:
-			case NUMERIC_64BIT_MUL:
+			if (binary.getOperator() instanceof Multiplication)
 				return left * right;
-			case NUMERIC_NON_OVERFLOWING_SUB:
-			case NUMERIC_8BIT_SUB:
-			case NUMERIC_16BIT_SUB:
-			case NUMERIC_32BIT_SUB:
-			case NUMERIC_64BIT_SUB:
+			if (binary.getOperator() instanceof SubtractionOperator)
 				return left - right;
-			default:
-				break;
-			}
-
 		}
 
 		return null;

@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.common.BoolType;
 
@@ -60,7 +60,7 @@ public class Or extends BinaryNativeCall {
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						left,
 						right,
-						BinaryOperator.LOGICAL_OR,
+						LogicalOr.INSTANCE,
 						getLocation()),
 				this);
 	}

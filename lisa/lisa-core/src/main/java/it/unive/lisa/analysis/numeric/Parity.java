@@ -8,11 +8,18 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.operator.AdditionOperator;
+import it.unive.lisa.symbolic.value.operator.DivisionOperator;
+import it.unive.lisa.symbolic.value.operator.Module;
+import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 /**
  * The overflow-insensitive Parity abstract domain, tracking if a numeric value
@@ -97,12 +104,9 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
 	@Override
 	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
-		switch (operator) {
-		case NUMERIC_NEG:
+		if (operator == NumericNegation.INSTANCE)
 			return arg;
-		default:
-			return top();
-		}
+		return top();
 	}
 
 	@Override
@@ -110,48 +114,25 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		if (left.isTop() || right.isTop())
 			return top();
 
-		switch (operator) {
-		case NUMERIC_NON_OVERFLOWING_ADD:
-		case NUMERIC_8BIT_ADD:
-		case NUMERIC_16BIT_ADD:
-		case NUMERIC_32BIT_ADD:
-		case NUMERIC_64BIT_ADD:
-		case NUMERIC_NON_OVERFLOWING_SUB:
-		case NUMERIC_8BIT_SUB:
-		case NUMERIC_16BIT_SUB:
-		case NUMERIC_32BIT_SUB:
-		case NUMERIC_64BIT_SUB:
+		if (operator instanceof AdditionOperator || operator instanceof SubtractionOperator)
 			if (right.equals(left))
 				return EVEN;
 			else
 				return ODD;
-		case NUMERIC_NON_OVERFLOWING_MUL:
-		case NUMERIC_8BIT_MUL:
-		case NUMERIC_16BIT_MUL:
-		case NUMERIC_32BIT_MUL:
-		case NUMERIC_64BIT_MUL:
+		else if (operator instanceof Multiplication)
 			if (left.isEven() || right.isEven())
 				return EVEN;
 			else
 				return ODD;
-		case NUMERIC_NON_OVERFLOWING_DIV:
-		case NUMERIC_8BIT_DIV:
-		case NUMERIC_16BIT_DIV:
-		case NUMERIC_32BIT_DIV:
-		case NUMERIC_64BIT_DIV:
+		else if (operator instanceof DivisionOperator)
 			if (left.isOdd())
 				return right.isOdd() ? ODD : EVEN;
 			else
 				return right.isOdd() ? EVEN : TOP;
-		case NUMERIC_NON_OVERFLOWING_MOD:
-		case NUMERIC_8BIT_MOD:
-		case NUMERIC_16BIT_MOD:
-		case NUMERIC_32BIT_MOD:
-		case NUMERIC_64BIT_MOD:
+		else if (operator instanceof Module)
 			return TOP;
-		default:
-			return TOP;
-		}
+
+		return TOP;
 	}
 
 	@Override
@@ -195,15 +176,13 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	protected ValueEnvironment<Parity> assumeBinaryExpression(
 			ValueEnvironment<Parity> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
-		switch (operator) {
-		case COMPARISON_EQ:
+		if (operator == ComparisonEq.INSTANCE) {
 			if (left instanceof Identifier)
 				environment = environment.assign((Identifier) left, right, pp);
 			else if (right instanceof Identifier)
 				environment = environment.assign((Identifier) right, left, pp);
 			return environment;
-		default:
-			return environment;
 		}
+		return environment;
 	}
 }

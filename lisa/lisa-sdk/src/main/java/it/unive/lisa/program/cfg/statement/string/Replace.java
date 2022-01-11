@@ -17,7 +17,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -87,7 +87,7 @@ public class Replace extends TernaryNativeCall {
 						leftExp,
 						middleExp,
 						rightExp,
-						TernaryOperator.STRING_REPLACE,
+						StringReplace.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);
 	}

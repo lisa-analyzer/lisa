@@ -17,16 +17,19 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.TernaryExpression;
-import it.unive.lisa.symbolic.value.TernaryOperator;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
+import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.lang.reflect.InvocationTargetException;
@@ -153,11 +156,11 @@ public class BaseInferredValueTest {
 			return (R) new Variable(provideParam(mtd, ExternalSet.class), "foo", SyntheticLocation.INSTANCE);
 
 		if (param == TernaryOperator.class)
-			return (R) TernaryOperator.STRING_REPLACE;
+			return (R) StringReplace.INSTANCE;
 		if (param == BinaryOperator.class)
-			return (R) BinaryOperator.COMPARISON_EQ;
+			return (R) ComparisonEq.INSTANCE;
 		if (param == UnaryOperator.class)
-			return (R) UnaryOperator.LOGICAL_NOT;
+			return (R) LogicalNegation.INSTANCE;
 
 		if (param == UnaryExpression.class)
 			return (R) new UnaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),

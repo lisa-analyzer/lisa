@@ -20,13 +20,13 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.BinaryOperator;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
@@ -107,7 +107,7 @@ public class PointBasedHeapTest {
 		assertEquals(assignResult, topHeap);
 
 		assignResult = topHeap.assign(x,
-				new BinaryExpression(intType, one, zero, BinaryOperator.NUMERIC_NON_OVERFLOWING_ADD, fakeLocation),
+				new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, fakeLocation),
 				fakeProgramPoint);
 
 		// binary expressions do not affect heap abstract domain

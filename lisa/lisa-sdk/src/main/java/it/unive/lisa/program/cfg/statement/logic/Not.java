@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
-import it.unive.lisa.symbolic.value.UnaryOperator;
+import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.common.BoolType;
 
@@ -54,7 +54,7 @@ public class Not extends UnaryNativeCall {
 				new UnaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						expr,
-						UnaryOperator.LOGICAL_NOT,
+						LogicalNegation.INSTANCE,
 						getLocation()),
 				this);
 	}
