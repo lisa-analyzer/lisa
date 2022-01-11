@@ -79,9 +79,7 @@ import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
-
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.graphstream.graph.implementations.SingleGraph;
 import org.junit.AfterClass;
@@ -260,8 +258,9 @@ public class EqualityContractVerificationTest {
 		// with null fields (not possible) and this would cause warnings
 
 		List<String> statementFields = List.of("cfg", "offset");
-		List<String> expressionFields = ListUtils.union(statementFields, List.of("runtimeTypes", "parent", "metaVariables"));
-		
+		List<String> expressionFields = ListUtils.union(statementFields,
+				List.of("runtimeTypes", "parent", "metaVariables"));
+
 		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
 			// the ignored fields are either mutable or auxiliary
@@ -271,12 +270,15 @@ public class EqualityContractVerificationTest {
 						// string statements are already pluggable-friendly
 						|| st.getPackageName().equals("it.unive.lisa.program.cfg.statement.string"))
 					extra.add("originating");
-				if (Call.class.isAssignableFrom(st))					
+				if (Call.class.isAssignableFrom(st))
 					extra.add("source");
-				verify(st, verifier -> verifier.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)), Warning.NULL_FIELDS);
-			}
-			else
-				verify(st, verifier -> verifier.withIgnoredFields(statementFields.toArray(String[]::new)), Warning.NULL_FIELDS);
+				verify(st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
+						Warning.NULL_FIELDS);
+			} else
+				verify(st, verifier -> verifier.withIgnoredFields(statementFields.toArray(String[]::new)),
+						Warning.NULL_FIELDS);
 	}
 
 	@Test
