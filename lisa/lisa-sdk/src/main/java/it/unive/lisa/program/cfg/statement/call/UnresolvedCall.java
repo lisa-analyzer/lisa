@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,13 +15,11 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call that happens inside the program to analyze. At this stage, the
@@ -28,95 +30,6 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class UnresolvedCall extends Call {
-
-	/**
-	 * An enum defining the different types of resolution strategies for call
-	 * signatures. Depending on the language, targets of calls might be resolved
-	 * (at compile time or runtime) relying on the static or runtime type of
-	 * their parameters. Each strategy in this enum comes with a different
-	 * {@link #matches(Parameter[], Expression[])} implementation that can
-	 * automatically detect if the signature of a cfg is matched by the given
-	 * expressions representing the parameters for a call to that cfg.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	public enum ResolutionStrategy {
-
-		/**
-		 * A strategy where the static types of the parameters of the call are
-		 * evaluated against the signature of a cfg: for each parameter, if the
-		 * static type of the actual parameter can be assigned to the type of
-		 * the formal parameter, than
-		 * {@link #matches(Parameter[], Expression[])} return {@code true}.
-		 */
-		STATIC_TYPES {
-			@Override
-			protected boolean matches(int pos, Parameter formal, Expression actual) {
-				return actual.getStaticType().canBeAssignedTo(formal.getStaticType());
-			}
-		},
-
-		/**
-		 * A strategy where the dynamic (runtime) types of the parameters of the
-		 * call are evaluated against the signature of a cfg: for each
-		 * parameter, if at least one of the runtime types of the actual
-		 * parameter can be assigned to the type of the formal parameter, than
-		 * {@link #matches(Parameter[], Expression[])} return {@code true}.
-		 */
-		DYNAMIC_TYPES {
-			@Override
-			protected boolean matches(int pos, Parameter formal, Expression actual) {
-				return actual.getRuntimeTypes().anyMatch(rt -> rt.canBeAssignedTo(formal.getStaticType()));
-			}
-		},
-
-		/**
-		 * A strategy where the first parameter is tested using
-		 * {@link #DYNAMIC_TYPES}, while the rest is tested using
-		 * {@link #STATIC_TYPES}.
-		 */
-		FIRST_DYNAMIC_THEN_STATIC {
-			@Override
-			protected boolean matches(int pos, Parameter formal, Expression actual) {
-				return pos == 0 ? DYNAMIC_TYPES.matches(pos, formal, actual)
-						: STATIC_TYPES.matches(pos, formal, actual);
-			}
-		};
-
-		/**
-		 * Yields {@code true} if and only if the signature of a cfg (i.e. the
-		 * types of its parameters) is matched by the given actual parameters,
-		 * according to this strategy.
-		 * 
-		 * @param formals the parameters definition of the cfg
-		 * @param actuals the expression that are used as call parameters
-		 * 
-		 * @return {@code true} if and only if that condition holds
-		 */
-		public final boolean matches(Parameter[] formals, Expression[] actuals) {
-			if (formals.length != actuals.length)
-				return false;
-
-			for (int i = 0; i < formals.length; i++)
-				if (!matches(i, formals[i], actuals[i]))
-					return false;
-
-			return true;
-		}
-
-		/**
-		 * Yields {@code true} if and only if the signature of the
-		 * {@code pos}-th parameter of a cfg is matched by the given actual
-		 * parameter, according to this strategy.
-		 * 
-		 * @param pos    the position of the parameter being evaluated
-		 * @param formal the parameter definition of the cfg
-		 * @param actual the expression that is used as parameter
-		 * 
-		 * @return {@code true} if and only if that condition holds
-		 */
-		protected abstract boolean matches(int pos, Parameter formal, Expression actual);
-	}
 
 	/**
 	 * The {@link ResolutionStrategy} of the parameters of this call
