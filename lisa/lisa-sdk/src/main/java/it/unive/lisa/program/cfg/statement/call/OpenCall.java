@@ -11,11 +11,12 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
+import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -26,64 +27,41 @@ import org.apache.commons.lang3.StringUtils;
 public class OpenCall extends CallWithResult implements MetaVariableCreator {
 
 	/**
-	 * The name of the target of this call
-	 */
-	private final String targetName;
-
-	/**
-	 * Builds the open call, happening at the given location in the program.
+	 * Builds the open call, happening at the given location in the program. The
+	 * {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, String targetName, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, staticType, parameters);
-		Objects.requireNonNull(targetName, "The name of the target of an open call cannot be null");
-		this.targetName = targetName;
+		super(cfg, location, targetName, staticType, parameters);
 	}
 
 	/**
-	 * Yields the name of the target of this open call.
+	 * Builds the open call, happening at the given location in the program.
 	 * 
-	 * @return the name of the target
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param targetName the name of the target of this open call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	public String getTargetName() {
-		return targetName;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		OpenCall other = (OpenCall) obj;
-		if (targetName == null) {
-			if (other.targetName != null)
-				return false;
-		} else if (!targetName.equals(other.targetName))
-			return false;
-		return true;
+	public OpenCall(CFG cfg, CodeLocation location, String targetName, Type staticType, EvaluationOrder order,
+			Expression... parameters) {
+		super(cfg, location, targetName, order, staticType, parameters);
 	}
 
 	@Override
 	public String toString() {
-		return "[open call]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return "[open call]" + getConstructName() + "(" + StringUtils.join(getSubExpressions(), ", ") + ")";
 	}
 
 	@Override

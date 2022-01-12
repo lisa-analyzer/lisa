@@ -11,7 +11,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
@@ -25,7 +25,7 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewArray extends NativeCall {
+public class IMPNewArray extends NaryExpression {
 
 	/**
 	 * Builds the array allocation.
@@ -39,31 +39,24 @@ public class IMPNewArray extends NativeCall {
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]",
-				ArrayType.lookup(type, dimensions.length),
-				dimensions);
+				ArrayType.lookup(type, dimensions.length), dimensions);
 	}
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call
-		// (the semantics of this call does not need information about the
-		// intermediate analysis states)
-		AnalysisState<A, H,
-				V> lastPostState = computedStates.length == 0 ? entryState : computedStates[computedStates.length - 1];
-		AnalysisState<A, H,
-				V> sem = lastPostState.smallStepSemantics(new HeapAllocation(getRuntimeTypes(), getLocation()), this);
+		HeapAllocation alloc = new HeapAllocation(getRuntimeTypes(), getLocation());
+		AnalysisState<A, H, V> sem = state.smallStepSemantics(alloc, this);
 
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			AnalysisState<A, H,
-					V> refSem = sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc, getLocation()), this);
+			HeapReference ref = new HeapReference(loc.getTypes(), loc, getLocation());
+			AnalysisState<A, H, V> refSem = sem.smallStepSemantics(ref, this);
 			result = result.lub(refSem);
 		}
 

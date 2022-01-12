@@ -47,7 +47,7 @@ public class Parameter implements CodeElement {
 	 * happening at the given location in the program.
 	 * 
 	 * @param location   the location where this parameter is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param name       the name of this parameter
 	 * @param staticType the type of this parameter. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
@@ -61,7 +61,7 @@ public class Parameter implements CodeElement {
 	 * happening at the given location in the program.
 	 * 
 	 * @param location    the location where this parameter is defined within
-	 *                        the source file.
+	 *                        the program
 	 * @param name        the name of this parameter
 	 * @param staticType  the type of this parameter. If unknown, use
 	 *                        {@link Untyped#INSTANCE}

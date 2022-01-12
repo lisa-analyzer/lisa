@@ -58,9 +58,6 @@ buildscript {
         classpath 'org.ajoberstar.grgit:grgit-core:4.0.2'
         classpath 'org.ajoberstar.grgit:grgit-gradle:4.0.2'
         
-        classpath 'com.github.roroche:plantuml-gradle-plugin:1.0.2'
-        classpath 'gradle.plugin.org.fmiw:plantuml-gradle-plugin:0.1'
-        
         classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.15.0'
     }
 }
@@ -68,8 +65,6 @@ buildscript {
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'eclipse'
-    apply plugin: 'com.github.roroche.plantuml' // generation of plantuml from source code (visualization: https://www.planttext.com/)
-    apply plugin: 'org.fmiw.plantuml' // plantuml to png
     apply plugin: 'org.ajoberstar.grgit' // parse git information during the build
     apply plugin: 'com.diffplug.spotless' // code formatting task
     apply plugin: 'checkstyle' // javadoc checking - coding conventions
@@ -78,7 +73,6 @@ subprojects {
     apply plugin: 'jacoco' // coverage reports
     
     apply from: "${project.rootDir}/code-style.gradle"
-    apply from: "${project.rootDir}/doc-extra.gradle"
     apply from: "${project.rootDir}/java.gradle"
     apply from: "${project.rootDir}/publishing.gradle"
 }

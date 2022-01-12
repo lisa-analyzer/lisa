@@ -16,11 +16,11 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 
 /**
- * An {@link NaryExpression} with exactly two sub-expressions.
+ * An {@link NaryExpression} with exactly three sub-expressions.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class BinaryExpression extends NaryExpression {
+public abstract class TernaryExpression extends NaryExpression {
 
 	/**
 	 * Builds the untyped expression, happening at the given location in the
@@ -33,11 +33,12 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
 	 * @param left          the first sub-expression of this expression
-	 * @param right         the second sub-expression of this expression
+	 * @param middle        the second sub-expression of this expression
+	 * @param right         the third sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			Expression left, Expression right) {
-		super(cfg, location, constructName, left, right);
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName,
+			Expression left, Expression middle, Expression right) {
+		super(cfg, location, constructName, left, middle, right);
 	}
 
 	/**
@@ -45,16 +46,18 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * The {@link EvaluationOrder} is {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
+	 * @param location      the location where the expression is defined within
 	 *                          the program
-	 * @param constructName the name of the construct invoked by this expression
+	 * @param constructName the name of the construct represented by this
+	 *                          expression
 	 * @param staticType    the static type of this expression
 	 * @param left          the first sub-expression of this expression
-	 * @param right         the second sub-expression of this expression
+	 * @param middle        the second sub-expression of this expression
+	 * @param right         the third sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
-			Expression left, Expression right) {
-		super(cfg, location, constructName, staticType, left, right);
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
+			Expression left, Expression middle, Expression right) {
+		super(cfg, location, constructName, staticType, left, middle, right);
 	}
 
 	/**
@@ -68,28 +71,31 @@ public abstract class BinaryExpression extends NaryExpression {
 	 *                          expression
 	 * @param order         the evaluation order of the sub-expressions
 	 * @param left          the first sub-expression of this expression
-	 * @param right         the second sub-expression of this expression
+	 * @param middle        the second sub-expression of this expression
+	 * @param right         the third sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName,
-			EvaluationOrder order, Expression left, Expression right) {
-		super(cfg, location, constructName, order, left, right);
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+			Expression left, Expression middle, Expression right) {
+		super(cfg, location, constructName, order, left, middle, right);
 	}
 
 	/**
 	 * Builds the expression, happening at the given location in the program.
 	 * 
 	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
+	 * @param location      the location where the expression is defined within
 	 *                          the program
-	 * @param constructName the name of the construct invoked by this expression
+	 * @param constructName the name of the construct represented by this
+	 *                          expression
 	 * @param order         the evaluation order of the sub-expressions
 	 * @param staticType    the static type of this expression
 	 * @param left          the first sub-expression of this expression
-	 * @param right         the second sub-expression of this expression
+	 * @param middle        the second sub-expression of this expression
+	 * @param right         the third sub-expression of this expression
 	 */
-	protected BinaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Type staticType, Expression left, Expression right) {
-		super(cfg, location, constructName, order, staticType, left, right);
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+			Type staticType, Expression left, Expression middle, Expression right) {
+		super(cfg, location, constructName, order, staticType, left, middle, right);
 	}
 
 	/**
@@ -102,12 +108,21 @@ public abstract class BinaryExpression extends NaryExpression {
 	}
 
 	/**
-	 * Yields the right-most (second) sub-expression of this expression.
+	 * Yields the middle (second) sub-expression of this expression.
+	 * 
+	 * @return the middle sub-expression
+	 */
+	public Expression getMiddle() {
+		return getSubExpressions()[2];
+	}
+
+	/**
+	 * Yields the right-most (third) sub-expression of this expression.
 	 * 
 	 * @return the right-most sub-expression
 	 */
 	public Expression getRight() {
-		return getSubExpressions()[1];
+		return getSubExpressions()[2];
 	}
 
 	@Override
@@ -120,8 +135,9 @@ public abstract class BinaryExpression extends NaryExpression {
 					throws SemanticException {
 		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression left : params[0])
-			for (SymbolicExpression right : params[1])
-				result = result.lub(binarySemantics(interprocedural, state, left, right));
+			for (SymbolicExpression middle : params[1])
+				for (SymbolicExpression right : params[2])
+					result = result.lub(ternarySemantics(interprocedural, state, left, middle, right));
 
 		return result;
 	}
@@ -140,8 +156,11 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param left            the symbolic expression representing the computed
 	 *                            value of the first sub-expression of this
 	 *                            expression
-	 * @param right           the symbolic expression representing the computed
+	 * @param middle          the symbolic expression representing the computed
 	 *                            value of the second sub-expression of this
+	 *                            expression
+	 * @param right           the symbolic expression representing the computed
+	 *                            value of the third sub-expression of this
 	 *                            expression
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
@@ -151,10 +170,11 @@ public abstract class BinaryExpression extends NaryExpression {
 	 */
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
+			V extends ValueDomain<V>> AnalysisState<A, H, V> ternarySemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
+					SymbolicExpression middle,
 					SymbolicExpression right)
 					throws SemanticException;
 }

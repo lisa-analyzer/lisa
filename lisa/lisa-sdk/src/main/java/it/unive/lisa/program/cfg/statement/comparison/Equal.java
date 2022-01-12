@@ -10,7 +10,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -22,7 +21,7 @@ import it.unive.lisa.type.common.BoolType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Equal extends BinaryNativeCall {
+public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the equality test.
@@ -40,14 +39,12 @@ public class Equal extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
 					throws SemanticException {
-		return rightState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new BinaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						left,

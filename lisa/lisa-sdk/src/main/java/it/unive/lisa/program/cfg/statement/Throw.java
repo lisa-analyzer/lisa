@@ -25,7 +25,7 @@ public class Throw extends UnaryStatement {
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where the expression is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, CodeLocation location, Expression expression) {

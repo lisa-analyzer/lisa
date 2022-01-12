@@ -10,7 +10,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
@@ -24,7 +23,7 @@ import it.unive.lisa.type.common.BoolType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Not extends UnaryNativeCall {
+public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Builds the logical negation.
@@ -41,16 +40,15 @@ public class Not extends UnaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> exprState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression expr)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isBooleanType() && !expr.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return exprState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new UnaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						expr,

@@ -45,6 +45,7 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -272,6 +273,8 @@ public class EqualityContractVerificationTest {
 					extra.add("originating");
 				if (Call.class.isAssignableFrom(st))
 					extra.add("source");
+				if (NaryExpression.class.isAssignableFrom(st))
+					extra.add("order");
 				verify(st,
 						verifier -> verifier
 								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),

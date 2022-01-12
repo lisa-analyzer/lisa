@@ -10,7 +10,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
@@ -24,7 +23,7 @@ import it.unive.lisa.type.common.BoolType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LessOrEqual extends BinaryNativeCall {
+public class LessOrEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the less or equal.
@@ -42,20 +41,18 @@ public class LessOrEqual extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isNumericType() && !left.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 		if (!right.getDynamicType().isNumericType() && !right.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return rightState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new BinaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						left,

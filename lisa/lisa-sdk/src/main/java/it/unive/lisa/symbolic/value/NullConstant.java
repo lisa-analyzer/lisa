@@ -16,7 +16,7 @@ public class NullConstant extends Constant {
 	 * Builds a null constant.
 	 * 
 	 * @param location the location where the expression is defined within the
-	 *                     source file.
+	 *                     program
 	 */
 	public NullConstant(CodeLocation location) {
 		super(NullType.INSTANCE, NULL_CONST, location);

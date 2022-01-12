@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
@@ -37,7 +36,7 @@ import it.unive.lisa.type.common.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Length extends UnaryNativeCall {
+public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to
@@ -62,15 +61,16 @@ public class Length extends UnaryNativeCall {
 	@Override
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> exprState,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression expr)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isStringType() && !expr.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return exprState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new UnaryExpression(
 						Caches.types().mkSingletonSet(Int32.INSTANCE),
 						expr,

@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -21,7 +21,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPArrayAccess extends BinaryNativeCall {
+public class IMPArrayAccess extends BinaryExpression {
 
 	/**
 	 * Builds the array access.
@@ -42,20 +42,19 @@ public class IMPArrayAccess extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
-
 					throws SemanticException {
+
 		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
 		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left, getLocation());
-		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
+		return state.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
 	}
 }

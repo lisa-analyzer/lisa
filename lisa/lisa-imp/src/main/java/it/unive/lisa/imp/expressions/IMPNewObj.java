@@ -11,8 +11,8 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.ArrayUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPNewObj extends NativeCall {
+public class IMPNewObj extends NaryExpression {
 
 	/**
 	 * Builds the object allocation and initialization.
@@ -51,30 +51,29 @@ public class IMPNewObj extends NativeCall {
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
-				getStaticType());
-		Expression[] fullExpressions = ArrayUtils.insert(0, getParameters(), paramThis);
+		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this", getStaticType());
+		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, new ExpressionSet<>(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
-		call.inheritRuntimeTypesFrom(this);
-		AnalysisState<A, H, V> sem = call.callSemantics(entryState, interprocedural, computedStates, fullParams);
+		call.setRuntimeTypes(getRuntimeTypes());
+		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams);
 
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
 
 		sem = sem.smallStepSemantics(created, this);
 
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions())
 			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc, getLocation()), call));
 

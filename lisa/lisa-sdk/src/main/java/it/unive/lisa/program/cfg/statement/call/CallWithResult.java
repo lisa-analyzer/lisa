@@ -11,29 +11,51 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
+import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 
 /**
- * A call to one or more of the CFGs under analysis.
+ * A call that evaluate its result directly.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class CallWithResult extends Call implements MetaVariableCreator {
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program.
+	 * Builds the call, happening at the given location in the program. The
+	 * {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
-	 *                       the source file. If unknown, use {@code null}
+	 *                       the program
+	 * @param targetName the name of the target of this call
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, Type staticType, Expression... parameters) {
-		super(cfg, location, staticType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, String targetName, Type staticType,
+			Expression... parameters) {
+		super(cfg, location, targetName, staticType, parameters);
+	}
+
+	/**
+	 * Builds the call, happening at the given location in the program.
+	 * 
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param targetName the name of the target of this call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this call
+	 * @param parameters the parameters of this call
+	 */
+	public CallWithResult(CFG cfg, CodeLocation location, String targetName, EvaluationOrder order,
+			Type staticType, Expression... parameters) {
+		super(cfg, location, targetName, order, staticType, parameters);
 	}
 
 	/**
@@ -69,25 +91,17 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call, it is the entry state if this call has no
-		// parameters (the semantics of this call does not need information
-		// about the intermediate analysis states)
-		AnalysisState<A, H, V> callState = computedStates.length == 0
-				? entryState
-				: computedStates[computedStates.length - 1];
 		// the stack has to be empty
-		callState = new AnalysisState<>(callState.getState(), new ExpressionSet<>());
+		state = new AnalysisState<>(state.getState(), new ExpressionSet<>());
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = compute(interprocedural, callState, params);
+		AnalysisState<A, H, V> returned = compute(interprocedural, state, params);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||

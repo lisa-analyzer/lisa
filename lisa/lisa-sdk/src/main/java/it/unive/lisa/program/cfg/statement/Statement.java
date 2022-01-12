@@ -38,7 +38,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 * 
 	 * @param cfg      the cfg that this statement belongs to
 	 * @param location the location where this statement is defined within the
-	 *                     source file. If unknown, use {@code null}
+	 *                     program
 	 */
 	protected Statement(CFG cfg, CodeLocation location) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");

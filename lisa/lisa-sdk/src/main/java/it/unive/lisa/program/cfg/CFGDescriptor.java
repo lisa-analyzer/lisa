@@ -65,7 +65,7 @@ public class CFGDescriptor implements CodeElement {
 
 	/**
 	 * The location where the cfg described by this descriptor appear in the
-	 * source file
+	 * program
 	 */
 	private final CodeLocation location;
 
@@ -73,7 +73,7 @@ public class CFGDescriptor implements CodeElement {
 	 * Builds the descriptor with {@link Untyped} return type.
 	 * 
 	 * @param location the location where the cfg associated is define within
-	 *                     the source file. If unknown use {@code null}
+	 *                     the program
 	 * @param unit     the {@link Unit} containing the cfg associated to this
 	 *                     descriptor
 	 * @param instance whether or not the cfg associated to this descriptor is
@@ -90,7 +90,7 @@ public class CFGDescriptor implements CodeElement {
 	 * Builds the descriptor.
 	 * 
 	 * @param location   the location where the cfg associated is define within
-	 *                       the source file, if unknown use {@code null}
+	 *                       the program
 	 * @param unit       the {@link Unit} containing the cfg associated to this
 	 *                       descriptor
 	 * @param instance   whether or not the cfg associated to this descriptor is
@@ -110,7 +110,7 @@ public class CFGDescriptor implements CodeElement {
 	 * Builds the descriptor.
 	 * 
 	 * @param location    the location where the cfg associated is define within
-	 *                        the source file, if unknown use {@code null}
+	 *                        the program
 	 * @param unit        the {@link Unit} containing the cfg associated to this
 	 *                        descriptor
 	 * @param instance    whether or not the cfg associated to this descriptor

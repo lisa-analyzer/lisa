@@ -21,7 +21,7 @@ public abstract class UnaryStatement extends Statement {
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where this statement is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param expression the argument of this statement
 	 */
 	protected UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {

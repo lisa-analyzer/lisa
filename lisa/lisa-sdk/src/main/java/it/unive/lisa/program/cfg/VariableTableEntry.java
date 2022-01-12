@@ -87,7 +87,7 @@ public class VariableTableEntry implements CodeElement {
 	 * variable defined at the given location in the program.
 	 * 
 	 * @param location   the location where the expression is defined within the
-	 *                       source file.
+	 *                       program
 	 * @param index      the index of the variable entry
 	 * @param scopeStart the statement where this variable is first visible,
 	 *                       {@code null} means that this variable is visible
@@ -110,7 +110,7 @@ public class VariableTableEntry implements CodeElement {
 	 * program.
 	 * 
 	 * @param location    the location where the expression is defined within
-	 *                        the source file.
+	 *                        the program
 	 * @param index       the index of the variable entry
 	 * @param scopeStart  the statement where this variable is first visible,
 	 *                        {@code null} means that this variable is visible
@@ -220,8 +220,7 @@ public class VariableTableEntry implements CodeElement {
 
 	/**
 	 * Creates a {@link VariableRef} for the variable depicted by this entry,
-	 * happening in the given {@link CFG} at the source file location of its
-	 * descriptor.
+	 * happening in the given {@link CFG} at the location of its descriptor.
 	 * 
 	 * @param cfg the cfg that the returned variable reference will be linked to
 	 * 
