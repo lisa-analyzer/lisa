@@ -1,8 +1,7 @@
 package it.unive.lisa.checks.warnings;
 
-import java.util.Objects;
-
 import it.unive.lisa.program.cfg.CodeLocation;
+import java.util.Objects;
 
 /**
  * A warning reported by LiSA on the program under analysis. This warning is
