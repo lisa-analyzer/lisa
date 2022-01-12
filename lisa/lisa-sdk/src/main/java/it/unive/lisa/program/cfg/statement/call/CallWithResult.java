@@ -29,10 +29,11 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
 	 *                       the source file. If unknown, use {@code null}
+	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, Type returnType, Expression... parameters) {
-		super(cfg, location, returnType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, Type staticType, Expression... parameters) {
+		super(cfg, location, staticType, parameters);
 	}
 
 	/**
@@ -40,6 +41,9 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * {@code parameters} are used as actual parameters, and the state when the
 	 * call is executed is {@code entryState}.
 	 * 
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param <H>             the type of the {@link HeapDomain}
+	 * @param <V>             the type of the {@link ValueDomain}
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param entryState      the abstract analysis state when the call is
