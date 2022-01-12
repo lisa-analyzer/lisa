@@ -104,7 +104,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifiedName(),
-						call.getStaticType(), call.getParameters());
+				call.getStaticType(), call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters);
 	}
 

@@ -702,7 +702,7 @@ public class LiSAConfiguration {
 				.append(syntacticChecks.size())
 				.append(" syntactic checks to execute")
 				.append((syntacticChecks.isEmpty() ? "" : ":"));
-		// TODO automatic way to keep this updated? 
+		// TODO automatic way to keep this updated?
 		for (SyntacticCheck check : syntacticChecks)
 			res.append("\n      ")
 					.append(check.getClass().getSimpleName());

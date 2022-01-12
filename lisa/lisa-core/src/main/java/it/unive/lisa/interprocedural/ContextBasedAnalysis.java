@@ -1,15 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
@@ -34,6 +24,14 @@ import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -150,7 +148,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			iter++;
 		} while (!fixpointTriggers.isEmpty());
 	}
-	
+
 	@Override
 	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
 		if (results.contains(cfg))
@@ -230,7 +228,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		return result;
 	}
-	
+
 	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
