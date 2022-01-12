@@ -27,7 +27,7 @@ public class Ret extends Statement {
 	 * 
 	 * @param cfg      the cfg that this statement belongs to
 	 * @param location the location where the statement is defined within the
-	 *                     source file. If unknown, use {@code null}
+	 *                     program
 	 */
 	public Ret(CFG cfg, CodeLocation location) {
 		super(cfg, location);

@@ -43,7 +43,7 @@ public class AccessInstanceGlobal extends Expression {
 	 * 
 	 * @param cfg      the cfg that this expression belongs to
 	 * @param location the location where the expression is defined within the
-	 *                     source file, if unknown use {@code null}
+	 *                     program
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */

@@ -28,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 public class CompilationUnit extends Unit implements CodeElement {
 
 	/**
-	 * The location in the source file of this unit
+	 * The location in the program of this unit
 	 */
 	private final CodeLocation location;
 

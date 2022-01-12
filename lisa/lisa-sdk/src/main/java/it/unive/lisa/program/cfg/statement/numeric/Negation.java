@@ -9,7 +9,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
@@ -22,7 +21,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Negation extends UnaryNativeCall {
+public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 	/**
 	 * Builds the numerical negation.

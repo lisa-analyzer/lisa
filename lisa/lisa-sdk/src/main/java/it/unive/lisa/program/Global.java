@@ -31,7 +31,7 @@ public class Global implements CodeElement {
 
 	/**
 	 * Builds an untyped global variable, identified by its name. The location
-	 * where this global happens is unknown (i.e. no source file/line/column is
+	 * where this global happens is unknown (e.g. no source file/line/column is
 	 * available) as well as its type (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
 	 * @param location the location of this global variable
@@ -46,7 +46,7 @@ public class Global implements CodeElement {
 	 * happening at the given location in the program.
 	 * 
 	 * @param location   the location where this global is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param name       the name of this global
 	 * @param staticType the type of this global. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
@@ -60,7 +60,7 @@ public class Global implements CodeElement {
 	 * happening at the given location in the program.
 	 * 
 	 * @param location    the location where this global is defined within the
-	 *                        source file. If unknown, use {@code null}
+	 *                        program
 	 * @param name        the name of this global
 	 * @param staticType  the type of this global. If unknown, use
 	 *                        {@link Untyped#INSTANCE}

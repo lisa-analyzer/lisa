@@ -40,7 +40,7 @@ public class AccessGlobal extends Expression {
 	 * 
 	 * @param cfg       the cfg that this expression belongs to
 	 * @param location  the location where the expression is defined within the
-	 *                      source file. If unknown, use {@code null}
+	 *                      program
 	 * @param container the unit containing the accessed global
 	 * @param target    the accessed global
 	 */

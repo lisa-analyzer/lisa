@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.TernaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
@@ -36,7 +35,7 @@ import it.unive.lisa.type.common.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Replace extends TernaryNativeCall {
+public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpression {
 
 	/**
 	 * Statement that has been rewritten to this operation, if any. This is to

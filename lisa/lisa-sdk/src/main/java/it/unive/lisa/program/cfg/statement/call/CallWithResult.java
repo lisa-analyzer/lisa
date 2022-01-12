@@ -11,29 +11,48 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
+import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 
 /**
- * A call to one or more of the CFGs under analysis.
+ * A call that evaluate its result directly.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class CallWithResult extends Call implements MetaVariableCreator {
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program.
+	 * Builds the call, happening at the given location in the program. The
+	 * {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
-	 *                       the source file. If unknown, use {@code null}
+	 *                       the program
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, Type staticType, Expression... parameters) {
-		super(cfg, location, staticType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, String targetName, Type staticType,
+			Expression... parameters) {
+		super(cfg, location, targetName, staticType, parameters);
+	}
+
+	/**
+	 * Builds the call, happening at the given location in the program.
+	 * 
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param staticType the static type of this call
+	 * @param parameters the parameters of this call
+	 */
+	public CallWithResult(CFG cfg, CodeLocation location, String targetName, EvaluationOrder order,
+			Type staticType, Expression... parameters) {
+		super(cfg, location, targetName, order, staticType, parameters);
 	}
 
 	/**
@@ -69,7 +88,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
+			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,

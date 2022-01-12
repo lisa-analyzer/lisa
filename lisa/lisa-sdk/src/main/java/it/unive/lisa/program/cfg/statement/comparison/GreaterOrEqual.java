@@ -10,7 +10,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
@@ -24,7 +23,7 @@ import it.unive.lisa.type.common.BoolType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class GreaterOrEqual extends BinaryNativeCall {
+public class GreaterOrEqual extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the greater or equal.

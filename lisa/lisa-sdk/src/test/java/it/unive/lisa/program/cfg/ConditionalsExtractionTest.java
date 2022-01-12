@@ -5,12 +5,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+
+import org.junit.Test;
+
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
@@ -21,18 +22,11 @@ import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Assignment;
-import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
+import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
@@ -69,29 +63,12 @@ public class ConditionalsExtractionTest {
 		checkMatrix("loop body", loop.getBody(), nodes);
 	}
 
-	class IMPNotEqual extends BinaryNativeCall {
-
-		protected IMPNotEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {
-			super(cfg, location, "!=", left, right);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(AnalysisState<A, H, V> entryState,
-						InterproceduralAnalysis<A, H, V> interprocedural, AnalysisState<A, H, V> leftState,
-						SymbolicExpression leftExp, AnalysisState<A, H, V> rightState, SymbolicExpression rightExp)
-						throws SemanticException {
-			return null;
-		}
-	}
-
 	@Test
 	public void testSimpleIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -121,7 +98,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(ret);
@@ -143,7 +120,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyBranch"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -173,7 +150,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "asymmetricIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -207,7 +184,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "bigAsymmetricIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -253,7 +230,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -283,7 +260,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -312,7 +289,7 @@ public class ConditionalsExtractionTest {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "longLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
-		IMPNotEqual condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -359,14 +336,14 @@ public class ConditionalsExtractionTest {
 		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "nested"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
 		Int32Literal constant1 = new Int32Literal(cfg, unknown, 100);
-		IMPNotEqual loop_condition = new IMPNotEqual(cfg, unknown, constant, constant);
+		NotEqual loop_condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment loop_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a1"),
 				constant);
 		Assignment loop_a2 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a2"),
 				constant);
-		IMPNotEqual if_condition = new IMPNotEqual(cfg, unknown, constant, constant1);
+		NotEqual if_condition = new NotEqual(cfg, unknown, constant, constant1);
 		Assignment if_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "if_a1"),
 				constant);

@@ -49,7 +49,7 @@ public abstract class Expression extends Statement {
 	 * 
 	 * @param cfg      the cfg that this expression belongs to
 	 * @param location the location where the expression is defined within the
-	 *                     source file. If unknown, use {@code null}
+	 *                     program
 	 */
 	protected Expression(CFG cfg, CodeLocation location) {
 		this(cfg, location, Untyped.INSTANCE);
@@ -60,7 +60,7 @@ public abstract class Expression extends Statement {
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
-	 *                       the source file. If unknown, use {@code null}
+	 *                       the program
 	 * @param staticType the static type of this expression
 	 */
 	protected Expression(CFG cfg, CodeLocation location, Type staticType) {

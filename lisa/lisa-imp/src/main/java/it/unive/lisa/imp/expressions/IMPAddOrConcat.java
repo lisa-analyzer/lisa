@@ -11,7 +11,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -35,7 +34,7 @@ import it.unive.lisa.type.common.StringType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPAddOrConcat extends BinaryNativeCall {
+public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.

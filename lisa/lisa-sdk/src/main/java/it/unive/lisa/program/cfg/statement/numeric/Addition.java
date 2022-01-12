@@ -9,7 +9,6 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
@@ -23,7 +22,7 @@ import it.unive.lisa.type.NumericType;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Addition extends BinaryNativeCall {
+public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 
 	/**
 	 * Builds the addition.

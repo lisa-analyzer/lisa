@@ -1,12 +1,13 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.PluggableStatement;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.PluggableStatement;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A native cfg, representing a cfg that is usually provided by the runtime of
@@ -15,8 +16,8 @@ import java.lang.reflect.Method;
  * results. <br>
  * <br>
  * NativeCFGs do not contain code, but they can be rewritten to a
- * {@link NativeCall} (that <b>must</b> implement {@link PluggableStatement})
- * providing their semantics through
+ * {@link NaryExpression} (that <b>must</b> implement
+ * {@link PluggableStatement}) providing their semantics through
  * {@link #rewrite(Statement, Expression...)}.<br>
  * <br>
  * Note that this class does not implement {@link #equals(Object)} nor
@@ -32,24 +33,24 @@ public class NativeCFG implements CodeMember {
 	private final CFGDescriptor descriptor;
 
 	/**
-	 * The class of the {@link NativeCall} that provides the semantics of this
-	 * native cfg
+	 * The class of the {@link NaryExpression} that provides the semantics of
+	 * this native cfg
 	 */
-	private final Class<? extends NativeCall> construct;
+	private final Class<? extends NaryExpression> construct;
 
 	/**
 	 * Builds the native control flow graph.
 	 * 
 	 * @param descriptor the descriptor of this cfg
-	 * @param construct  the class of the {@link NativeCall} that provides the
-	 *                       semantics of this native cfg; the class of the
+	 * @param construct  the class of the {@link NaryExpression} that provides
+	 *                       the semantics of this native cfg; the class of the
 	 *                       construct must also be a subtype of
 	 *                       {@link PluggableStatement}
 	 * 
 	 * @throws IllegalArgumentException if the class of the construct does not
 	 *                                      implement {@link PluggableStatement}
 	 */
-	public NativeCFG(CFGDescriptor descriptor, Class<? extends NativeCall> construct) {
+	public NativeCFG(CFGDescriptor descriptor, Class<? extends NaryExpression> construct) {
 		if (!PluggableStatement.class.isAssignableFrom(construct))
 			throw new IllegalArgumentException(construct + " must implement the " + PluggableStatement.class.getName()
 					+ " to be used within native cfgs");
@@ -63,26 +64,27 @@ public class NativeCFG implements CodeMember {
 	}
 
 	/**
-	 * Produces a {@link NativeCall} providing the semantics of this native cfg.
-	 * Such native call can be used when a call to this native cfg is found
+	 * Produces an {@link NaryExpression} providing the semantics of this native
+	 * cfg. Such native call can be used when a call to this native cfg is found
 	 * within the program to analyze.
 	 * 
 	 * @param original the {@link Statement} that must be rewritten as a call to
 	 *                     this native cfg
 	 * @param params   the parameters of the call to this cfg
 	 * 
-	 * @return a {@link NativeCall} providing the semantics of this native cfg,
-	 *             that can be used instead of calling this cfg
+	 * @return a {@link NaryExpression} providing the semantics of this native
+	 *             cfg, that can be used instead of calling this cfg
 	 * 
 	 * @throws CallResolutionException if something goes wrong while creating
 	 *                                     the native call
 	 */
-	public NativeCall rewrite(Statement original, Expression... params)
+	public NaryExpression rewrite(Statement original, Expression... params)
 			throws CallResolutionException {
 
 		try {
 			Method builder = construct.getDeclaredMethod("build", CFG.class, CodeLocation.class, Expression[].class);
-			NativeCall instance = (NativeCall) builder.invoke(null, original.getCFG(), original.getLocation(), params);
+			NaryExpression instance = (NaryExpression) builder.invoke(null, original.getCFG(), original.getLocation(),
+					params);
 			((PluggableStatement) instance).setOriginatingStatement(original);
 			return instance;
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException

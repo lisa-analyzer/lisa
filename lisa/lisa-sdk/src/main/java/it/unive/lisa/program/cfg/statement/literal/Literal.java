@@ -36,7 +36,7 @@ public abstract class Literal<T> extends Expression {
 	 * 
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param value      the value of this literal
 	 * @param staticType the type of this literal
 	 */

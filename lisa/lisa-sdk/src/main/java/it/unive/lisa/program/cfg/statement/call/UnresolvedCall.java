@@ -13,6 +13,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
+import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -35,24 +37,20 @@ public class UnresolvedCall extends Call {
 	private final ResolutionStrategy strategy;
 
 	/**
-	 * The name of the call target
-	 */
-	private final String targetName;
-
-	/**
 	 * Whether or not this is a call to an instance method of a unit (that can
 	 * be overridden) or not.
 	 */
 	private final boolean instanceCall;
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program. The
-	 * static type of this CFGCall is the one return type of the descriptor of
-	 * {@code target}.
+	 * Builds the unresolved call, happening at the given location in the
+	 * program. The static type of this call is {@link Untyped}. The
+	 * {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
-	 *                         the source file. If unknown, use {@code null}
+	 *                         the program
 	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
 	 *                         this call
 	 * @param instanceCall whether or not this is a call to an instance method
@@ -66,13 +64,13 @@ public class UnresolvedCall extends Call {
 	}
 
 	/**
-	 * Builds the CFG call, happening at the given location in the program. The
-	 * static type of this CFGCall is the one return type of the descriptor of
-	 * {@code target}.
+	 * Builds the unresolved call, happening at the given location in the
+	 * program. The {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
 	 * 
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
-	 *                         the source file. If unknown, use {@code null}
+	 *                         the program
 	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
 	 *                         this call
 	 * @param instanceCall whether or not this is a call to an instance method
@@ -83,10 +81,48 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
 			boolean instanceCall, String targetName, Type staticType, Expression... parameters) {
-		super(cfg, location, staticType, parameters);
-		Objects.requireNonNull(targetName, "The target's name of an unresolved call cannot be null");
+		this(cfg, location, strategy, instanceCall, targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
+	}
+
+	/**
+	 * Builds the unresolved call, happening at the given location in the
+	 * program. The static type of this call is {@link Untyped}.
+	 * 
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param location     the location where the expression is defined within
+	 *                         the program
+	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
+	 *                         this call
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not.
+	 * @param targetName   the name of the target of this call
+	 * @param parameters   the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
+			boolean instanceCall, String targetName, EvaluationOrder order, Expression... parameters) {
+		this(cfg, location, strategy, instanceCall, targetName, order, Untyped.INSTANCE, parameters);
+	}
+
+	/**
+	 * Builds the unresolved call, happening at the given location in the
+	 * program.
+	 * 
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param location     the location where the expression is defined within
+	 *                         the program
+	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
+	 *                         this call
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not.
+	 * @param targetName   the name of the target of this call
+	 * @param staticType   the static type of this call
+	 * @param parameters   the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
+			boolean instanceCall, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
+		super(cfg, location, targetName, order, staticType, parameters);
+		Objects.requireNonNull(strategy, "The resolution strategy of an unresolved call cannot be null");
 		this.strategy = strategy;
-		this.targetName = targetName;
 		this.instanceCall = instanceCall;
 	}
 
@@ -97,15 +133,6 @@ public class UnresolvedCall extends Call {
 	 */
 	public ResolutionStrategy getStrategy() {
 		return strategy;
-	}
-
-	/**
-	 * Yields the name of the target of this call.
-	 * 
-	 * @return the name of the target
-	 */
-	public String getTargetName() {
-		return targetName;
 	}
 
 	/**
@@ -125,7 +152,6 @@ public class UnresolvedCall extends Call {
 		int result = super.hashCode();
 		result = prime * result + (instanceCall ? 1231 : 1237);
 		result = prime * result + ((strategy == null) ? 0 : strategy.hashCode());
-		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 		return result;
 	}
 
@@ -142,24 +168,20 @@ public class UnresolvedCall extends Call {
 			return false;
 		if (strategy != other.strategy)
 			return false;
-		if (targetName == null) {
-			if (other.targetName != null)
-				return false;
-		} else if (!targetName.equals(other.targetName))
-			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "[unresolved]" + targetName + "(" + StringUtils.join(getParameters(), ", ") + ")";
+		return "[unresolved]" + getConstructName() + "(" + StringUtils.join(getSubExpressions(), ", ") + ")";
 	}
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V>[] computedStates,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
@@ -170,18 +192,9 @@ public class UnresolvedCall extends Call {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}
 		resolved.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H, V> result = resolved.callSemantics(entryState, interprocedural, computedStates, params);
+		AnalysisState<A, H,
+				V> result = resolved.expressionSemantics(entryState, interprocedural, computedStates, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
-	}
-
-	/**
-	 * Updates this call's runtime types to match the ones of the given
-	 * expression.
-	 * 
-	 * @param other the expression to inherit from
-	 */
-	public void inheritRuntimeTypesFrom(Expression other) {
-		setRuntimeTypes(other.getRuntimeTypes());
 	}
 }

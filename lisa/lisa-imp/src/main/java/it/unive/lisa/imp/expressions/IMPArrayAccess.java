@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -21,7 +21,7 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IMPArrayAccess extends BinaryNativeCall {
+public class IMPArrayAccess extends BinaryExpression {
 
 	/**
 	 * Builds the array access.
@@ -42,7 +42,8 @@ public class IMPArrayAccess extends BinaryNativeCall {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> entryState,
+					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> leftState,
 					SymbolicExpression left,
 					AnalysisState<A, H, V> rightState,

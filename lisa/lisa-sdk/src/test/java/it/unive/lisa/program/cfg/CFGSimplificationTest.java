@@ -3,12 +3,8 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import org.junit.Test;
+
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -19,19 +15,16 @@ import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Assignment;
-import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.program.cfg.statement.call.BinaryNativeCall;
-import it.unive.lisa.program.cfg.statement.call.UnaryNativeCall;
+import it.unive.lisa.program.cfg.statement.comparison.GreaterThan;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
-import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.program.cfg.statement.string.Length;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import org.junit.Test;
 
 public class CFGSimplificationTest {
 
@@ -107,39 +100,6 @@ public class CFGSimplificationTest {
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
-	private static class GT extends BinaryNativeCall {
-		protected GT(CFG cfg, Expression left, Expression right) {
-			super(cfg, new SourceCodeLocation("unknown", 0, 0), "gt", left, right);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-						AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-						AnalysisState<A, H, V> leftState, SymbolicExpression left,
-						AnalysisState<A, H, V> rightState, SymbolicExpression right) throws SemanticException {
-			return rightState;
-		}
-	}
-
-	private static class Print extends UnaryNativeCall {
-		protected Print(CFG cfg, Expression arg) {
-			super(cfg, new SourceCodeLocation("unknown", 0, 0), "print", arg);
-		}
-
-		@Override
-		protected <A extends AbstractState<A, H, V>,
-				H extends HeapDomain<H>,
-				V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-						AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-						AnalysisState<A, H, V> exprState, SymbolicExpression expr)
-						throws SemanticException {
-			return entryState;
-		}
-
-	}
-
 	@Test
 	public void testConditionalSimplification() throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
@@ -148,9 +108,9 @@ public class CFGSimplificationTest {
 		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));
-		GT gt = new GT(first, new VariableRef(first, unknownLocation, "x"),
+		GreaterThan gt = new GreaterThan(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 2));
-		Print print = new Print(first, new StringLiteral(first, unknownLocation, "f"));
+		Length print = new Length(first, unknownLocation, new StringLiteral(first, unknownLocation, "f"));
 		NoOp noop1 = new NoOp(first, unknownLocation);
 		NoOp noop2 = new NoOp(first, unknownLocation2);
 		Return ret = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
@@ -178,9 +138,9 @@ public class CFGSimplificationTest {
 		assign = new Assignment(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
 				new Int32Literal(second, unknownLocation, 5));
-		gt = new GT(second, new VariableRef(second, unknownLocation, "x"),
+		gt = new GreaterThan(second, unknownLocation, new VariableRef(second, unknownLocation, "x"),
 				new Int32Literal(second, unknownLocation, 2));
-		print = new Print(second, new StringLiteral(second, unknownLocation, "f"));
+		print = new Length(second, unknownLocation, new StringLiteral(second, unknownLocation, "f"));
 		ret = new Return(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"));
 

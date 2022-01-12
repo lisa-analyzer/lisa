@@ -28,7 +28,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	 * 
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where this statement is defined within the
-	 *                       source file. If unknown, use {@code null}
+	 *                       program
 	 * @param expression the expression to return
 	 */
 	public Return(CFG cfg, CodeLocation location, Expression expression) {
