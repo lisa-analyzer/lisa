@@ -37,15 +37,16 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 					StatementStore<A, H, V> expressions,
 					ExpressionSet<SymbolicExpression>[] computed)
 					throws SemanticException {
-		@SuppressWarnings("unchecked")
-		AnalysisState<A, H, V>[] subStates = new AnalysisState[subExpressions.length];
+		if (subExpressions.length == 0)
+			return entryState;
+
 		AnalysisState<A, H, V> preState = entryState;
 		for (int i = 0; i < computed.length; i++) {
-			preState = subStates[i] = subExpressions[i].semantics(preState, interprocedural, expressions);
-			expressions.put(subExpressions[i], subStates[i]);
-			computed[i] = subStates[i].getComputedExpressions();
+			preState = subExpressions[i].semantics(preState, interprocedural, expressions);
+			expressions.put(subExpressions[i], preState);
+			computed[i] = preState.getComputedExpressions();
 		}
 
-		return subStates[subStates.length - 1];
+		return preState;
 	}
 }

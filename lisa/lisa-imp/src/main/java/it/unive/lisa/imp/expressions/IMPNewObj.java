@@ -59,8 +59,7 @@ public class IMPNewObj extends NaryExpression {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
 
 		// we need to add the receiver to the parameters
-		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this",
-				getStaticType());
+		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this", getStaticType());
 		Expression[] fullExpressions = ArrayUtils.insert(0, getSubExpressions(), paramThis);
 		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, new ExpressionSet<>(created));
 

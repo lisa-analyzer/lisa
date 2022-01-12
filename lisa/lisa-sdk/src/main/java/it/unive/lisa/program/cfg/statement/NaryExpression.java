@@ -90,7 +90,7 @@ public abstract class NaryExpression extends Expression {
 	 */
 	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
 			Expression... subExpressions) {
-		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, subExpressions);
+		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, staticType, subExpressions);
 	}
 
 	/**
