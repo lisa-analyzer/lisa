@@ -52,9 +52,8 @@ public class IMPNewObj extends NaryExpression {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
@@ -68,14 +67,14 @@ public class IMPNewObj extends NaryExpression {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H, V> sem = call.expressionSemantics(entryState, interprocedural, computedStates, fullParams);
+		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams);
 
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
 
 		sem = sem.smallStepSemantics(created, this);
 
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions())
 			result = result.lub(sem.smallStepSemantics(new HeapReference(loc.getTypes(), loc, getLocation()), call));
 

@@ -50,6 +50,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param location   the location where the expression is defined within the
 	 *                       program
 	 * @param targetName the name of the target of this open call
+	 * @param order      the evaluation order of the sub-expressions
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */

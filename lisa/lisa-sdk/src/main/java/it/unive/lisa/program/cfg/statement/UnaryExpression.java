@@ -65,6 +65,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param subExpression the sub-expression of this expression
 	 */
 	protected UnaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
@@ -80,6 +81,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param staticType    the static type of this expression
 	 * @param subExpression the sub-expression of this expression
 	 */
@@ -101,14 +103,13 @@ public abstract class UnaryExpression extends NaryExpression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression expr : params[0])
-			result = result.lub(unarySemantics(entryState, interprocedural, computedStates[0], expr));
+			result = result.lub(unarySemantics(interprocedural, state, expr));
 		return result;
 	}
 
@@ -120,11 +121,9 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param entryState      the entry state of this unary expression
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
-	 * @param exprState       the state obtained by evaluating {@code expr} in
-	 *                            {@code entryState}
+	 * @param state           the state where the expression is to be evaluated
 	 * @param expr            the symbolic expressions representing the computed
 	 *                            value of the sub-expression of this expression
 	 * 
@@ -136,9 +135,8 @@ public abstract class UnaryExpression extends NaryExpression {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> exprState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression expr)
 					throws SemanticException;
 }

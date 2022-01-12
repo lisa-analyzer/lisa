@@ -46,6 +46,7 @@ public class Assignment extends BinaryExpression {
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where this statement is defined within the
 	 *                       program
+	 * @param order      the evaluation order of the sub-expressions
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
@@ -61,6 +62,7 @@ public class Assignment extends BinaryExpression {
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where this statement is defined within the
 	 *                       program
+	 * @param staticType the static type of this expression
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
@@ -75,6 +77,8 @@ public class Assignment extends BinaryExpression {
 	 * @param cfg        the cfg that this statement belongs to
 	 * @param location   the location where this statement is defined within the
 	 *                       program
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this expression
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
@@ -92,13 +96,11 @@ public class Assignment extends BinaryExpression {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
-					SymbolicExpression leftExp,
-					AnalysisState<A, H, V> rightState,
-					SymbolicExpression rightExp)
+					AnalysisState<A, H, V> state,
+					SymbolicExpression left,
+					SymbolicExpression right)
 					throws SemanticException {
-		return leftState.assign(leftExp, rightExp, this);
+		return state.assign(left, right, this);
 	}
 }

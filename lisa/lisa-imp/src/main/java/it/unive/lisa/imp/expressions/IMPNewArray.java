@@ -46,21 +46,14 @@ public class IMPNewArray extends NaryExpression {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call (the semantics of this call does not need
-		// information about the intermediate analysis states)
-		AnalysisState<A, H, V> last = computedStates.length == 0
-				? entryState
-				: computedStates[computedStates.length - 1];
 		HeapAllocation alloc = new HeapAllocation(getRuntimeTypes(), getLocation());
-		AnalysisState<A, H, V> sem = last.smallStepSemantics(alloc, this);
+		AnalysisState<A, H, V> sem = state.smallStepSemantics(alloc, this);
 
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
 			HeapReference ref = new HeapReference(loc.getTypes(), loc, getLocation());
 			AnalysisState<A, H, V> refSem = sem.smallStepSemantics(ref, this);

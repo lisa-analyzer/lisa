@@ -33,6 +33,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
 	 *                       the program
+	 * @param targetName the name of the target of this call
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
@@ -47,6 +48,8 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where this expression is defined within
 	 *                       the program
+	 * @param targetName the name of the target of this call
+	 * @param order      the evaluation order of the sub-expressions
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
@@ -89,24 +92,16 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call, it is the entry state if this call has no
-		// parameters (the semantics of this call does not need information
-		// about the intermediate analysis states)
-		AnalysisState<A, H, V> callState = computedStates.length == 0
-				? entryState
-				: computedStates[computedStates.length - 1];
 		// the stack has to be empty
-		callState = new AnalysisState<>(callState.getState(), new ExpressionSet<>());
+		state = new AnalysisState<>(state.getState(), new ExpressionSet<>());
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = compute(interprocedural, callState, params);
+		AnalysisState<A, H, V> returned = compute(interprocedural, state, params);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||

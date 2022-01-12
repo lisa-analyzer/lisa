@@ -39,14 +39,12 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
 					throws SemanticException {
-		return rightState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new BinaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						left,

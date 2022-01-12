@@ -63,24 +63,22 @@ public class StartsWith extends it.unive.lisa.program.cfg.statement.BinaryExpres
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
-					SymbolicExpression leftExp,
-					AnalysisState<A, H, V> rightState,
-					SymbolicExpression rightExp)
+					AnalysisState<A, H, V> state,
+					SymbolicExpression left,
+					SymbolicExpression right)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
-		if (!leftExp.getDynamicType().isStringType() && !leftExp.getDynamicType().isUntyped())
-			return entryState.bottom();
-		if (!rightExp.getDynamicType().isStringType() && !rightExp.getDynamicType().isUntyped())
-			return entryState.bottom();
+		if (!left.getDynamicType().isStringType() && !left.getDynamicType().isUntyped())
+			return state.bottom();
+		if (!right.getDynamicType().isStringType() && !right.getDynamicType().isUntyped())
+			return state.bottom();
 
-		return rightState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new BinaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
-						leftExp,
-						rightExp,
+						left,
+						right,
 						StringStartsWith.INSTANCE,
 						getLocation()),
 				originating == null ? this : originating);

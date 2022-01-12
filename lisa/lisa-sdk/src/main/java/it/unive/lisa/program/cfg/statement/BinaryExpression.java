@@ -66,6 +66,7 @@ public abstract class BinaryExpression extends NaryExpression {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
 	 */
@@ -81,6 +82,7 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param location      the location where this expression is defined within
 	 *                          the program
 	 * @param constructName the name of the construct invoked by this expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param staticType    the static type of this expression
 	 * @param left          the first sub-expression of this expression
 	 * @param right         the second sub-expression of this expression
@@ -112,17 +114,14 @@ public abstract class BinaryExpression extends NaryExpression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = entryState.bottom();
-
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(binarySemantics(entryState, interprocedural, computedStates[0], left,
-						computedStates[1], right));
+				result = result.lub(binarySemantics(interprocedural, state, left, right));
 
 		return result;
 	}
@@ -135,17 +134,13 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param entryState      the entry state of this binary expression
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
-	 * @param leftState       the state obtained by evaluating {@code left} in
-	 *                            {@code entryState}
-	 * @param leftExp         the symbolic expression representing the computed
+	 * @param state           the state where the expression is to be evaluated
+	 * @param left            the symbolic expression representing the computed
 	 *                            value of the first sub-expression of this
 	 *                            expression
-	 * @param rightState      the state obtained by evaluating {@code right} in
-	 *                            {@code leftState}
-	 * @param rightExp        the symbolic expression representing the computed
+	 * @param right           the symbolic expression representing the computed
 	 *                            value of the second sub-expression of this
 	 *                            expression
 	 * 
@@ -157,11 +152,9 @@ public abstract class BinaryExpression extends NaryExpression {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
-					SymbolicExpression leftExp,
-					AnalysisState<A, H, V> rightState,
-					SymbolicExpression rightExp)
+					AnalysisState<A, H, V> state,
+					SymbolicExpression left,
+					SymbolicExpression right)
 					throws SemanticException;
 }

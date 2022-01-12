@@ -40,16 +40,15 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> exprState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression expr)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isBooleanType() && !expr.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return exprState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new UnaryExpression(
 						Caches.types().mkSingletonSet(BoolType.INSTANCE),
 						expr,

@@ -42,21 +42,19 @@ public class IMPArrayAccess extends BinaryExpression {
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
-
 					throws SemanticException {
+
 		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
 		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left, getLocation());
-		return rightState.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
+		return state.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
 	}
 }

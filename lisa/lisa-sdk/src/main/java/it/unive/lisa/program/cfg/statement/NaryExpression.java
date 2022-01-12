@@ -68,6 +68,7 @@ public abstract class NaryExpression extends Expression {
 	 *                           the program
 	 * @param constructName  the name of the construct represented by this
 	 *                           expression
+	 * @param order          the evaluation order of the sub-expressions
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
 	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
@@ -100,6 +101,7 @@ public abstract class NaryExpression extends Expression {
 	 *                           the program
 	 * @param constructName  the name of the construct represented by this
 	 *                           expression
+	 * @param order          the evaluation order of the sub-expressions
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
@@ -206,19 +208,15 @@ public abstract class NaryExpression extends Expression {
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		ExpressionSet<SymbolicExpression>[] computed = new ExpressionSet[subExpressions.length];
-		AnalysisState<A, H, V>[] subStates = new AnalysisState[subExpressions.length];
 
-		order.evaluate(subExpressions, entryState, interprocedural, expressions, computed, subStates);
-		AnalysisState<A, H, V> result = expressionSemantics(entryState, interprocedural, subStates, computed);
+		AnalysisState<A, H,
+				V> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
+		AnalysisState<A, H, V> result = expressionSemantics(interprocedural, eval, computed);
 
 		for (Expression sub : subExpressions)
 			if (!sub.getMetaVariables().isEmpty())
 				result = result.forgetIdentifiers(sub.getMetaVariables());
 		return result;
-	}
-
-	protected void evaluateSubExpressions() {
-
 	}
 
 	/**
@@ -229,18 +227,9 @@ public abstract class NaryExpression extends Expression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param entryState      the entry state of this call
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
-	 * @param subStates       the array of states chaining the sub-expressions'
-	 *                            semantics evaluation starting from
-	 *                            {@code entryState}, namely
-	 *                            {@code subStates[i]} corresponds to the state
-	 *                            obtained by the evaluation of
-	 *                            {@code subExpressions[i]} in the state
-	 *                            {@code subStates[i-1]}
-	 *                            ({@code subExpressions[0]} is evaluated in
-	 *                            {@code entryState})
+	 * @param state           the state where the expression is to be evaluated
 	 * @param params          the symbolic expressions representing the computed
 	 *                            values of the sub-expressions of this
 	 *                            expression
@@ -253,9 +242,8 @@ public abstract class NaryExpression extends Expression {
 	public abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] subStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException;
 }

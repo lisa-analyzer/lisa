@@ -67,6 +67,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * @param location      the location where this expression is defined within
 	 *                          program
 	 * @param qualifiedName the qualified name of the static target of this call
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */

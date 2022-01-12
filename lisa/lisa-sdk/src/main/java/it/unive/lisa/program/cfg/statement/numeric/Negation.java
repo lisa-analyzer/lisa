@@ -38,16 +38,15 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> exprState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression expr)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!expr.getDynamicType().isNumericType() && !expr.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return exprState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new UnaryExpression(
 						expr.getTypes(),
 						expr,

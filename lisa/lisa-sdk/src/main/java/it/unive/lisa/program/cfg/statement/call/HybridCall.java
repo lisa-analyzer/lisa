@@ -76,6 +76,7 @@ public class HybridCall extends Call {
 	 * @param location      the location where this expression is defined within
 	 *                          the program
 	 * @param qualifiedName the qualified name of the static target of this call
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
@@ -189,26 +190,25 @@ public class HybridCall extends Call {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
 		if (!targets.isEmpty()) {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getConstructName(), targets, parameters);
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
-			result = cfgcall.expressionSemantics(entryState, interprocedural, computedStates, params);
+			result = cfgcall.expressionSemantics(interprocedural, state, params);
 			getMetaVariables().addAll(cfgcall.getMetaVariables());
 		}
 
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				result = result.lub(rewritten.expressionSemantics(entryState, interprocedural, computedStates, params));
+				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

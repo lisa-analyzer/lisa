@@ -54,7 +54,7 @@ public class UnresolvedCall extends Call {
 	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
 	 *                         this call
 	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not.
+	 *                         of a unit (that can be overridden) or not
 	 * @param targetName   the name of the target of this call
 	 * @param parameters   the parameters of this call
 	 */
@@ -96,6 +96,7 @@ public class UnresolvedCall extends Call {
 	 * @param instanceCall whether or not this is a call to an instance method
 	 *                         of a unit (that can be overridden) or not.
 	 * @param targetName   the name of the target of this call
+	 * @param order        the evaluation order of the sub-expressions
 	 * @param parameters   the parameters of this call
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
@@ -115,6 +116,7 @@ public class UnresolvedCall extends Call {
 	 * @param instanceCall whether or not this is a call to an instance method
 	 *                         of a unit (that can be overridden) or not.
 	 * @param targetName   the name of the target of this call
+	 * @param order        the evaluation order of the sub-expressions
 	 * @param staticType   the static type of this call
 	 * @param parameters   the parameters of this call
 	 */
@@ -180,9 +182,8 @@ public class UnresolvedCall extends Call {
 	public <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 		Call resolved;
@@ -193,7 +194,7 @@ public class UnresolvedCall extends Call {
 		}
 		resolved.setRuntimeTypes(getRuntimeTypes());
 		AnalysisState<A, H,
-				V> result = resolved.expressionSemantics(entryState, interprocedural, computedStates, params);
+				V> result = resolved.expressionSemantics(interprocedural, state, params);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}

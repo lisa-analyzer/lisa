@@ -40,20 +40,18 @@ public class Remainder extends it.unive.lisa.program.cfg.statement.BinaryExpress
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isNumericType() && !left.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 		if (!right.getDynamicType().isNumericType() && !right.getDynamicType().isUntyped())
-			return entryState.bottom();
+			return state.bottom();
 
-		return rightState.smallStepSemantics(
+		return state.smallStepSemantics(
 				new BinaryExpression(
 						getRuntimeTypes(),
 						left,

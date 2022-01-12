@@ -69,6 +69,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param left          the first sub-expression of this expression
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
@@ -86,6 +87,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          expression
+	 * @param order         the evaluation order of the sub-expressions
 	 * @param staticType    the static type of this expression
 	 * @param left          the first sub-expression of this expression
 	 * @param middle        the second sub-expression of this expression
@@ -127,18 +129,15 @@ public abstract class TernaryExpression extends NaryExpression {
 	public final <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
+					AnalysisState<A, H, V> state,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = entryState.bottom();
-
+		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression middle : params[1])
 				for (SymbolicExpression right : params[2])
-					result = result.lub(ternarySemantics(entryState, interprocedural, computedStates[0], left,
-							computedStates[1], middle, computedStates[2], right));
+					result = result.lub(ternarySemantics(interprocedural, state, left, middle, right));
 
 		return result;
 	}
@@ -151,22 +150,16 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param entryState      the entry state of this binary expression
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
-	 * @param leftState       the state obtained by evaluating {@code left} in
-	 *                            {@code entryState}
-	 * @param leftExp         the symbolic expression representing the computed
+	 * @param state           the state where the expression is to be evaluated
+	 * @param left            the symbolic expression representing the computed
 	 *                            value of the first sub-expression of this
 	 *                            expression
-	 * @param middleState     the state obtained by evaluating {@code middle} in
-	 *                            {@code leftState}
-	 * @param middleExp       the symbolic expression representing the computed
+	 * @param middle          the symbolic expression representing the computed
 	 *                            value of the second sub-expression of this
 	 *                            expression
-	 * @param rightState      the state obtained by evaluating {@code right} in
-	 *                            {@code middleState}
-	 * @param rightExp        the symbolic expression representing the computed
+	 * @param right           the symbolic expression representing the computed
 	 *                            value of the third sub-expression of this
 	 *                            expression
 	 * 
@@ -178,13 +171,10 @@ public abstract class TernaryExpression extends NaryExpression {
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> ternarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
-					SymbolicExpression leftExp,
-					AnalysisState<A, H, V> middleState,
-					SymbolicExpression middleExp,
-					AnalysisState<A, H, V> rightState,
-					SymbolicExpression rightExp)
+					AnalysisState<A, H, V> state,
+					SymbolicExpression left,
+					SymbolicExpression middle,
+					SymbolicExpression right)
 					throws SemanticException;
 }

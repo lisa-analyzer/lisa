@@ -54,14 +54,12 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					AnalysisState<A, H, V> entryState,
 					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> leftState,
+					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					AnalysisState<A, H, V> rightState,
 					SymbolicExpression right)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V> result = state.bottom();
 		BinaryOperator op;
 
 		for (Type tleft : left.getTypes())
@@ -91,7 +89,7 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 				if (op == null)
 					continue;
 
-				result = result.lub(rightState.smallStepSemantics(
+				result = result.lub(state.smallStepSemantics(
 						new BinaryExpression(
 								op == StringConcat.INSTANCE
 										? Caches.types().mkSingletonSet(StringType.INSTANCE)

@@ -29,6 +29,7 @@ public abstract class Call extends NaryExpression {
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
 	 *                       program
+	 * @param targetName the name of the target of this call
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
@@ -42,6 +43,8 @@ public abstract class Call extends NaryExpression {
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
 	 *                       program
+	 * @param targetName the name of the target of this call
+	 * @param order      the evaluation order of the sub-expressions
 	 * @param staticType the static type of this call
 	 * @param parameters the parameters of this call
 	 */
