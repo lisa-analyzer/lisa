@@ -36,7 +36,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A worst case modular analysis were all method calls return top.
+ * A worst case modular analysis were all cfg calls are treated as open calls.
  * 
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
@@ -54,6 +54,11 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	private Program program;
 
 	/**
+	 * The policy used for computing the result of cfg calls.
+	 */
+	private OpenCallPolicy policy;
+
+	/**
 	 * The cash of the fixpoints' results. {@link Map#keySet()} will contain all
 	 * the cfgs that have been added. If a key's values's
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
@@ -62,7 +67,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	private final Map<CFG, Optional<CFGWithAnalysisResults<A, H, V>>> results;
 
 	/**
-	 * Builds the call graph.
+	 * Builds the interprocedural analysis.
 	 */
 	public ModularWorstCaseAnalysis() {
 		this.results = new ConcurrentHashMap<>();
@@ -97,18 +102,23 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters)
-			throws SemanticException {
-		if (call.getStaticType().isVoidType())
-			return entryState.top();
-
-		return entryState.top()
-				.smallStepSemantics(new Variable(call.getRuntimeTypes(), "ret_value", call.getLocation()), call);
+			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifiedName(),
+						call.getStaticType(), call.getParameters());
+		return getAbstractResultOf(open, entryState, parameters);
 	}
 
 	@Override
-	public void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
+	public AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+		return policy.apply(call, entryState, parameters);
+	}
+
+	@Override
+	public void init(Program program, CallGraph callgraph, OpenCallPolicy policy)
+			throws InterproceduralAnalysisException {
 		this.program = program;
+		this.policy = policy;
 	}
 
 	@Override

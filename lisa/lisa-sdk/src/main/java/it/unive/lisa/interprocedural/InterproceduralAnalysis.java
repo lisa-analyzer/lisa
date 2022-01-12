@@ -15,6 +15,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -41,12 +42,14 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @param callgraph the callgraph used to resolve method calls
 	 * @param program   the program
+	 * @param policy    the {@link OpenCallPolicy} to be used for computing the
+	 *                      result of {@link OpenCall}s
 	 *
 	 * @throws InterproceduralAnalysisException if an exception happens while
 	 *                                              performing the
 	 *                                              interprocedural analysis
 	 */
-	void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException;
+	void init(Program program, CallGraph callgraph, OpenCallPolicy policy) throws InterproceduralAnalysisException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
@@ -85,16 +88,15 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg);
 
 	/**
-	 * Resolves the given call to all of its possible runtime targets, and then
-	 * computes an analysis state that abstracts the execution of the possible
+	 * Computes an analysis state that abstracts the execution of the possible
 	 * targets considering that they were given {@code parameters} as actual
-	 * parameters. The abstract value of each parameter is computed on
+	 * parameters, and the state when the call is executed is
 	 * {@code entryState}.<br>
 	 * <br>
 	 * Note that the interprocedural analysis is also responsible for
 	 * registering the call to the {@link CallGraph}, if needed.
 	 *
-	 * @param call       the call to resolve and evaluate
+	 * @param call       the call to evaluate
 	 * @param entryState the abstract analysis state when the call is reached
 	 * @param parameters the expressions representing the actual parameters of
 	 *                       the call
@@ -103,11 +105,34 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *             the cfg call. The
 	 *             {@link AnalysisState#getComputedExpressions()} will contain
 	 *             an {@link Identifier} pointing to the meta variable
-	 *             containing the abstraction of the returned value
+	 *             containing the abstraction of the returned value, if any
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
 	AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters)
+			throws SemanticException;
+
+	/**
+	 * Computes an analysis state that abstracts the execution of an unknown
+	 * target considering that they were given {@code parameters} as actual
+	 * parameters, and the state when the call is executed is
+	 * {@code entryState}.
+	 *
+	 * @param call       the call to evaluate
+	 * @param entryState the abstract analysis state when the call is reached
+	 * @param parameters the expressions representing the actual parameters of
+	 *                       the call
+	 *
+	 * @return an abstract analysis state representing the abstract result of
+	 *             the open call. The
+	 *             {@link AnalysisState#getComputedExpressions()} will contain
+	 *             an {@link Identifier} pointing to the meta variable
+	 *             containing the abstraction of the returned value, if any
+	 *
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
+	AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters)
 			throws SemanticException;
 

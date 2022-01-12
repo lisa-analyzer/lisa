@@ -16,6 +16,7 @@ import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
+import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -135,7 +136,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		}
 
 		try {
-			interproc.init(program, callGraph);
+			interproc.init(program, callGraph, conf.getOpenCallPolicy());
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisExecutionException(
@@ -143,7 +144,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		}
 
 		if (conf.isInferTypes())
-			inferTypes(fileManager, program, allCFGs);
+			inferTypes(fileManager, program, allCFGs, conf.getOpenCallPolicy());
 		else
 			LOG.warn("Type inference disabled: dynamic type information will not be available for following analysis");
 
@@ -191,7 +192,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs) {
+	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs, OpenCallPolicy policy) {
 		T typesState = this.typeState.top();
 		InterproceduralAnalysis<T, HT, VT> typesInterproc;
 		CallGraph typesCg;
@@ -199,7 +200,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 			typesCg = getInstance(callGraph.getClass());
 			typesInterproc = getInstance(interproc.getClass());
 			typesCg.init(program);
-			typesInterproc.init(program, typesCg);
+			typesInterproc.init(program, typesCg, policy);
 		} catch (AnalysisSetupException | InterproceduralAnalysisException | CallGraphConstructionException e) {
 			throw new AnalysisExecutionException("Unable to initialize type inference", e);
 		}

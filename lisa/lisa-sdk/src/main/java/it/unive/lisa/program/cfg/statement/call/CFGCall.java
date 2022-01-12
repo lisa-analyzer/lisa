@@ -1,5 +1,12 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -14,22 +21,16 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more of the CFGs under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGCall extends Call implements MetaVariableCreator {
+public class CFGCall extends CallWithResult implements MetaVariableCreator {
 
 	/**
 	 * The targets of this call
@@ -154,63 +155,23 @@ public class CFGCall extends Call implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation(), getLocation());
-	}
-
-	@Override
-	public <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
-					ExpressionSet<SymbolicExpression>[] params)
-					throws SemanticException {
-		// it corresponds to the analysis state after the evaluation of all the
-		// parameters of this call, it is the entry state if this call has no
-		// parameters (the semantics of this call does not need information
-		// about the intermediate analysis states)
-		AnalysisState<A, H, V> callState = computedStates.length == 0
-				? entryState
-				: computedStates[computedStates.length - 1];
-		// the stack has to be empty
-		callState = new AnalysisState<>(callState.getState(), new ExpressionSet<>());
-
-		// this will contain only the information about the returned
-		// metavariable
-		AnalysisState<A, H, V> returned = interprocedural.getAbstractResultOf(this, callState, params);
-
-		if (getStaticType().isVoidType() ||
-				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
-				(returned.getComputedExpressions().size() == 1
-						&& returned.getComputedExpressions().iterator().next() instanceof Skip))
-			// no need to add the meta variable since nothing has been pushed on
-			// the stack
-			return returned.smallStepSemantics(new Skip(getLocation()), this);
-
-		Identifier meta = getMetaVariable();
-		for (SymbolicExpression expr : returned.getComputedExpressions())
-			// It might be the case it chose a
-			// target with void return type
-			getMetaVariables().add((Identifier) expr);
-
+		Variable meta = new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation(), getLocation());
 		// propagates the annotations of the targets
 		// to the metavariable of this cfg call
 		for (CFG target : targets)
 			for (Annotation ann : target.getDescriptor().getAnnotations())
 				meta.addAnnotation(ann);
+		return meta;
+	}
 
-		getMetaVariables().add(meta);
-
-		AnalysisState<A, H, V> result = returned.bottom();
-		for (SymbolicExpression expr : returned.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
-			result = result.lub(tmp.smallStepSemantics(meta, this));
-			// We need to perform this evaluation of the identifier not pushed
-			// with the scope since otherwise
-			// the value associated with the returned variable would be lost
-		}
-
-		return result;
+	@Override
+	protected <A extends AbstractState<A, H, V>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> entryState,
+					ExpressionSet<SymbolicExpression>[] parameters)
+					throws SemanticException {
+		return interprocedural.getAbstractResultOf(this, entryState, parameters);
 	}
 }

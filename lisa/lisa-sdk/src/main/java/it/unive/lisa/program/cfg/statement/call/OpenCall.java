@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -13,18 +17,15 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class OpenCall extends Call implements MetaVariableCreator {
+public class OpenCall extends CallWithResult implements MetaVariableCreator {
 
 	/**
 	 * The name of the target of this call
@@ -93,19 +94,13 @@ public class OpenCall extends Call implements MetaVariableCreator {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	protected <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> callSemantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V>[] computedStates,
-					ExpressionSet<SymbolicExpression>[] params)
+			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					AnalysisState<A, H, V> entryState,
+					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
-		// TODO too coarse
-		AnalysisState<A, H, V> poststate = entryState.top();
-
-		if (getStaticType().isVoidType())
-			return poststate.smallStepSemantics(new Skip(getLocation()), this);
-		else
-			return poststate.smallStepSemantics(getMetaVariable(), this);
+		return interprocedural.getAbstractResultOf(this, entryState, parameters);
 	}
 }

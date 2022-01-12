@@ -36,6 +36,7 @@ import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -103,7 +104,7 @@ public class SemanticsSanityTest {
 		cg = new RTACallGraph();
 		cg.init(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();
-		interprocedural.init(p, cg);
+		interprocedural.init(p, cg, WorstCasePolicy.INSTANCE);
 		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
