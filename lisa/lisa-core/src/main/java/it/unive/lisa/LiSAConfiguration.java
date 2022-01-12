@@ -6,9 +6,12 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.OpenCallPolicy;
+import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -121,6 +124,12 @@ public class LiSAConfiguration {
 	private Class<?> fixpointWorkingSet;
 
 	/**
+	 * The {@link OpenCallPolicy} to be used for computing the result of
+	 * {@link OpenCall}s.
+	 */
+	private OpenCallPolicy openCallPolicy;
+
+	/**
 	 * Builds a new configuration object, with default settings. By default:
 	 * <ul>
 	 * <li>no syntactic check is executed</li>
@@ -135,6 +144,7 @@ public class LiSAConfiguration {
 	 * <li>the json report will not be dumped</li>
 	 * <li>the default warning threshold ({@value #DEFAULT_WIDENING_THRESHOLD})
 	 * will be used</li>
+	 * <li>the open call policy used is {@link WorstCasePolicy}</li>
 	 * </ul>
 	 */
 	public LiSAConfiguration() {
@@ -143,6 +153,7 @@ public class LiSAConfiguration {
 		this.workdir = Paths.get(".").toAbsolutePath().normalize().toString();
 		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
+		this.openCallPolicy = WorstCasePolicy.INSTANCE;
 	}
 
 	/**
@@ -401,6 +412,18 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Sets the {@link OpenCallPolicy} to use during the analysis.
+	 * 
+	 * @param openCallPolicy the policy to use
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setOpenCallPolicy(OpenCallPolicy openCallPolicy) {
+		this.openCallPolicy = openCallPolicy;
+		return this;
+	}
+
+	/**
 	 * Yields the {@link CallGraph} for the analysis. Might be {@code null} if
 	 * none was set.
 	 * 
@@ -553,6 +576,15 @@ public class LiSAConfiguration {
 		return wideningThreshold;
 	}
 
+	/**
+	 * Yields the {@link OpenCallPolicy} to use during the analysis.
+	 * 
+	 * @return the policy
+	 */
+	public OpenCallPolicy getOpenCallPolicy() {
+		return openCallPolicy;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -572,6 +604,7 @@ public class LiSAConfiguration {
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
 		result = prime * result + wideningThreshold;
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
+		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		return result;
 	}
 
@@ -641,6 +674,11 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!workdir.equals(other.workdir))
 			return false;
+		if (openCallPolicy == null) {
+			if (other.openCallPolicy != null)
+				return false;
+		} else if (!openCallPolicy.equals(other.openCallPolicy))
+			return false;
 		return true;
 	}
 
@@ -664,7 +702,7 @@ public class LiSAConfiguration {
 				.append(syntacticChecks.size())
 				.append(" syntactic checks to execute")
 				.append((syntacticChecks.isEmpty() ? "" : ":"));
-
+		// TODO automatic way to keep this updated?
 		for (SyntacticCheck check : syntacticChecks)
 			res.append("\n      ")
 					.append(check.getClass().getSimpleName());

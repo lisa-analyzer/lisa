@@ -240,5 +240,4 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			fixpointTriggers.add(cfg);
 		return res.getRight();
 	}
-
 }

@@ -13,7 +13,9 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
@@ -40,8 +42,14 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	 */
 	protected Program program;
 
+	/**
+	 * The policy to evaluate results of open calls.
+	 */
+	protected OpenCallPolicy policy;
+
 	@Override
-	public void init(Program program, CallGraph callgraph) throws InterproceduralAnalysisException {
+	public void init(Program program, CallGraph callgraph, OpenCallPolicy policy)
+			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.program = program;
 	}
@@ -74,5 +82,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 
 		// the stack has to be empty
 		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>());
+	}
+
+	@Override
+	public AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+		return policy.apply(call, entryState, parameters);
 	}
 }
