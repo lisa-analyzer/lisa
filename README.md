@@ -4,10 +4,10 @@
 
 ![GitHub](https://img.shields.io/github/license/UniVE-SSV/lisa?color=brightgreen)
 ![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/UniVE-SSV/lisa/Gradle%20Build/master)
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/UniVE-SSV/lisa?include_prereleases&sort=semver&color=brightgreen)
+![GitHub release (latest)](https://img.shields.io/github/v/release/UniVE-SSV/lisa?include_prereleases&display_name=release&color=brightgreen)
 ![GitHub last commit](https://img.shields.io/github/last-commit/UniVE-SSV/lisa)
 [![Maven Central](https://img.shields.io/maven-central/v/com.github.unive-ssv/lisa-sdk?color=brightgreen)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk)
-[![Javadoc](https://javadoc.io/badge2/com.github.unive-ssv/lisa/javadoc.svg)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk)
+[![Javadoc.io](https://javadoc.io/badge2/com.github.unive-ssv/lisa-sdk/javadoc.svg)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk)
 
 LiSA (Library for Static Analysis) aims to ease the creation and implementation of static analyzers based on the Abstract Interpretation theory.
 LiSA provides an analysis engine that works on a generic and extensible control flow graph representation of the program to analyze. Abstract interpreters in LiSA are built 
