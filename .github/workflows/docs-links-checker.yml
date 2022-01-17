@@ -35,8 +35,8 @@ jobs:
             fi
           else
             if [[ "$polished" == "{{ site.baseurl }}/"* ]]; then
-		          # we remove the website-root specifier
-		          polished=${polished/"{{ site.baseurl }}/"/}
+              # we remove the website-root specifier
+              polished=${polished/"{{ site.baseurl }}/"/}
             fi
             if [ ! -f "$(dirname $1)/$polished" -a ! -d "$(dirname $1)/$polished" ]; then
               echo "- broken file ref: $polished"
