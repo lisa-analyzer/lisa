@@ -25,8 +25,8 @@ jobs:
           polished=$(echo $link | cut -d'#' -f 1)
           if [ -z "$polished" ]; then
             # in-page link
-              return 0
-            fi
+            return 0
+          fi
           if [[ $polished == https://* ]]; then
             curl -o /dev/null -Ifs "$polished"
             if [[ $? -ne 0 ]]; then
@@ -34,7 +34,11 @@ jobs:
               return 1
             fi
           else
-            if [ ! -f "$(dirname $1)/$polished" ]; then
+            if [[ "$polished" == "{{ site.baseurl }}/"* ]]; then
+		          # we remove the website-root specifier
+		          polished=${polished/"{{ site.baseurl }}/"/}
+            fi
+            if [ ! -f "$(dirname $1)/$polished" -a ! -d "$(dirname $1)/$polished" ]; then
               echo "- broken file ref: $polished"
               return 1
             fi
@@ -43,6 +47,7 @@ jobs:
         }
         markdowns=$(find $1 -type f -regex "[^_]*\.md")
         code=0
+        IFS=$'\n'
         for file in ${markdowns[@]}; do
           echo Checking $file
           hreflinks=$(grep -oP '(?<=href=").*?(?=")' $file)
