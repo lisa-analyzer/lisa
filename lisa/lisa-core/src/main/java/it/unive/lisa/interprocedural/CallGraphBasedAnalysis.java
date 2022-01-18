@@ -52,6 +52,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
 		this.program = program;
+		this.policy = policy;
 	}
 
 	@Override
