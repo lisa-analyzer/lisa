@@ -9,8 +9,7 @@ on:
         default: 'master'
 
 jobs:
-  build-and-cron:
-    name: 'Compile and execute cron tests'
+  cron-runner:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout'

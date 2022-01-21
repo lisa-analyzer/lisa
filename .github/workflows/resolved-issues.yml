@@ -6,10 +6,9 @@ on:
       - labeled
 
 jobs:
-  move_issues:
-    if: github.event.label.name == 'resolved'
+  move-resolved-issues:
+    if: github.event.label.name == 'resolution:resolved'
     runs-on: ubuntu-latest
-
     steps:
     - name: Move to the DONE column
       uses: alex-page/github-project-automation-plus@v0.7.1

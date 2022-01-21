@@ -5,8 +5,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build-and-check:
-    name: 'Compile, execute all tests, check code style'
+  compile-test-cron-codestyle:
     runs-on: ubuntu-latest
     steps:
     - name: 'Checkout'
@@ -18,7 +17,7 @@ jobs:
     - name: 'Grant execute permission for gradlew'
       run: chmod +x lisa/gradlew
     - name: 'Gradle: full build, run all tests and check code style'
-      run: cd lisa && ./gradlew build cron checkCodeStyle
+      run: cd lisa && ./gradlew completeBuild
     - name: 'Publish unit test results'
       uses: EnricoMi/publish-unit-test-result-action@v1.6
       if: always()

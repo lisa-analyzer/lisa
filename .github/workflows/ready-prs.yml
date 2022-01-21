@@ -1,4 +1,4 @@
-name: Label ready prs
+name: 'Move ready PRs'
 
 on:
   pull_request:
@@ -6,10 +6,9 @@ on:
       - unlabeled
 
 jobs:
-  move_prs:
-    if: github.event.label.name == 'resolved'
+  move-prs:
+    if: github.event.label.name == 'resolution:wip'
     runs-on: ubuntu-latest
-
     steps:
     - name: Move to the PR-READY column
       uses: alex-page/github-project-automation-plus@v0.7.1

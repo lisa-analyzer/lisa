@@ -3,16 +3,16 @@ tag-template: 'v$RESOLVED_VERSION'
 categories:
   - title: '🚀 Features'
     labels:
-      - 'enhancement'
+      - 'type:feature'
   - title: '🐛 Bug Fixes'
     labels:
-      - 'bug'
-  - title: '🧰 Maintenance'
+      - 'type:bug'
+  - title: '🧰 Maintenance and others'
     labels: 
-      - 'test'
-      - 'infrastructure'
-      - 'refactoring'
-      - 'documentation'
+      - 'type:test'
+      - 'scope:infrastructure'
+      - 'type:refactoring'
+      - 'scope:documentation'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 version-resolver:
@@ -27,6 +27,10 @@ version-resolver:
       - 'patch'
   default: patch
 template: |
+  [Milestone with issues list](https://github.com/UniVE-SSV/lisa/milestone/8) 
+  [Maven (sdk)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk/$RESOLVED_VERSION/jar) - [Maven (core)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-core/$RESOLVED_VERSION/jar) - [Maven (imp)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-imp/$RESOLVED_VERSION/jar)
+  [Javadoc (sdk)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk/$RESOLVED_VERSION) - [Javadoc (core)](https://javadoc.io/doc/com.github.unive-ssv/lisa-core/$RESOLVED_VERSION) - [Javadoc (imp)](https://javadoc.io/doc/com.github.unive-ssv/lisa-imp/$RESOLVED_VERSION)
+  
   ## Changes
 
   $CHANGES
