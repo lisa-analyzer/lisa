@@ -6,12 +6,11 @@ on:
       - closed
 
 jobs:
-  move_issues:
+  label-closed-issues:
     runs-on: ubuntu-latest
-
     steps:
     - name: add label
       uses: andymckay/labeler@22d5392de2b725cea4b284df5824125054049d84
       with:
-        add-labels: 'resolved'
+        add-labels: 'resolution:resolved'
         repo-token: ${{ secrets.SSVPAT }}

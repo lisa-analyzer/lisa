@@ -1,4 +1,4 @@
-name: 'Cron scheduler'
+name: 'Cron tests scheduler'
 
 on:
   schedule:
@@ -6,8 +6,7 @@ on:
   workflow_dispatch:
     
 jobs:
-  scheduler:
-    name: 'Execute cron-runner on branches with new activity'
+  cron-test-scheduler:
     runs-on: ubuntu-latest
     steps:
     - name: 'Ensure git is installed'
