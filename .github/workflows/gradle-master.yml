@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: 'Checkout'
       uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # needed to have the tags below
     - name: 'Ensure git is installed'
       run: sudo apt-get install -y git
     - name: 'Set up JDK 11'
