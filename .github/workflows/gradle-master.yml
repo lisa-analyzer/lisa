@@ -56,7 +56,7 @@ jobs:
             currenttag=$(git describe --tags --abbrev=0 $currenttag^)
         done
         # now currenttag contains the last proper tag, excluding 'latest' or similar
-        git log $(if [[ -z $currenttag ]]; then echo HEAD; else echo $currenttag..HEAD; fi) --pretty=format:"%C(auto)%h - %s - %Cgreen@%an" >> changelog.txt
+        git log $(if [[ -z $currenttag ]]; then echo HEAD; else echo $currenttag..HEAD; fi) --pretty=format:"%C(auto)%h - %s" >> changelog.txt
         function join_by {
           local d=${1-} f=${2-}
           if shift 2; then
@@ -101,7 +101,7 @@ jobs:
         tag_name: latest
         release_name: "Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT"
         body: |
-          
+          Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT.
           This release is not stable: its contents will be replaced at each push on branch `master`.
           No older copies of the snapshots will be kept in GitHub Packages.
           
