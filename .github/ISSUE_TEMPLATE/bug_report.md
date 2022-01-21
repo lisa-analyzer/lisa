@@ -2,7 +2,7 @@
 name: Bug report
 about: Reporting erroneous/inconsistent behavior
 title: "[BUG] "
-labels: bug
+labels: type:bug
 assignees: lucaneg
 
 ---
