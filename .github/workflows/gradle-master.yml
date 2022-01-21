@@ -70,10 +70,13 @@ jobs:
         let nexttag[-1]=${nexttag[-1]}+1
         echo $(join_by "" "${nexttag[@]}") >> nextver.txt
         echo $currenttag >> currentver.txt
+        echo "currentver: $(cat currentver.txt)"
+        echo "nextver: $(cat nextver.txt)"
+        echo "changelog: $(cat changelog.txt)"
     - name: Read changelog and versions
       id: readfiles
       run: |
-        echo "::set-output name=changelog::$(cat getchangelog.txt)"
+        echo "::set-output name=changelog::$(cat changelog.txt)"
         echo "::set-output name=nextver::$(cat nextver.txt)"
         echo "::set-output name=currentver::$(cat currentver.txt)"
     - name: 'Gradle: publish to GitHub Packages'
@@ -87,7 +90,7 @@ jobs:
     - name: Create latest tag on this commit
       run: |
         git tag -f latest
-        git push origin latest
+        git push -f origin latest
     - name: Create snapshot release
       uses: viperproject/create-nightly-release@v1
       env:
@@ -96,6 +99,7 @@ jobs:
         tag_name: latest
         release_name: "Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT"
         body: |
+          
           This release is not stable: its contents will be replaced at each push on branch `master`.
           No older copies of the snapshots will be kept in GitHub Packages.
           
