@@ -49,6 +49,7 @@ jobs:
         min-versions-to-keep: 0
         delete-only-pre-release-versions: "true"
     - name: 'Retrieve commit list'
+      id: gitinfo
       run: |
         currenttag=$(git describe --tags --abbrev=0)
         while [[ "$currenttag" != "v"* ]]; do
@@ -68,17 +69,16 @@ jobs:
         currenttag=${currenttag#?} # remove the v
         nexttag=( $(grep -oE '[0-9]+|[^0-9]+' <<< $currenttag) ) 
         let nexttag[-1]=${nexttag[-1]}+1
-        echo $(join_by "" "${nexttag[@]}") >> nextver.txt
-        echo $currenttag >> currentver.txt
-        echo "currentver: $(cat currentver.txt)"
-        echo "nextver: $(cat nextver.txt)"
-        echo "changelog: $(cat changelog.txt)"
-    - name: Read changelog and versions
-      id: readfiles
-      run: |
-        echo "::set-output name=changelog::$(cat changelog.txt)"
-        echo "::set-output name=nextver::$(cat nextver.txt)"
-        echo "::set-output name=currentver::$(cat currentver.txt)"
+        nextver=$(join_by "" "${nexttag[@]}")
+        changelog=$(cat changelog.txt)
+        echo "currentver: $currenttag"
+        echo "nextver: $nextver"
+        echo "changelog: $changelog"
+        echo "::set-output name=nextver::$nextver"
+        echo "::set-output name=currentver::$currenttag"
+        echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+        echo "$changelog" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
     - name: 'Gradle: publish to GitHub Packages'
       env:
         SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
@@ -86,7 +86,7 @@ jobs:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cd lisa && ./gradlew -Pversion=${{ steps.readfiles.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
+      run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
     - name: Delete old latest tag
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
@@ -99,14 +99,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: latest
-        release_name: "Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT"
+        release_name: "Latest snapshot relese: ${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT"
         body: |
-          Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT.
+          Latest snapshot relese: ${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT.
           This release is not stable: its contents will be replaced at each push on branch `master`.
           No older copies of the snapshots will be kept in GitHub Packages.
           
-          Contents (commits since ${{ steps.readfiles.outputs.currentver }}):
-          ${{ steps.readfiles.outputs.changelog }}
+          Contents (commits since ${{ steps.gitinfo.outputs.currentver }}):
+          ${{ env.CHANGELOG }}
         keep_num: 0
         keep_tags: false
         
