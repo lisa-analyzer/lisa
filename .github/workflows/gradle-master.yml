@@ -77,6 +77,12 @@ jobs:
         echo "::set-output name=nextver::$(cat nextver.txt)"
         echo "::set-output name=currentver::$(cat currentver.txt)"
     - name: 'Gradle: publish to GitHub Packages'
+      env:
+        SIGN_PW: ${{ secrets.SIGN_PASSPHRASE }}
+        SIGN_KEY: ${{ secrets.SIGN_PRIVATE_KEY }}
+        MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+        MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: cd lisa && ./gradlew -Pversion=${{ steps.readfiles.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
     - name: Create latest tag on this commit
       run: |
