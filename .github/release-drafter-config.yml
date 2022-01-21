@@ -1,5 +1,5 @@
-name-template: 'v$RESOLVED_VERSION'
-tag-template: 'v$RESOLVED_VERSION'
+name-template: 'Release draft'
+tag-template: 'draft'
 categories:
   - title: '🚀 Features'
     labels:
@@ -12,24 +12,13 @@ categories:
       - 'type:test'
       - 'scope:infrastructure'
       - 'type:refactoring'
-      - 'scope:documentation'
+      - 'scope:docs'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
-version-resolver:
-  major:
-    labels:
-      - 'major'
-  minor:
-    labels:
-      - 'minor'
-  patch:
-    labels:
-      - 'patch'
-  default: patch
 template: |
-  [Milestone with issues list](https://github.com/UniVE-SSV/lisa/milestone/8) 
-  [Maven (sdk)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk/$RESOLVED_VERSION/jar) - [Maven (core)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-core/$RESOLVED_VERSION/jar) - [Maven (imp)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-imp/$RESOLVED_VERSION/jar)
-  [Javadoc (sdk)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk/$RESOLVED_VERSION) - [Javadoc (core)](https://javadoc.io/doc/com.github.unive-ssv/lisa-core/$RESOLVED_VERSION) - [Javadoc (imp)](https://javadoc.io/doc/com.github.unive-ssv/lisa-imp/$RESOLVED_VERSION)
+  [Milestone with issues list](https://github.com/UniVE-SSV/lisa/milestone/###MILESTONE_NUMBER###) 
+  [Maven (sdk)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk/###TARGET_VERSION###/jar) - [Maven (core)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-core/###TARGET_VERSION###/jar) - [Maven (imp)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-imp/###TARGET_VERSION###/jar)
+  [Javadoc (sdk)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk/###TARGET_VERSION###) - [Javadoc (core)](https://javadoc.io/doc/com.github.unive-ssv/lisa-core/###TARGET_VERSION###) - [Javadoc (imp)](https://javadoc.io/doc/com.github.unive-ssv/lisa-imp/###TARGET_VERSION###)
   
   ## Changes
 
