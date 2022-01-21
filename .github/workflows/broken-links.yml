@@ -1,0 +1,15 @@
+name: Broken Link Check
+
+on:
+  schedule:
+    - cron: 0 0 * * *
+  workflow_dispatch: 
+  
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check links with linkcheck
+        uses: filiph/linkcheck@v2.0.15+1
+        arguments: https://unive-ssv.github.io/lisa/ -e
+      
