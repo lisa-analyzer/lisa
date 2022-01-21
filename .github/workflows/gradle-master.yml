@@ -28,6 +28,24 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         check_name: 'All Test Results (unit + cron)'
         files: lisa/lisa-*/build/test-results/**/TEST-*.xml
+    - name: 'Delete pre-releases of lisa-sdk from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'com.github.unive-ssv.lisa-sdk'
+        min-versions-to-keep: 0
+        delete-only-pre-release-versions: "true"
+    - name: 'Delete pre-releases of lisa-core from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'com.github.unive-ssv.lisa-core'
+        min-versions-to-keep: 0
+        delete-only-pre-release-versions: "true"
+    - name: 'Delete pre-releases of lisa-imp from packages'
+      uses: actions/delete-package-versions@v2
+      with: 
+        package-name: 'com.github.unive-ssv.lisa-imp'
+        min-versions-to-keep: 0
+        delete-only-pre-release-versions: "true"
     - name: 'Retrieve commit list'
       run: |
         currenttag=$(git describe --tags --abbrev=0)
@@ -56,24 +74,8 @@ jobs:
         echo "::set-output name=changelog::$(cat getchangelog.txt)"
         echo "::set-output name=nextver::$(cat nextver.txt)"
         echo "::set-output name=currentver::$(cat currentver.txt)"
-    - name: 'Delete pre-releases of lisa-sdk from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'com.github.unive-ssv.lisa-sdk'
-        min-versions-to-keep: 0
-        delete-only-pre-release-versions: "true"
-    - name: 'Delete pre-releases of lisa-core from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'com.github.unive-ssv.lisa-core'
-        min-versions-to-keep: 0
-        delete-only-pre-release-versions: "true"
-    - name: 'Delete pre-releases of lisa-imp from packages'
-      uses: actions/delete-package-versions@v2
-      with: 
-        package-name: 'com.github.unive-ssv.lisa-imp'
-        min-versions-to-keep: 0
-        delete-only-pre-release-versions: "true"
+    - name: 'Gradle: publish to GitHub Packages'
+      run: cd lisa && ./gradlew -Pversion=${{ steps.readfiles.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
     - name: Create latest tag on this commit
       run: |
         git tag -f latest
@@ -93,6 +95,4 @@ jobs:
           ${{ steps.readfiles.outputs.changelog }}
         keep_num: 0
         keep_tags: false
-    - name: 'Gradle: publish to GitHub Packages'
-      run: cd lisa && ./gradlew -Pversion=${{ steps.readfiles.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
         
