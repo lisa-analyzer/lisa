@@ -84,7 +84,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: latest
-        release_name: Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT
+        release_name: "Latest snapshot relese: ${{ steps.readfiles.outputs.nextver }}-SNAPSHOT"
         body: |
           This release is not stable: its contents will be replaced at each push on branch `master`.
           No older copies of the snapshots will be kept in GitHub Packages.
