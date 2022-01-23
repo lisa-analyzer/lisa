@@ -12,5 +12,5 @@ jobs:
       - name: Check links with linkcheck
         uses: filiph/linkcheck@v2.0.15+1
         with:
-          arguments: https://unive-ssv.github.io/lisa/ -e
+          arguments: https://unive-ssv.github.io/lisa/
       
