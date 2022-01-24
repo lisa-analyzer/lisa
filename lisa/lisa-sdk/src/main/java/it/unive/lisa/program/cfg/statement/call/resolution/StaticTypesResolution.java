@@ -2,12 +2,13 @@ package it.unive.lisa.program.cfg.statement.call.resolution;
 
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * A strategy where the static types of the parameters of the call are evaluated
  * against the signature of a cfg: for each parameter, if the static type of the
- * actual parameter can be assigned to the type of the formal parameter, than
- * {@link #matches(Parameter[], Expression[])} return {@code true}.
+ * actual parameter can be assigned to the type of the formal parameter, then
+ * {@link #matches(Call, Parameter[], Expression[])} return {@code true}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -22,7 +23,7 @@ public class StaticTypesResolution extends FixedOrderResolution {
 	}
 
 	@Override
-	protected boolean matches(int pos, Parameter formal, Expression actual) {
+	protected boolean matches(Call call, int pos, Parameter formal, Expression actual) {
 		return actual.getStaticType().canBeAssignedTo(formal.getStaticType());
 	}
 }

@@ -48,7 +48,7 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesResolution;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -163,7 +163,7 @@ public class SemanticsSanityTest {
 			return new Expression[] { fake };
 		if (param == Collection.class)
 			return Collections.emptyList();
-		if (param == ResolutionStrategy.class)
+		if (param == ParameterMatchingStrategy.class)
 			return StaticTypesResolution.INSTANCE;
 		if (param == Unit.class)
 			return unit;

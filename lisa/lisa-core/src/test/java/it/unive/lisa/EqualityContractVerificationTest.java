@@ -105,9 +105,9 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, StaticTypesResolution.INSTANCE, false,
-			"foo");
+			"foo", "foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, StaticTypesResolution.INSTANCE, false,
-			"bar");
+			"bar", "bar");
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 

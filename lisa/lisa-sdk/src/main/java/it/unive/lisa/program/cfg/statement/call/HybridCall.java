@@ -21,7 +21,6 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis.
@@ -49,22 +48,20 @@ public class HybridCall extends Call {
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param location      the location where this expression is defined within
 	 *                          the program
-	 * @param qualifiedName the qualified name of the static target of this call
+	 * @param instanceCall  whether or not this is a call to an instance method
+	 *                          of a unit (that can be overridden) or not
+	 * @param qualifier     the optional qualifier of the call (can be null or
+	 *                          empty - see {@link #getFullTargetName()} for
+	 *                          more info)
+	 * @param targetName    the qualified name of the static target of this call
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, String qualifiedName, Collection<CFG> targets,
-			Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		super(cfg, location, qualifiedName, getCommonReturnType(targets, nativeTargets), parameters);
-		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
-		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
-		for (CFG target : targets)
-			Objects.requireNonNull(target, "A target of a hybrid call cannot be null");
-		for (NativeCFG target : nativeTargets)
-			Objects.requireNonNull(target, "A native target of a hybrid call cannot be null");
-		this.targets = targets;
-		this.nativeTargets = nativeTargets;
+	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
+		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, nativeTargets,
+				parameters);
 	}
 
 	/**
@@ -75,15 +72,22 @@ public class HybridCall extends Call {
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param location      the location where this expression is defined within
 	 *                          the program
-	 * @param qualifiedName the qualified name of the static target of this call
+	 * @param instanceCall  whether or not this is a call to an instance method
+	 *                          of a unit (that can be overridden) or not
+	 * @param qualifier     the optional qualifier of the call (can be null or
+	 *                          empty - see {@link #getFullTargetName()} for
+	 *                          more info)
+	 * @param targetName    the qualified name of the static target of this call
 	 * @param order         the evaluation order of the sub-expressions
 	 * @param targets       the CFGs that are targeted by this CFG call
 	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, String qualifiedName, EvaluationOrder order,
-			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		super(cfg, location, qualifiedName, order, getCommonReturnType(targets, nativeTargets), parameters);
+	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			EvaluationOrder order, Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Expression... parameters) {
+		super(cfg, location, instanceCall, qualifier, targetName, order, getCommonReturnType(targets, nativeTargets),
+				parameters);
 		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
 		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
 		for (CFG target : targets)
@@ -182,8 +186,7 @@ public class HybridCall extends Call {
 
 	@Override
 	public String toString() {
-		return "[" + (targets.size() + nativeTargets.size()) + " targets]" + getConstructName() + "("
-				+ StringUtils.join(getSubExpressions(), ", ") + ")";
+		return "[" + (targets.size() + nativeTargets.size()) + " targets] " + super.toString();
 	}
 
 	@Override
@@ -198,7 +201,8 @@ public class HybridCall extends Call {
 
 		Expression[] parameters = getSubExpressions();
 		if (!targets.isEmpty()) {
-			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getConstructName(), targets, parameters);
+			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), isInstanceCall(), getQualifier(), getTargetName(),
+					targets, parameters);
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
 			result = cfgcall.expressionSemantics(interprocedural, state, params);

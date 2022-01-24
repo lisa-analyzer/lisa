@@ -22,7 +22,6 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -42,20 +41,22 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
-	 *                          program
-	 * @param qualifiedName the qualified name of the static target of this call
-	 * @param targets       the CFGs that are targeted by this CFG call
-	 * @param parameters    the parameters of this call
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param location     the location where this expression is defined within
+	 *                         program
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
+	 * @param targetName   the qualified name of the static target of this call
+	 * @param targets      the CFGs that are targeted by this CFG call
+	 * @param parameters   the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, Collection<CFG> targets,
-			Expression... parameters) {
-		super(cfg, location, qualifiedName, getCommonReturnType(targets), parameters);
-		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
-		for (CFG target : targets)
-			Objects.requireNonNull(target, "A target of a CFG call cannot be null");
-		this.targets = targets;
+	public CFGCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			Collection<CFG> targets, Expression... parameters) {
+		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
+				targets, parameters);
 	}
 
 	/**
@@ -63,17 +64,22 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * static type of this call is the common supertype of the return types of
 	 * all targets.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
-	 *                          program
-	 * @param qualifiedName the qualified name of the static target of this call
-	 * @param order         the evaluation order of the sub-expressions
-	 * @param targets       the CFGs that are targeted by this CFG call
-	 * @param parameters    the parameters of this call
+	 * @param cfg          the cfg that this expression belongs to
+	 * @param location     the location where this expression is defined within
+	 *                         program
+	 * @param instanceCall whether or not this is a call to an instance method
+	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
+	 * @param targetName   the qualified name of the static target of this call
+	 * @param order        the evaluation order of the sub-expressions
+	 * @param targets      the CFGs that are targeted by this CFG call
+	 * @param parameters   the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, String qualifiedName, EvaluationOrder order,
-			Collection<CFG> targets, Expression... parameters) {
-		super(cfg, location, qualifiedName, order, getCommonReturnType(targets), parameters);
+	public CFGCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			EvaluationOrder order, Collection<CFG> targets, Expression... parameters) {
+		super(cfg, location, instanceCall, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)
 			Objects.requireNonNull(target, "A target of a CFG call cannot be null");
@@ -137,8 +143,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 
 	@Override
 	public String toString() {
-		return "[" + targets.size() + " targets]" + getConstructName() + "("
-				+ StringUtils.join(getSubExpressions(), ", ") + ")";
+		return "[" + targets.size() + " targets] " + super.toString();
 	}
 
 	@Override

@@ -103,7 +103,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	@Override
 	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getTargetName(),
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(), call.getTargetName(),
 				call.getStaticType(), call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters);
 	}
@@ -122,10 +122,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException {
-		OpenCall open = new OpenCall(unresolvedCall.getCFG(), unresolvedCall.getLocation(),
-				unresolvedCall.getTargetName(), unresolvedCall.getStaticType(), unresolvedCall.getParameters());
-		open.setRuntimeTypes(unresolvedCall.getRuntimeTypes());
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(),
+				call.getTargetName(), call.getStaticType(), call.getParameters());
+		open.setRuntimeTypes(call.getRuntimeTypes());
 		return open;
 	}
 }

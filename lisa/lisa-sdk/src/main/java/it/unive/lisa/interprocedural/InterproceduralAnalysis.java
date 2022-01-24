@@ -141,12 +141,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
 	 * {@link CallGraph#resolve(UnresolvedCall)} if needed.
 	 *
-	 * @param unresolvedCall the call to resolve
+	 * @param call the call to resolve
 	 *
 	 * @return a collection of all the possible runtime targets
 	 *
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException;
+	Call resolve(UnresolvedCall call) throws CallResolutionException;
 }

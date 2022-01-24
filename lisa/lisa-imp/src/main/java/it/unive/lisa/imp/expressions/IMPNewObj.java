@@ -64,7 +64,8 @@ public class IMPNewObj extends NaryExpression {
 		ExpressionSet<SymbolicExpression>[] fullParams = ArrayUtils.insert(0, params, new ExpressionSet<>(created));
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
-				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
+				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), getStaticType().toString(),
+				fullExpressions);
 		call.setRuntimeTypes(getRuntimeTypes());
 		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams);
 

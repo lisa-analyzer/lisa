@@ -17,7 +17,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -34,13 +33,17 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
 	 *                       program
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
 	 * @param targetName the name of the target of this open call
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, String targetName, Type staticType,
+	public OpenCall(CFG cfg, CodeLocation location, String qualifier, String targetName, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, targetName, staticType, parameters);
+		// if a call is open we don't really care if it's instance or not
+		super(cfg, location, false, qualifier, targetName, staticType, parameters);
 	}
 
 	/**
@@ -49,19 +52,23 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param cfg        the cfg that this expression belongs to
 	 * @param location   the location where the expression is defined within the
 	 *                       program
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
 	 * @param targetName the name of the target of this open call
 	 * @param order      the evaluation order of the sub-expressions
 	 * @param parameters the parameters of this call
 	 * @param staticType the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, String targetName, Type staticType, EvaluationOrder order,
-			Expression... parameters) {
-		super(cfg, location, targetName, order, staticType, parameters);
+	public OpenCall(CFG cfg, CodeLocation location, String qualifier, String targetName, Type staticType,
+			EvaluationOrder order, Expression... parameters) {
+		// if a call is open we don't really care if it's instance or not
+		super(cfg, location, false, qualifier, targetName, order, staticType, parameters);
 	}
 
 	@Override
 	public String toString() {
-		return "[open call]" + getConstructName() + "(" + StringUtils.join(getSubExpressions(), ", ") + ")";
+		return "[open] " + super.toString();
 	}
 
 	@Override

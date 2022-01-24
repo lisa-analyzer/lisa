@@ -56,8 +56,8 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException {
-		return callgraph.resolve(unresolvedCall);
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+		return callgraph.resolve(call);
 	}
 
 	/**

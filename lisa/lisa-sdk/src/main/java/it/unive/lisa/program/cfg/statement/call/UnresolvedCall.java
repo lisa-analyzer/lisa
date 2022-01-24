@@ -12,14 +12,13 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call that happens inside the program to analyze. At this stage, the
@@ -32,15 +31,9 @@ import org.apache.commons.lang3.StringUtils;
 public class UnresolvedCall extends Call {
 
 	/**
-	 * The {@link ResolutionStrategy} of the parameters of this call
+	 * The {@link ParameterMatchingStrategy} of the parameters of this call
 	 */
-	private final ResolutionStrategy strategy;
-
-	/**
-	 * Whether or not this is a call to an instance method of a unit (that can
-	 * be overridden) or not.
-	 */
-	private final boolean instanceCall;
+	private final ParameterMatchingStrategy strategy;
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
@@ -51,16 +44,19 @@ public class UnresolvedCall extends Call {
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
 	 *                         the program
-	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
-	 *                         this call
+	 * @param strategy     the {@link ParameterMatchingStrategy} of the
+	 *                         parameters of this call
 	 * @param instanceCall whether or not this is a call to an instance method
 	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
 	 * @param targetName   the name of the target of this call
 	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
-			boolean instanceCall, String targetName, Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, targetName, Untyped.INSTANCE, parameters);
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+			boolean instanceCall, String qualifier, String targetName, Expression... parameters) {
+		this(cfg, location, strategy, instanceCall, qualifier, targetName, Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -71,17 +67,21 @@ public class UnresolvedCall extends Call {
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
 	 *                         the program
-	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
-	 *                         this call
+	 * @param strategy     the {@link ParameterMatchingStrategy} of the
+	 *                         parameters of this call
 	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not.
+	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
 	 * @param targetName   the name of the target of this call
 	 * @param staticType   the static type of this call
 	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
-			boolean instanceCall, String targetName, Type staticType, Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
+		this(cfg, location, strategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
+				parameters);
 	}
 
 	/**
@@ -91,17 +91,21 @@ public class UnresolvedCall extends Call {
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
 	 *                         the program
-	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
-	 *                         this call
+	 * @param strategy     the {@link ParameterMatchingStrategy} of the
+	 *                         parameters of this call
 	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not.
+	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
 	 * @param targetName   the name of the target of this call
 	 * @param order        the evaluation order of the sub-expressions
 	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
-			boolean instanceCall, String targetName, EvaluationOrder order, Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, targetName, order, Untyped.INSTANCE, parameters);
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order,
+			Expression... parameters) {
+		this(cfg, location, strategy, instanceCall, qualifier, targetName, order, Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -111,48 +115,40 @@ public class UnresolvedCall extends Call {
 	 * @param cfg          the cfg that this expression belongs to
 	 * @param location     the location where the expression is defined within
 	 *                         the program
-	 * @param strategy     the {@link ResolutionStrategy} of the parameters of
-	 *                         this call
+	 * @param strategy     the {@link ParameterMatchingStrategy} of the
+	 *                         parameters of this call
 	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not.
+	 *                         of a unit (that can be overridden) or not
+	 * @param qualifier    the optional qualifier of the call (can be null or
+	 *                         empty - see {@link #getFullTargetName()} for more
+	 *                         info)
 	 * @param targetName   the name of the target of this call
 	 * @param order        the evaluation order of the sub-expressions
 	 * @param staticType   the static type of this call
 	 * @param parameters   the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ResolutionStrategy strategy,
-			boolean instanceCall, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
-		super(cfg, location, targetName, order, staticType, parameters);
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
+			Expression... parameters) {
+		super(cfg, location, instanceCall, qualifier, targetName, order, staticType, parameters);
 		Objects.requireNonNull(strategy, "The resolution strategy of an unresolved call cannot be null");
 		this.strategy = strategy;
-		this.instanceCall = instanceCall;
 	}
 
 	/**
-	 * Yields the {@link ResolutionStrategy} of the parameters of this call.
+	 * Yields the {@link ParameterMatchingStrategy} of the parameters of this
+	 * call.
 	 * 
 	 * @return the resolution strategy
 	 */
-	public ResolutionStrategy getStrategy() {
+	public ParameterMatchingStrategy getStrategy() {
 		return strategy;
-	}
-
-	/**
-	 * Yields whether or not this is a call to an instance method of a unit
-	 * (that can be overridden) or not.
-	 * 
-	 * @return {@code true} if this call targets instance cfgs, {@code false}
-	 *             otherwise
-	 */
-	public boolean isInstanceCall() {
-		return instanceCall;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + (instanceCall ? 1231 : 1237);
 		result = prime * result + ((strategy == null) ? 0 : strategy.hashCode());
 		return result;
 	}
@@ -166,16 +162,9 @@ public class UnresolvedCall extends Call {
 		if (getClass() != obj.getClass())
 			return false;
 		UnresolvedCall other = (UnresolvedCall) obj;
-		if (instanceCall != other.instanceCall)
-			return false;
 		if (strategy != other.strategy)
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "[unresolved]" + getConstructName() + "(" + StringUtils.join(getSubExpressions(), ", ") + ")";
 	}
 
 	@Override

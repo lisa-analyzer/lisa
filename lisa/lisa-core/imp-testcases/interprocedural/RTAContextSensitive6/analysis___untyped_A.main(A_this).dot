@@ -1,5 +1,5 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<arr1 = [unresolved]build(this, 1)<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21: [1, 2] ]]<BR/>}} -&gt; [arr1]>];
+	"node0" [shape="rect",color="black",label=<arr1 = A::build(this, 1)<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21: [1, 2] ]]<BR/>}} -&gt; [arr1]>];
 	"node1" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21] ]]<BR/>value [[ heap[w]:pp@'imp-testcases/interprocedural/programContextSensitive5.imp':4:21: [1, 2] ]]<BR/>}} -&gt; [skip]>];
 	"node0" -> "node1" [color="black"];
 subgraph cluster_legend {

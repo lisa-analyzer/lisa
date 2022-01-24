@@ -681,7 +681,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
 		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				IMPFrontend.CALL_STRATEGY, true, name, args);
+				IMPFrontend.CALL_STRATEGY, true, descriptor.getUnit().getName(), name, args);
 	}
 
 	@Override
