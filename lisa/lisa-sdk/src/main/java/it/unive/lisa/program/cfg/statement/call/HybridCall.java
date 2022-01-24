@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement.call;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -192,7 +193,8 @@ public class HybridCall extends Call {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = state.bottom();
 
@@ -201,14 +203,14 @@ public class HybridCall extends Call {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getConstructName(), targets, parameters);
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
-			result = cfgcall.expressionSemantics(interprocedural, state, params);
+			result = cfgcall.expressionSemantics(interprocedural, state, params, null);
 			getMetaVariables().addAll(cfgcall.getMetaVariables());
 		}
 
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params));
+				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, null));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

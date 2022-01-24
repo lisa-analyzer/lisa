@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement.logic;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
@@ -44,7 +45,8 @@ public class And extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					SymbolicExpression right)
+					SymbolicExpression right,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		// we allow untyped for the type inference phase
 		if (!left.getDynamicType().isBooleanType() && !left.getDynamicType().isUntyped())

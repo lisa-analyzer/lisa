@@ -211,7 +211,7 @@ public abstract class NaryExpression extends Expression {
 
 		AnalysisState<A, H,
 				V> eval = order.evaluate(subExpressions, entryState, interprocedural, expressions, computed);
-		AnalysisState<A, H, V> result = expressionSemantics(interprocedural, eval, computed);
+		AnalysisState<A, H, V> result = expressionSemantics(interprocedural, eval, computed, expressions);
 
 		for (Expression sub : subExpressions)
 			if (!sub.getMetaVariables().isEmpty())
@@ -233,6 +233,10 @@ public abstract class NaryExpression extends Expression {
 	 * @param params          the symbolic expressions representing the computed
 	 *                            values of the sub-expressions of this
 	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this expression
@@ -244,6 +248,6 @@ public abstract class NaryExpression extends Expression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params, StatementStore<A, H, V> expressions)
 					throws SemanticException;
 }

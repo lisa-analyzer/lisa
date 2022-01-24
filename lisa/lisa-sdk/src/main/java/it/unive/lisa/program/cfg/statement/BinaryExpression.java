@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -116,12 +117,13 @@ public abstract class BinaryExpression extends NaryExpression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression left : params[0])
 			for (SymbolicExpression right : params[1])
-				result = result.lub(binarySemantics(interprocedural, state, left, right));
+				result = result.lub(binarySemantics(interprocedural, state, left, right, expressions));
 
 		return result;
 	}
@@ -143,6 +145,10 @@ public abstract class BinaryExpression extends NaryExpression {
 	 * @param right           the symbolic expression representing the computed
 	 *                            value of the second sub-expression of this
 	 *                            expression
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions are stored and that can be
+	 *                            accessed to query for post-states of
+	 *                            parameters expressions
 	 * 
 	 * @return the {@link AnalysisState} representing the abstract result of the
 	 *             execution of this expression
@@ -155,6 +161,7 @@ public abstract class BinaryExpression extends NaryExpression {
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					SymbolicExpression right)
+					SymbolicExpression right,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException;
 }
