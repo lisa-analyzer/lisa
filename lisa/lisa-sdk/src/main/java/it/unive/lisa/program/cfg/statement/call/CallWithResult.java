@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -26,31 +25,6 @@ import it.unive.lisa.type.Type;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class CallWithResult extends Call implements MetaVariableCreator {
-
-	/**
-	 * Builds the call, happening at the given location in the program. The
-	 * {@link EvaluationOrder} of the parameter is
-	 * {@link LeftToRightEvaluation}.
-	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the name of the target of this call
-	 * @param staticType        the static type of this call
-	 * @param parameters        the parameters of this call
-	 */
-	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
-		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, staticType, parameters);
-	}
 
 	/**
 	 * Builds the call, happening at the given location in the program.
@@ -82,16 +56,18 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * {@code parameters} are used as actual parameters, and the state when the
 	 * call is executed is {@code entryState}.
 	 * 
+	 * @param entryState      the abstract analysis state when the call is
+	 *                            reached
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored
+	 * @param parameters      the expressions representing the actual parameters
+	 *                            of the call
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
-	 * @param interprocedural the interprocedural analysis of the program to
-	 *                            analyze
-	 * @param entryState      the abstract analysis state when the call is
-	 *                            reached
-	 * @param parameters      the expressions representing the actual parameters
-	 *                            of the call
-	 *
+	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
 	 *             {@link AnalysisState#getComputedExpressions()} will contain
@@ -103,10 +79,10 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	protected abstract <A extends AbstractState<A, H, V>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
-					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> entryState,
-					ExpressionSet<SymbolicExpression>[] parameters,
-					StatementStore<A, H, V> expressions)
+					InterproceduralAnalysis<A, H, V> interprocedural,
+					StatementStore<A, H, V> expressions,
+					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException;
 
 	@Override
@@ -123,7 +99,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = compute(interprocedural, state, params, expressions);
+		AnalysisState<A, H, V> returned = compute(state, interprocedural, expressions, params);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||

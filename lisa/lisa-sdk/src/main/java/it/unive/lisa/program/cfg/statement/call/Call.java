@@ -7,7 +7,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.type.Type;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -40,37 +39,10 @@ public abstract class Call extends NaryExpression {
 	private final String targetName;
 
 	/**
-	 * Whether or not this is a call to an instance method of a unit (that can
-	 * be overridden) or not.
+	 * Whether or not this is a call to an instance cfg of a unit (that can be
+	 * overridden) or not.
 	 */
 	private final boolean instanceCall;
-
-	/**
-	 * Builds a call happening at the given source location. The
-	 * {@link EvaluationOrder} of the parameter is
-	 * {@link LeftToRightEvaluation}.
-	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where the expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the name of the target of this call
-	 * @param staticType        the static type of this call
-	 * @param parameters        the parameters of this call
-	 */
-	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, Type staticType,
-			Expression... parameters) {
-		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
-				staticType, parameters);
-	}
 
 	/**
 	 * Builds a call happening at the given source location.
@@ -80,9 +52,8 @@ public abstract class Call extends NaryExpression {
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param instanceCall      whether or not this is a call to an instance cfg
+	 *                              of a unit (that can be overridden) or not
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -138,7 +109,7 @@ public abstract class Call extends NaryExpression {
 	 * target of a call follows the following structure:
 	 * {@code qualifier::targetName}, where {@code qualifier} is optional and,
 	 * when it is not present (i.e. null or empty), the {@code ::} are omitted.
-	 * This method returns is an alias of {@link #getConstructName()}.
+	 * This cfg returns is an alias of {@link #getConstructName()}.
 	 * 
 	 * @return the full name of the target of the call
 	 */
@@ -181,8 +152,8 @@ public abstract class Call extends NaryExpression {
 	}
 
 	/**
-	 * Yields whether or not this is a call to an instance method of a unit
-	 * (that can be overridden) or not.
+	 * Yields whether or not this is a call to an instance cfg of a unit (that
+	 * can be overridden) or not.
 	 * 
 	 * @return {@code true} if this call targets instance cfgs, {@code false}
 	 *             otherwise
@@ -217,6 +188,7 @@ public abstract class Call extends NaryExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((assigningStrategy == null) ? 0 : assigningStrategy.hashCode());
 		result = prime * result + (instanceCall ? 1231 : 1237);
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
@@ -232,6 +204,11 @@ public abstract class Call extends NaryExpression {
 		if (!(obj instanceof Call))
 			return false;
 		Call other = (Call) obj;
+		if (assigningStrategy == null) {
+			if (other.assigningStrategy != null)
+				return false;
+		} else if (!assigningStrategy.equals(other.assigningStrategy))
+			return false;
 		if (instanceCall != other.instanceCall)
 			return false;
 		if (qualifier == null) {

@@ -119,6 +119,20 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		return resolved;
 	}
 
+	/**
+	 * Resolves the given call as regular (non-instance) call.
+	 * 
+	 * @param call    the call to resolve
+	 * @param targets the list of targets that, after the execution of this
+	 *                    method, will contain the {@link CFG}s targeted by the
+	 *                    call
+	 * @param natives the list of targets that, after the execution of this
+	 *                    method, will contain the {@link NativeCFG}s targeted
+	 *                    by the call
+	 * 
+	 * @throws CallResolutionException if something goes wrong while resolving
+	 *                                     the call
+	 */
 	protected void resolveNonInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
@@ -131,6 +145,20 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					natives.add((NativeCFG) cm);
 	}
 
+	/**
+	 * Resolves the given call as an instance call.
+	 * 
+	 * @param call    the call to resolve
+	 * @param targets the list of targets that, after the execution of this
+	 *                    method, will contain the {@link CFG}s targeted by the
+	 *                    call
+	 * @param natives the list of targets that, after the execution of this
+	 *                    method, will contain the {@link NativeCFG}s targeted
+	 *                    by the call
+	 * 
+	 * @throws CallResolutionException if something goes wrong while resolving
+	 *                                     the call
+	 */
 	protected void resolveInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
@@ -157,6 +185,16 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		}
 	}
 
+	/**
+	 * Matches the name (qualifier + target name) of the given call against the
+	 * given code member.
+	 * 
+	 * @param call the call to match
+	 * @param cm   the code member being matched
+	 * 
+	 * @return {@code true} if the name of {@code cm} is compatible with the one
+	 *             of the call's target
+	 */
 	protected boolean matchCFGName(UnresolvedCall call, CodeMember cm) {
 		if (!cm.getDescriptor().getName().equals(call.getTargetName()))
 			return false;

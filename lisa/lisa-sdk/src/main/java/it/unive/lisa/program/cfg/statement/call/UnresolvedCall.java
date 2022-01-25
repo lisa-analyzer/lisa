@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
@@ -76,6 +77,35 @@ public class UnresolvedCall extends Call {
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
+	 * program. The static type of this call is {@link Untyped}. The
+	 * {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
+	 * 
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param parameters        the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			Expression... parameters) {
+		this(cfg, location, PythonLikeStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+				targetName, Untyped.INSTANCE, parameters);
+	}
+
+	/**
+	 * Builds the unresolved call, happening at the given location in the
 	 * program. The {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
@@ -107,6 +137,35 @@ public class UnresolvedCall extends Call {
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
+	 * program. The {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}.
+	 * 
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			Type staticType, Expression... parameters) {
+		this(cfg, location, PythonLikeStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+				targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
+	}
+
+	/**
+	 * Builds the unresolved call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 
 	 * @param cfg               the cfg that this expression belongs to
@@ -134,6 +193,34 @@ public class UnresolvedCall extends Call {
 			EvaluationOrder order, Expression... parameters) {
 		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
 				order, Untyped.INSTANCE, parameters);
+	}
+
+	/**
+	 * Builds the unresolved call, happening at the given location in the
+	 * program. The static type of this call is {@link Untyped}.
+	 * 
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param parameters        the parameters of this call
+	 */
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			EvaluationOrder order, Expression... parameters) {
+		this(cfg, location, PythonLikeStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+				targetName, order, Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -195,6 +282,7 @@ public class UnresolvedCall extends Call {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((matchingStrategy == null) ? 0 : matchingStrategy.hashCode());
+		result = prime * result + ((traversalStrategy == null) ? 0 : traversalStrategy.hashCode());
 		return result;
 	}
 
@@ -204,10 +292,18 @@ public class UnresolvedCall extends Call {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof UnresolvedCall))
 			return false;
 		UnresolvedCall other = (UnresolvedCall) obj;
-		if (matchingStrategy != other.matchingStrategy)
+		if (matchingStrategy == null) {
+			if (other.matchingStrategy != null)
+				return false;
+		} else if (!matchingStrategy.equals(other.matchingStrategy))
+			return false;
+		if (traversalStrategy == null) {
+			if (other.traversalStrategy != null)
+				return false;
+		} else if (!traversalStrategy.equals(other.traversalStrategy))
 			return false;
 		return true;
 	}

@@ -1,5 +1,6 @@
 package it.unive.lisa.program.cfg;
 
+import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.annotations.Annotation;
@@ -61,6 +62,16 @@ public class Parameter implements CodeElement {
 		this(location, name, staticType, null, new Annotations());
 	}
 
+	/**
+	 * Builds the parameter reference, identified by its name and its type,
+	 * happening at the given location in the program.
+	 * 
+	 * @param location     the location where this parameter is defined within
+	 *                         the program
+	 * @param name         the name of this parameter
+	 * @param defaultValue the default value for this parameter that can be used
+	 *                         when a call does not specify a value for it
+	 */
 	public Parameter(CodeLocation location, String name, Expression defaultValue) {
 		this(location, name, defaultValue.getStaticType(), defaultValue, new Annotations());
 	}
@@ -69,12 +80,14 @@ public class Parameter implements CodeElement {
 	 * Builds the parameter reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location    the location where this parameter is defined within
-	 *                        the program
-	 * @param name        the name of this parameter
-	 * @param staticType  the type of this parameter. If unknown, use
-	 *                        {@link Untyped#INSTANCE}
-	 * @param annotations the annotations of this parameter
+	 * @param location     the location where this parameter is defined within
+	 *                         the program
+	 * @param name         the name of this parameter
+	 * @param staticType   the type of this parameter. If unknown, use
+	 *                         {@link Untyped#INSTANCE}
+	 * @param defaultValue the default value for this parameter that can be used
+	 *                         when a call does not specify a value for it
+	 * @param annotations  the annotations of this parameter
 	 */
 	public Parameter(CodeLocation location, String name, Type staticType, Expression defaultValue,
 			Annotations annotations) {
@@ -177,10 +190,22 @@ public class Parameter implements CodeElement {
 		annotations.addAnnotation(ann);
 	}
 
+	/**
+	 * Yields the default value for this parameter that can be used when a call
+	 * does not specify a value for it.
+	 * 
+	 * @return the default value
+	 */
 	public Expression getDefaultValue() {
 		return defaultValue;
 	}
 
+	/**
+	 * Creates a {@link Variable} that represent this parameter, that can be
+	 * used by {@link SemanticDomain}s to reference this parameter.
+	 * 
+	 * @return the variable representing this parameter
+	 */
 	public Variable toSymbolicVariable() {
 		return new Variable(Caches.types().mkSet(getStaticType().allInstances()), name, annotations, location);
 	}

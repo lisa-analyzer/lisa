@@ -35,15 +35,20 @@ public interface ParameterAssigningStrategy {
 	 * preserving their evaluation order (Java-like), or they may be passed
 	 * by-name (Python-like).
 	 * 
-	 * @param <A>       the type of {@link AbstractState}
-	 * @param <H>       the type of the {@link HeapDomain}
-	 * @param <V>       the type of the {@link ValueDomain}
-	 * @param call      the call to be prepared
-	 * @param callState the analysis state where the call is to be executed
-	 * @param formals   the expressions representing the formal parameters of
-	 *                      the call
-	 * @param actuals   the expressions representing the actual parameters of
-	 *                      the call
+	 * @param <A>             the type of {@link AbstractState}
+	 * @param <H>             the type of the {@link HeapDomain}
+	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param call            the call to be prepared
+	 * @param callState       the analysis state where the call is to be
+	 *                            executed
+	 * @param interprocedural the interprocedural analysis of the program to
+	 *                            analyze
+	 * @param expressions     the cache where analysis states of intermediate
+	 *                            expressions must be stored
+	 * @param formals         the expressions representing the formal parameters
+	 *                            of the call
+	 * @param actuals         the expressions representing the actual parameters
+	 *                            of the call
 	 * 
 	 * @return the prepared state, ready to be used as entry-state for the
 	 *             targets

@@ -11,24 +11,44 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.Untyped;
 
+/**
+ * An expression that can be used to for by-name parameter passing to
+ * {@link Call}s. In some languages, parameters can be passed in a different
+ * order from the one declared in the target procedure's signature. This is made
+ * possible by prefixing the expression representing the parameter's value with
+ * its name. This expression models the by-name parameter passing, and instances
+ * of {@link ParameterAssigningStrategy} can use instances of this class to
+ * detect which parameter is being assingned.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class NamedParameterExpression extends UnaryExpression {
 
 	private final String parameterName;
 
+	/**
+	 * Builds the expression. The static type of this expression is the one of
+	 * {@code subExpression}.
+	 * 
+	 * @param cfg           the {@link CFG} where this operation lies
+	 * @param location      the location where this literal is defined
+	 * @param parameterName the name of the parameter being assigned here
+	 * @param subExpression the expression being assigned to the target
+	 *                          parameter
+	 */
 	public NamedParameterExpression(CFG cfg, CodeLocation location, String parameterName, Expression subExpression) {
-		this(cfg, location, parameterName, Untyped.INSTANCE, subExpression);
-	}
-
-	public NamedParameterExpression(CFG cfg, CodeLocation location, String parameterName, Type staticType,
-			Expression subExpression) {
-		super(cfg, location, parameterName + "=", staticType, subExpression);
+		super(cfg, location, parameterName + "=", subExpression.getStaticType(), subExpression);
 		this.parameterName = parameterName;
 	}
 
+	/**
+	 * Yields the name of the parameter targeted by this expression.
+	 * 
+	 * @return the name of the parameter
+	 */
 	public String getParameterName() {
 		return parameterName;
 	}

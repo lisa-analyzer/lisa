@@ -371,7 +371,8 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testProgramStructure() {
 		verify(Global.class);
-		verify(Parameter.class);
+		// the default value does not impact the definition of the formal
+		verify(Parameter.class, verifier -> verifier.withIgnoredFields("defaultValue"));
 		// 'overridable' is mutable
 		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS);
 		// scope bounds are mutable

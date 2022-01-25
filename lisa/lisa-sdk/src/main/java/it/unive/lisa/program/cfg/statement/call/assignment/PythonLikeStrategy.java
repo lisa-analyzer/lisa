@@ -40,11 +40,11 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * Keyword parameters are identified by actuals (i.e. {@link Expression}s) that
  * are instance of {@link NamedParameterExpression}.
  * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
  * @see <a href=
  *          "https://docs.python.org/3/reference/expressions.html#calls">Python
  *          Language Reference: calls</a>
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class PythonLikeStrategy implements ParameterAssigningStrategy {
 

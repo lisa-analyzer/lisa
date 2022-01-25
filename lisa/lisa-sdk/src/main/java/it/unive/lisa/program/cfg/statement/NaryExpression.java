@@ -140,6 +140,15 @@ public abstract class NaryExpression extends Expression {
 		return subExpressions;
 	}
 
+	/**
+	 * Yields the {@link EvaluationOrder} of the sub-expressions.
+	 * 
+	 * @return the evaluation order
+	 */
+	public EvaluationOrder getOrder() {
+		return order;
+	}
+
 	@Override
 	public final int setOffset(int offset) {
 		this.offset = offset;

@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -41,6 +42,32 @@ public class HybridCall extends Call {
 	 * The native targets of this call
 	 */
 	private final Collection<NativeCFG> nativeTargets;
+
+	/**
+	 * Builds the hybrid call, happening at the given location in the program.
+	 * The {@link EvaluationOrder} of the parameter is
+	 * {@link LeftToRightEvaluation}. The static type of this call is the common
+	 * supertype of the return types of all targets.
+	 * 
+	 * @param cfg           the cfg that this expression belongs to
+	 * @param location      the location where this expression is defined within
+	 *                          the program
+	 * @param instanceCall  whether or not this is a call to an instance method
+	 *                          of a unit (that can be overridden) or not
+	 * @param qualifier     the optional qualifier of the call (can be null or
+	 *                          empty - see {@link #getFullTargetName()} for
+	 *                          more info)
+	 * @param targetName    the qualified name of the static target of this call
+	 * @param targets       the CFGs that are targeted by this CFG call
+	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
+	 * @param parameters    the parameters of this call
+	 */
+	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
+		this(cfg, location, PythonLikeStrategy.INSTANCE, instanceCall, qualifier, targetName,
+				LeftToRightEvaluation.INSTANCE,
+				targets, nativeTargets, parameters);
+	}
 
 	/**
 	 * Builds the hybrid call, happening at the given location in the program.
@@ -112,6 +139,16 @@ public class HybridCall extends Call {
 		this.nativeTargets = nativeTargets;
 	}
 
+	/**
+	 * Creates a hybrid call as the resolved version of the given {@code source}
+	 * call, copying all its data.
+	 * 
+	 * @param source        the unresolved call to copy
+	 * @param targets       the {@link CFG}s that the call has been resolved
+	 *                          against
+	 * @param nativeTargets the {@link NativeCFG}s that the call has been
+	 *                          resolved against
+	 */
 	public HybridCall(UnresolvedCall source, Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.isInstanceCall(), source.getQualifier(),
