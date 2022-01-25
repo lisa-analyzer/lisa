@@ -3,6 +3,7 @@ package it.unive.lisa.imp.expressions;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -48,7 +49,8 @@ public class IMPNewArray extends NaryExpression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		HeapAllocation alloc = new HeapAllocation(getRuntimeTypes(), getLocation());
 		AnalysisState<A, H, V> sem = state.smallStepSemantics(alloc, this);

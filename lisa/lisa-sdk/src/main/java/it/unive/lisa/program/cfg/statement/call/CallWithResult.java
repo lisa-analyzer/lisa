@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement.call;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -112,7 +113,8 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		// the stack has to be empty
 		state = new AnalysisState<>(state.getState(), new ExpressionSet<>());
