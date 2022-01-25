@@ -42,7 +42,8 @@ public class CallRegisteringTest {
 
 		CFG cfg1 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
-				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE,
+				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
+				SingleInheritanceTraversalStrategy.INSTANCE,
 				false, p.getName(), "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));

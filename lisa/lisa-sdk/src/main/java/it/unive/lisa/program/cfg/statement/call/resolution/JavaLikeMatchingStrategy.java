@@ -6,10 +6,10 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * A strategy where the first parameter is tested using
- * {@link RuntimeTypesMatchingStrategy} if it represents the receiver of an instance
- * call, otherwise it is tested with {@link StaticTypesMatchingStrategy}. Other
- * parameters are always tested using {@link StaticTypesMatchingStrategy}, achieving
- * Java-like resolution.
+ * {@link RuntimeTypesMatchingStrategy} if it represents the receiver of an
+ * instance call, otherwise it is tested with
+ * {@link StaticTypesMatchingStrategy}. Other parameters are always tested using
+ * {@link StaticTypesMatchingStrategy}, achieving Java-like resolution.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

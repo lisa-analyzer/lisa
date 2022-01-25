@@ -69,7 +69,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			EvaluationOrder order, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order, Untyped.INSTANCE,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order,
+				Untyped.INSTANCE,
 				parameters);
 	}
 
@@ -118,7 +119,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			EvaluationOrder order, Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order, staticType,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order,
+				staticType,
 				parameters);
 	}
 

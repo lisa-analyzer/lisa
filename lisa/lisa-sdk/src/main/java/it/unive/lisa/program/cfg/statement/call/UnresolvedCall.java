@@ -100,7 +100,8 @@ public class UnresolvedCall extends Call {
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+				qualifier,
 				targetName, Untyped.INSTANCE, parameters);
 	}
 
@@ -160,7 +161,8 @@ public class UnresolvedCall extends Call {
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			Type staticType, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+				qualifier,
 				targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
 
@@ -219,7 +221,8 @@ public class UnresolvedCall extends Call {
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall, qualifier,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+				qualifier,
 				targetName, order, Untyped.INSTANCE, parameters);
 	}
 
