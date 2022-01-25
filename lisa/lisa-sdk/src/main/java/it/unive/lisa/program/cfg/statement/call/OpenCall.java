@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -42,8 +43,9 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, String qualifier, String targetName, Type staticType,
 			Expression... parameters) {
-		// if a call is open we don't really care if it's instance or not
-		super(cfg, location, false, qualifier, targetName, staticType, parameters);
+		// if a call is open we don't really care if it's instance or not and we
+		// will never perform parameter assignment
+		super(cfg, location, PythonLikeStrategy.INSTANCE, false, qualifier, targetName, staticType, parameters);
 	}
 
 	/**
@@ -62,8 +64,10 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, String qualifier, String targetName, Type staticType,
 			EvaluationOrder order, Expression... parameters) {
-		// if a call is open we don't really care if it's instance or not
-		super(cfg, location, false, qualifier, targetName, order, staticType, parameters);
+		// if a call is open we don't really care if it's instance or not and we
+		// will never perform parameter assignment
+		super(cfg, location, PythonLikeStrategy.INSTANCE, false, qualifier, targetName, order, staticType,
+				parameters);
 	}
 
 	@Override

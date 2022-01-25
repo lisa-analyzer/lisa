@@ -1,5 +1,15 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisExecutionException;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
@@ -7,10 +17,10 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.cfg.CFG;
@@ -19,19 +29,10 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A context sensitive interprocedural analysis. The context sensitivity is
@@ -169,8 +170,11 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters)
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			CFGCall call, 
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException {
 		ScopeToken scope = new ScopeToken(call);
 		token = token.pushToken(scope);
@@ -181,19 +185,16 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 			// prepare the state for the call: hide the visible variables
 			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
-			// prepare the state for the call: assign the value to each
-			// parameter
-			AnalysisState<A, H, V> prepared = callState;
-			for (int i = 0; i < parameters.length; i++) {
-				AnalysisState<A, H, V> temp = prepared.bottom();
-				Parameter parameter = cfg.getDescriptor().getArgs()[i];
-				Identifier parid = new Variable(
-						Caches.types().mkSet(parameter.getStaticType().allInstances()),
-						parameter.getName(), parameter.getAnnotations(), parameter.getLocation());
-				for (SymbolicExpression exp : parameters[i])
-					temp = temp.lub(prepared.assign(parid, exp.pushScope(scope), cfg.getGenericProgramPoint()));
-				prepared = temp;
-			}
+
+			Parameter[] formals = cfg.getDescriptor().getArgs();
+			@SuppressWarnings("unchecked")
+			ExpressionSet<SymbolicExpression>[] actuals = new ExpressionSet[parameters.length];
+
+			for (int i = 0; i < parameters.length; i++)
+				actuals[i] = parameters[i].pushScope(scope);
+
+			AnalysisState<A, H, V> prepared = call.getAssigningStrategy().prepare(call, callState, this,
+					expressions, formals, actuals);
 
 			AnalysisState<A, H, V> exitState;
 			if (states != null && prepared.lessOrEqual(states.getLeft()))

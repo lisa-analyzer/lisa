@@ -1,15 +1,18 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.type.Type;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to another cfg.
@@ -22,6 +25,11 @@ public abstract class Call extends NaryExpression {
 	 * The original {@link UnresolvedCall} that has been resolved to this one
 	 */
 	private UnresolvedCall source = null;
+
+	/**
+	 * The {@link ParameterAssigningStrategy} of the parameters of this call
+	 */
+	private final ParameterAssigningStrategy assigningStrategy;
 
 	/**
 	 * An optional qualifier for the call.
@@ -44,48 +52,66 @@ public abstract class Call extends NaryExpression {
 	 * {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Type staticType,
+	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, Type staticType,
 			Expression... parameters) {
-		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
-				parameters);
+		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
+				staticType, parameters);
 	}
 
 	/**
 	 * Builds a call happening at the given source location.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
+	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
+			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");
+		Objects.requireNonNull(assigningStrategy, "The assigning strategy of a call cannot be null");
 		this.targetName = targetName;
 		this.qualifier = qualifier;
 		this.instanceCall = instanceCall;
+		this.assigningStrategy = assigningStrategy;
+	}
+
+	/**
+	 * Yields the {@link ParameterAssigningStrategy} of the parameters of this
+	 * call.
+	 * 
+	 * @return the assigning strategy
+	 */
+	public ParameterAssigningStrategy getAssigningStrategy() {
+		return assigningStrategy;
 	}
 
 	private static String completeName(String qualifier, String name) {

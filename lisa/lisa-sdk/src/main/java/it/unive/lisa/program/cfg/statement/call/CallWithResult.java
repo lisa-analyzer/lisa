@@ -11,6 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -30,42 +31,49 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where this expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Type staticType, Expression... parameters) {
-		super(cfg, location, instanceCall, qualifier, targetName, staticType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
+		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, staticType, parameters);
 	}
 
 	/**
 	 * Builds the call, happening at the given location in the program.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where this expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			EvaluationOrder order, Type staticType, Expression... parameters) {
-		super(cfg, location, instanceCall, qualifier, targetName, order, staticType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
+			Expression... parameters) {
+		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order, staticType, parameters);
 	}
 
 	/**

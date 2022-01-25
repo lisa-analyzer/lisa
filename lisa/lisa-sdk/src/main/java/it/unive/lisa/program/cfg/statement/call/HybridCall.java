@@ -6,16 +6,20 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
@@ -45,23 +49,29 @@ public class HybridCall extends Call {
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
-	 *                          the program
-	 * @param instanceCall  whether or not this is a call to an instance method
-	 *                          of a unit (that can be overridden) or not
-	 * @param qualifier     the optional qualifier of the call (can be null or
-	 *                          empty - see {@link #getFullTargetName()} for
-	 *                          more info)
-	 * @param targetName    the qualified name of the static target of this call
-	 * @param targets       the CFGs that are targeted by this CFG call
-	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
-	 * @param parameters    the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the qualified name of the static target of this
+	 *                              call
+	 * @param targets           the CFGs that are targeted by this CFG call
+	 * @param nativeTargets     the NativeCFGs that are targeted by this CFG
+	 *                              call
+	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, nativeTargets,
-				parameters);
+	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets, Expression... parameters) {
+		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
+				targets, nativeTargets, parameters);
 	}
 
 	/**
@@ -69,25 +79,30 @@ public class HybridCall extends Call {
 	 * The static type of this call is the common supertype of the return types
 	 * of all targets.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
-	 *                          the program
-	 * @param instanceCall  whether or not this is a call to an instance method
-	 *                          of a unit (that can be overridden) or not
-	 * @param qualifier     the optional qualifier of the call (can be null or
-	 *                          empty - see {@link #getFullTargetName()} for
-	 *                          more info)
-	 * @param targetName    the qualified name of the static target of this call
-	 * @param order         the evaluation order of the sub-expressions
-	 * @param targets       the CFGs that are targeted by this CFG call
-	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
-	 * @param parameters    the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the qualified name of the static target of this
+	 *                              call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param targets           the CFGs that are targeted by this CFG call
+	 * @param nativeTargets     the NativeCFGs that are targeted by this CFG
+	 *                              call
+	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			EvaluationOrder order, Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
-			Expression... parameters) {
-		super(cfg, location, instanceCall, qualifier, targetName, order, getCommonReturnType(targets, nativeTargets),
-				parameters);
+	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
+			Collection<NativeCFG> nativeTargets, Expression... parameters) {
+		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order,
+				getCommonReturnType(targets, nativeTargets), parameters);
 		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
 		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
 		for (CFG target : targets)
@@ -96,6 +111,12 @@ public class HybridCall extends Call {
 			Objects.requireNonNull(target, "A native target of a hybrid call cannot be null");
 		this.targets = targets;
 		this.nativeTargets = nativeTargets;
+	}
+
+	public HybridCall(UnresolvedCall source, Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
+		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
+				source.isInstanceCall(), source.getQualifier(),
+				source.getTargetName(), targets, nativeTargets, source.getParameters());
 	}
 
 	private static Type getCommonReturnType(Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
@@ -201,8 +222,8 @@ public class HybridCall extends Call {
 
 		Expression[] parameters = getSubExpressions();
 		if (!targets.isEmpty()) {
-			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), isInstanceCall(), getQualifier(), getTargetName(),
-					targets, parameters);
+			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getAssigningStrategy(), isInstanceCall(),
+					getQualifier(), getTargetName(), targets, parameters);
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
 			result = cfgcall.expressionSemantics(interprocedural, state, params);
@@ -212,7 +233,10 @@ public class HybridCall extends Call {
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params));
+				Parameter[] formals = nat.getDescriptor().getArgs();
+				AnalysisState<A, H, V> prepared = getAssigningStrategy().prepare(this, state, interprocedural,
+						expressions, formals, params);
+				result = result.lub(rewritten.expressionSemantics(interprocedural, prepared, params));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

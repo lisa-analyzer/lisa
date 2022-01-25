@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -102,7 +103,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 
 	@Override
 	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+			ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A, H, V> expressions)
+			throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(), call.getTargetName(),
 				call.getStaticType(), call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters);

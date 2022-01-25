@@ -5,7 +5,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
- * A strategy for matching call signatures, . Depending on the language, targets
+ * A strategy for matching call signatures. Depending on the language, targets
  * of calls might be resolved (at compile time or runtime) relying on the static
  * or runtime type of their parameters. Some languages might also have named
  * parameter passing, allowing shuffling of parameters. Each strategy comes with

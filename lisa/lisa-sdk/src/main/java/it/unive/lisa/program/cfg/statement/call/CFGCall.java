@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -41,21 +42,25 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where this expression is defined within
-	 *                         program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the qualified name of the static target of this call
-	 * @param targets      the CFGs that are targeted by this CFG call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the qualified name of the static target of this
+	 *                              call
+	 * @param targets           the CFGs that are targeted by this CFG call
+	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Collection<CFG> targets, Expression... parameters) {
-		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
+	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
+			String qualifier, String targetName, Collection<CFG> targets, Expression... parameters) {
+		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, parameters);
 	}
 
@@ -64,26 +69,38 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * static type of this call is the common supertype of the return types of
 	 * all targets.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where this expression is defined within
-	 *                         program
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the qualified name of the static target of this call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param targets      the CFGs that are targeted by this CFG call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where this expression is defined
+	 *                              within program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the qualified name of the static target of this
+	 *                              call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param targets           the CFGs that are targeted by this CFG call
+	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			EvaluationOrder order, Collection<CFG> targets, Expression... parameters) {
-		super(cfg, location, instanceCall, qualifier, targetName, order, getCommonReturnType(targets), parameters);
+	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
+			String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
+			Expression... parameters) {
+		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order,
+				getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
 		for (CFG target : targets)
 			Objects.requireNonNull(target, "A target of a CFG call cannot be null");
 		this.targets = targets;
+	}
+
+	public CFGCall(UnresolvedCall source, Collection<CFG> targets) {
+		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
+				source.isInstanceCall(), source.getQualifier(),
+				source.getTargetName(), targets, source.getParameters());
 	}
 
 	private static Type getCommonReturnType(Collection<CFG> targets) {
@@ -165,6 +182,6 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 					AnalysisState<A, H, V> entryState,
 					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
-		return interprocedural.getAbstractResultOf(this, entryState, parameters);
+		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 }

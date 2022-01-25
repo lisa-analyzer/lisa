@@ -12,7 +12,9 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -33,7 +35,12 @@ public class UnresolvedCall extends Call {
 	/**
 	 * The {@link ParameterMatchingStrategy} of the parameters of this call
 	 */
-	private final ParameterMatchingStrategy strategy;
+	private final ParameterMatchingStrategy matchingStrategy;
+
+	/**
+	 * The {@link HierarcyTraversalStrategy} of the parameters of this call
+	 */
+	private final HierarcyTraversalStrategy traversalStrategy;
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
@@ -41,22 +48,29 @@ public class UnresolvedCall extends Call {
 	 * {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param strategy     the {@link ParameterMatchingStrategy} of the
-	 *                         parameters of this call
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, qualifier, targetName, Untyped.INSTANCE, parameters);
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+				Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -64,92 +78,122 @@ public class UnresolvedCall extends Call {
 	 * program. The {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param strategy     the {@link ParameterMatchingStrategy} of the
-	 *                         parameters of this call
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
-				parameters);
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+				LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
 	 * program. The static type of this call is {@link Untyped}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param strategy     the {@link ParameterMatchingStrategy} of the
-	 *                         parameters of this call
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order,
-			Expression... parameters) {
-		this(cfg, location, strategy, instanceCall, qualifier, targetName, order, Untyped.INSTANCE, parameters);
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
+			boolean instanceCall, String qualifier, String targetName,
+			EvaluationOrder order, Expression... parameters) {
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+				order, Untyped.INSTANCE, parameters);
 	}
 
 	/**
 	 * Builds the unresolved call, happening at the given location in the
 	 * program.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param strategy     the {@link ParameterMatchingStrategy} of the
-	 *                         parameters of this call
-	 * @param instanceCall whether or not this is a call to an instance method
-	 *                         of a unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param staticType   the static type of this call
-	 * @param parameters   the parameters of this call
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
+	 *                              parameters of this call
+	 * @param matchingStrategy  the {@link ParameterMatchingStrategy} of the
+	 *                              parameters of this call
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              call
+	 * @param instanceCall      whether or not this is a call to an instance
+	 *                              method of a unit (that can be overridden) or
+	 *                              not
+	 * @param qualifier         the optional qualifier of the call (can be null
+	 *                              or empty - see {@link #getFullTargetName()}
+	 *                              for more info)
+	 * @param targetName        the name of the target of this call
+	 * @param order             the evaluation order of the sub-expressions
+	 * @param staticType        the static type of this call
+	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy strategy,
+	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, instanceCall, qualifier, targetName, order, staticType, parameters);
-		Objects.requireNonNull(strategy, "The resolution strategy of an unresolved call cannot be null");
-		this.strategy = strategy;
+		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order, staticType, parameters);
+		Objects.requireNonNull(matchingStrategy, "The matching strategy of an unresolved call cannot be null");
+		Objects.requireNonNull(traversalStrategy, "The traversal strategy of an unresolved call cannot be null");
+		this.matchingStrategy = matchingStrategy;
+		this.traversalStrategy = traversalStrategy;
 	}
 
 	/**
 	 * Yields the {@link ParameterMatchingStrategy} of the parameters of this
 	 * call.
 	 * 
-	 * @return the resolution strategy
+	 * @return the matching strategy
 	 */
-	public ParameterMatchingStrategy getStrategy() {
-		return strategy;
+	public ParameterMatchingStrategy getMatchingStrategy() {
+		return matchingStrategy;
+	}
+
+	/**
+	 * Yields the {@link HierarcyTraversalStrategy} of this call.
+	 * 
+	 * @return the traversal strategy
+	 */
+	public HierarcyTraversalStrategy getTraversalStrategy() {
+		return traversalStrategy;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((strategy == null) ? 0 : strategy.hashCode());
+		result = prime * result + ((matchingStrategy == null) ? 0 : matchingStrategy.hashCode());
 		return result;
 	}
 
@@ -162,7 +206,7 @@ public class UnresolvedCall extends Call {
 		if (getClass() != obj.getClass())
 			return false;
 		UnresolvedCall other = (UnresolvedCall) obj;
-		if (strategy != other.strategy)
+		if (matchingStrategy != other.matchingStrategy)
 			return false;
 		return true;
 	}

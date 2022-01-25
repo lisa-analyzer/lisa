@@ -91,7 +91,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
 				for (CodeMember cm : candidates)
 					if (cm.getDescriptor().isInstance()
-							&& call.getStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
+							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(),
+									call.getParameters()))
 						if (cm instanceof CFG)
 							targets.add((CFG) cm);
 						else
@@ -100,7 +101,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		} else {
 			for (CodeMember cm : program.getAllCodeMembers())
 				if (!cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
-						&& call.getStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
+						&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
 					if (cm instanceof CFG)
 						targets.add((CFG) cm);
 					else
@@ -112,11 +113,9 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			resolved = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(), call.getTargetName(),
 					call.getStaticType(), call.getParameters());
 		else if (nativeTargets.isEmpty())
-			resolved = new CFGCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
-					call.getTargetName(), targets, call.getParameters());
+			resolved = new CFGCall(call, targets);
 		else
-			resolved = new HybridCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
-					call.getTargetName(), targets, nativeTargets, call.getParameters());
+			resolved = new HybridCall(call, targets, nativeTargets);
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
