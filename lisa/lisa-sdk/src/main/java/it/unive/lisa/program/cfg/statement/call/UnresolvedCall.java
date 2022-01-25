@@ -195,8 +195,7 @@ public class UnresolvedCall extends Call {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}
 		resolved.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H,
-				V> result = resolved.expressionSemantics(interprocedural, state, params, null);
+		AnalysisState<A, H, V> result = resolved.expressionSemantics(interprocedural, state, params, expressions);
 		getMetaVariables().addAll(resolved.getMetaVariables());
 		return result;
 	}

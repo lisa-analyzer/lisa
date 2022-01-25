@@ -68,7 +68,7 @@ public class IMPNewObj extends NaryExpression {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams, null);
+		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams, expressions);
 
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());

@@ -203,14 +203,14 @@ public class HybridCall extends Call {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getConstructName(), targets, parameters);
 			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
-			result = cfgcall.expressionSemantics(interprocedural, state, params, null);
+			result = cfgcall.expressionSemantics(interprocedural, state, params, expressions);
 			getMetaVariables().addAll(cfgcall.getMetaVariables());
 		}
 
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, null));
+				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);
