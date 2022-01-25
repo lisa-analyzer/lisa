@@ -118,7 +118,7 @@ public class PythonLikeStrategy implements ParameterAssigningStrategy {
 				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;
 		}
-		
+
 		return prepared;
 	}
 
