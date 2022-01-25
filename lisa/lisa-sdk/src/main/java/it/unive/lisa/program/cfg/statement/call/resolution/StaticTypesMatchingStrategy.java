@@ -12,14 +12,14 @@ import it.unive.lisa.program.cfg.statement.call.Call;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StaticTypesResolution extends FixedOrderResolution {
+public class StaticTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 
 	/**
 	 * The singleton instance of this class.
 	 */
-	public static final StaticTypesResolution INSTANCE = new StaticTypesResolution();
+	public static final StaticTypesMatchingStrategy INSTANCE = new StaticTypesMatchingStrategy();
 
-	private StaticTypesResolution() {
+	private StaticTypesMatchingStrategy() {
 	}
 
 	@Override

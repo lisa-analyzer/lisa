@@ -15,14 +15,14 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class SingleInheritanceTraversal implements HierarcyTraversalStrategy {
+public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStrategy {
 
 	/**
 	 * The singleton instance of this class.
 	 */
-	public static final SingleInheritanceTraversal INSTANCE = new SingleInheritanceTraversal();
+	public static final SingleInheritanceTraversalStrategy INSTANCE = new SingleInheritanceTraversalStrategy();
 
-	private SingleInheritanceTraversal() {
+	private SingleInheritanceTraversalStrategy() {
 	}
 
 	@Override

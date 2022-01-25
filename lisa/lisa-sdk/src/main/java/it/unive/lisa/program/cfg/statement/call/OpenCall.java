@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -46,7 +46,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeStrategy.INSTANCE, instanceCall, qualifier, targetName,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, parameters);
 	}
 
@@ -69,7 +69,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			EvaluationOrder order, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeStrategy.INSTANCE, instanceCall, qualifier, targetName, order, Untyped.INSTANCE,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order, Untyped.INSTANCE,
 				parameters);
 	}
 
@@ -118,7 +118,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			EvaluationOrder order, Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeStrategy.INSTANCE, instanceCall, qualifier, targetName, order, staticType,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order, staticType,
 				parameters);
 	}
 

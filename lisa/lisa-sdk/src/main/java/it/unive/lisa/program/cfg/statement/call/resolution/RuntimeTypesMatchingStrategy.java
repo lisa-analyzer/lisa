@@ -13,14 +13,14 @@ import it.unive.lisa.program.cfg.statement.call.Call;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class RuntimeTypesResolution extends FixedOrderResolution {
+public class RuntimeTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 
 	/**
 	 * The singleton instance of this class.
 	 */
-	public static final RuntimeTypesResolution INSTANCE = new RuntimeTypesResolution();
+	public static final RuntimeTypesMatchingStrategy INSTANCE = new RuntimeTypesMatchingStrategy();
 
-	private RuntimeTypesResolution() {
+	private RuntimeTypesMatchingStrategy() {
 	}
 
 	@Override

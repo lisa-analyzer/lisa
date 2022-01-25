@@ -16,7 +16,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -64,7 +64,7 @@ public class HybridCall extends Call {
 	 */
 	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
 			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		this(cfg, location, PythonLikeStrategy.INSTANCE, instanceCall, qualifier, targetName,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE,
 				targets, nativeTargets, parameters);
 	}

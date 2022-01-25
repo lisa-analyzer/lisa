@@ -1,21 +1,13 @@
-package it.unive.lisa.program.cfg.statement.call.assignment;
+package it.unive.lisa.program.cfg.statement.call.resolution;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
-import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
- * A Python-like assigning strategy. Specifically:<br>
+ * A Python-like matching strategy. Specifically, actual parameters are
+ * rearranged following the specification:<br>
  * <i>If keyword arguments are present, they are first converted to positional
  * arguments, as follows. First, a list of unfilled slots is created for the
  * formal parameters. If there are N positional arguments, they are placed in
@@ -34,11 +26,14 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * correspond to a formal parameter name, a TypeError exception is raised
  * [...].</i><br>
  * The only difference w.r.t. this specification is that whenever a TypeError
- * exception should be raised, this strategy returns the bottom state without
- * throwing errors.<br>
+ * exception should be raised, the matching interrupts and {@code false} is
+ * returned.<br>
  * <br>
  * Keyword parameters are identified by actuals (i.e. {@link Expression}s) that
- * are instance of {@link NamedParameterExpression}.
+ * are instance of {@link NamedParameterExpression}.<br>
+ * <br>
+ * After the reordering is completed, the type-based matching of each parameter
+ * happens by delegation to a specified {@link FixedOrderMatchingStrategy}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -46,31 +41,23 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  *          "https://docs.python.org/3/reference/expressions.html#calls">Python
  *          Language Reference: calls</a>
  */
-public class PythonLikeStrategy implements ParameterAssigningStrategy {
+public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
+
+	private final FixedOrderMatchingStrategy delegate;
 
 	/**
-	 * The singleton instance of this class.
+	 * Builds the strategy.
+	 * 
+	 * @param delegate the strategy to delegate the match after the actual
+	 *                     parameters have been shuffled
 	 */
-	public static final PythonLikeStrategy INSTANCE = new PythonLikeStrategy();
-
-	private PythonLikeStrategy() {
+	public PythonLikeMatchingStrategy(FixedOrderMatchingStrategy delegate) {
+		this.delegate = delegate;
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(
-					Call call,
-					AnalysisState<A, H, V> callState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
-					Parameter[] formals,
-					ExpressionSet<SymbolicExpression>[] parameters)
-					throws SemanticException {
-
-		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
-		Expression[] actuals = call.getParameters();
+	public boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
+		Expression[] slots = new Expression[formals.length];
 		int pos = 0;
 
 		// first phase: positional arguments
@@ -79,7 +66,7 @@ public class PythonLikeStrategy implements ParameterAssigningStrategy {
 			if (actuals[pos] instanceof NamedParameterExpression)
 				break;
 			else
-				slots[pos] = parameters[pos];
+				slots[pos] = actuals[pos];
 
 		// second phase: keyword arguments
 		for (; pos < actuals.length; pos++) {
@@ -88,38 +75,24 @@ public class PythonLikeStrategy implements ParameterAssigningStrategy {
 				if (formals[i].getName().equals(name)) {
 					if (slots[i] != null)
 						// already filled -> TypeError
-						return callState.bottom();
+						return false;
 					else
-						slots[i] = parameters[pos];
+						slots[i] = actuals[pos];
 					break;
 				}
 		}
 
 		// third phase: default values
-		for (; pos < actuals.length; pos++) {
+		for (; pos < actuals.length; pos++)
 			if (slots[pos] == null) {
 				Expression def = formals[pos].getDefaultValue();
 				if (def == null)
 					// unfilled and no default value -> TypeError
-					return callState.bottom();
-				else {
-					callState = def.semantics(callState, interprocedural, expressions);
-					expressions.put(def, callState);
-					slots[pos] = callState.getComputedExpressions();
-				}
+					return false;
+				else
+					slots[pos] = def;
 			}
-		}
 
-		// prepare the state for the call: assign the value to each parameter
-		AnalysisState<A, H, V> prepared = callState;
-		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A, H, V> temp = prepared.bottom();
-			for (SymbolicExpression exp : slots[i])
-				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
-			prepared = temp;
-		}
-
-		return prepared;
+		return delegate.matches(call, formals, slots);
 	}
-
 }

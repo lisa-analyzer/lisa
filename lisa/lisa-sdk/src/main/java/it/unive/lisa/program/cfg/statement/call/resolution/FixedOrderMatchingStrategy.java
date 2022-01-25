@@ -10,7 +10,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class FixedOrderResolution implements ParameterMatchingStrategy {
+public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
 	public final boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
