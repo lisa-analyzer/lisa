@@ -110,8 +110,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A, H, V> expressions)
+	AnalysisState<A, H, V> getAbstractResultOf(
+			CFGCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException;
 
 	/**
@@ -133,8 +136,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters)
+	AnalysisState<A, H, V> getAbstractResultOf(
+			OpenCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException;
 
 	/**

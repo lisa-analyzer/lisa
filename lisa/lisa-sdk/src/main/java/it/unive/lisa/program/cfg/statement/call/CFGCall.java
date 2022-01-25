@@ -1,8 +1,13 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -20,9 +25,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -180,7 +182,8 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> entryState,
-					ExpressionSet<SymbolicExpression>[] parameters)
+					ExpressionSet<SymbolicExpression>[] parameters,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}

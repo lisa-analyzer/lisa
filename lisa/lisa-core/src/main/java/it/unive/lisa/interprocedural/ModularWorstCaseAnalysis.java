@@ -102,17 +102,24 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters, StatementStore<A, H, V> expressions)
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			CFGCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(), call.getTargetName(),
 				call.getStaticType(), call.getParameters());
-		return getAbstractResultOf(open, entryState, parameters);
+		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			OpenCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
+			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
 

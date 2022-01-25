@@ -3,6 +3,7 @@ package it.unive.lisa.program.cfg.statement.call;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -70,6 +71,11 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 				parameters);
 	}
 
+	public OpenCall(UnresolvedCall source) {
+		this(source.getCFG(), source.getLocation(), source.getQualifier(), source.getTargetName(),
+				source.getStaticType(), source.getParameters());
+	}
+
 	@Override
 	public String toString() {
 		return "[open] " + super.toString();
@@ -86,8 +92,9 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> entryState,
-					ExpressionSet<SymbolicExpression>[] parameters)
+					ExpressionSet<SymbolicExpression>[] parameters,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		return interprocedural.getAbstractResultOf(this, entryState, parameters);
+		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
 	}
 }

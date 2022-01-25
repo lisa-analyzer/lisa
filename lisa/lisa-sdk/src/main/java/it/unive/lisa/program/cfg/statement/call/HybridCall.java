@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,7 +11,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
@@ -20,12 +23,8 @@ import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStr
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
 
 /**
  * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis.
@@ -238,7 +237,7 @@ public class HybridCall extends Call {
 				Parameter[] formals = nat.getDescriptor().getArgs();
 				AnalysisState<A, H, V> prepared = getAssigningStrategy().prepare(this, state, interprocedural,
 						expressions, formals, params);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, prepared, params));
+				result = result.lub(rewritten.expressionSemantics(interprocedural, prepared, params, expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

@@ -105,7 +105,9 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> entryState,
-					ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException;
+					ExpressionSet<SymbolicExpression>[] parameters,
+					StatementStore<A, H, V> expressions)
+					throws SemanticException;
 
 	@Override
 	public <A extends AbstractState<A, H, V>,
@@ -121,7 +123,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = compute(interprocedural, state, params);
+		AnalysisState<A, H, V> returned = compute(interprocedural, state, params, expressions);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||

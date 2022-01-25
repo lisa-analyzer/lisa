@@ -1,5 +1,17 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
@@ -14,15 +26,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.Graph;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -78,40 +81,14 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		Collection<CFG> targets = new ArrayList<>();
 		Collection<NativeCFG> nativeTargets = new ArrayList<>();
 
-		if (call.isInstanceCall()) {
-			if (call.getParameters().length == 0)
-				throw new CallResolutionException(
-						"An instance call should have at least one parameter to be used as the receiver of the call");
-			Expression receiver = call.getParameters()[0];
-			for (Type recType : getPossibleTypesOfReceiver(receiver)) {
-				if (!recType.isUnitType())
-					continue;
-
-				CompilationUnit unit = recType.asUnitType().getUnit();
-				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
-				for (CodeMember cm : candidates)
-					if (cm.getDescriptor().isInstance()
-							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(),
-									call.getParameters()))
-						if (cm instanceof CFG)
-							targets.add((CFG) cm);
-						else
-							nativeTargets.add((NativeCFG) cm);
-			}
-		} else {
-			for (CodeMember cm : program.getAllCodeMembers())
-				if (!cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
-						&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
-					if (cm instanceof CFG)
-						targets.add((CFG) cm);
-					else
-						nativeTargets.add((NativeCFG) cm);
-		}
+		if (call.isInstanceCall())
+			resolveInstance(call, targets, nativeTargets);
+		else
+			resolveNonInstance(call, targets, nativeTargets);
 
 		Call resolved;
 		if (targets.isEmpty() && nativeTargets.isEmpty())
-			resolved = new OpenCall(call.getCFG(), call.getLocation(), call.getQualifier(), call.getTargetName(),
-					call.getStaticType(), call.getParameters());
+			resolved = new OpenCall(call);
 		else if (nativeTargets.isEmpty())
 			resolved = new CFGCall(call, targets);
 		else
@@ -142,6 +119,52 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		}
 
 		return resolved;
+	}
+
+	protected void resolveNonInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+			throws CallResolutionException {
+		for (CodeMember cm : program.getAllCodeMembers())
+			if (!cm.getDescriptor().isInstance()
+					&& matchCFGName(call, cm)
+					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
+				if (cm instanceof CFG)
+					targets.add((CFG) cm);
+				else
+					natives.add((NativeCFG) cm);
+	}
+
+	protected void resolveInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+			throws CallResolutionException {
+		if (call.getParameters().length == 0)
+			throw new CallResolutionException(
+					"An instance call should have at least one parameter to be used as the receiver of the call");
+		Expression receiver = call.getParameters()[0];
+		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
+			if (!recType.isUnitType())
+				continue;
+
+			CompilationUnit unit = recType.asUnitType().getUnit();
+			for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
+				// we inspect only the ones of the current unit
+				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
+				for (CodeMember cm : candidates)
+					if (cm.getDescriptor().isInstance()
+							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(),
+									call.getParameters()))
+						if (cm instanceof CFG)
+							targets.add((CFG) cm);
+						else
+							natives.add((NativeCFG) cm);
+			}
+		}
+	}
+
+	protected boolean matchCFGName(UnresolvedCall call, CodeMember cm) {
+		if (!cm.getDescriptor().getName().equals(call.getTargetName()))
+			return false;
+		if (StringUtils.isBlank(call.getQualifier()))
+			return true;
+		return cm.getDescriptor().getUnit().getName().equals(call.getQualifier());
 	}
 
 	/**

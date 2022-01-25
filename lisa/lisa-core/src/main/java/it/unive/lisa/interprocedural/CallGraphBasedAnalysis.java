@@ -3,6 +3,7 @@ package it.unive.lisa.interprocedural;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -86,8 +87,12 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			OpenCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
+			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
 }

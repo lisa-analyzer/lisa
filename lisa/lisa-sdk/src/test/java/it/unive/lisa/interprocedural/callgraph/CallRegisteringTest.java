@@ -16,7 +16,9 @@ import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesResolution;
+import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversal;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import org.junit.Test;
@@ -40,7 +42,7 @@ public class CallRegisteringTest {
 
 		CFG cfg1 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
-				StaticTypesResolution.INSTANCE,
+				PythonLikeStrategy.INSTANCE, StaticTypesResolution.INSTANCE, SingleInheritanceTraversal.INSTANCE,
 				false, "cfg2", "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
