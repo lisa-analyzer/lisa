@@ -610,8 +610,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 					if (!ann.isInherited())
 						instCfg.getDescriptor().addAnnotation(ann);
 
-					Parameter[] args = instCfg.getDescriptor().getArgs();
-					Parameter[] superArgs = matching.getDescriptor().getArgs();
+					Parameter[] args = instCfg.getDescriptor().getFormals();
+					Parameter[] superArgs = matching.getDescriptor().getFormals();
 					for (int i = 0; i < args.length; i++)
 						for (Annotation parAnn : superArgs[i].getAnnotations()) {
 							if (!parAnn.isInherited())

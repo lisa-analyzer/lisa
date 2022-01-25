@@ -186,7 +186,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			// prepare the state for the call: hide the visible variables
 			AnalysisState<A, H, V> callState = entryState.pushScope(scope);
 
-			Parameter[] formals = cfg.getDescriptor().getArgs();
+			Parameter[] formals = cfg.getDescriptor().getFormals();
 			@SuppressWarnings("unchecked")
 			ExpressionSet<SymbolicExpression>[] actuals = new ExpressionSet[parameters.length];
 

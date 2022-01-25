@@ -234,7 +234,7 @@ public class HybridCall extends Call {
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				Parameter[] formals = nat.getDescriptor().getArgs();
+				Parameter[] formals = nat.getDescriptor().getFormals();
 				AnalysisState<A, H, V> prepared = getAssigningStrategy().prepare(this, state, interprocedural,
 						expressions, formals, params);
 				result = result.lub(rewritten.expressionSemantics(interprocedural, prepared, params, expressions));

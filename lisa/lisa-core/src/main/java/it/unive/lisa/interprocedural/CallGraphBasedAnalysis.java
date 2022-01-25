@@ -76,7 +76,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 			throws SemanticException {
 		AnalysisState<A, H, V> prepared = entryState;
 
-		for (Parameter arg : cfg.getDescriptor().getArgs()) {
+		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
 			Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
 			prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());

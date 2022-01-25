@@ -126,7 +126,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		for (CodeMember cm : program.getAllCodeMembers())
 			if (!cm.getDescriptor().isInstance()
 					&& matchCFGName(call, cm)
-					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(), call.getParameters()))
+					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters()))
 				if (cm instanceof CFG)
 					targets.add((CFG) cm);
 				else
@@ -149,7 +149,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
 				for (CodeMember cm : candidates)
 					if (cm.getDescriptor().isInstance()
-							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getArgs(),
+							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
 									call.getParameters()))
 						if (cm instanceof CFG)
 							targets.add((CFG) cm);
