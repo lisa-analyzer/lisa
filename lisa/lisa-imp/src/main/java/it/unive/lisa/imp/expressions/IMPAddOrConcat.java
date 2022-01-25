@@ -4,6 +4,7 @@ package it.unive.lisa.imp.expressions;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
@@ -57,7 +58,8 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
 					SymbolicExpression left,
-					SymbolicExpression right)
+					SymbolicExpression right,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V> result = state.bottom();
 		BinaryOperator op;

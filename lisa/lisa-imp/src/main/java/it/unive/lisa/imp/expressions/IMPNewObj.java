@@ -3,6 +3,7 @@ package it.unive.lisa.imp.expressions;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -54,7 +55,8 @@ public class IMPNewObj extends NaryExpression {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
 					InterproceduralAnalysis<A, H, V> interprocedural,
 					AnalysisState<A, H, V> state,
-					ExpressionSet<SymbolicExpression>[] params)
+					ExpressionSet<SymbolicExpression>[] params,
+					StatementStore<A, H, V> expressions)
 					throws SemanticException {
 		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
 
@@ -66,7 +68,7 @@ public class IMPNewObj extends NaryExpression {
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
 				IMPFrontend.CALL_STRATEGY, true, getStaticType().toString(), fullExpressions);
 		call.setRuntimeTypes(getRuntimeTypes());
-		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams);
+		AnalysisState<A, H, V> sem = call.expressionSemantics(interprocedural, state, fullParams, expressions);
 
 		if (!call.getMetaVariables().isEmpty())
 			sem = sem.forgetIdentifiers(call.getMetaVariables());
