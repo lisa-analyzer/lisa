@@ -1,8 +1,12 @@
 package it.unive.lisa.program.cfg;
 
+import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Objects;
@@ -31,6 +35,8 @@ public class Parameter implements CodeElement {
 
 	private final Annotations annotations;
 
+	private final Expression defaultValue;
+
 	/**
 	 * Builds an untyped parameter reference, identified by its name. The type
 	 * of this parameter is unknown (i.e. it is {#link Untyped#INSTANCE}).
@@ -39,7 +45,7 @@ public class Parameter implements CodeElement {
 	 * @param name     the name of this parameter
 	 */
 	public Parameter(CodeLocation location, String name) {
-		this(location, name, Untyped.INSTANCE);
+		this(location, name, Untyped.INSTANCE, null, new Annotations());
 	}
 
 	/**
@@ -53,21 +59,38 @@ public class Parameter implements CodeElement {
 	 *                       {@link Untyped#INSTANCE}
 	 */
 	public Parameter(CodeLocation location, String name, Type staticType) {
-		this(location, name, staticType, new Annotations());
+		this(location, name, staticType, null, new Annotations());
 	}
 
 	/**
 	 * Builds the parameter reference, identified by its name and its type,
 	 * happening at the given location in the program.
 	 * 
-	 * @param location    the location where this parameter is defined within
-	 *                        the program
-	 * @param name        the name of this parameter
-	 * @param staticType  the type of this parameter. If unknown, use
-	 *                        {@link Untyped#INSTANCE}
-	 * @param annotations the annotations of this parameter
+	 * @param location     the location where this parameter is defined within
+	 *                         the program
+	 * @param name         the name of this parameter
+	 * @param defaultValue the default value for this parameter that can be used
+	 *                         when a call does not specify a value for it
 	 */
-	public Parameter(CodeLocation location, String name, Type staticType, Annotations annotations) {
+	public Parameter(CodeLocation location, String name, Expression defaultValue) {
+		this(location, name, defaultValue.getStaticType(), defaultValue, new Annotations());
+	}
+
+	/**
+	 * Builds the parameter reference, identified by its name and its type,
+	 * happening at the given location in the program.
+	 * 
+	 * @param location     the location where this parameter is defined within
+	 *                         the program
+	 * @param name         the name of this parameter
+	 * @param staticType   the type of this parameter. If unknown, use
+	 *                         {@link Untyped#INSTANCE}
+	 * @param defaultValue the default value for this parameter that can be used
+	 *                         when a call does not specify a value for it
+	 * @param annotations  the annotations of this parameter
+	 */
+	public Parameter(CodeLocation location, String name, Type staticType, Expression defaultValue,
+			Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a parameter cannot be null");
 		Objects.requireNonNull(staticType, "The type of a parameter cannot be null");
 		Objects.requireNonNull(location, "The location of a CFG cannot be null");
@@ -75,6 +98,7 @@ public class Parameter implements CodeElement {
 		this.name = name;
 		this.staticType = staticType;
 		this.annotations = annotations;
+		this.defaultValue = defaultValue;
 	}
 
 	/**
@@ -164,5 +188,25 @@ public class Parameter implements CodeElement {
 	 */
 	public void addAnnotation(Annotation ann) {
 		annotations.addAnnotation(ann);
+	}
+
+	/**
+	 * Yields the default value for this parameter that can be used when a call
+	 * does not specify a value for it.
+	 * 
+	 * @return the default value
+	 */
+	public Expression getDefaultValue() {
+		return defaultValue;
+	}
+
+	/**
+	 * Creates a {@link Variable} that represent this parameter, that can be
+	 * used by {@link SemanticDomain}s to reference this parameter.
+	 * 
+	 * @return the variable representing this parameter
+	 */
+	public Variable toSymbolicVariable() {
+		return new Variable(Caches.types().mkSet(getStaticType().allInstances()), name, annotations, location);
 	}
 }

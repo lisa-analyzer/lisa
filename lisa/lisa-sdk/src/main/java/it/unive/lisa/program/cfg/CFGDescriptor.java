@@ -33,9 +33,9 @@ public class CFGDescriptor implements CodeElement {
 	private final String name;
 
 	/**
-	 * The arguments of the CFG associated with this descriptor.
+	 * The formal parameters of the CFG associated with this descriptor.
 	 */
-	private final Parameter[] args;
+	private final Parameter[] formals;
 
 	/**
 	 * The return type of the CFG associated with this descriptor.
@@ -79,11 +79,12 @@ public class CFGDescriptor implements CodeElement {
 	 * @param instance whether or not the cfg associated to this descriptor is
 	 *                     an instance cfg
 	 * @param name     the name of the CFG associated with this descriptor
-	 * @param args     the arguments of the CFG associated with this descriptor
+	 * @param formals  the formal parametersof the CFG associated with this
+	 *                     descriptor
 	 */
 	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
-			Parameter... args) {
-		this(location, unit, instance, name, Untyped.INSTANCE, args);
+			Parameter... formals) {
+		this(location, unit, instance, name, Untyped.INSTANCE, formals);
 	}
 
 	/**
@@ -98,12 +99,12 @@ public class CFGDescriptor implements CodeElement {
 	 * @param name       the name of the CFG associated with this descriptor
 	 * @param returnType the return type of the CFG associated with this
 	 *                       descriptor
-	 * @param args       the arguments of the CFG associated with this
+	 * @param formals    the formal parameters of the CFG associated with this
 	 *                       descriptor
 	 */
 	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
-			Type returnType, Parameter... args) {
-		this(location, unit, instance, name, returnType, new Annotations(), args);
+			Type returnType, Parameter... formals) {
+		this(location, unit, instance, name, returnType, new Annotations(), formals);
 	}
 
 	/**
@@ -120,22 +121,22 @@ public class CFGDescriptor implements CodeElement {
 	 *                        descriptor
 	 * @param annotations the annotations of the CFG associated with this
 	 *                        descriptor
-	 * @param args        the arguments of the CFG associated with this
+	 * @param formals     the formal parameters of the CFG associated with this
 	 *                        descriptor
 	 */
 	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
-			Type returnType, Annotations annotations, Parameter... args) {
+			Type returnType, Annotations annotations, Parameter... formals) {
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
-		Objects.requireNonNull(args, "The array of argument names of a CFG cannot be null");
+		Objects.requireNonNull(formals, "The array of formal parameters of a CFG cannot be null");
 		Objects.requireNonNull(returnType, "The return type of a CFG cannot be null");
 		Objects.requireNonNull(location, "The location of a CFG cannot be null");
-		for (int i = 0; i < args.length; i++)
-			Objects.requireNonNull(args[i], "The " + i + "-th argument name of a CFG cannot be null");
+		for (int i = 0; i < formals.length; i++)
+			Objects.requireNonNull(formals[i], "The " + i + "-th formal parameter of a CFG cannot be null");
 		this.location = location;
 		this.unit = unit;
 		this.name = name;
-		this.args = args;
+		this.formals = formals;
 		this.returnType = returnType;
 		this.instance = instance;
 		this.annotations = annotations;
@@ -146,9 +147,9 @@ public class CFGDescriptor implements CodeElement {
 
 		this.variables = new LinkedList<>();
 		int i = 0;
-		for (Parameter arg : args)
-			addVariable(new VariableTableEntry(arg.getLocation(), i++, null, null,
-					arg.getName(), arg.getStaticType()));
+		for (Parameter formal : formals)
+			addVariable(new VariableTableEntry(formal.getLocation(), i++, null, null,
+					formal.getName(), formal.getStaticType()));
 	}
 
 	/**
@@ -188,9 +189,9 @@ public class CFGDescriptor implements CodeElement {
 	 * @return the signature
 	 */
 	public String getSignature() {
-		Type[] types = new Type[args.length];
+		Type[] types = new Type[formals.length];
 		for (int i = 0; i < types.length; i++)
-			types[i] = args[i].getStaticType();
+			types[i] = formals[i].getStaticType();
 		return getFullName() + "(" + StringUtils.join(types, ", ") + ")";
 	}
 
@@ -201,7 +202,7 @@ public class CFGDescriptor implements CodeElement {
 	 * @return the signature with parameters names included
 	 */
 	public String getSignatureWithParNames() {
-		return getFullName() + "(" + StringUtils.join(args, ", ") + ")";
+		return getFullName() + "(" + StringUtils.join(formals, ", ") + ")";
 	}
 
 	/**
@@ -226,13 +227,13 @@ public class CFGDescriptor implements CodeElement {
 	}
 
 	/**
-	 * Yields the array containing the arguments of the CFG associated with this
-	 * descriptor.
+	 * Yields the array containing the formal parameters of the CFG associated
+	 * with this descriptor.
 	 * 
-	 * @return the arguments
+	 * @return the formal parameters
 	 */
-	public Parameter[] getArgs() {
-		return args;
+	public Parameter[] getFormals() {
+		return formals;
 	}
 
 	/**
@@ -322,7 +323,7 @@ public class CFGDescriptor implements CodeElement {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((annotations == null) ? 0 : annotations.hashCode());
-		result = prime * result + Arrays.hashCode(args);
+		result = prime * result + Arrays.hashCode(formals);
 		result = prime * result + (instance ? 1231 : 1237);
 		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
@@ -349,7 +350,7 @@ public class CFGDescriptor implements CodeElement {
 				return false;
 		} else if (!annotations.equals(other.annotations))
 			return false;
-		if (!Arrays.equals(args, other.args))
+		if (!Arrays.equals(formals, other.formals))
 			return false;
 		if (instance != other.instance)
 			return false;
@@ -405,8 +406,8 @@ public class CFGDescriptor implements CodeElement {
 	 * to match, it is required that:
 	 * <ul>
 	 * <li>both signatures have the same name</li>
-	 * <li>both signatures have the same number of arguments</li>
-	 * <li>for each argument, the static type of the matching signature (i.e.,
+	 * <li>both signatures have the same number of formals</li>
+	 * <li>for each formal, the static type of the matching signature (i.e.,
 	 * {@code this}) can be assigned to the static type of the matched signature
 	 * (i.e., {@code reference})</li>
 	 * </ul>
@@ -420,11 +421,11 @@ public class CFGDescriptor implements CodeElement {
 		if (!name.equals(reference.name))
 			return false;
 
-		if (args.length != reference.args.length)
+		if (formals.length != reference.formals.length)
 			return false;
 
-		for (int i = 0; i < args.length; i++)
-			if (!args[i].getStaticType().canBeAssignedTo(reference.args[i].getStaticType()))
+		for (int i = 0; i < formals.length; i++)
+			if (!formals[i].getStaticType().canBeAssignedTo(reference.formals[i].getStaticType()))
 				// TODO not sure if this is generic enough
 				return false;
 

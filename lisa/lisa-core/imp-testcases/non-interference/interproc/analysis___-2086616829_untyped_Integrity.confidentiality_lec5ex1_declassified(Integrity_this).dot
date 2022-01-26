@@ -2,12 +2,12 @@ digraph {
 	labelloc="t";
 	label="[['imp-testcases/non-interference/interproc/program.imp':28:44]]";
 	"node0" [shape="rect",color="black",label=<h = 5<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>this: HL<BR/>[inferred: HL, state: _|_] ]]<BR/>}} -&gt; [h]>];
-	"node1" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: _|_, state: _|_] ]]<BR/>}} -&gt; [skip]>];
-	"node2" [shape="rect",color="gray",label=<l = [unresolved]declassify(this, h)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: LL, state: _|_] ]]<BR/>}} -&gt; [l]>];
-	"node3" [shape="rect",color="gray",label=<l = h<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: LL, state: _|_] ]]<BR/>}} -&gt; [l]>];
-	"node0" -> "node3" [color="black"];
-	"node2" -> "node1" [color="black"];
-	"node3" -> "node2" [color="black"];
+	"node1" [shape="rect",color="gray",label=<l = h<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: LL, state: _|_] ]]<BR/>}} -&gt; [l]>];
+	"node2" [shape="rect",color="gray",label=<l = Integrity::declassify(this, h)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: LL, state: _|_] ]]<BR/>}} -&gt; [l]>];
+	"node3" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ h: HL<BR/>l: LL<BR/>this: HL<BR/>[inferred: _|_, state: _|_] ]]<BR/>}} -&gt; [skip]>];
+	"node0" -> "node1" [color="black"];
+	"node1" -> "node2" [color="black"];
+	"node2" -> "node3" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

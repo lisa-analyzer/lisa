@@ -31,8 +31,12 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.call.resolution.FirstRuntimeThenStaticStaticResolution;
-import it.unive.lisa.program.cfg.statement.call.resolution.ResolutionStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
@@ -68,9 +72,19 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
 
 	/**
-	 * The resolution strategy for IMP calling expressions.
+	 * The parameter matching strategy for IMP calling expressions.
 	 */
-	public static final ResolutionStrategy CALL_STRATEGY = FirstRuntimeThenStaticStaticResolution.INSTANCE;
+	public static final ParameterMatchingStrategy MATCHING_STRATEGY = JavaLikeMatchingStrategy.INSTANCE;
+
+	/**
+	 * The hierarchy traversal strategy for IMP calling expressions.
+	 */
+	public static final HierarcyTraversalStrategy TRAVERSAL_STRATEGY = SingleInheritanceTraversalStrategy.INSTANCE;
+
+	/**
+	 * The parameter assigning strategy for IMP calling expressions.
+	 */
+	public static final ParameterAssigningStrategy ASSIGN_STRATEGY = PythonLikeAssigningStrategy.INSTANCE;
 
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
@@ -351,6 +365,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+				Untyped.INSTANCE, null, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 }

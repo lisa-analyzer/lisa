@@ -23,6 +23,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -78,45 +79,18 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		Collection<CFG> targets = new ArrayList<>();
 		Collection<NativeCFG> nativeTargets = new ArrayList<>();
 
-		if (call.isInstanceCall()) {
-			if (call.getParameters().length == 0)
-				throw new CallResolutionException(
-						"An instance call should have at least one parameter to be used as the receiver of the call");
-			Expression receiver = call.getParameters()[0];
-			for (Type recType : getPossibleTypesOfReceiver(receiver)) {
-				if (!recType.isUnitType())
-					continue;
-
-				CompilationUnit unit = recType.asUnitType().getUnit();
-				Collection<CodeMember> candidates = unit.getInstanceCodeMembersByName(call.getTargetName(), true);
-				for (CodeMember cm : candidates)
-					if (cm.getDescriptor().isInstance()
-							&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
-						if (cm instanceof CFG)
-							targets.add((CFG) cm);
-						else
-							nativeTargets.add((NativeCFG) cm);
-			}
-		} else {
-			for (CodeMember cm : program.getAllCodeMembers())
-				if (!cm.getDescriptor().isInstance() && cm.getDescriptor().getName().equals(call.getTargetName())
-						&& call.getStrategy().matches(cm.getDescriptor().getArgs(), call.getParameters()))
-					if (cm instanceof CFG)
-						targets.add((CFG) cm);
-					else
-						nativeTargets.add((NativeCFG) cm);
-		}
+		if (call.isInstanceCall())
+			resolveInstance(call, targets, nativeTargets);
+		else
+			resolveNonInstance(call, targets, nativeTargets);
 
 		Call resolved;
 		if (targets.isEmpty() && nativeTargets.isEmpty())
-			resolved = new OpenCall(call.getCFG(), call.getLocation(), call.getTargetName(), call.getStaticType(),
-					call.getParameters());
+			resolved = new OpenCall(call);
 		else if (nativeTargets.isEmpty())
-			resolved = new CFGCall(call.getCFG(), call.getLocation(), call.getTargetName(), targets,
-					call.getParameters());
+			resolved = new CFGCall(call, targets);
 		else
-			resolved = new HybridCall(call.getCFG(), call.getLocation(), call.getTargetName(), targets, nativeTargets,
-					call.getParameters());
+			resolved = new HybridCall(call, targets, nativeTargets);
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
@@ -143,6 +117,90 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		}
 
 		return resolved;
+	}
+
+	/**
+	 * Resolves the given call as regular (non-instance) call.
+	 * 
+	 * @param call    the call to resolve
+	 * @param targets the list of targets that, after the execution of this
+	 *                    method, will contain the {@link CFG}s targeted by the
+	 *                    call
+	 * @param natives the list of targets that, after the execution of this
+	 *                    method, will contain the {@link NativeCFG}s targeted
+	 *                    by the call
+	 * 
+	 * @throws CallResolutionException if something goes wrong while resolving
+	 *                                     the call
+	 */
+	protected void resolveNonInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+			throws CallResolutionException {
+		for (CodeMember cm : program.getAllCodeMembers())
+			if (!cm.getDescriptor().isInstance()
+					&& matchCFGName(call, cm)
+					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters()))
+				if (cm instanceof CFG)
+					targets.add((CFG) cm);
+				else
+					natives.add((NativeCFG) cm);
+	}
+
+	/**
+	 * Resolves the given call as an instance call.
+	 * 
+	 * @param call    the call to resolve
+	 * @param targets the list of targets that, after the execution of this
+	 *                    method, will contain the {@link CFG}s targeted by the
+	 *                    call
+	 * @param natives the list of targets that, after the execution of this
+	 *                    method, will contain the {@link NativeCFG}s targeted
+	 *                    by the call
+	 * 
+	 * @throws CallResolutionException if something goes wrong while resolving
+	 *                                     the call
+	 */
+	protected void resolveInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+			throws CallResolutionException {
+		if (call.getParameters().length == 0)
+			throw new CallResolutionException(
+					"An instance call should have at least one parameter to be used as the receiver of the call");
+		Expression receiver = call.getParameters()[0];
+		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
+			if (!recType.isUnitType())
+				continue;
+
+			CompilationUnit unit = recType.asUnitType().getUnit();
+			for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
+				// we inspect only the ones of the current unit
+				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
+				for (CodeMember cm : candidates)
+					if (cm.getDescriptor().isInstance()
+							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
+									call.getParameters()))
+						if (cm instanceof CFG)
+							targets.add((CFG) cm);
+						else
+							natives.add((NativeCFG) cm);
+			}
+		}
+	}
+
+	/**
+	 * Matches the name (qualifier + target name) of the given call against the
+	 * given code member.
+	 * 
+	 * @param call the call to match
+	 * @param cm   the code member being matched
+	 * 
+	 * @return {@code true} if the name of {@code cm} is compatible with the one
+	 *             of the call's target
+	 */
+	protected boolean matchCFGName(UnresolvedCall call, CodeMember cm) {
+		if (!cm.getDescriptor().getName().equals(call.getTargetName()))
+			return false;
+		if (StringUtils.isBlank(call.getQualifier()))
+			return true;
+		return cm.getDescriptor().getUnit().getName().equals(call.getQualifier());
 	}
 
 	/**

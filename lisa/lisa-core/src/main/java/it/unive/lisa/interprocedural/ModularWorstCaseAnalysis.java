@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -82,7 +83,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 			try {
 				AnalysisState<A, H, V> prepared = entryState;
 
-				for (Parameter arg : cfg.getDescriptor().getArgs()) {
+				for (Parameter arg : cfg.getDescriptor().getFormals()) {
 					ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
 					Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
 					prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
@@ -101,16 +102,24 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getTargetName(),
-				call.getStaticType(), call.getParameters());
-		return getAbstractResultOf(open, entryState, parameters);
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			CFGCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
+			throws SemanticException {
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
+				call.getTargetName(), call.getStaticType(), call.getParameters());
+		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters) throws SemanticException {
+	public AnalysisState<A, H, V> getAbstractResultOf(
+			OpenCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
+			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
 
@@ -122,10 +131,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException {
-		OpenCall open = new OpenCall(unresolvedCall.getCFG(), unresolvedCall.getLocation(),
-				unresolvedCall.getTargetName(), unresolvedCall.getStaticType(), unresolvedCall.getParameters());
-		open.setRuntimeTypes(unresolvedCall.getRuntimeTypes());
+	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
+				call.getTargetName(), call.getStaticType(), call.getParameters());
+		open.setRuntimeTypes(call.getRuntimeTypes());
 		return open;
 	}
 }

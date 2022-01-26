@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -96,10 +97,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * Note that the interprocedural analysis is also responsible for
 	 * registering the call to the {@link CallGraph}, if needed.
 	 *
-	 * @param call       the call to evaluate
-	 * @param entryState the abstract analysis state when the call is reached
-	 * @param parameters the expressions representing the actual parameters of
-	 *                       the call
+	 * @param call        the call to evaluate
+	 * @param entryState  the abstract analysis state when the call is reached
+	 * @param parameters  the expressions representing the actual parameters of
+	 *                        the call
+	 * @param expressions the cache where analysis states of intermediate
+	 *                        expressions must be stored
 	 *
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
@@ -109,8 +112,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(CFGCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters)
+	AnalysisState<A, H, V> getAbstractResultOf(
+			CFGCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException;
 
 	/**
@@ -119,10 +125,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * parameters, and the state when the call is executed is
 	 * {@code entryState}.
 	 *
-	 * @param call       the call to evaluate
-	 * @param entryState the abstract analysis state when the call is reached
-	 * @param parameters the expressions representing the actual parameters of
-	 *                       the call
+	 * @param call        the call to evaluate
+	 * @param entryState  the abstract analysis state when the call is reached
+	 * @param parameters  the expressions representing the actual parameters of
+	 *                        the call
+	 * @param expressions the cache where analysis states of intermediate
+	 *                        expressions must be stored
 	 *
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the open call. The
@@ -132,8 +140,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(OpenCall call, AnalysisState<A, H, V> entryState,
-			ExpressionSet<SymbolicExpression>[] parameters)
+	AnalysisState<A, H, V> getAbstractResultOf(
+			OpenCall call,
+			AnalysisState<A, H, V> entryState,
+			ExpressionSet<SymbolicExpression>[] parameters,
+			StatementStore<A, H, V> expressions)
 			throws SemanticException;
 
 	/**
@@ -141,12 +152,12 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
 	 * {@link CallGraph#resolve(UnresolvedCall)} if needed.
 	 *
-	 * @param unresolvedCall the call to resolve
+	 * @param call the call to resolve
 	 *
 	 * @return a collection of all the possible runtime targets
 	 *
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall unresolvedCall) throws CallResolutionException;
+	Call resolve(UnresolvedCall call) throws CallResolutionException;
 }

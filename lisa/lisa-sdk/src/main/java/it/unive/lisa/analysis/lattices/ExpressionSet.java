@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.lattices;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticExceptionWrapper;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -135,5 +136,47 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	private Collection<Identifier> onlyIds() {
 		return elements.stream().filter(Identifier.class::isInstance).map(Identifier.class::cast)
 				.collect(Collectors.toSet());
+	}
+
+	/**
+	 * Pushes a new scope, identified by the give token, in the set. This
+	 * recursively invokes {@link SymbolicExpression#pushScope(ScopeToken)} on
+	 * all elements of the set (return type is forced to
+	 * {@code ExpressionSet<SymbolicExpression>} since this operation returns
+	 * the root of the hierarchy).
+	 *
+	 * @param token the token identifying the scope to push
+	 * 
+	 * @return a copy of this set where the expressions have the given scope
+	 *             pushed
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public ExpressionSet<SymbolicExpression> pushScope(ScopeToken token) throws SemanticException {
+		Set<SymbolicExpression> mapped = new HashSet<>();
+		for (T exp : elements)
+			mapped.add(exp.pushScope(token));
+		return new ExpressionSet<>(mapped);
+	}
+
+	/**
+	 * Pops the scope identified by the given token from the set. This
+	 * recursively invokes {@link SymbolicExpression#popScope(ScopeToken)} on
+	 * all elements of the set (return type is forced to
+	 * {@code ExpressionSet<SymbolicExpression>} since this operation returns
+	 * the root of the hierarchy).
+	 *
+	 * @param token the token of the scope to be restored
+	 * 
+	 * @return a copy of this domain where the the expressions have the given
+	 *             scope popped
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public ExpressionSet<SymbolicExpression> popScope(ScopeToken token) throws SemanticException {
+		Set<SymbolicExpression> mapped = new HashSet<>();
+		for (T exp : elements)
+			mapped.add(exp.popScope(token));
+		return new ExpressionSet<>(mapped);
 	}
 }

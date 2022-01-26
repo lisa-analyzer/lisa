@@ -51,7 +51,9 @@ import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesResolution;
+import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
+import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -104,10 +106,10 @@ public class EqualityContractVerificationTest {
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
-	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, StaticTypesResolution.INSTANCE, false,
-			"foo");
-	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, StaticTypesResolution.INSTANCE, false,
-			"bar");
+	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "foo", "foo");
+	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "bar", "bar");
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
@@ -369,7 +371,8 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testProgramStructure() {
 		verify(Global.class);
-		verify(Parameter.class);
+		// the default value does not impact the definition of the formal
+		verify(Parameter.class, verifier -> verifier.withIgnoredFields("defaultValue"));
 		// 'overridable' is mutable
 		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS);
 		// scope bounds are mutable
