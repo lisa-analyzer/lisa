@@ -55,10 +55,7 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -92,10 +89,7 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -159,10 +153,7 @@ public class CFGSimplificationTest {
 		second.addControlFlowStructure(
 				new IfThenElse(second.getAdjacencyMatrix(), gt, ret, tbranch.getNodes(), fbranch.getNodes()));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
@@ -197,10 +188,7 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -232,10 +220,7 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign, ret));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -270,10 +255,7 @@ public class CFGSimplificationTest {
 
 		second.addEdge(new SequentialEdge(assign1, assign2));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 	}
 
@@ -331,10 +313,7 @@ public class CFGSimplificationTest {
 		second.addControlFlowStructure(
 				new IfThenElse(second.getAdjacencyMatrix(), assign1, null, tbranch.getNodes(), fbranch.getNodes()));
 
-		first.validate();
-		second.validate();
 		first.simplify();
-		first.validate();
 		assertTrue("Different CFGs", second.isEqualTo(first));
 		ControlFlowStructure exp = second.getControlFlowStructures().iterator().next();
 		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();

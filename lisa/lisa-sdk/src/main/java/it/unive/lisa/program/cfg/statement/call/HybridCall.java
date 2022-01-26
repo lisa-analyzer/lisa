@@ -12,7 +12,6 @@ import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -270,10 +269,7 @@ public class HybridCall extends Call {
 		for (NativeCFG nat : nativeTargets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				Parameter[] formals = nat.getDescriptor().getFormals();
-				AnalysisState<A, H, V> prepared = getAssigningStrategy().prepare(this, state, interprocedural,
-						expressions, formals, params);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, prepared, params, expressions));
+				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

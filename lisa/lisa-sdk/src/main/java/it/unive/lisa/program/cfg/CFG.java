@@ -637,6 +637,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	 * effectively in the cfg</li>
 	 * <li>all {@link Statement}s that stop the execution (according to
 	 * {@link Statement#stopsExecution()}) do not have outgoing edges</li>
+	 * <li>all {@link Statement}s that do not have outgoing edges stop the
+	 * execution (according to {@link Statement#stopsExecution()})</li>
 	 * <li>all entrypoints are effectively part of this cfg</li>
 	 * </ul>
 	 * 
@@ -659,11 +661,15 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 							+ ") that contains a node not in the graph: " + st);
 		}
 
-		for (Entry<Statement, AdjacencyMatrix.NodeEdges<Statement, Edge, CFG>> st : adjacencyMatrix)
+		for (Entry<Statement, AdjacencyMatrix.NodeEdges<Statement, Edge, CFG>> st : adjacencyMatrix) {
 			// no outgoing edges in execution-terminating statements
 			if (st.getKey().stopsExecution() && !st.getValue().getOutgoing().isEmpty())
 				throw new ProgramValidationException(
 						this + " contains an execution-stopping node that has followers: " + st.getKey());
+			if (st.getValue().getOutgoing().isEmpty() && !st.getKey().stopsExecution() && !st.getKey().throwsError())
+				throw new ProgramValidationException(
+						this + " contains a node with no followers that is not execution-stopping: " + st.getKey());
+		}
 
 		// all entrypoints should be within the cfg
 		if (!adjacencyMatrix.getNodes().containsAll(entrypoints))

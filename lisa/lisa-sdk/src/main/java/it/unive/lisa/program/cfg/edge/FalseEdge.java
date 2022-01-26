@@ -42,16 +42,13 @@ public class FalseEdge extends Edge {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
 					AnalysisState<A, H, V> sourceState) throws SemanticException {
 		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = sourceState.bottom();
 		for (SymbolicExpression expr : exprs) {
 			AnalysisState<A, H, V> tmp = sourceState
 					.assume(new UnaryExpression(expr.getTypes(), expr, LogicalNegation.INSTANCE,
 							expr.getCodeLocation()),
 							getSource());
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
+			result = result.lub(tmp);
 		}
 		return result;
 	}
