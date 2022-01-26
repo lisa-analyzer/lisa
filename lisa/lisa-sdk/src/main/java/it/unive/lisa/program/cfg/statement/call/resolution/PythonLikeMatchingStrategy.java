@@ -57,6 +57,10 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
 	public boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
+		if (formals.length < actuals.length)
+			// too many arguments!
+			return false;
+
 		Expression[] slots = new Expression[formals.length];
 		int pos = 0;
 
