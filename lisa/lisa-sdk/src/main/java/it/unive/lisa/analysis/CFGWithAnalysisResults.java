@@ -158,12 +158,9 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	private AnalysisState<A, H, V> lub(Collection<Statement> statements, boolean entry) throws SemanticException {
-		AnalysisState<A, H, V> result = null;
+		AnalysisState<A, H, V> result = entryStates.lattice.bottom();
 		for (Statement st : statements)
-			if (result == null)
-				result = entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st);
-			else
-				result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
+			result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
 		return result;
 
 	}

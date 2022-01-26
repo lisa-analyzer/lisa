@@ -39,14 +39,9 @@ public class TrueEdge extends Edge {
 			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
 					AnalysisState<A, H, V> sourceState) throws SemanticException {
 		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
-		AnalysisState<A, H, V> result = null;
-		for (SymbolicExpression expr : exprs) {
-			AnalysisState<A, H, V> tmp = sourceState.assume(expr, getSource());
-			if (result == null)
-				result = tmp;
-			else
-				result = result.lub(tmp);
-		}
+		AnalysisState<A, H, V> result = sourceState.bottom();
+		for (SymbolicExpression expr : exprs)
+			result = result.lub(sourceState.assume(expr, getSource()));
 		return result;
 	}
 
