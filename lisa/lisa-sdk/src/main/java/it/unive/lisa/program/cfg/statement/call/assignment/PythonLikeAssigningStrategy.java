@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
+import it.unive.lisa.program.cfg.statement.call.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
@@ -71,43 +72,21 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
 		Expression[] actuals = call.getParameters();
-		int pos = 0;
 
-		// first phase: positional arguments
-		// we stop at the first named parameter
-		for (; pos < actuals.length; pos++)
-			if (actuals[pos] instanceof NamedParameterExpression)
-				break;
-			else
-				slots[pos] = parameters[pos];
-
-		// second phase: keyword arguments
-		for (; pos < actuals.length; pos++) {
-			String name = ((NamedParameterExpression) actuals[pos]).getParameterName();
-			for (int i = pos; i < formals.length; i++)
-				if (formals[i].getName().equals(name)) {
-					if (slots[i] != null)
-						// already filled -> TypeError
-						return callState.bottom();
-					else
-						slots[i] = parameters[pos];
-					break;
-				}
+		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
+		for (int pos = 0; pos < slots.length; pos++) {
+			Expression def = formals[pos].getDefaultValue();
+			if (def != null) {
+				callState = def.semantics(callState, interprocedural, expressions);
+				expressions.put(def, callState);
+				defaults[pos] = callState.getComputedExpressions();
+			}
 		}
 
-		// third phase: default values
-		for (; pos < actuals.length; pos++)
-			if (slots[pos] == null) {
-				Expression def = formals[pos].getDefaultValue();
-				if (def == null)
-					// unfilled and no default value -> TypeError
-					return callState.bottom();
-				else {
-					callState = def.semantics(callState, interprocedural, expressions);
-					expressions.put(def, callState);
-					slots[pos] = callState.getComputedExpressions();
-				}
-			}
+		AnalysisState<A, H, V> logic = PythonLikeMatchingStrategy.pythonLogic(formals, actuals, parameters,
+				defaults, slots, callState.bottom());
+		if (logic != null)
+			return logic;
 
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A, H, V> prepared = callState;

@@ -57,11 +57,55 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
 	public boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
+		Expression[] slots = new Expression[formals.length];
+		Expression[] defaults = new Expression[formals.length];
+		for (int pos = 0; pos < slots.length; pos++) {
+			Expression def = formals[pos].getDefaultValue();
+			if (def != null)
+				defaults[pos] = def;
+		}
+
+		Boolean logic = PythonLikeMatchingStrategy.pythonLogic(formals, actuals, actuals,
+				defaults, slots, false);
+		if (logic != null)
+			return logic;
+
+		return delegate.matches(call, formals, slots);
+	}
+
+	/**
+	 * Python logic for preparing an argument list for a method call. If the
+	 * preparation fails, that is, if the signatures are incompatible,
+	 * {@code failure} is returned. Otherwise, {@code null} is returned.
+	 * {@code slots} is filled with the positional parameters from {@code given}
+	 * first (that is, ones corresponding to an actual in {@code actuals} that
+	 * is not an instance of {@link NamedParameterExpression}), then named
+	 * parameters from {@code given}, and lastly with default values from
+	 * {@code defaults}.
+	 * 
+	 * @param <T>      the type of elements in {@code slots}
+	 * @param <F>      the type of the element returned if the preparation fails
+	 * @param formals  the formal parameters
+	 * @param actuals  the actual parameters
+	 * @param given    the value to use for each parameter, positional or named
+	 * @param defaults the default values for each parameter if no explicit
+	 *                     value is provided
+	 * @param slots    the slots that represent final values to use as
+	 *                     parameters
+	 * @param failure  what to return in case of failure
+	 * 
+	 * @return {@code failure} if the preparation fails, {@code null} otherwise
+	 * 
+	 * @see <a href=
+	 *          "https://docs.python.org/3/reference/expressions.html#calls">Python
+	 *          Language Reference: calls</a>
+	 */
+	public static <T, F> F pythonLogic(Parameter[] formals, Expression[] actuals, T[] given, T[] defaults, T[] slots,
+			F failure) {
 		if (formals.length < actuals.length)
 			// too many arguments!
-			return false;
+			return failure;
 
-		Expression[] slots = new Expression[formals.length];
 		int pos = 0;
 
 		// first phase: positional arguments
@@ -70,7 +114,7 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 			if (actuals[pos] instanceof NamedParameterExpression)
 				break;
 			else
-				slots[pos] = actuals[pos];
+				slots[pos] = given[pos];
 
 		// second phase: keyword arguments
 		for (; pos < actuals.length; pos++) {
@@ -79,24 +123,24 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 				if (formals[i].getName().equals(name)) {
 					if (slots[i] != null)
 						// already filled -> TypeError
-						return false;
+						return failure;
 					else
-						slots[i] = actuals[pos];
+						slots[i] = given[pos];
 					break;
 				}
 		}
 
 		// third phase: default values
-		for (; pos < actuals.length; pos++)
+		for (pos = 0; pos < slots.length; pos++)
 			if (slots[pos] == null) {
 				Expression def = formals[pos].getDefaultValue();
 				if (def == null)
 					// unfilled and no default value -> TypeError
-					return false;
+					return failure;
 				else
-					slots[pos] = def;
+					slots[pos] = defaults[pos];
 			}
 
-		return delegate.matches(call, formals, slots);
+		return null;
 	}
 }
