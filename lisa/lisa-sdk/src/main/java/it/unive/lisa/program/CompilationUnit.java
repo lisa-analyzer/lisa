@@ -633,7 +633,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 					throw new ProgramValidationException(
 							sup.getDescriptor().getSignature() + " is overriden multiple times in unit " + this + ": "
 									+ StringUtils.join(", ", overriding));
-				else if (!overriding.isEmpty())
+				else if (!overriding.isEmpty()) {
 					if (!sup.getDescriptor().isOverridable()) {
 						throw new ProgramValidationException(
 								this + " overrides the non-overridable cfg " + sup.getDescriptor().getSignature());
@@ -643,6 +643,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 						over.getDescriptor().overrides().add(sup);
 						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
 					}
+				} else if (!s.canBeInstantiated())
+					throw new ProgramValidationException(
+							this + " does not overrides the cfg " + sup.getDescriptor().getSignature()
+									+ " of the non-instantiable unit " + s);
 			}
 
 		for (InterfaceUnit i : superInterfaceUnits)
