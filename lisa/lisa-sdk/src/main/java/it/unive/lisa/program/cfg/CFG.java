@@ -418,6 +418,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
 			StatementStore<A, H, V> expressions = new StatementStore<>(entrystate.getLeft().bottom());
 			AnalysisState<A, H, V> approx = node.semantics(entrystate.getLeft(), interprocedural, expressions);
+			if (node instanceof Expression)
+				approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables());
 			return Pair.of(approx, expressions);
 		}
 

@@ -1,8 +1,12 @@
 package it.unive.lisa.program.cfg;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import org.junit.Test;
+
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -16,9 +20,10 @@ import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import org.junit.Test;
 
 public class CFGFixpointTest {
 
@@ -76,5 +81,21 @@ public class CFGFixpointTest {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
 		}
+	}
+
+	@Test
+	public void testMetaVariablesOfRootExpressions()
+			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
+		Program program = new Program();
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
+		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, false, "test", "test");
+		cfg.addNode(call, true);
+
+		AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
+				ValueEnvironment<Sign>> domain = mkState();
+		CFGWithAnalysisResults<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
+				ValueEnvironment<Sign>> result = cfg.fixpoint(domain, mkAnalysis(program), FIFOWorkingSet.mk(), 5);
+		
+		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
 	}
 }
