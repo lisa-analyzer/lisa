@@ -141,11 +141,11 @@ public abstract class AnalysisTestExecutor {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);
 			Accumulator acc = new Accumulator(expectedPath);
-			boolean comparison = JsonReportComparer.compare(expected, actual, expectedPath.toFile(),
-					actualPath.toFile(), acc);
 			if (!update)
-				assertTrue("Results are different", comparison);
-			else if (!comparison) {
+				assertTrue("Results are different",
+						JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+			else if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(),
+					actualPath.toFile(), acc)) {
 				System.err.println("Results are different, regenerating differences");
 				boolean updateReport = !acc.addedWarning.isEmpty() || !acc.removedWarning.isEmpty()
 						|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()

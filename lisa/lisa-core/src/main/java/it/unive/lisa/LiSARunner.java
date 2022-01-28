@@ -29,6 +29,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -272,7 +273,10 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		// fill up the types cache by side effect on an external set
 		Caches.types().clear();
 		ExternalSet<Type> types = Caches.types().mkEmptySet();
-		program.getRegisteredTypes().forEach(types::add);
+		for (Type t : program.getRegisteredTypes()) {
+			types.add(t);
+			types.add(new ReferenceType(t));
+		}
 		types = null;
 
 		TimerLogger.execAction(LOG, "Finalizing input program", () -> {

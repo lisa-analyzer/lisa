@@ -1,16 +1,30 @@
 package it.unive.lisa.type;
 
-import java.util.Collection;
-
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collection;
 
-public class ReferenceType implements PointerType {
+import org.apache.commons.lang3.StringUtils;
+
+/**
+ * A type for references to memory regions. This type is the one of variables
+ * holding references to entities that leave in the heap. For instance, where
+ * creating an array if {@code int32}, the location in memory containing the
+ * array will have type {@code int32[]}, while all variables referencing that
+ * location will have type {@code referenceType(int32[])}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public final class ReferenceType implements PointerType {
 
 	private final ExternalSet<Type> innerTypes;
 
 	public ReferenceType(ExternalSet<Type> innerTypes) {
 		this.innerTypes = innerTypes;
+	}
+
+	public ReferenceType(Type t) {
+		this(Caches.types().mkSingletonSet(t));
 	}
 
 	@Override
@@ -28,6 +42,12 @@ public class ReferenceType implements PointerType {
 		return Caches.types().mkSingletonSet(this);
 	}
 
+	/**
+	 * Yields the inner types, that is, the types of the memory region that
+	 * variables with this type point to.
+	 * 
+	 * @return the inner types
+	 */
 	public ExternalSet<Type> getInnerTypes() {
 		return innerTypes;
 	}
@@ -57,6 +77,6 @@ public class ReferenceType implements PointerType {
 
 	@Override
 	public String toString() {
-		return "*(" + innerTypes + ")";
+		return "*(" + StringUtils.join(innerTypes, ", ") + ")";
 	}
 }
