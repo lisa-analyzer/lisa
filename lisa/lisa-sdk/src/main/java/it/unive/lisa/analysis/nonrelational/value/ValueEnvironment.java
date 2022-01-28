@@ -29,7 +29,7 @@ import org.apache.commons.lang3.tuple.Pair;
 public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		extends Environment<ValueEnvironment<T>, ValueExpression, T, T> implements ValueDomain<ValueEnvironment<T>> {
 
-	private final T stack;
+	protected final T stack;
 
 	/**
 	 * Builds an empty environment.
@@ -42,7 +42,7 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		this.stack = domain.bottom();
 	}
 
-	private ValueEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	protected ValueEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}
