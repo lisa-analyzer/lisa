@@ -249,4 +249,17 @@ public class SimpleAbstractState<H extends HeapDomain<H>, V extends ValueDomain<
 	public String toString() {
 		return representation().toString();
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getDomainInstance(Class<T> domain) {
+		if (domain.isAssignableFrom(getClass()))
+			return (T) this;
+
+		T di = heapState.getDomainInstance(domain);
+		if (di != null)
+			return di;
+
+		return valueState.getDomainInstance(domain);
+	}
 }

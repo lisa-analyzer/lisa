@@ -215,4 +215,17 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	public boolean isBottom() {
 		return left.isBottom() && right.isBottom();
 	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getDomainInstance(Class<T> domain) {
+		if (domain.isAssignableFrom(getClass()))
+			return (T) this;
+
+		T di = left.getDomainInstance(domain);
+		if (di != null)
+			return di;
+
+		return right.getDomainInstance(domain);
+	}
 }

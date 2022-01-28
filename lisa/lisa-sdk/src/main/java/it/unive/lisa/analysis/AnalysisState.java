@@ -302,4 +302,13 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public String toString() {
 		return representation().toString();
 	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getDomainInstance(Class<T> domain) {
+		if (domain.isAssignableFrom(getClass()))
+			return (T) this;
+		
+		return state.getDomainInstance(domain);
+	}
 }
