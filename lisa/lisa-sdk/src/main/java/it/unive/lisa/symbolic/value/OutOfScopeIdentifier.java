@@ -28,9 +28,10 @@ public class OutOfScopeIdentifier extends Identifier {
 	 *                     this expression
 	 */
 	public OutOfScopeIdentifier(Identifier id, ScopeToken scope, CodeLocation location) {
-		super(id.getTypes(), scope.toString() + ":" + id.getName(), id.isWeak(), location);
+		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), location);
 		this.id = id;
 		this.scope = scope;
+		setRuntimeTypes(getRuntimeTypes());
 	}
 
 	@Override

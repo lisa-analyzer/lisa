@@ -4,11 +4,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
+import java.util.HashSet;
+
+import org.junit.Test;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -30,14 +34,10 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Collections;
-import java.util.HashSet;
-import org.junit.Test;
 
 public class PointBasedHeapTest {
-	private final ExternalSet<Type> untyped = Caches.types().mkSingletonSet(Untyped.INSTANCE);
-	private final ExternalSet<Type> intType = Caches.types().mkSingletonSet(Int32.INSTANCE);
+	private final Type untyped = Untyped.INSTANCE;
+	private final Type intType = Int32.INSTANCE;
 
 	private final CodeLocation loc1 = new SourceCodeLocation("fake", 1, 1);
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);

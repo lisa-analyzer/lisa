@@ -110,12 +110,12 @@ public class InferredTypes extends BaseNonRelationalValueDomain<InferredTypes> {
 		InferredTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
-		return new InferredTypes(id.getTypes());
+		return new InferredTypes(id.getRuntimeTypes());
 	}
 
 	@Override
 	protected InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
-		return new InferredTypes(pushAny.getTypes());
+		return new InferredTypes(pushAny.getRuntimeTypes());
 	}
 
 	@Override

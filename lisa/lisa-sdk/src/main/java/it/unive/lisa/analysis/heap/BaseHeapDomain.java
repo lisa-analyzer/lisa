@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,8 +19,6 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A base implementation of the {@link HeapDomain} interface, handling base
@@ -124,9 +125,12 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 				ExpressionSet<ValueExpression> arg,
 				Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
-			for (ValueExpression expr : arg)
-				result.add(new UnaryExpression(expression.getTypes(), expr, expression.getOperator(),
-						expression.getCodeLocation()));
+			for (ValueExpression expr : arg) {
+				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
+						expression.getCodeLocation());
+				e.setRuntimeTypes(expr.getRuntimeTypes());
+				result.add(e);
+			}
 			return new ExpressionSet<>(result);
 		}
 
@@ -136,9 +140,13 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 				ExpressionSet<ValueExpression> right, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression l : left)
-				for (ValueExpression r : right)
-					result.add(new BinaryExpression(expression.getTypes(), l, r, expression.getOperator(),
-							expression.getCodeLocation()));
+				for (ValueExpression r : right) {
+					BinaryExpression e = new BinaryExpression(expression.getStaticType(), l, r,
+							expression.getOperator(),
+							expression.getCodeLocation());
+					e.setRuntimeTypes(expression.getRuntimeTypes());
+					result.add(e);
+				}
 			return new ExpressionSet<>(result);
 		}
 
@@ -150,9 +158,13 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression l : left)
 				for (ValueExpression m : middle)
-					for (ValueExpression r : right)
-						result.add(new TernaryExpression(expression.getTypes(), l, m, r, expression.getOperator(),
-								expression.getCodeLocation()));
+					for (ValueExpression r : right) {
+						TernaryExpression e = new TernaryExpression(expression.getStaticType(), l, m, r,
+								expression.getOperator(),
+								expression.getCodeLocation());
+						e.setRuntimeTypes(expression.getRuntimeTypes());
+						result.add(e);
+					}
 			return new ExpressionSet<>(result);
 		}
 

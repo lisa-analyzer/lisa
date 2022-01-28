@@ -19,7 +19,7 @@ import it.unive.lisa.type.NumericType;
  * An expression modeling the subtraction operation ({@code -}). Both operands'
  * types must be instances of {@link NumericType}. The type of this expression
  * is the common numerical type of its operands, according to the type
- * inference.
+ * inference. 
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -55,7 +55,7 @@ public class Subtraction extends it.unive.lisa.program.cfg.statement.BinaryExpre
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						getRuntimeTypes(),
+						getStaticType(),
 						left,
 						right,
 						NumericNonOverflowingSub.INSTANCE,

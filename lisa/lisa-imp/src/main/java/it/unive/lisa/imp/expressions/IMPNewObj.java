@@ -1,5 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,7 +9,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -22,7 +23,6 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -60,7 +60,7 @@ public class IMPNewObj extends NaryExpression {
 					ExpressionSet<SymbolicExpression>[] params,
 					StatementStore<A, H, V> expressions)
 					throws SemanticException {
-		HeapAllocation created = new HeapAllocation(getRuntimeTypes(), getLocation());
+		HeapAllocation created = new HeapAllocation(getStaticType(), getLocation());
 
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "this", getStaticType());
@@ -80,8 +80,8 @@ public class IMPNewObj extends NaryExpression {
 
 		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions())
-			result = result.lub(sem.smallStepSemantics(new HeapReference(
-					Caches.types().mkSingletonSet(new ReferenceType(loc.getTypes())), loc, getLocation()), call));
+			result = result.lub(sem.smallStepSemantics(
+					new HeapReference(new ReferenceType(loc.getRuntimeTypes()), loc, getLocation()), call));
 
 		return result;
 	}

@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.heap;
 
+import java.util.Collections;
+import java.util.List;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -16,8 +19,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -131,20 +132,22 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
-			// new
-			// one is modeled through the monolith
-			return new ExpressionSet<>(
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
+			// new one is modeled through the monolith
+			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+					expression.getCodeLocation());
+			e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
-			// new
-			// one is modeled through the monolith
-			return new ExpressionSet<>(
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()));
+			// new one is modeled through the monolith
+			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+					expression.getCodeLocation());
+			e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 
 		@Override
@@ -152,11 +155,12 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
-			// new
-			// one is modeled through the monolith
-			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
-					expression.getCodeLocation()));
+			// new one is modeled through the monolith
+			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+					expression.getCodeLocation());
+			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
+			e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 
 		@Override
@@ -166,9 +170,11 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// any expression accessing an area of the heap or instantiating a
 			// new
 			// one is modeled through the monolith
-			return new ExpressionSet<>(new MemoryPointer(expression.getTypes(),
-					new HeapLocation(expression.getTypes(), MONOLITH_NAME, true, expression.getCodeLocation()),
-					expression.getCodeLocation()));
+			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+					expression.getCodeLocation());
+			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
+			e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -18,7 +20,6 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
 
 /**
  * A reference to a variable of the current CFG, identified by its name.
@@ -110,7 +111,7 @@ public class VariableRef extends Expression {
 	 * @return the expression representing the variable
 	 */
 	public Variable getVariable() {
-		Variable v = new Variable(getRuntimeTypes(), getName(), getLocation());
+		Variable v = new Variable(getStaticType(), getName(), getLocation());
 		for (Annotation ann : getAnnotations())
 			v.addAnnotation(ann);
 		return v;

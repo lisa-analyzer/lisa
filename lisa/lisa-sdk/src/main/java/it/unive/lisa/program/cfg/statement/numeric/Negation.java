@@ -50,7 +50,7 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 
 		return state.smallStepSemantics(
 				new UnaryExpression(
-						expr.getTypes(),
+						expr.getStaticType(),
 						expr,
 						NumericNegation.INSTANCE,
 						getLocation()),

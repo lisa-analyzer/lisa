@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -22,9 +26,6 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -198,7 +199,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Variable meta = new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation(), getLocation());
+		Variable meta = new Variable(getStaticType(), "call_ret_value@" + getLocation(), getLocation());
 		// propagates the annotations of the targets
 		// to the metavariable of this cfg call
 		for (CFG target : targets)

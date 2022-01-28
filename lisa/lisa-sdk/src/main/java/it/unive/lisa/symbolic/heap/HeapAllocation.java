@@ -4,7 +4,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An allocation of a memory location.
@@ -16,12 +15,12 @@ public class HeapAllocation extends HeapExpression {
 	/**
 	 * Builds the heap allocation.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public HeapAllocation(ExternalSet<Type> types, CodeLocation location) {
-		super(types, location);
+	public HeapAllocation(Type staticType, CodeLocation location) {
+		super(staticType, location);
 	}
 
 	@Override
@@ -42,7 +41,7 @@ public class HeapAllocation extends HeapExpression {
 
 	@Override
 	public String toString() {
-		return "new " + getTypes();
+		return "new " + getRuntimeTypes();
 	}
 
 	@Override

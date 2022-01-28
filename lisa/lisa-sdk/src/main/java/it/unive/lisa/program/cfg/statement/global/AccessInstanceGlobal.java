@@ -129,10 +129,10 @@ public class AccessInstanceGlobal extends Expression {
 		expressions.put(receiver, rec);
 
 		AnalysisState<A, H, V> result = entryState.bottom();
-		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations(), target.getLocation());
+		Variable v = new Variable(getStaticType(), target.getName(), target.getAnnotations(), target.getLocation());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
 			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
-					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v,
+					new AccessChild(getStaticType(), new HeapDereference(getStaticType(), expr, getLocation()), v,
 							getLocation()),
 					this);
 			result = result.lub(tmp);

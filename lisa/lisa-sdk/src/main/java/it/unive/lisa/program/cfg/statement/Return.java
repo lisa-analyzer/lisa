@@ -47,8 +47,11 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getExpression().getRuntimeTypes(),
-				"ret_value@" + getCFG().getDescriptor().getName(), getLocation());
+		Expression e = getExpression();
+		Variable var = new Variable(e.getStaticType(), "ret_value@" + getCFG().getDescriptor().getName(),
+				getLocation());
+		var.setRuntimeTypes(e.getRuntimeTypes());
+		return var;
 	}
 
 	@Override

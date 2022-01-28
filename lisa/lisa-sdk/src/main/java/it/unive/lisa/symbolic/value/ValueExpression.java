@@ -7,7 +7,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A symbolic expression that represents an operation on the program's state.
@@ -21,12 +20,12 @@ public abstract class ValueExpression extends SymbolicExpression {
 	/**
 	 * Builds the heap expression.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param location the code location of the statement that has generated
-	 *                     this value expression
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this value expression
 	 */
-	protected ValueExpression(ExternalSet<Type> types, CodeLocation location) {
-		super(types, location);
+	protected ValueExpression(Type staticType, CodeLocation location) {
+		super(staticType, location);
 	}
 
 	/**

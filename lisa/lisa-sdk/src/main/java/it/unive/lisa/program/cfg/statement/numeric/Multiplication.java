@@ -55,7 +55,7 @@ public class Multiplication extends it.unive.lisa.program.cfg.statement.BinaryEx
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						getRuntimeTypes(),
+						getStaticType(),
 						left,
 						right,
 						NumericNonOverflowingMul.INSTANCE,

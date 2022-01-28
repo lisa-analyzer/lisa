@@ -56,7 +56,7 @@ public class IMPArrayAccess extends BinaryExpression {
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left, getLocation());
-		return state.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
+		HeapDereference deref = new HeapDereference(getStaticType(), left, getLocation());
+		return state.smallStepSemantics(new AccessChild(getStaticType(), deref, right, getLocation()), this);
 	}
 }

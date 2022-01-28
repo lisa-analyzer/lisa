@@ -261,7 +261,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected T evalTypeConv(BinaryExpression conv, T left, T right, ProgramPoint pp) throws SemanticException {
-		return conv.getTypes().isEmpty() ? bottom() : left;
+		return conv.getRuntimeTypes().isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -279,7 +279,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected T evalTypeCast(BinaryExpression cast, T left, T right, ProgramPoint pp) throws SemanticException {
-		return cast.getTypes().isEmpty() ? bottom() : left;
+		return cast.getRuntimeTypes().isEmpty() ? bottom() : left;
 	}
 
 	/**

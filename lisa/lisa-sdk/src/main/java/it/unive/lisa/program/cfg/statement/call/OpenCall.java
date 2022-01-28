@@ -142,7 +142,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getRuntimeTypes(), "open_call_ret_value@" + getLocation(), getLocation());
+		return new Variable(getStaticType(), "open_call_ret_value@" + getLocation(), getLocation());
 	}
 
 	@Override

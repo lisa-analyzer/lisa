@@ -45,7 +45,7 @@ public class FalseEdge extends Edge {
 		AnalysisState<A, H, V> result = sourceState.bottom();
 		for (SymbolicExpression expr : exprs) {
 			AnalysisState<A, H, V> tmp = sourceState
-					.assume(new UnaryExpression(expr.getTypes(), expr, LogicalNegation.INSTANCE,
+					.assume(new UnaryExpression(expr.getStaticType(), expr, LogicalNegation.INSTANCE,
 							expr.getCodeLocation()),
 							getSource());
 			result = result.lub(tmp);

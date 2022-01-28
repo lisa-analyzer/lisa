@@ -55,7 +55,7 @@ public class Addition extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						getRuntimeTypes(),
+						getStaticType(),
 						left,
 						right,
 						NumericNonOverflowingAdd.INSTANCE,

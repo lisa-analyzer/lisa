@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -78,7 +77,7 @@ public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpressio
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						Caches.types().mkSingletonSet(Int32.INSTANCE),
+						Int32.INSTANCE,
 						left,
 						right,
 						StringIndexOf.INSTANCE,

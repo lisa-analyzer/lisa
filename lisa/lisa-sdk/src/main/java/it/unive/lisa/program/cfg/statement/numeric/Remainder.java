@@ -55,7 +55,7 @@ public class Remainder extends it.unive.lisa.program.cfg.statement.BinaryExpress
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						getRuntimeTypes(),
+						getStaticType(),
 						left,
 						right,
 						NumericNonOverflowingMod.INSTANCE,

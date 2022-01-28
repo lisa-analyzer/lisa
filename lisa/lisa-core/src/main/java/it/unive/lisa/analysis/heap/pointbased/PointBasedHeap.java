@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -20,10 +25,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -236,8 +237,10 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
-					result.add(new AllocationSite(expression.getTypes(), site.getLocationName(), true,
-							expression.getCodeLocation()));
+					AllocationSite e = new AllocationSite(expression.getStaticType(), site.getLocationName(), true,
+							expression.getCodeLocation());
+					e.setRuntimeTypes(expression.getRuntimeTypes());
+					result.add(e);
 				}
 
 			return new ExpressionSet<>(result);
@@ -246,8 +249,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			AllocationSite id = new AllocationSite(expression.getTypes(),
+			AllocationSite id = new AllocationSite(expression.getStaticType(),
 					expression.getCodeLocation().getCodeLocation(), true, expression.getCodeLocation());
+			id.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(id);
 		}
 
@@ -258,9 +262,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression locExp : loc)
-				if (locExp instanceof AllocationSite)
-					result.add(new MemoryPointer(locExp.getTypes(), (AllocationSite) locExp, locExp.getCodeLocation()));
-				else
+				if (locExp instanceof AllocationSite) {
+					MemoryPointer e = new MemoryPointer(locExp.getStaticType(), (AllocationSite) locExp,
+							locExp.getCodeLocation());
+					e.setRuntimeTypes(locExp.getRuntimeTypes());
+					result.add(e);
+				} else
 					result.add(locExp);
 			return new ExpressionSet<>(result);
 		}
@@ -294,8 +301,11 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 		private Set<ValueExpression> resolveIdentifier(Identifier v) {
 			Set<ValueExpression> result = new HashSet<>();
-			for (AllocationSite site : heapEnv.getState(v))
-				result.add(new MemoryPointer(site.getTypes(), site, site.getCodeLocation()));
+			for (AllocationSite site : heapEnv.getState(v)) {
+				MemoryPointer e = new MemoryPointer(site.getStaticType(), site, site.getCodeLocation());
+				e.setRuntimeTypes(site.getRuntimeTypes());
+				result.add(e);
+			}
 
 			return result;
 		}

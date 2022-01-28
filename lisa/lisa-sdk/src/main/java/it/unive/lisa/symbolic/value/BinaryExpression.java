@@ -7,7 +7,6 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A bynary expression that applies a {@link BinaryOperator} to two
@@ -35,16 +34,16 @@ public class BinaryExpression extends ValueExpression {
 	/**
 	 * Builds the binary expression.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param left     the left-hand side operand of this expression
-	 * @param right    the right-hand side operand of this expression
-	 * @param operator the operator to apply
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param left       the left-hand side operand of this expression
+	 * @param right      the right-hand side operand of this expression
+	 * @param operator   the operator to apply
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public BinaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression right,
+	public BinaryExpression(Type staticType, SymbolicExpression left, SymbolicExpression right,
 			BinaryOperator operator, CodeLocation location) {
-		super(types, location);
+		super(staticType, location);
 		this.left = left;
 		this.right = right;
 		this.operator = operator;
@@ -80,14 +79,18 @@ public class BinaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.pushScope(token), right.pushScope(token), operator,
-				getCodeLocation());
+		BinaryExpression expr = new BinaryExpression(getStaticType(), left.pushScope(token), right.pushScope(token),
+				operator, getCodeLocation());
+		expr.setRuntimeTypes(getRuntimeTypes());
+		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return new BinaryExpression(this.getTypes(), left.popScope(token), right.popScope(token), operator,
-				getCodeLocation());
+		BinaryExpression expr = new BinaryExpression(getStaticType(), left.popScope(token), right.popScope(token),
+				operator, getCodeLocation());
+		expr.setRuntimeTypes(getRuntimeTypes());
+		return expr;
 	}
 
 	@Override

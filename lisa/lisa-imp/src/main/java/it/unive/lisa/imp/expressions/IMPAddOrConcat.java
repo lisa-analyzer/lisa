@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -64,8 +63,8 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 		AnalysisState<A, H, V> result = state.bottom();
 		BinaryOperator op;
 
-		for (Type tleft : left.getTypes())
-			for (Type tright : right.getTypes()) {
+		for (Type tleft : left.getRuntimeTypes())
+			for (Type tright : right.getRuntimeTypes()) {
 				if (tleft.isStringType())
 					if (tright.isStringType() || tright.isUntyped())
 						op = StringConcat.INSTANCE;
@@ -94,8 +93,8 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 				result = result.lub(state.smallStepSemantics(
 						new BinaryExpression(
 								op == StringConcat.INSTANCE
-										? Caches.types().mkSingletonSet(StringType.INSTANCE)
-										: getRuntimeTypes(),
+										? StringType.INSTANCE
+										: getStaticType(),
 								left,
 								right,
 								op,

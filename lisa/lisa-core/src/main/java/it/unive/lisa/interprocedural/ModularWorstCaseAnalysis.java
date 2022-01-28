@@ -1,5 +1,14 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -9,7 +18,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -24,17 +32,8 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A worst case modular analysis were all cfg calls are treated as open calls.
@@ -84,9 +83,10 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 				AnalysisState<A, H, V> prepared = entryState;
 
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
-					ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-					Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
-					prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
+					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
+							arg.getLocation());
+					prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
+							cfg.getGenericProgramPoint());
 				}
 
 				results.put(cfg, Optional

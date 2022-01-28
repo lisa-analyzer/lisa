@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -9,8 +12,6 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -62,10 +63,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			for (ValueExpression contRewritten : receiver)
 				if (contRewritten instanceof MemoryPointer) {
 					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getReferencedLocation();
-					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(expression.getTypes(), site.getLocationName(), childRewritten,
+					for (SymbolicExpression childRewritten : child) {
+						AllocationSite e = new AllocationSite(expression.getStaticType(), site.getLocationName(),
+								childRewritten,
 								site.isWeak(),
-								site.getCodeLocation()));
+								site.getCodeLocation());
+						e.setRuntimeTypes(expression.getRuntimeTypes());
+						result.add(e);
+					}
 				}
 
 			return new ExpressionSet<>(result);
@@ -76,12 +81,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				throws SemanticException {
 			String pp = expression.getCodeLocation().getCodeLocation();
 
+			boolean weak;
 			if (alreadyAllocated(pp) != null)
-				return new ExpressionSet<>(
-						new AllocationSite(expression.getTypes(), pp, true, expression.getCodeLocation()));
+				weak = true;
 			else
-				return new ExpressionSet<>(
-						new AllocationSite(expression.getTypes(), pp, false, expression.getCodeLocation()));
+				weak = false;
+			AllocationSite e = new AllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 
 		private AllocationSite alreadyAllocated(String id) {

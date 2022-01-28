@@ -3,6 +3,7 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
@@ -24,39 +25,69 @@ public abstract class SymbolicExpression {
 	private final CodeLocation location;
 
 	/**
+	 * The static type of this expression
+	 */
+	private final Type staticType;
+
+	/**
 	 * The runtime types of this expression
 	 */
-	private final ExternalSet<Type> types;
+	private ExternalSet<Type> types;
 
 	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	protected SymbolicExpression(ExternalSet<Type> types, CodeLocation location) {
-		this.types = types;
+	protected SymbolicExpression(Type staticType, CodeLocation location) {
+		this.staticType = staticType;
 		this.location = location;
 	}
 
 	/**
-	 * Yields the runtime types of this expression.
+	 * Yields the static type of this expression.
+	 * 
+	 * @return the static type
+	 */
+	public Type getStaticType() {
+		return staticType;
+	}
+
+	/**
+	 * Yields the runtime types of this expression. If
+	 * {@link #setRuntimeTypes(ExternalSet)} has never been called before, this
+	 * method will return all instances of the static type.
 	 * 
 	 * @return the runtime types
 	 */
-	public final ExternalSet<Type> getTypes() {
+	public final ExternalSet<Type> getRuntimeTypes() {
+		if (types == null)
+			return Caches.types().mkSet(staticType.allInstances());
 		return types;
+	}
+
+	/**
+	 * Sets the runtime types to the given set of types.
+	 * 
+	 * @param types the runtime types
+	 */
+	public void setRuntimeTypes(ExternalSet<Type> types) {
+		this.types = types;
 	}
 
 	/**
 	 * Yields the dynamic type of this expression, that is, the most specific
 	 * common supertype of all its runtime types (available through
-	 * {@link #getTypes()}.
+	 * {@link #getRuntimeTypes()}. If {@link #setRuntimeTypes(ExternalSet)} has
+	 * never been called before, this method will return the static type.
 	 * 
 	 * @return the dynamic type of this expression
 	 */
 	public final Type getDynamicType() {
+		if (types == null || types.isEmpty())
+			return staticType;
 		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
 
@@ -108,6 +139,8 @@ public abstract class SymbolicExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((location == null) ? 0 : location.hashCode());
+		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
@@ -116,11 +149,19 @@ public abstract class SymbolicExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
+		if (!(obj instanceof SymbolicExpression))
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
+		if (location == null) {
+			if (other.location != null)
+				return false;
+		} else if (!location.equals(other.location))
+			return false;
+		if (staticType == null) {
+			if (other.staticType != null)
+				return false;
+		} else if (!staticType.equals(other.staticType))
+			return false;
 		if (types == null) {
 			if (other.types != null)
 				return false;

@@ -5,21 +5,23 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.LiSAFactory.ConfigurableComponent;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Sign;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.symbolic.value.Variable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
+
+import it.unive.lisa.LiSAFactory.ConfigurableComponent;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Untyped;
 
 public class LiSAFactoryTest {
 
@@ -112,11 +114,11 @@ public class LiSAFactoryTest {
 		if (def instanceof ValueEnvironment<?>)
 			def = ((ValueEnvironment<?>) def).top()
 					.getState(
-							new Variable(Caches.types().mkEmptySet(), "foo", new SourceCodeLocation("unknown", 0, 0)));
+							new Variable(Untyped.INSTANCE, "foo", new SourceCodeLocation("unknown", 0, 0)));
 		else if (def instanceof HeapEnvironment<?>)
 			def = ((HeapEnvironment<?>) def).top()
 					.getState(
-							new Variable(Caches.types().mkEmptySet(), "foo", new SourceCodeLocation("unknown", 0, 0)));
+							new Variable(Untyped.INSTANCE, "foo", new SourceCodeLocation("unknown", 0, 0)));
 
 		return def.getClass();
 	}

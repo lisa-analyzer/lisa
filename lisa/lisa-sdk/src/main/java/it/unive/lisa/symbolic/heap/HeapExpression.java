@@ -8,7 +8,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A symbolic expression that identifies a location in the program's heap.
@@ -22,12 +21,12 @@ public abstract class HeapExpression extends SymbolicExpression {
 	/**
 	 * Builds the heap expression.
 	 * 
-	 * @param types    the runtime types of this expression
+	 * @param type     the static types of this expression
 	 * @param location the code location of the statement that has generated
 	 *                     this heap expression
 	 */
-	protected HeapExpression(ExternalSet<Type> types, CodeLocation location) {
-		super(types, location);
+	protected HeapExpression(Type type, CodeLocation location) {
+		super(type, location);
 	}
 
 	// By default a heap expression does not change the scope.

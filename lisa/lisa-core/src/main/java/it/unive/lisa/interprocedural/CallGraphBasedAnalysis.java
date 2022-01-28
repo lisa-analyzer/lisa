@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Program;
@@ -19,8 +18,6 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An interprocedural analysis based on a call graph.
@@ -77,9 +74,9 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 		AnalysisState<A, H, V> prepared = entryState;
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
-			ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-			Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
-			prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
+			Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(), arg.getLocation());
+			prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
+					cfg.getGenericProgramPoint());
 		}
 
 		// the stack has to be empty
