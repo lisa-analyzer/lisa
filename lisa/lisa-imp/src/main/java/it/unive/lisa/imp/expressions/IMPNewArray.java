@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -16,6 +17,7 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 
 /**
@@ -57,7 +59,8 @@ public class IMPNewArray extends NaryExpression {
 
 		AnalysisState<A, H, V> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			HeapReference ref = new HeapReference(loc.getTypes(), loc, getLocation());
+			HeapReference ref = new HeapReference(Caches.types().mkSingletonSet(new ReferenceType(loc.getTypes())), loc,
+					getLocation());
 			AnalysisState<A, H, V> refSem = sem.smallStepSemantics(ref, this);
 			result = result.lub(refSem);
 		}
