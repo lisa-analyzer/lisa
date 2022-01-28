@@ -43,7 +43,7 @@ public class CFGFixpointTest {
 	public void testEmptyCFG()
 			throws InterproceduralAnalysisException, CallGraphConstructionException, ParsingException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
-		CFG cfg = p.getAllCFGs().iterator().next();
+		ImplementedCFG cfg = p.getAllCFGs().iterator().next();
 		try {
 			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {
@@ -56,7 +56,7 @@ public class CFGFixpointTest {
 	public void testEmptyIMPMethod()
 			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
-		CFG cfg = p.getAllCFGs().iterator().next();
+		ImplementedCFG cfg = p.getAllCFGs().iterator().next();
 		try {
 			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {
@@ -69,7 +69,7 @@ public class CFGFixpointTest {
 	public void testIMPMethodWithEmptyIfBranch()
 			throws ParsingException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
-		CFG cfg = p.getAllCFGs().iterator().next();
+		ImplementedCFG cfg = p.getAllCFGs().iterator().next();
 		try {
 			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
 		} catch (FixpointException e) {

@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
@@ -21,9 +21,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
- * {@link Dominators} to extract {@link Loop}s, and a graph visiting heuristics
- * to find {@link IfThenElse}s.<br>
+ * An extractor of {@link ControlFlowStructure}s from {@link ImplementedCFG}s.
+ * It uses {@link Dominators} to extract {@link Loop}s, and a graph visiting
+ * heuristics to find {@link IfThenElse}s.<br>
  * <br>
  * Extracting control flows should be a last-resort: if the cfg contains
  * arbitrary jumps (like {@code goto, break, continue, ...}) the aforementioned
@@ -35,7 +35,7 @@ import java.util.Set;
  */
 public class ControlFlowExtractor {
 
-	private final CFG target;
+	private final ImplementedCFG target;
 
 	private final Collection<ControlFlowStructure> extracted;
 
@@ -44,7 +44,7 @@ public class ControlFlowExtractor {
 	 * 
 	 * @param target the cfg whose control flows structures are to be extracted
 	 */
-	public ControlFlowExtractor(CFG target) {
+	public ControlFlowExtractor(ImplementedCFG target) {
 		this.target = target;
 		this.extracted = new ArrayList<>();
 	}
@@ -67,7 +67,7 @@ public class ControlFlowExtractor {
 		// https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf
 		// http://pages.cs.wisc.edu/~fischer/cs701.f14/finding.loops.html
 		Map<Statement, ControlFlowStructure> result = new HashMap<>();
-		Map<Statement, Set<Statement>> dominators = new Dominators<CFG, Statement, Edge>().build(target);
+		Map<Statement, Set<Statement>> dominators = new Dominators<ImplementedCFG, Statement, Edge>().build(target);
 		for (Statement conditional : conditionals)
 			for (Statement pred : target.predecessorsOf(conditional))
 				if (dominators.get(pred).contains(conditional))
@@ -96,7 +96,7 @@ public class ControlFlowExtractor {
 		}
 
 		private void build() {
-			AdjacencyMatrix<Statement, Edge, CFG> body = new AdjacencyMatrix<>();
+			AdjacencyMatrix<Statement, Edge, ImplementedCFG> body = new AdjacencyMatrix<>();
 
 			// with empty loops, we can skip the whole reasoning
 			if (tail != conditional) {
@@ -120,7 +120,7 @@ public class ControlFlowExtractor {
 					conditional, exit.getDestination(), body.getNodes()));
 		}
 
-		private Edge findExitEdge(AdjacencyMatrix<Statement, Edge, CFG> body) {
+		private Edge findExitEdge(AdjacencyMatrix<Statement, Edge, ImplementedCFG> body) {
 			Edge exit = null;
 			for (Edge out : target.getOutgoingEdges(conditional))
 				// in empty loops, the conditional is a follower of itself
@@ -141,8 +141,8 @@ public class ControlFlowExtractor {
 		private final Edge trueEdgeStartingEdge;
 		private final Edge falseEdgeStartingEdge;
 
-		private final AdjacencyMatrix<Statement, Edge, CFG> trueBranch;
-		private final AdjacencyMatrix<Statement, Edge, CFG> falseBranch;
+		private final AdjacencyMatrix<Statement, Edge, ImplementedCFG> trueBranch;
+		private final AdjacencyMatrix<Statement, Edge, ImplementedCFG> falseBranch;
 
 		private final Map<Statement, ControlFlowStructure> computed;
 
@@ -195,7 +195,7 @@ public class ControlFlowExtractor {
 					struct = computed.containsKey(trueNext.getDestination())
 							? computed.get(trueNext.getDestination())
 							: new IfReconstructor(trueNext.getDestination(), computed).build();
-					AdjacencyMatrix<Statement, Edge, CFG> completeStructure = struct.getCompleteStructure();
+					AdjacencyMatrix<Statement, Edge, ImplementedCFG> completeStructure = struct.getCompleteStructure();
 					trueBranch.mergeWith(completeStructure);
 					trueBranch.addEdge(trueNext);
 
@@ -217,7 +217,7 @@ public class ControlFlowExtractor {
 					struct = computed.containsKey(falseNext.getDestination())
 							? computed.get(falseNext.getDestination())
 							: new IfReconstructor(falseNext.getDestination(), computed).build();
-					AdjacencyMatrix<Statement, Edge, CFG> completeStructure = struct.getCompleteStructure();
+					AdjacencyMatrix<Statement, Edge, ImplementedCFG> completeStructure = struct.getCompleteStructure();
 					falseBranch.mergeWith(completeStructure);
 					falseBranch.addEdge(falseNext);
 
@@ -311,7 +311,7 @@ public class ControlFlowExtractor {
 		}
 	}
 
-	private static boolean isConditional(CFG graph, Statement node) {
+	private static boolean isConditional(ImplementedCFG graph, Statement node) {
 		Collection<Edge> out = graph.getOutgoingEdges(node);
 		if (out.size() != 2)
 			return false;
@@ -329,15 +329,16 @@ public class ControlFlowExtractor {
 		return false;
 	}
 
-	private static class ConditionalsExtractor implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
+	private static class ConditionalsExtractor
+			implements GraphVisitor<ImplementedCFG, Statement, Edge, Collection<Statement>> {
 
 		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph) {
+		public boolean visit(Collection<Statement> tool, ImplementedCFG graph) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph, Statement node) {
+		public boolean visit(Collection<Statement> tool, ImplementedCFG graph, Statement node) {
 			if (node instanceof Expression && ((Expression) node).getRootStatement() != node)
 				// we only consider root statements
 				return true;
@@ -349,7 +350,7 @@ public class ControlFlowExtractor {
 		}
 
 		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph, Edge edge) {
+		public boolean visit(Collection<Statement> tool, ImplementedCFG graph, Edge edge) {
 			return true;
 		}
 	}

@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.symbolic.value.NullConstant;
 import it.unive.lisa.type.NullType;
 
@@ -27,7 +27,7 @@ public class NullLiteral extends Literal<Object> {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	public NullLiteral(CFG cfg, CodeLocation location) {
+	public NullLiteral(ImplementedCFG cfg, CodeLocation location) {
 		super(cfg, location, null, NullType.INSTANCE);
 	}
 

@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.annotations.Annotation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -36,7 +36,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	/**
 	 * The targets of this call
 	 */
-	private final Collection<CFG> targets;
+	private final Collection<ImplementedCFG> targets;
 
 	/**
 	 * Builds the CFG call, happening at the given location in the program. The
@@ -56,8 +56,8 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * @param targets      the CFGs that are targeted by this CFG call
 	 * @param parameters   the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+			Collection<ImplementedCFG> targets, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
@@ -84,8 +84,9 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
-			String qualifier, String targetName, Collection<CFG> targets, Expression... parameters) {
+	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall,
+			String qualifier, String targetName, Collection<ImplementedCFG> targets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, parameters);
 	}
@@ -112,13 +113,14 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
-			String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
+	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall,
+			String qualifier, String targetName, EvaluationOrder order, Collection<ImplementedCFG> targets,
 			Expression... parameters) {
 		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order,
 				getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a CFG call cannot be null");
-		for (CFG target : targets)
+		for (ImplementedCFG target : targets)
 			Objects.requireNonNull(target, "A target of a CFG call cannot be null");
 		this.targets = targets;
 	}
@@ -128,16 +130,17 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * call, copying all its data.
 	 * 
 	 * @param source  the unresolved call to copy
-	 * @param targets the {@link CFG}s that the call has been resolved against
+	 * @param targets the {@link ImplementedCFG}s that the call has been
+	 *                    resolved against
 	 */
-	public CFGCall(UnresolvedCall source, Collection<CFG> targets) {
+	public CFGCall(UnresolvedCall source, Collection<ImplementedCFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.isInstanceCall(), source.getQualifier(),
 				source.getTargetName(), targets, source.getParameters());
 	}
 
-	private static Type getCommonReturnType(Collection<CFG> targets) {
-		Iterator<CFG> it = targets.iterator();
+	private static Type getCommonReturnType(Collection<ImplementedCFG> targets) {
+		Iterator<ImplementedCFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
 			Type current = it.next().getDescriptor().getReturnType();
@@ -162,7 +165,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	 * 
 	 * @return the target CFG
 	 */
-	public Collection<CFG> getTargets() {
+	public Collection<ImplementedCFG> getTargets() {
 		return targets;
 	}
 
@@ -201,7 +204,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 		Variable meta = new Variable(getRuntimeTypes(), "call_ret_value@" + getLocation(), getLocation());
 		// propagates the annotations of the targets
 		// to the metavariable of this cfg call
-		for (CFG target : targets)
+		for (ImplementedCFG target : targets)
 			for (Annotation ann : target.getDescriptor().getAnnotations())
 				meta.addAnnotation(ann);
 		return meta;

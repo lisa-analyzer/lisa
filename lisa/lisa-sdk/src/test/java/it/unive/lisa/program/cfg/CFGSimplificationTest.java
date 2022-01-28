@@ -31,7 +31,7 @@ public class CFGSimplificationTest {
 	public void testSimpleSimplification() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
 				new Int32Literal(first, unknown, 5));
@@ -44,7 +44,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
 				new Int32Literal(second, unknown, 5));
@@ -64,7 +64,7 @@ public class CFGSimplificationTest {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));
 		NoOp noop1 = new NoOp(first, unknownLocation);
@@ -78,7 +78,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(noop1, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
 				new Int32Literal(second, unknownLocation, 5));
@@ -98,7 +98,7 @@ public class CFGSimplificationTest {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
 		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));
 		GreaterThan gt = new GreaterThan(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
@@ -120,14 +120,14 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(print, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		AdjacencyMatrix<Statement, Edge, ImplementedCFG> tbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(print);
-		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		AdjacencyMatrix<Statement, Edge, ImplementedCFG> fbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(noop1);
 		first.addControlFlowStructure(
 				new IfThenElse(first.getAdjacencyMatrix(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
 
-		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(second, unknownLocation,
 				new VariableRef(second, unknownLocation, "x"),
 				new Int32Literal(second, unknownLocation, 5));
@@ -164,7 +164,7 @@ public class CFGSimplificationTest {
 	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
 				new Int32Literal(first, unknown, 5));
@@ -177,7 +177,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign, noop));
 		first.addEdge(new SequentialEdge(noop, ret));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, true, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknown, unit, true, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
 				new Int32Literal(second, unknown, 5));
@@ -196,7 +196,7 @@ public class CFGSimplificationTest {
 	public void testSimplificationAtTheStart() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		NoOp start = new NoOp(first, unknown);
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
@@ -209,7 +209,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign, ret));
 		first.addEdge(new SequentialEdge(start, assign));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "x"),
 				new Int32Literal(second, unknown, 5));
@@ -228,7 +228,7 @@ public class CFGSimplificationTest {
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
 				new Int32Literal(first, unknown, 5));
@@ -242,7 +242,7 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign1, assign2));
 		first.addEdge(new SequentialEdge(assign2, end));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(second, unknown,
 				new VariableRef(first, unknown, "x"),
 				new Int32Literal(first, unknown, 5));
@@ -263,7 +263,7 @@ public class CFGSimplificationTest {
 	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CompilationUnit unit = new CompilationUnit(unknown, "foo", false);
-		CFG first = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG first = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "b"),
 				new TrueLiteral(first, unknown));
@@ -283,14 +283,14 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign2, end));
 		first.addEdge(new SequentialEdge(assign3, end));
 
-		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		AdjacencyMatrix<Statement, Edge, ImplementedCFG> tbranch = new AdjacencyMatrix<>();
 		tbranch.addNode(assign2);
-		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		AdjacencyMatrix<Statement, Edge, ImplementedCFG> fbranch = new AdjacencyMatrix<>();
 		fbranch.addNode(assign3);
 		first.addControlFlowStructure(
 				new IfThenElse(first.getAdjacencyMatrix(), assign1, end, tbranch.getNodes(), fbranch.getNodes()));
 
-		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
+		ImplementedCFG second = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(second, unknown,
 				new VariableRef(second, unknown, "b"),
 				new TrueLiteral(second, unknown));

@@ -2,9 +2,9 @@ package it.unive.lisa.imp.constructs;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -53,7 +53,7 @@ public class StringLength extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringLength build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringLength build(ImplementedCFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringLength(cfg, location, params[0]);
 		}
 
@@ -65,14 +65,15 @@ public class StringLength extends NativeCFG {
 		/**
 		 * Builds the length.
 		 * 
-		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param cfg        the {@link ImplementedCFG} where this operation
+		 *                       lies
 		 * @param sourceFile the source file name where this operation is
 		 *                       defined
 		 * @param line       the line number where this operation is defined
 		 * @param col        the column where this operation is defined
 		 * @param parameter  the operand of this operation
 		 */
-		public IMPStringLength(CFG cfg, String sourceFile, int line, int col,
+		public IMPStringLength(ImplementedCFG cfg, String sourceFile, int line, int col,
 				Expression parameter) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), parameter);
 		}
@@ -80,11 +81,11 @@ public class StringLength extends NativeCFG {
 		/**
 		 * Builds the length.
 		 * 
-		 * @param cfg       the {@link CFG} where this operation lies
+		 * @param cfg       the {@link ImplementedCFG} where this operation lies
 		 * @param location  the code location where this operation is defined
 		 * @param parameter the operand of this operation
 		 */
-		public IMPStringLength(CFG cfg, CodeLocation location, Expression parameter) {
+		public IMPStringLength(ImplementedCFG cfg, CodeLocation location, Expression parameter) {
 			super(cfg, location, parameter);
 		}
 	}

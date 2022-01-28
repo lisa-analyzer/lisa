@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -13,7 +13,7 @@ public class CFGWarning extends WarningWithLocation {
 	/**
 	 * The cfg where this warning was reported on
 	 */
-	private final CFG cfg;
+	private final ImplementedCFG cfg;
 
 	/**
 	 * Builds the warning.
@@ -21,7 +21,7 @@ public class CFGWarning extends WarningWithLocation {
 	 * @param cfg     the cfg where this warning was reported on
 	 * @param message the message of this warning
 	 */
-	public CFGWarning(CFG cfg, String message) {
+	public CFGWarning(ImplementedCFG cfg, String message) {
 		super(cfg.getDescriptor().getLocation(), message);
 		this.cfg = cfg;
 	}
@@ -31,7 +31,7 @@ public class CFGWarning extends WarningWithLocation {
 	 * 
 	 * @return the cfg
 	 */
-	public final CFG getCFG() {
+	public final ImplementedCFG getCFG() {
 		return cfg;
 	}
 

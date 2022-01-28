@@ -13,8 +13,8 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -31,7 +31,7 @@ public class CheckToolTest {
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), "fake");
 	private static final CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation("fake", 2, 0), unit, false,
 			"foo");
-	private static final CFG cfg = new CFG(descriptor);
+	private static final ImplementedCFG cfg = new ImplementedCFG(descriptor);
 
 	private static Warning build(CheckTool tool, Object target, String message) {
 		if (target == null) {
@@ -43,9 +43,9 @@ public class CheckToolTest {
 		} else if (target instanceof Global) {
 			tool.warnOn(unit, (Global) target, message);
 			return new GlobalWarning(unit, (Global) target, message);
-		} else if (target instanceof CFG) {
-			tool.warnOn((CFG) target, message);
-			return new CFGWarning((CFG) target, message);
+		} else if (target instanceof ImplementedCFG) {
+			tool.warnOn((ImplementedCFG) target, message);
+			return new CFGWarning((ImplementedCFG) target, message);
 		} else if (target instanceof CFGDescriptor) {
 			tool.warnOn((CFGDescriptor) target, message);
 			return new CFGDescriptorWarning((CFGDescriptor) target, message);

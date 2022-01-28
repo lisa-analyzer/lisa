@@ -3,7 +3,7 @@ package it.unive.lisa.checks;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -24,7 +24,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @param <T> the type of tool used during the inspection
  */
-public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
+public interface Check<T> extends GraphVisitor<ImplementedCFG, Statement, Edge, T> {
 
 	/**
 	 * Callback invoked only once before the beginning of the inspection of the

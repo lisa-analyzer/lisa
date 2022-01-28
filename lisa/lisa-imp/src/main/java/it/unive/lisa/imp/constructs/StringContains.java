@@ -2,9 +2,9 @@ package it.unive.lisa.imp.constructs;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -56,7 +56,7 @@ public class StringContains extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringContains build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringContains build(ImplementedCFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringContains(cfg, location, params[0], params[1]);
 		}
 
@@ -68,7 +68,8 @@ public class StringContains extends NativeCFG {
 		/**
 		 * Builds the contains.
 		 * 
-		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param cfg        the {@link ImplementedCFG} where this operation
+		 *                       lies
 		 * @param sourceFile the source file name where this operation is
 		 *                       defined
 		 * @param line       the line number where this operation is defined
@@ -76,7 +77,7 @@ public class StringContains extends NativeCFG {
 		 * @param left       the left-hand side of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringContains(CFG cfg, String sourceFile, int line, int col, Expression left,
+		public IMPStringContains(ImplementedCFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
 		}
@@ -84,12 +85,12 @@ public class StringContains extends NativeCFG {
 		/**
 		 * Builds the contains.
 		 * 
-		 * @param cfg      the {@link CFG} where this operation lies
+		 * @param cfg      the {@link ImplementedCFG} where this operation lies
 		 * @param location the code location where this operation is defined
 		 * @param left     the left-hand side of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringContains(CFG cfg, CodeLocation location, Expression left, Expression right) {
+		public IMPStringContains(ImplementedCFG cfg, CodeLocation location, Expression left, Expression right) {
 			super(cfg, location, left, right);
 		}
 	}

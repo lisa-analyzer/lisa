@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -51,12 +51,12 @@ public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpressio
 	/**
 	 * Builds the indexOf.
 	 * 
-	 * @param cfg      the {@link CFG} where this operation lies
+	 * @param cfg      the {@link ImplementedCFG} where this operation lies
 	 * @param location the code location where this operation is defined
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public IndexOf(CFG cfg, CodeLocation location, Expression left, Expression right) {
+	public IndexOf(ImplementedCFG cfg, CodeLocation location, Expression left, Expression right) {
 		super(cfg, location, "indexOf", Int32.INSTANCE, left, right);
 	}
 

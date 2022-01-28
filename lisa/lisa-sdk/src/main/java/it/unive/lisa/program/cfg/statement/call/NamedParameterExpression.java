@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -33,13 +33,14 @@ public class NamedParameterExpression extends UnaryExpression {
 	 * Builds the expression. The static type of this expression is the one of
 	 * {@code subExpression}.
 	 * 
-	 * @param cfg           the {@link CFG} where this operation lies
+	 * @param cfg           the {@link ImplementedCFG} where this operation lies
 	 * @param location      the location where this literal is defined
 	 * @param parameterName the name of the parameter being assigned here
 	 * @param subExpression the expression being assigned to the target
 	 *                          parameter
 	 */
-	public NamedParameterExpression(CFG cfg, CodeLocation location, String parameterName, Expression subExpression) {
+	public NamedParameterExpression(ImplementedCFG cfg, CodeLocation location, String parameterName,
+			Expression subExpression) {
 		super(cfg, location, parameterName + "=", subExpression.getStaticType(), subExpression);
 		this.parameterName = parameterName;
 	}

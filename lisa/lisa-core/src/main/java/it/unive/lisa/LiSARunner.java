@@ -24,7 +24,7 @@ import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -116,10 +116,10 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 	Collection<Warning> run(Program program, FileManager fileManager) {
 		finalizeProgram(program);
 
-		Collection<CFG> allCFGs = program.getAllCFGs();
+		Collection<ImplementedCFG> allCFGs = program.getAllCFGs();
 
 		if (conf.isDumpCFGs())
-			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
+			for (ImplementedCFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
 				dumpCFG(fileManager, "", cfg, st -> "");
 
 		CheckTool tool = new CheckTool();
@@ -150,8 +150,9 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager);
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results = new IdentityHashMap<>(allCFGs.size());
-			for (CFG cfg : allCFGs)
+			Map<ImplementedCFG,
+					Collection<CFGWithAnalysisResults<A, H, V>>> results = new IdentityHashMap<>(allCFGs.size());
+			for (ImplementedCFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -169,7 +170,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		return tool.getWarnings();
 	}
 
-	private void analyze(Collection<CFG> allCFGs, FileManager fileManager) {
+	private void analyze(Collection<ImplementedCFG> allCFGs, FileManager fileManager) {
 		A state = this.state.top();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
@@ -183,7 +184,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 				});
 
 		if (conf.isDumpAnalysis())
-			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs")) {
+			for (ImplementedCFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs")) {
 				for (CFGWithAnalysisResults<A, H, V> result : interproc.getAnalysisResultsOf(cfg))
 					dumpCFG(fileManager,
 							"analysis___" + (result.getId() == null ? "" : result.getId().hashCode() + "_"), result,
@@ -192,7 +193,8 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 	}
 
 	@SuppressWarnings("unchecked")
-	private void inferTypes(FileManager fileManager, Program program, Collection<CFG> allCFGs, OpenCallPolicy policy) {
+	private void inferTypes(FileManager fileManager, Program program, Collection<ImplementedCFG> allCFGs,
+			OpenCallPolicy policy) {
 		T typesState = this.typeState.top();
 		InterproceduralAnalysis<T, HT, VT> typesInterproc;
 		CallGraph typesCg;
@@ -219,7 +221,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		String message = conf.isDumpTypeInference()
 				? "Dumping type analysis and propagating it to cfgs"
 				: "Propagating type information to cfgs";
-		for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, message, "cfgs")) {
+		for (ImplementedCFG cfg : IterationLogger.iterate(LOG, allCFGs, message, "cfgs")) {
 			Collection<CFGWithAnalysisResults<T, HT, VT>> results = typesInterproc.getAnalysisResultsOf(cfg);
 			if (results.isEmpty()) {
 				LOG.warn("No type information computed for '{}': it is unreachable", cfg);
@@ -247,20 +249,20 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 
 	private class TypesPropagator
 			implements
-			GraphVisitor<CFG, Statement, Edge, CFGWithAnalysisResults<T, HT, VT>> {
+			GraphVisitor<ImplementedCFG, Statement, Edge, CFGWithAnalysisResults<T, HT, VT>> {
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph) {
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, ImplementedCFG graph) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph, Edge edge) {
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, ImplementedCFG graph, Edge edge) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, CFG graph,
+		public boolean visit(CFGWithAnalysisResults<T, HT, VT> tool, ImplementedCFG graph,
 				Statement node) {
 			if (tool != null && node instanceof Expression)
 				((Expression) node).setRuntimeTypes(typeExtractor.apply(tool.getAnalysisStateAfter(node).getState()));
@@ -284,7 +286,7 @@ public class LiSARunner<A extends AbstractState<A, H, V>,
 		});
 	}
 
-	private static void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
+	private static void dumpCFG(FileManager fileManager, String filePrefix, ImplementedCFG cfg,
 			Function<Statement, String> labelGenerator) {
 		try {
 			fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),

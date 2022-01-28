@@ -3,8 +3,8 @@ package it.unive.lisa.interprocedural.callgraph;
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -60,7 +60,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
-		for (CFG cfg : call.getTargets()) {
+		for (ImplementedCFG cfg : call.getTargets()) {
 			callsites.computeIfAbsent(cfg, cm -> new HashSet<>()).add(call);
 
 			CallGraphNode t = new CallGraphNode(this, cfg);
@@ -76,7 +76,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		if (cached != null)
 			return cached;
 
-		Collection<CFG> targets = new ArrayList<>();
+		Collection<ImplementedCFG> targets = new ArrayList<>();
 		Collection<NativeCFG> nativeTargets = new ArrayList<>();
 
 		if (call.isInstanceCall())
@@ -100,7 +100,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
-		for (CFG target : targets) {
+		for (ImplementedCFG target : targets) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, program.getEntryPoints().contains(call.getCFG()));
@@ -124,8 +124,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * 
 	 * @param call    the call to resolve
 	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link CFG}s targeted by the
-	 *                    call
+	 *                    method, will contain the {@link ImplementedCFG}s
+	 *                    targeted by the call
 	 * @param natives the list of targets that, after the execution of this
 	 *                    method, will contain the {@link NativeCFG}s targeted
 	 *                    by the call
@@ -133,14 +133,15 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+	protected void resolveNonInstance(UnresolvedCall call, Collection<ImplementedCFG> targets,
+			Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
 			if (!cm.getDescriptor().isInstance()
 					&& matchCFGName(call, cm)
 					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters()))
-				if (cm instanceof CFG)
-					targets.add((CFG) cm);
+				if (cm instanceof ImplementedCFG)
+					targets.add((ImplementedCFG) cm);
 				else
 					natives.add((NativeCFG) cm);
 	}
@@ -150,8 +151,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * 
 	 * @param call    the call to resolve
 	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link CFG}s targeted by the
-	 *                    call
+	 *                    method, will contain the {@link ImplementedCFG}s
+	 *                    targeted by the call
 	 * @param natives the list of targets that, after the execution of this
 	 *                    method, will contain the {@link NativeCFG}s targeted
 	 *                    by the call
@@ -159,7 +160,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+	protected void resolveInstance(UnresolvedCall call, Collection<ImplementedCFG> targets,
+			Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
@@ -177,8 +179,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					if (cm.getDescriptor().isInstance()
 							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
 									call.getParameters()))
-						if (cm instanceof CFG)
-							targets.add((CFG) cm);
+						if (cm instanceof ImplementedCFG)
+							targets.add((ImplementedCFG) cm);
 						else
 							natives.add((NativeCFG) cm);
 			}

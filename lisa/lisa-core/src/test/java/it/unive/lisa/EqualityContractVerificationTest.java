@@ -28,6 +28,7 @@ import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.outputs.JsonReport.JsonWarning;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
@@ -36,10 +37,10 @@ import it.unive.lisa.program.annotations.AnnotationMember;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.values.AnnotationValue;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -96,12 +97,14 @@ public class EqualityContractVerificationTest {
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
 	private static final CompilationUnit unit1 = new CompilationUnit(loc, "fake1", false);
 	private static final CompilationUnit unit2 = new CompilationUnit(loc, "fake2", false);
+	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, "fake1");
+	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, "fake2");
 	private static final CFGDescriptor descr1 = new CFGDescriptor(loc, unit1, false, "fake1");
 	private static final CFGDescriptor descr2 = new CFGDescriptor(loc, unit2, false, "fake2");
-	private static final CFG cfg1 = new CFG(descr1);
-	private static final CFG cfg2 = new CFG(descr2);
-	private static final AdjacencyMatrix<Statement, Edge, CFG> adj1 = new AdjacencyMatrix<>();
-	private static final AdjacencyMatrix<Statement, Edge, CFG> adj2 = new AdjacencyMatrix<>();
+	private static final ImplementedCFG cfg1 = new ImplementedCFG(descr1);
+	private static final ImplementedCFG cfg2 = new ImplementedCFG(descr2);
+	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj1 = new AdjacencyMatrix<>();
+	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj2 = new AdjacencyMatrix<>();
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
@@ -175,9 +178,10 @@ public class EqualityContractVerificationTest {
 
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
-				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(ImplementedCFG.class, cfg1, cfg2)
 				.withPrefabValues(CFGDescriptor.class, descr1, descr2)
 				.withPrefabValues(CompilationUnit.class, unit1, unit2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(AdjacencyMatrix.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))

@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -51,11 +51,11 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	/**
 	 * Builds the length.
 	 * 
-	 * @param cfg       the {@link CFG} where this operation lies
+	 * @param cfg       the {@link ImplementedCFG} where this operation lies
 	 * @param location  the code location where this operation is defined
 	 * @param parameter the operand of this operation
 	 */
-	public Length(CFG cfg, CodeLocation location, Expression parameter) {
+	public Length(ImplementedCFG cfg, CodeLocation location, Expression parameter) {
 		super(cfg, location, "len", Int32.INSTANCE, parameter);
 	}
 

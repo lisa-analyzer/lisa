@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -26,7 +26,8 @@ import java.util.Iterator;
 import java.util.Objects;
 
 /**
- * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis.
+ * A call to one or more {@link ImplementedCFG}s and/or {@link NativeCFG}s under
+ * analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -35,7 +36,7 @@ public class HybridCall extends Call {
 	/**
 	 * The targets of this call
 	 */
-	private final Collection<CFG> targets;
+	private final Collection<ImplementedCFG> targets;
 
 	/**
 	 * The native targets of this call
@@ -61,8 +62,9 @@ public class HybridCall extends Call {
 	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
-			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
+	public HybridCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
+			String targetName,
+			Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE,
 				targets, nativeTargets, parameters);
@@ -92,8 +94,8 @@ public class HybridCall extends Call {
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, Collection<CFG> targets,
+	public HybridCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, Collection<ImplementedCFG> targets,
 			Collection<NativeCFG> nativeTargets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, nativeTargets, parameters);
@@ -123,14 +125,15 @@ public class HybridCall extends Call {
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
+	public HybridCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order,
+			Collection<ImplementedCFG> targets,
 			Collection<NativeCFG> nativeTargets, Expression... parameters) {
 		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order,
 				getCommonReturnType(targets, nativeTargets), parameters);
 		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
 		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
-		for (CFG target : targets)
+		for (ImplementedCFG target : targets)
 			Objects.requireNonNull(target, "A target of a hybrid call cannot be null");
 		for (NativeCFG target : nativeTargets)
 			Objects.requireNonNull(target, "A native target of a hybrid call cannot be null");
@@ -143,19 +146,19 @@ public class HybridCall extends Call {
 	 * call, copying all its data.
 	 * 
 	 * @param source        the unresolved call to copy
-	 * @param targets       the {@link CFG}s that the call has been resolved
-	 *                          against
+	 * @param targets       the {@link ImplementedCFG}s that the call has been
+	 *                          resolved against
 	 * @param nativeTargets the {@link NativeCFG}s that the call has been
 	 *                          resolved against
 	 */
-	public HybridCall(UnresolvedCall source, Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
+	public HybridCall(UnresolvedCall source, Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.isInstanceCall(), source.getQualifier(),
 				source.getTargetName(), targets, nativeTargets, source.getParameters());
 	}
 
-	private static Type getCommonReturnType(Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
-		Iterator<CFG> it = targets.iterator();
+	private static Type getCommonReturnType(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets) {
+		Iterator<ImplementedCFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
 			Type current = it.next().getDescriptor().getReturnType();
@@ -196,7 +199,7 @@ public class HybridCall extends Call {
 	 * 
 	 * @return the target CFG
 	 */
-	public Collection<CFG> getTargets() {
+	public Collection<ImplementedCFG> getTargets() {
 		return targets;
 	}
 

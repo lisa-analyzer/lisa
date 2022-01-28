@@ -5,7 +5,7 @@ import static it.unive.lisa.logging.IterationLogger.iterate;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +38,7 @@ public final class ChecksExecutor {
 		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
 			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
 
-		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
+		for (ImplementedCFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 
 		for (CompilationUnit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
@@ -57,10 +57,10 @@ public final class ChecksExecutor {
 		for (Global global : unit.getInstanceGlobals(false))
 			c.visitGlobal(tool, unit, global, true);
 
-		for (CFG cfg : unit.getCFGs())
+		for (ImplementedCFG cfg : unit.getCFGs())
 			cfg.accept(c, tool);
 
-		for (CFG cfg : unit.getInstanceCFGs(false))
+		for (ImplementedCFG cfg : unit.getInstanceCFGs(false))
 			cfg.accept(c, tool);
 	}
 }

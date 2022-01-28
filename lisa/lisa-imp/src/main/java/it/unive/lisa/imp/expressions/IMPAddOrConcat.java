@@ -10,7 +10,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -40,14 +40,14 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 	/**
 	 * Builds the addition.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param cfg        the {@link ImplementedCFG} where this operation lies
 	 * @param sourceFile the source file name where this operation is defined
 	 * @param line       the line number where this operation is defined
 	 * @param col        the column where this operation is defined
 	 * @param left       the left-hand side of this operation
 	 * @param right      the right-hand side of this operation
 	 */
-	public IMPAddOrConcat(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
+	public IMPAddOrConcat(ImplementedCFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "+", left, right);
 	}
 

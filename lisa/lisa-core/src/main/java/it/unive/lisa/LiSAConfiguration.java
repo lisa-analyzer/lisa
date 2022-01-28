@@ -9,7 +9,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -291,7 +291,7 @@ public class LiSAConfiguration {
 	 * Sets whether or not dot files, named {@code <cfg name>.dot}, should be
 	 * created and dumped in the working directory at the start of the
 	 * execution. These files will contain a dot graph representing the each
-	 * input {@link CFG}s' structure.<br>
+	 * input {@link ImplementedCFG}s' structure.<br>
 	 * <br>
 	 * To customize where the graphs should be generated, use
 	 * {@link #setWorkdir(String)}.
@@ -310,9 +310,9 @@ public class LiSAConfiguration {
 	 * Sets whether or not dot files, named {@code typing__<cfg name>.dot},
 	 * should be created and dumped in the working directory at the end of the
 	 * type inference. These files will contain a dot graph representing the
-	 * each input {@link CFG}s' structure, and whose nodes will contain a
-	 * textual representation of the results of the type inference on each
-	 * {@link Statement}.<br>
+	 * each input {@link ImplementedCFG}s' structure, and whose nodes will
+	 * contain a textual representation of the results of the type inference on
+	 * each {@link Statement}.<br>
 	 * <br>
 	 * To decide whether or not the type inference should be executed, use
 	 * {@link #setInferTypes(boolean)}.<br>
@@ -334,8 +334,8 @@ public class LiSAConfiguration {
 	 * Sets whether or not dot files, named {@code analysis__<cfg name>.dot},
 	 * should be created and dumped in the working directory at the end of the
 	 * analysis. These files will contain a dot graph representing the each
-	 * input {@link CFG}s' structure, and whose nodes will contain a textual
-	 * representation of the results of the semantic analysis on each
+	 * input {@link ImplementedCFG}s' structure, and whose nodes will contain a
+	 * textual representation of the results of the semantic analysis on each
 	 * {@link Statement}.<br>
 	 * <br>
 	 * To customize where the graphs should be generated, use
@@ -507,7 +507,7 @@ public class LiSAConfiguration {
 
 	/**
 	 * Yields whether or not the input program should be dumped in the form of
-	 * dot files representing single {@link CFG}s.
+	 * dot files representing single {@link ImplementedCFG}s.
 	 * 
 	 * @return {@code true} if input program should be dumped
 	 */
@@ -518,7 +518,7 @@ public class LiSAConfiguration {
 	/**
 	 * Yields whether or not the results of type inference, if run, should be
 	 * dumped in the form of dot files representing results on single
-	 * {@link CFG}s.
+	 * {@link ImplementedCFG}s.
 	 * 
 	 * @return {@code true} if type inference should be dumped
 	 */
@@ -528,7 +528,8 @@ public class LiSAConfiguration {
 
 	/**
 	 * Yields whether or not the results of analysis, if run, should be dumped
-	 * in the form of dot files representing results on single {@link CFG}s.
+	 * in the form of dot files representing results on single
+	 * {@link ImplementedCFG}s.
 	 * 
 	 * @return {@code true} if the analysis should be dumped
 	 */

@@ -2,9 +2,9 @@ package it.unive.lisa.imp.constructs;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -57,7 +57,7 @@ public class StringReplace extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringReplace build(CFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringReplace build(ImplementedCFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringReplace(cfg, location, params[0], params[1], params[2]);
 		}
 
@@ -69,7 +69,8 @@ public class StringReplace extends NativeCFG {
 		/**
 		 * Builds the replace.
 		 * 
-		 * @param cfg        the {@link CFG} where this operation lies
+		 * @param cfg        the {@link ImplementedCFG} where this operation
+		 *                       lies
 		 * @param sourceFile the source file name where this operation is
 		 *                       defined
 		 * @param line       the line number where this operation is defined
@@ -78,7 +79,7 @@ public class StringReplace extends NativeCFG {
 		 * @param middle     the middle operand of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringReplace(CFG cfg, String sourceFile, int line, int col, Expression left,
+		public IMPStringReplace(ImplementedCFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression middle, Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, middle, right);
 		}
@@ -86,13 +87,13 @@ public class StringReplace extends NativeCFG {
 		/**
 		 * Builds the replace.
 		 * 
-		 * @param cfg      the {@link CFG} where this operation lies
+		 * @param cfg      the {@link ImplementedCFG} where this operation lies
 		 * @param location the code location where this operation is defined
 		 * @param left     the left-hand side of this operation
 		 * @param middle   the middle operand of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringReplace(CFG cfg, CodeLocation location, Expression left,
+		public IMPStringReplace(ImplementedCFG cfg, CodeLocation location, Expression left,
 				Expression middle, Expression right) {
 			super(cfg, location, left, middle, right);
 		}

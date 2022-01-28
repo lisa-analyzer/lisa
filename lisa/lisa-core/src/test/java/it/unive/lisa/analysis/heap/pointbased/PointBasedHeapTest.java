@@ -11,8 +11,8 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
@@ -53,7 +53,7 @@ public class PointBasedHeapTest {
 		}
 
 		@Override
-		public CFG getCFG() {
+		public ImplementedCFG getCFG() {
 			return null;
 		}
 	};
@@ -66,7 +66,7 @@ public class PointBasedHeapTest {
 		}
 
 		@Override
-		public CFG getCFG() {
+		public ImplementedCFG getCFG() {
 			return null;
 		}
 	};
@@ -81,7 +81,7 @@ public class PointBasedHeapTest {
 		}
 
 		@Override
-		public CFG getCFG() {
+		public ImplementedCFG getCFG() {
 			return null;
 		}
 	};

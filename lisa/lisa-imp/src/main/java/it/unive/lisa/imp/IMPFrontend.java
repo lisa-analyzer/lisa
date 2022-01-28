@@ -27,8 +27,8 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -279,7 +279,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
 			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (CFG cfg : currentUnit.getInstanceCFGs(false)) {
+		for (ImplementedCFG cfg : currentUnit.getInstanceCFGs(false)) {
 			if (currentUnit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
@@ -299,7 +299,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return currentUnit;
 	}
 
-	private boolean isEntryPoint(CFG cfg) {
+	private boolean isEntryPoint(ImplementedCFG cfg) {
 		if (!onlyMain)
 			return true;
 		else
@@ -313,7 +313,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
+	public ImplementedCFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descr = mkDescriptor(ctx);
 		if (!currentUnit.getName().equals(descr.getName()))
 			throw new IMPSyntaxException("Constructor does not have the same name as its containing class");
@@ -321,7 +321,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
+	public ImplementedCFG visitMethodDeclaration(MethodDeclarationContext ctx) {
 		CFGDescriptor descr = mkDescriptor(ctx);
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
 	}

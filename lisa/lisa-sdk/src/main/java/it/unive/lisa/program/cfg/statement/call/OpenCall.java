@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -42,7 +42,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param targetName   the name of the target of this open call
 	 * @param parameters   the parameters of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
+			String targetName,
 			Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
@@ -65,7 +66,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param order        the evaluation order of the sub-expressions
 	 * @param parameters   the parameters of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
+			String targetName,
 			EvaluationOrder order, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
@@ -91,7 +93,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param parameters   the parameters of this call
 	 * @param staticType   the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
+			String targetName,
 			Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
@@ -115,7 +118,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param parameters   the parameters of this call
 	 * @param staticType   the static type of this call
 	 */
-	public OpenCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
+			String targetName,
 			EvaluationOrder order, Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment

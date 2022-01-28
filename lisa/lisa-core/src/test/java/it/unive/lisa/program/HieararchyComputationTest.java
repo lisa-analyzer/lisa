@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import org.junit.Test;
 
 public class HieararchyComputationTest {
@@ -17,8 +17,9 @@ public class HieararchyComputationTest {
 		return unit;
 	}
 
-	private static CFG findCFG(CompilationUnit unit, String name) {
-		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name)).findFirst()
+	private static ImplementedCFG findCFG(CompilationUnit unit, String name) {
+		ImplementedCFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
@@ -40,7 +41,7 @@ public class HieararchyComputationTest {
 					unit.getSuperUnits().contains(sup));
 	}
 
-	private static void overrides(CFG sup, CFG cfg) {
+	private static void overrides(ImplementedCFG sup, ImplementedCFG cfg) {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -51,7 +52,7 @@ public class HieararchyComputationTest {
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
-	private static void notOverrides(CFG sup, CFG cfg) {
+	private static void notOverrides(ImplementedCFG sup, ImplementedCFG cfg) {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -82,8 +83,8 @@ public class HieararchyComputationTest {
 		isInstance(first, second);
 		notInstance(second, first);
 
-		CFG fooFirst = findCFG(first, "foo");
-		CFG fooSecond = findCFG(second, "foo");
+		ImplementedCFG fooFirst = findCFG(first, "foo");
+		ImplementedCFG fooSecond = findCFG(second, "foo");
 
 		overrides(fooFirst, fooSecond);
 	}
@@ -147,11 +148,11 @@ public class HieararchyComputationTest {
 		notInstance(fourth, third);
 		notInstance(fifth, third);
 
-		CFG fooFirst = findCFG(first, "foo");
-		CFG fooSecond = findCFG(second, "foo");
-		CFG fooThird = findCFG(third, "foo");
-		CFG fooFourth = findCFG(fourth, "foo");
-		CFG fooFifth = findCFG(fifth, "foo");
+		ImplementedCFG fooFirst = findCFG(first, "foo");
+		ImplementedCFG fooSecond = findCFG(second, "foo");
+		ImplementedCFG fooThird = findCFG(third, "foo");
+		ImplementedCFG fooFourth = findCFG(fourth, "foo");
+		ImplementedCFG fooFifth = findCFG(fifth, "foo");
 
 		overrides(fooFirst, fooSecond);
 		overrides(fooFirst, fooThird);
@@ -178,8 +179,8 @@ public class HieararchyComputationTest {
 		isInstance(first, third);
 		isInstance(second, third);
 
-		CFG fooFirst = findCFG(first, "foo");
-		CFG fooThird = findCFG(third, "foo");
+		ImplementedCFG fooFirst = findCFG(first, "foo");
+		ImplementedCFG fooThird = findCFG(third, "foo");
 
 		overrides(fooFirst, fooThird);
 	}

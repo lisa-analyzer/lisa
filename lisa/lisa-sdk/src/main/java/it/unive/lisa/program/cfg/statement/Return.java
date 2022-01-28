@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
@@ -31,7 +31,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	 *                       program
 	 * @param expression the expression to return
 	 */
-	public Return(CFG cfg, CodeLocation location, Expression expression) {
+	public Return(ImplementedCFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location, expression);
 	}
 

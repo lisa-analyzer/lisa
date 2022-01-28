@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -103,7 +103,7 @@ public class InferredTypesTest {
 	private final ProgramPoint fake = new ProgramPoint() {
 
 		@Override
-		public CFG getCFG() {
+		public ImplementedCFG getCFG() {
 			return null;
 		}
 

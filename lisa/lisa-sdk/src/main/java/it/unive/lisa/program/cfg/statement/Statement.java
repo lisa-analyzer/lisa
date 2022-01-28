@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.Node;
@@ -19,12 +19,12 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPoint, Comparable<Statement> {
+public abstract class Statement implements Node<Statement, Edge, ImplementedCFG>, ProgramPoint, Comparable<Statement> {
 
 	/**
 	 * The cfg containing this statement.
 	 */
-	private final CFG cfg;
+	private final ImplementedCFG cfg;
 
 	/**
 	 * The offset of the statement within the cfg.
@@ -40,7 +40,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 * @param location the location where this statement is defined within the
 	 *                     program
 	 */
-	protected Statement(CFG cfg, CodeLocation location) {
+	protected Statement(ImplementedCFG cfg, CodeLocation location) {
 		Objects.requireNonNull(cfg, "Containing CFG cannot be null");
 		Objects.requireNonNull(location, "The location of a statement cannot be null");
 		this.cfg = cfg;
@@ -49,7 +49,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	}
 
 	@Override
-	public final CFG getCFG() {
+	public final ImplementedCFG getCFG() {
 		return cfg;
 	}
 

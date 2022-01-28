@@ -2,12 +2,13 @@ package it.unive.lisa.program;
 
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.SignatureCFG;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,9 +34,15 @@ public class CompilationUnit extends Unit implements CodeElement {
 	private final CodeLocation location;
 
 	/**
-	 * The collection of compilation units this unit directly inherits from
+	 * The collection of compilation units this unit directly inherits from.
+	 * This collection may contain both concrete and abstract compilation unit.
 	 */
-	private final Collection<CompilationUnit> superUnits;
+	private final Collection<CompilationUnit> superCompilationUnits;
+
+	/**
+	 * The collection of interface units this unit directly inherits from.
+	 */
+	private final Collection<InterfaceUnit> superInterfaceUnits;
 
 	/**
 	 * The lazily computed collection of instances of this unit, that is, the
@@ -54,7 +61,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * The instance cfgs defined in this unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, CFG> instanceCfgs;
+	private final Map<String, ImplementedCFG> instanceCfgs;
 
 	/**
 	 * The instance constructs ({@link NativeCFG}s) defined in this unit,
@@ -77,7 +84,12 @@ public class CompilationUnit extends Unit implements CodeElement {
 	private Annotations annotations;
 
 	/**
-	 * Builds a compilation unit, defined at the given program point.
+	 * Whether or not this compilation unit is abstract
+	 */
+	private final boolean abstractUnit;
+
+	/**
+	 * Builds a concrete compilation unit, defined at the given program point.
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
@@ -87,17 +99,34 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 *                     units
 	 */
 	public CompilationUnit(CodeLocation location, String name, boolean sealed) {
+		this(location, name, sealed, false);
+	}
+
+	/**
+	 * Builds a compilation unit, defined at the given program point.
+	 * 
+	 * @param location     the location where the unit is define within the
+	 *                         source file
+	 * @param name         the name of the unit
+	 * @param sealed       whether or not this unit is sealed, meaning that it
+	 *                         cannot be used as super unit of other compilation
+	 *                         units
+	 * @param abstractUnit whether or not this compilation unit is abstract
+	 */
+	public CompilationUnit(CodeLocation location, String name, boolean sealed, boolean abstractUnit) {
 		super(name);
 		Objects.requireNonNull(location, "The location of a unit cannot be null.");
 		this.location = location;
 		this.sealed = sealed;
-		superUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		superCompilationUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instanceGlobals = new ConcurrentHashMap<>();
 		instanceCfgs = new ConcurrentHashMap<>();
 		instanceConstructs = new ConcurrentHashMap<>();
 		hierarchyComputed = false;
 		annotations = new Annotations();
+		this.abstractUnit = abstractUnit;
 	}
 
 	/**
@@ -118,7 +147,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * @return the collection of direct super units
 	 */
 	public final Collection<CompilationUnit> getSuperUnits() {
-		return superUnits;
+		return superCompilationUnits;
 	}
 
 	/**
@@ -152,8 +181,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 	}
 
 	/**
-	 * Yields the collection of instance {@link CFG}s defined in this unit. Each
-	 * cfg is uniquely identified by its signature
+	 * Yields the collection of instance {@link ImplementedCFG}s defined in this
+	 * unit. Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * instance cfgs having the same signature in each unit. Instance cfgs can
 	 * be overridden inside subunits, according to
@@ -164,7 +193,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @return the collection of instance cfgs
 	 */
-	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> true, true, false, traverseHierarchy);
 	}
 
@@ -194,7 +223,19 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 *             of the call
 	 */
 	public final boolean addSuperUnit(CompilationUnit unit) {
-		return superUnits.add(unit);
+		return superCompilationUnits.add(unit);
+	}
+
+	/**
+	 * Adds a new {@link InterfaceUnit} as super interface of this unit.
+	 * 
+	 * @param unit the unit to add
+	 * 
+	 * @return {@code true} if the collection of superunits changed as a result
+	 *             of the call
+	 */
+	public final boolean addSuperUnit(InterfaceUnit unit) {
+		return superInterfaceUnits.add(unit);
 	}
 
 	/**
@@ -213,7 +254,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	}
 
 	/**
-	 * Adds a new instance {@link CFG}, identified by its signature
+	 * Adds a new instance {@link ImplementedCFG}, identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), to this unit. Instance cfgs can
 	 * be overridden inside subunits, according to
 	 * {@link CFGDescriptor#isOverridable()}.
@@ -224,8 +265,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 *             with the same signature, {@code false} otherwise. If this
 	 *             method returns {@code false}, the given cfg is discarded.
 	 */
-	public final boolean addInstanceCFG(CFG cfg) {
-		CFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
+	public final boolean addInstanceCFG(ImplementedCFG cfg) {
+		ImplementedCFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
 		if (sealed)
 			if (c == null)
 				cfg.getDescriptor().setOverridable(false);
@@ -258,8 +299,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 	}
 
 	/**
-	 * Yields the instance {@link CFG} defined in this unit having the given
-	 * signature ({@link CFGDescriptor#getSignature()}), if any.
+	 * Yields the instance {@link ImplementedCFG} defined in this unit having
+	 * the given signature ({@link CFGDescriptor#getSignature()}), if any.
 	 * 
 	 * @param signature         the signature of the cfg to find
 	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
@@ -267,9 +308,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @return the instance cfg with the given signature, or {@code null}
 	 */
-	public final CFG getInstanceCFG(String signature, boolean traverseHierarchy) {
-		Collection<CFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
-				false, traverseHierarchy);
+	public final ImplementedCFG getInstanceCFG(String signature, boolean traverseHierarchy) {
+		Collection<
+				ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
+						false, traverseHierarchy);
 		if (res.isEmpty())
 			return null;
 		return res.stream().findFirst().get();
@@ -332,8 +374,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 	}
 
 	/**
-	 * Yields the collection of all instance {@link CFG}s defined in this unit
-	 * that have the given name.
+	 * Yields the collection of all instance {@link ImplementedCFG}s defined in
+	 * this unit that have the given name.
 	 * 
 	 * @param name              the name of the constructs to include
 	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
@@ -341,7 +383,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @return the collection of instance cfgs with the given name
 	 */
-	public final Collection<CFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
+	public final Collection<ImplementedCFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), true, false, traverseHierarchy);
 	}
 
@@ -414,7 +456,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 		Collection<T> result = new HashSet<>();
 
 		if (cfgs)
-			for (CFG cfg : instanceCfgs.values())
+			for (ImplementedCFG cfg : instanceCfgs.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
 
@@ -426,7 +468,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 		if (!traverseHierarchy)
 			return result;
 
-		for (CompilationUnit cu : superUnits)
+		for (CompilationUnit cu : superCompilationUnits)
 			for (CodeMember sup : cu.searchCodeMembers(filter, cfgs, constructs, true))
 				if (!result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
 					// we skip the ones that are overridden by code members that
@@ -457,7 +499,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 		if (!traverseHierarchy)
 			return result.values();
 
-		for (CompilationUnit cu : superUnits)
+		for (CompilationUnit cu : superCompilationUnits)
 			for (Global sup : cu.searchGlobals(filter, true))
 				if (!result.containsKey(sup.getName()))
 					// we skip the ones that are hidden by globals that
@@ -474,8 +516,8 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * This method also returns all the instance cfgs defined in this unit.
 	 */
 	@Override
-	public Collection<CFG> getAllCFGs() {
-		Collection<CFG> all = super.getAllCFGs();
+	public Collection<ImplementedCFG> getAllCFGs() {
+		Collection<ImplementedCFG> all = super.getAllCFGs();
 		instanceCfgs.values().forEach(all::add);
 		return all;
 	}
@@ -533,15 +575,15 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 */
 	public final boolean isInstanceOf(CompilationUnit unit) {
 		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
-				: superUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
+				: superCompilationUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
 	}
 
 	private final void addInstance(CompilationUnit unit) throws ProgramValidationException {
-		if (superUnits.contains(unit))
+		if (superCompilationUnits.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
 		instances.add(unit);
-		for (CompilationUnit sup : superUnits)
+		for (CompilationUnit sup : superCompilationUnits)
 			sup.addInstance(unit);
 	}
 
@@ -566,11 +608,15 @@ public class CompilationUnit extends Unit implements CodeElement {
 
 		super.validateAndFinalize();
 
-		for (CompilationUnit sup : superUnits)
+		for (CompilationUnit sup : superCompilationUnits)
 			if (sup.sealed)
 				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
 			else
 				sup.validateAndFinalize();
+
+		for (InterfaceUnit i : superInterfaceUnits)
+			i.validateAndFinalize();
+
 		addInstance(this);
 
 		for (CodeMember cfg : getInstanceCodeMembers(false)) {
@@ -580,7 +626,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
 		}
 
-		for (CompilationUnit s : superUnits)
+		for (CompilationUnit s : superCompilationUnits)
 			for (CodeMember sup : s.getInstanceCodeMembers(true)) {
 				Collection<CodeMember> overriding = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
 				if (overriding.size() > 1)
@@ -599,7 +645,20 @@ public class CompilationUnit extends Unit implements CodeElement {
 					}
 			}
 
-		for (CompilationUnit superUnit : superUnits)
+		for (InterfaceUnit i : superInterfaceUnits)
+			for (SignatureCFG sup : i.getInstanceCFGs(true)) {
+				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
+				if (implementing.size() > 1)
+					throw new ProgramValidationException(
+							sup.getDescriptor().getSignature() + " is implemented multiple times in unit " + this + ": "
+									+ StringUtils.join(", ", implementing));
+				else if (implementing.isEmpty())
+					throw new ProgramValidationException(
+							this + " implements the interface " + i.getName() + " but does not implements the cfg "
+									+ sup.getDescriptor().getSignature());
+			}
+
+		for (CompilationUnit superUnit : superCompilationUnits)
 			for (Annotation ann : superUnit.getAnnotations())
 				if (!ann.isInherited())
 					addAnnotation(ann);
@@ -643,5 +702,10 @@ public class CompilationUnit extends Unit implements CodeElement {
 	@Override
 	public CodeLocation getLocation() {
 		return location;
+	}
+
+	@Override
+	public boolean canBeInstantiated() {
+		return !abstractUnit;
 	}
 }

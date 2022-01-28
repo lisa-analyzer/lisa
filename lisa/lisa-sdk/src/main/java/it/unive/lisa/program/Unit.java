@@ -1,8 +1,8 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 /**
  * A unit of the program to analyze. A unit is a logical entity that groups a
- * set of {@link Global}s, a set of {@link CFG}s and a set of
+ * set of {@link Global}s, a set of {@link ImplementedCFG}s and a set of
  * {@link NativeCFG}s. The signature of each of these elements is unique within
  * the unit.<br>
  * <br>
@@ -37,7 +37,7 @@ public abstract class Unit {
 	 * The cfgs defined in this unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, CFG> cfgs;
+	private final Map<String, ImplementedCFG> cfgs;
 
 	/**
 	 * The constructs ({@link NativeCFG}s) defined in this unit, indexed by
@@ -78,14 +78,14 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of {@link CFG}s defined in this unit. Each cfg is
-	 * uniquely identified by its signature
+	 * Yields the collection of {@link ImplementedCFG}s defined in this unit.
+	 * Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * cfgs having the same signature in each unit.
 	 * 
 	 * @return the collection of cfgs
 	 */
-	public final Collection<CFG> getCFGs() {
+	public final Collection<ImplementedCFG> getCFGs() {
 		return cfgs.values();
 	}
 
@@ -127,14 +127,14 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the {@link CFG} defined in this unit having the given signature
-	 * ({@link CFGDescriptor#getSignature()}), if any.
+	 * Yields the {@link ImplementedCFG} defined in this unit having the given
+	 * signature ({@link CFGDescriptor#getSignature()}), if any.
 	 * 
 	 * @param signature the signature of the cfg to find
 	 * 
 	 * @return the cfg with the given signature, or {@code null}
 	 */
-	public final CFG getCFG(String signature) {
+	public final ImplementedCFG getCFG(String signature) {
 		return cfgs.get(signature);
 	}
 
@@ -170,14 +170,14 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of all {@link CFG}s defined in this unit that have
-	 * the given name.
+	 * Yields the collection of all {@link ImplementedCFG}s defined in this unit
+	 * that have the given name.
 	 * 
 	 * @param name the name of the cfgs to include
 	 * 
 	 * @return the collection of cfgs with the given name
 	 */
-	public final Collection<CFG> getCFGsByName(String name) {
+	public final Collection<ImplementedCFG> getCFGsByName(String name) {
 		return cfgs.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.collect(Collectors.toList());
 	}
@@ -221,12 +221,12 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of <b>all</b> the {@link CFG}s defined in this
-	 * unit.
+	 * Yields the collection of <b>all</b> the {@link ImplementedCFG}s defined
+	 * in this unit.
 	 * 
 	 * @return the collection of the cfgs
 	 */
-	public Collection<CFG> getAllCFGs() {
+	public Collection<ImplementedCFG> getAllCFGs() {
 		return new HashSet<>(getCFGs());
 	}
 
@@ -268,7 +268,7 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Adds a new {@link CFG}, identified by its signature
+	 * Adds a new {@link ImplementedCFG}, identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), to this unit.
 	 * 
 	 * @param cfg the cfg to add
@@ -277,7 +277,7 @@ public abstract class Unit {
 	 *             same signature, {@code false} otherwise. If this method
 	 *             returns {@code false}, the given cfg is discarded.
 	 */
-	public final boolean addCFG(CFG cfg) {
+	public final boolean addCFG(ImplementedCFG cfg) {
 		return cfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
 
@@ -312,7 +312,7 @@ public abstract class Unit {
 	public final Collection<CodeMember> getMatchingCodeMember(CFGDescriptor signature) {
 		Collection<CodeMember> result = new HashSet<>();
 
-		for (CFG cfg : cfgs.values())
+		for (ImplementedCFG cfg : cfgs.values())
 			if (cfg.getDescriptor().matchesSignature(signature))
 				result.add(cfg);
 
@@ -328,7 +328,8 @@ public abstract class Unit {
 	 * code members exist in this unit whose signatures matches one another,
 	 * according to {@link CFGDescriptor#matchesSignature(CFGDescriptor)}. This
 	 * avoids ambiguous call resolution. Moreover, this ensures that all
-	 * {@link CFG}s are valid, according to {@link CFG#validate()}.
+	 * {@link ImplementedCFG}s are valid, according to
+	 * {@link ImplementedCFG#validate()}.
 	 * 
 	 * @throws ProgramValidationException if the program has an invalid
 	 *                                        structure
@@ -341,7 +342,16 @@ public abstract class Unit {
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
 		}
 
-		for (CFG cfg : getAllCFGs())
+		for (ImplementedCFG cfg : getAllCFGs())
 			cfg.validate();
 	}
+
+	/**
+	 * Yields {@code true} if this unit can be instantiated, {@code false}
+	 * otherwise (e.g., interfaces, abstract classes).
+	 * 
+	 * @return {@code true} if this unit can be instantiated, {@code false}
+	 *             otherwise
+	 */
+	public abstract boolean canBeInstantiated();
 }

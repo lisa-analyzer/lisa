@@ -16,7 +16,7 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -90,7 +90,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		public boolean visit(
 				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
 						MonolithicHeap, InferenceSystem<NonInterference>> tool,
-				CFG graph) {
+				ImplementedCFG graph) {
 			return true;
 		}
 
@@ -99,7 +99,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		public boolean visit(
 				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
 						MonolithicHeap, InferenceSystem<NonInterference>> tool,
-				CFG graph, Statement node) {
+				ImplementedCFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
@@ -138,7 +138,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		public boolean visit(
 				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
 						MonolithicHeap, InferenceSystem<NonInterference>> tool,
-				CFG graph, Edge edge) {
+				ImplementedCFG graph, Edge edge) {
 			return true;
 		}
 

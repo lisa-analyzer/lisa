@@ -10,8 +10,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -68,7 +68,7 @@ public class UnresolvedCall extends Call {
 	 * @param targetName        the name of the target of this call
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, Expression... parameters) {
 		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
@@ -97,7 +97,7 @@ public class UnresolvedCall extends Call {
 	 * @param targetName        the name of the target of this call
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
@@ -129,7 +129,7 @@ public class UnresolvedCall extends Call {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
 		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
@@ -158,7 +158,7 @@ public class UnresolvedCall extends Call {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			Type staticType, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
@@ -189,7 +189,7 @@ public class UnresolvedCall extends Call {
 	 * @param order             the evaluation order of the sub-expressions
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
@@ -218,7 +218,7 @@ public class UnresolvedCall extends Call {
 	 * @param order             the evaluation order of the sub-expressions
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
 			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
@@ -250,7 +250,7 @@ public class UnresolvedCall extends Call {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public UnresolvedCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
 			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {

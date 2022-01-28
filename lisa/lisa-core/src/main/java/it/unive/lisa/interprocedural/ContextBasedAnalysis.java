@@ -13,7 +13,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -56,7 +56,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 
 	private ContextSensitivityToken token;
 
-	private final Collection<CFG> fixpointTriggers;
+	private final Collection<ImplementedCFG> fixpointTriggers;
 
 	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
 
@@ -118,7 +118,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		do {
 			LOG.info("Performing %s fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
+			for (ImplementedCFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints",
+					"entries"))
 				try {
 					CFGResults<A, H, V> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
@@ -135,11 +136,12 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 			// starting from the callers of the cfgs that needed a lub,
 			// find out the complete set of cfgs that might need to be
 			// processed again
-			VisitOnceWorkingSet<CFG> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
-			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(CFG.class::isInstance)
-					.map(CFG.class::cast).forEach(ws::push));
+			VisitOnceWorkingSet<ImplementedCFG> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
+			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(ImplementedCFG.class::isInstance)
+					.map(ImplementedCFG.class::cast).forEach(ws::push));
 			while (!ws.isEmpty())
-				callgraph.getCallers(ws.pop()).stream().filter(CFG.class::isInstance).map(CFG.class::cast)
+				callgraph.getCallers(ws.pop()).stream().filter(ImplementedCFG.class::isInstance)
+						.map(ImplementedCFG.class::cast)
 						.forEach(ws::push);
 
 			ws.getSeen().forEach(results::forget);
@@ -149,14 +151,14 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(ImplementedCFG cfg) {
 		if (results.contains(cfg))
 			return results.getState(cfg).getAll();
 		else
 			return Collections.emptySet();
 	}
 
-	private Pair<AnalysisState<A, H, V>, AnalysisState<A, H, V>> getEntryAndExit(CFG cfg)
+	private Pair<AnalysisState<A, H, V>, AnalysisState<A, H, V>> getEntryAndExit(ImplementedCFG cfg)
 			throws SemanticException {
 		if (!results.contains(cfg))
 			return null;
@@ -178,7 +180,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		token = token.pushToken(scope);
 		AnalysisState<A, H, V> result = entryState.bottom();
 
-		for (CFG cfg : call.getTargets()) {
+		for (ImplementedCFG cfg : call.getTargets()) {
 			Pair<AnalysisState<A, H, V>, AnalysisState<A, H, V>> states = getEntryAndExit(cfg);
 
 			// prepare the state for the call: hide the visible variables
@@ -228,7 +230,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V>,
 		return result;
 	}
 
-	private CFGWithAnalysisResults<A, H, V> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
+	private CFGWithAnalysisResults<A, H, V> computeFixpoint(ImplementedCFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
 		CFGWithAnalysisResults<A, H, V> fixpointResult = cfg.fixpoint(computedEntryState, this,

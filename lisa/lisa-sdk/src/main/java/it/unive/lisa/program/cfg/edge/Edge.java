@@ -5,7 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Objects;
@@ -15,7 +15,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, CFG> {
+public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, ImplementedCFG> {
 
 	/**
 	 * The source node.
@@ -105,7 +105,7 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 					AnalysisState<A, H, V> sourceState) throws SemanticException;
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
 	}
 }

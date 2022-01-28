@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -9,7 +9,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * A control flow structure of a {@link CFG}.
+ * A control flow structure of a {@link ImplementedCFG}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -18,7 +18,7 @@ public abstract class ControlFlowStructure {
 	/**
 	 * The matrix of the cfg containing this structure.
 	 */
-	protected final AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix;
+	protected final AdjacencyMatrix<Statement, Edge, ImplementedCFG> cfgMatrix;
 
 	private final Statement condition;
 
@@ -31,7 +31,7 @@ public abstract class ControlFlowStructure {
 	 * @param condition     the condition of the structure
 	 * @param firstFollower the first statement after the structure exits
 	 */
-	protected ControlFlowStructure(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition,
+	protected ControlFlowStructure(AdjacencyMatrix<Statement, Edge, ImplementedCFG> cfgMatrix, Statement condition,
 			Statement firstFollower) {
 		this.cfgMatrix = cfgMatrix;
 		this.condition = condition;
@@ -133,8 +133,8 @@ public abstract class ControlFlowStructure {
 	 * 
 	 * @return the matrix containing the full structure
 	 */
-	public AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
-		AdjacencyMatrix<Statement, Edge, CFG> complete = new AdjacencyMatrix<>();
+	public AdjacencyMatrix<Statement, Edge, ImplementedCFG> getCompleteStructure() {
+		AdjacencyMatrix<Statement, Edge, ImplementedCFG> complete = new AdjacencyMatrix<>();
 
 		// add all nodes
 		complete.addNode(getCondition());

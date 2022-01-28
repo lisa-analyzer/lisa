@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
@@ -27,11 +27,11 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 	/**
 	 * Builds the numerical negation.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param cfg        the {@link ImplementedCFG} where this operation lies
 	 * @param location   the location where this literal is defined
 	 * @param expression the operand of this operation
 	 */
-	public Negation(CFG cfg, CodeLocation location, Expression expression) {
+	public Negation(ImplementedCFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location, "-", expression);
 	}
 

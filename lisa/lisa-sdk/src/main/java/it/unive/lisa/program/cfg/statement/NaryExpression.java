@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -55,7 +55,8 @@ public abstract class NaryExpression extends Expression {
 	 *                           expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Expression... subExpressions) {
+	protected NaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName,
+			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, subExpressions);
 	}
 
@@ -71,7 +72,7 @@ public abstract class NaryExpression extends Expression {
 	 * @param order          the evaluation order of the sub-expressions
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected NaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, order, Untyped.INSTANCE, subExpressions);
 	}
@@ -88,7 +89,7 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
+	protected NaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, Type staticType,
 			Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, staticType, subExpressions);
 	}
@@ -105,7 +106,7 @@ public abstract class NaryExpression extends Expression {
 	 * @param staticType     the static type of this expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected NaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Type staticType, Expression... subExpressions) {
 		super(cfg, location, staticType);
 		Objects.requireNonNull(subExpressions, "The array of sub-expressions of an expression cannot be null");
@@ -159,7 +160,7 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public final <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
 		for (Expression sub : subExpressions)
 			if (!sub.accept(visitor, tool))
 				return false;

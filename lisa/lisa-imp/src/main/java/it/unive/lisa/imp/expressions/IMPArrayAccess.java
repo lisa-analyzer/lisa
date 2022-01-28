@@ -8,7 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.BinaryExpression;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -27,7 +27,7 @@ public class IMPArrayAccess extends BinaryExpression {
 	/**
 	 * Builds the array access.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
+	 * @param cfg        the {@link ImplementedCFG} where this operation lies
 	 * @param sourceFile the source file name where this operation is defined
 	 * @param line       the line number where this operation is defined
 	 * @param col        the column where this operation is defined
@@ -35,7 +35,8 @@ public class IMPArrayAccess extends BinaryExpression {
 	 *                       will receive the access
 	 * @param location   the expression representing the accessed element
 	 */
-	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container, Expression location) {
+	public IMPArrayAccess(ImplementedCFG cfg, String sourceFile, int line, int col, Expression container,
+			Expression location) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
 	}
 

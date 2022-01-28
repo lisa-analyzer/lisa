@@ -1,6 +1,6 @@
 package it.unive.lisa.outputs;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
@@ -10,21 +10,22 @@ import java.util.function.Function;
 import org.graphstream.graph.implementations.MultiGraph;
 
 /**
- * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be
- * created through {@link #fromCFG(CFG, String, Function)}, or read from a file
+ * An {@link DotGraph} built from a {@link ImplementedCFG}. Instances of this
+ * class can be created through
+ * {@link #fromCFG(ImplementedCFG, String, Function)}, or read from a file
  * through {@link DotGraph#readDot(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class DotCFG extends DotGraph<Statement, Edge, CFG> {
+public class DotCFG extends DotGraph<Statement, Edge, ImplementedCFG> {
 
 	private DotCFG(String title) {
 		super(title, new CFGLegend().graph);
 	}
 
 	/**
-	 * Builds a {@link DotCFG} from a {@link CFG}. The label of a node
-	 * representing a statement {@code node} will be composed by joining
+	 * Builds a {@link DotCFG} from a {@link ImplementedCFG}. The label of a
+	 * node representing a statement {@code node} will be composed by joining
 	 * {@code node.toString()} ( {@link Statement#toString()}) with
 	 * {@code labelGenerator.apply(node)} ({@link Function#apply(Object)})
 	 * through a new line.
@@ -35,7 +36,7 @@ public class DotCFG extends DotGraph<Statement, Edge, CFG> {
 	 * 
 	 * @return the exported graph built starting from the source
 	 */
-	public static DotCFG fromCFG(CFG source, String title, Function<Statement, String> labelGenerator) {
+	public static DotCFG fromCFG(ImplementedCFG source, String title, Function<Statement, String> labelGenerator) {
 		DotCFG graph = new DotCFG(title);
 
 		for (Statement node : source.getEntrypoints())

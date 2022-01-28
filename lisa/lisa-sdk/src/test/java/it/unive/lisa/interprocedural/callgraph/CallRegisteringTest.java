@@ -7,9 +7,9 @@ import static org.junit.Assert.assertTrue;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Ret;
@@ -40,7 +40,8 @@ public class CallRegisteringTest {
 
 		Program p = new Program();
 
-		CFG cfg1 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
+		ImplementedCFG cfg1 = new ImplementedCFG(
+				new CFGDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
 				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
 				SingleInheritanceTraversalStrategy.INSTANCE,
@@ -50,7 +51,8 @@ public class CallRegisteringTest {
 		cfg1.addNode(ret, false);
 		cfg1.addEdge(new SequentialEdge(call, ret));
 
-		CFG cfg2 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake2", 0, 0), p, false, "cfg2"));
+		ImplementedCFG cfg2 = new ImplementedCFG(
+				new CFGDescriptor(new SourceCodeLocation("fake2", 0, 0), p, false, "cfg2"));
 		cfg2.addNode(new Ret(cfg2, new SourceCodeLocation("fake2", 1, 0)), true);
 
 		p.addCFG(cfg2);

@@ -83,7 +83,7 @@ import org.reflections.scanners.SubTypesScanner;
 public class SemanticsSanityTest {
 
 	private CompilationUnit unit;
-	private CFG cfg;
+	private ImplementedCFG cfg;
 	private CallGraph cg;
 	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
 			ValueEnvironment<Sign>> interprocedural;
@@ -100,7 +100,7 @@ public class SemanticsSanityTest {
 		Program p = new Program();
 		unit = new CompilationUnit(unknownLocation, "foo", false);
 		p.addCompilationUnit(unit);
-		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		cfg = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();
 		cg.init(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();
@@ -116,7 +116,7 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
-			public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+			public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
 				return false;
 			}
 
@@ -141,7 +141,7 @@ public class SemanticsSanityTest {
 	}
 
 	private Object valueFor(Class<?> param) {
-		if (param == CFG.class)
+		if (param == ImplementedCFG.class)
 			return cfg;
 		if (param == String.class)
 			return "foo";
@@ -318,7 +318,7 @@ public class SemanticsSanityTest {
 			return as;
 		if (root == InferredPair.class)
 			return new InferredTypes();
-		if (param == CFG.class)
+		if (param == ImplementedCFG.class)
 			return cfg;
 		if (param == AnalysisState.class)
 			return as;

@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg.statement.literal;
 
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.type.common.Int64;
 
 /**
@@ -16,11 +16,11 @@ public class Int64Literal extends Literal<Long> {
 	/**
 	 * Builds the literal.
 	 * 
-	 * @param cfg      the {@link CFG} where this literal lies
+	 * @param cfg      the {@link ImplementedCFG} where this literal lies
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int64Literal(CFG cfg, CodeLocation location, long value) {
+	public Int64Literal(ImplementedCFG cfg, CodeLocation location, long value) {
 		super(cfg, location, value, Int64.INSTANCE);
 	}
 }

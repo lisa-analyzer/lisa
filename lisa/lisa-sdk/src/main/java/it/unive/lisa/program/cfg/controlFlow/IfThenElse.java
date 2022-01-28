@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -29,7 +29,8 @@ public class IfThenElse extends ControlFlowStructure {
 	 * @param trueBranch    the statements in the true branch
 	 * @param falseBranch   the statements in the false branch
 	 */
-	public IfThenElse(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition, Statement firstFollower,
+	public IfThenElse(AdjacencyMatrix<Statement, Edge, ImplementedCFG> cfgMatrix, Statement condition,
+			Statement firstFollower,
 			Collection<Statement> trueBranch, Collection<Statement> falseBranch) {
 		super(cfgMatrix, condition, firstFollower);
 		this.trueBranch = trueBranch;

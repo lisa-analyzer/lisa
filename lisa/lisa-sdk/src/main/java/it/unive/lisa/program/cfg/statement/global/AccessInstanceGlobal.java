@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -47,7 +47,7 @@ public class AccessInstanceGlobal extends Expression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessInstanceGlobal(ImplementedCFG cfg, CodeLocation location, Expression receiver, Global target) {
 		super(cfg, location, target.getStaticType());
 		this.receiver = receiver;
 		this.target = target;
@@ -79,7 +79,7 @@ public class AccessInstanceGlobal extends Expression {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 

@@ -7,8 +7,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import java.util.Collection;
@@ -28,7 +28,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>> extends CheckTool {
 
-	private final Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results;
+	private final Map<ImplementedCFG, Collection<CFGWithAnalysisResults<A, H, V>>> results;
 
 	private final CallGraph callgraph;
 
@@ -38,7 +38,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 	 * @param results   the results to store
 	 * @param callgraph the callgraph that has been built during the analysis
 	 */
-	public CheckToolWithAnalysisResults(Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results,
+	public CheckToolWithAnalysisResults(Map<ImplementedCFG, Collection<CFGWithAnalysisResults<A, H, V>>> results,
 			CallGraph callgraph) {
 		this.results = results;
 		this.callgraph = callgraph;
@@ -52,7 +52,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 	 * @param callgraph the callgraph that has been built during the analysis
 	 */
 	public CheckToolWithAnalysisResults(CheckTool other,
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V>>> results,
+			Map<ImplementedCFG, Collection<CFGWithAnalysisResults<A, H, V>>> results,
 			CallGraph callgraph) {
 		super(other);
 		this.results = results;
@@ -61,13 +61,13 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V>,
 
 	/**
 	 * Yields the analysis results stored in this tool for the given
-	 * {@link CFG}.
+	 * {@link ImplementedCFG}.
 	 * 
 	 * @param cfg the cfg whose results are to be retrieved
 	 * 
 	 * @return the results on the given cfg
 	 */
-	public Collection<CFGWithAnalysisResults<A, H, V>> getResultOf(CFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V>> getResultOf(ImplementedCFG cfg) {
 		return results.get(cfg);
 	}
 
