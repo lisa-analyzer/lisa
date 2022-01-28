@@ -1,5 +1,5 @@
 digraph {
-	"node0" [shape="rect",color="black",peripheries="2",label=<return 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ret_value@foo: + ]]<BR/>}} -&gt; [ret_value@foo]>];
+	"node0" [shape="rect",color="black",peripheries="2",label=<return 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ret_value@foo: +<BR/>[stack: +] ]]<BR/>}} -&gt; [ret_value@foo]>];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

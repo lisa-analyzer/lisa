@@ -1,20 +1,28 @@
 package it.unive.lisa;
 
-import static it.unive.lisa.outputs.compare.JsonReportComparer.compare;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collection;
+import java.util.HashSet;
 
 public abstract class AnalysisTestExecutor {
 
@@ -128,16 +136,102 @@ public abstract class AnalysisTestExecutor {
 
 		File expFile = Paths.get(expectedPath.toString(), "report.json").toFile();
 		File actFile = Paths.get(actualPath.toString(), "report.json").toFile();
+		boolean update = "true".equals(System.getProperty("lisa.cron.update"));
 		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);
-			assertTrue("Results are different", compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
+			Accumulator acc = new Accumulator(expectedPath);
+			boolean comparison = JsonReportComparer.compare(expected, actual, expectedPath.toFile(),
+					actualPath.toFile(), acc);
+			if (!update)
+				assertTrue("Results are different", comparison);
+			else if (!comparison) {
+				System.err.println("Results are different, regenerating differences");
+				boolean updateReport = !acc.addedWarning.isEmpty() || !acc.removedWarning.isEmpty()
+						|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
+						|| !acc.changedFileName.isEmpty();
+				if (updateReport) {
+					Files.copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					System.err.println("- Updated report.json");
+				}
+				for (Path f : acc.removedFilePaths) {
+					Files.delete(f);
+					System.err.println("- Deleted " + f);
+				}
+				for (Path f : acc.addedFilePaths) {
+					Files.copy(f, Paths.get(expectedPath.toString(), actualPath.relativize(f).toString()));
+					System.err.println("- Copied (new) " + f);
+				}
+				for (Path f : acc.changedFileName) {
+					Path fresh = Paths.get(expectedPath.toString(), f.toString());
+					Files.copy(
+							Paths.get(actualPath.toString(), f.toString()),
+							fresh,
+							StandardCopyOption.REPLACE_EXISTING);
+					System.err.println("- Copied (update) " + fresh);
+				}
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
 			fail("Unable to find report file");
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
 			fail("Unable to compare reports");
+		}
+
+	}
+
+	private class Accumulator implements DiffReporter {
+
+		private final Collection<Path> changedFileName = new HashSet<>();
+		private final Collection<Path> addedFilePaths = new HashSet<>();
+		private final Collection<Path> removedFilePaths = new HashSet<>();
+		private final Collection<Warning> addedWarning = new HashSet<>();
+		private final Collection<Warning> removedWarning = new HashSet<>();
+		private final Path exp;
+
+		public Accumulator(Path exp) {
+			this.exp = exp;
+		}
+
+		@Override
+		public void report(REPORTED_COMPONENT component, REPORT_TYPE type, Collection<?> reported) {
+			switch (type) {
+			case ONLY_FIRST:
+				switch (component) {
+				case FILES:
+					reported.forEach(e -> removedFilePaths.add(Paths.get((String) e)));
+					break;
+				case WARNINGS:
+					reported.forEach(e -> removedWarning.add((Warning) e));
+					break;
+				default:
+					break;
+				}
+				break;
+			case ONLY_SECOND:
+				switch (component) {
+				case FILES:
+					reported.forEach(e -> addedFilePaths.add(Paths.get((String) e)));
+					break;
+				case WARNINGS:
+					reported.forEach(e -> addedWarning.add((Warning) e));
+					break;
+				default:
+					break;
+				}
+				break;
+			case COMMON:
+			default:
+				break;
+
+			}
+		}
+
+		@Override
+		public void fileDiff(String first, String second, String message) {
+			Path file = Paths.get(first);
+			changedFileName.add(exp.relativize(file));
 		}
 	}
 

@@ -1,13 +1,13 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<o1 = new A(1, 2)<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o1]>];
-	"node1" [shape="rect",color="gray",label=<o1::a = o1::b<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [2, 2]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]]>];
-	"node2" [shape="rect",color="gray",label=<o1::b = 2<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [1, 1]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]]>];
-	"node3" [shape="rect",color="gray",label=<o1::a = 1<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [1, 1] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [2, 2]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2] ]]<BR/>}} -&gt; [skip]>];
-	"node1" -> "node4" [color="black"];
-	"node0" -> "node3" [color="black"];
-	"node2" -> "node1" [color="black"];
-	"node3" -> "node2" [color="black"];
+	"node1" [shape="rect",color="gray",label=<o1::a = o1::b<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [2, 2]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2]<BR/>[stack: [2, 2]] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [2, 2]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2]<BR/>[stack: _|_] ]]<BR/>}} -&gt; [skip]>];
+	"node3" [shape="rect",color="gray",label=<o1::b = 2<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [1, 1]<BR/>heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]: [2, 2]<BR/>[stack: [2, 2]] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[b]]>];
+	"node4" [shape="rect",color="gray",label=<o1::a = 1<BR/>{{<BR/>heap [[ [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20] ]]<BR/>value [[ heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]: [1, 1]<BR/>[stack: [1, 1]] ]]<BR/>}} -&gt; [heap[s]:pp@'imp-testcases/heap/point-based-heap/field-sensitive/program.imp':6:20[a]]>];
+	"node0" -> "node4" [color="black"];
+	"node1" -> "node2" [color="black"];
+	"node3" -> "node1" [color="black"];
+	"node4" -> "node3" [color="black"];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

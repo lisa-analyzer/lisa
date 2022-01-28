@@ -1,7 +1,7 @@
 digraph {
 	labelloc="t";
 	label="[['imp-testcases/non-interference/interproc/program.imp':29:41], ['imp-testcases/non-interference/interproc/program.imp':21:23]]";
-	"node0" [shape="rect",color="black",peripheries="2",label=<return y<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ['imp-testcases/non-interference/interproc/program.imp':21:23]:['imp-testcases/non-interference/interproc/program.imp':29:41]:call_ret_value@'imp-testcases/non-interference/interproc/program.imp':28:44: HL<BR/>['imp-testcases/non-interference/interproc/program.imp':21:23]:h: HL<BR/>['imp-testcases/non-interference/interproc/program.imp':21:23]:l: LL<BR/>['imp-testcases/non-interference/interproc/program.imp':21:23]:this: HL<BR/>ret_value@declassify: HL<BR/>this: HL<BR/>y: HL<BR/>[inferred: HL, state: _|_] ]]<BR/>}} -&gt; [ret_value@declassify]>];
+	"node0" [shape="rect",color="black",peripheries="2",label=<return y<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ['imp-testcases/non-interference/interproc/program.imp':21:23]:h: HL<BR/>['imp-testcases/non-interference/interproc/program.imp':21:23]:l: LL<BR/>['imp-testcases/non-interference/interproc/program.imp':21:23]:this: HL<BR/>ret_value@declassify: HL<BR/>this: HL<BR/>y: HL<BR/>[inferred: HL, state: _|_] ]]<BR/>}} -&gt; [ret_value@declassify]>];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

@@ -1,13 +1,13 @@
 digraph {
-	"node0" [shape="rect",color="black",label=<!=(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf] ]]<BR/>}} -&gt; [a != b]>];
-	"node1" [shape="rect",color="gray",label=<&gt;(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf] ]]<BR/>}} -&gt; [a &gt; b]>];
-	"node2" [shape="rect",color="black",peripheries="2",label=<return a<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>ret_value@gcd: [-Inf, +Inf] ]]<BR/>}} -&gt; [ret_value@gcd]>];
-	"node3" [shape="rect",color="gray",label=<b = -(b, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf] ]]<BR/>}} -&gt; [b]>];
-	"node4" [shape="rect",color="gray",label=<a = -(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf] ]]<BR/>}} -&gt; [a]>];
+	"node0" [shape="rect",color="black",label=<!=(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [a != b]>];
+	"node1" [shape="rect",color="gray",label=<&gt;(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [a &gt; b]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<return a<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>ret_value@gcd: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [ret_value@gcd]>];
+	"node3" [shape="rect",color="gray",label=<a = -(a, b)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [a]>];
+	"node4" [shape="rect",color="gray",label=<b = -(b, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ a: [-Inf, +Inf]<BR/>b: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [b]>];
+	"node1" -> "node3" [color="blue",style="dashed"];
+	"node1" -> "node4" [color="red",style="dashed"];
 	"node0" -> "node1" [color="blue",style="dashed"];
 	"node0" -> "node2" [color="red",style="dashed"];
-	"node1" -> "node3" [color="red",style="dashed"];
-	"node1" -> "node4" [color="blue",style="dashed"];
 	"node3" -> "node0" [color="black"];
 	"node4" -> "node0" [color="black"];
 subgraph cluster_legend {

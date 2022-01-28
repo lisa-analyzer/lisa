@@ -1,12 +1,12 @@
 digraph {
 	"node0" [shape="rect",color="black",label=<o = new A(1, 2)<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ #TOP# ]]<BR/>}} -&gt; [o]>];
-	"node1" [shape="rect",color="gray",label=<o::a = 0<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf] ]]<BR/>}} -&gt; [heap[w]:A]>];
-	"node2" [shape="rect",color="gray",label=<i = 0<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ i: [0, 0] ]]<BR/>}} -&gt; [i]>];
-	"node3" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [1, +Inf] ]]<BR/>}} -&gt; [i]>];
-	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf] ]]<BR/>}} -&gt; [skip]>];
-	"node5" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf] ]]<BR/>}} -&gt; [true]>];
-	"node1" -> "node3" [color="black"];
-	"node0" -> "node2" [color="black"];
+	"node1" [shape="rect",color="gray",label=<o::a = 0<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf]<BR/>[stack: [0, 0]] ]]<BR/>}} -&gt; [heap[w]:A]>];
+	"node2" [shape="rect",color="gray",label=<i = +(i, 1)<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [1, +Inf]<BR/>[stack: [1, 6]] ]]<BR/>}} -&gt; [i]>];
+	"node3" [shape="rect",color="gray",label=<i = 0<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ i: [0, 0]<BR/>[stack: [0, 0]] ]]<BR/>}} -&gt; [i]>];
+	"node4" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf]<BR/>[stack: _|_] ]]<BR/>}} -&gt; [skip]>];
+	"node5" [shape="rect",color="gray",label=<true<BR/>{{<BR/>heap [[ [A] ]]<BR/>value [[ heap[w]:A: [0, 0]<BR/>i: [0, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [true]>];
+	"node1" -> "node2" [color="black"];
+	"node0" -> "node3" [color="black"];
 	"node2" -> "node5" [color="black"];
 	"node3" -> "node5" [color="black"];
 	"node5" -> "node1" [color="blue",style="dashed"];
