@@ -2,13 +2,15 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 
 import static org.junit.Assert.assertEquals;
 
-import it.unive.lisa.util.datastructures.graph.TestGraph;
-import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
-import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
 import org.junit.Test;
+
+import it.unive.lisa.util.datastructures.graph.TestGraph;
+import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
+import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 
 public class DominatorsTest {
 

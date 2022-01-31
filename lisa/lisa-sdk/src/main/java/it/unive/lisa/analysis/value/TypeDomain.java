@@ -1,15 +1,15 @@
-package it.unive.lisa.analysis.instances;
+package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
- * An analysis that is able to determine the runtime types of an expression
+ * An domain that is able to determine the runtime types of an expression
  * given the runtime types of its operands.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface TypeAnalysis {
+public interface TypeDomain<T extends TypeDomain<T>> extends ValueDomain<T> {
 
 	/**
 	 * Yields the runtime types that this analysis inferred for the last

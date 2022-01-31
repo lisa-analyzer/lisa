@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
-import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
@@ -38,7 +38,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InferredTypes extends BaseNonRelationalValueDomain<InferredTypes> {
+public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes TOP = new InferredTypes(Caches.types().mkUniversalSet());
 
@@ -73,12 +73,7 @@ public class InferredTypes extends BaseNonRelationalValueDomain<InferredTypes> {
 		this.elements = types;
 	}
 
-	/**
-	 * Yields the {@link ExternalSet} containing the types held by this
-	 * instance.
-	 * 
-	 * @return the set of types inside this instance
-	 */
+	@Override
 	public ExternalSet<Type> getRuntimeTypes() {
 		return elements;
 	}
@@ -105,7 +100,7 @@ public class InferredTypes extends BaseNonRelationalValueDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalIdentifier(Identifier id, ValueEnvironment<InferredTypes> environment,
+	protected InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
 		InferredTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())

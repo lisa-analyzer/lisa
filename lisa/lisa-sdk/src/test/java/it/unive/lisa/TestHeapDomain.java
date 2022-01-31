@@ -1,5 +1,7 @@
 package it.unive.lisa;
 
+import java.util.List;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -9,7 +11,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.List;
 
 public class TestHeapDomain extends BaseHeapDomain<TestHeapDomain> {
 

@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
@@ -120,18 +121,18 @@ public class AccessInstanceGlobal extends Expression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
+		AnalysisState<A, H, V, T> rec = receiver.semantics(entryState, interprocedural, expressions);
 		expressions.put(receiver, rec);
 
-		AnalysisState<A, H, V> result = entryState.bottom();
+		AnalysisState<A, H, V, T> result = entryState.bottom();
 		Variable v = new Variable(getStaticType(), target.getName(), target.getAnnotations(), target.getLocation());
 		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
+			AnalysisState<A, H, V, T> tmp = rec.smallStepSemantics(
 					new AccessChild(getStaticType(), new HeapDereference(getStaticType(), expr, getLocation()), v,
 							getLocation()),
 					this);

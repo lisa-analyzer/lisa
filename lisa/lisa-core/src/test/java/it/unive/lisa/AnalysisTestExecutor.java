@@ -3,16 +3,6 @@ package it.unive.lisa;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.checks.warnings.Warning;
-import it.unive.lisa.imp.IMPFrontend;
-import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.outputs.compare.JsonReportComparer;
-import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
-import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.util.file.FileManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -23,6 +13,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashSet;
+
+import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.outputs.compare.JsonReportComparer;
+import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
+import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.util.file.FileManager;
 
 public abstract class AnalysisTestExecutor {
 

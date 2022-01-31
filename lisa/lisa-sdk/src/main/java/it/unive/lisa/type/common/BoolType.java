@@ -1,10 +1,11 @@
 package it.unive.lisa.type.common;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * An internal implementation of the {@link BooleanType}. The only singleton

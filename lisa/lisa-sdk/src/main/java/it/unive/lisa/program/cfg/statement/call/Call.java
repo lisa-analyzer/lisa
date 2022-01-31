@@ -1,5 +1,9 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -8,8 +12,6 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.type.Type;
-import java.util.Objects;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to another cfg.

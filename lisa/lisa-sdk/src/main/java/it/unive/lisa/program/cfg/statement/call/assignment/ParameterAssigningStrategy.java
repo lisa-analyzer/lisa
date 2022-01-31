@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
@@ -56,13 +57,13 @@ public interface ParameterAssigningStrategy {
 	 * @throws SemanticException if something goes wrong while preparing the
 	 *                               entry-state
 	 */
-	<A extends AbstractState<A, H, V>,
+	<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(
+			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> prepare(
 					Call call,
-					AnalysisState<A, H, V> callState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
+					AnalysisState<A, H, V, T> callState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions,
 					Parameter[] formals,
 					ExpressionSet<SymbolicExpression>[] actuals)
 					throws SemanticException;

@@ -1,9 +1,10 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import it.unive.lisa.caches.Caches;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * Type interface. Any instance of a concrete type, instance of Type, should be

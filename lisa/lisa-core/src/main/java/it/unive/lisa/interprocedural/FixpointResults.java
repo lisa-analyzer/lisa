@@ -1,14 +1,17 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link CFG}s to {@link CFGResults}s. This
@@ -24,9 +27,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
  */
-public class FixpointResults<A extends AbstractState<A, H, V>,
+public class FixpointResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> extends FunctionalLattice<FixpointResults<A, H, V>, CFG, CFGResults<A, H, V>> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		extends FunctionalLattice<FixpointResults<A, H, V, T>, CFG, CFGResults<A, H, V, T>> {
 
 	/**
 	 * Builds a new result.
@@ -34,11 +39,11 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public FixpointResults(CFGResults<A, H, V> lattice) {
+	public FixpointResults(CFGResults<A, H, V, T> lattice) {
 		super(lattice);
 	}
 
-	private FixpointResults(CFGResults<A, H, V> lattice, Map<CFG, CFGResults<A, H, V>> function) {
+	private FixpointResults(CFGResults<A, H, V, T> lattice, Map<CFG, CFGResults<A, H, V, T>> function) {
 		super(lattice, function);
 	}
 
@@ -58,10 +63,10 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V>> putResult(CFG cfg, ContextSensitivityToken token,
-			CFGWithAnalysisResults<A, H, V> result)
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg, ContextSensitivityToken token,
+			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
-		CFGResults<A, H, V> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
+		CFGResults<A, H, V, T> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
 		return res.putResult(token, result);
 	}
 
@@ -77,7 +82,7 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public FixpointResults<A, H, V> top() {
+	public FixpointResults<A, H, V, T> top() {
 		return new FixpointResults<>(lattice.top());
 	}
 
@@ -87,7 +92,7 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public FixpointResults<A, H, V> bottom() {
+	public FixpointResults<A, H, V, T> bottom() {
 		return new FixpointResults<>(lattice.bottom());
 	}
 
@@ -106,7 +111,7 @@ public class FixpointResults<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	protected FixpointResults<A, H, V> mk(CFGResults<A, H, V> lattice, Map<CFG, CFGResults<A, H, V>> function) {
+	protected FixpointResults<A, H, V, T> mk(CFGResults<A, H, V, T> lattice, Map<CFG, CFGResults<A, H, V, T>> function) {
 		return new FixpointResults<>(lattice, function);
 	}
 }

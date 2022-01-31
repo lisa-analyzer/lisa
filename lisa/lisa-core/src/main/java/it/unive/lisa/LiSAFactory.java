@@ -1,28 +1,5 @@
 package it.unive.lisa;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.SimpleAbstractState;
-import it.unive.lisa.analysis.dataflow.DataflowElement;
-import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
-import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
-import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
-import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
-import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
-import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.ContextSensitivityToken;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
-import it.unive.lisa.interprocedural.RecursionFreeToken;
-import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,11 +14,40 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.SimpleAbstractState;
+import it.unive.lisa.analysis.dataflow.DataflowElement;
+import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
+import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
+import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
+import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
+import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalTypeDomain;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
+import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
+import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.ContextSensitivityToken;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.RecursionFreeToken;
+import it.unive.lisa.interprocedural.callgraph.CallGraph;
+import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 
 /**
  * An utility class for instantiating analysis components, that is, modular
@@ -78,6 +84,7 @@ public final class LiSAFactory {
 		DEFAULT_IMPLEMENTATIONS.put(CallGraph.class, RTACallGraph.class);
 		DEFAULT_IMPLEMENTATIONS.put(HeapDomain.class, MonolithicHeap.class);
 		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
+		DEFAULT_IMPLEMENTATIONS.put(TypeDomain.class, InferredTypes.class);
 		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
 		DEFAULT_PARAMETERS.put(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class });
 		DEFAULT_PARAMETERS.put(ContextBasedAnalysis.class, new Class[] { RecursionFreeToken.class });
@@ -154,6 +161,8 @@ public final class LiSAFactory {
 			return true;
 		else if (NonRelationalValueDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
+		else if (NonRelationalTypeDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(TypeDomain.class))
+			return true;
 		else if (InferredValue.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
 		else if (DataflowElement.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
@@ -168,6 +177,8 @@ public final class LiSAFactory {
 			return new HeapEnvironment((NonRelationalHeapDomain<?>) param);
 		else if (NonRelationalValueDomain.class.isAssignableFrom(param.getClass()))
 			return new ValueEnvironment((NonRelationalValueDomain<?>) param);
+		else if (NonRelationalTypeDomain.class.isAssignableFrom(param.getClass()))
+			return new TypeEnvironment((NonRelationalTypeDomain<?>) param);
 		else if (InferredValue.class.isAssignableFrom(param.getClass()))
 			return new InferenceSystem((InferredValue<?>) param);
 		else if (DataflowElement.class.isAssignableFrom(param.getClass())) {
@@ -474,8 +485,10 @@ public final class LiSAFactory {
 		in.add(new ConfigurableComponent<>(AbstractState.class));
 		in.add(new ConfigurableComponent<>(HeapDomain.class));
 		in.add(new ConfigurableComponent<>(ValueDomain.class));
+		in.add(new ConfigurableComponent<>(TypeDomain.class));
 		in.add(new ConfigurableComponent<>(NonRelationalHeapDomain.class));
 		in.add(new ConfigurableComponent<>(NonRelationalValueDomain.class));
+		in.add(new ConfigurableComponent<>(NonRelationalTypeDomain.class));
 		in.add(new ConfigurableComponent<>(InferredValue.class));
 		in.add(new ConfigurableComponent<>(DataflowElement.class));
 		return in;

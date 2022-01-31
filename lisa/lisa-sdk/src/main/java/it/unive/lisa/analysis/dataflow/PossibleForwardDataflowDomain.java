@@ -1,10 +1,12 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.SetLattice;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.collections4.SetUtils;
+
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.SetLattice;
 
 /**
  * A {@link DataflowDomain} for <b>forward</b> and <b>possible</b> dataflow

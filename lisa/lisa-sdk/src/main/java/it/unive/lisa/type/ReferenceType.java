@@ -1,10 +1,11 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.caches.Caches;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A type for references to memory regions. This type is the one of variables

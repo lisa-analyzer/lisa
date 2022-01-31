@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -20,8 +24,6 @@ import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningSt
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.Type;
-import java.util.Collection;
-import org.junit.Test;
 
 public class CallRegisteringTest {
 

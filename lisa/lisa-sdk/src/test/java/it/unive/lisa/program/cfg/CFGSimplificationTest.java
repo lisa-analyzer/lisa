@@ -3,6 +3,8 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -23,7 +25,6 @@ import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.program.cfg.statement.string.Length;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import org.junit.Test;
 
 public class CFGSimplificationTest {
 

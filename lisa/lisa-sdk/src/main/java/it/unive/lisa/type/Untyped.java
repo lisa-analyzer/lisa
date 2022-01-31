@@ -1,7 +1,8 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
 import java.util.Collection;
+
+import it.unive.lisa.caches.Caches;
 
 /**
  * The untyped type, corresponding to an unknown/untyped type. This type is used

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -26,9 +27,9 @@ import it.unive.lisa.symbolic.value.Variable;
  * @param <H> The heap domain
  * @param <V> The value domain
  */
-public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
+public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> implements InterproceduralAnalysis<A, H, V> {
+		V extends ValueDomain<V>, T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -69,9 +70,9 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	protected AnalysisState<A, H, V> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V> entryState, CFG cfg)
+	protected AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState, CFG cfg)
 			throws SemanticException {
-		AnalysisState<A, H, V> prepared = entryState;
+		AnalysisState<A, H, V, T> prepared = entryState;
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
 			Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(), arg.getLocation());
@@ -84,11 +85,11 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(
+	public AnalysisState<A, H, V, T> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V> entryState,
+			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V> expressions)
+			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}

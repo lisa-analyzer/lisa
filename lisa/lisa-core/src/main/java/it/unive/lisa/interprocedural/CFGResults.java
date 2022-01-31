@@ -1,14 +1,17 @@
 package it.unive.lisa.interprocedural;
 
+import java.util.Collection;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import java.util.Collection;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
@@ -24,10 +27,11 @@ import org.apache.commons.lang3.tuple.Pair;
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
  */
-public class CFGResults<A extends AbstractState<A, H, V>,
+public class CFGResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>>
-		extends FunctionalLattice<CFGResults<A, H, V>, ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		extends FunctionalLattice<CFGResults<A, H, V, T>, ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> {
 
 	/**
 	 * Builds a new result.
@@ -35,7 +39,7 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	public CFGResults(CFGWithAnalysisResults<A, H, V> lattice) {
+	public CFGResults(CFGWithAnalysisResults<A, H, V, T> lattice) {
 		super(lattice);
 	}
 
@@ -45,8 +49,8 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * @param lattice a singleton instance used for retrieving top and bottom
 	 *                    values
 	 */
-	private CFGResults(CFGWithAnalysisResults<A, H, V> lattice,
-			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> function) {
+	private CFGResults(CFGWithAnalysisResults<A, H, V, T> lattice,
+			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
 		super(lattice, function);
 	}
 
@@ -77,10 +81,10 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V>> putResult(ContextSensitivityToken token,
-			CFGWithAnalysisResults<A, H, V> result)
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ContextSensitivityToken token,
+			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
-		CFGWithAnalysisResults<A, H, V> previousResult = function.get(token);
+		CFGWithAnalysisResults<A, H, V, T> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
 			function.put(token, result);
@@ -100,7 +104,7 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 			return Pair.of(false, previousResult);
 		} else {
 			// result and previous are not comparable
-			CFGWithAnalysisResults<A, H, V> lub = previousResult.lub(result);
+			CFGWithAnalysisResults<A, H, V, T> lub = previousResult.lub(result);
 			function.put(token, lub);
 			return Pair.of(true, lub);
 		}
@@ -124,12 +128,12 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	 * 
 	 * @return the results
 	 */
-	public Collection<CFGWithAnalysisResults<A, H, V>> getAll() {
+	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAll() {
 		return function.values();
 	}
 
 	@Override
-	public CFGResults<A, H, V> top() {
+	public CFGResults<A, H, V, T> top() {
 		return new CFGResults<>(lattice.top());
 	}
 
@@ -139,7 +143,7 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public CFGResults<A, H, V> bottom() {
+	public CFGResults<A, H, V, T> bottom() {
 		return new CFGResults<>(lattice.bottom());
 	}
 
@@ -149,8 +153,8 @@ public class CFGResults<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	protected CFGResults<A, H, V> mk(CFGWithAnalysisResults<A, H, V> lattice,
-			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V>> function) {
+	protected CFGResults<A, H, V, T> mk(CFGWithAnalysisResults<A, H, V, T> lattice,
+			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 }

@@ -2,6 +2,7 @@ package it.unive.lisa.checks.semantic;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.Check;
 
@@ -17,7 +18,8 @@ import it.unive.lisa.checks.Check;
  * @param <H> the type of {@link HeapDomain} contained in the results
  * @param <V> the type of {@link ValueDomain} contained in the results
  */
-public interface SemanticCheck<A extends AbstractState<A, H, V>,
+public interface SemanticCheck<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> extends Check<CheckToolWithAnalysisResults<A, H, V>> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> extends Check<CheckToolWithAnalysisResults<A, H, V, T>> {
 }

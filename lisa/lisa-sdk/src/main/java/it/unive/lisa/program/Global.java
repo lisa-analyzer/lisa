@@ -1,11 +1,12 @@
 package it.unive.lisa.program;
 
+import java.util.Objects;
+
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Objects;
 
 /**
  * A global variable, scoped by its container. Instances of this class can refer

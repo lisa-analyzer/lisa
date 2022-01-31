@@ -1,17 +1,19 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -26,9 +28,12 @@ import java.util.stream.Collectors;
  * @param <H> the type of {@link HeapDomain} embedded in the abstract state
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
  */
-public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		extends BaseLattice<AnalysisState<A, H, V>> implements
-		SemanticDomain<AnalysisState<A, H, V>, SymbolicExpression, Identifier> {
+public class AnalysisState<A extends AbstractState<A, H, V, T>,
+		H extends HeapDomain<H>,
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		extends BaseLattice<AnalysisState<A, H, V, T>> implements
+		SemanticDomain<AnalysisState<A, H, V, T>, SymbolicExpression, Identifier> {
 
 	/**
 	 * The abstract state of program variables and memory locations
@@ -91,7 +96,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
+	public AnalysisState<A, H, V, T> assign(Identifier id, SymbolicExpression value, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.assign(id, value, pp);
 		return new AnalysisState<>(s, new ExpressionSet<>(id));
@@ -112,7 +117,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public AnalysisState<A, H, V> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
+	public AnalysisState<A, H, V, T> assign(SymbolicExpression id, SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 
 		if (id instanceof Identifier)
@@ -126,7 +131,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+	public AnalysisState<A, H, V, T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		A s = state.smallStepSemantics(expression, pp);
 		return new AnalysisState<>(s, new ExpressionSet<>(expression));
@@ -141,7 +146,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		return new AnalysisState<>(state.assume(expression, pp), computedExpressions);
 	}
 
@@ -151,7 +156,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> pushScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A, H, V, T> pushScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<>(state.pushScope(scope),
 				onAllExpressions(this.computedExpressions, scope, true));
 	}
@@ -166,33 +171,33 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> popScope(ScopeToken scope) throws SemanticException {
+	public AnalysisState<A, H, V, T> popScope(ScopeToken scope) throws SemanticException {
 		return new AnalysisState<>(state.popScope(scope),
 				onAllExpressions(this.computedExpressions, scope, false));
 	}
 
 	@Override
-	public AnalysisState<A, H, V> lubAux(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V, T> lubAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return new AnalysisState<>(state.lub(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
-	public AnalysisState<A, H, V> wideningAux(AnalysisState<A, H, V> other) throws SemanticException {
+	public AnalysisState<A, H, V, T> wideningAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return new AnalysisState<>(state.widening(other.state), computedExpressions.lub(other.computedExpressions));
 	}
 
 	@Override
-	public boolean lessOrEqualAux(AnalysisState<A, H, V> other) throws SemanticException {
+	public boolean lessOrEqualAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return state.lessOrEqual(other.state);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> top() {
+	public AnalysisState<A, H, V, T> top() {
 		return new AnalysisState<>(state.top(), new ExpressionSet<>());
 	}
 
 	@Override
-	public AnalysisState<A, H, V> bottom() {
+	public AnalysisState<A, H, V, T> bottom() {
 		return new AnalysisState<>(state.bottom(), new ExpressionSet<>());
 	}
 
@@ -211,7 +216,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	}
 
 	@Override
-	public AnalysisState<A, H, V> forgetIdentifier(Identifier id) throws SemanticException {
+	public AnalysisState<A, H, V, T> forgetIdentifier(Identifier id) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions);
 	}
 
@@ -232,7 +237,7 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AnalysisState<?, ?, ?> other = (AnalysisState<?, ?, ?>) obj;
+		AnalysisState<?, ?, ?, ?> other = (AnalysisState<?, ?, ?, ?>) obj;
 		if (computedExpressions == null) {
 			if (other.computedExpressions != null)
 				return false;
@@ -249,6 +254,20 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	@Override
 	public DomainRepresentation representation() {
 		return new AnalysisStateRepresentation(state.representation(),
+				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
+	}
+
+	/**
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this domain's instance. This differs from {@link #representation()} by
+	 * using invoking {@link AbstractState#typeRepresentation()} instead of
+	 * {@link SemanticDomain#representation()} on the abstract state contained
+	 * inside this analysis state.
+	 * 
+	 * @return the representation
+	 */
+	public DomainRepresentation typeRepresentation() {
+		return new AnalysisStateRepresentation(state.typeRepresentation(),
 				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
 	}
 
@@ -302,13 +321,13 @@ public class AnalysisState<A extends AbstractState<A, H, V>, H extends HeapDomai
 	public String toString() {
 		return representation().toString();
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getDomainInstance(Class<T> domain) {
+	public <D> D getDomainInstance(Class<D> domain) {
 		if (domain.isAssignableFrom(getClass()))
-			return (T) this;
-		
+			return (D) this;
+
 		return state.getDomainInstance(domain);
 	}
 }

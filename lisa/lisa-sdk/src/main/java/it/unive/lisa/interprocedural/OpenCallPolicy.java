@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -42,11 +43,12 @@ public interface OpenCallPolicy {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	<A extends AbstractState<A, H, V>,
+	<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> apply(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> apply(
 					OpenCall call,
-					AnalysisState<A, H, V> entryState,
+					AnalysisState<A, H, V, T> entryState,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException;
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.function.Predicate;
+
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.OverflowingOperator;
@@ -7,7 +9,6 @@ import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.function.Predicate;
 
 /**
  * Given two expressions that both evaluate to numeric values, a

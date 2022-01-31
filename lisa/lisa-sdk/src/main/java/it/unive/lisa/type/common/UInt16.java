@@ -1,10 +1,11 @@
 package it.unive.lisa.type.common;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Collections;
 
 /**
  * An unsigned 16-bit integral {@link NumericType}. The only singleton instance

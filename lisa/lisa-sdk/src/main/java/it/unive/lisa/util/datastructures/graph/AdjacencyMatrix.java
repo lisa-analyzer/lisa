@@ -1,7 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,8 +14,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and

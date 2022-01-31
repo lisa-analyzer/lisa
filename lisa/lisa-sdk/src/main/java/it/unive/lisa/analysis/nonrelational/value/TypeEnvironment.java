@@ -8,29 +8,32 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
- * An environment for a {@link NonRelationalValueDomain}, that maps
+ * An environment for a {@link NonRelationalTypeDomain}, that maps
  * {@link Identifier}s to instances of such domain. This is a
  * {@link FunctionalLattice}, that is, it implements a function mapping keys
  * (identifiers) to values (instances of the domain), and lattice operations are
  * automatically lifted for individual elements of the environment if they are
- * mapped to the same key. The abstract value computed for the last processed
- * expression is exposed through {@link #getValueOnStack()}.
+ * mapped to the same key. The runtime types computed for the last processed
+ * expression are exposed through {@link #getInferredRuntimeTypes()} (and
+ * {@link #getInferredDynamicType()} yields the lub of such types).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
- * @param <T> the concrete instance of the {@link NonRelationalValueDomain}
- *                whose instances are mapped in this environment
+ * @param <T> the concrete instance of the {@link NonRelationalTypeDomain} whose
+ *                instances are mapped in this environment
  */
-public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
-		extends Environment<ValueEnvironment<T>, ValueExpression, T, T>
-		implements ValueDomain<ValueEnvironment<T>> {
+public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
+		extends Environment<TypeEnvironment<T>, ValueExpression, T, T>
+		implements TypeDomain<TypeEnvironment<T>> {
 
 	protected final T stack;
 
@@ -40,36 +43,24 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	public ValueEnvironment(T domain) {
+	public TypeEnvironment(T domain) {
 		super(domain);
 		this.stack = domain.bottom();
 	}
 
-	protected ValueEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	protected TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}
 
-	/**
-	 * Yields the computed value of the last {@link SymbolicExpression} handled
-	 * by this domain, either through
-	 * {@link #assign(Identifier, SymbolicExpression, ProgramPoint)} or
-	 * {@link #smallStepSemantics(ValueExpression, ProgramPoint)}.
-	 * 
-	 * @return the value computed for the last expression
-	 */
-	public T getValueOnStack() {
-		return stack;
+	@Override
+	protected TypeEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+		return new TypeEnvironment<>(lattice, function, stack);
 	}
 
 	@Override
-	protected ValueEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
-		return new ValueEnvironment<>(lattice, function, stack);
-	}
-
-	@Override
-	protected ValueEnvironment<T> copy() {
-		return new ValueEnvironment<>(lattice, mkNewFunction(function), stack);
+	protected TypeEnvironment<T> copy() {
+		return new TypeEnvironment<>(lattice, mkNewFunction(function), stack);
 	}
 
 	@Override
@@ -79,36 +70,36 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	protected ValueEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
+	protected TypeEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
 			T value, T eval, ProgramPoint pp) {
-		return new ValueEnvironment<>(lattice, function, value);
+		return new TypeEnvironment<>(lattice, function, value);
 	}
 
 	@Override
-	public ValueEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
+	public TypeEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return new ValueEnvironment<>(lattice, function, lattice.eval(expression, this, pp));
+		return new TypeEnvironment<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
 	@Override
-	protected ValueEnvironment<T> assumeSatisfied(T eval) {
+	protected TypeEnvironment<T> assumeSatisfied(T eval) {
 		return this;
 	}
 
 	@Override
-	protected ValueEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, ValueEnvironment<T> other)
+	protected TypeEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, TypeEnvironment<T> other)
 			throws SemanticException {
-		return new ValueEnvironment<>(lattice, function, stack.glb(other.stack));
+		return new TypeEnvironment<>(lattice, function, stack.glb(other.stack));
 	}
 
 	@Override
-	public ValueEnvironment<T> top() {
-		return isTop() ? this : new ValueEnvironment<>(lattice.top(), null, lattice.top());
+	public TypeEnvironment<T> top() {
+		return isTop() ? this : new TypeEnvironment<>(lattice.top(), null, lattice.top());
 	}
 
 	@Override
-	public ValueEnvironment<T> bottom() {
-		return isBottom() ? this : new ValueEnvironment<>(lattice.bottom(), null, lattice.bottom());
+	public TypeEnvironment<T> bottom() {
+		return isBottom() ? this : new TypeEnvironment<>(lattice.bottom(), null, lattice.bottom());
 	}
 
 	@Override
@@ -125,9 +116,9 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof ValueEnvironment))
+		if (!(obj instanceof TypeEnvironment))
 			return false;
-		ValueEnvironment<?> other = (ValueEnvironment<?>) obj;
+		TypeEnvironment<?> other = (TypeEnvironment<?>) obj;
 		if (stack == null) {
 			if (other.stack != null)
 				return false;
@@ -189,5 +180,18 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 				return false;
 			return true;
 		}
+	}
+
+	@Override
+	public ExternalSet<Type> getInferredRuntimeTypes() {
+		return stack.getRuntimeTypes();
+	}
+
+	@Override
+	public Type getInferredDynamicType() {
+		ExternalSet<Type> types = stack.getRuntimeTypes();
+		if (stack.isTop() || stack.isBottom() || types.isEmpty())
+			return Untyped.INSTANCE;
+		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
 }

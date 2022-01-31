@@ -42,11 +42,13 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.IMPFrontend;
@@ -85,12 +87,21 @@ public class SemanticsSanityTest {
 	private CompilationUnit unit;
 	private CFG cfg;
 	private CallGraph cg;
-	private InterproceduralAnalysis<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-			ValueEnvironment<Sign>> interprocedural;
-	private AnalysisState<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-			ValueEnvironment<Sign>> as;
-	private StatementStore<SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>>, MonolithicHeap,
-			ValueEnvironment<Sign>> store;
+	private InterproceduralAnalysis<
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
+			MonolithicHeap,
+			ValueEnvironment<Sign>,
+			TypeEnvironment<InferredTypes>> interprocedural;
+	private AnalysisState<
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
+			MonolithicHeap,
+			ValueEnvironment<Sign>,
+			TypeEnvironment<InferredTypes>> as;
+	private StatementStore<
+			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
+			MonolithicHeap,
+			ValueEnvironment<Sign>,
+			TypeEnvironment<InferredTypes>> store;
 	private Expression fake;
 
 	@Before
@@ -105,7 +116,9 @@ public class SemanticsSanityTest {
 		cg.init(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();
 		interprocedural.init(p, cg, WorstCasePolicy.INSTANCE);
-		as = new AnalysisState<>(new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign())),
+		as = new AnalysisState<>(
+				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
+						new TypeEnvironment<>(new InferredTypes())),
 				new ExpressionSet<>());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, unknownLocation) {
@@ -126,10 +139,12 @@ public class SemanticsSanityTest {
 			}
 
 			@Override
-			public <A extends AbstractState<A, H, V>,
+			public <A extends AbstractState<A, H, V, T>,
 					H extends HeapDomain<H>,
-					V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-							InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+					V extends ValueDomain<V>,
+					T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
+							AnalysisState<A, H, V, T> entryState,
+							InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
 							throws SemanticException {
 				return entryState
 						.smallStepSemantics(
@@ -302,7 +317,8 @@ public class SemanticsSanityTest {
 			return new AvailableExpressions();
 		if (root == AnalysisState.class)
 			if (param == AbstractState.class)
-				return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()));
+				return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
+						new TypeEnvironment<>(new InferredTypes()));
 			else if (param == SymbolicExpression.class)
 				return new Skip(new SourceCodeLocation("unknown", 0, 0));
 			else if (param == ExpressionSet.class)
