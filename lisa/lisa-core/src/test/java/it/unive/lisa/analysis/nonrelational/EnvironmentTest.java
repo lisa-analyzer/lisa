@@ -14,6 +14,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Untyped;
 import java.util.Set;
 import org.junit.Test;
 
@@ -23,12 +24,14 @@ public class EnvironmentTest {
 	// implementation possible
 	private static final ValueEnvironment<Sign> env = new ValueEnvironment<>(new Sign().bottom());
 
-	private static final Identifier varA = new Variable(null, "a", SyntheticLocation.INSTANCE);
-	private static final Identifier varB = new Variable(null, "b", SyntheticLocation.INSTANCE);
-	private static final Identifier heapA = new HeapLocation(null, "a", false, SyntheticLocation.INSTANCE);
-	private static final Identifier heapB = new HeapLocation(null, "b", false, SyntheticLocation.INSTANCE);
-	private static final Identifier heapAweak = new HeapLocation(null, "a", true, SyntheticLocation.INSTANCE);
-	private static final Identifier heapBweak = new HeapLocation(null, "b", true, SyntheticLocation.INSTANCE);
+	private static final Identifier varA = new Variable(Untyped.INSTANCE, "a", SyntheticLocation.INSTANCE);
+	private static final Identifier varB = new Variable(Untyped.INSTANCE, "b", SyntheticLocation.INSTANCE);
+	private static final Identifier heapA = new HeapLocation(Untyped.INSTANCE, "a", false, SyntheticLocation.INSTANCE);
+	private static final Identifier heapB = new HeapLocation(Untyped.INSTANCE, "b", false, SyntheticLocation.INSTANCE);
+	private static final Identifier heapAweak = new HeapLocation(Untyped.INSTANCE, "a", true,
+			SyntheticLocation.INSTANCE);
+	private static final Identifier heapBweak = new HeapLocation(Untyped.INSTANCE, "b", true,
+			SyntheticLocation.INSTANCE);
 
 	@Test
 	public void testLubKeys() throws SemanticException {
@@ -68,11 +71,8 @@ public class EnvironmentTest {
 		assertEquals(onlyAscoped, actual);
 		assertEquals(onlyA, actual.popScope(scoper));
 
-		// TODO: this currently fails due to the errors in push/pop of
-		// environment and identifiers
-		// enable and extend when we merge the branch about heap references
-//		ValueEnvironment<Sign> AandB = onlyA.putState(heapB, state);
-//		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper), state);
-//		assertEquals(AandBscoped, AandB.pushScope(scoper));
+		ValueEnvironment<Sign> AandB = onlyA.putState(heapB, state);
+		ValueEnvironment<Sign> AandBscoped = onlyAscoped.putState((Identifier) heapB.pushScope(scoper), state);
+		assertEquals(AandBscoped, AandB.pushScope(scoper));
 	}
 }

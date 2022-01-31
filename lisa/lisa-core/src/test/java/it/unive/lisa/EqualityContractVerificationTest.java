@@ -252,7 +252,7 @@ public class EqualityContractVerificationTest {
 			else
 				// location is excluded on purpose: it only brings syntactic
 				// information
-				verify(expr, verifier -> verifier.withIgnoredFields("location"));
+				verify(expr, verifier -> verifier.withIgnoredFields("location", "types"));
 	}
 
 	@Test
@@ -262,7 +262,7 @@ public class EqualityContractVerificationTest {
 
 		List<String> statementFields = List.of("cfg", "offset");
 		List<String> expressionFields = ListUtils.union(statementFields,
-				List.of("runtimeTypes", "parent", "metaVariables"));
+				List.of("parent", "metaVariables"));
 
 		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))

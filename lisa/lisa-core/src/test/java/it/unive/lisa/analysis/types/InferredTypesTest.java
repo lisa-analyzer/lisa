@@ -218,7 +218,8 @@ public class InferredTypesTest {
 			if (operand.lessOrEqual(first.getValue())) {
 				assertFalse(String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
 						eval.isBottom());
-				assertEquals(String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()), expected,
+				assertEquals(String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
+						expected.getRuntimeTypes(),
 						eval.getRuntimeTypes());
 			} else
 				assertTrue(String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
@@ -233,7 +234,7 @@ public class InferredTypesTest {
 				assertFalse(String.format(UNEXPECTED_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
 						eval.isBottom());
 				assertEquals(String.format(WRONG_RESULT, op.getClass().getSimpleName(), first.getKey()),
-						expected.get(first.getValue()),
+						expected.get(first.getValue()).getRuntimeTypes(),
 						eval.getRuntimeTypes());
 			} else
 				assertTrue(String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(), first.getKey()),
@@ -271,7 +272,7 @@ public class InferredTypesTest {
 					assertEquals(
 							String.format(WRONG_RESULT, op.getClass().getSimpleName(),
 									first.getKey() + "," + second.getKey()),
-							expected, eval.getRuntimeTypes());
+							expected.getRuntimeTypes(), eval.getRuntimeTypes());
 				} else
 					assertTrue(
 							String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(),
@@ -295,7 +296,7 @@ public class InferredTypesTest {
 					assertEquals(
 							String.format(WRONG_RESULT, op.getClass().getSimpleName(),
 									first.getKey() + "," + second.getKey()),
-							expected, eval.getRuntimeTypes());
+							expected.getRuntimeTypes(), eval.getRuntimeTypes());
 				} else
 					assertTrue(
 							String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(),
@@ -328,7 +329,8 @@ public class InferredTypesTest {
 					assertEquals(
 							String.format(WRONG_RESULT, op.getClass().getSimpleName(),
 									first.getKey() + "," + second.getKey()),
-							expected.apply(first.getValue(), second.getValue()), eval.getRuntimeTypes());
+							expected.apply(first.getValue(), second.getValue()).getRuntimeTypes(),
+							eval.getRuntimeTypes());
 				} else
 					assertTrue(
 							String.format(RESULT_NOT_BOTTOM, op.getClass().getSimpleName(),
@@ -355,7 +357,7 @@ public class InferredTypesTest {
 				assertEquals(
 						String.format(WRONG_RESULT, op.getClass().getSimpleName(),
 								first.getKey() + "," + second.getKey() + "[transformed to " + st + "]"),
-						expected.apply(first.getValue(), st), evalT.getRuntimeTypes());
+						expected.apply(first.getValue(), st).getRuntimeTypes(), evalT.getRuntimeTypes());
 			}
 	}
 
@@ -425,7 +427,8 @@ public class InferredTypesTest {
 										first.getKey() + "," + second.getKey() + "," + third.getKey()),
 								eval.isBottom());
 						assertEquals(String.format(WRONG_RESULT, op.getClass().getSimpleName(),
-								first.getKey() + "," + second.getKey() + "," + third.getKey()), expected,
+								first.getKey() + "," + second.getKey() + "," + third.getKey()),
+								expected.getRuntimeTypes(),
 								eval.getRuntimeTypes());
 					} else
 						assertTrue(

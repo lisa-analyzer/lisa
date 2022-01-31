@@ -1,5 +1,7 @@
 package it.unive.lisa.symbolic;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -42,6 +44,8 @@ public abstract class SymbolicExpression {
 	 *                       this expression
 	 */
 	protected SymbolicExpression(Type staticType, CodeLocation location) {
+		Objects.requireNonNull(staticType, "The static type of a symbolic expression cannot be null");
+		Objects.requireNonNull(location, "The location of a symbolic expression cannot be null");
 		this.staticType = staticType;
 		this.location = location;
 	}
@@ -75,6 +79,19 @@ public abstract class SymbolicExpression {
 	 */
 	public void setRuntimeTypes(ExternalSet<Type> types) {
 		this.types = types;
+	}
+
+	/**
+	 * Yields {@code true} if this expression's runtime types have been set
+	 * (even to the empty set). If this method returns {@code false}, then
+	 * {@link #getDynamicType()} will yield the same as
+	 * {@link #getStaticType()}, and {@link #getRuntimeTypes()} returns all
+	 * possible instances of the static type.
+	 * 
+	 * @return whether or not runtime types are set for this expression
+	 */
+	public boolean hasRuntimeTypes() {
+		return types != null;
 	}
 
 	/**
@@ -139,9 +156,7 @@ public abstract class SymbolicExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((location == null) ? 0 : location.hashCode());
 		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
-		result = prime * result + ((types == null) ? 0 : types.hashCode());
 		return result;
 	}
 
@@ -149,23 +164,15 @@ public abstract class SymbolicExpression {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof SymbolicExpression))
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
-		if (location == null) {
-			if (other.location != null)
-				return false;
-		} else if (!location.equals(other.location))
-			return false;
 		if (staticType == null) {
 			if (other.staticType != null)
 				return false;
 		} else if (!staticType.equals(other.staticType))
-			return false;
-		if (types == null) {
-			if (other.types != null)
-				return false;
-		} else if (!types.equals(other.types))
 			return false;
 		return true;
 	}

@@ -82,15 +82,23 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
 
 		PointBasedHeap result = bottom();
-		for (ValueExpression exp : rewrittenExp) {
+		for (ValueExpression exp : rewrittenExp) 
 			if (exp instanceof MemoryPointer) {
 				MemoryPointer pid = (MemoryPointer) exp;
-				Identifier v = id instanceof MemoryPointer ? ((MemoryPointer) id).getReferencedLocation() : id;
-				HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(v, pid.getReferencedLocation(), pp);
-				result = result.lub(from(new PointBasedHeap(heap)));
+				HeapLocation star_y = pid.getReferencedLocation();
+				if (id instanceof MemoryPointer) {
+					// we have x = y, where both are pointers
+					// we perform *x = *y so that x and y 
+					// become aliases
+					Identifier star_x = ((MemoryPointer) id).getReferencedLocation();
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
+					result = result.lub(from(new PointBasedHeap(heap)));
+				} else {
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
+					result = result.lub(from(new PointBasedHeap(heap)));
+				}
 			} else
 				result = result.lub(sss);
-		}
 
 		return result;
 	}
@@ -238,7 +246,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
 					AllocationSite e = new AllocationSite(expression.getStaticType(), site.getLocationName(), true,
 							expression.getCodeLocation());
-					e.setRuntimeTypes(expression.getRuntimeTypes());
+					if (expression.hasRuntimeTypes())
+						e.setRuntimeTypes(expression.getRuntimeTypes());
 					result.add(e);
 				}
 
@@ -250,7 +259,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				throws SemanticException {
 			AllocationSite id = new AllocationSite(expression.getStaticType(),
 					expression.getCodeLocation().getCodeLocation(), true, expression.getCodeLocation());
-			id.setRuntimeTypes(expression.getRuntimeTypes());
+			if (expression.hasRuntimeTypes())
+				id.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(id);
 		}
 
@@ -262,9 +272,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 			for (ValueExpression locExp : loc)
 				if (locExp instanceof AllocationSite) {
-					MemoryPointer e = new MemoryPointer(locExp.getStaticType(), (AllocationSite) locExp,
+					MemoryPointer e = new MemoryPointer(
+							locExp.getStaticType(), 
+							(AllocationSite) locExp,
 							locExp.getCodeLocation());
-					e.setRuntimeTypes(locExp.getRuntimeTypes());
+					if (locExp.hasRuntimeTypes())
+						e.setRuntimeTypes(locExp.getRuntimeTypes());
 					result.add(e);
 				} else
 					result.add(locExp);
@@ -302,7 +315,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 			for (AllocationSite site : heapEnv.getState(v)) {
 				MemoryPointer e = new MemoryPointer(site.getStaticType(), site, site.getCodeLocation());
-				e.setRuntimeTypes(site.getRuntimeTypes());
+				if (site.hasRuntimeTypes())
+					e.setRuntimeTypes(site.getRuntimeTypes());
 				result.add(e);
 			}
 

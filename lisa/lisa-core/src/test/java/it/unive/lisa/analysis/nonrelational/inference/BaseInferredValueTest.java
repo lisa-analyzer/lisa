@@ -30,6 +30,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -148,7 +149,7 @@ public class BaseInferredValueTest {
 			return (R) Int32.INSTANCE;
 
 		if (param == PushAny.class)
-			return (R) new PushAny(null, SyntheticLocation.INSTANCE);
+			return (R) new PushAny(Untyped.INSTANCE, SyntheticLocation.INSTANCE);
 		if (param == Constant.class || param == ValueExpression.class)
 			return (R) new Constant(Int32.INSTANCE, 5, SyntheticLocation.INSTANCE);
 		if (param == Identifier.class)

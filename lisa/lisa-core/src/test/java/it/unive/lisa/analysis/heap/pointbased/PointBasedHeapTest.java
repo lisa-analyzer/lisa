@@ -102,7 +102,7 @@ public class PointBasedHeapTest {
 				one, fakeProgramPoint);
 
 		// constants do not affect heap abstract domain
-		assertEquals(assignResult, topHeap);
+		assertEquals(topHeap, assignResult);
 
 		assignResult = topHeap.assign(x,
 				new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, fakeLocation),
@@ -120,7 +120,7 @@ public class PointBasedHeapTest {
 
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1), false);
 		HeapEnvironment<AllocationSites> expectedEnv = emptyHeapEnv.putState(x, xSites);
-		assertEquals(xAssign, new PointBasedHeap(expectedEnv));
+		assertEquals(new PointBasedHeap(expectedEnv), xAssign);
 
 		// from x -> pp1, assignment x = *(pp2)
 		// expected: x -> pp2
@@ -425,7 +425,7 @@ public class PointBasedHeapTest {
 				pp1);
 
 		// [scoped]x -> pp1 popScope = x -> pp1
-		assertEquals(xScopedAssign.popScope(token), xAssign);
+		assertEquals(xAssign, xScopedAssign.popScope(token));
 
 		// x -> pp1 popScope = empty environment
 		assertEquals(xAssign.popScope(token), emptyHeap);

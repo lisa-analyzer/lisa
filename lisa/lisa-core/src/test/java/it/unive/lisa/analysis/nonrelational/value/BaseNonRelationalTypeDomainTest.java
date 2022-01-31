@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -30,15 +31,16 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 
-public class BaseNonRelationalValueDomainTest {
+public class BaseNonRelationalTypeDomainTest {
 
-	private static class Sample extends BaseNonRelationalValueDomain<Sample> {
+	private static class Sample extends BaseNonRelationalTypeDomain<Sample> {
 
 		@Override
 		public DomainRepresentation representation() {
@@ -79,11 +81,16 @@ public class BaseNonRelationalValueDomainTest {
 		public int hashCode() {
 			return getClass().hashCode();
 		}
+
+		@Override
+		public ExternalSet<Type> getRuntimeTypes() {
+			return Caches.types().mkEmptySet();
+		}
 	}
 
 	@Test
 	public void testDefaults() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		for (Method mtd : BaseNonRelationalValueDomain.class.getDeclaredMethods())
+		for (Method mtd : BaseNonRelationalTypeDomain.class.getDeclaredMethods())
 			if (Modifier.isProtected(mtd.getModifiers()))
 				try {
 					AtomicReference<Integer> envPos = new AtomicReference<>();
@@ -111,7 +118,7 @@ public class BaseNonRelationalValueDomainTest {
 		Object[] res = new Object[params.length];
 		for (int i = 0; i < res.length; i++) {
 			res[i] = provideParam(mtd, params[i]);
-			if (params[i] == ValueEnvironment.class)
+			if (params[i] == TypeEnvironment.class)
 				envPos.set(i);
 		}
 		return res;
@@ -161,9 +168,9 @@ public class BaseNonRelationalValueDomainTest {
 			return (R) new TernaryExpression(provideParam(mtd, Type.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, Constant.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, TernaryOperator.class), SyntheticLocation.INSTANCE);
-		if (param == ValueEnvironment.class)
-			return (R) new ValueEnvironment<>(new Sample());
-		if (param == Sample.class || param == BaseNonRelationalValueDomain.class)
+		if (param == TypeEnvironment.class)
+			return (R) new TypeEnvironment<>(new Sample());
+		if (param == Sample.class || param == BaseNonRelationalTypeDomain.class)
 			return (R) new Sample();
 		if (param == ProgramPoint.class)
 			return (R) new FakePP();

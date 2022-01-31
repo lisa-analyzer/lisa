@@ -84,7 +84,8 @@ public final class LiSAFactory {
 		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
 		DEFAULT_IMPLEMENTATIONS.put(TypeDomain.class, InferredTypes.class);
 		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
-		DEFAULT_PARAMETERS.put(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class });
+		DEFAULT_PARAMETERS.put(SimpleAbstractState.class,
+				new Class[] { MonolithicHeap.class, Interval.class, InferredTypes.class });
 		DEFAULT_PARAMETERS.put(ContextBasedAnalysis.class, new Class[] { RecursionFreeToken.class });
 	}
 

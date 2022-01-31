@@ -31,7 +31,8 @@ public class OutOfScopeIdentifier extends Identifier {
 		super(id.getStaticType(), scope.toString() + ":" + id.getName(), id.isWeak(), location);
 		this.id = id;
 		this.scope = scope;
-		setRuntimeTypes(getRuntimeTypes());
+		if (id.hasRuntimeTypes())
+			setRuntimeTypes(id.getRuntimeTypes());
 	}
 
 	@Override
