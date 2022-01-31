@@ -135,7 +135,6 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	public Call resolve(UnresolvedCall call) throws CallResolutionException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
-		open.setRuntimeTypes(call.getRuntimeTypes());
 		return open;
 	}
 }

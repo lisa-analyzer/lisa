@@ -50,7 +50,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -204,8 +203,6 @@ public class SemanticsSanityTest {
 						for (int i = 0; i < params.length; i++)
 							params[i] = valueFor(types[i]);
 						Statement st = (Statement) c.newInstance(params);
-						if (st instanceof Expression)
-							((Expression) st).setRuntimeTypes(Caches.types().mkSingletonSet(Untyped.INSTANCE));
 						st.semantics(as, interprocedural, store);
 					} catch (Exception e) {
 						failures.computeIfAbsent(statement, s -> new HashMap<>())

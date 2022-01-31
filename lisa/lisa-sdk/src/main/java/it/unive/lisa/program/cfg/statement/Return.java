@@ -49,9 +49,8 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	@Override
 	public final Identifier getMetaVariable() {
 		Expression e = getExpression();
-		Variable var = new Variable(e.getStaticType(), "ret_value@" + getCFG().getDescriptor().getName(),
-				getLocation());
-		var.setRuntimeTypes(e.getRuntimeTypes());
+		String name = "ret_value@" + getCFG().getDescriptor().getName();
+		Variable var = new Variable(e.getStaticType(), name, getLocation());
 		return var;
 	}
 
@@ -60,7 +59,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState, 
+					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {

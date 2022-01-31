@@ -46,9 +46,7 @@ public class ReturnTopPolicy implements OpenCallPolicy {
 			return entryState.smallStepSemantics(new Skip(call.getLocation()), call);
 		else {
 			PushAny pushany = new PushAny(call.getStaticType(), call.getLocation());
-			pushany.setRuntimeTypes(call.getRuntimeTypes());
 			Variable var = new Variable(call.getStaticType(), RETURNED_VARIABLE_NAME, call.getLocation());
-			var.setRuntimeTypes(call.getRuntimeTypes());
 			return entryState.assign(var, pushany, call);
 		}
 	}

@@ -262,7 +262,6 @@ public class HybridCall extends Call {
 		if (!targets.isEmpty()) {
 			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getAssigningStrategy(), isInstanceCall(),
 					getQualifier(), getTargetName(), targets, parameters);
-			cfgcall.setRuntimeTypes(getRuntimeTypes());
 			cfgcall.setSource(getSource());
 			result = cfgcall.expressionSemantics(interprocedural, state, params, expressions);
 			getMetaVariables().addAll(cfgcall.getMetaVariables());

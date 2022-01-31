@@ -3,6 +3,8 @@ package it.unive.lisa.program.cfg.statement.call.resolution;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A strategy where the first parameter is tested using
@@ -24,9 +26,9 @@ public class JavaLikeMatchingStrategy extends FixedOrderMatchingStrategy {
 	}
 
 	@Override
-	protected boolean matches(Call call, int pos, Parameter formal, Expression actual) {
+	protected boolean matches(Call call, int pos, Parameter formal, Expression actual, ExternalSet<Type> types) {
 		if (call.isInstanceCall() && pos == 0)
-			return RuntimeTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual);
-		return StaticTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual);
+			return RuntimeTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);
+		return StaticTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);
 	}
 }

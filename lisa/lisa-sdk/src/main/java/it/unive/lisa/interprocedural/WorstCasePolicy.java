@@ -44,7 +44,6 @@ public class WorstCasePolicy implements OpenCallPolicy {
 			return poststate.smallStepSemantics(new Skip(call.getLocation()), call);
 		else {
 			Variable var = new Variable(call.getStaticType(), RETURNED_VARIABLE_NAME, call.getLocation());
-			var.setRuntimeTypes(call.getRuntimeTypes());
 			return poststate.smallStepSemantics(var, call);
 		}
 	}

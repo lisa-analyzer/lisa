@@ -13,6 +13,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.type.Type;
 
 /**
  * An assertion in an IMP program.
@@ -50,7 +51,9 @@ public class IMPAssert extends UnaryStatement {
 		expressions.put(getExpression(), result);
 		if (!getExpression().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		if (!getExpression().getDynamicType().isBooleanType())
+		
+		Type type = result.getDomainInstance(TypeDomain.class).getInferredDynamicType();
+		if (!type.isBooleanType())
 			return result.bottom();
 		return result.smallStepSemantics(new Skip(getLocation()), this);
 	}
