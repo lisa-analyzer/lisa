@@ -1,7 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.Collection;
-
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collection;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic

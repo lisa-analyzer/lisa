@@ -18,8 +18,8 @@ import it.unive.lisa.symbolic.value.Identifier;
  * @param <A> the concrete type of the {@link AbstractState}
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
- * @param <T> the type of {@link ValueDomain} and {@link TypeDomain} embedded
- *                in this state
+ * @param <T> the type of {@link ValueDomain} and {@link TypeDomain} embedded in
+ *                this state
  */
 public interface AbstractState<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

@@ -1,10 +1,9 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.Collection;
-
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collection;
 
 /**
  * A call graph constructed following the Rapid Type Analysis as defined in:

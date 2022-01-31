@@ -1,10 +1,9 @@
 package it.unive.lisa.type.common;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * An implementation of the {@link it.unive.lisa.type.StringType}. The only

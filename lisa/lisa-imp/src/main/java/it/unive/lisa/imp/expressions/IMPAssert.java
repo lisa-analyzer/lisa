@@ -43,7 +43,8 @@ public class IMPAssert extends UnaryStatement {
 	@Override
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
 					AnalysisState<A, H, V, T> entryState, InterproceduralAnalysis<A, H, V, T> interprocedural,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
@@ -51,7 +52,7 @@ public class IMPAssert extends UnaryStatement {
 		expressions.put(getExpression(), result);
 		if (!getExpression().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		
+
 		Type type = result.getDomainInstance(TypeDomain.class).getInferredDynamicType();
 		if (!type.isBooleanType())
 			return result.bottom();

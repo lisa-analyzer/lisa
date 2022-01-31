@@ -228,7 +228,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	@Override
 	public SimpleAbstractState<H, V, T> forgetIdentifier(Identifier id) throws SemanticException {
 		return new SimpleAbstractState<>(
-				heapState.forgetIdentifier(id), 
+				heapState.forgetIdentifier(id),
 				valueState.forgetIdentifier(id),
 				typeState.forgetIdentifier(id));
 	}

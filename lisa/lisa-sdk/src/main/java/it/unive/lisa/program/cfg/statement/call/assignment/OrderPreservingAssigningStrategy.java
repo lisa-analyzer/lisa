@@ -32,7 +32,8 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 	@Override
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> prepare(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> prepare(
 					Call call,
 					AnalysisState<A, H, V, T> callState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,

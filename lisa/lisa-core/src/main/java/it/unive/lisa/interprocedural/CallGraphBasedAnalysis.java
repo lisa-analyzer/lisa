@@ -31,7 +31,8 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  */
 public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>, T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 
 	/**
 	 * The call graph used to resolve method calls.

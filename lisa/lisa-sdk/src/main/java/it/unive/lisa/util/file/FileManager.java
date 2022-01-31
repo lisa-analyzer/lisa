@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
 
 /**

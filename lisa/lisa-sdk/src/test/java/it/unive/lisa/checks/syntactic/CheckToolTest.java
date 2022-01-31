@@ -2,12 +2,6 @@ package it.unive.lisa.checks.syntactic;
 
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
-
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -25,6 +19,10 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import java.util.Collection;
+import java.util.HashSet;
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
 
 public class CheckToolTest {
 

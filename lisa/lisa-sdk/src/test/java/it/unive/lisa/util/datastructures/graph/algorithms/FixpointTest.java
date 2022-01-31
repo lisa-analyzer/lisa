@@ -6,19 +6,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.collections4.SetUtils;
-import org.junit.Test;
-
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.collections4.SetUtils;
+import org.junit.Test;
 
 public class FixpointTest {
 

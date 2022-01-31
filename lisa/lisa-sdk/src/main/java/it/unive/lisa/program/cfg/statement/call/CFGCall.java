@@ -1,9 +1,5 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -27,6 +23,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * A call to one or more of the CFGs under analysis.
@@ -212,7 +211,8 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator {
 	@Override
 	protected <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					StatementStore<A, H, V, T> expressions,

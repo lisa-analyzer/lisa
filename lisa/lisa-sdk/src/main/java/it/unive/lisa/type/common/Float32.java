@@ -1,11 +1,10 @@
 package it.unive.lisa.type.common;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A signed 32-bit floating point {@link NumericType}. The only singleton
