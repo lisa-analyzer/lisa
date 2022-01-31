@@ -4,21 +4,32 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ImplementedCFG;
-import org.junit.Test;
+import it.unive.lisa.program.cfg.SignatureCFG;
 
 public class HieararchyComputationTest {
 
-	private static CompilationUnit findUnit(Program prog, String name) {
-		CompilationUnit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
+	private static Unit findUnit(Program prog, String name) {
+		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
 		assertNotNull("'" + name + "' unit not found", unit);
 		return unit;
 	}
 
 	private static ImplementedCFG findCFG(CompilationUnit unit, String name) {
 		ImplementedCFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst()
+				.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		return cfg;
+	}
+	
+	private static SignatureCFG findCFG(InterfaceUnit unit, String name) {
+		SignatureCFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
@@ -41,7 +52,7 @@ public class HieararchyComputationTest {
 					unit.getSuperUnits().contains(sup));
 	}
 
-	private static void overrides(ImplementedCFG sup, ImplementedCFG cfg) {
+	private static void overrides(CFG sup, CFG cfg) {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -75,8 +86,8 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = findUnit(prog, "first");
-		CompilationUnit second = findUnit(prog, "second");
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -100,18 +111,24 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
 		prog.validateAndFinalize();
 	}
+	
+	@Test(expected = ProgramValidationException.class)
+	public void testInterfaces() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
+		prog.validateAndFinalize();
+	}
 
 	@Test
 	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = findUnit(prog, "first");
-		CompilationUnit second = findUnit(prog, "second");
-		CompilationUnit third = findUnit(prog, "third");
-		CompilationUnit fourth = findUnit(prog, "fourth");
-		CompilationUnit fifth = findUnit(prog, "fifth");
-		CompilationUnit sixth = findUnit(prog, "sixth");
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
+		CompilationUnit fourth = (CompilationUnit) findUnit(prog, "fourth");
+		CompilationUnit fifth = (CompilationUnit) findUnit(prog, "fifth");
+		CompilationUnit sixth = (CompilationUnit) findUnit(prog, "sixth");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -169,9 +186,9 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = findUnit(prog, "first");
-		CompilationUnit second = findUnit(prog, "second");
-		CompilationUnit third = findUnit(prog, "third");
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -183,5 +200,24 @@ public class HieararchyComputationTest {
 		ImplementedCFG fooThird = findCFG(third, "foo");
 
 		overrides(fooFirst, fooThird);
+	}
+	
+	@Test
+	public void testSimpleInterfaces() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-interfaces.imp", false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
+
+		findCFG(first, "foo");
+		ImplementedCFG aFirst = findCFG(first, "a");
+		ImplementedCFG bFirst = findCFG(first, "b");
+
+		SignatureCFG aI = findCFG(i, "a");
+		SignatureCFG bI = findCFG(i, "b");
+
+		overrides(aI, aFirst);
+		overrides(bI, bFirst);
 	}
 }

@@ -50,6 +50,14 @@ CLASS
    : 'class'
    ;
 
+INTERFACE
+	: 'interface'
+	;
+
+IMPLEMENTS
+	: 'implements'
+	;
+
 EXTENDS
    : 'extends'
    ;

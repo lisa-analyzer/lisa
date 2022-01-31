@@ -21,6 +21,12 @@ class first {}
 class second extends first {}
 
 /*
+ *
+ * imp provides interfaces
+ */
+interface anInterface {}
+
+/*
  * an imp class can be annotated with one or more annotation.
  * annotation can optionally have one or more members
  */

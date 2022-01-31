@@ -1,17 +1,19 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
-import it.unive.lisa.program.cfg.SignatureCFG;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.SignatureCFG;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a
@@ -20,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InterfaceUnit extends Unit implements CodeElement {
+public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 
 	/**
 	 * The location in the program of this interface unit
@@ -31,14 +33,15 @@ public class InterfaceUnit extends Unit implements CodeElement {
 	 * The instance cfgs defined in this interface unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, SignatureCFG> instanceSignatureCfgs;
+	private final Map<String, CFG> instanceCFG;
 
 	/**
-	 * The instance cfgs defined in this interface unit, indexed by
-	 * {@link CFGDescriptor#getSignature()}
+	 * The lazily computed collection of instances of this unit, that is, the
+	 * collection of compilation units that directly or indirectly inherit from
+	 * this unit
 	 */
-	private final Map<String, ImplementedCFG> instanceImplementedCfgs;
-
+	private final Collection<Unit> instances;
+	
 	/**
 	 * The collection of interface units this unit directly inherits from.
 	 */
@@ -53,9 +56,9 @@ public class InterfaceUnit extends Unit implements CodeElement {
 	public InterfaceUnit(CodeLocation location, String name) {
 		super(name);
 		this.location = location;
-		instanceSignatureCfgs = new ConcurrentHashMap<>();
-		instanceImplementedCfgs = new ConcurrentHashMap<>();
+		instanceCFG = new ConcurrentHashMap<>();
 		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		hierarchyComputed = false;
 	}
 
@@ -74,11 +77,7 @@ public class InterfaceUnit extends Unit implements CodeElement {
 		Collection<T> result = new HashSet<>();
 
 		if (cfgs) {
-			for (SignatureCFG cfg : instanceSignatureCfgs.values())
-				if (filter.test(cfg))
-					result.add((T) cfg);
-
-			for (ImplementedCFG cfg : instanceImplementedCfgs.values())
+			for (CFG cfg : instanceCFG.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
 		}
@@ -115,6 +114,11 @@ public class InterfaceUnit extends Unit implements CodeElement {
 	}
 
 	@Override
+	public final boolean addSuperUnit(UnitWithSuperUnits unit) {
+		return superInterfaceUnits.add((InterfaceUnit) unit);
+	}
+	
+	@Override
 	public void validateAndFinalize() throws ProgramValidationException {
 		if (hierarchyComputed)
 			return;
@@ -123,7 +127,9 @@ public class InterfaceUnit extends Unit implements CodeElement {
 
 		for (InterfaceUnit i : superInterfaceUnits)
 			i.validateAndFinalize();
-
+		
+		addInstance(this);
+		
 		for (InterfaceUnit s : superInterfaceUnits)
 			for (CodeMember sup : s.getInstanceCFGs(true)) {
 				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
@@ -142,6 +148,40 @@ public class InterfaceUnit extends Unit implements CodeElement {
 		hierarchyComputed = true;
 	}
 
+	public final boolean addInstanceCFG(SignatureCFG cfg) {
+		return instanceCFG.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
+	}
+	
+	@Override
+	public final Collection<InterfaceUnit> getSuperUnits() {
+		return superInterfaceUnits;
+	}
+	
+	/**
+	 * Yields the collection of {@link CompilationUnit}s that are instances of
+	 * this one, including itself. In other words, this method returns the
+	 * collection of compilation units that directly or indirectly, inherit from
+	 * this one.<br>
+	 * <br>
+	 * Note that this method returns an empty collection, until
+	 * {@link #validateAndFinalize()} has been called.
+	 * 
+	 * @return the collection of units that are instances of this one, including
+	 *             this unit itself
+	 */
+	public final Collection<Unit> getInstances() {
+		return instances;
+	}
+	
+	private final void addInstance(Unit unit) throws ProgramValidationException {
+		if (superInterfaceUnits.contains(unit))
+			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
+					+ " is both a super unit and an instance of " + this);
+		instances.add(unit);
+		for (InterfaceUnit sup : superInterfaceUnits)
+			sup.addInstance(unit);
+	}
+	
 	@Override
 	public CodeLocation getLocation() {
 		return location;

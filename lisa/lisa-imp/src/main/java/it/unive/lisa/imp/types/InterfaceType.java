@@ -1,12 +1,5 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.type.PointerType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.UnitType;
-import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,18 +7,17 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * A type representing an IMP class defined in an IMP program. ClassTypes are
- * instances of {@link PointerType} and {@link UnitType}, and are identified by
- * their name. To ensure uniqueness of ClassType objects,
- * {@link #lookup(String, CompilationUnit)} must be used to retrieve existing
- * instances (or automatically create one if no matching instance exists).
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- */
-public final class ClassType implements PointerType, UnitType {
+import it.unive.lisa.program.InterfaceUnit;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 
-	private static final Map<String, ClassType> types = new HashMap<>();
+public final class InterfaceType implements UnitType {
+
+	private static final Map<String, InterfaceType> types = new HashMap<>();
 
 	/**
 	 * Clears the cache of {@link ClassType}s created up to now.
@@ -39,7 +31,7 @@ public final class ClassType implements PointerType, UnitType {
 	 * 
 	 * @return the collection of all the class types
 	 */
-	public static Collection<ClassType> all() {
+	public static Collection<InterfaceType> all() {
 		return types.values();
 	}
 
@@ -54,37 +46,29 @@ public final class ClassType implements PointerType, UnitType {
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(String name, CompilationUnit unit) {
-		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
+	public static InterfaceType lookup(String name, InterfaceUnit unit) {
+		return types.computeIfAbsent(name, x -> new InterfaceType(name, unit));
 	}
 
 	private final String name;
 
-	private final CompilationUnit unit;
+	private final InterfaceUnit unit;
 
-	private ClassType(String name, CompilationUnit unit) {
-		Objects.requireNonNull(name, "The name of a class type cannot be null");
-		Objects.requireNonNull(unit, "The unit of a class type cannot be null");
+	private InterfaceType(String name, InterfaceUnit unit) {
+		Objects.requireNonNull(name, "The name of an interface type cannot be null");
+		Objects.requireNonNull(unit, "The unit of a interface type cannot be null");
 		this.name = name;
 		this.unit = unit;
 	}
 
 	@Override
-	public CompilationUnit getUnit() {
+	public InterfaceUnit getUnit() {
 		return unit;
 	}
 
 	@Override
 	public final boolean canBeAssignedTo(Type other) {
-		if (other instanceof ClassType)
-			return subclass((ClassType) other);
-		
-		// TODO: fix
-		return other instanceof InterfaceType;
-	}
-
-	private boolean subclass(ClassType other) {
-		return this == other || unit.isInstanceOf(other.unit);
+		return false;
 	}
 
 	@Override
@@ -95,9 +79,6 @@ public final class ClassType implements PointerType, UnitType {
 		if (!other.isUnitType())
 			return Untyped.INSTANCE;
 
-		if (canBeAssignedTo(other))
-			return other;
-
 		if (other.canBeAssignedTo(this))
 			return this;
 
@@ -105,10 +86,10 @@ public final class ClassType implements PointerType, UnitType {
 	}
 
 	private Type scanForSupertypeOf(UnitType other) {
-		WorkingSet<ClassType> ws = FIFOWorkingSet.mk();
-		Set<ClassType> seen = new HashSet<>();
+		WorkingSet<InterfaceType> ws = FIFOWorkingSet.mk();
+		Set<InterfaceType> seen = new HashSet<>();
 		ws.push(this);
-		ClassType current;
+		InterfaceType current;
 		while (!ws.isEmpty()) {
 			current = ws.pop();
 			if (!seen.add(current))
@@ -146,7 +127,7 @@ public final class ClassType implements PointerType, UnitType {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ClassType other = (ClassType) obj;
+		InterfaceType other = (InterfaceType) obj;
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -159,12 +140,15 @@ public final class ClassType implements PointerType, UnitType {
 			return false;
 		return true;
 	}
-
+	
 	@Override
 	public Collection<Type> allInstances() {
 		Collection<Type> instances = new HashSet<>();
-		for (CompilationUnit in : unit.getInstances())
-			instances.add(lookup(in.getName(), null));
+		for (Unit un : unit.getInstances())
+			if (un instanceof InterfaceUnit)
+				instances.add(lookup(un.getName(), null));
+			else 
+				instances.add(ClassType.lookup(un.getName(), null));
 		return instances;
 	}
 }

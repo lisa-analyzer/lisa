@@ -5,6 +5,7 @@ import static it.unive.lisa.logging.IterationLogger.iterate;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,8 +42,9 @@ public final class ChecksExecutor {
 		for (ImplementedCFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 
-		for (CompilationUnit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
-			checks.forEach(c -> visitUnit(tool, unit, c));
+		// TODO: to check casting
+		for (Unit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
+			checks.forEach(c -> visitUnit(tool, (CompilationUnit) unit, c));
 
 		checks.forEach(c -> c.afterExecution(tool));
 	}

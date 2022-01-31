@@ -170,8 +170,10 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
 			if (!recType.isUnitType())
 				continue;
-
-			CompilationUnit unit = recType.asUnitType().getUnit();
+			
+			// TODO: fix here: we should check that the unit returned
+			// is a compilation unit
+			CompilationUnit unit = (CompilationUnit) recType.asUnitType().getUnit();
 			for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
 				// we inspect only the ones of the current unit
 				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);

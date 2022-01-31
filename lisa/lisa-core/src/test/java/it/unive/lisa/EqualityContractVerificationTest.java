@@ -42,6 +42,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.SignatureCFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -103,6 +104,10 @@ public class EqualityContractVerificationTest {
 	private static final CFGDescriptor descr2 = new CFGDescriptor(loc, unit2, false, "fake2");
 	private static final ImplementedCFG cfg1 = new ImplementedCFG(descr1);
 	private static final ImplementedCFG cfg2 = new ImplementedCFG(descr2);
+	private static final CFGDescriptor signDescr1 = new CFGDescriptor(loc, interface1, true, "fake1");
+	private static final CFGDescriptor signDescr2 = new CFGDescriptor(loc, interface1, true, "fake2");
+	private static final SignatureCFG signCfg1 = new SignatureCFG(signDescr1);
+	private static final SignatureCFG signCfg2 = new SignatureCFG(signDescr2);
 	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj1 = new AdjacencyMatrix<>();
 	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj2 = new AdjacencyMatrix<>();
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
@@ -179,8 +184,10 @@ public class EqualityContractVerificationTest {
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
 				.withPrefabValues(ImplementedCFG.class, cfg1, cfg2)
+				.withPrefabValues(SignatureCFG.class, signCfg1, signCfg2)
 				.withPrefabValues(CFGDescriptor.class, descr1, descr2)
 				.withPrefabValues(CompilationUnit.class, unit1, unit2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(AdjacencyMatrix.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)

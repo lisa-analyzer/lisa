@@ -27,7 +27,7 @@ public class Program extends Unit {
 	 * The compilation units defined in this program, indexed by
 	 * {@link CompilationUnit#getName()}.
 	 */
-	private final Map<String, CompilationUnit> units;
+	private final Map<String, Unit> units;
 
 	/**
 	 * The entry points defined in this program.
@@ -82,7 +82,7 @@ public class Program extends Unit {
 	 *             same name, {@code false} otherwise. If this method returns
 	 *             {@code false}, the given unit is discarded.
 	 */
-	public final boolean addCompilationUnit(CompilationUnit unit) {
+	public final boolean addUnit(Unit unit) {
 		return units.putIfAbsent(unit.getName(), unit) == null;
 	}
 
@@ -117,7 +117,7 @@ public class Program extends Unit {
 	 * 
 	 * @return the collection of compilation units
 	 */
-	public final Collection<CompilationUnit> getUnits() {
+	public final Collection<Unit> getUnits() {
 		return units.values();
 	}
 
@@ -129,7 +129,7 @@ public class Program extends Unit {
 	 * 
 	 * @return the compilation unit with the given name, or {@code null}
 	 */
-	public final CompilationUnit getUnit(String name) {
+	public final Unit getUnit(String name) {
 		return units.get(name);
 	}
 
@@ -190,7 +190,7 @@ public class Program extends Unit {
 
 		super.validateAndFinalize();
 
-		for (CompilationUnit unit : getUnits())
+		for (Unit unit : getUnits())
 			unit.validateAndFinalize();
 	}
 

@@ -277,14 +277,30 @@ constructorDeclaration
 methodDeclaration
    : annotations? FINAL? name = IDENTIFIER pars = formals code = block
    ;
+   
+signatureDeclaration
+	: annotations? FINAL? name = IDENTIFIER formals SEMI
+	;
+signatureDeclarations
+	: signatureDeclaration*
+	;
+
 /*
  * CLASS
  */
    
    
 unit
-   : annotations? CLASS name = unitName (EXTENDS superclass = unitName)? LBRACE declarations = memberDeclarations RBRACE
+   : classUnit | interfaceUnit
    ;
+
+classUnit
+	: annotations? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterface = unitName)? LBRACE declarations = memberDeclarations RBRACE
+  ;
+  
+interfaceUnit
+	: annotations? INTERFACE name = unitName (EXTENDS superinterface = unitName)? LBRACE declarations = signatureDeclarations RBRACE
+  ;
 
 file
    : unit*

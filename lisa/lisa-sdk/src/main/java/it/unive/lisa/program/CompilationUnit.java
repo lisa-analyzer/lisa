@@ -1,5 +1,16 @@
 package it.unive.lisa.program;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFGDescriptor;
@@ -9,15 +20,6 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.SignatureCFG;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A compilation unit of the program to analyze. A compilation unit is a
@@ -26,7 +28,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CompilationUnit extends Unit implements CodeElement {
+public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 
 	/**
 	 * The location in the program of this unit
@@ -146,6 +148,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @return the collection of direct super units
 	 */
+	@Override
 	public final Collection<CompilationUnit> getSuperUnits() {
 		return superCompilationUnits;
 	}
@@ -214,28 +217,12 @@ public class CompilationUnit extends Unit implements CodeElement {
 		return searchCodeMembers(cm -> true, false, true, traverseHierarchy);
 	}
 
-	/**
-	 * Adds a new {@link CompilationUnit} as superunit of this unit.
-	 * 
-	 * @param unit the unit to add
-	 * 
-	 * @return {@code true} if the collection of superunits changed as a result
-	 *             of the call
-	 */
-	public final boolean addSuperUnit(CompilationUnit unit) {
-		return superCompilationUnits.add(unit);
-	}
-
-	/**
-	 * Adds a new {@link InterfaceUnit} as super interface of this unit.
-	 * 
-	 * @param unit the unit to add
-	 * 
-	 * @return {@code true} if the collection of superunits changed as a result
-	 *             of the call
-	 */
-	public final boolean addSuperUnit(InterfaceUnit unit) {
-		return superInterfaceUnits.add(unit);
+	@Override
+	public final boolean addSuperUnit(UnitWithSuperUnits unit) {
+		if (unit instanceof CompilationUnit)
+			return superCompilationUnits.add((CompilationUnit) unit);
+		else
+			return superInterfaceUnits.add((InterfaceUnit) unit);
 	}
 
 	/**
@@ -607,7 +594,7 @@ public class CompilationUnit extends Unit implements CodeElement {
 			return;
 
 		super.validateAndFinalize();
-
+	
 		for (CompilationUnit sup : superCompilationUnits)
 			if (sup.sealed)
 				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
@@ -660,6 +647,12 @@ public class CompilationUnit extends Unit implements CodeElement {
 					throw new ProgramValidationException(
 							this + " implements the interface " + i.getName() + " but does not implements the cfg "
 									+ sup.getDescriptor().getSignature());
+				else {
+					CodeMember over = implementing.iterator().next();
+					over.getDescriptor().overrides().addAll(sup.getDescriptor().overrides());
+					over.getDescriptor().overrides().add(sup);
+					over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
+				}
 			}
 
 		for (CompilationUnit superUnit : superCompilationUnits)

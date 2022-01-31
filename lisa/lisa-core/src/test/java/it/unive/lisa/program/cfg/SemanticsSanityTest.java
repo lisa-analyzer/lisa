@@ -99,7 +99,7 @@ public class SemanticsSanityTest {
 
 		Program p = new Program();
 		unit = new CompilationUnit(unknownLocation, "foo", false);
-		p.addCompilationUnit(unit);
+		p.addUnit(unit);
 		cfg = new ImplementedCFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();
 		cg.init(p);

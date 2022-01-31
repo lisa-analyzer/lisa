@@ -1,6 +1,7 @@
 package it.unive.lisa.type;
 
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
 
 /**
  * Interface for types that are introduced by a {@link CompilationUnit}.
@@ -10,9 +11,9 @@ import it.unive.lisa.program.CompilationUnit;
 public interface UnitType extends Type {
 
 	/**
-	 * Yields the {@link CompilationUnit} that induces this type.
+	 * Yields the {@link Unit} that induces this type.
 	 * 
 	 * @return the unit
 	 */
-	CompilationUnit getUnit();
+	Unit getUnit();
 }

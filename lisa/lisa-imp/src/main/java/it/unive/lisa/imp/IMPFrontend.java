@@ -3,14 +3,37 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.imp.antlr.IMPLexer;
 import it.unive.lisa.imp.antlr.IMPParser;
+import it.unive.lisa.imp.antlr.IMPParser.ClassUnitContext;
 import it.unive.lisa.imp.antlr.IMPParser.ConstructorDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.FieldDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.FileContext;
 import it.unive.lisa.imp.antlr.IMPParser.FormalContext;
 import it.unive.lisa.imp.antlr.IMPParser.FormalsContext;
+import it.unive.lisa.imp.antlr.IMPParser.InterfaceUnitContext;
 import it.unive.lisa.imp.antlr.IMPParser.MethodDeclarationContext;
+import it.unive.lisa.imp.antlr.IMPParser.SignatureDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.imp.constructs.StringContains;
@@ -23,13 +46,18 @@ import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
+import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.UnitWithSuperUnits;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.cfg.SignatureCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -37,27 +65,12 @@ import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrat
 import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -161,17 +174,20 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
-	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap;
+	private final Map<String, Pair<UnitWithSuperUnits, String>> inheritanceMap;
+
+	private final Map<String, Set<Pair<UnitWithSuperUnits, String>>> implementedInterfaces;
 
 	private final Program program;
 
-	private CompilationUnit currentUnit;
+	private Unit currentUnit;
 
 	private final boolean onlyMain;
 
 	private IMPFrontend(String file, boolean onlyMain) {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
+		implementedInterfaces = new HashMap<>();
 		program = new Program();
 		this.onlyMain = onlyMain;
 	}
@@ -180,6 +196,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		// first remove all cached types from previous executions
 		ClassType.clearAll();
 		ArrayType.clearAll();
+		InterfaceType.clearAll();
 
 		try {
 			log.info("Reading file... " + file);
@@ -220,6 +237,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			p.registerType(StringType.INSTANCE);
 			ClassType.all().forEach(p::registerType);
 			ArrayType.all().forEach(p::registerType);
+			InterfaceType.all().forEach(p::registerType);
 
 			return p;
 		} catch (FileNotFoundException e) {
@@ -247,56 +265,110 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Program visitFile(FileContext ctx) {
 		for (UnitContext unit : ctx.unit()) {
 			// we add all the units first, so that type resolution an work
-			CompilationUnit u = new CompilationUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-					unit.name.getText(), false);
-			program.addCompilationUnit(u);
-			ClassType.lookup(u.getName(), u);
+			if (unit.classUnit() != null) {
+				CompilationUnit u = new CompilationUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+						unit.classUnit().name.getText(), false);
+				program.addUnit(u);
+				ClassType.lookup(u.getName(), u);
+
+				implementedInterfaces.put(unit.classUnit().name.getText(), new HashSet<>());
+			} else if (unit.interfaceUnit() != null) {
+				InterfaceUnit i = new InterfaceUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+						unit.interfaceUnit().name.getText());
+				program.addUnit(i);
+				InterfaceType.lookup(i.getName(), i);
+
+				implementedInterfaces.put(unit.interfaceUnit().name.getText(), new HashSet<>());
+			}
+
 		}
 
 		for (UnitContext unit : ctx.unit())
 			// now we populate each unit
 			visitUnit(unit);
 
-		for (Pair<CompilationUnit, String> unit : inheritanceMap.values())
+		// adding super units
+		for (Pair<UnitWithSuperUnits, String> unit : inheritanceMap.values())
 			if (unit.getRight() != null)
 				unit.getLeft().addSuperUnit(inheritanceMap.get(unit.getRight()).getLeft());
+
+		// adding super interfaces
+		for (Set<Pair<UnitWithSuperUnits, String>> intfs : implementedInterfaces.values())
+			for (Pair<UnitWithSuperUnits, String> unit : intfs)
+				if (unit.getRight() != null) {
+					Set<Pair<UnitWithSuperUnits, String>> is = implementedInterfaces.get(unit.getRight());
+					for (Pair<UnitWithSuperUnits, String> i : is)
+						unit.getLeft().addSuperUnit(i.getLeft());
+				}
 
 		return program;
 	}
 
 	@Override
-	public CompilationUnit visitUnit(UnitContext ctx) {
-		currentUnit = program.getUnit(ctx.name.getText());
+	public Unit visitUnit(UnitContext ctx) {
+		if (ctx.classUnit() != null)
+			return visitClassUnit(ctx.classUnit());
+		else if (ctx.interfaceUnit() != null)
+			return visitInterfaceUnit(ctx.interfaceUnit());
+		return null;
+	}
+
+	@Override
+	public InterfaceUnit visitInterfaceUnit(InterfaceUnitContext ctx) {
+		InterfaceUnit unit = (InterfaceUnit) program.getUnit(ctx.name.getText());
+		currentUnit = unit;
+
+		if (ctx.superinterface != null)
+			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, ctx.superinterface.getText()));
+		else
+			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
+
+		for (SignatureDeclarationContext decl : ctx.signatureDeclarations().signatureDeclaration())
+			unit.addInstanceCFG(visitSignatureDeclaration(decl));
+
+		return unit;
+	}
+
+	@Override
+	public CompilationUnit visitClassUnit(ClassUnitContext ctx) {
+		CompilationUnit unit = (CompilationUnit) program.getUnit(ctx.name.getText());
+		currentUnit = unit;
 
 		if (ctx.superclass != null)
-			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, ctx.superclass.getText()));
+			inheritanceMap.put(unit.getName(), Pair.of(unit, ctx.superclass.getText()));
 		else
-			inheritanceMap.put(currentUnit.getName(), Pair.of(currentUnit, null));
+			inheritanceMap.put(unit.getName(), Pair.of(unit, null));
+
+		if (ctx.superinterface != null)
+			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, ctx.superinterface.getText()));
+		else
+			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
+
 
 		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
-			currentUnit.addInstanceCFG(visitMethodDeclaration(decl));
+			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
 		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
-			currentUnit.addInstanceCFG(visitConstructorDeclaration(decl));
+			unit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (ImplementedCFG cfg : currentUnit.getInstanceCFGs(false)) {
-			if (currentUnit.getInstanceCFGs(false).stream()
+		for (ImplementedCFG cfg : unit.getInstanceCFGs(false)) {
+			if (unit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+					&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
 			if (isEntryPoint(cfg))
 				program.addEntryPoint(cfg);
 		}
 
 		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
-			currentUnit.addInstanceGlobal(visitFieldDeclaration(decl));
+			unit.addInstanceGlobal(visitFieldDeclaration(decl));
 
-		for (Global global : currentUnit.getInstanceGlobals(false))
-			if (currentUnit.getInstanceGlobals(false).stream()
+		for (Global global : unit.getInstanceGlobals(false))
+			if (unit.getInstanceGlobals(false).stream()
 					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
 				throw new IMPSyntaxException("Duplicate global: " + global);
 
-		return currentUnit;
+		return unit;
 	}
 
 	private boolean isEntryPoint(ImplementedCFG cfg) {
@@ -326,6 +398,22 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
 	}
 
+	@Override
+	public SignatureCFG visitSignatureDeclaration(SignatureDeclarationContext ctx) {
+		CFGDescriptor descr = mkDescriptor(ctx);
+		return new SignatureCFG(descr);
+	}
+
+	private CFGDescriptor mkDescriptor(SignatureDeclarationContext ctx) {
+		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+				currentUnit,
+				true, ctx.name.getText(), Untyped.INSTANCE,
+				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
+				visitFormals(ctx.formals()));
+		descriptor.setOverridable(true);
+		return descriptor;
+	}
+
 	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
@@ -353,9 +441,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
+		Type unitType = currentUnit instanceof InterfaceUnit ? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit) : ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
-				ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
+		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",	unitType);
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);
