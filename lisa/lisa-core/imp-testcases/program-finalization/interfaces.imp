@@ -1,6 +1,9 @@
-interface i {
+interface j {
+	b(x);
+}
+
+interface i extends j {
 	a(x);
-	b(x);	
 }
 
 class first implements i {
@@ -8,6 +11,7 @@ class first implements i {
 	~first(x) {
 		this.field = x;
 	}
+	
 	foo(i, j) {
 		return i + j;
 	}

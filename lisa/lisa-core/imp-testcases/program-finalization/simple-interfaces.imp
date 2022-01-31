@@ -1,6 +1,11 @@
-interface i{
+
+interface j {
 	a(x);
-	b(x);	
+}
+
+interface i extends j {
+	b(x);
+	c(x);	
 }
 
 class first implements i {
@@ -18,5 +23,9 @@ class first implements i {
 	
 	b(x) {
 		return x - 1;
+	}
+	
+	c(x) {
+		return x * 1;
 	}
 }

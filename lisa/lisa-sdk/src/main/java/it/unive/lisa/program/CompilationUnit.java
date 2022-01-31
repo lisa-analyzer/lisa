@@ -150,6 +150,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	@Override
 	public final Collection<CompilationUnit> getSuperUnits() {
+		// TODO: it should return both super compilation units and super interfaces
 		return superCompilationUnits;
 	}
 

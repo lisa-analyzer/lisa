@@ -111,12 +111,6 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
 		prog.validateAndFinalize();
 	}
-	
-	@Test(expected = ProgramValidationException.class)
-	public void testInterfaces() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
-		prog.validateAndFinalize();
-	}
 
 	@Test
 	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
@@ -209,15 +203,26 @@ public class HieararchyComputationTest {
 
 		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
-
+		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
+	
 		findCFG(first, "foo");
 		ImplementedCFG aFirst = findCFG(first, "a");
 		ImplementedCFG bFirst = findCFG(first, "b");
+		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aI = findCFG(i, "a");
+		SignatureCFG aJ = findCFG(j, "a");
 		SignatureCFG bI = findCFG(i, "b");
-
-		overrides(aI, aFirst);
+		SignatureCFG cI = findCFG(i, "c");
+		
+		overrides(aJ, aFirst);
 		overrides(bI, bFirst);
+		overrides(cI, cFirst);
+	}
+	
+	
+	@Test(expected = ProgramValidationException.class)
+	public void testInterfaces() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
+		prog.validateAndFinalize();
 	}
 }
