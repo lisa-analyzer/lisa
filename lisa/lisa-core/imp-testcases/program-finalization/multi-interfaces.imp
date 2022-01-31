@@ -1,0 +1,34 @@
+interface i {
+	a(x);
+}
+
+interface j {
+	b(x);
+}
+
+interface k {
+	c(x);
+}
+
+class first implements i, j, k {
+	field;
+	~first(x) {
+		this.field = x;
+	}
+	
+	foo(i, j) {
+		return i + j;
+	}
+	
+	a(x) {
+		return x + 1;
+	}
+	
+	b(x) {
+		return x - 1;
+	}
+	
+	c(x) {
+		return x * 1;
+	}
+}

@@ -295,12 +295,16 @@ unit
    ;
 
 classUnit
-	: annotations? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterface = unitName)? LBRACE declarations = memberDeclarations RBRACE
+	: annotations? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = memberDeclarations RBRACE
   ;
   
 interfaceUnit
-	: annotations? INTERFACE name = unitName (EXTENDS superinterface = unitName)? LBRACE declarations = signatureDeclarations RBRACE
+	: annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = signatureDeclarations RBRACE
   ;
+
+unitNames
+	: unitName (COMMA unitName)*
+	;
 
 file
    : unit*

@@ -35,6 +35,7 @@ import it.unive.lisa.imp.antlr.IMPParser.InterfaceUnitContext;
 import it.unive.lisa.imp.antlr.IMPParser.MethodDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.SignatureDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitContext;
+import it.unive.lisa.imp.antlr.IMPParser.UnitNameContext;
 import it.unive.lisa.imp.antlr.IMPParserBaseVisitor;
 import it.unive.lisa.imp.constructs.StringContains;
 import it.unive.lisa.imp.constructs.StringEndsWith;
@@ -318,8 +319,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		InterfaceUnit unit = (InterfaceUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
 
-		if (ctx.superinterface != null)
-			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, ctx.superinterface.getText()));
+		if (ctx.superinterfaces != null)
+			for (UnitNameContext intf : ctx.superinterfaces.unitName())
+				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, intf.getText()));
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
@@ -339,8 +341,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else
 			inheritanceMap.put(unit.getName(), Pair.of(unit, null));
 
-		if (ctx.superinterface != null)
-			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, ctx.superinterface.getText()));
+		if (ctx.superinterfaces != null)
+			for (UnitNameContext intf : ctx.superinterfaces.unitName())
+				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, intf.getText()));
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 

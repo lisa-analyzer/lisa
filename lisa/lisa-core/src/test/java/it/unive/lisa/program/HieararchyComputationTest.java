@@ -219,6 +219,30 @@ public class HieararchyComputationTest {
 		overrides(cI, cFirst);
 	}
 	
+	@Test
+	public void testMultiInterfaces() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/multi-interfaces.imp", false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
+		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
+		InterfaceUnit k = (InterfaceUnit) findUnit(prog, "k");
+	
+		findCFG(first, "foo");
+		ImplementedCFG aFirst = findCFG(first, "a");
+		ImplementedCFG bFirst = findCFG(first, "b");
+		ImplementedCFG cFirst = findCFG(first, "c");
+
+		SignatureCFG aI = findCFG(i, "a");
+		SignatureCFG bJ = findCFG(j, "b");
+		SignatureCFG cK = findCFG(k, "c");
+		
+		overrides(aI, aFirst);
+		overrides(bJ, bFirst);
+		overrides(cK, cFirst);
+	}
+	
 	
 	@Test(expected = ProgramValidationException.class)
 	public void testInterfaces() throws ParsingException, ProgramValidationException {
