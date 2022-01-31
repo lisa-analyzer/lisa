@@ -23,6 +23,8 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 
@@ -153,7 +155,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
-	 * {@link CallGraph#resolve(UnresolvedCall)} if needed.
+	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[])} if needed.
 	 *
 	 * @param call the call to resolve
 	 *
@@ -162,5 +164,5 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall call) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException;
 }

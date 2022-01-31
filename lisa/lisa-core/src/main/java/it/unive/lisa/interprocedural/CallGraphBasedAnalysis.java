@@ -19,6 +19,8 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An interprocedural analysis based on a call graph.
@@ -55,8 +57,8 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) throws CallResolutionException {
-		return callgraph.resolve(call);
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
+		return callgraph.resolve(call, types);
 	}
 
 	/**

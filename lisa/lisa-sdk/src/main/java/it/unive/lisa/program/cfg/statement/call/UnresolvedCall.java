@@ -316,7 +316,8 @@ public class UnresolvedCall extends Call {
 	@Override
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>, T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					AnalysisState<A, H, V, T> state,
 					ExpressionSet<SymbolicExpression>[] params,
@@ -324,7 +325,7 @@ public class UnresolvedCall extends Call {
 					throws SemanticException {
 		Call resolved;
 		try {
-			resolved = interprocedural.resolve(this);
+			resolved = interprocedural.resolve(this, parameterTypes(expressions));
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}

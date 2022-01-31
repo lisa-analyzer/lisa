@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A call graph constructed following the Class Hierarchy Analysis as defined
@@ -18,7 +19,7 @@ import it.unive.lisa.type.Type;
 public final class CHACallGraph extends BaseCallGraph {
 
 	@Override
-	protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver) {
+	protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types) {
 		return receiver.getStaticType().allInstances();
 	}
 

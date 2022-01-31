@@ -25,6 +25,7 @@ import it.unive.lisa.program.cfg.statement.call.HybridCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
 
 /**
@@ -73,18 +74,22 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
 		if (cached != null)
 			return cached;
+		
+		if (types == null)
+			// we allow types to be null only for calls that we already resolved
+			throw new CallResolutionException("Cannot resolve call without runtime types");
 
 		Collection<CFG> targets = new ArrayList<>();
 		Collection<NativeCFG> nativeTargets = new ArrayList<>();
 
 		if (call.isInstanceCall())
-			resolveInstance(call, targets, nativeTargets);
+			resolveInstance(call, types, targets, nativeTargets);
 		else
-			resolveNonInstance(call, targets, nativeTargets);
+			resolveNonInstance(call, types, targets, nativeTargets);
 
 		Call resolved;
 		if (targets.isEmpty() && nativeTargets.isEmpty())
@@ -135,12 +140,14 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
+			Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
 			if (!cm.getDescriptor().isInstance()
 					&& matchCFGName(call, cm)
-					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters()))
+					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters(),
+							types))
 				if (cm instanceof CFG)
 					targets.add((CFG) cm);
 				else
@@ -161,13 +168,14 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, Collection<CFG> targets, Collection<NativeCFG> natives)
+	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
+			Collection<NativeCFG> natives)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
 					"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
-		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
+		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
 			if (!recType.isUnitType())
 				continue;
 
@@ -178,7 +186,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 				for (CodeMember cm : candidates)
 					if (cm.getDescriptor().isInstance()
 							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
-									call.getParameters()))
+									call.getParameters(), types))
 						if (cm instanceof CFG)
 							targets.add((CFG) cm);
 						else
@@ -216,7 +224,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver) throws CallResolutionException;
+	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+			throws CallResolutionException;
 
 	@Override
 	public Collection<CodeMember> getCallees(CodeMember cm) {

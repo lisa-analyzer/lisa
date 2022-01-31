@@ -44,6 +44,8 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 public class CheckToolWithAnalysisResultsTest {
 
@@ -59,10 +61,6 @@ public class CheckToolWithAnalysisResultsTest {
 	private static final CFG cfg2 = new CFG(descriptor2);
 
 	private static final CallGraph fakeCallGraph = new CallGraph() {
-		@Override
-		public Call resolve(UnresolvedCall call) throws CallResolutionException {
-			return null;
-		}
 
 		@Override
 		public void registerCall(CFGCall call) {
@@ -84,6 +82,11 @@ public class CheckToolWithAnalysisResultsTest {
 
 		@Override
 		public Collection<Call> getCallSites(CodeMember cm) {
+			return null;
+		}
+
+		@Override
+		public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
 			return null;
 		}
 	};

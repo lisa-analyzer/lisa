@@ -33,6 +33,8 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 
@@ -45,7 +47,8 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
  */
 public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>, T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
@@ -132,7 +135,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
 		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
 		return open;

@@ -76,11 +76,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
 		ExternalSet<Type>[] slotsTypes = new ExternalSet[formals.length];
-
 		Expression[] actuals = call.getParameters();
-		ExternalSet<Type>[] types = new ExternalSet[actuals.length];
-		for (int i = 0; i < actuals.length; i++)
-			types[i] = expressions.getState(actuals[i]).getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
 
 		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
 		ExternalSet<Type>[] defaultTypes = new ExternalSet[formals.length];
@@ -98,7 +94,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				formals,
 				actuals,
 				parameters,
-				types,
+				call.parameterTypes(expressions),
 				defaults,
 				defaultTypes,
 				slots,

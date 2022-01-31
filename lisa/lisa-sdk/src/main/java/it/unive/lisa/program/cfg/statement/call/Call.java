@@ -4,6 +4,11 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -12,6 +17,7 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A call to another cfg.
@@ -224,5 +230,17 @@ public abstract class Call extends NaryExpression {
 		} else if (!targetName.equals(other.targetName))
 			return false;
 		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	public <A extends AbstractState<A, H, V, T>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> ExternalSet<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions) {
+		Expression[] actuals = getParameters();
+		ExternalSet<Type>[] types = new ExternalSet[actuals.length];
+		for (int i = 0; i < actuals.length; i++)
+			types[i] = expressions.getState(actuals[i]).getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
+		return types;
 	}
 }

@@ -123,7 +123,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 */
 	public Call getResolvedVersion(UnresolvedCall call) {
 		try {
-			return callgraph.resolve(call);
+			return callgraph.resolve(call, null);
 		} catch (CallResolutionException e) {
 			return null;
 		}

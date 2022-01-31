@@ -7,6 +7,8 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic
@@ -37,7 +39,7 @@ public interface CallGraph {
 	 * @throws CallResolutionException if this call graph is unable to resolve
 	 *                                     the given call
 	 */
-	Call resolve(UnresolvedCall call) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException;
 
 	/**
 	 * Registers an already resolved {@link CFGCall} in this {@link CallGraph}.

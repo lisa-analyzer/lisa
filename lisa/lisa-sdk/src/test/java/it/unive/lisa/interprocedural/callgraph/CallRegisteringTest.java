@@ -24,6 +24,7 @@ import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningSt
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 public class CallRegisteringTest {
 
@@ -35,9 +36,11 @@ public class CallRegisteringTest {
 		CallGraph cg = new BaseCallGraph() {
 
 			@Override
-			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver) throws CallResolutionException {
+			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+					throws CallResolutionException {
 				return receiver.getStaticType().allInstances();
 			}
+
 		};
 
 		Program p = new Program();
@@ -60,7 +63,8 @@ public class CallRegisteringTest {
 		p.validateAndFinalize();
 
 		cg.init(p);
-		CFGCall resolved = (CFGCall) cg.resolve(call);
+		@SuppressWarnings("unchecked")
+		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0]);
 		cg.registerCall(resolved);
 
 		Collection<CodeMember> callees = cg.getCallees(cfg1);
