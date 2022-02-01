@@ -283,4 +283,31 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
 		prog.validateAndFinalize();
 	}
+	
+	@Test
+	public void testOverridingDefaultMethods() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/overriding-default-method.imp", false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
+		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
+
+		findCFG(j, "a");
+		ImplementedCFG bJ = (ImplementedCFG) findCFG(j, "b");
+
+		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
+		findCFG(i, "d");
+		
+		ImplementedCFG bFirst = findCFG(first, "b");
+		ImplementedCFG cFirst = findCFG(first, "c");
+
+	
+		overrides(bJ, bFirst);
+		overrides(cI, cFirst);
+
+		isInstance(i, first);
+		isInstance(j, i);
+		isInstance(j, first);
+	}
 }
