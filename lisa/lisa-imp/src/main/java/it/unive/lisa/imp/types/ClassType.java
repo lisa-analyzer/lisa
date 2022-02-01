@@ -1,18 +1,20 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.type.PointerType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.UnitType;
-import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.type.PointerType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 
 /**
  * A type representing an IMP class defined in an IMP program. ClassTypes are
@@ -163,7 +165,7 @@ public final class ClassType implements PointerType, UnitType {
 	@Override
 	public Collection<Type> allInstances() {
 		Collection<Type> instances = new HashSet<>();
-		for (CompilationUnit in : unit.getInstances())
+		for (Unit in : unit.getInstances())
 			instances.add(lookup(in.getName(), null));
 		return instances;
 	}

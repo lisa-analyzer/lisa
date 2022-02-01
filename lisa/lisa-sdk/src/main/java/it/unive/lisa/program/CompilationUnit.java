@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -45,13 +46,6 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * The collection of interface units this unit directly inherits from.
 	 */
 	private final Collection<InterfaceUnit> superInterfaceUnits;
-
-	/**
-	 * The lazily computed collection of instances of this unit, that is, the
-	 * collection of compilation units that directly or indirectly inherit from
-	 * this unit
-	 */
-	private final Collection<CompilationUnit> instances;
 
 	/**
 	 * The instance globals defined in this unit, indexed by
@@ -122,7 +116,6 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		this.sealed = sealed;
 		superCompilationUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instanceGlobals = new ConcurrentHashMap<>();
 		instanceCfgs = new ConcurrentHashMap<>();
 		instanceConstructs = new ConcurrentHashMap<>();
@@ -152,22 +145,6 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	public final Collection<CompilationUnit> getSuperUnits() {
 		// TODO: it should return both super compilation units and super interfaces
 		return superCompilationUnits;
-	}
-
-	/**
-	 * Yields the collection of {@link CompilationUnit}s that are instances of
-	 * this one, including itself. In other words, this method returns the
-	 * collection of compilation units that directly or indirectly, inherit from
-	 * this one.<br>
-	 * <br>
-	 * Note that this method returns an empty collection, until
-	 * {@link #validateAndFinalize()} has been called.
-	 * 
-	 * @return the collection of units that are instances of this one, including
-	 *             this unit itself
-	 */
-	public final Collection<CompilationUnit> getInstances() {
-		return instances;
 	}
 
 	/**
@@ -298,8 +275,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	public final ImplementedCFG getInstanceCFG(String signature, boolean traverseHierarchy) {
 		Collection<
-				ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
-						false, traverseHierarchy);
+		ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
+				false, traverseHierarchy);
 		if (res.isEmpty())
 			return null;
 		return res.stream().findFirst().get();
@@ -561,7 +538,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return {@code true} only if that condition holds
 	 */
-	public final boolean isInstanceOf(CompilationUnit unit) {
+	public final boolean isInstanceOf(UnitWithSuperUnits unit) {
 		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
 				: superCompilationUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
 	}
@@ -571,7 +548,11 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
 		instances.add(unit);
+		
 		for (CompilationUnit sup : superCompilationUnits)
+			sup.addInstance(unit);
+		
+		for (InterfaceUnit sup : superInterfaceUnits)
 			sup.addInstance(unit);
 	}
 
@@ -595,7 +576,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 			return;
 
 		super.validateAndFinalize();
-	
+
 		for (CompilationUnit sup : superCompilationUnits)
 			if (sup.sealed)
 				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
@@ -634,21 +615,22 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 				} else if (!s.canBeInstantiated())
 					throw new ProgramValidationException(
 							this + " does not overrides the cfg " + sup.getDescriptor().getSignature()
-									+ " of the non-instantiable unit " + s);
+							+ " of the non-instantiable unit " + s);
 			}
 
 		for (InterfaceUnit i : superInterfaceUnits)
-			for (SignatureCFG sup : i.getInstanceCFGs(true)) {
+			for (CFG sup : i.getInstanceCFGs(true)) {
 				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
 				if (implementing.size() > 1)
 					throw new ProgramValidationException(
 							sup.getDescriptor().getSignature() + " is implemented multiple times in unit " + this + ": "
 									+ StringUtils.join(", ", implementing));
-				else if (implementing.isEmpty())
-					throw new ProgramValidationException(
-							this + " implements the interface " + i.getName() + " but does not implements the cfg "
-									+ sup.getDescriptor().getSignature());
-				else {
+				else if (implementing.isEmpty()) {
+					if (sup instanceof SignatureCFG)
+						throw new ProgramValidationException(
+								this + " implements the interface " + i.getName() + " but does not implements the cfg "
+										+ sup.getDescriptor().getSignature());
+				} else {
 					CodeMember over = implementing.iterator().next();
 					over.getDescriptor().overrides().addAll(sup.getDescriptor().overrides());
 					over.getDescriptor().overrides().add(sup);

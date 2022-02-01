@@ -13,14 +13,13 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.SignatureCFG;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a
  * {@link Unit} that only defines instance members, from which other units (both
  * {@link CompilationUnit} and {@link InterfaceUnit}) can inherit from
  * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 
@@ -34,13 +33,6 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * {@link CFGDescriptor#getSignature()}
 	 */
 	private final Map<String, CFG> instanceCFG;
-
-	/**
-	 * The lazily computed collection of instances of this unit, that is, the
-	 * collection of compilation units that directly or indirectly inherit from
-	 * this unit
-	 */
-	private final Collection<Unit> instances;
 	
 	/**
 	 * The collection of interface units this unit directly inherits from.
@@ -58,7 +50,6 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		this.location = location;
 		instanceCFG = new ConcurrentHashMap<>();
 		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		hierarchyComputed = false;
 	}
 
@@ -67,7 +58,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return false;
 	}
 
-	public final Collection<SignatureCFG> getInstanceCFGs(boolean traverseHierarchy) {
+	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> true, true, false, traverseHierarchy);
 	}
 
@@ -148,7 +139,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		hierarchyComputed = true;
 	}
 
-	public final boolean addInstanceCFG(SignatureCFG cfg) {
+	public final boolean addInstanceCFG(CFG cfg) {
 		return instanceCFG.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
 	
@@ -157,29 +148,19 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return superInterfaceUnits;
 	}
 	
-	/**
-	 * Yields the collection of {@link CompilationUnit}s that are instances of
-	 * this one, including itself. In other words, this method returns the
-	 * collection of compilation units that directly or indirectly, inherit from
-	 * this one.<br>
-	 * <br>
-	 * Note that this method returns an empty collection, until
-	 * {@link #validateAndFinalize()} has been called.
-	 * 
-	 * @return the collection of units that are instances of this one, including
-	 *             this unit itself
-	 */
-	public final Collection<Unit> getInstances() {
-		return instances;
-	}
-	
-	private final void addInstance(Unit unit) throws ProgramValidationException {
+	protected final void addInstance(Unit unit) throws ProgramValidationException {
 		if (superInterfaceUnits.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
 		instances.add(unit);
+		
 		for (InterfaceUnit sup : superInterfaceUnits)
 			sup.addInstance(unit);
+	}
+	
+	public final boolean isInstanceOf(InterfaceUnit unit) {
+		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
+				: superInterfaceUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
 	}
 	
 	@Override

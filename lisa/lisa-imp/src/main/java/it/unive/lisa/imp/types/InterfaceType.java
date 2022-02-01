@@ -15,6 +15,7 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 
+//TODO: consider to remove this class and keep the ClassType type
 public final class InterfaceType implements UnitType {
 
 	private static final Map<String, InterfaceType> types = new HashMap<>();

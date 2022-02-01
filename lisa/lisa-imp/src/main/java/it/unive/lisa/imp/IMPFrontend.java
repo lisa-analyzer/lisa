@@ -320,13 +320,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		currentUnit = unit;
 
 		if (ctx.superinterfaces != null)
-			for (UnitNameContext intf : ctx.superinterfaces.unitName())
-				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, intf.getText()));
+			for (UnitNameContext inft : ctx.superinterfaces.unitName())
+				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, inft.getText()));
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
-
-		for (SignatureDeclarationContext decl : ctx.signatureDeclarations().signatureDeclaration())
+		
+		for (SignatureDeclarationContext decl : ctx.methodOrSignarureDeclarations().signatureDeclaration())
 			unit.addInstanceCFG(visitSignatureDeclaration(decl));
+
+		for (MethodDeclarationContext decl : ctx.methodOrSignarureDeclarations().methodDeclaration())
+			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
 		return unit;
 	}

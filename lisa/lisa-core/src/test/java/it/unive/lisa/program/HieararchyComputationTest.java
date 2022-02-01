@@ -27,21 +27,26 @@ public class HieararchyComputationTest {
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
-	
-	private static SignatureCFG findCFG(InterfaceUnit unit, String name) {
-		SignatureCFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+
+	private static CFG findCFG(InterfaceUnit unit, String name) {
+		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static void isInstance(CompilationUnit sup, CompilationUnit unit) {
+	private static void isInstance(UnitWithSuperUnits sup, Unit unit) {
 		assertTrue("'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
-		if (sup != unit)
-			assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-					unit.isInstanceOf(sup));
+		if (sup != unit) {
+			if (unit instanceof CompilationUnit)
+				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+						((CompilationUnit) unit).isInstanceOf(sup));
+			else
+				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
+						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
+		}
 	}
 
 	private static void notInstance(CompilationUnit sup, CompilationUnit unit) {
@@ -56,10 +61,10 @@ public class HieararchyComputationTest {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+						sup.getDescriptor().overriddenBy().contains(cfg));
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName()
-						+ "'",
+				+ "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
@@ -67,10 +72,10 @@ public class HieararchyComputationTest {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
-				sup.getDescriptor().overriddenBy().contains(cfg));
+						sup.getDescriptor().overriddenBy().contains(cfg));
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName()
-						+ "'",
+				+ "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
@@ -195,7 +200,7 @@ public class HieararchyComputationTest {
 
 		overrides(fooFirst, fooThird);
 	}
-	
+
 	@Test
 	public void testSimpleInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-interfaces.imp", false);
@@ -204,21 +209,21 @@ public class HieararchyComputationTest {
 		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
-	
+
 		findCFG(first, "foo");
 		ImplementedCFG aFirst = findCFG(first, "a");
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aJ = findCFG(j, "a");
-		SignatureCFG bI = findCFG(i, "b");
-		SignatureCFG cI = findCFG(i, "c");
-		
+		SignatureCFG aJ = (SignatureCFG) findCFG(j, "a");
+		SignatureCFG bI = (SignatureCFG) findCFG(i, "b");
+		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
+
 		overrides(aJ, aFirst);
 		overrides(bI, bFirst);
 		overrides(cI, cFirst);
 	}
-	
+
 	@Test
 	public void testMultiInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/multi-interfaces.imp", false);
@@ -228,22 +233,51 @@ public class HieararchyComputationTest {
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 		InterfaceUnit k = (InterfaceUnit) findUnit(prog, "k");
-	
+
 		findCFG(first, "foo");
 		ImplementedCFG aFirst = findCFG(first, "a");
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aI = findCFG(i, "a");
-		SignatureCFG bJ = findCFG(j, "b");
-		SignatureCFG cK = findCFG(k, "c");
-		
+		SignatureCFG aI = (SignatureCFG) findCFG(i, "a");
+		SignatureCFG bJ = (SignatureCFG) findCFG(j, "b");
+		SignatureCFG cK = (SignatureCFG) findCFG(k, "c");
+
 		overrides(aI, aFirst);
 		overrides(bJ, bFirst);
 		overrides(cK, cFirst);
+		
+		isInstance(i, first);
+		isInstance(j, first);
+		isInstance(k, first);
 	}
-	
-	
+
+	@Test
+	public void testDefaultMethodsInterface() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/default-methods-interface.imp", false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
+		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
+
+		findCFG(j, "a");
+		ImplementedCFG bFirst = findCFG(first, "b");
+		ImplementedCFG cFirst = findCFG(first, "c");
+
+		SignatureCFG bI = (SignatureCFG) findCFG(i, "b");
+		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
+		findCFG(i, "d");
+
+		overrides(bI, bFirst);
+		overrides(cI, cFirst);
+
+		isInstance(i, first);
+		isInstance(j, i);
+		isInstance(j, first);
+	}
+
+
 	@Test(expected = ProgramValidationException.class)
 	public void testInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);

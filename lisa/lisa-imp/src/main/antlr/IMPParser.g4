@@ -281,8 +281,9 @@ methodDeclaration
 signatureDeclaration
 	: annotations? FINAL? name = IDENTIFIER formals SEMI
 	;
-signatureDeclarations
-	: signatureDeclaration*
+
+methodOrSignarureDeclarations
+	: (signatureDeclaration | methodDeclaration)*
 	;
 
 /*
@@ -299,7 +300,7 @@ classUnit
   ;
   
 interfaceUnit
-	: annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = signatureDeclarations RBRACE
+	: annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = methodOrSignarureDeclarations RBRACE
   ;
 
 unitNames
