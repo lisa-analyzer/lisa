@@ -33,6 +33,8 @@ public interface OpenCallPolicy {
 	 *                       computed abstract state
 	 * @param <V>        the type of {@link ValueDomain} contained into the
 	 *                       computed abstract state
+	 * @param <T>        the type of {@link TypeDomain} contained into the
+	 *                       computed abstract state
 	 * @param call       the {@link OpenCall} under evaluation
 	 * @param entryState the state when the call is executed
 	 * @param params     the symbolic expressions representing the computed

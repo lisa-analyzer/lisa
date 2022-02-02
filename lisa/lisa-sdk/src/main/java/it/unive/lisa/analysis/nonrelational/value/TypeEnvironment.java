@@ -33,7 +33,7 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 		extends Environment<TypeEnvironment<T>, ValueExpression, T, T>
 		implements TypeDomain<TypeEnvironment<T>> {
 
-	protected final T stack;
+	private final T stack;
 
 	/**
 	 * Builds an empty environment.
@@ -46,7 +46,7 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 		this.stack = domain.bottom();
 	}
 
-	protected TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	private TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}

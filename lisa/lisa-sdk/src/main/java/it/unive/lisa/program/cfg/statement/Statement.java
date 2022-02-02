@@ -124,6 +124,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param entryState      the entry state that represents the abstract
 	 *                            values of each program variable and memory
 	 *                            location when the execution reaches this

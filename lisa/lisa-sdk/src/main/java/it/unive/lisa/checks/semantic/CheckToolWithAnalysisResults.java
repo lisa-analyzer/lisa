@@ -24,6 +24,7 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractState} contained in the results
  * @param <H> the type of {@link HeapDomain} contained in the results
  * @param <V> the type of {@link ValueDomain} contained in the results
+ * @param <T> the type of {@link TypeDomain} contained in the results
  */
 public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

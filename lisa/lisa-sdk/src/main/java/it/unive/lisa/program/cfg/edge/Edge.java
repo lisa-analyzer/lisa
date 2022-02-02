@@ -93,6 +93,7 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	 * @param <A>         the concrete {@link AbstractState} instance
 	 * @param <H>         the concrete {@link HeapDomain} instance
 	 * @param <V>         the concrete {@link ValueDomain} instance
+	 * @param <T>         the concrete {@link TypeDomain} instance
 	 * @param sourceState the {@link AnalysisState} computed at the source of
 	 *                        this edge
 	 * 

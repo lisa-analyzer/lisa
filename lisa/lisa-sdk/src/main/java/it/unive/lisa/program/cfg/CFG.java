@@ -230,6 +230,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
 	 * @param entryState      the entry states to apply to each
 	 *                            {@link Statement} returned by
 	 *                            {@link #getEntrypoints()}
@@ -288,6 +290,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
 	 * @param entrypoints     the collection of {@link Statement}s that to use
 	 *                            as a starting point of the computation (that
 	 *                            must be nodes of this cfg)
@@ -345,6 +349,8 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	 * @param <H>             the type of {@link HeapDomain} contained into the
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
+	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
 	 *                            computed abstract state
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis

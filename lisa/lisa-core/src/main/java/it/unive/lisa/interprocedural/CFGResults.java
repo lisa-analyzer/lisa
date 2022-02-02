@@ -24,6 +24,8 @@ import org.apache.commons.lang3.tuple.Pair;
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
  */
 public class CFGResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

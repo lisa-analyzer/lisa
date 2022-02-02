@@ -128,6 +128,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * Resolves the given call as regular (non-instance) call.
 	 * 
 	 * @param call    the call to resolve
+	 * @param types   the runtime types of the parameters of the call
 	 * @param targets the list of targets that, after the execution of this
 	 *                    method, will contain the {@link CFG}s targeted by the
 	 *                    call
@@ -156,6 +157,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * Resolves the given call as an instance call.
 	 * 
 	 * @param call    the call to resolve
+	 * @param types   the runtime types of the parameters of the call
 	 * @param targets the list of targets that, after the execution of this
 	 *                    method, will contain the {@link CFG}s targeted by the
 	 *                    call
@@ -223,13 +225,15 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	/**
-	 * Returns all the possible types of the given expression, that is a
-	 * receiver of a method call. How we choose this set varies from the call
-	 * graph algorithm we decide to adopt (e.g., CHA, RTA, 0-CFA, ...)
+	 * Returns all the possible types of the given expression that should be
+	 * considered as possible receivers of the call. How we choose this set
+	 * varies from the call graph algorithm we decide to adopt (e.g., CHA, RTA,
+	 * 0-CFA, ...)
 	 * 
 	 * @param receiver an expression
+	 * @param types    the runtime types of the receiver
 	 * 
-	 * @return the possible types of the given expression
+	 * @return the possible types to use as receivers
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */

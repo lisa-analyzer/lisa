@@ -100,16 +100,24 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 	 * parameters from {@code given}, and lastly with default values from
 	 * {@code defaults}.
 	 * 
-	 * @param <T>      the type of elements in {@code slots}
-	 * @param <F>      the type of the element returned if the preparation fails
-	 * @param formals  the formal parameters
-	 * @param actuals  the actual parameters
-	 * @param given    the value to use for each parameter, positional or named
-	 * @param defaults the default values for each parameter if no explicit
-	 *                     value is provided
-	 * @param slots    the slots that represent final values to use as
-	 *                     parameters
-	 * @param failure  what to return in case of failure
+	 * @param <T>          the type of elements in {@code slots}
+	 * @param <F>          the type of the element returned if the preparation
+	 *                         fails
+	 * @param formals      the formal parameters
+	 * @param actuals      the actual parameters
+	 * @param given        the value to use for each parameter, positional or
+	 *                         named
+	 * @param givenTypes   the types of the value to use for each parameter,
+	 *                         positional or named
+	 * @param defaults     the default values for each parameter if no explicit
+	 *                         value is provided
+	 * @param defaultTypes the types of the default values for each parameter if
+	 *                         no explicit value is provided
+	 * @param slots        the slots that represent final values to use as
+	 *                         parameters
+	 * @param slotTypes    the types of the slots that represent final values to
+	 *                         use as parameters
+	 * @param failure      what to return in case of failure
 	 * 
 	 * @return {@code failure} if the preparation fails, {@code null} otherwise
 	 * 

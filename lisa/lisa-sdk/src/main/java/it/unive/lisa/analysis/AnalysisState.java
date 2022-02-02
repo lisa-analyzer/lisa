@@ -26,6 +26,7 @@ import java.util.Set;
  * @param <A> the type of {@link AbstractState} embedded in this state
  * @param <H> the type of {@link HeapDomain} embedded in the abstract state
  * @param <V> the type of {@link ValueDomain} embedded in the abstract state
+ * @param <T> the type of {@link TypeDomain} embedded in the abstract state
  */
 public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

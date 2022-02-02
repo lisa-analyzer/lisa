@@ -30,7 +30,7 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		extends Environment<ValueEnvironment<T>, ValueExpression, T, T>
 		implements ValueDomain<ValueEnvironment<T>> {
 
-	protected final T stack;
+	private final T stack;
 
 	/**
 	 * Builds an empty environment.
@@ -43,7 +43,7 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		this.stack = domain.bottom();
 	}
 
-	protected ValueEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	private ValueEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}

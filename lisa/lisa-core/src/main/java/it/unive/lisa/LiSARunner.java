@@ -48,6 +48,8 @@ import org.apache.logging.log4j.Logger;
  *                that will be used in the analysis fixpoint
  * @param <V> the type of {@link ValueDomain} contained into the abstract state
  *                that will be used in the analysis fixpoint
+ * @param <T> the type of {@link TypeDomain} contained into the abstract state
+ *                that will be used in the analysis fixpoint
  */
 public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

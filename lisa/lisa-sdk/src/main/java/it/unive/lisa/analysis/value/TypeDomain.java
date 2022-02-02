@@ -8,6 +8,8 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * the runtime types of its operands.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <T> the concrete type of the {@link TypeDomain}
  */
 public interface TypeDomain<T extends TypeDomain<T>> extends ValueDomain<T> {
 

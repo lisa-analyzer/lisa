@@ -36,6 +36,8 @@ import java.util.Collection;
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
  */
 public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
@@ -156,8 +158,9 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
 	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[])} if needed.
 	 *
-	 * @param call the call to resolve
-	 *
+	 * @param call  the call to resolve
+	 * @param types the runtime types of the parameters of the call
+	 * 
 	 * @return a collection of all the possible runtime targets
 	 *
 	 * @throws CallResolutionException if this analysis is unable to resolve the

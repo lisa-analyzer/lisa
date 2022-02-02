@@ -39,6 +39,7 @@ public interface ParameterAssigningStrategy {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param call            the call to be prepared
 	 * @param callState       the analysis state where the call is to be
 	 *                            executed

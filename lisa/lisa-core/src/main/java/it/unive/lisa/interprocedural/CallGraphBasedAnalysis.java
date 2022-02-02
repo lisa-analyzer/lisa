@@ -28,6 +28,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * @param <A> The abstract state of the analysis
  * @param <H> The heap domain
  * @param <V> The value domain
+ * @param <T> The type domain
  */
 public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

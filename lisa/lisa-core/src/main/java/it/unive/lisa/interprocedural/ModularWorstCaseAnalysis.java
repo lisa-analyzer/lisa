@@ -42,6 +42,7 @@ import org.apache.logging.log4j.Logger;
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
  * @param <V> the value domain
+ * @param <T> the type domain
  */
 public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

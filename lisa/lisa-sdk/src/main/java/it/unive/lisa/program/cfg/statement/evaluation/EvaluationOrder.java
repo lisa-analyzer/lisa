@@ -30,6 +30,7 @@ public interface EvaluationOrder {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param subExpressions  the sub-expressions to evaluate
 	 * @param entryState      the state to use as starting point for the
 	 *                            evaluation

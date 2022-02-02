@@ -125,6 +125,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the expression is to be evaluated

@@ -17,6 +17,7 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractState}
  * @param <H> the type of the {@link HeapDomain}
  * @param <V> the type of the {@link ValueDomain}
+ * @param <T> the type of {@link TypeDomain}
  */
 public class StatementStore<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,

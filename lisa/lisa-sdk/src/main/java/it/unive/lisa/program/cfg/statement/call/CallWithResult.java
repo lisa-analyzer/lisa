@@ -68,6 +68,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The

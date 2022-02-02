@@ -21,6 +21,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @param <H> the type of {@link HeapDomain} embedded in this state
  * @param <V> the type of {@link ValueDomain} embedded in this state
+ * @param <T> the type of {@link TypeDomain} embedded in this state
  */
 public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
@@ -40,8 +41,8 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	private final V valueState;
 
 	/**
-	 * The domain containing runtime types information regarding values of
-	 * program variables and concretized memory locations
+	 * The domain containing runtime types information regarding runtime types
+	 * of program variables and concretized memory locations
 	 */
 	private final T typeState;
 
@@ -52,6 +53,9 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	 *                       structures
 	 * @param valueState the domain containing information regarding values of
 	 *                       program variables and concretized memory locations
+	 * @param typeState  the domain containing information regarding runtime
+	 *                       types of program variables and concretized memory
+	 *                       locations
 	 */
 	public SimpleAbstractState(H heapState, V valueState, T typeState) {
 		this.heapState = heapState;

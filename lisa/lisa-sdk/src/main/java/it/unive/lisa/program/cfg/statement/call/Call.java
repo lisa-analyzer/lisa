@@ -230,6 +230,19 @@ public abstract class Call extends NaryExpression {
 		return true;
 	}
 
+	/**
+	 * Yields an array containing the runtime types of the parameters of this
+	 * call, retrieved by accessing the given {@link StatementStore}.
+	 * 
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of the {@link HeapDomain}
+	 * @param <V>         the type of the {@link ValueDomain}
+	 * @param <T>         the type of {@link TypeDomain}
+	 * @param expressions the store containing the computed states for the
+	 *                        parameters
+	 * 
+	 * @return the array of parameter types
+	 */
 	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,

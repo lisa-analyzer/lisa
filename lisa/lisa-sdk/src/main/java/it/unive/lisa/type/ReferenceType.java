@@ -23,10 +23,22 @@ public final class ReferenceType implements PointerType {
 	// workaround to this problem
 	private Type innerType;
 
+	/**
+	 * Builds the type for a reference to a location containing values of types
+	 * {@code innerTypes}.
+	 * 
+	 * @param innerTypes the possible types of the referenced location
+	 */
 	public ReferenceType(ExternalSet<Type> innerTypes) {
 		this.innerTypes = innerTypes;
 	}
 
+	/**
+	 * Builds the type for a reference to a location containing values of types
+	 * {@code t}.
+	 * 
+	 * @param t the type of the referenced location
+	 */
 	public ReferenceType(Type t) {
 		innerType = t;
 	}

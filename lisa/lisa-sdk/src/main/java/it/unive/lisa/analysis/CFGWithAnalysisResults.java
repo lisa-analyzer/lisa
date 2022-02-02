@@ -26,6 +26,8 @@ import java.util.function.Function;
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
+ * @param <T> the type of {@link TypeDomain} embedded into the computed abstract
+ *                state
  */
 public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
