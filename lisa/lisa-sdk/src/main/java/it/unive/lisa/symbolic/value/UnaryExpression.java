@@ -77,7 +77,8 @@ public class UnaryExpression extends ValueExpression {
 			BinaryExpression expr = new BinaryExpression(binary.getStaticType(), left.removeNegations(),
 					right.removeNegations(),
 					oppositeOp, getCodeLocation());
-			expr.setRuntimeTypes(getRuntimeTypes());
+			if (hasRuntimeTypes())
+				expr.setRuntimeTypes(getRuntimeTypes());
 			return expr;
 		}
 
@@ -95,7 +96,8 @@ public class UnaryExpression extends ValueExpression {
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.popScope(token), operator,
 				getCodeLocation());
-		expr.setRuntimeTypes(getRuntimeTypes());
+		if (hasRuntimeTypes())
+			expr.setRuntimeTypes(getRuntimeTypes());
 		return expr;
 	}
 

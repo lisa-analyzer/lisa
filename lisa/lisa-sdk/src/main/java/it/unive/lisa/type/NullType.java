@@ -13,7 +13,7 @@ import java.util.Collections;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class NullType implements PointerType {
+public class NullType implements InMemoryType {
 
 	/**
 	 * Unique instance of {@link NullType}.

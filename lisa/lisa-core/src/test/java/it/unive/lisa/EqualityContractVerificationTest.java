@@ -57,10 +57,14 @@ import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTrave
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.collections.externalSet.BitExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.collections.externalSet.UniversalExternalSet;
 import it.unive.lisa.util.collections.workset.ConcurrentFIFOWorkingSet;
@@ -110,6 +114,9 @@ public class EqualityContractVerificationTest {
 			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "foo", "foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
 			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "bar", "bar");
+	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
+	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
+	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
@@ -183,6 +190,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
+				.withPrefabValues(ExternalSet.class, s1, s2)
 				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
 
 		if (getClass)
@@ -212,8 +220,8 @@ public class EqualityContractVerificationTest {
 		// caring about fields
 		verify(ExternalSetCache.class, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		// suppress nullity: the cache will never be null..
-		verify(BitExternalSet.class, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
-		verify(UniversalExternalSet.class);
+		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
+		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
 		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
 		verify(NodeEdges.class);
@@ -235,8 +243,13 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			// type token is the only one with an eclipse-like equals
-			verify(type, type == TypeTokenType.class);
+			if (type == ReferenceType.class)
+				// TODO to avoid using the cache early, we have non-final fields
+				// in here and not all of them are used
+				verify(type, Warning.NONFINAL_FIELDS, Warning.ALL_FIELDS_SHOULD_BE_USED);
+			else
+				// type token is the only one with an eclipse-like equals
+				verify(type, type == TypeTokenType.class);
 	}
 
 	@Test

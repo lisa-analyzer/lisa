@@ -81,7 +81,8 @@ public class BinaryExpression extends ValueExpression {
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.pushScope(token), right.pushScope(token),
 				operator, getCodeLocation());
-		expr.setRuntimeTypes(getRuntimeTypes());
+		if (hasRuntimeTypes())
+			expr.setRuntimeTypes(getRuntimeTypes());
 		return expr;
 	}
 
@@ -89,7 +90,8 @@ public class BinaryExpression extends ValueExpression {
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.popScope(token), right.popScope(token),
 				operator, getCodeLocation());
-		expr.setRuntimeTypes(getRuntimeTypes());
+		if (hasRuntimeTypes())
+			expr.setRuntimeTypes(getRuntimeTypes());
 		return expr;
 	}
 

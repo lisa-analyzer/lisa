@@ -15,6 +15,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression modeling the array element access operation
@@ -51,14 +53,20 @@ public class IMPArrayAccess extends BinaryExpression {
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-
-		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
+		Type recType = left.getDynamicType();
+		Type arrayType;
+		if (recType.isUntyped()) {
+			arrayType = recType;
+		} else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isArrayType)) {
+			ExternalSet<Type> inner = recType.asPointerType().getInnerTypes();
+			arrayType = inner.reduce(inner.first(), (r, t) -> r.commonSupertype(t));
+		} else
 			return state.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		HeapDereference deref = new HeapDereference(getStaticType(), left, getLocation());
+		HeapDereference deref = new HeapDereference(arrayType, left, getLocation());
 		return state.smallStepSemantics(new AccessChild(getStaticType(), deref, right, getLocation()), this);
 	}
 }

@@ -443,10 +443,7 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 			this.bits = BitExternalSet.this.bits;
 			// we go back to the integer representation
 			this.totalBits = bits.length << 6;
-			if (BitExternalSet.this.isEmpty())
-				this.next = -100;
-			else
-				this.next = findNextBit();
+			this.next = findNextBit();
 		}
 
 		/**

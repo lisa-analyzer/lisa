@@ -29,6 +29,7 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -42,13 +43,16 @@ public class RightToLeftEvaluation implements EvaluationOrder {
 		if (subExpressions.length == 0)
 			return entryState;
 
-		AnalysisState<A, H, V, T> preState = entryState;
+		AnalysisState<A, H, V, T> postState = entryState;
 		for (int i = computed.length - 1; i >= 0; i--) {
-			preState = subExpressions[i].semantics(preState, interprocedural, expressions);
-			expressions.put(subExpressions[i], preState);
-			computed[i] = preState.getComputedExpressions();
+			AnalysisState<A, H, V, T> tmp = subExpressions[i].semantics(postState, interprocedural, expressions);
+			expressions.put(subExpressions[i], tmp);
+			computed[i] = tmp.getComputedExpressions();
+			computed[i].forEach(
+					e -> e.setRuntimeTypes(tmp.getDomainInstance(TypeDomain.class).getInferredRuntimeTypes()));
+			postState = tmp;
 		}
 
-		return preState;
+		return postState;
 	}
 }

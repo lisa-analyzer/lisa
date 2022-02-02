@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.types;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -29,7 +31,6 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -50,7 +51,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	 * represents an empty set of types.
 	 */
 	public InferredTypes() {
-		this(Caches.types().mkEmptySet());
+		this(Caches.types().mkUniversalSet());
 	}
 
 	/**
@@ -83,8 +84,18 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
+	public boolean isTop() {
+		return super.isTop() || elements.equals(TOP.elements);
+	}
+
+	@Override
 	public InferredTypes bottom() {
 		return BOTTOM;
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() || elements.equals(BOTTOM.elements);
 	}
 
 	@Override

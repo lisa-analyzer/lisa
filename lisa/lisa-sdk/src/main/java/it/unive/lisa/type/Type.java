@@ -1,9 +1,10 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import it.unive.lisa.caches.Caches;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * Type interface. Any instance of a concrete type, instance of Type, should be
@@ -138,6 +139,27 @@ public interface Type {
 	 */
 	default PointerType asPointerType() {
 		return isPointerType() ? (PointerType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link InMemoryType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isInMemoryType() {
+		return this instanceof InMemoryType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link InMemoryType}, only if
+	 * {@link #isInMemoryType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link InMemoryType}, or {@code null}
+	 */
+	default InMemoryType asInMemoryType() {
+		return isInMemoryType() ? (InMemoryType) this : null;
 	}
 
 	/**

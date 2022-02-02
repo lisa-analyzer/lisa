@@ -118,7 +118,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			int wideningThreshold) throws AnalysisExecutionException {
 		int iter = 0;
 		do {
-			LOG.info("Performing %s fixpoint iteration", ordinal(iter + 1));
+			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
 			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {

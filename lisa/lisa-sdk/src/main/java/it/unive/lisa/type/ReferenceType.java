@@ -16,14 +16,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class ReferenceType implements PointerType {
 
-	private final ExternalSet<Type> innerTypes;
+	private ExternalSet<Type> innerTypes;
+
+	// TODO the purpose of this field is to avoid using the cache
+	// when defining the descriptors of cfgs, we have to find another
+	// workaround to this problem
+	private Type innerType;
 
 	public ReferenceType(ExternalSet<Type> innerTypes) {
 		this.innerTypes = innerTypes;
 	}
 
 	public ReferenceType(Type t) {
-		this(Caches.types().mkSingletonSet(t));
+		innerType = t;
 	}
 
 	@Override
@@ -41,21 +46,22 @@ public final class ReferenceType implements PointerType {
 		return Caches.types().mkSingletonSet(this);
 	}
 
-	/**
-	 * Yields the inner types, that is, the types of the memory region that
-	 * variables with this type point to.
-	 * 
-	 * @return the inner types
-	 */
+	@Override
 	public ExternalSet<Type> getInnerTypes() {
-		return innerTypes;
+		return innerTypes != null ? innerTypes : Caches.types().mkSingletonSet(innerType);
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((innerTypes == null) ? 0 : innerTypes.hashCode());
+		if (innerTypes != null)
+			if (innerTypes.size() == 1)
+				result = prime * result + innerTypes.first().hashCode();
+			else
+				result = prime * result + ((innerTypes == null) ? 0 : innerTypes.hashCode());
+		else
+			result = prime * result + ((innerType == null) ? 0 : innerType.hashCode());
 		return result;
 	}
 
@@ -66,16 +72,53 @@ public final class ReferenceType implements PointerType {
 		if (!(obj instanceof ReferenceType))
 			return false;
 		ReferenceType other = (ReferenceType) obj;
-		if (innerTypes == null) {
+
+		if (innerTypes != null) {
+			if (innerTypes.size() == 1) {
+				if (other.innerTypes != null)
+					if (other.innerTypes.size() != 1)
+						// [x] != [y, z]
+						return false;
+					else
+						// [x] ?= [y]
+						return innerTypes.first().equals(other.innerTypes.first());
+				else
+					// [x] ?= y
+					return innerTypes.first().equals(other.innerType);
+			} else {
+				if (other.innerTypes != null)
+					if (other.innerTypes.size() != 1)
+						// [x, w] ?= [y, z]
+						return innerTypes.equals(other.innerTypes);
+					else
+						// [x, w] != [y]
+						return false;
+				else
+					// [x, w] != y
+					return false;
+			}
+		} else if (innerType != null) {
 			if (other.innerTypes != null)
-				return false;
-		} else if (!innerTypes.equals(other.innerTypes))
+				if (other.innerTypes.size() != 1)
+					// x != [y, z]
+					return false;
+				else
+					// x ?= [y]
+					return innerType.equals(other.innerTypes.first());
+			else
+				// x ?= y
+				return innerType.equals(other.innerType);
+		} else
 			return false;
-		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "*(" + StringUtils.join(innerTypes, ", ") + ")";
+		if (innerTypes != null)
+			if (innerTypes.size() == 1)
+				return innerTypes.first() + "*";
+			else
+				return "[" + StringUtils.join(innerTypes, ", ") + "]*";
+		return innerType + "*";
 	}
 }

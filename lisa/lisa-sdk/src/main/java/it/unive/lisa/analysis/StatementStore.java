@@ -1,11 +1,12 @@
 package it.unive.lisa.analysis;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Map;
 
 /**
  * A functional lattice that stores instances of {@link AnalysisState} computed
@@ -54,6 +55,15 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	 */
 	public AnalysisState<A, H, V, T> put(Statement st, AnalysisState<A, H, V, T> state) {
 		return function.put(st, state);
+	}
+
+	/**
+	 * Removes the stored state for the given statement.
+	 * 
+	 * @param st the statement whose state needs to be forgotten
+	 */
+	public void forget(Statement st) {
+		function.remove(st);
 	}
 
 	@Override

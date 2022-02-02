@@ -1,5 +1,16 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
@@ -13,18 +24,9 @@ import it.unive.lisa.program.cfg.statement.call.HybridCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -81,8 +83,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			// we allow types to be null only for calls that we already resolved
 			throw new CallResolutionException("Cannot resolve call without runtime types");
 
-		Collection<CFG> targets = new ArrayList<>();
-		Collection<NativeCFG> nativeTargets = new ArrayList<>();
+		Collection<CFG> targets = new HashSet<>();
+		Collection<NativeCFG> nativeTargets = new HashSet<>();
 
 		if (call.isInstanceCall())
 			resolveInstance(call, types, targets, nativeTargets);
@@ -174,22 +176,33 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
 		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
-			if (!recType.isUnitType())
+			Collection<CompilationUnit> units;
+			if (recType.isUnitType())
+				units = Collections.singleton(recType.asUnitType().getUnit());
+			else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isUnitType))
+				units = recType.asPointerType()
+						.getInnerTypes()
+						.stream()
+						.filter(Type::isUnitType)
+						.map(Type::asUnitType)
+						.map(UnitType::getUnit)
+						.collect(Collectors.toSet());
+			else
 				continue;
 
-			CompilationUnit unit = recType.asUnitType().getUnit();
-			for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
-				// we inspect only the ones of the current unit
-				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
-				for (CodeMember cm : candidates)
-					if (cm.getDescriptor().isInstance()
-							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
-									call.getParameters(), types))
-						if (cm instanceof CFG)
-							targets.add((CFG) cm);
-						else
-							natives.add((NativeCFG) cm);
-			}
+			for (CompilationUnit unit : units)
+				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
+					// we inspect only the ones of the current unit
+					Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
+					for (CodeMember cm : candidates)
+						if (cm.getDescriptor().isInstance()
+								&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
+										call.getParameters(), types))
+							if (cm instanceof CFG)
+								targets.add((CFG) cm);
+							else
+								natives.add((NativeCFG) cm);
+				}
 		}
 	}
 

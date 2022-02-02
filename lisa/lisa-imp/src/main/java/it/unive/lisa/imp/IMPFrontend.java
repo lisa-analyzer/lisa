@@ -37,6 +37,7 @@ import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrat
 import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
@@ -355,7 +356,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Parameter[] visitFormals(FormalsContext ctx) {
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
 		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
-				ClassType.lookup(this.currentUnit.getName(), this.currentUnit));
+				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

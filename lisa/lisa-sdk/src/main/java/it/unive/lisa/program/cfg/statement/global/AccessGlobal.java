@@ -125,7 +125,7 @@ public class AccessGlobal extends Expression {
 					throws SemanticException {
 		// unit globals are unique, we can directly access those
 		return entryState.smallStepSemantics(
-				new Variable(getStaticType(), toString(), target.getAnnotations(), getLocation()),
+				new Variable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),
 				this);
 	}
 }

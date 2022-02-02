@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -10,9 +13,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import it.unive.lisa.symbolic.value.ValueExpression;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -138,10 +139,14 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	private ExpressionSet<SymbolicExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		return new ExpressionSet<>(
-				getState().getHeapState().rewrite(expression, pp).elements()
-						.stream()
-						.map(SymbolicExpression.class::cast).collect(Collectors.toSet()));
+		Set<SymbolicExpression> rewritten = new HashSet<>();
+		@SuppressWarnings("unchecked")
+		ExpressionSet<ValueExpression> tmp = getState().getDomainInstance(HeapDomain.class).rewrite(expression, pp);
+		tmp.elements()
+				.stream()
+				.map(SymbolicExpression.class::cast)
+				.forEach(rewritten::add);
+		return new ExpressionSet<>(rewritten);
 	}
 
 	@Override

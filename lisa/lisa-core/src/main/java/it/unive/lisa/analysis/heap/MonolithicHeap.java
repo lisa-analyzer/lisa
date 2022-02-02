@@ -134,7 +134,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			e.setRuntimeTypes(expression.getRuntimeTypes());
+			if (expression.hasRuntimeTypes())
+				e.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(e);
 		}
 
@@ -145,7 +146,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			// new one is modeled through the monolith
 			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			e.setRuntimeTypes(expression.getRuntimeTypes());
+			if (expression.hasRuntimeTypes())
+				e.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(e);
 		}
 
@@ -158,7 +160,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
 			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
-			e.setRuntimeTypes(expression.getRuntimeTypes());
+			if (expression.hasRuntimeTypes())
+				e.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(e);
 		}
 
@@ -172,7 +175,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
 					expression.getCodeLocation());
 			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
-			e.setRuntimeTypes(expression.getRuntimeTypes());
+			if (expression.hasRuntimeTypes())
+				e.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(e);
 		}
 	}

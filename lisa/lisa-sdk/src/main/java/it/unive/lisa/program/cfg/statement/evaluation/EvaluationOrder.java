@@ -23,7 +23,9 @@ public interface EvaluationOrder {
 	/**
 	 * Evaluates the given sub-expressions according to this order. This method
 	 * will fill {@code computed} and {@code subStates} such that
-	 * {@code subStates[i] = subExpressions[i].semantics(); computed[i] = subStates[i].computedExpressions}
+	 * {@code subStates[i] = subExpressions[i].semantics(); computed[i] = subStates[i].computedExpressions},
+	 * while also setting the runtime types for the expressions left on the
+	 * stack.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
