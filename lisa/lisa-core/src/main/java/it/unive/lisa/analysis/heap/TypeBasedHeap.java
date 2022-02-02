@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.apache.commons.collections4.SetUtils;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -30,6 +23,11 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import org.apache.commons.collections4.SetUtils;
 
 /**
  * A type-based heap implementation that abstracts heap locations depending on
@@ -253,7 +251,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 							Type dynamic = inner.isEmpty() ? Untyped.INSTANCE
 									: inner.reduce(inner.first(), (r, tt) -> r.commonSupertype(tt));
 
-							HeapLocation loc = new HeapLocation(dynamic, dynamic.toString(), true, var.getCodeLocation());
+							HeapLocation loc = new HeapLocation(dynamic, dynamic.toString(), true,
+									var.getCodeLocation());
 							loc.setRuntimeTypes(inner);
 
 							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());

@@ -1,7 +1,5 @@
 package it.unive.lisa.symbolic;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,6 +9,7 @@ import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Objects;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.

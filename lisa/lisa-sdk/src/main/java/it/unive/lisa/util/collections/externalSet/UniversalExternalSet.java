@@ -131,7 +131,7 @@ public final class UniversalExternalSet<T> implements ExternalSet<T> {
 			return true;
 		if (obj == null)
 			return false;
-		if (getClass() != obj.getClass()) 
+		if (getClass() != obj.getClass())
 			// custom equals for collections
 			return copy().equals(obj);
 		UniversalExternalSet<?> other = (UniversalExternalSet<?>) obj;

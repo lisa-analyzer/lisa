@@ -1,16 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
@@ -27,6 +16,15 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.Graph;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve

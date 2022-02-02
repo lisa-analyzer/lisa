@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.types;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -31,6 +29,7 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the

@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Map;
 
 /**
  * A functional lattice that stores instances of {@link AnalysisState} computed
