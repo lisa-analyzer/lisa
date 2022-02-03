@@ -148,14 +148,15 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	/**
 	 * Resolves the given call as regular (non-instance) call.
 	 * 
-	 * @param call    the call to resolve
-	 * @param types   the runtime types of the parameters of the call
-	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link CFG}s targeted by the
-	 *                    call
-	 * @param natives the list of targets that, after the execution of this
-	 *                    method, will contain the {@link NativeCFG}s targeted
-	 *                    by the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
@@ -170,14 +171,15 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	/**
 	 * Resolves the given call as an instance call.
 	 * 
-	 * @param call    the call to resolve
-	 * @param types   the runtime types of the parameters of the call
-	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link CFG}s targeted by the
-	 *                    call
-	 * @param natives the list of targets that, after the execution of this
-	 *                    method, will contain the {@link NativeCFG}s targeted
-	 *                    by the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
@@ -214,6 +216,25 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		}
 	}
 
+	/**
+	 * Checks if the given code member {@code cm} is a candidate target for the
+	 * given call, and proceeds to add it to the set of targets if it is.
+	 * Aliasing information is used here to match code members that have been
+	 * aliased and that can be targeted by calls that refer to other names.
+	 * 
+	 * @param call     the call to match
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
+	 * @param cm       the code member to match
+	 * @param instance whether or not the only instance or non-instance members
+	 *                     should be matched
+	 */
 	protected void checkMember(
 			UnresolvedCall call,
 			ExternalSet<Type>[] types,
@@ -238,7 +259,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		// name individually
 		if (!qnAlias.isEmpty()) {
 			for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
-				if (matchCFGName(call, alias.getQualifier(), alias.getName())) {
+				if (matchCodeMemberName(call, alias.getQualifier(), alias.getName())) {
 					add = true;
 					break;
 				}
@@ -246,7 +267,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 		if (!add && !qAlias.isEmpty()) {
 			for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
-				if (matchCFGName(call, alias.getQualifier(), name)) {
+				if (matchCodeMemberName(call, alias.getQualifier(), name)) {
 					add = true;
 					break;
 				}
@@ -254,14 +275,14 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 		if (!add && !nAlias.isEmpty()) {
 			for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
-				if (matchCFGName(call, qualifier, alias.getName())) {
+				if (matchCodeMemberName(call, qualifier, alias.getName())) {
 					add = true;
 					break;
 				}
 		}
 
 		if (!add)
-			add = matchCFGName(call, qualifier, name);
+			add = matchCodeMemberName(call, qualifier, name);
 
 		if (add && call.getMatchingStrategy().matches(call, descr.getFormals(), call.getParameters(), types))
 			add(targets, natives, cm);
@@ -278,12 +299,15 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * Matches the name (qualifier + target name) of the given call against the
 	 * given code member.
 	 * 
-	 * @param call the call to match
+	 * @param call      the call to match
+	 * @param qualifier the qualifier (name of the defining unit) of the code
+	 *                      member
+	 * @param name      the name of the code member
 	 * 
-	 * @return {@code true} if the name of {@code cm} is compatible with the one
-	 *             of the call's target
+	 * @return {@code true} if the qualifier and name are compatible with the
+	 *             ones of the call's target
 	 */
-	protected boolean matchCFGName(UnresolvedCall call, String qualifier, String name) {
+	protected boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
 		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))

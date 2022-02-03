@@ -1,20 +1,42 @@
 package it.unive.lisa.analysis.symbols;
 
+/**
+ * A {@link Symbol} that represents a fully qualified name, composed of both a
+ * name and a qualifier.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class QualifiedNameSymbol implements Symbol {
 
 	private final String qualifier;
 
 	private final String name;
 
+	/**
+	 * Builds the symbol.
+	 * 
+	 * @param qualifier the qualifier represented by this symbol
+	 * @param name      the name represented by this symbol
+	 */
 	public QualifiedNameSymbol(String qualifier, String name) {
 		this.qualifier = qualifier;
 		this.name = name;
 	}
 
+	/**
+	 * Yields the qualifier represented by this symbol.
+	 * 
+	 * @return the qualifier
+	 */
 	public String getQualifier() {
 		return qualifier;
 	}
 
+	/**
+	 * Yields the name represented by this symbol.
+	 * 
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}

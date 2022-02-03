@@ -24,8 +24,27 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class Call extends NaryExpression {
 
+	/**
+	 * Possible types of a call, identifying the type of targets (instance or
+	 * static) it can have.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public enum CallType {
-		INSTANCE, STATIC, UNKNOWN
+
+		/**
+		 * Only instance code members are targeted by the call.
+		 */
+		INSTANCE,
+		/**
+		 * Only non-instance code members are targeted by the call.
+		 */
+		STATIC,
+
+		/**
+		 * Both instance and non-instance code members are targeted by the call.
+		 */
+		UNKNOWN
 	}
 
 	/**

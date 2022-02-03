@@ -32,8 +32,9 @@ public interface CallGraph {
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}.
 	 * 
-	 * @param call  the call to resolve
-	 * @param types the runtime types of the parameters of the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @return a collection of all the possible runtime targets
 	 * 

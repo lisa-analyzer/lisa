@@ -160,8 +160,9 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[], SymbolAliasing)}
 	 * if needed.
 	 *
-	 * @param call  the call to resolve
-	 * @param types the runtime types of the parameters of the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @return a collection of all the possible runtime targets
 	 *

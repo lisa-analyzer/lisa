@@ -1,13 +1,28 @@
 package it.unive.lisa.analysis.symbols;
 
+/**
+ * A {@link Symbol} that represents a qualifier (i.e. the name of a unit).
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class QualifierSymbol implements Symbol {
 
 	private final String qualifier;
 
+	/**
+	 * Builds the symbol.
+	 * 
+	 * @param qualifier the qualifier represented by this symbol
+	 */
 	public QualifierSymbol(String qualifier) {
 		this.qualifier = qualifier;
 	}
 
+	/**
+	 * Yields the qualifier represented by this symbol.
+	 * 
+	 * @return the qualifier
+	 */
 	public String getQualifier() {
 		return qualifier;
 	}

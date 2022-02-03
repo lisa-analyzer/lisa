@@ -70,6 +70,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * @param state              the {@link AbstractState} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
+	 * @param aliasing           the symbol aliasing information
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression, SymbolAliasing aliasing) {
 		this(state, new ExpressionSet<>(computedExpression), aliasing);
@@ -92,6 +93,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * @param state               the {@link AbstractState} to embed in this
 	 *                                analysis state
 	 * @param computedExpressions the expressions that have been computed
+	 * @param aliasing            the symbol aliasing information
 	 */
 	public AnalysisState(A state, ExpressionSet<SymbolicExpression> computedExpressions, SymbolAliasing aliasing) {
 		this.state = state;
@@ -109,6 +111,13 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		return state;
 	}
 
+	/**
+	 * Yields the symbol aliasing information, that can be used to resolve
+	 * targets of calls when the names used in the call are different from the
+	 * ones in the target's signature.
+	 * 
+	 * @return the aliasing information
+	 */
 	public SymbolAliasing getAliasing() {
 		return aliasing;
 	}
@@ -129,6 +138,15 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		return computedExpressions;
 	}
 
+	/**
+	 * Registers an alias for the given symbol. Any previous aliases will be
+	 * deleted.
+	 * 
+	 * @param toAlias the symbol being aliased
+	 * @param alias   the alias for {@code toAlias}
+	 * 
+	 * @return a copy of this analysis state, with the new alias
+	 */
 	public AnalysisState<A, H, V, T> alias(Symbol toAlias, Symbol alias) {
 		SymbolAliasing aliasing = this.aliasing.putState(toAlias, alias);
 		return new AnalysisState<>(state, computedExpressions, aliasing);

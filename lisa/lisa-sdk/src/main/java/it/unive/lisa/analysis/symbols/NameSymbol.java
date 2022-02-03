@@ -1,13 +1,28 @@
 package it.unive.lisa.analysis.symbols;
 
+/**
+ * A {@link Symbol} that represents a name (e.g. the name of a code member).
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class NameSymbol implements Symbol {
 
 	private final String name;
 
+	/**
+	 * Builds the symbol.
+	 * 
+	 * @param name the name represented by this symbol
+	 */
 	public NameSymbol(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Yields the name represented by this symbol.
+	 * 
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
