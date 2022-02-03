@@ -60,9 +60,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -71,8 +69,8 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
-			boolean instanceCall, String qualifier, String targetName, Expression... parameters) {
-		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+			CallType callType, String qualifier, String targetName, Expression... parameters) {
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, callType, qualifier, targetName,
 				Untyped.INSTANCE, parameters);
 	}
 
@@ -89,9 +87,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -99,9 +95,9 @@ public class UnresolvedCall extends Call {
 	 * @param parameters        the parameters of this call
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
-			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			HierarcyTraversalStrategy traversalStrategy, CallType callType, String qualifier, String targetName,
 			Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, callType,
 				qualifier,
 				targetName, Untyped.INSTANCE, parameters);
 	}
@@ -120,9 +116,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -132,8 +126,8 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
-			boolean instanceCall, String qualifier, String targetName, Type staticType, Expression... parameters) {
-		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+			CallType callType, String qualifier, String targetName, Type staticType, Expression... parameters) {
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, callType, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
 
@@ -149,9 +143,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -160,9 +152,9 @@ public class UnresolvedCall extends Call {
 	 * @param parameters        the parameters of this call
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
-			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			HierarcyTraversalStrategy traversalStrategy, CallType callType, String qualifier, String targetName,
 			Type staticType, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, callType,
 				qualifier,
 				targetName, LeftToRightEvaluation.INSTANCE, staticType, parameters);
 	}
@@ -180,9 +172,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -192,9 +182,9 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
-			boolean instanceCall, String qualifier, String targetName,
+			CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
-		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, instanceCall, qualifier, targetName,
+		this(cfg, location, assigningStrategy, matchingStrategy, traversalStrategy, callType, qualifier, targetName,
 				order, Untyped.INSTANCE, parameters);
 	}
 
@@ -209,9 +199,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -220,9 +208,9 @@ public class UnresolvedCall extends Call {
 	 * @param parameters        the parameters of this call
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterMatchingStrategy matchingStrategy,
-			HierarcyTraversalStrategy traversalStrategy, boolean instanceCall, String qualifier, String targetName,
+			HierarcyTraversalStrategy traversalStrategy, CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, instanceCall,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, matchingStrategy, traversalStrategy, callType,
 				qualifier,
 				targetName, order, Untyped.INSTANCE, parameters);
 	}
@@ -240,9 +228,7 @@ public class UnresolvedCall extends Call {
 	 *                              parameters of this call
 	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
 	 *                              call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -253,9 +239,9 @@ public class UnresolvedCall extends Call {
 	 */
 	public UnresolvedCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			ParameterMatchingStrategy matchingStrategy, HierarcyTraversalStrategy traversalStrategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
+			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order, staticType, parameters);
+		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order, staticType, parameters);
 		Objects.requireNonNull(matchingStrategy, "The matching strategy of an unresolved call cannot be null");
 		Objects.requireNonNull(traversalStrategy, "The traversal strategy of an unresolved call cannot be null");
 		this.matchingStrategy = matchingStrategy;

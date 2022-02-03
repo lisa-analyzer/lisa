@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
@@ -83,8 +84,8 @@ public class IMPNewObj extends NaryExpression {
 		expressions.put(paramThis, tmp);
 
 		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
-				IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY, true,
-				type.toString(), type.toString(), fullExpressions);
+				IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY,
+				CallType.INSTANCE, type.toString(), type.toString(), fullExpressions);
 		AnalysisState<A, H, V, T> sem = call.expressionSemantics(interprocedural, tmp, fullParams, expressions);
 
 		if (!call.getMetaVariables().isEmpty())

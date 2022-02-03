@@ -112,7 +112,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 			ExpressionSet<SymbolicExpression>[] parameters,
 			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}

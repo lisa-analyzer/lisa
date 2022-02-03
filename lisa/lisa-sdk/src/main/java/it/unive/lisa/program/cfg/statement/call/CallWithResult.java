@@ -35,9 +35,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -47,9 +45,9 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param parameters        the parameters of this call
 	 */
 	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
+			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order, staticType, parameters);
+		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
 	/**

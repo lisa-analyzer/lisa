@@ -16,6 +16,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
@@ -48,7 +49,7 @@ public class CallRegisteringTest {
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
 				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
 				SingleInheritanceTraversalStrategy.INSTANCE,
-				false, p.getName(), "cfg2");
+				CallType.STATIC, p.getName(), "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);

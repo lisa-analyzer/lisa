@@ -21,6 +21,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -102,7 +103,7 @@ public class CFGFixpointTest {
 			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program program = new Program();
 		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
-		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, false, "test", "test");
+		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 
 		AnalysisState<

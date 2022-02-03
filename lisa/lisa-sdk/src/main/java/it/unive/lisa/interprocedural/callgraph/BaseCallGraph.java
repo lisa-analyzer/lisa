@@ -96,10 +96,19 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
 
-		if (call.isInstanceCall())
+		switch (call.getCallType()) {
+		case INSTANCE:
 			resolveInstance(call, types, targets, nativeTargets, aliasing);
-		else
+			break;
+		case STATIC:
 			resolveNonInstance(call, types, targets, nativeTargets, aliasing);
+			break;
+		case UNKNOWN:
+		default:
+			resolveInstance(call, types, targets, nativeTargets, aliasing);
+			resolveNonInstance(call, types, targets, nativeTargets, aliasing);
+			break;
+		}
 
 		Call resolved;
 		if (targets.isEmpty() && nativeTargets.isEmpty())

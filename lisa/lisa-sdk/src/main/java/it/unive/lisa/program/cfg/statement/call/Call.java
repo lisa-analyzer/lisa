@@ -24,6 +24,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public abstract class Call extends NaryExpression {
 
+	public enum CallType {
+		INSTANCE, STATIC, UNKNOWN
+	}
+
 	/**
 	 * The original {@link UnresolvedCall} that has been resolved to this one
 	 */
@@ -45,10 +49,9 @@ public abstract class Call extends NaryExpression {
 	private final String targetName;
 
 	/**
-	 * Whether or not this is a call to an instance cfg of a unit (that can be
-	 * overridden) or not.
+	 * The call type of this call.
 	 */
-	private final boolean instanceCall;
+	private final CallType callType;
 
 	/**
 	 * Builds a call happening at the given source location.
@@ -58,8 +61,7 @@ public abstract class Call extends NaryExpression {
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance cfg
-	 *                              of a unit (that can be overridden) or not
+	 * @param type              the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -68,14 +70,14 @@ public abstract class Call extends NaryExpression {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
+	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType type,
 			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");
 		Objects.requireNonNull(assigningStrategy, "The assigning strategy of a call cannot be null");
 		this.targetName = targetName;
 		this.qualifier = qualifier;
-		this.instanceCall = instanceCall;
+		this.callType = type;
 		this.assigningStrategy = assigningStrategy;
 	}
 
@@ -158,14 +160,12 @@ public abstract class Call extends NaryExpression {
 	}
 
 	/**
-	 * Yields whether or not this is a call to an instance cfg of a unit (that
-	 * can be overridden) or not.
+	 * Yields the call type of this call.
 	 * 
-	 * @return {@code true} if this call targets instance cfgs, {@code false}
-	 *             otherwise
+	 * @return the call type
 	 */
-	public boolean isInstanceCall() {
-		return instanceCall;
+	public CallType getCallType() {
+		return callType;
 	}
 
 	/**
@@ -195,9 +195,10 @@ public abstract class Call extends NaryExpression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((assigningStrategy == null) ? 0 : assigningStrategy.hashCode());
-		result = prime * result + (instanceCall ? 1231 : 1237);
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
+		result = prime * result + ((source == null) ? 0 : source.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
+		result = prime * result + ((callType == null) ? 0 : callType.hashCode());
 		return result;
 	}
 
@@ -207,7 +208,7 @@ public abstract class Call extends NaryExpression {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof Call))
+		if (getClass() != obj.getClass())
 			return false;
 		Call other = (Call) obj;
 		if (assigningStrategy == null) {
@@ -215,17 +216,22 @@ public abstract class Call extends NaryExpression {
 				return false;
 		} else if (!assigningStrategy.equals(other.assigningStrategy))
 			return false;
-		if (instanceCall != other.instanceCall)
-			return false;
 		if (qualifier == null) {
 			if (other.qualifier != null)
 				return false;
 		} else if (!qualifier.equals(other.qualifier))
 			return false;
+		if (source == null) {
+			if (other.source != null)
+				return false;
+		} else if (!source.equals(other.source))
+			return false;
 		if (targetName == null) {
 			if (other.targetName != null)
 				return false;
 		} else if (!targetName.equals(other.targetName))
+			return false;
+		if (callType != other.callType)
 			return false;
 		return true;
 	}

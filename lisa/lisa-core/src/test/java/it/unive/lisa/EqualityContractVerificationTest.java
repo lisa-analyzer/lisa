@@ -50,6 +50,7 @@ import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
@@ -111,9 +112,11 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "foo", "foo");
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
+			"foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "bar", "bar");
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "bar",
+			"bar");
 	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
 	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
 	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);

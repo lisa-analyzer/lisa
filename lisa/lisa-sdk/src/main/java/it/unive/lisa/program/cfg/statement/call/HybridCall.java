@@ -52,8 +52,7 @@ public class HybridCall extends Call {
 	 * @param cfg           the cfg that this expression belongs to
 	 * @param location      the location where this expression is defined within
 	 *                          the program
-	 * @param instanceCall  whether or not this is a call to an instance method
-	 *                          of a unit (that can be overridden) or not
+	 * @param callType      the call type of this call
 	 * @param qualifier     the optional qualifier of the call (can be null or
 	 *                          empty - see {@link #getFullTargetName()} for
 	 *                          more info)
@@ -62,9 +61,9 @@ public class HybridCall extends Call {
 	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
 	 * @param parameters    the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, boolean instanceCall, String qualifier, String targetName,
+	public HybridCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
+		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE,
 				targets, nativeTargets, parameters);
 	}
@@ -80,9 +79,7 @@ public class HybridCall extends Call {
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -94,9 +91,9 @@ public class HybridCall extends Call {
 	 * @param parameters        the parameters of this call
 	 */
 	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, Collection<CFG> targets,
+			CallType callType, String qualifier, String targetName, Collection<CFG> targets,
 			Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		this(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
+		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, nativeTargets, parameters);
 	}
 
@@ -110,9 +107,7 @@ public class HybridCall extends Call {
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -125,9 +120,9 @@ public class HybridCall extends Call {
 	 * @param parameters        the parameters of this call
 	 */
 	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
+			CallType callType, String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
 			Collection<NativeCFG> nativeTargets, Expression... parameters) {
-		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order,
+		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,
 				getCommonReturnType(targets, nativeTargets), parameters);
 		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
 		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
@@ -151,7 +146,7 @@ public class HybridCall extends Call {
 	 */
 	public HybridCall(UnresolvedCall source, Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
-				source.isInstanceCall(), source.getQualifier(),
+				source.getCallType(), source.getQualifier(),
 				source.getTargetName(), targets, nativeTargets, source.getParameters());
 	}
 
@@ -260,7 +255,7 @@ public class HybridCall extends Call {
 
 		Expression[] parameters = getSubExpressions();
 		if (!targets.isEmpty()) {
-			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getAssigningStrategy(), isInstanceCall(),
+			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getAssigningStrategy(), getCallType(),
 					getQualifier(), getTargetName(), targets, parameters);
 			cfgcall.setSource(getSource());
 			result = cfgcall.expressionSemantics(interprocedural, state, params, expressions);
