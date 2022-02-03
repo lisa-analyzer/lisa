@@ -215,7 +215,6 @@ public abstract class Call extends NaryExpression {
 		int result = super.hashCode();
 		result = prime * result + ((assigningStrategy == null) ? 0 : assigningStrategy.hashCode());
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
-		result = prime * result + ((source == null) ? 0 : source.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 		result = prime * result + ((callType == null) ? 0 : callType.hashCode());
 		return result;
@@ -239,11 +238,6 @@ public abstract class Call extends NaryExpression {
 			if (other.qualifier != null)
 				return false;
 		} else if (!qualifier.equals(other.qualifier))
-			return false;
-		if (source == null) {
-			if (other.source != null)
-				return false;
-		} else if (!source.equals(other.source))
 			return false;
 		if (targetName == null) {
 			if (other.targetName != null)

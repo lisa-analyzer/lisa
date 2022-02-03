@@ -52,10 +52,10 @@ buildscript {
     }
     
     dependencies {
-        classpath 'org.ajoberstar.grgit:grgit-core:4.0.2'
-        classpath 'org.ajoberstar.grgit:grgit-gradle:4.0.2'
+        classpath 'org.ajoberstar.grgit:grgit-core:4.1.1'
+        classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
         
-        classpath 'com.diffplug.spotless:spotless-plugin-gradle:5.15.0'
+        classpath 'com.diffplug.spotless:spotless-plugin-gradle:6.2.1'
     }
 }
 

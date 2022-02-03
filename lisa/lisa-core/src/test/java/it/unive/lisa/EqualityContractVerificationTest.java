@@ -16,6 +16,7 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
@@ -417,5 +418,12 @@ public class EqualityContractVerificationTest {
 		// underlying graph, and equality testing the graph will take them into
 		// account
 		verify(DotCFG.class, verifier -> verifier.withIgnoredFields("legend", "title", "codes", "nextCode"));
+	}
+
+	@Test
+	public void testSymbolAliases() {
+		Reflections scanner = mkReflections();
+		for (Class<? extends Symbol> sym : scanner.getSubTypesOf(Symbol.class))
+			verify(sym);
 	}
 }
