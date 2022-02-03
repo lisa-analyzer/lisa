@@ -324,7 +324,7 @@ public class UnresolvedCall extends Call {
 					throws SemanticException {
 		Call resolved;
 		try {
-			resolved = interprocedural.resolve(this, parameterTypes(expressions));
+			resolved = interprocedural.resolve(this, parameterTypes(expressions), state.getAliasing());
 		} catch (CallResolutionException e) {
 			throw new SemanticException("Unable to resolve call " + this, e);
 		}

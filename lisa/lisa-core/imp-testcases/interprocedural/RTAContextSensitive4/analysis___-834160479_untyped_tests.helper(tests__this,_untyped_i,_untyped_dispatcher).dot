@@ -1,7 +1,7 @@
 digraph {
 	labelloc="t";
 	label="[['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]]";
-	"node0" [shape="rect",color="black",peripheries="2",label=<return tests::identity(dispatcher, i)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:minusone: -<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:one: +<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:positive: +<BR/>i: -<BR/>ret_value@helper: -<BR/>[stack: -] ]]<BR/>}} -&gt; [ret_value@helper]>];
+	"node0" [shape="rect",color="black",peripheries="2",label=<return identity(dispatcher, i)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:minusone: -<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:one: +<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:positive: +<BR/>i: -<BR/>ret_value@helper: -<BR/>[stack: -] ]]<BR/>}} -&gt; [ret_value@helper]>];
 subgraph cluster_legend {
 	label="Legend";
 	style=dotted;

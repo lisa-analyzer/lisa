@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -134,9 +135,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
-				call.getTargetName(), call.getStaticType(), call.getParameters());
-		return open;
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException {
+		return new OpenCall(call);
 	}
 }

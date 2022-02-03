@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -156,7 +157,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
-	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[])} if needed.
+	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[], SymbolAliasing)}
+	 * if needed.
 	 *
 	 * @param call  the call to resolve
 	 * @param types the runtime types of the parameters of the call
@@ -166,5 +168,6 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException;
 }

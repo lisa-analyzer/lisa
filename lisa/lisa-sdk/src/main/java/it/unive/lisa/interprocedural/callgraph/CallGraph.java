@@ -1,5 +1,6 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -39,7 +40,8 @@ public interface CallGraph {
 	 * @throws CallResolutionException if this call graph is unable to resolve
 	 *                                     the given call
 	 */
-	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException;
 
 	/**
 	 * Registers an already resolved {@link CFGCall} in this {@link CallGraph}.

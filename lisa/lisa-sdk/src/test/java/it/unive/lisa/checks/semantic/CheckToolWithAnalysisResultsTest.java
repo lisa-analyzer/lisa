@@ -10,6 +10,7 @@ import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
@@ -84,7 +85,8 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
+		public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+				throws CallResolutionException {
 			return null;
 		}
 	};

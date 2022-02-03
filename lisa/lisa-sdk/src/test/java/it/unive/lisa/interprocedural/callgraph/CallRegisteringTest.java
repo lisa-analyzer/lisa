@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -62,7 +63,7 @@ public class CallRegisteringTest {
 
 		cg.init(p);
 		@SuppressWarnings("unchecked")
-		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0]);
+		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
 		cg.registerCall(resolved);
 
 		Collection<CodeMember> callees = cg.getCallees(cfg1);

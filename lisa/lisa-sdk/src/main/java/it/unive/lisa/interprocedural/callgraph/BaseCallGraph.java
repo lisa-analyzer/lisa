@@ -1,9 +1,15 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import it.unive.lisa.analysis.symbols.Aliases;
+import it.unive.lisa.analysis.symbols.NameSymbol;
+import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
+import it.unive.lisa.analysis.symbols.QualifierSymbol;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -22,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
@@ -72,7 +79,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types) throws CallResolutionException {
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
 		if (cached != null)
 			return cached;
@@ -80,14 +88,18 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		if (types == null)
 			// we allow types to be null only for calls that we already resolved
 			throw new CallResolutionException("Cannot resolve call without runtime types");
+		if (aliasing == null)
+			// we allow aliasing to be null only for calls that we already
+			// resolved
+			throw new CallResolutionException("Cannot resolve call without symbol aliasing");
 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
 
 		if (call.isInstanceCall())
-			resolveInstance(call, types, targets, nativeTargets);
+			resolveInstance(call, types, targets, nativeTargets, aliasing);
 		else
-			resolveNonInstance(call, types, targets, nativeTargets);
+			resolveNonInstance(call, types, targets, nativeTargets, aliasing);
 
 		Call resolved;
 		if (targets.isEmpty() && nativeTargets.isEmpty())
@@ -140,17 +152,10 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 *                                     the call
 	 */
 	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
-			Collection<NativeCFG> natives)
+			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
-			if (!cm.getDescriptor().isInstance()
-					&& matchCFGName(call, cm)
-					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters(),
-							types))
-				if (cm instanceof CFG)
-					targets.add((CFG) cm);
-				else
-					natives.add((NativeCFG) cm);
+			checkMember(call, types, targets, natives, aliasing, cm, false);
 	}
 
 	/**
@@ -169,7 +174,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 *                                     the call
 	 */
 	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
-			Collection<NativeCFG> natives)
+			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
@@ -190,20 +195,74 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			else
 				continue;
 
+			Set<CompilationUnit> seen = new HashSet<>();
 			for (CompilationUnit unit : units)
-				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
-					// we inspect only the ones of the current unit
-					Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
-					for (CodeMember cm : candidates)
-						if (cm.getDescriptor().isInstance()
-								&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
-										call.getParameters(), types))
-							if (cm instanceof CFG)
-								targets.add((CFG) cm);
-							else
-								natives.add((NativeCFG) cm);
+				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit))
+					if (seen.add(unit))
+						// we inspect only the ones of the current unit
+						for (CodeMember cm : cu.getInstanceCodeMembers(false))
+							checkMember(call, types, targets, natives, aliasing, cm, true);
+		}
+	}
+
+	protected void checkMember(
+			UnresolvedCall call,
+			ExternalSet<Type>[] types,
+			Collection<CFG> targets,
+			Collection<NativeCFG> natives,
+			SymbolAliasing aliasing,
+			CodeMember cm,
+			boolean instance) {
+		CFGDescriptor descr = cm.getDescriptor();
+		if (instance != descr.isInstance())
+			return;
+
+		String qualifier = descr.getUnit().getName();
+		String name = descr.getName();
+
+		Aliases nAlias = aliasing.getState(new NameSymbol(name));
+		Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
+		Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
+
+		boolean add = false;
+		// we first check the qualified name, then the qualifier and the
+		// name individually
+		if (!qnAlias.isEmpty()) {
+			for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
+				if (matchCFGName(call, alias.getQualifier(), alias.getName())) {
+					add = true;
+					break;
 				}
 		}
+
+		if (!add && !qAlias.isEmpty()) {
+			for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
+				if (matchCFGName(call, alias.getQualifier(), name)) {
+					add = true;
+					break;
+				}
+		}
+
+		if (!add && !nAlias.isEmpty()) {
+			for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
+				if (matchCFGName(call, qualifier, alias.getName())) {
+					add = true;
+					break;
+				}
+		}
+
+		if (!add)
+			add = matchCFGName(call, qualifier, name);
+
+		if (add && call.getMatchingStrategy().matches(call, descr.getFormals(), call.getParameters(), types))
+			add(targets, natives, cm);
+	}
+
+	private void add(Collection<CFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
+		if (cm instanceof CFG)
+			targets.add((CFG) cm);
+		else
+			natives.add((NativeCFG) cm);
 	}
 
 	/**
@@ -211,17 +270,16 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	 * given code member.
 	 * 
 	 * @param call the call to match
-	 * @param cm   the code member being matched
 	 * 
 	 * @return {@code true} if the name of {@code cm} is compatible with the one
 	 *             of the call's target
 	 */
-	protected boolean matchCFGName(UnresolvedCall call, CodeMember cm) {
-		if (!cm.getDescriptor().getName().equals(call.getTargetName()))
+	protected boolean matchCFGName(UnresolvedCall call, String qualifier, String name) {
+		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))
 			return true;
-		return cm.getDescriptor().getUnit().getName().equals(call.getQualifier());
+		return qualifier.equals(call.getQualifier());
 	}
 
 	/**
