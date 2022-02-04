@@ -13,8 +13,10 @@ import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.HybridCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
@@ -32,6 +34,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -45,6 +49,8 @@ import org.apache.commons.lang3.StringUtils;
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
 public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
+
+	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
 	private Program program;
 
@@ -79,6 +85,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
@@ -96,6 +103,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
 
+		Expression[] params = call.getParameters();
 		switch (call.getCallType()) {
 		case INSTANCE:
 			resolveInstance(call, types, targets, nativeTargets, aliasing);
@@ -106,7 +114,29 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		case UNKNOWN:
 		default:
 			resolveInstance(call, types, targets, nativeTargets, aliasing);
-			resolveNonInstance(call, types, targets, nativeTargets, aliasing);
+			if (!(params[0] instanceof VariableRef)) {
+				LOG.debug(call
+						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
+				break;
+			}
+
+			Expression[] truncatedParams = new Expression[params.length - 1];
+			ExternalSet<Type>[] truncatedTypes = new ExternalSet[types.length - 1];
+			System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
+			System.arraycopy(types, 1, truncatedTypes, 0, types.length - 1);
+
+			UnresolvedCall tempCall = new UnresolvedCall(
+					call.getCFG(),
+					call.getLocation(),
+					call.getAssigningStrategy(),
+					call.getMatchingStrategy(),
+					call.getTraversalStrategy(),
+					CallType.STATIC,
+					((VariableRef) params[0]).getName(),
+					call.getTargetName(),
+					call.getOrder(),
+					truncatedParams);
+			resolveNonInstance(tempCall, truncatedTypes, targets, nativeTargets, aliasing);
 			break;
 		}
 

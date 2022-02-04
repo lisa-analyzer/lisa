@@ -33,16 +33,23 @@ public abstract class Call extends NaryExpression {
 	public enum CallType {
 
 		/**
-		 * Only instance code members are targeted by the call.
+		 * Only instance code members are targeted by the call. The first
+		 * parameter of the call is the receiver.
 		 */
 		INSTANCE,
 		/**
-		 * Only non-instance code members are targeted by the call.
+		 * Only non-instance code members are targeted by the call. The call has
+		 * no receiver, and the optional qualifier can be used to restrict the
+		 * possible targets representing the name of the unit where the target
+		 * is defined.
 		 */
 		STATIC,
 
 		/**
 		 * Both instance and non-instance code members are targeted by the call.
+		 * The call should be resolved by both considering the first parameter
+		 * as a receiver, and by removing the first parameter and using it as a
+		 * qualifier.
 		 */
 		UNKNOWN
 	}
