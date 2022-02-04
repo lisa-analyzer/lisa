@@ -38,12 +38,12 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	/**
 	 * The left-hand side abstract domain.
 	 */
-	protected final T1 left;
+	public final T1 left;
 
 	/**
 	 * The right-hand side abstract domain.
 	 */
-	protected final T2 right;
+	public final T2 right;
 
 	/**
 	 * Builds the Cartesian product abstract domain.
