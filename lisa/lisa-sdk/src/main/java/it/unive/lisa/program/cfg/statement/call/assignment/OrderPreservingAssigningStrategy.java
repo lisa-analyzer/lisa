@@ -12,6 +12,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A strategy that passes the parameters in the same order as they are
@@ -33,7 +34,7 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> prepare(
+			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
 					Call call,
 					AnalysisState<A, H, V, T> callState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
@@ -50,7 +51,7 @@ public class OrderPreservingAssigningStrategy implements ParameterAssigningStrat
 			prepared = temp;
 		}
 
-		return prepared;
+		return Pair.of(prepared, parameters);
 	}
 
 }

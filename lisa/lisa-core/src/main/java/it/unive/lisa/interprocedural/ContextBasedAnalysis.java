@@ -194,11 +194,12 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			for (int i = 0; i < parameters.length; i++)
 				actuals[i] = parameters[i].pushScope(scope);
 
-			AnalysisState<A, H, V, T> prepared = call.getAssigningStrategy().prepare(call, callState, this,
-					expressions, formals, actuals);
+			Pair<AnalysisState<A, H, V, T>,
+					ExpressionSet<SymbolicExpression>[]> prepared = call.getAssigningStrategy().prepare(call, callState,
+							this, expressions, formals, actuals);
 
 			AnalysisState<A, H, V, T> exitState;
-			if (states != null && prepared.lessOrEqual(states.getLeft()))
+			if (states != null && prepared.getLeft().lessOrEqual(states.getLeft()))
 				// no need to compute the fixpoint: we already have an
 				// approximation
 				exitState = states.getRight();
@@ -206,7 +207,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 				// compute the result
 				CFGWithAnalysisResults<A, H, V, T> fixpointResult = null;
 				try {
-					fixpointResult = computeFixpoint(cfg, token, prepared);
+					fixpointResult = computeFixpoint(cfg, token, prepared.getLeft());
 				} catch (FixpointException | AnalysisSetupException e) {
 					throw new SemanticException("Exception during the interprocedural analysis", e);
 				}

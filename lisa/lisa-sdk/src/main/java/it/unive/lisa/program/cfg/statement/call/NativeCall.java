@@ -25,6 +25,7 @@ import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A call to one or more {@link NativeCFG}s under analysis.
@@ -211,8 +212,13 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 		Expression[] parameters = getSubExpressions();
 		for (NativeCFG nat : targets)
 			try {
+				Pair<AnalysisState<A, H, V, T>,
+						ExpressionSet<SymbolicExpression>[]> prepared = getAssigningStrategy().prepare(this, state,
+								interprocedural, expressions, nat.getDescriptor().getFormals(), params);
+
 				NaryExpression rewritten = nat.rewrite(this, parameters);
-				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, expressions));
+				result = result
+						.lub(rewritten.expressionSemantics(interprocedural, state, prepared.getRight(), expressions));
 				getMetaVariables().addAll(rewritten.getMetaVariables());
 			} catch (CallResolutionException e) {
 				throw new SemanticException("Unable to resolve call " + this, e);

@@ -17,6 +17,7 @@ import it.unive.lisa.program.cfg.statement.call.resolution.PythonLikeMatchingStr
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A Python-like assigning strategy. Specifically:<br>
@@ -65,7 +66,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> prepare(
+			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
 					Call call,
 					AnalysisState<A, H, V, T> callState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
@@ -101,7 +102,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				slotsTypes,
 				callState.bottom());
 		if (logic != null)
-			return logic;
+			return Pair.of(logic, parameters);
 
 		// prepare the state for the call: assign the value to each parameter
 		AnalysisState<A, H, V, T> prepared = callState;
@@ -112,7 +113,7 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 			prepared = temp;
 		}
 
-		return prepared;
+		return Pair.of(prepared, slots);
 	}
 
 }
