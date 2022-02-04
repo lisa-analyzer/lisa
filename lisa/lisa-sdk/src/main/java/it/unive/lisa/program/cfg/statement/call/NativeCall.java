@@ -27,49 +27,42 @@ import java.util.Iterator;
 import java.util.Objects;
 
 /**
- * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis.
+ * A call to one or more {@link NativeCFG}s under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HybridCall extends Call {
-
-	/**
-	 * The targets of this call
-	 */
-	private final Collection<CFG> targets;
+public class NativeCall extends Call implements CanRemoveReceiver {
 
 	/**
 	 * The native targets of this call
 	 */
-	private final Collection<NativeCFG> nativeTargets;
+	private final Collection<NativeCFG> targets;
 
 	/**
-	 * Builds the hybrid call, happening at the given location in the program.
+	 * Builds the native call, happening at the given location in the program.
 	 * The {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
 	 * 
-	 * @param cfg           the cfg that this expression belongs to
-	 * @param location      the location where this expression is defined within
-	 *                          the program
-	 * @param callType      the call type of this call
-	 * @param qualifier     the optional qualifier of the call (can be null or
-	 *                          empty - see {@link #getFullTargetName()} for
-	 *                          more info)
-	 * @param targetName    the qualified name of the static target of this call
-	 * @param targets       the CFGs that are targeted by this CFG call
-	 * @param nativeTargets the NativeCFGs that are targeted by this CFG call
-	 * @param parameters    the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the qualified name of the static target of this call
+	 * @param targets    the NativeCFGs that are targeted by this CFG call
+	 * @param parameters the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
-			Collection<CFG> targets, Collection<NativeCFG> nativeTargets, Expression... parameters) {
+	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+			Collection<NativeCFG> targets, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
-				LeftToRightEvaluation.INSTANCE,
-				targets, nativeTargets, parameters);
+				LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
 	/**
-	 * Builds the hybrid call, happening at the given location in the program.
+	 * Builds the native call, happening at the given location in the program.
 	 * The {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
@@ -85,20 +78,19 @@ public class HybridCall extends Call {
 	 *                              for more info)
 	 * @param targetName        the qualified name of the static target of this
 	 *                              call
-	 * @param targets           the CFGs that are targeted by this CFG call
-	 * @param nativeTargets     the NativeCFGs that are targeted by this CFG
+	 * @param targets           the NativeCFGs that are targeted by this CFG
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, Collection<CFG> targets,
-			Collection<NativeCFG> nativeTargets, Expression... parameters) {
+	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			CallType callType, String qualifier, String targetName,
+			Collection<NativeCFG> targets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
-				targets, nativeTargets, parameters);
+				targets, parameters);
 	}
 
 	/**
-	 * Builds the hybrid call, happening at the given location in the program.
+	 * Builds the native call, happening at the given location in the program.
 	 * The static type of this call is the common supertype of the return types
 	 * of all targets.
 	 * 
@@ -114,63 +106,41 @@ public class HybridCall extends Call {
 	 * @param targetName        the qualified name of the static target of this
 	 *                              call
 	 * @param order             the evaluation order of the sub-expressions
-	 * @param targets           the CFGs that are targeted by this CFG call
-	 * @param nativeTargets     the NativeCFGs that are targeted by this CFG
+	 * @param targets           the NativeCFGs that are targeted by this CFG
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public HybridCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
-			Collection<NativeCFG> nativeTargets, Expression... parameters) {
+	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			CallType callType, String qualifier, String targetName, EvaluationOrder order,
+			Collection<NativeCFG> targets, Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,
-				getCommonReturnType(targets, nativeTargets), parameters);
-		Objects.requireNonNull(targets, "The targets of a hybrid call cannot be null");
-		Objects.requireNonNull(nativeTargets, "The native targets of a hybrid call cannot be null");
-		for (CFG target : targets)
-			Objects.requireNonNull(target, "A target of a hybrid call cannot be null");
-		for (NativeCFG target : nativeTargets)
-			Objects.requireNonNull(target, "A native target of a hybrid call cannot be null");
+				getCommonReturnType(targets), parameters);
+		Objects.requireNonNull(targets, "The targets of a native call cannot be null");
+		Objects.requireNonNull(targets, "The native targets of a native call cannot be null");
+		for (NativeCFG target : targets)
+			Objects.requireNonNull(target, "A native target of a native call cannot be null");
 		this.targets = targets;
-		this.nativeTargets = nativeTargets;
 	}
 
 	/**
-	 * Creates a hybrid call as the resolved version of the given {@code source}
+	 * Creates a native call as the resolved version of the given {@code source}
 	 * call, copying all its data.
 	 * 
-	 * @param source        the unresolved call to copy
-	 * @param targets       the {@link CFG}s that the call has been resolved
-	 *                          against
-	 * @param nativeTargets the {@link NativeCFG}s that the call has been
-	 *                          resolved against
+	 * @param source  the unresolved call to copy
+	 * @param targets the {@link NativeCFG}s that the call has been resolved
+	 *                    against
 	 */
-	public HybridCall(UnresolvedCall source, Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
+	public NativeCall(UnresolvedCall source, Collection<NativeCFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.getCallType(), source.getQualifier(),
-				source.getTargetName(), targets, nativeTargets, source.getParameters());
+				source.getTargetName(), targets, source.getParameters());
 	}
 
-	private static Type getCommonReturnType(Collection<CFG> targets, Collection<NativeCFG> nativeTargets) {
-		Iterator<CFG> it = targets.iterator();
+	private static Type getCommonReturnType(Collection<NativeCFG> targets) {
+		Iterator<NativeCFG> it = targets.iterator();
 		Type result = null;
 		while (it.hasNext()) {
 			Type current = it.next().getDescriptor().getReturnType();
-			if (result == null)
-				result = current;
-			else if (current.canBeAssignedTo(result))
-				continue;
-			else if (result.canBeAssignedTo(current))
-				result = current;
-			else
-				result = result.commonSupertype(current);
-
-			if (current.isUntyped())
-				break;
-		}
-
-		Iterator<NativeCFG> it1 = nativeTargets.iterator();
-		while (it1.hasNext()) {
-			Type current = it1.next().getDescriptor().getReturnType();
 			if (result == null)
 				result = current;
 			else if (current.canBeAssignedTo(result))
@@ -188,28 +158,18 @@ public class HybridCall extends Call {
 	}
 
 	/**
-	 * Yields the CFGs that are targeted by this CFG call.
+	 * Yields the NativeCFGs that are targeted by this native call.
 	 * 
-	 * @return the target CFG
+	 * @return the target NativeCFGs
 	 */
-	public Collection<CFG> getTargets() {
+	public Collection<NativeCFG> getTargets() {
 		return targets;
-	}
-
-	/**
-	 * Yields the CFGs that are targeted by this CFG call.
-	 * 
-	 * @return the target CFG
-	 */
-	public Collection<NativeCFG> getNativeTargets() {
-		return nativeTargets;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((nativeTargets == null) ? 0 : nativeTargets.hashCode());
 		result = prime * result + ((targets == null) ? 0 : targets.hashCode());
 		return result;
 	}
@@ -222,12 +182,7 @@ public class HybridCall extends Call {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HybridCall other = (HybridCall) obj;
-		if (nativeTargets == null) {
-			if (other.nativeTargets != null)
-				return false;
-		} else if (!nativeTargets.equals(other.nativeTargets))
-			return false;
+		NativeCall other = (NativeCall) obj;
 		if (targets == null) {
 			if (other.targets != null)
 				return false;
@@ -238,7 +193,7 @@ public class HybridCall extends Call {
 
 	@Override
 	public String toString() {
-		return "[" + (targets.size() + nativeTargets.size()) + " targets] " + super.toString();
+		return "[" + targets.size() + " targets] " + super.toString();
 	}
 
 	@Override
@@ -254,15 +209,7 @@ public class HybridCall extends Call {
 		AnalysisState<A, H, V, T> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
-		if (!targets.isEmpty()) {
-			CFGCall cfgcall = new CFGCall(getCFG(), getLocation(), getAssigningStrategy(), getCallType(),
-					getQualifier(), getTargetName(), targets, parameters);
-			cfgcall.setSource(getSource());
-			result = cfgcall.expressionSemantics(interprocedural, state, params, expressions);
-			getMetaVariables().addAll(cfgcall.getMetaVariables());
-		}
-
-		for (NativeCFG nat : nativeTargets)
+		for (NativeCFG nat : targets)
 			try {
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result.lub(rewritten.expressionSemantics(interprocedural, state, params, expressions));
@@ -272,5 +219,12 @@ public class HybridCall extends Call {
 			}
 
 		return result;
+	}
+
+	@Override
+	public TruncatedParamsCall removeFirstParameter() {
+		return new TruncatedParamsCall(
+				new NativeCall(getCFG(), getLocation(), getAssigningStrategy(), getCallType(), getQualifier(),
+						getFullTargetName(), getOrder(), targets, CanRemoveReceiver.truncate(getParameters())));
 	}
 }

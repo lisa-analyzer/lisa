@@ -129,7 +129,7 @@ public abstract class Call extends NaryExpression {
 	 * and</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
-	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * {@link MultiCall}), and its semantics generated the call <i>u</i></li>
 	 * </ul>
 	 * 
 	 * @return the call that this one originated from
@@ -202,12 +202,12 @@ public abstract class Call extends NaryExpression {
 	 * and</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
-	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * {@link MultiCall}), and its semantics generated the call <i>u</i></li>
 	 * </ul>
 	 * 
 	 * @param source the call that this one originated from
 	 */
-	public final void setSource(UnresolvedCall source) {
+	public void setSource(UnresolvedCall source) {
 		this.source = source;
 	}
 

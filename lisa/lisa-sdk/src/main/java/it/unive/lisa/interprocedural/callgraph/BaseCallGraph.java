@@ -17,8 +17,10 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
-import it.unive.lisa.program.cfg.statement.call.HybridCall;
+import it.unive.lisa.program.cfg.statement.call.MultiCall;
+import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
@@ -102,6 +104,8 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
+		Collection<CFG> targetsNoRec = new HashSet<>();
+		Collection<NativeCFG> nativeTargetsNoRec = new HashSet<>();
 
 		Expression[] params = call.getParameters();
 		switch (call.getCallType()) {
@@ -136,17 +140,35 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					call.getTargetName(),
 					call.getOrder(),
 					truncatedParams);
-			resolveNonInstance(tempCall, truncatedTypes, targets, nativeTargets, aliasing);
+			resolveNonInstance(tempCall, truncatedTypes, targetsNoRec, nativeTargetsNoRec, aliasing);
 			break;
 		}
 
 		Call resolved;
-		if (targets.isEmpty() && nativeTargets.isEmpty())
+		CFGCall cfgcall = new CFGCall(call, targets);
+		NativeCall nativecall = new NativeCall(call, nativeTargets);
+		TruncatedParamsCall cfgcallnorec = new CFGCall(call, targetsNoRec).removeFirstParameter();
+		TruncatedParamsCall nativecallnorec = new NativeCall(call, nativeTargetsNoRec).removeFirstParameter();
+		if (noTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
 			resolved = new OpenCall(call);
-		else if (nativeTargets.isEmpty())
-			resolved = new CFGCall(call, targets);
+		else if (onlyNonRewritingCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = cfgcall;
+		else if (onlyNonRewritingNativeTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = nativecall;
+		else if (onlyNonRewritingTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcall, nativecall);
+		else if (onlyRewritingCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = cfgcallnorec;
+		else if (onlyRewritingNativeTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = nativecallnorec;
+		else if (onlyRewritingTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcallnorec, nativecallnorec);
+		else if (onlyCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcall, cfgcallnorec);
+		else if (onlyNativeCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, nativecall, nativecallnorec);
 		else
-			resolved = new HybridCall(call, targets, nativeTargets);
+			resolved = new MultiCall(call, cfgcall, cfgcallnorec, nativecall, nativecallnorec);
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
@@ -173,6 +195,87 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		}
 
 		return resolved;
+	}
+
+	private boolean onlyNativeCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean noTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
 	}
 
 	/**

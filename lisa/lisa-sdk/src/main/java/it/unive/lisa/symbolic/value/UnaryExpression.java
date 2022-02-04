@@ -131,7 +131,7 @@ public class UnaryExpression extends ValueExpression {
 
 	@Override
 	public String toString() {
-		return operator.toString() + expression.toString();
+		return operator + " " + expression;
 	}
 
 	@Override
