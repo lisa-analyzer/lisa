@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -16,6 +17,10 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.ReferenceType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collections;
 import java.util.List;
 
@@ -132,7 +137,15 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
-			HeapLocation e = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+			ExternalSet<Type> acc = Caches.types().mkEmptySet();
+			child.forEach(e -> acc.add(e.getStaticType()));
+			Type refType;
+			if (acc.isEmpty())
+				refType = Untyped.INSTANCE;
+			else
+				refType = acc.reduce(acc.first(), (r, t) -> r.commonSupertype(t));
+
+			HeapLocation e = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes());
@@ -157,9 +170,17 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith
-			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
+			ExternalSet<Type> acc = Caches.types().mkEmptySet();
+			ref.forEach(e -> acc.add(e.getStaticType()));
+			Type refType;
+			if (acc.isEmpty())
+				refType = Untyped.INSTANCE;
+			else
+				refType = acc.reduce(acc.first(), (r, t) -> r.commonSupertype(t));
+
+			HeapLocation loc = new HeapLocation(refType, MONOLITH_NAME, true,
 					expression.getCodeLocation());
-			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
+			MemoryPointer e = new MemoryPointer(new ReferenceType(refType), loc, expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes());
 			return new ExpressionSet<>(e);
@@ -170,14 +191,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 				Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
-			// new
-			// one is modeled through the monolith
-			HeapLocation loc = new HeapLocation(expression.getStaticType(), MONOLITH_NAME, true,
-					expression.getCodeLocation());
-			MemoryPointer e = new MemoryPointer(expression.getStaticType(), loc, expression.getCodeLocation());
-			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes());
-			return new ExpressionSet<>(e);
+			// new one is modeled through the monolith
+			return deref;
 		}
 	}
 }

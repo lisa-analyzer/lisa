@@ -41,7 +41,7 @@ public class HeapAllocation extends HeapExpression {
 
 	@Override
 	public String toString() {
-		return "new " + getRuntimeTypes();
+		return "new " + getStaticType();
 	}
 
 	@Override
