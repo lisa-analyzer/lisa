@@ -8,6 +8,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -20,6 +22,8 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
@@ -33,10 +37,13 @@ import java.util.Collection;
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
  */
-public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
+public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> {
 
 	/**
 	 * Initializes the interprocedural analysis of the given program.
@@ -72,7 +79,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
-	void fixpoint(AnalysisState<A, H, V> entryState,
+	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException;
 
@@ -86,7 +93,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(CFG cfg);
+	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible
@@ -112,11 +119,11 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(
+	AnalysisState<A, H, V, T> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V> entryState,
+			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V> expressions)
+			StatementStore<A, H, V, T> expressions)
 			throws SemanticException;
 
 	/**
@@ -140,24 +147,28 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V>,
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	AnalysisState<A, H, V> getAbstractResultOf(
+	AnalysisState<A, H, V, T> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V> entryState,
+			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V> expressions)
+			StatementStore<A, H, V, T> expressions)
 			throws SemanticException;
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}. This method will forward the call to
-	 * {@link CallGraph#resolve(UnresolvedCall)} if needed.
+	 * {@link CallGraph#resolve(UnresolvedCall, ExternalSet[], SymbolAliasing)}
+	 * if needed.
 	 *
-	 * @param call the call to resolve
-	 *
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param aliasing the symbol aliasing information
+	 * 
 	 * @return a collection of all the possible runtime targets
 	 *
 	 * @throws CallResolutionException if this analysis is unable to resolve the
 	 *                                     given call
 	 */
-	Call resolve(UnresolvedCall call) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException;
 }

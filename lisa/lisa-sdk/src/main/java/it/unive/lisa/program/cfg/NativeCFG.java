@@ -62,6 +62,11 @@ public class NativeCFG implements CodeMember {
 		return descriptor;
 	}
 
+	@Override
+	public String toString() {
+		return descriptor.toString();
+	}
+
 	/**
 	 * Produces an {@link NaryExpression} providing the semantics of this native
 	 * cfg. Such native call can be used when a call to this native cfg is found

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
@@ -34,9 +35,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance
-	 *                              method of a unit (that can be overridden) or
-	 *                              not
+	 * @param callType          the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -46,9 +45,9 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param parameters        the parameters of this call
 	 */
 	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			boolean instanceCall, String qualifier, String targetName, EvaluationOrder order, Type staticType,
+			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {
-		super(cfg, location, assigningStrategy, instanceCall, qualifier, targetName, order, staticType, parameters);
+		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
 	/**
@@ -67,6 +66,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * 
 	 * @return an abstract analysis state representing the abstract result of
 	 *             the cfg call. The
@@ -76,30 +76,32 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <A extends AbstractState<A, H, V>,
+	protected abstract <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
+					AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions,
 					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException;
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> state,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
 					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V> expressions)
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
 		// the stack has to be empty
 		state = new AnalysisState<>(state.getState(), new ExpressionSet<>());
 
 		// this will contain only the information about the returned
 		// metavariable
-		AnalysisState<A, H, V> returned = compute(state, interprocedural, expressions, params);
+		AnalysisState<A, H, V, T> returned = compute(state, interprocedural, expressions, params);
 
 		if (getStaticType().isVoidType() ||
 				(getStaticType().isUntyped() && returned.getComputedExpressions().isEmpty()) ||
@@ -117,12 +119,12 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 
 		getMetaVariables().add(meta);
 
-		AnalysisState<A, H, V> result = returned.bottom();
+		AnalysisState<A, H, V, T> result = returned.bottom();
 		for (SymbolicExpression expr : returned.getComputedExpressions()) {
 			// We need to perform this evaluation of the identifier not pushed
 			// with the scope since otherwise the value associated with the
 			// returned variable would be lost
-			AnalysisState<A, H, V> tmp = returned.assign(meta, expr, this);
+			AnalysisState<A, H, V, T> tmp = returned.assign(meta, expr, this);
 			result = result.lub(tmp.smallStepSemantics(meta, this));
 		}
 

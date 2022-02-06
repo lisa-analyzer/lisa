@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -19,8 +20,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive1() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class),
+						new Sign(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
@@ -29,8 +33,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive2() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class),
+						new Sign(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
@@ -39,8 +46,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive3() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class),
+						new Sign(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
@@ -49,8 +59,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive4() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						getDefaultFor(HeapDomain.class),
+						new Sign(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
 				.setCallGraph(new RTACallGraph());
@@ -59,8 +72,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive5() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, new PointBasedHeap(), new Interval()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						new PointBasedHeap(),
+						new Interval(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
@@ -69,8 +85,11 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testRTAContextSensitive6() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, new PointBasedHeap(), new Interval()))
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						new PointBasedHeap(),
+						new Interval(),
+						getDefaultFor(TypeDomain.class)))
 				.setDumpAnalysis(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());

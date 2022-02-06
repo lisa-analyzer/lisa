@@ -7,7 +7,6 @@ import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A bynary expression that applies a {@link TernaryExpression} to three
@@ -40,18 +39,18 @@ public class TernaryExpression extends ValueExpression {
 	/**
 	 * Builds the binary expression.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param left     the left-hand side operand of this expression
-	 * @param middle   the middle operand of this expression
-	 * @param right    the right-hand side operand of this expression
-	 * @param operator the operator to apply
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param left       the left-hand side operand of this expression
+	 * @param middle     the middle operand of this expression
+	 * @param right      the right-hand side operand of this expression
+	 * @param operator   the operator to apply
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public TernaryExpression(ExternalSet<Type> types, SymbolicExpression left, SymbolicExpression middle,
+	public TernaryExpression(Type staticType, SymbolicExpression left, SymbolicExpression middle,
 			SymbolicExpression right,
 			TernaryOperator operator, CodeLocation location) {
-		super(types, location);
+		super(staticType, location);
 		this.left = left;
 		this.middle = middle;
 		this.right = right;
@@ -97,14 +96,20 @@ public class TernaryExpression extends ValueExpression {
 
 	@Override
 	public SymbolicExpression pushScope(ScopeToken token) throws SemanticException {
-		return new TernaryExpression(this.getTypes(), this.left.pushScope(token), this.middle.pushScope(token),
-				this.right.pushScope(token), this.operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(getStaticType(), left.pushScope(token), middle.pushScope(token),
+				right.pushScope(token), operator, getCodeLocation());
+		if (hasRuntimeTypes())
+			expr.setRuntimeTypes(getRuntimeTypes());
+		return expr;
 	}
 
 	@Override
 	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
-		return new TernaryExpression(this.getTypes(), this.left.popScope(token), this.middle.popScope(token),
-				this.right.popScope(token), this.operator, getCodeLocation());
+		TernaryExpression expr = new TernaryExpression(getStaticType(), left.popScope(token), middle.popScope(token),
+				right.popScope(token), operator, getCodeLocation());
+		if (hasRuntimeTypes())
+			expr.setRuntimeTypes(getRuntimeTypes());
+		return expr;
 	}
 
 	@Override

@@ -142,6 +142,27 @@ public interface Type {
 
 	/**
 	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link InMemoryType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isInMemoryType() {
+		return this instanceof InMemoryType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link InMemoryType}, only if
+	 * {@link #isInMemoryType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link InMemoryType}, or {@code null}
+	 */
+	default InMemoryType asInMemoryType() {
+		return isInMemoryType() ? (InMemoryType) this : null;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this type is an instance of
 	 * {@link ArrayType}.
 	 * 
 	 * @return {@code true} if that condition holds

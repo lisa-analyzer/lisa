@@ -8,6 +8,8 @@ import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
+import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
@@ -27,9 +29,14 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testConfidentialityNI() throws AnalysisSetupException {
+		SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+				TypeEnvironment<InferredTypes>> s = new SimpleAbstractState<>(
+						new MonolithicHeap(),
+						new InferenceSystem<>(new NonInterference()),
+						new TypeEnvironment<>(new InferredTypes()));
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
 				.setAbstractState(
-						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
+						s)
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/confidentiality", "program.imp", conf);
 	}
@@ -38,7 +45,10 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	public void testIntegrityNI() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
 				.setAbstractState(
-						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
+						new SimpleAbstractState<>(
+								new MonolithicHeap(),
+								new InferenceSystem<>(new NonInterference()),
+								new TypeEnvironment<>(new InferredTypes())))
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/integrity", "program.imp", conf);
 	}
@@ -47,7 +57,10 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	public void testDeclassification() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
 				.setAbstractState(
-						new SimpleAbstractState<>(new MonolithicHeap(), new InferenceSystem<>(new NonInterference())))
+						new SimpleAbstractState<>(
+								new MonolithicHeap(),
+								new InferenceSystem<>(new NonInterference()),
+								new TypeEnvironment<>(new InferredTypes())))
 				.setCallGraph(new RTACallGraph())
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
 				.addSemanticCheck(new NICheck());
@@ -55,41 +68,62 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 	}
 
 	private static class NICheck
-			implements SemanticCheck<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-					MonolithicHeap, InferenceSystem<NonInterference>> {
+			implements SemanticCheck<
+					SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+							TypeEnvironment<InferredTypes>>,
+					MonolithicHeap,
+					InferenceSystem<NonInterference>,
+					TypeEnvironment<InferredTypes>> {
 
 		@Override
 		public void beforeExecution(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool) {
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap, InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
 		}
 
 		@Override
 		public void afterExecution(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool) {
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
 		}
 
 		@Override
 		public boolean visitCompilationUnit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
 				CompilationUnit unit) {
 			return true;
 		}
 
 		@Override
 		public void visitGlobal(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
 				Unit unit, Global global,
 				boolean instance) {
 		}
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
 				CFG graph) {
 			return true;
 		}
@@ -97,8 +131,12 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		@Override
 		@SuppressWarnings({ "unchecked" })
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
 				CFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
@@ -107,13 +145,13 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			Collection<?> results = tool.getResultOf(graph);
 
 			for (Object res : results) {
-				CFGWithAnalysisResults<?, ?, ?> result = (CFGWithAnalysisResults<?, ?, ?>) res;
-				InferenceSystem<NonInterference> state = (InferenceSystem<NonInterference>) result
-						.getAnalysisStateAfter(assign).getState().getValueState();
-				InferenceSystem<NonInterference> left = (InferenceSystem<NonInterference>) result
-						.getAnalysisStateAfter(assign.getLeft()).getState().getValueState();
-				InferenceSystem<NonInterference> right = (InferenceSystem<NonInterference>) result
-						.getAnalysisStateAfter(assign.getRight()).getState().getValueState();
+				CFGWithAnalysisResults<?, ?, ?, ?> result = (CFGWithAnalysisResults<?, ?, ?, ?>) res;
+				InferenceSystem<NonInterference> state = result
+						.getAnalysisStateAfter(assign).getDomainInstance(InferenceSystem.class);
+				InferenceSystem<NonInterference> left = result
+						.getAnalysisStateAfter(assign.getLeft()).getDomainInstance(InferenceSystem.class);
+				InferenceSystem<NonInterference> right = result
+						.getAnalysisStateAfter(assign.getRight()).getDomainInstance(InferenceSystem.class);
 
 				if (left.getInferredValue().isLowConfidentiality() && right.getInferredValue().isHighConfidentiality())
 					tool.warnOn(assign,
@@ -136,8 +174,12 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 
 		@Override
 		public boolean visit(
-				CheckToolWithAnalysisResults<SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>>,
-						MonolithicHeap, InferenceSystem<NonInterference>> tool,
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
 				CFG graph, Edge edge) {
 			return true;
 		}

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -230,14 +231,21 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 		if (this == obj)
 			return true;
-		if (obj.getClass() != getClass())
+
+		// custom equals for collections
+		if (!(obj instanceof Set))
 			return false;
-		BitExternalSet other = (BitExternalSet) obj;
-		if (cache != other.cache) {
-			// we make them have the same cache
-			other = (BitExternalSet) cache.mkSet(other);
-		}
-		return Arrays.equals(bits, other.bits);
+		if (!(obj instanceof ExternalSet))
+			// set.equals() will check for elements
+			return obj.equals(this);
+
+		ExternalSet other = (ExternalSet) obj;
+		if (cache != other.getCache() || !(other instanceof BitExternalSet)) {
+			// we make them have the same cache and be backed by the a bitset
+			BitExternalSet o = (BitExternalSet) cache.mkSet(other);
+			return Arrays.equals(bits, o.bits);
+		} else
+			return Arrays.equals(bits, ((BitExternalSet) other).bits);
 	}
 
 	@Override

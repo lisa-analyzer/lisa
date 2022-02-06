@@ -1,5 +1,10 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -8,6 +13,7 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -17,6 +23,36 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class Call extends NaryExpression {
+
+	/**
+	 * Possible types of a call, identifying the type of targets (instance or
+	 * static) it can have.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public enum CallType {
+
+		/**
+		 * Only instance code members are targeted by the call. The first
+		 * parameter of the call is the receiver.
+		 */
+		INSTANCE,
+		/**
+		 * Only non-instance code members are targeted by the call. The call has
+		 * no receiver, and the optional qualifier can be used to restrict the
+		 * possible targets representing the name of the unit where the target
+		 * is defined.
+		 */
+		STATIC,
+
+		/**
+		 * Both instance and non-instance code members are targeted by the call.
+		 * The call should be resolved by both considering the first parameter
+		 * as a receiver, and by removing the first parameter and using it as a
+		 * qualifier.
+		 */
+		UNKNOWN
+	}
 
 	/**
 	 * The original {@link UnresolvedCall} that has been resolved to this one
@@ -39,10 +75,9 @@ public abstract class Call extends NaryExpression {
 	private final String targetName;
 
 	/**
-	 * Whether or not this is a call to an instance cfg of a unit (that can be
-	 * overridden) or not.
+	 * The call type of this call.
 	 */
-	private final boolean instanceCall;
+	private final CallType callType;
 
 	/**
 	 * Builds a call happening at the given source location.
@@ -52,8 +87,7 @@ public abstract class Call extends NaryExpression {
 	 *                              within the program
 	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
 	 *                              parameters of this call
-	 * @param instanceCall      whether or not this is a call to an instance cfg
-	 *                              of a unit (that can be overridden) or not
+	 * @param type              the call type of this call
 	 * @param qualifier         the optional qualifier of the call (can be null
 	 *                              or empty - see {@link #getFullTargetName()}
 	 *                              for more info)
@@ -62,14 +96,14 @@ public abstract class Call extends NaryExpression {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, boolean instanceCall,
+	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType type,
 			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");
 		Objects.requireNonNull(assigningStrategy, "The assigning strategy of a call cannot be null");
 		this.targetName = targetName;
 		this.qualifier = qualifier;
-		this.instanceCall = instanceCall;
+		this.callType = type;
 		this.assigningStrategy = assigningStrategy;
 	}
 
@@ -95,7 +129,7 @@ public abstract class Call extends NaryExpression {
 	 * and</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
-	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * {@link MultiCall}), and its semantics generated the call <i>u</i></li>
 	 * </ul>
 	 * 
 	 * @return the call that this one originated from
@@ -152,14 +186,12 @@ public abstract class Call extends NaryExpression {
 	}
 
 	/**
-	 * Yields whether or not this is a call to an instance cfg of a unit (that
-	 * can be overridden) or not.
+	 * Yields the call type of this call.
 	 * 
-	 * @return {@code true} if this call targets instance cfgs, {@code false}
-	 *             otherwise
+	 * @return the call type
 	 */
-	public boolean isInstanceCall() {
-		return instanceCall;
+	public CallType getCallType() {
+		return callType;
 	}
 
 	/**
@@ -170,12 +202,12 @@ public abstract class Call extends NaryExpression {
 	 * and</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to <i>r</i>, or</li>
 	 * <li>a {@link CallGraph} resolved <i>u</i> to a call <i>c</i> (e.g. a
-	 * {@link HybridCall}), and its semantics generated the call <i>u</i></li>
+	 * {@link MultiCall}), and its semantics generated the call <i>u</i></li>
 	 * </ul>
 	 * 
 	 * @param source the call that this one originated from
 	 */
-	public final void setSource(UnresolvedCall source) {
+	public void setSource(UnresolvedCall source) {
 		this.source = source;
 	}
 
@@ -189,9 +221,9 @@ public abstract class Call extends NaryExpression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((assigningStrategy == null) ? 0 : assigningStrategy.hashCode());
-		result = prime * result + (instanceCall ? 1231 : 1237);
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
+		result = prime * result + ((callType == null) ? 0 : callType.hashCode());
 		return result;
 	}
 
@@ -201,15 +233,13 @@ public abstract class Call extends NaryExpression {
 			return true;
 		if (!super.equals(obj))
 			return false;
-		if (!(obj instanceof Call))
+		if (getClass() != obj.getClass())
 			return false;
 		Call other = (Call) obj;
 		if (assigningStrategy == null) {
 			if (other.assigningStrategy != null)
 				return false;
 		} else if (!assigningStrategy.equals(other.assigningStrategy))
-			return false;
-		if (instanceCall != other.instanceCall)
 			return false;
 		if (qualifier == null) {
 			if (other.qualifier != null)
@@ -221,6 +251,33 @@ public abstract class Call extends NaryExpression {
 				return false;
 		} else if (!targetName.equals(other.targetName))
 			return false;
+		if (callType != other.callType)
+			return false;
 		return true;
+	}
+
+	/**
+	 * Yields an array containing the runtime types of the parameters of this
+	 * call, retrieved by accessing the given {@link StatementStore}.
+	 * 
+	 * @param <A>         the type of {@link AbstractState}
+	 * @param <H>         the type of the {@link HeapDomain}
+	 * @param <V>         the type of the {@link ValueDomain}
+	 * @param <T>         the type of {@link TypeDomain}
+	 * @param expressions the store containing the computed states for the
+	 *                        parameters
+	 * 
+	 * @return the array of parameter types
+	 */
+	@SuppressWarnings("unchecked")
+	public <A extends AbstractState<A, H, V, T>,
+			H extends HeapDomain<H>,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> ExternalSet<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions) {
+		Expression[] actuals = getParameters();
+		ExternalSet<Type>[] types = new ExternalSet[actuals.length];
+		for (int i = 0; i < actuals.length; i++)
+			types[i] = expressions.getState(actuals[i]).getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
+		return types;
 	}
 }

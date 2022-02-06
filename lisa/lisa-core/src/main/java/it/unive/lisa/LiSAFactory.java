@@ -12,9 +12,13 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ContextSensitivityToken;
@@ -78,8 +82,10 @@ public final class LiSAFactory {
 		DEFAULT_IMPLEMENTATIONS.put(CallGraph.class, RTACallGraph.class);
 		DEFAULT_IMPLEMENTATIONS.put(HeapDomain.class, MonolithicHeap.class);
 		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
+		DEFAULT_IMPLEMENTATIONS.put(TypeDomain.class, InferredTypes.class);
 		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
-		DEFAULT_PARAMETERS.put(SimpleAbstractState.class, new Class[] { MonolithicHeap.class, Interval.class });
+		DEFAULT_PARAMETERS.put(SimpleAbstractState.class,
+				new Class[] { MonolithicHeap.class, Interval.class, InferredTypes.class });
 		DEFAULT_PARAMETERS.put(ContextBasedAnalysis.class, new Class[] { RecursionFreeToken.class });
 	}
 
@@ -154,6 +160,8 @@ public final class LiSAFactory {
 			return true;
 		else if (NonRelationalValueDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
+		else if (NonRelationalTypeDomain.class.isAssignableFrom(actual) && desired.isAssignableFrom(TypeDomain.class))
+			return true;
 		else if (InferredValue.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
 			return true;
 		else if (DataflowElement.class.isAssignableFrom(actual) && desired.isAssignableFrom(ValueDomain.class))
@@ -168,6 +176,8 @@ public final class LiSAFactory {
 			return new HeapEnvironment((NonRelationalHeapDomain<?>) param);
 		else if (NonRelationalValueDomain.class.isAssignableFrom(param.getClass()))
 			return new ValueEnvironment((NonRelationalValueDomain<?>) param);
+		else if (NonRelationalTypeDomain.class.isAssignableFrom(param.getClass()))
+			return new TypeEnvironment((NonRelationalTypeDomain<?>) param);
 		else if (InferredValue.class.isAssignableFrom(param.getClass()))
 			return new InferenceSystem((InferredValue<?>) param);
 		else if (DataflowElement.class.isAssignableFrom(param.getClass())) {
@@ -474,8 +484,10 @@ public final class LiSAFactory {
 		in.add(new ConfigurableComponent<>(AbstractState.class));
 		in.add(new ConfigurableComponent<>(HeapDomain.class));
 		in.add(new ConfigurableComponent<>(ValueDomain.class));
+		in.add(new ConfigurableComponent<>(TypeDomain.class));
 		in.add(new ConfigurableComponent<>(NonRelationalHeapDomain.class));
 		in.add(new ConfigurableComponent<>(NonRelationalValueDomain.class));
+		in.add(new ConfigurableComponent<>(NonRelationalTypeDomain.class));
 		in.add(new ConfigurableComponent<>(InferredValue.class));
 		in.add(new ConfigurableComponent<>(DataflowElement.class));
 		return in;

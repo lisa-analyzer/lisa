@@ -5,32 +5,28 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An access to an instance {@link Global} of a {@link CompilationUnit}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class AccessInstanceGlobal extends Expression {
-
-	/**
-	 * The receiver of the access
-	 */
-	private final Expression receiver;
+public class AccessInstanceGlobal extends UnaryExpression {
 
 	/**
 	 * The global being accessed
@@ -48,8 +44,7 @@ public class AccessInstanceGlobal extends Expression {
 	 * @param target   the accessed global
 	 */
 	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
-		super(cfg, location, target.getStaticType());
-		this.receiver = receiver;
+		super(cfg, location, "::", target.getStaticType(), receiver);
 		this.target = target;
 		receiver.setParentStatement(this);
 	}
@@ -61,7 +56,7 @@ public class AccessInstanceGlobal extends Expression {
 	 * @return the receiver of the access
 	 */
 	public Expression getReceiver() {
-		return receiver;
+		return getSubExpression();
 	}
 
 	/**
@@ -74,20 +69,9 @@ public class AccessInstanceGlobal extends Expression {
 	}
 
 	@Override
-	public int setOffset(int offset) {
-		return this.offset = offset;
-	}
-
-	@Override
-	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
-		return visitor.visit(tool, getCFG(), this);
-	}
-
-	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((receiver == null) ? 0 : receiver.hashCode());
 		result = prime * result + ((target == null) ? 0 : target.hashCode());
 		return result;
 	}
@@ -101,11 +85,6 @@ public class AccessInstanceGlobal extends Expression {
 		if (getClass() != obj.getClass())
 			return false;
 		AccessInstanceGlobal other = (AccessInstanceGlobal) obj;
-		if (receiver == null) {
-			if (other.receiver != null)
-				return false;
-		} else if (!receiver.equals(other.receiver))
-			return false;
 		if (target == null) {
 			if (other.target != null)
 				return false;
@@ -116,30 +95,36 @@ public class AccessInstanceGlobal extends Expression {
 
 	@Override
 	public String toString() {
-		return receiver + "::" + target.getName();
+		return getSubExpression() + "::" + target.getName();
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	protected <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural, StatementStore<A, H, V> expressions)
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
+					SymbolicExpression expr,
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> rec = receiver.semantics(entryState, interprocedural, expressions);
-		expressions.put(receiver, rec);
+		Variable var = new Variable(
+				target.getStaticType(),
+				target.getName(),
+				target.getAnnotations(),
+				target.getLocation());
 
-		AnalysisState<A, H, V> result = entryState.bottom();
-		Variable v = new Variable(getRuntimeTypes(), target.getName(), target.getAnnotations(), target.getLocation());
-		for (SymbolicExpression expr : rec.getComputedExpressions()) {
-			AnalysisState<A, H, V> tmp = rec.smallStepSemantics(
-					new AccessChild(getRuntimeTypes(), new HeapDereference(getRuntimeTypes(), expr, getLocation()), v,
-							getLocation()),
-					this);
-			result = result.lub(tmp);
-		}
-
-		if (!receiver.getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(receiver.getMetaVariables());
-		return result;
+		Type exprType = expr.getDynamicType();
+		Type recType;
+		if (exprType.isUntyped()) {
+			recType = exprType;
+		} else if (exprType.isPointerType()) {
+			ExternalSet<Type> inner = exprType.asPointerType().getInnerTypes();
+			recType = inner.reduce(inner.first(), (r, t) -> r.commonSupertype(t));
+		} else
+			return state.bottom();
+		HeapDereference container = new HeapDereference(recType, expr, getLocation());
+		AccessChild access = new AccessChild(var.getStaticType(), container, var, getLocation());
+		return state.smallStepSemantics(access, this);
 	}
 }

@@ -1,0 +1,12 @@
+digraph {
+	labelloc="t";
+	label="['imp-testcases/interprocedural/programContextSensitive3.imp':26:41]";
+	"node0" [shape="rect",color="black",peripheries="2",label=<return identity(dispatcher, i)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ ['imp-testcases/interprocedural/programContextSensitive3.imp':26:41]:one: +<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:minusone: -<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:one: +<BR/>['imp-testcases/interprocedural/programContextSensitive3.imp':28:46]:positive: #TOP#<BR/>i: #TOP#<BR/>ret_value@helper: #TOP#<BR/>[stack: #TOP#] ]]<BR/>}} -&gt; [ret_value@helper]>];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}

@@ -58,6 +58,20 @@ tasks.register('cron', Test) {
 	}
 }
 
+tasks.register('update-cron', Test) {
+    description = 'Runs cron tests, updating expected results of failed ones'
+    group = 'verification'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    systemProperty "lisa.cron.update", "true"
+    
+    filter {
+    	failOnNoMatchingTests false
+		includeTestsMatching 'it.unive.lisa.cron.*'
+	}
+}
+
 tasks.register('allTests') {
     description = 'Runs unit tests and cron tests'
     group = 'verification'

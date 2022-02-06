@@ -7,7 +7,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A memory pointer to a heap location.
@@ -24,27 +23,27 @@ public class MemoryPointer extends Identifier {
 	/**
 	 * Builds a memory pointer with empty annotations.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param loc      the heap location pointed by this memory pointer
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param loc        the heap location pointed by this memory pointer
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc, CodeLocation location) {
-		this(types, loc, new Annotations(), location);
+	public MemoryPointer(Type staticType, HeapLocation loc, CodeLocation location) {
+		this(staticType, loc, new Annotations(), location);
 	}
 
 	/**
 	 * Builds a memory pointer.
 	 * 
-	 * @param types       the runtime types of this expression
+	 * @param staticType  the static type of this expression
 	 * @param loc         the heap location pointed by this memory pointer
 	 * @param annotations the annotation of this memory pointer
 	 * @param location    the code location of the statement that has generated
 	 *                        this expression
 	 */
-	public MemoryPointer(ExternalSet<Type> types, HeapLocation loc, Annotations annotations, CodeLocation location) {
+	public MemoryPointer(Type staticType, HeapLocation loc, Annotations annotations, CodeLocation location) {
 		// A pointer identifier is always a strong identifier
-		super(types, loc.getName(), false, annotations, location);
+		super(staticType, loc.getName(), false, annotations, location);
 		this.loc = loc;
 	}
 

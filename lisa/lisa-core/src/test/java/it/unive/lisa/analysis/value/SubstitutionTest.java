@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -129,14 +128,10 @@ public class SubstitutionTest {
 		}
 	};
 
-	private final Variable x = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "x",
-			SyntheticLocation.INSTANCE);
-	private final Variable y = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "y",
-			SyntheticLocation.INSTANCE);
-	private final Variable z = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "z",
-			SyntheticLocation.INSTANCE);
-	private final Variable w = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "w",
-			SyntheticLocation.INSTANCE);
+	private final Variable x = new Variable(Int32.INSTANCE, "x", SyntheticLocation.INSTANCE);
+	private final Variable y = new Variable(Int32.INSTANCE, "y", SyntheticLocation.INSTANCE);
+	private final Variable z = new Variable(Int32.INSTANCE, "z", SyntheticLocation.INSTANCE);
+	private final Variable w = new Variable(Int32.INSTANCE, "w", SyntheticLocation.INSTANCE);
 	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
 
 	private void check(List<HeapReplacement> sub,

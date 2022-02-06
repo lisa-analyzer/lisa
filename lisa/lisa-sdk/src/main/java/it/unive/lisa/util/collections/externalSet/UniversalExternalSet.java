@@ -11,7 +11,7 @@ import java.util.Iterator;
  * 
  * @param <T> the type of elements inside this set
  */
-public class UniversalExternalSet<T> implements ExternalSet<T> {
+public final class UniversalExternalSet<T> implements ExternalSet<T> {
 
 	private static final String CANNOT_PERFORM_ERROR = "Cannot remove elements from a universal view of an external set";
 	/**
@@ -132,7 +132,8 @@ public class UniversalExternalSet<T> implements ExternalSet<T> {
 		if (obj == null)
 			return false;
 		if (getClass() != obj.getClass())
-			return false;
+			// custom equals for collections
+			return copy().equals(obj);
 		UniversalExternalSet<?> other = (UniversalExternalSet<?>) obj;
 		if (cache == null) {
 			if (other.cache != null)

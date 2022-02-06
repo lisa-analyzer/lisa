@@ -2,24 +2,17 @@ package it.unive.lisa;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
-import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.JsonReport;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,19 +90,7 @@ public class LiSA {
 			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
 		}
 
-		AbstractState inferenceState = conf.getTypeInferenceState();
-		Function<AbstractState<?, ?, ?>, ExternalSet<Type>> typeExtractor = conf.getTypeExtractor();
-		if (conf.isInferTypes() && inferenceState == null) {
-			// these are used only if type inference is requested
-			// we can skip configuration otherwise
-			inferenceState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
-					new InferenceSystem<>(new InferredTypes()));
-			typeExtractor = s -> ((InferenceSystem<InferredTypes>) s.getValueState()).getInferredValue()
-					.getRuntimeTypes();
-		}
-
-		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getAbstractState(),
-				inferenceState, typeExtractor);
+		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getAbstractState());
 
 		try {
 			warnings.addAll(TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(program, fileManager)));

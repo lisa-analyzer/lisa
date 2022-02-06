@@ -360,7 +360,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
-		return conv.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return conv.getRuntimeTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 
@@ -383,7 +383,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
-		return cast.getTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return cast.getRuntimeTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 

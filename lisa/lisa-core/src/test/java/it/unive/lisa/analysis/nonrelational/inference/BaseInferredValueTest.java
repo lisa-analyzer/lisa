@@ -10,7 +10,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -30,8 +29,9 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -145,15 +145,15 @@ public class BaseInferredValueTest {
 
 		}
 
-		if (param == ExternalSet.class)
-			return (R) Caches.types().mkEmptySet();
+		if (param == Type.class)
+			return (R) Int32.INSTANCE;
 
 		if (param == PushAny.class)
-			return (R) new PushAny(null, SyntheticLocation.INSTANCE);
+			return (R) new PushAny(Untyped.INSTANCE, SyntheticLocation.INSTANCE);
 		if (param == Constant.class || param == ValueExpression.class)
 			return (R) new Constant(Int32.INSTANCE, 5, SyntheticLocation.INSTANCE);
 		if (param == Identifier.class)
-			return (R) new Variable(provideParam(mtd, ExternalSet.class), "foo", SyntheticLocation.INSTANCE);
+			return (R) new Variable(provideParam(mtd, Type.class), "foo", SyntheticLocation.INSTANCE);
 
 		if (param == TernaryOperator.class)
 			return (R) StringReplace.INSTANCE;
@@ -163,14 +163,14 @@ public class BaseInferredValueTest {
 			return (R) LogicalNegation.INSTANCE;
 
 		if (param == UnaryExpression.class)
-			return (R) new UnaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+			return (R) new UnaryExpression(provideParam(mtd, Type.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, UnaryOperator.class), SyntheticLocation.INSTANCE);
 		if (param == BinaryExpression.class)
-			return (R) new BinaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+			return (R) new BinaryExpression(provideParam(mtd, Type.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, Constant.class), provideParam(mtd, BinaryOperator.class),
 					SyntheticLocation.INSTANCE);
 		if (param == TernaryExpression.class)
-			return (R) new TernaryExpression(provideParam(mtd, ExternalSet.class), provideParam(mtd, Constant.class),
+			return (R) new TernaryExpression(provideParam(mtd, Type.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, Constant.class), provideParam(mtd, Constant.class),
 					provideParam(mtd, TernaryOperator.class), SyntheticLocation.INSTANCE);
 		if (param == InferenceSystem.class)

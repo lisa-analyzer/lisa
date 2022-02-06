@@ -1,0 +1,38 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<i = -1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-1, -1]<BR/>x: [-Inf, +Inf]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-1, -1]] ]]<BR/>}} -&gt; [i]>];
+	"node1" [shape="rect",color="gray",label=<&lt;(i, j)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [0, 0]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [i &lt; j]>];
+	"node2" [shape="rect",color="gray",label=<x = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [1, 1]<BR/>y: [-Inf, +Inf]<BR/>[stack: [1, 1]] ]]<BR/>}} -&gt; [x]>];
+	"node3" [shape="rect",color="gray",label=<j = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-1, -1]<BR/>j: [0, 0]<BR/>x: [-Inf, +Inf]<BR/>y: [-Inf, +Inf]<BR/>[stack: [0, 0]] ]]<BR/>}} -&gt; [j]>];
+	"node4" [shape="rect",color="gray",label=<x = 0<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [0, 0]<BR/>y: [-Inf, +Inf]<BR/>[stack: [0, 0]] ]]<BR/>}} -&gt; [x]>];
+	"node5" [shape="rect",color="gray",label=<&lt;=(i, -1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [1, 1]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [i &lt;= -1]>];
+	"node6" [shape="rect",color="gray",label=<==(x, y)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [-Inf, +Inf]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [x == y]>];
+	"node7" [shape="rect",color="gray",label=<x = +(x, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [5, +Inf]<BR/>x: [3, 3]<BR/>y: [-Inf, +Inf]<BR/>[stack: [3, 3]] ]]<BR/>}} -&gt; [x]>];
+	"node8" [shape="rect",color="black",peripheries="2",label=<return x<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>ret_value@sat: [2, 3]<BR/>x: [2, 3]<BR/>y: [-Inf, +Inf]<BR/>[stack: [2, 3]] ]]<BR/>}} -&gt; [ret_value@sat]>];
+	"node9" [shape="rect",color="gray",label=<x = +(x, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [2, 2]<BR/>y: [-Inf, +Inf]<BR/>[stack: [2, 2]] ]]<BR/>}} -&gt; [x]>];
+	"node10" [shape="rect",color="gray",label=<&gt;=(j, 5)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -1]<BR/>j: [0, +Inf]<BR/>x: [2, 2]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-Inf, +Inf]] ]]<BR/>}} -&gt; [j &gt;= 5]>];
+	"node11" [shape="rect",color="gray",label=<i = -(i, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -2]<BR/>j: [0, +Inf]<BR/>x: [-Inf, +Inf]<BR/>y: [-Inf, +Inf]<BR/>[stack: [-7, -2]] ]]<BR/>}} -&gt; [i]>];
+	"node12" [shape="rect",color="gray",label=<j = +(j, 1)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ i: [-Inf, -2]<BR/>j: [1, +Inf]<BR/>x: [-Inf, +Inf]<BR/>y: [-Inf, +Inf]<BR/>[stack: [1, 6]] ]]<BR/>}} -&gt; [j]>];
+	"node1" -> "node5" [color="red",style="dashed"];
+	"node1" -> "node2" [color="blue",style="dashed"];
+	"node2" -> "node5" [color="black"];
+	"node3" -> "node6" [color="black"];
+	"node4" -> "node1" [color="black"];
+	"node0" -> "node3" [color="black"];
+	"node5" -> "node10" [color="red",style="dashed"];
+	"node5" -> "node9" [color="blue",style="dashed"];
+	"node6" -> "node4" [color="red",style="dashed"];
+	"node6" -> "node11" [color="blue",style="dashed"];
+	"node7" -> "node8" [color="black"];
+	"node9" -> "node10" [color="black"];
+	"node10" -> "node7" [color="blue",style="dashed"];
+	"node10" -> "node8" [color="red",style="dashed"];
+	"node11" -> "node12" [color="black"];
+	"node12" -> "node6" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}

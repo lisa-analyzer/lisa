@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.Parameter;
@@ -14,6 +15,9 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.cfg.statement.call.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A Python-like assigning strategy. Specifically:<br>
@@ -59,45 +63,57 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> prepare(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepare(
 					Call call,
-					AnalysisState<A, H, V> callState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
+					AnalysisState<A, H, V, T> callState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions,
 					Parameter[] formals,
 					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
 
 		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
+		ExternalSet<Type>[] slotsTypes = new ExternalSet[formals.length];
 		Expression[] actuals = call.getParameters();
 
 		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
+		ExternalSet<Type>[] defaultTypes = new ExternalSet[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
 			if (def != null) {
 				callState = def.semantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
 				defaults[pos] = callState.getComputedExpressions();
+				defaultTypes[pos] = callState.getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
 			}
 		}
 
-		AnalysisState<A, H, V> logic = PythonLikeMatchingStrategy.pythonLogic(formals, actuals, parameters,
-				defaults, slots, callState.bottom());
+		AnalysisState<A, H, V, T> logic = PythonLikeMatchingStrategy.pythonLogic(
+				formals,
+				actuals,
+				parameters,
+				call.parameterTypes(expressions),
+				defaults,
+				defaultTypes,
+				slots,
+				slotsTypes,
+				callState.bottom());
 		if (logic != null)
-			return logic;
+			return Pair.of(logic, parameters);
 
 		// prepare the state for the call: assign the value to each parameter
-		AnalysisState<A, H, V> prepared = callState;
+		AnalysisState<A, H, V, T> prepared = callState;
 		for (int i = 0; i < formals.length; i++) {
-			AnalysisState<A, H, V> temp = prepared.bottom();
+			AnalysisState<A, H, V, T> temp = prepared.bottom();
 			for (SymbolicExpression exp : slots[i])
 				temp = temp.lub(prepared.assign(formals[i].toSymbolicVariable(), exp, call));
 			prepared = temp;
 		}
 
-		return prepared;
+		return Pair.of(prepared, slots);
 	}
 
 }

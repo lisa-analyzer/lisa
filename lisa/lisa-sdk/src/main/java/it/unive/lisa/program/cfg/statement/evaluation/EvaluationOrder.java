@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -22,11 +23,14 @@ public interface EvaluationOrder {
 	/**
 	 * Evaluates the given sub-expressions according to this order. This method
 	 * will fill {@code computed} and {@code subStates} such that
-	 * {@code subStates[i] = subExpressions[i].semantics(); computed[i] = subStates[i].computedExpressions}
+	 * {@code subStates[i] = subExpressions[i].semantics(); computed[i] = subStates[i].computedExpressions},
+	 * while also setting the runtime types for the expressions left on the
+	 * stack.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param subExpressions  the sub-expressions to evaluate
 	 * @param entryState      the state to use as starting point for the
 	 *                            evaluation
@@ -45,13 +49,14 @@ public interface EvaluationOrder {
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	<A extends AbstractState<A, H, V>,
+	<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> evaluate(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> evaluate(
 					Expression[] subExpressions,
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
+					AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions,
 					ExpressionSet<SymbolicExpression>[] computed)
 					throws SemanticException;
 }

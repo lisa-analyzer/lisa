@@ -5,7 +5,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A reference to a memory location, identified by its name.
@@ -22,13 +21,13 @@ public class HeapReference extends HeapExpression {
 	/**
 	 * Builds the heap reference.
 	 * 
-	 * @param types      the runtime types of this expression
+	 * @param staticType the static type of this expression
 	 * @param expression the expression that this refers to
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public HeapReference(ExternalSet<Type> types, SymbolicExpression expression, CodeLocation location) {
-		super(types, location);
+	public HeapReference(Type staticType, SymbolicExpression expression, CodeLocation location) {
+		super(staticType, location);
 		this.expression = expression;
 	}
 

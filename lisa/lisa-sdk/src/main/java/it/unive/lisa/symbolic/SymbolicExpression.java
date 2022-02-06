@@ -3,11 +3,13 @@ package it.unive.lisa.symbolic;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Objects;
 
 /**
  * A symbolic expression that can be evaluated by {@link SemanticDomain}s.
@@ -24,39 +26,84 @@ public abstract class SymbolicExpression {
 	private final CodeLocation location;
 
 	/**
+	 * The static type of this expression
+	 */
+	private final Type staticType;
+
+	/**
 	 * The runtime types of this expression
 	 */
-	private final ExternalSet<Type> types;
+	private ExternalSet<Type> types;
 
 	/**
 	 * Builds the symbolic expression.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	protected SymbolicExpression(ExternalSet<Type> types, CodeLocation location) {
-		this.types = types;
+	protected SymbolicExpression(Type staticType, CodeLocation location) {
+		Objects.requireNonNull(staticType, "The static type of a symbolic expression cannot be null");
+		Objects.requireNonNull(location, "The location of a symbolic expression cannot be null");
+		this.staticType = staticType;
 		this.location = location;
 	}
 
 	/**
-	 * Yields the runtime types of this expression.
+	 * Yields the static type of this expression.
+	 * 
+	 * @return the static type
+	 */
+	public Type getStaticType() {
+		return staticType;
+	}
+
+	/**
+	 * Yields the runtime types of this expression. If
+	 * {@link #setRuntimeTypes(ExternalSet)} has never been called before, this
+	 * method will return all instances of the static type.
 	 * 
 	 * @return the runtime types
 	 */
-	public final ExternalSet<Type> getTypes() {
+	public final ExternalSet<Type> getRuntimeTypes() {
+		if (types == null)
+			return Caches.types().mkSet(staticType.allInstances());
 		return types;
+	}
+
+	/**
+	 * Sets the runtime types to the given set of types.
+	 * 
+	 * @param types the runtime types
+	 */
+	public void setRuntimeTypes(ExternalSet<Type> types) {
+		this.types = types;
+	}
+
+	/**
+	 * Yields {@code true} if this expression's runtime types have been set
+	 * (even to the empty set). If this method returns {@code false}, then
+	 * {@link #getDynamicType()} will yield the same as
+	 * {@link #getStaticType()}, and {@link #getRuntimeTypes()} returns all
+	 * possible instances of the static type.
+	 * 
+	 * @return whether or not runtime types are set for this expression
+	 */
+	public boolean hasRuntimeTypes() {
+		return types != null;
 	}
 
 	/**
 	 * Yields the dynamic type of this expression, that is, the most specific
 	 * common supertype of all its runtime types (available through
-	 * {@link #getTypes()}.
+	 * {@link #getRuntimeTypes()}. If {@link #setRuntimeTypes(ExternalSet)} has
+	 * never been called before, this method will return the static type.
 	 * 
 	 * @return the dynamic type of this expression
 	 */
 	public final Type getDynamicType() {
+		if (types == null || types.isEmpty())
+			return staticType;
 		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
 	}
 
@@ -108,7 +155,7 @@ public abstract class SymbolicExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((types == null) ? 0 : types.hashCode());
+		result = prime * result + ((staticType == null) ? 0 : staticType.hashCode());
 		return result;
 	}
 
@@ -121,10 +168,10 @@ public abstract class SymbolicExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		SymbolicExpression other = (SymbolicExpression) obj;
-		if (types == null) {
-			if (other.types != null)
+		if (staticType == null) {
+			if (other.staticType != null)
 				return false;
-		} else if (!types.equals(other.types))
+		} else if (!staticType.equals(other.staticType))
 			return false;
 		return true;
 	}

@@ -7,7 +7,7 @@ import it.unive.lisa.program.CompilationUnit;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface UnitType extends Type {
+public interface UnitType extends InMemoryType {
 
 	/**
 	 * Yields the {@link CompilationUnit} that induces this type.

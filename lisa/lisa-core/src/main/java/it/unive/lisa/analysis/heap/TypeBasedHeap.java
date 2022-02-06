@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -18,7 +19,9 @@ import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collections;
 import java.util.HashSet;
@@ -116,8 +119,8 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 		if (expression instanceof HeapAllocation) {
 			Set<String> names = new HashSet<>(this.names);
-			for (Type type : expression.getTypes())
-				if (type.isPointerType())
+			for (Type type : expression.getRuntimeTypes())
+				if (type.isInMemoryType())
 					names.add(type.toString());
 
 			return new TypeBasedHeap(names);
@@ -178,15 +181,21 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			// we use the container because we are not field-sensitive
-			ExternalSet<Type> types = expression.getTypes();
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
-					for (Type t : pid.getTypes())
-						if (t.isPointerType())
-							result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
+					for (Type t : pid.getRuntimeTypes())
+						if (t.isPointerType()) {
+							ExternalSet<Type> inner = t.asPointerType().getInnerTypes();
+							Type dynamic = inner.isEmpty() ? Untyped.INSTANCE
+									: inner.reduce(inner.first(), (r, tt) -> r.commonSupertype(tt));
+							HeapLocation e = new HeapLocation(dynamic, dynamic.toString(), true,
+									expression.getCodeLocation());
+							e.setRuntimeTypes(inner);
+							result.add(e);
+						}
 				}
 			return new ExpressionSet<>(result);
 		}
@@ -194,11 +203,13 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			ExternalSet<Type> types = expression.getTypes();
 			Set<ValueExpression> result = new HashSet<>();
-			for (Type t : types)
-				if (t.isPointerType())
-					result.add(new HeapLocation(types, t.toString(), true, expression.getCodeLocation()));
+			for (Type t : expression.getRuntimeTypes())
+				if (t.isInMemoryType()) {
+					HeapLocation e = new HeapLocation(t, t.toString(), true, expression.getCodeLocation());
+					e.setRuntimeTypes(Caches.types().mkSingletonSet(t));
+					result.add(e);
+				}
 			return new ExpressionSet<>(result);
 		}
 
@@ -209,9 +220,17 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			Set<ValueExpression> result = new HashSet<>();
 			for (ValueExpression refExp : ref)
-				if (refExp instanceof HeapLocation)
-					result.add(
-							new MemoryPointer(expression.getTypes(), (HeapLocation) refExp, refExp.getCodeLocation()));
+				if (refExp instanceof HeapLocation) {
+					ExternalSet<Type> all = Caches.types().mkSet(refExp.getStaticType().allInstances());
+					ExternalSet<Type> rt = refExp.getRuntimeTypes();
+					MemoryPointer e = new MemoryPointer(
+							new ReferenceType(refExp.hasRuntimeTypes() ? rt : all),
+							(HeapLocation) refExp,
+							refExp.getCodeLocation());
+					if (expression.hasRuntimeTypes())
+						e.setRuntimeTypes(expression.getRuntimeTypes());
+					result.add(e);
+				}
 
 			return new ExpressionSet<>(result);
 		}
@@ -225,13 +244,20 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 			for (ValueExpression derefExp : deref) {
 				if (derefExp instanceof Variable) {
-					Variable v = (Variable) derefExp;
-					ExternalSet<Type> types = v.getTypes();
-					for (Type t : types)
-						if (t.isPointerType())
-							result.add(new MemoryPointer(types,
-									new HeapLocation(types, t.toString(), true, v.getCodeLocation()),
-									v.getCodeLocation()));
+					Variable var = (Variable) derefExp;
+					for (Type t : var.getRuntimeTypes())
+						if (t.isPointerType()) {
+							ExternalSet<Type> inner = t.asPointerType().getInnerTypes();
+							Type dynamic = inner.isEmpty() ? Untyped.INSTANCE
+									: inner.reduce(inner.first(), (r, tt) -> r.commonSupertype(tt));
+
+							HeapLocation loc = new HeapLocation(dynamic, dynamic.toString(), true,
+									var.getCodeLocation());
+							loc.setRuntimeTypes(inner);
+
+							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());
+							result.add(pointer);
+						}
 				}
 			}
 

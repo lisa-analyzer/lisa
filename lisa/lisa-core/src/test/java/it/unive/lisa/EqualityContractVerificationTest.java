@@ -16,6 +16,7 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
@@ -50,6 +51,7 @@ import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
@@ -57,10 +59,14 @@ import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTrave
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.collections.externalSet.BitExternalSet;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.collections.externalSet.UniversalExternalSet;
 import it.unive.lisa.util.collections.workset.ConcurrentFIFOWorkingSet;
@@ -107,9 +113,14 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "foo", "foo");
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
+			"foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, false, "bar", "bar");
+			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "bar",
+			"bar");
+	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
+	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
+	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
@@ -183,6 +194,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
+				.withPrefabValues(ExternalSet.class, s1, s2)
 				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
 
 		if (getClass)
@@ -212,8 +224,8 @@ public class EqualityContractVerificationTest {
 		// caring about fields
 		verify(ExternalSetCache.class, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		// suppress nullity: the cache will never be null..
-		verify(BitExternalSet.class, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
-		verify(UniversalExternalSet.class);
+		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
+		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
 		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
 		verify(NodeEdges.class);
@@ -235,8 +247,13 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			// type token is the only one with an eclipse-like equals
-			verify(type, type == TypeTokenType.class);
+			if (type == ReferenceType.class)
+				// TODO to avoid using the cache early, we have non-final fields
+				// in here and not all of them are used
+				verify(type, Warning.NONFINAL_FIELDS, Warning.ALL_FIELDS_SHOULD_BE_USED);
+			else
+				// type token is the only one with an eclipse-like equals
+				verify(type, type == TypeTokenType.class);
 	}
 
 	@Test
@@ -252,7 +269,7 @@ public class EqualityContractVerificationTest {
 			else
 				// location is excluded on purpose: it only brings syntactic
 				// information
-				verify(expr, verifier -> verifier.withIgnoredFields("location"));
+				verify(expr, verifier -> verifier.withIgnoredFields("location", "types"));
 	}
 
 	@Test
@@ -262,7 +279,7 @@ public class EqualityContractVerificationTest {
 
 		List<String> statementFields = List.of("cfg", "offset");
 		List<String> expressionFields = ListUtils.union(statementFields,
-				List.of("runtimeTypes", "parent", "metaVariables"));
+				List.of("parent", "metaVariables"));
 
 		Reflections scanner = mkReflections();
 		for (Class<? extends Statement> st : scanner.getSubTypesOf(Statement.class))
@@ -401,5 +418,12 @@ public class EqualityContractVerificationTest {
 		// underlying graph, and equality testing the graph will take them into
 		// account
 		verify(DotCFG.class, verifier -> verifier.withIgnoredFields("legend", "title", "codes", "nextCode"));
+	}
+
+	@Test
+	public void testSymbolAliases() {
+		Reflections scanner = mkReflections();
+		for (Class<? extends Symbol> sym : scanner.getSubTypesOf(Symbol.class))
+			verify(sym);
 	}
 }

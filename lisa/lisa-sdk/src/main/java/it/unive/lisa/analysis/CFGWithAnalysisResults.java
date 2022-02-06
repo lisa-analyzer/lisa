@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.cfg.CFG;
@@ -25,9 +26,14 @@ import java.util.function.Function;
  *                abstract state
  * @param <V> the type of {@link ValueDomain} contained into the computed
  *                abstract state
+ * @param <T> the type of {@link TypeDomain} embedded into the computed abstract
+ *                state
  */
-public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V>> {
+public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
+		H extends HeapDomain<H>,
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V, T>> {
 
 	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
 
@@ -36,12 +42,12 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	/**
 	 * The map storing the analysis results
 	 */
-	private final StatementStore<A, H, V> results;
+	private final StatementStore<A, H, V, T> results;
 
 	/**
 	 * The map storing the entry state of each entry point
 	 */
-	private final StatementStore<A, H, V> entryStates;
+	private final StatementStore<A, H, V, T> entryStates;
 
 	/**
 	 * An optional string meant to identify this specific result, based on how
@@ -58,7 +64,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton) {
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton) {
 		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
 
@@ -73,9 +79,9 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V> singleton,
-			Map<Statement, AnalysisState<A, H, V>> entryStates,
-			Map<Statement, AnalysisState<A, H, V>> results) {
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton,
+			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
+			Map<Statement, AnalysisState<A, H, V, T>> results) {
 		super(cfg);
 		this.results = new StatementStore<>(singleton);
 		results.forEach(this.results::put);
@@ -83,7 +89,8 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 		entryStates.forEach(this.entryStates::put);
 	}
 
-	private CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V> entryStates, StatementStore<A, H, V> results) {
+	private CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V, T> entryStates,
+			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;
 		this.entryStates = entryStates;
@@ -118,7 +125,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A, H, V> getAnalysisStateBefore(Statement st) throws SemanticException {
+	public AnalysisState<A, H, V, T> getAnalysisStateBefore(Statement st) throws SemanticException {
 		if (getEntrypoints().contains(st))
 			return entryStates.getState(st);
 		return lub(predecessorsOf(st), false);
@@ -131,7 +138,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 *
 	 * @return the result computed at the given statement
 	 */
-	public AnalysisState<A, H, V> getAnalysisStateAfter(Statement st) {
+	public AnalysisState<A, H, V, T> getAnalysisStateAfter(Statement st) {
 		return results.getState(st);
 	}
 
@@ -142,7 +149,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A, H, V> getEntryState() throws SemanticException {
+	public AnalysisState<A, H, V, T> getEntryState() throws SemanticException {
 		return lub(this.getEntrypoints(), true);
 	}
 
@@ -153,12 +160,12 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if the lub operator fails
 	 */
-	public AnalysisState<A, H, V> getExitState() throws SemanticException {
+	public AnalysisState<A, H, V, T> getExitState() throws SemanticException {
 		return lub(this.getNormalExitpoints(), false);
 	}
 
-	private AnalysisState<A, H, V> lub(Collection<Statement> statements, boolean entry) throws SemanticException {
-		AnalysisState<A, H, V> result = entryStates.lattice.bottom();
+	private AnalysisState<A, H, V, T> lub(Collection<Statement> statements, boolean entry) throws SemanticException {
+		AnalysisState<A, H, V, T> result = entryStates.lattice.bottom();
 		for (Statement st : statements)
 			result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
 		return result;
@@ -176,7 +183,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	 * 
 	 * @throws SemanticException if something goes wrong during the join
 	 */
-	public CFGWithAnalysisResults<A, H, V> join(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+	public CFGWithAnalysisResults<A, H, V, T> join(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
@@ -185,29 +192,31 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V> lub(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+	public CFGWithAnalysisResults<A, H, V, T> lub(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		CFGWithAnalysisResults<A, H, V> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
+		CFGWithAnalysisResults<A, H, V, T> lub = new CFGWithAnalysisResults<>(this, entryStates.lub(other.entryStates),
 				results.lub(other.results));
 		lub.setId(joinIDs(other));
 		return lub;
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V> widening(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+	public CFGWithAnalysisResults<A, H, V, T> widening(CFGWithAnalysisResults<A, H, V, T> other)
+			throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		CFGWithAnalysisResults<A, H,
-				V> widen = new CFGWithAnalysisResults<>(this, entryStates.widening(other.entryStates),
-						results.widening(other.results));
+		CFGWithAnalysisResults<A, H, V, T> widen = new CFGWithAnalysisResults<>(
+				this,
+				entryStates.widening(other.entryStates),
+				results.widening(other.results));
 		widen.setId(joinIDs(other));
 		return widen;
 	}
 
-	private String joinIDs(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+	private String joinIDs(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
 		// we accept merging only if the ids are the same
 		if (id == null) {
 			if (other.id == null)
@@ -226,7 +235,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	@Override
-	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V> other) throws SemanticException {
+	public boolean lessOrEqual(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
@@ -234,7 +243,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V> top() {
+	public CFGWithAnalysisResults<A, H, V, T> top() {
 		return new CFGWithAnalysisResults<>(this, entryStates.top(), results.top());
 	}
 
@@ -244,7 +253,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 	}
 
 	@Override
-	public CFGWithAnalysisResults<A, H, V> bottom() {
+	public CFGWithAnalysisResults<A, H, V, T> bottom() {
 		return new CFGWithAnalysisResults<>(this, entryStates.bottom(), results.bottom());
 	}
 
@@ -276,7 +285,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V>, H extends 
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGWithAnalysisResults<?, ?, ?> other = (CFGWithAnalysisResults<?, ?, ?>) obj;
+		CFGWithAnalysisResults<?, ?, ?, ?> other = (CFGWithAnalysisResults<?, ?, ?, ?>) obj;
 		if (entryStates == null) {
 			if (other.entryStates != null)
 				return false;

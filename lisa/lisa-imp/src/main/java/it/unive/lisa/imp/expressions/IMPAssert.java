@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -12,6 +13,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.symbolic.value.Skip;
+import it.unive.lisa.type.Type;
 
 /**
  * An assertion in an IMP program.
@@ -39,17 +41,20 @@ public class IMPAssert extends UnaryStatement {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> semantics(
-					AnalysisState<A, H, V> entryState, InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions)
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
+					AnalysisState<A, H, V, T> entryState, InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = getExpression().semantics(entryState, interprocedural, expressions);
+		AnalysisState<A, H, V, T> result = getExpression().semantics(entryState, interprocedural, expressions);
 		expressions.put(getExpression(), result);
 		if (!getExpression().getMetaVariables().isEmpty())
 			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		if (!getExpression().getDynamicType().isBooleanType())
+
+		Type type = result.getDomainInstance(TypeDomain.class).getInferredDynamicType();
+		if (!type.isBooleanType())
 			return result.bottom();
 		return result.smallStepSemantics(new Skip(getLocation()), this);
 	}

@@ -6,7 +6,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a synthetic program variable that represents a resolved
@@ -19,15 +18,15 @@ public class HeapLocation extends Identifier {
 	/**
 	 * Builds the heap location.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param name     the name of the location
-	 * @param weak     whether or not this identifier is weak, meaning that it
-	 *                     should only receive weak assignments
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param name       the name of the location
+	 * @param weak       whether or not this identifier is weak, meaning that it
+	 *                       should only receive weak assignments
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public HeapLocation(ExternalSet<Type> types, String name, boolean weak, CodeLocation location) {
-		super(types, name, weak, location);
+	public HeapLocation(Type staticType, String name, boolean weak, CodeLocation location) {
+		super(staticType, name, weak, location);
 	}
 
 	@Override

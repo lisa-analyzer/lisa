@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -14,6 +15,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression modeling the array element access operation
@@ -40,23 +43,30 @@ public class IMPArrayAccess extends BinaryExpression {
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,
+	protected <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> binarySemantics(
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> state,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
 					SymbolicExpression left,
 					SymbolicExpression right,
-					StatementStore<A, H, V> expressions)
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-
-		if (!left.getDynamicType().isArrayType() && !left.getDynamicType().isUntyped())
+		Type recType = left.getDynamicType();
+		Type arrayType;
+		if (recType.isUntyped()) {
+			arrayType = recType;
+		} else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isArrayType)) {
+			ExternalSet<Type> inner = recType.asPointerType().getInnerTypes();
+			arrayType = inner.reduce(inner.first(), (r, t) -> r.commonSupertype(t));
+		} else
 			return state.bottom();
 		// it is not possible to detect the correct type of the field without
 		// resolving it. we rely on the rewriting that will happen inside heap
 		// domain to translate this into a variable that will have its correct
 		// type
-		HeapDereference deref = new HeapDereference(getRuntimeTypes(), left, getLocation());
-		return state.smallStepSemantics(new AccessChild(getRuntimeTypes(), deref, right, getLocation()), this);
+		HeapDereference deref = new HeapDereference(arrayType, left, getLocation());
+		return state.smallStepSemantics(new AccessChild(getStaticType(), deref, right, getLocation()), this);
 	}
 }
