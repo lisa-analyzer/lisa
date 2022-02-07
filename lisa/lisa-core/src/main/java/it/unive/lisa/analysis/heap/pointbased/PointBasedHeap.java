@@ -284,7 +284,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							(AllocationSite) loc,
 							loc.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(loc.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes());
 					result.add(e);
 				} else
 					result.add(loc);
