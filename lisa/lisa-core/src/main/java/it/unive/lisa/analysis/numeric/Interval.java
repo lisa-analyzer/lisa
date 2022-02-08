@@ -50,13 +50,34 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	/**
 	 * The interval represented by this domain element.
 	 */
-	final IntInterval interval;
+	public final IntInterval interval;
 
-	private Interval(IntInterval interval) {
+	/**
+	 * Builds the interval.
+	 * 
+	 * @param interval the underlying {@link IntInterval}
+	 */
+	public Interval(IntInterval interval) {
 		this.interval = interval;
 	}
 
-	private Interval(MathNumber low, MathNumber high) {
+	/**
+	 * Builds the interval.
+	 * 
+	 * @param low  the lower bound
+	 * @param high the higher bound
+	 */
+	public Interval(MathNumber low, MathNumber high) {
+		this(new IntInterval(low, high));
+	}
+
+	/**
+	 * Builds the interval.
+	 * 
+	 * @param low  the lower bound
+	 * @param high the higher bound
+	 */
+	public Interval(int low, int high) {
 		this(new IntInterval(low, high));
 	}
 
