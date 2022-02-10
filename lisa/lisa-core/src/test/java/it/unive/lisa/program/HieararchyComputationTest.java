@@ -4,13 +4,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Test;
-
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.SignatureCFG;
+import org.junit.Test;
 
 public class HieararchyComputationTest {
 
@@ -61,10 +60,10 @@ public class HieararchyComputationTest {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
-						sup.getDescriptor().overriddenBy().contains(cfg));
+				sup.getDescriptor().overriddenBy().contains(cfg));
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' does not override '" + cfg.getDescriptor().getFullName()
-				+ "'",
+						+ "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
@@ -72,10 +71,10 @@ public class HieararchyComputationTest {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
-						sup.getDescriptor().overriddenBy().contains(cfg));
+				sup.getDescriptor().overriddenBy().contains(cfg));
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' overrides '" + cfg.getDescriptor().getFullName()
-				+ "'",
+						+ "'",
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
@@ -246,7 +245,7 @@ public class HieararchyComputationTest {
 		overrides(aI, aFirst);
 		overrides(bJ, bFirst);
 		overrides(cK, cFirst);
-		
+
 		isInstance(i, first);
 		isInstance(j, first);
 		isInstance(k, first);
@@ -254,7 +253,8 @@ public class HieararchyComputationTest {
 
 	@Test
 	public void testDefaultMethodsInterface() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/default-methods-interface.imp", false);
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/default-methods-interface.imp",
+				false);
 		prog.validateAndFinalize();
 
 		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
@@ -277,16 +277,16 @@ public class HieararchyComputationTest {
 		isInstance(j, first);
 	}
 
-
 	@Test(expected = ProgramValidationException.class)
 	public void testInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
 		prog.validateAndFinalize();
 	}
-	
+
 	@Test
 	public void testOverridingDefaultMethods() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/overriding-default-method.imp", false);
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/overriding-default-method.imp",
+				false);
 		prog.validateAndFinalize();
 
 		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
@@ -298,11 +298,10 @@ public class HieararchyComputationTest {
 
 		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
 		findCFG(i, "d");
-		
+
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-	
 		overrides(bJ, bFirst);
 		overrides(cI, cFirst);
 

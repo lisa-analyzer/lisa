@@ -1,16 +1,5 @@
 package it.unive.lisa.program;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
@@ -21,6 +10,15 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.SignatureCFG;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A compilation unit of the program to analyze. A compilation unit is a
@@ -143,7 +141,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	@Override
 	public final Collection<CompilationUnit> getSuperUnits() {
-		// TODO: it should return both super compilation units and super interfaces
+		// TODO: it should return both super compilation units and super
+		// interfaces
 		return superCompilationUnits;
 	}
 
@@ -275,8 +274,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	public final ImplementedCFG getInstanceCFG(String signature, boolean traverseHierarchy) {
 		Collection<
-		ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
-				false, traverseHierarchy);
+				ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
+						false, traverseHierarchy);
 		if (res.isEmpty())
 			return null;
 		return res.stream().findFirst().get();
@@ -548,10 +547,10 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
 		instances.add(unit);
-		
+
 		for (CompilationUnit sup : superCompilationUnits)
 			sup.addInstance(unit);
-		
+
 		for (InterfaceUnit sup : superInterfaceUnits)
 			sup.addInstance(unit);
 	}
@@ -615,7 +614,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 				} else if (!s.canBeInstantiated())
 					throw new ProgramValidationException(
 							this + " does not overrides the cfg " + sup.getDescriptor().getSignature()
-							+ " of the non-instantiable unit " + s);
+									+ " of the non-instantiable unit " + s);
 			}
 
 		for (InterfaceUnit i : superInterfaceUnits)

@@ -12,13 +12,13 @@ public abstract class UnitWithSuperUnits extends Unit {
 	 * this unit
 	 */
 	protected final Collection<Unit> instances;
-	
+
 	protected UnitWithSuperUnits(String name) {
 		super(name);
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
 	}
-	
+
 	/**
 	 * Yields the collection of {@link CompilationUnit}s that are instances of
 	 * this one, including itself. In other words, this method returns the
@@ -34,7 +34,7 @@ public abstract class UnitWithSuperUnits extends Unit {
 	public final Collection<Unit> getInstances() {
 		return instances;
 	}
-	
+
 	public abstract Collection<? extends UnitWithSuperUnits> getSuperUnits();
 
 	/**

@@ -170,7 +170,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
 			if (!recType.isUnitType())
 				continue;
-			
+
 			// TODO: fix here: we should check that the unit returned
 			// is a compilation unit
 			CompilationUnit unit = (CompilationUnit) recType.asUnitType().getUnit();

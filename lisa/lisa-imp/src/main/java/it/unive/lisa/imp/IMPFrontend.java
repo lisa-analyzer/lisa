@@ -3,26 +3,6 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.imp.antlr.IMPLexer;
 import it.unive.lisa.imp.antlr.IMPParser;
 import it.unive.lisa.imp.antlr.IMPParser.ClassUnitContext;
@@ -72,6 +52,24 @@ import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -268,7 +266,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			// we add all the units first, so that type resolution an work
 			if (unit.classUnit() != null) {
 				CompilationUnit u = new CompilationUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-						unit.classUnit().name.getText(), false);
+						unit.classUnit().name.getText(), false, unit.classUnit().ABSTRACT() != null);
 				program.addUnit(u);
 				ClassType.lookup(u.getName(), u);
 
@@ -324,7 +322,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				implementedInterfaces.get(unit.getName()).add(Pair.of(unit, inft.getText()));
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
-		
+
 		for (SignatureDeclarationContext decl : ctx.methodOrSignarureDeclarations().signatureDeclaration())
 			unit.addInstanceCFG(visitSignatureDeclaration(decl));
 
@@ -350,7 +348,6 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
-
 		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
 			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
@@ -360,7 +357,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (ImplementedCFG cfg : unit.getInstanceCFGs(false)) {
 			if (unit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-					&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
 			if (isEntryPoint(cfg))
 				program.addEntryPoint(cfg);
@@ -447,9 +444,11 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
-		Type unitType = currentUnit instanceof InterfaceUnit ? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit) : ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
+		Type unitType = currentUnit instanceof InterfaceUnit
+				? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit)
+				: ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",	unitType);
+		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this", unitType);
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

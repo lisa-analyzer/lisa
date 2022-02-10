@@ -277,35 +277,35 @@ constructorDeclaration
 methodDeclaration
    : annotations? FINAL? name = IDENTIFIER pars = formals code = block
    ;
-   
+
 signatureDeclaration
-	: annotations? FINAL? name = IDENTIFIER formals SEMI
-	;
+   : annotations? FINAL? name = IDENTIFIER formals SEMI
+   ;
 
 methodOrSignarureDeclarations
-	: (signatureDeclaration | methodDeclaration)*
-	;
-
+   : (signatureDeclaration | methodDeclaration)*
+   ;
 /*
  * CLASS
  */
    
    
 unit
-   : classUnit | interfaceUnit
+   : classUnit
+   | interfaceUnit
    ;
 
 classUnit
-	: annotations? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = memberDeclarations RBRACE
-  ;
-  
+   : annotations? ABSTRACT? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = memberDeclarations RBRACE
+   ;
+
 interfaceUnit
-	: annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = methodOrSignarureDeclarations RBRACE
-  ;
+   : annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = methodOrSignarureDeclarations RBRACE
+   ;
 
 unitNames
-	: unitName (COMMA unitName)*
-	;
+   : unitName (COMMA unitName)*
+   ;
 
 file
    : unit*

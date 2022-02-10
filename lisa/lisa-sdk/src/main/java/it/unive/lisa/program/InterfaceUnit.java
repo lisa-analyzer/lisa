@@ -1,18 +1,16 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-
 import org.apache.commons.lang3.StringUtils;
-
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.CodeMember;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a
@@ -33,7 +31,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * {@link CFGDescriptor#getSignature()}
 	 */
 	private final Map<String, CFG> instanceCFG;
-	
+
 	/**
 	 * The collection of interface units this unit directly inherits from.
 	 */
@@ -108,7 +106,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	public final boolean addSuperUnit(UnitWithSuperUnits unit) {
 		return superInterfaceUnits.add((InterfaceUnit) unit);
 	}
-	
+
 	@Override
 	public void validateAndFinalize() throws ProgramValidationException {
 		if (hierarchyComputed)
@@ -118,9 +116,9 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 
 		for (InterfaceUnit i : superInterfaceUnits)
 			i.validateAndFinalize();
-		
+
 		addInstance(this);
-		
+
 		for (InterfaceUnit s : superInterfaceUnits)
 			for (CodeMember sup : s.getInstanceCFGs(true)) {
 				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
@@ -142,27 +140,27 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	public final boolean addInstanceCFG(CFG cfg) {
 		return instanceCFG.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
-	
+
 	@Override
 	public final Collection<InterfaceUnit> getSuperUnits() {
 		return superInterfaceUnits;
 	}
-	
+
 	protected final void addInstance(Unit unit) throws ProgramValidationException {
 		if (superInterfaceUnits.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
 		instances.add(unit);
-		
+
 		for (InterfaceUnit sup : superInterfaceUnits)
 			sup.addInstance(unit);
 	}
-	
+
 	public final boolean isInstanceOf(InterfaceUnit unit) {
 		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
 				: superInterfaceUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
 	}
-	
+
 	@Override
 	public CodeLocation getLocation() {
 		return location;

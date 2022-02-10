@@ -1,12 +1,5 @@
 package it.unive.lisa.imp.types;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.type.Type;
@@ -14,6 +7,12 @@ import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 //TODO: consider to remove this class and keep the ClassType type
 public final class InterfaceType implements UnitType {
@@ -141,14 +140,14 @@ public final class InterfaceType implements UnitType {
 			return false;
 		return true;
 	}
-	
+
 	@Override
 	public Collection<Type> allInstances() {
 		Collection<Type> instances = new HashSet<>();
 		for (Unit un : unit.getInstances())
 			if (un instanceof InterfaceUnit)
 				instances.add(lookup(un.getName(), null));
-			else 
+			else
 				instances.add(ClassType.lookup(un.getName(), null));
 		return instances;
 	}
