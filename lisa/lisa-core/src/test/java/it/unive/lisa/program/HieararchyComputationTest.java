@@ -309,4 +309,10 @@ public class HieararchyComputationTest {
 		isInstance(j, i);
 		isInstance(j, first);
 	}
+	
+	@Test(expected = ProgramValidationException.class)
+	public void testAbstractClass() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
+		prog.validateAndFinalize();
+	}
 }

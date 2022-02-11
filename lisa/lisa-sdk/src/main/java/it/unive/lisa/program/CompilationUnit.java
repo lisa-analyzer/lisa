@@ -601,6 +601,9 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
 		}
 
+		if (!signatureCfgs.isEmpty() && !abstractUnit)
+			throw new ProgramValidationException(this + " is not an abstract class and it cannot have signature cfgs.");
+
 		for (CompilationUnit s : superCompilationUnits)
 			for (CodeMember sup : s.getInstanceCodeMembers(true)) {
 				Collection<CodeMember> overriding = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
