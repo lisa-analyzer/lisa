@@ -29,9 +29,9 @@ interface anInterface {}
  * imp provides abstract classes
  */
  abstract class forth {
- 	a()
- 	b()
- 	c()
+ 	a();
+ 	b();
+ 	c();
  	d() {
  		return 1;
  	}
