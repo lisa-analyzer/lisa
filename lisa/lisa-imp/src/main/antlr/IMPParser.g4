@@ -285,6 +285,10 @@ signatureDeclaration
 methodOrSignarureDeclarations
    : (signatureDeclaration | methodDeclaration)*
    ;
+
+memberOrSignatureDeclarations
+   : (signatureDeclaration | methodDeclaration | fieldDeclaration | constructorDeclaration)*
+   ;
 /*
  * CLASS
  */
@@ -296,7 +300,7 @@ unit
    ;
 
 classUnit
-   : annotations? ABSTRACT? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = memberDeclarations RBRACE
+   : annotations? ABSTRACT? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = memberOrSignatureDeclarations RBRACE
    ;
 
 interfaceUnit

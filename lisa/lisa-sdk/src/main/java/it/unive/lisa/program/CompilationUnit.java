@@ -58,6 +58,12 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	private final Map<String, ImplementedCFG> instanceCfgs;
 
 	/**
+	 * The instance cfgs defined in this unit, indexed by
+	 * {@link CFGDescriptor#getSignature()}
+	 */
+	private final Map<String, SignatureCFG> signatureCfgs;
+
+	/**
 	 * The instance constructs ({@link NativeCFG}s) defined in this unit,
 	 * indexed by {@link CFGDescriptor#getSignature()}
 	 */
@@ -116,6 +122,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		instanceGlobals = new ConcurrentHashMap<>();
 		instanceCfgs = new ConcurrentHashMap<>();
+		signatureCfgs = new ConcurrentHashMap<>();
 		instanceConstructs = new ConcurrentHashMap<>();
 		hierarchyComputed = false;
 		annotations = new Annotations();
@@ -686,5 +693,14 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	@Override
 	public boolean canBeInstantiated() {
 		return !abstractUnit;
+	}
+
+	public boolean addSignatureCFG(SignatureCFG cfg) {
+		SignatureCFG c = signatureCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
+		if (c == null)
+			cfg.getDescriptor().setOverridable(true);
+		else
+			c.getDescriptor().setOverridable(true);
+		return c == null;
 	}
 }

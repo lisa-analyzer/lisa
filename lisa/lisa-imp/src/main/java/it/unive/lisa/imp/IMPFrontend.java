@@ -348,11 +348,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
-		for (MethodDeclarationContext decl : ctx.memberDeclarations().methodDeclaration())
+		for (MethodDeclarationContext decl : ctx.memberOrSignatureDeclarations().methodDeclaration())
 			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
-		for (ConstructorDeclarationContext decl : ctx.memberDeclarations().constructorDeclaration())
+		for (ConstructorDeclarationContext decl : ctx.memberOrSignatureDeclarations().constructorDeclaration())
 			unit.addInstanceCFG(visitConstructorDeclaration(decl));
+
+		for (SignatureDeclarationContext decl : ctx.memberOrSignatureDeclarations().signatureDeclaration())
+			unit.addSignatureCFG(visitSignatureDeclaration(decl));
 
 		for (ImplementedCFG cfg : unit.getInstanceCFGs(false)) {
 			if (unit.getInstanceCFGs(false).stream()
@@ -363,7 +366,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				program.addEntryPoint(cfg);
 		}
 
-		for (FieldDeclarationContext decl : ctx.memberDeclarations().fieldDeclaration())
+		for (FieldDeclarationContext decl : ctx.memberOrSignatureDeclarations().fieldDeclaration())
 			unit.addInstanceGlobal(visitFieldDeclaration(decl));
 
 		for (Global global : unit.getInstanceGlobals(false))

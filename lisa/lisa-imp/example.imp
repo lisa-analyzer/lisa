@@ -28,8 +28,14 @@ interface anInterface {}
 /*
  * imp provides abstract classes
  */
- 
- abstract class forth {}
+ abstract class forth {
+ 	a()
+ 	b()
+ 	c()
+ 	d() {
+ 		return 1;
+ 	}
+ }
 
 /*
  * an imp class can be annotated with one or more annotation.

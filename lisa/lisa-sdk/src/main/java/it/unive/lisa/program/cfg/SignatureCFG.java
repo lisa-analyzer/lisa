@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg;
 
+import it.unive.lisa.program.ProgramValidationException;
+
 /**
  * A signature control flow graph, that has no graph implementation but just its
  * signature<br>
@@ -28,5 +30,10 @@ public class SignatureCFG implements CFG {
 	@Override
 	public CFGDescriptor getDescriptor() {
 		return descriptor;
+	}
+
+	@Override
+	public void validate() throws ProgramValidationException {
+		// nothing to do here
 	}
 }

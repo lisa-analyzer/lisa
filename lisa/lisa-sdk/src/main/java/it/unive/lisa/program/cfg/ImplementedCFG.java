@@ -645,6 +645,7 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @throws ProgramValidationException if one of the aforementioned checks
 	 *                                        fail
 	 */
+	@Override
 	public void validate() throws ProgramValidationException {
 		try {
 			adjacencyMatrix.validate(entrypoints);
