@@ -325,6 +325,13 @@ public class HieararchyComputationTest {
 		prog.validateAndFinalize();
 	}
 
+	@Test(expected = ProgramValidationException.class)
+	public void testExtendingButNotImpl() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/extending-but-not-impl.imp",
+				false);
+		prog.validateAndFinalize();
+	}
+
 	@Test
 	public void testSimpleAbstractClass() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-abstract-class.imp",
@@ -342,5 +349,28 @@ public class HieararchyComputationTest {
 		overrides(aFirst, aSecond);
 
 		isInstance(first, second);
+	}
+
+	@Test
+	public void testAbstractClassExt() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/abstract-class-ext.imp",
+				false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
+
+		assertFalse(first.canBeInstantiated());
+		assertFalse(second.canBeInstantiated());
+
+		SignatureCFG aFirst = findSignatureCFG(first, "a");
+		ImplementedCFG aThird = findCFG(third, "a");
+
+		overrides(aFirst, aThird);
+
+		isInstance(first, second);
+		isInstance(first, third);
+		isInstance(second, third);
 	}
 }

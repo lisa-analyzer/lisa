@@ -633,7 +633,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 						over.getDescriptor().overrides().add(sup);
 						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
 					}
-				} else if (!s.canBeInstantiated())
+				} else if (!s.canBeInstantiated() && canBeInstantiated())
 					throw new ProgramValidationException(
 							this + " does not overrides the cfg " + sup.getDescriptor().getSignature()
 									+ " of the non-instantiable unit " + s);
