@@ -27,6 +27,14 @@ public class HieararchyComputationTest {
 		return cfg;
 	}
 
+	private static SignatureCFG findSignatureCFG(CompilationUnit unit, String name) {
+		SignatureCFG cfg = unit.getSignatureCFG(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst()
+				.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		return cfg;
+	}
+
 	private static CFG findCFG(InterfaceUnit unit, String name) {
 		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
@@ -309,10 +317,30 @@ public class HieararchyComputationTest {
 		isInstance(j, i);
 		isInstance(j, first);
 	}
-	
+
 	@Test(expected = ProgramValidationException.class)
 	public void testAbstractClass() throws ParsingException, ProgramValidationException {
-		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp", false);
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp",
+				false);
 		prog.validateAndFinalize();
+	}
+
+	@Test
+	public void testSimpleAbstractClass() throws ParsingException, ProgramValidationException {
+		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-abstract-class.imp",
+				false);
+		prog.validateAndFinalize();
+
+		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+
+		assertFalse(first.canBeInstantiated());
+
+		SignatureCFG aFirst = findSignatureCFG(first, "a");
+		ImplementedCFG aSecond = findCFG(second, "a");
+
+		overrides(aFirst, aSecond);
+
+		isInstance(first, second);
 	}
 }

@@ -181,7 +181,11 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * @return the collection of instance cfgs
 	 */
 	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> true, true, false, traverseHierarchy);
+		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
+	}
+
+	public final Collection<SignatureCFG> getSignatureCFG(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
 	}
 
 	/**
@@ -281,7 +285,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	public final ImplementedCFG getInstanceCFG(String signature, boolean traverseHierarchy) {
 		Collection<
-				ImplementedCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
+				ImplementedCFG> res = searchCodeMembers(
+						cm -> cm instanceof ImplementedCFG && cm.getDescriptor().getSignature().equals(signature), true,
 						false, traverseHierarchy);
 		if (res.isEmpty())
 			return null;
@@ -355,7 +360,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * @return the collection of instance cfgs with the given name
 	 */
 	public final Collection<ImplementedCFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), true, false, traverseHierarchy);
+		return searchCodeMembers(cm -> cm instanceof ImplementedCFG && cm.getDescriptor().getName().equals(name), true,
+				false, traverseHierarchy);
 	}
 
 	/**
@@ -426,10 +432,15 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 			boolean constructs, boolean traverseHierarchy) {
 		Collection<T> result = new HashSet<>();
 
-		if (cfgs)
+		if (cfgs) {
 			for (ImplementedCFG cfg : instanceCfgs.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
+
+			for (SignatureCFG cfg : signatureCfgs.values())
+				if (filter.test(cfg))
+					result.add((T) cfg);
+		}
 
 		if (constructs)
 			for (NativeCFG construct : instanceConstructs.values())
@@ -530,6 +541,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	public final Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
 		HashSet<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
+		all.addAll(getSignatureCFG(traverseHierarchy));
 		all.addAll(getInstanceConstructs(traverseHierarchy));
 		return all;
 	}
