@@ -28,15 +28,23 @@ public class HieararchyComputationTest {
 	}
 
 	private static SignatureCFG findSignatureCFG(CompilationUnit unit, String name) {
-		SignatureCFG cfg = unit.getSignatureCFG(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+		SignatureCFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static CFG findCFG(InterfaceUnit unit, String name) {
-		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static CFG findSignatureCFG(InterfaceUnit unit, String name) {
+		CFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.findFirst()
+				.get();
+		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
+		return cfg;
+	}
+
+	private static CFG findImplementedCFG(InterfaceUnit unit, String name) {
+		CFG cfg = unit.getImplementedCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
@@ -222,9 +230,9 @@ public class HieararchyComputationTest {
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aJ = (SignatureCFG) findCFG(j, "a");
-		SignatureCFG bI = (SignatureCFG) findCFG(i, "b");
-		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
+		SignatureCFG aJ = (SignatureCFG) findSignatureCFG(j, "a");
+		SignatureCFG bI = (SignatureCFG) findSignatureCFG(i, "b");
+		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
 
 		overrides(aJ, aFirst);
 		overrides(bI, bFirst);
@@ -246,9 +254,9 @@ public class HieararchyComputationTest {
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aI = (SignatureCFG) findCFG(i, "a");
-		SignatureCFG bJ = (SignatureCFG) findCFG(j, "b");
-		SignatureCFG cK = (SignatureCFG) findCFG(k, "c");
+		SignatureCFG aI = (SignatureCFG) findSignatureCFG(i, "a");
+		SignatureCFG bJ = (SignatureCFG) findSignatureCFG(j, "b");
+		SignatureCFG cK = (SignatureCFG) findSignatureCFG(k, "c");
 
 		overrides(aI, aFirst);
 		overrides(bJ, bFirst);
@@ -269,13 +277,13 @@ public class HieararchyComputationTest {
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
-		findCFG(j, "a");
+		findImplementedCFG(j, "a");
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");
 
-		SignatureCFG bI = (SignatureCFG) findCFG(i, "b");
-		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
-		findCFG(i, "d");
+		SignatureCFG bI = (SignatureCFG) findSignatureCFG(i, "b");
+		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
+		findImplementedCFG(i, "d");
 
 		overrides(bI, bFirst);
 		overrides(cI, cFirst);
@@ -301,11 +309,11 @@ public class HieararchyComputationTest {
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
-		findCFG(j, "a");
-		ImplementedCFG bJ = (ImplementedCFG) findCFG(j, "b");
+		findImplementedCFG(j, "a");
+		ImplementedCFG bJ = (ImplementedCFG) findImplementedCFG(j, "b");
 
-		SignatureCFG cI = (SignatureCFG) findCFG(i, "c");
-		findCFG(i, "d");
+		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
+		findImplementedCFG(i, "d");
 
 		ImplementedCFG bFirst = findCFG(first, "b");
 		ImplementedCFG cFirst = findCFG(first, "c");

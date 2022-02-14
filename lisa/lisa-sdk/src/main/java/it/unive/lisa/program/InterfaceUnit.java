@@ -4,8 +4,11 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.SignatureCFG;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +23,12 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
+
+	/**
+	 * The instance globals defined in this unit, indexed by
+	 * {@link Global#getName()}
+	 */
+	private final Map<String, Global> instanceGlobals;
 
 	/**
 	 * The location in the program of this interface unit
@@ -47,6 +56,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		super(name);
 		this.location = location;
 		instanceCFG = new ConcurrentHashMap<>();
+		instanceGlobals = new ConcurrentHashMap<>();
 		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
 		hierarchyComputed = false;
 	}
@@ -56,7 +66,15 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return false;
 	}
 
-	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
+	}
+
+	public final Collection<ImplementedCFG> getImplementedCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
+	}
+
+	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> true, true, false, traverseHierarchy);
 	}
 
@@ -164,5 +182,29 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	@Override
 	public CodeLocation getLocation() {
 		return location;
+	}
+
+	public final Collection<Global> getInstanceGlobals(boolean traverseHierarchy) {
+		return searchGlobals(g -> true, traverseHierarchy);
+	}
+
+	private Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
+		Map<String, Global> result = new HashMap<>();
+		for (Global g : instanceGlobals.values())
+			if (filter.test(g))
+				result.put(g.getName(), g);
+
+		if (!traverseHierarchy)
+			return result.values();
+
+		for (InterfaceUnit cu : superInterfaceUnits)
+			for (Global sup : cu.searchGlobals(filter, true))
+				if (!result.containsKey(sup.getName()))
+					// we skip the ones that are hidden by globals that
+					// are already in the set, since they are "hidden" from the
+					// point of view of this unit
+					result.put(sup.getName(), sup);
+
+		return result.values();
 	}
 }

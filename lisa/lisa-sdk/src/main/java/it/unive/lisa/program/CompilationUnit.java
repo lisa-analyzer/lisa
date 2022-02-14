@@ -184,7 +184,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
 	}
 
-	public final Collection<SignatureCFG> getSignatureCFG(boolean traverseHierarchy) {
+	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
 	}
 
@@ -541,7 +541,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	public final Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
 		HashSet<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
-		all.addAll(getSignatureCFG(traverseHierarchy));
+		all.addAll(getSignatureCFGs(traverseHierarchy));
 		all.addAll(getInstanceConstructs(traverseHierarchy));
 		return all;
 	}

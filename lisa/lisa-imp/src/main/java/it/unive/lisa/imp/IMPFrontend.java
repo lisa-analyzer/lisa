@@ -323,11 +323,33 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
-		for (SignatureDeclarationContext decl : ctx.methodOrSignarureDeclarations().signatureDeclaration())
+		for (SignatureDeclarationContext decl : ctx.interfaceMemberDeclarations().signatureDeclaration())
 			unit.addInstanceCFG(visitSignatureDeclaration(decl));
 
-		for (MethodDeclarationContext decl : ctx.methodOrSignarureDeclarations().methodDeclaration())
+		for (MethodDeclarationContext decl : ctx.interfaceMemberDeclarations().methodDeclaration())
 			unit.addInstanceCFG(visitMethodDeclaration(decl));
+
+		for (ImplementedCFG cfg : unit.getImplementedCFGs(false)) {
+			if (unit.getImplementedCFGs(false).stream()
+					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
+							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
+		}
+
+		for (SignatureCFG cfg : unit.getSignatureCFGs(false)) {
+			if (unit.getSignatureCFGs(false).stream()
+					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
+							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
+		}
+
+		for (FieldDeclarationContext decl : ctx.interfaceMemberDeclarations().fieldDeclaration())
+			unit.addGlobal(visitFieldDeclaration(decl));
+
+		for (Global global : unit.getInstanceGlobals(false))
+			if (unit.getInstanceGlobals(false).stream()
+					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
+				throw new IMPSyntaxException("Duplicate global: " + global);
 
 		return unit;
 	}
@@ -348,13 +370,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		else
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
-		for (MethodDeclarationContext decl : ctx.memberOrSignatureDeclarations().methodDeclaration())
+		for (MethodDeclarationContext decl : ctx.classMemberDeclarations().methodDeclaration())
 			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
-		for (ConstructorDeclarationContext decl : ctx.memberOrSignatureDeclarations().constructorDeclaration())
+		for (ConstructorDeclarationContext decl : ctx.classMemberDeclarations().constructorDeclaration())
 			unit.addInstanceCFG(visitConstructorDeclaration(decl));
 
-		for (SignatureDeclarationContext decl : ctx.memberOrSignatureDeclarations().signatureDeclaration())
+		for (SignatureDeclarationContext decl : ctx.classMemberDeclarations().signatureDeclaration())
 			unit.addSignatureCFG(visitSignatureDeclaration(decl));
 
 		for (ImplementedCFG cfg : unit.getInstanceCFGs(false)) {
@@ -366,7 +388,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				program.addEntryPoint(cfg);
 		}
 
-		for (FieldDeclarationContext decl : ctx.memberOrSignatureDeclarations().fieldDeclaration())
+		for (SignatureCFG cfg : unit.getSignatureCFGs(false)) {
+			if (unit.getSignatureCFGs(false).stream()
+					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
+							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
+		}
+
+		for (FieldDeclarationContext decl : ctx.classMemberDeclarations().fieldDeclaration())
 			unit.addInstanceGlobal(visitFieldDeclaration(decl));
 
 		for (Global global : unit.getInstanceGlobals(false))
