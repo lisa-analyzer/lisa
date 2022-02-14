@@ -64,7 +64,7 @@ public class HieararchyComputationTest {
 		}
 	}
 
-	private static void notInstance(CompilationUnit sup, CompilationUnit unit) {
+	private static void notInstance(UnitWithSuperUnits sup, UnitWithSuperUnits unit) {
 		assertFalse("'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit)
@@ -291,6 +291,9 @@ public class HieararchyComputationTest {
 		isInstance(i, first);
 		isInstance(j, i);
 		isInstance(j, first);
+		notInstance(first, i);
+		notInstance(i, j);
+		notInstance(first, j);
 	}
 
 	@Test(expected = ProgramValidationException.class)
@@ -324,6 +327,9 @@ public class HieararchyComputationTest {
 		isInstance(i, first);
 		isInstance(j, i);
 		isInstance(j, first);
+		notInstance(first, i);
+		notInstance(i, j);
+		notInstance(first, j);
 	}
 
 	@Test(expected = ProgramValidationException.class)
@@ -357,6 +363,7 @@ public class HieararchyComputationTest {
 		overrides(aFirst, aSecond);
 
 		isInstance(first, second);
+		notInstance(second, first);
 	}
 
 	@Test
@@ -380,5 +387,8 @@ public class HieararchyComputationTest {
 		isInstance(first, second);
 		isInstance(first, third);
 		isInstance(second, third);
+		notInstance(third, second);
+		notInstance(third, first);
+		notInstance(second, first);	
 	}
 }
