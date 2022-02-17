@@ -117,7 +117,19 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			break;
 		case UNKNOWN:
 		default:
+			UnresolvedCall tempCall = new UnresolvedCall(
+					call.getCFG(),
+					call.getLocation(),
+					call.getAssigningStrategy(),
+					call.getMatchingStrategy(),
+					call.getTraversalStrategy(),
+					CallType.INSTANCE,
+					call.getQualifier(),
+					call.getTargetName(),
+					call.getOrder(),
+					params);
 			resolveInstance(call, types, targets, nativeTargets, aliasing);
+
 			if (!(params[0] instanceof VariableRef)) {
 				LOG.debug(call
 						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
@@ -128,8 +140,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 			ExternalSet<Type>[] truncatedTypes = new ExternalSet[types.length - 1];
 			System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
 			System.arraycopy(types, 1, truncatedTypes, 0, types.length - 1);
-
-			UnresolvedCall tempCall = new UnresolvedCall(
+			tempCall = new UnresolvedCall(
 					call.getCFG(),
 					call.getLocation(),
 					call.getAssigningStrategy(),
