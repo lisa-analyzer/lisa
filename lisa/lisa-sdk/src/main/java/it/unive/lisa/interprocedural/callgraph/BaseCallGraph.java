@@ -128,7 +128,7 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 					call.getTargetName(),
 					call.getOrder(),
 					params);
-			resolveInstance(call, types, targets, nativeTargets, aliasing);
+			resolveInstance(tempCall, types, targets, nativeTargets, aliasing);
 
 			if (!(params[0] instanceof VariableRef)) {
 				LOG.debug(call
