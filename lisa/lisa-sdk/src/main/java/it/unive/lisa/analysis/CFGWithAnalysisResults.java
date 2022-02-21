@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
 import java.util.Collections;
@@ -126,9 +127,15 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * @throws SemanticException if the lub operator fails
 	 */
 	public AnalysisState<A, H, V, T> getAnalysisStateBefore(Statement st) throws SemanticException {
-		if (getEntrypoints().contains(st))
-			return entryStates.getState(st);
-		return lub(predecessorsOf(st), false);
+		Statement pred = st.getEvaluationPredecessor();
+		if (pred != null)
+			results.getState(pred);
+
+		Statement target = st instanceof Expression ? ((Expression) st).getRootStatement() : st;
+		if (getEntrypoints().contains(target))
+			return entryStates.getState(target);
+
+		return lub(predecessorsOf(target), false);
 	}
 
 	/**

@@ -306,13 +306,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				if (rightSign.isNegative() || rightSign.isZero())
 					// x < 0/-
 					environment = environment.assign((Identifier) left,
-							new Constant(right.getDynamicType(), -1, right.getCodeLocation()), pp);
+							new Constant(right.getStaticType(), -1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isPositive() || leftSign.isZero())
 					// 0/+ < x
 					environment = environment.assign((Identifier) right,
-							new Constant(left.getDynamicType(), 1, left.getCodeLocation()), pp);
+							new Constant(left.getStaticType(), 1, left.getCodeLocation()), pp);
 			} else
 				return environment;
 		else if (operator == ComparisonGt.INSTANCE)
@@ -321,13 +321,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				if (rightSign.isPositive() || rightSign.isZero())
 					// x > +/0
 					environment = environment.assign((Identifier) left,
-							new Constant(right.getDynamicType(), 1, right.getCodeLocation()), pp);
+							new Constant(right.getStaticType(), 1, right.getCodeLocation()), pp);
 			} else if (right instanceof Identifier) {
 				Sign leftSign = eval(left, environment, pp);
 				if (leftSign.isNegative() || leftSign.isZero())
 					// -/0 > x
 					environment = environment.assign((Identifier) right,
-							new Constant(left.getDynamicType(), -1, right.getCodeLocation()), pp);
+							new Constant(left.getStaticType(), -1, right.getCodeLocation()), pp);
 			} else
 				return environment;
 

@@ -3,12 +3,12 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
@@ -119,7 +119,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testCopy() {
-		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CheckToolWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
+				TestHeapDomain,
 				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -148,7 +149,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CheckToolWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
+				TestHeapDomain,
 				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -164,7 +166,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CheckToolWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
+				TestHeapDomain,
 				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -178,7 +181,8 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CheckToolWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
+				TestHeapDomain,
 				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
@@ -195,21 +199,22 @@ public class CheckToolWithAnalysisResultsTest {
 
 	@Test
 	public void testResultRetrieval() {
-		AnalysisState<TestAbstractState, TestHeapDomain,
+		AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> singleton = new AnalysisState<>(
-						new TestAbstractState(new TestHeapDomain(), new TestValueDomain()),
+						new SimpleAbstractState<>(new TestHeapDomain(), new TestValueDomain(), new TestTypeDomain()),
 						new ExpressionSet<>());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
-		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CFGWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
-		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CFGWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
-		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
+		CheckToolWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
+				TestHeapDomain,
 				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(
 						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)), fakeCallGraph);
 

@@ -18,6 +18,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
 
@@ -73,12 +74,11 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		// we allow untyped for the type inference phase
-		if (!left.getDynamicType().isStringType() && !left.getDynamicType().isUntyped())
+		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (!middle.getDynamicType().isNumericType() && !middle.getDynamicType().isUntyped())
+		if (middle.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (!right.getDynamicType().isNumericType() && !right.getDynamicType().isUntyped())
+		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

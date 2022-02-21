@@ -11,7 +11,6 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -284,11 +283,6 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		return true;
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
 	}
 
 	@Override

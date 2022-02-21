@@ -21,6 +21,7 @@ import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.workset.WorkingSet;
@@ -702,8 +703,16 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 			return Collections.emptyList();
 
 		Statement st = (Statement) pp;
+		if (st instanceof Call) {
+			Call original = (Call) st;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != st)
+				st = original;
+		}
 		if (st instanceof Expression)
 			st = ((Expression) st).getRootStatement();
+
 		Collection<ControlFlowStructure> res = new LinkedList<>();
 		for (ControlFlowStructure cf : cfStructs)
 			if (cf.contains(st))

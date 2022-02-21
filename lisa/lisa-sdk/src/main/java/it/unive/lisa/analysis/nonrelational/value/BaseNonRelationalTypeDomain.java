@@ -204,14 +204,14 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
-		// As default, base non relational values domains
+		// As default, base non relational type domains
 		// tracks only non-pointer identifier
-		return !id.getDynamicType().isPointerType() && !id.getDynamicType().isInMemoryType();
+		return canProcess(id);
 	}
 
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
+		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
 	}
 
 	/**

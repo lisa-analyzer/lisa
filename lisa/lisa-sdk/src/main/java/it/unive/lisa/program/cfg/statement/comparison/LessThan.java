@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.BoolType;
 
 /**
@@ -49,10 +50,9 @@ public class LessThan extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		// we allow untyped for the type inference phase
-		if (!left.getDynamicType().isNumericType() && !left.getDynamicType().isUntyped())
+		if (left.getRuntimeTypes().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (!right.getDynamicType().isNumericType() && !right.getDynamicType().isUntyped())
+		if (right.getRuntimeTypes().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

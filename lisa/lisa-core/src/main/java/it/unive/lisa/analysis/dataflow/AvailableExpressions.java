@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -154,16 +153,6 @@ public class AvailableExpressions
 		} else if (!expression.equals(other.expression))
 			return false;
 		return true;
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !id.getDynamicType().isPointerType();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
 	}
 
 	@Override

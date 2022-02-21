@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
 
 /**
  * An expression modeling the numerical negation operation ({@code -}). The
@@ -46,8 +47,7 @@ public class Negation extends it.unive.lisa.program.cfg.statement.UnaryExpressio
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		// we allow untyped for the type inference phase
-		if (!expr.getDynamicType().isNumericType() && !expr.getDynamicType().isUntyped())
+		if (expr.getRuntimeTypes().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

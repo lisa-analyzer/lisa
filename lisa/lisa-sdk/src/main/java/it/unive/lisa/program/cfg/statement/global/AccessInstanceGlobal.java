@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
@@ -114,16 +115,17 @@ public class AccessInstanceGlobal extends UnaryExpression {
 				target.getAnnotations(),
 				target.getLocation());
 
-		Type exprType = expr.getDynamicType();
-		Type recType;
-		if (exprType.isUntyped()) {
-			recType = exprType;
-		} else if (exprType.isPointerType()) {
-			ExternalSet<Type> inner = exprType.asPointerType().getInnerTypes();
-			recType = inner.reduce(inner.first(), (r, t) -> r.commonSupertype(t));
-		} else
+		ExternalSet<Type> rectypes = Caches.types().mkEmptySet();
+		for (Type t : expr.getRuntimeTypes())
+			if (t.isPointerType())
+				rectypes.addAll(t.asPointerType().getInnerTypes());
+
+		if (rectypes.isEmpty())
 			return state.bottom();
-		HeapDereference container = new HeapDereference(recType, expr, getLocation());
+
+		Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
+		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
+		container.setRuntimeTypes(rectypes);
 		AccessChild access = new AccessChild(var.getStaticType(), container, var, getLocation());
 		return state.smallStepSemantics(access, this);
 	}

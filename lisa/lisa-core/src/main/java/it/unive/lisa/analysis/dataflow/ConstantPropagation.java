@@ -175,16 +175,6 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !id.getDynamicType().isPointerType();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
-	}
-
-	@Override
 	public DomainRepresentation representation() {
 		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}

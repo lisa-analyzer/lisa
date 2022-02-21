@@ -11,7 +11,7 @@ public interface ArrayType extends InMemoryType {
 	 * Yields the type of the inner dimension of this array type. For instance,
 	 * if this type represents {@code int[]}, this method will return
 	 * {@code int}. Instead, if this type represents {@code int[][]}, this
-	 * method will return {@code int}.
+	 * method will return {@code int[]}.
 	 * 
 	 * @return the inner type of this array type
 	 */

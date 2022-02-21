@@ -6,7 +6,6 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.PairRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -107,16 +106,6 @@ public class ReachingDefinitions
 	public Collection<ReachingDefinitions> kill(ValueExpression expression, ProgramPoint pp,
 			PossibleForwardDataflowDomain<ReachingDefinitions> domain) {
 		return Collections.emptyList();
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !id.getDynamicType().isPointerType();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
 	}
 
 	@Override
