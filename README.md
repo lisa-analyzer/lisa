@@ -24,20 +24,9 @@ For more information, documentation and useful guides, refer to the [project web
 LiSA is developed and maintained by the [Software and System Verification (SSV)](https://ssv.dais.unive.it/) group @ Università Ca' Foscari in Venice, Italy. 
 External contributions are always welcome! Check out our [contributing guidelines](./CONTRIBUTING.md) for information on how to contribute to LiSA.
 
-## Release plan 
+## Releases
 
-We foresee at least five alpha releases that are meant as intermediate building blocks for starting to experiment with analyzers on several languages. 
-
-| Version | Release date | Contents |
-| --- | --- | --- |
-| [0.1b4](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b4) | Jan. 13, 2022 | Customizable open call handling, removal of enums (resolution strategy and symbolic operators) to increase modularity, removal of native calls, order of evaluation of expressions |
-| [0.1b3](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b3) | Oct. 29, 2021 | Additions of missing accessors and constructors, exposing call resolution information to semantic checks |
-| [0.1b2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b2) | Oct. 1, 2021 | Project splitting, default statement and types, more symbolic operators |
-| [0.1b1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1b1) | Aug. 25, 2021 | Interprocedural analyses, annotations |
-| [0.1a4](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a4) | Apr. 8, 2021 | Heap analyses: type-based, program point-based, field sensitive program point-based |
-| [0.1a3](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a3) | Feb. 16, 2021 | Program structure, inference systems, dataflow analysis |
-| [0.1a2](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a2) | Dec. 11, 2020 | Complete prototype of the structure of the library, including the definition of call graphs and heap abstractions, type hierarchy, and type inference |
-| [0.1a1](https://github.com/UniVE-SSV/lisa/releases/tag/v0.1a1) | Oct. 19, 2020 | First draft of the prototype of the structure of the library, with syntactic checkers (no lattices, semantic domain, call graphs, …) |
+Head to the [project's website](https://unive-ssv.github.io/lisa/releases/) for the full list of releases. 
 
 ### Snapshots
 
