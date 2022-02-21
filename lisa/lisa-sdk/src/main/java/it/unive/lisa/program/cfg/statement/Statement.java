@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.statement;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -16,6 +14,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.util.datastructures.graph.Node;
+import java.util.Objects;
 
 /**
  * A statement of the program to analyze.
@@ -186,6 +185,8 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 * {@code other} is contained into this expression. If this method returns
 	 * {@code null}, then {@code other} is the first expression evaluated when
 	 * this statement is evaluated.
+	 *
+	 * @param other the other statement
 	 * 
 	 * @return the previous statement, or {@code null}
 	 */

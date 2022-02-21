@@ -77,7 +77,7 @@ public abstract class UnaryStatement extends Statement {
 			return false;
 		return visitor.visit(tool, getCFG(), this);
 	}
-	
+
 	@Override
 	protected Statement getStatementEvaluatedBefore(Statement other) {
 		return other == this ? expression : null;
