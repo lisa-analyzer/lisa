@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -19,10 +24,6 @@ import it.unive.lisa.symbolic.value.operator.Module;
 import it.unive.lisa.symbolic.value.operator.Multiplication;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An implementation of the overflow-insensitive constant propagation dataflow
@@ -172,16 +173,6 @@ public class ConstantPropagation
 		} else if (!constant.equals(other.constant))
 			return false;
 		return true;
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !id.getDynamicType().isPointerType();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
 	}
 
 	@Override

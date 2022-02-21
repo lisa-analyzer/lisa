@@ -129,7 +129,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new InferredTypes(constant.getDynamicType());
+		return new InferredTypes(constant.getStaticType());
 	}
 
 	@Override

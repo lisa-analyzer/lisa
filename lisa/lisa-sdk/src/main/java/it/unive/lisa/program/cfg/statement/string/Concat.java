@@ -18,6 +18,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -70,10 +71,9 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		// we allow untyped for the type inference phase
-		if (!left.getDynamicType().isStringType() && !left.getDynamicType().isUntyped())
+		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (!right.getDynamicType().isStringType() && !right.getDynamicType().isUntyped())
+		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
