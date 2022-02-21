@@ -160,6 +160,21 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
+	protected Statement getStatementEvaluatedBefore(Statement other) {
+		int len = subExpressions.length;
+		if (other == this)
+			return len == 0 ? null : subExpressions[order.last(len)];
+
+		for (int i = 0; i < len; i++)
+			if (subExpressions[i] == other)
+				if (i == order.first(len))
+					return null;
+				else
+					return subExpressions[order.previous(i, len)];
+		return null;
+	}
+
+	@Override
 	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		for (Expression sub : subExpressions)
 			if (!sub.accept(visitor, tool))

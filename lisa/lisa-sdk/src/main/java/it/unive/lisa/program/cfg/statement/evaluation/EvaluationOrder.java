@@ -21,6 +21,51 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 public interface EvaluationOrder {
 
 	/**
+	 * Assuming that {@code pos} is the index of a sub-expression, yields the
+	 * index of the sub-expression that has to be evaluated before the given
+	 * one.
+	 * 
+	 * @param pos the index of a sub-expression
+	 * @param len the total number of sub-expressions
+	 * 
+	 * @return the previous index (a negative value means that there is no
+	 *             previous sub-expression, that is, {@code pos} is the first
+	 *             that needs to be evaluated)
+	 */
+	int previous(int pos, int len);
+
+	/**
+	 * Assuming that {@code pos} is the index of a sub-expression, yields the
+	 * index of the sub-expression that has to be evaluated after the given one.
+	 * 
+	 * @param pos the index of a sub-expression
+	 * @param len the total number of sub-expressions
+	 * 
+	 * @return the next index (a negative value means that there is no next
+	 *             sub-expression, that is, {@code pos} is the last that needs
+	 *             to be evaluated)
+	 */
+	int next(int pos, int len);
+
+	/**
+	 * Yields the index of the first sub-expression that has to be evaluated.
+	 * 
+	 * @param len the total number of sub-expressions
+	 * 
+	 * @return the index of the first expression to evaluate
+	 */
+	int first(int len);
+
+	/**
+	 * Yields the index of the last sub-expression that has to be evaluated.
+	 * 
+	 * @param len the total number of sub-expressions
+	 * 
+	 * @return the index of the last expression to evaluate
+	 */
+	int last(int len);
+
+	/**
 	 * Evaluates the given sub-expressions according to this order. This method
 	 * will fill {@code computed} and {@code subStates} such that
 	 * {@code subStates[i] = subExpressions[i].semantics(); computed[i] = subStates[i].computedExpressions},

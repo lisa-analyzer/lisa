@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -12,8 +14,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.util.datastructures.graph.Node;
-import java.util.Objects;
 
 /**
  * A statement of the program to analyze.
@@ -156,5 +158,38 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	@Override
 	public int compareTo(Statement o) {
 		return location.compareTo(o.location);
+	}
+
+	/**
+	 * Yields the {@link Statement} that is evaluated right before this one,
+	 * such that querying for the entry state of {@code this} expression is
+	 * equivalent to querying the exit state of the returned one. If this method
+	 * returns {@code null}, then this is the first expression evaluated when an
+	 * entire statement is evaluated.
+	 * 
+	 * @return the previous statement, or {@code null}
+	 */
+	public final Statement getEvaluationPredecessor() {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return getStatementEvaluatedBefore(original);
+		}
+
+		return getStatementEvaluatedBefore(this);
+	}
+
+	/**
+	 * Yields the {@link Statement} that precedes the given one, assuming that
+	 * {@code other} is contained into this expression. If this method returns
+	 * {@code null}, then {@code other} is the first expression evaluated when
+	 * this statement is evaluated.
+	 * 
+	 * @return the previous statement, or {@code null}
+	 */
+	protected Statement getStatementEvaluatedBefore(Statement other) {
+		return null;
 	}
 }
