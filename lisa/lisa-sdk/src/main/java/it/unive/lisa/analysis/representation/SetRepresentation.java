@@ -50,7 +50,17 @@ public class SetRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toString() {
+	public String toJSONString() {
+		StringBuilder out = new StringBuilder();
+		for(DomainRepresentation e : elements)
+			if(e.toString().startsWith("{") || e.toString().startsWith("\""))
+				out.append(e).append(",");
+			else
+				out.append("\"").append(e).append("\",");
+		return out.toString();
+	}
+
+	public String toDotString() {
 		return "[" + StringUtils.join(elements, ", ") + "]";
 	}
 

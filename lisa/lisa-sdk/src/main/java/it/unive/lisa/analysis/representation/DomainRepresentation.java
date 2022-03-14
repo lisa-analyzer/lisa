@@ -34,5 +34,14 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 	public abstract boolean equals(Object obj);
 
 	@Override
-	public abstract String toString();
+	public String toString(){
+		if (true)
+			return toJSONString();
+		else
+			return toDotString();
+	};
+
+	protected abstract String toJSONString();
+
+	protected abstract String toDotString();
 }

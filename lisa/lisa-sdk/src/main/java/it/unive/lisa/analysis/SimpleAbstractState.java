@@ -297,7 +297,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		}
 
 		@Override
-		public String toString() {
+		public String toJSONString() {
+			String out = String.format("\"heap\" : [%s], \"value\" : [%s]", heap, value);
+			return out.replaceAll(",]", "]");
+		}
+
+		@Override
+		public String toDotString() {
 			return "heap [[ " + heap + " ]]\nvalue [[ " + value + " ]]";
 		}
 

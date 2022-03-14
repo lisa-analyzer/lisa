@@ -190,8 +190,13 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	@Override
 	public DomainRepresentation representation() {
-		return isBottom() ? Lattice.BOTTOM_REPR
-				: new StringRepresentation((isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L"));
+		return isBottom() ? new StringRepresentation(Lattice.BOTTOM_REPR)
+				: new StringRepresentation("\"type\" : \"nonInterference\", \"value\" : \"" + (isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L") + "\"");
+	}
+
+	public DomainRepresentation valueRepresentation() {
+		return isBottom() ? new StringRepresentation(Lattice.BOTTOM_REPR)
+				: new StringRepresentation("\"" + (isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L") + "\"");
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {

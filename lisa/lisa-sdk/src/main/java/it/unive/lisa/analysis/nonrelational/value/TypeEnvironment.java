@@ -12,6 +12,8 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Map;
+import java.util.Objects;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -144,7 +146,14 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 		}
 
 		@Override
-		public String toString() {
+		public String toJSONString() {
+			if(Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
+				return map + "{\"type\" : \"typeEnvironment\", \"value\" : " + stack + "}";
+			return map + "{\"type\" : \"typeEnvironment\", \"value\" : {" + stack + "}}";
+		}
+
+		@Override
+		public String toDotString() {
 			return map + "\n[stack: " + stack + "]";
 		}
 

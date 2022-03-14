@@ -258,7 +258,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                         the given writer
 	 */
 	public void dump(Writer writer, Function<N, String> labelGenerator) throws IOException {
-		toDot(labelGenerator).dumpDot(writer);
+		toDot(labelGenerator).dumpJSON(writer);
 	}
 
 	/**

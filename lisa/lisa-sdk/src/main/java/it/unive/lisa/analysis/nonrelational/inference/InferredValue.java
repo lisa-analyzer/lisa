@@ -196,12 +196,12 @@ public interface InferredValue<T extends InferredValue<T>>
 		 * @param pair the inferred pair to represent
 		 */
 		public InferredPairRepresentation(InferredPair<?> pair) {
-			super(pair.inferred.representation(), pair.state.representation());
+			super(pair.inferred.valueRepresentation(), pair.state.valueRepresentation());
 		}
 
 		@Override
-		public String toString() {
-			return "inferred: " + left + ", state: " + right;
+		public String toJSONString() {
+			return "\"value\" : " + left + ", \"state\" : " + right +"";
 		}
 	}
 }

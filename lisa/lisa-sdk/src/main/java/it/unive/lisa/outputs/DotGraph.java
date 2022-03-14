@@ -158,11 +158,11 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		if (exit)
 			n.setAttribute(EXIT_NODE_EXTRA_ATTR, EXIT_NODE_EXTRA_VALUE);
 
-		String label = dotEscape(node.toString());
+		String label = node.toString().replace('"', '\'');
 		String extraLabel = labelGenerator.apply(node);
 		if (!extraLabel.isEmpty())
-			extraLabel = "<BR/>" + dotEscape(extraLabel);
-		n.setAttribute(LABEL, "<" + label + extraLabel + ">");
+			extraLabel = extraLabel + "";
+		n.setAttribute(LABEL,  String.format("{\"instruction\" : \"%s\", \"data\" : %s", label, extraLabel));
 	}
 
 	private static String nodeName(long id) {
@@ -212,6 +212,17 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 			}
 		};
 		sink.setDirected(true);
+		sink.writeAll(graph, writer);
+	}
+
+	/**
+	 * Dumps this graph through the given {@link Writer}.
+	 *
+	 * @param writer the writer fto use for dumping the graph
+	 * @throws IOException if an I/O error occurs while writing
+	 */
+	public void dumpJSON(Writer writer) throws IOException{
+		FileSinkJSON sink = new FileSinkJSON();
 		sink.writeAll(graph, writer);
 	}
 
@@ -364,7 +375,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 					break;
 				} else
 					writer.append(line);
-				writer.append("\n");
+				writer.append("");
 			}
 			content = writer.toString();
 		}
