@@ -29,6 +29,7 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -116,7 +117,7 @@ public class SemanticsSanityTest {
 		as = new AnalysisState<>(
 				new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>());
+				new ExpressionSet<>(), new SymbolAliasing());
 		store = new StatementStore<>(as);
 		fake = new Expression(cfg, unknownLocation) {
 

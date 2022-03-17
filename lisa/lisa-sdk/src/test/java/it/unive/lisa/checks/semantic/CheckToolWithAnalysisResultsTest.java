@@ -202,7 +202,7 @@ public class CheckToolWithAnalysisResultsTest {
 		AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> singleton = new AnalysisState<>(
 						new SimpleAbstractState<>(new TestHeapDomain(), new TestValueDomain(), new TestTypeDomain()),
-						new ExpressionSet<>());
+						new ExpressionSet<>(), new SymbolAliasing());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		CFGWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,

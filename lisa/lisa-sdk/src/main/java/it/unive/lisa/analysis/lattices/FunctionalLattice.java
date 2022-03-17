@@ -257,6 +257,28 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		return true;
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * By default, a functional lattice is the top lattice if the underlying
+	 * lattice's {@code isTop()} holds and its function is {@code null}.
+	 */
+	@Override
+	public boolean isTop() {
+		return lattice.isTop() && function == null;
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * By default, a functional lattice is the top lattice if the underlying
+	 * lattice's {@code isBottom()} holds and its function is {@code null}.
+	 */
+	@Override
+	public boolean isBottom() {
+		return lattice.isBottom() && function == null;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

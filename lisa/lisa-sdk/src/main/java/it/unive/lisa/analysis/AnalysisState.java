@@ -59,32 +59,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * @param state              the {@link AbstractState} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
-	 */
-	public AnalysisState(A state, SymbolicExpression computedExpression) {
-		this(state, new ExpressionSet<>(computedExpression), new SymbolAliasing());
-	}
-
-	/**
-	 * Builds a new state.
-	 * 
-	 * @param state              the {@link AbstractState} to embed in this
-	 *                               analysis state
-	 * @param computedExpression the expression that has been computed
 	 * @param aliasing           the symbol aliasing information
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression, SymbolAliasing aliasing) {
 		this(state, new ExpressionSet<>(computedExpression), aliasing);
-	}
-
-	/**
-	 * Builds a new state.
-	 * 
-	 * @param state               the {@link AbstractState} to embed in this
-	 *                                analysis state
-	 * @param computedExpressions the expressions that have been computed
-	 */
-	public AnalysisState(A state, ExpressionSet<SymbolicExpression> computedExpressions) {
-		this(state, computedExpressions, new SymbolAliasing());
 	}
 
 	/**

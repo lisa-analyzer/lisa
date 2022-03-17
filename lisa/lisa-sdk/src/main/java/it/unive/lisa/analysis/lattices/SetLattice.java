@@ -31,15 +31,24 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	/**
 	 * The set of elements contained in the lattice.
 	 */
-	protected Set<E> elements;
+	protected final Set<E> elements;
+
+	/**
+	 * Whether or not this is the top or bottom element of the lattice, valid
+	 * only if the set of elements is empty.
+	 */
+	protected final boolean isTop;
 
 	/**
 	 * Builds the lattice.
 	 * 
 	 * @param elements the elements that are contained in the lattice
+	 * @param isTop    whether or not this is the top or bottom element of the
+	 *                     lattice, valid only if the set of elements is empty
 	 */
-	protected SetLattice(Set<E> elements) {
+	protected SetLattice(Set<E> elements, boolean isTop) {
 		this.elements = elements;
+		this.isTop = isTop;
 	}
 
 	/**
@@ -97,6 +106,16 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 		return other.elements.containsAll(elements);
 	}
 
+	@Override
+	public boolean isTop() {
+		return isTop && elements.isEmpty();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return !isTop && elements.isEmpty();
+	}
+
 	/**
 	 * Checks whether an element is contained in this set.
 	 * 
@@ -119,16 +138,17 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	}
 
 	@Override
+	public Iterator<E> iterator() {
+		return this.elements.iterator();
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
+		result = prime * result + (isTop ? 1231 : 1237);
 		return result;
-	}
-
-	@Override
-	public Iterator<E> iterator() {
-		return this.elements.iterator();
 	}
 
 	@Override
@@ -144,6 +164,8 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 			if (other.elements != null)
 				return false;
 		} else if (!elements.equals(other.elements))
+			return false;
+		if (isTop != other.isTop)
 			return false;
 		return true;
 	}

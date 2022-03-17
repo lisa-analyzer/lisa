@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
@@ -149,7 +150,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						interproc.fixpoint(new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE)),
+						interproc.fixpoint(
+								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								conf.getFixpointWorkingSet(), conf.getWideningThreshold());
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
