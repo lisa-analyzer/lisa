@@ -43,18 +43,8 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 	}
 
 	@Override
-	public boolean isTop() {
-		return lattice.isTop() && function == null;
-	}
-
-	@Override
 	public SymbolAliasing bottom() {
 		return new SymbolAliasing(lattice.bottom(), null);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return lattice.isBottom() && function == null;
 	}
 
 	@Override

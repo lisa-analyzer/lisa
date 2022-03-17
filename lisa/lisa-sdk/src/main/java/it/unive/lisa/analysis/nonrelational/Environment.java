@@ -221,28 +221,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * An environment is the top environment if the underlying lattice's
-	 * {@code isTop()} holds and its function is {@code null}.
-	 */
-	@Override
-	public boolean isTop() {
-		return lattice.isTop() && function == null;
-	}
-
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * An environment is the bottom environment if the underlying lattice's
-	 * {@code isBottom()} holds and its function is {@code null}.
-	 */
-	@Override
-	public boolean isBottom() {
-		return lattice.isBottom() && function == null;
-	}
-
 	@Override
 	public M pushScope(ScopeToken scope) throws SemanticException {
 		AtomicReference<SemanticException> holder = new AtomicReference<>();

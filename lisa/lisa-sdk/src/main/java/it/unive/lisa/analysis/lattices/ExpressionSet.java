@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
  */
 public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<ExpressionSet<T>, T> {
 
-	private final boolean isTop;
-
 	/**
 	 * Builds the empty set lattice element.
 	 */
@@ -54,23 +52,12 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	}
 
 	private ExpressionSet(Set<T> set, boolean isTop) {
-		super(set);
-		this.isTop = isTop;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
+		super(set, isTop);
 	}
 
 	@Override
 	public ExpressionSet<T> top() {
 		return new ExpressionSet<>(true);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return !isTop && elements.isEmpty();
 	}
 
 	@Override

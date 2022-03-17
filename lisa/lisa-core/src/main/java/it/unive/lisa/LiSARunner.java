@@ -150,7 +150,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
 					try {
-						interproc.fixpoint(new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
+						interproc.fixpoint(
+								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								conf.getFixpointWorkingSet(), conf.getWideningThreshold());
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
