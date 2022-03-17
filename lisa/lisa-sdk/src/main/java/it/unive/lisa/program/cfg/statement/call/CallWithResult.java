@@ -97,7 +97,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
 		// the stack has to be empty
-		state = new AnalysisState<>(state.getState(), new ExpressionSet<>());
+		state = new AnalysisState<>(state.getState(), new ExpressionSet<>(), state.getAliasing());
 
 		// this will contain only the information about the returned
 		// metavariable

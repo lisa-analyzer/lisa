@@ -6,6 +6,7 @@ import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -33,7 +34,7 @@ public class CFGWithAnalysisResultsTest {
 				TestValueDomain,
 				TestTypeDomain> state = new AnalysisState<>(
 						new SimpleAbstractState<>(new TestHeapDomain(), new TestValueDomain(), new TestTypeDomain()),
-						new ExpressionSet<>());
+						new ExpressionSet<>(), new SymbolAliasing());
 
 		Map<Statement, AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
 				TestHeapDomain, TestValueDomain, TestTypeDomain>> entries = Map.of(ret, state);
