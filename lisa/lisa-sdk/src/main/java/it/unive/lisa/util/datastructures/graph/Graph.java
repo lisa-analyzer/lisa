@@ -242,7 +242,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                         the given writer
 	 */
 	public void dump(Writer writer) throws IOException {
-		dump(writer, node -> "");
+		dumpDot(writer, node -> "");
 	}
 
 	/**
@@ -257,7 +257,11 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * @throws IOException if an exception happens while writing something to
 	 *                         the given writer
 	 */
-	public void dump(Writer writer, Function<N, String> labelGenerator) throws IOException {
+	public void dumpDot(Writer writer, Function<N, String> labelGenerator) throws IOException {
+		toDot(labelGenerator).dumpDot(writer);
+	}
+
+	public void dumpJSON(Writer writer, Function<N, String> labelGenerator) throws IOException {
 		toDot(labelGenerator).dumpJSON(writer);
 	}
 

@@ -19,7 +19,7 @@ public class AvailableExpressionsTest extends AnalysisTestExecutor {
 				getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class),
 						new AvailableExpressions(),
-						getDefaultFor(TypeDomain.class)));
+						getDefaultFor(TypeDomain.class))).setJsonFile(false);
 		perform("available-expressions", "available-expressions.imp", conf);
 	}
 }

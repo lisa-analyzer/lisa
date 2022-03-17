@@ -29,6 +29,8 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -98,7 +100,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (conf.isDumpCFGs())
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
-				dumpCFG(fileManager, "", cfg, st -> "");
+				dumpCFG(fileManager, "", cfg, st -> "", conf.isJsonFile() ? FileType.JSON : FileType.DOT);
 
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty())
@@ -163,10 +165,10 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					String filename = result.getId() == null ? "" : result.getId().hashCode() + "_";
 					if (conf.isDumpTypeInference())
 						dumpCFG(fileManager, "typing___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).typeRepresentation().toString());
+								st -> result.getAnalysisStateAfter(st).typeRepresentation().toString(), conf.isJsonFile() ? FileType.JSON : FileType.DOT);
 					if (conf.isDumpAnalysis())
 						dumpCFG(fileManager, "analysis___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).representation().toString());
+								st -> result.getAnalysisStateAfter(st).representation().toString(), conf.isJsonFile() ? FileType.JSON : FileType.DOT);
 				}
 	}
 
@@ -189,11 +191,20 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		});
 	}
 
+	public enum FileType {JSON, DOT}
+
 	private static void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
-			Function<Statement, String> labelGenerator) {
+			Function<Statement, String> labelGenerator, FileType type) {
 		try {
-			fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
-					writer -> cfg.dump(writer, labelGenerator::apply));
+			if(type == FileType.JSON){
+				fileManager.mkJSONFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
+						writer -> cfg.dumpJSON(writer, labelGenerator::apply));
+			} else if (type == FileType.DOT){
+				fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
+						writer -> cfg.dumpDot(writer, labelGenerator::apply));
+			}
+
+
 		} catch (IOException e) {
 			LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
 			LOG.error(e);

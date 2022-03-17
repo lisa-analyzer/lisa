@@ -82,6 +82,11 @@ public class LiSAConfiguration {
 	private boolean jsonOutput;
 
 	/**
+	 * Whether the output file should be in JSON format
+	 */
+	private boolean jsonFile;
+
+	/**
 	 * The workdir that LiSA should use as root for all generated files (log
 	 * files excluded, use the logging configuration for controlling where those
 	 * are placed).
@@ -131,6 +136,7 @@ public class LiSAConfiguration {
 		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
 		this.openCallPolicy = WorstCasePolicy.INSTANCE;
+		this.jsonFile = true;
 	}
 
 	/**
@@ -304,6 +310,11 @@ public class LiSAConfiguration {
 		return this;
 	}
 
+	public LiSAConfiguration setJsonFile(boolean jsonFile){
+		this.jsonFile = jsonFile;
+		return this;
+	}
+
 	/**
 	 * Sets the working directory for this instance of LiSA, that is, the
 	 * directory files will be created, if any. If files need to be created and
@@ -446,6 +457,10 @@ public class LiSAConfiguration {
 	 */
 	public boolean isJsonOutput() {
 		return jsonOutput;
+	}
+
+	public boolean isJsonFile(){
+		return jsonFile;
 	}
 
 	/**

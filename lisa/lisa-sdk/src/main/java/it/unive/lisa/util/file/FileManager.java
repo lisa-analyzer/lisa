@@ -97,6 +97,10 @@ public class FileManager {
 		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
 	}
 
+	public void mkJSONFile(String name, WriteAction filler) throws  IOException{
+		mkOutputFile(cleanupForDotFile(name) + ".json", false, filler);
+	}
+
 	/**
 	 * Creates a UTF-8 encoded file with the given name, appending the
 	 * {@code dot} extension. If name is a path, all missing directories will be
