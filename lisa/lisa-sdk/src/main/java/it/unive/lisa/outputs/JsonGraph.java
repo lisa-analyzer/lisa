@@ -3,26 +3,18 @@ package it.unive.lisa.outputs;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.Node;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
 
 /**
  * An auxiliary graph built from a {@link Graph} that can be dumped in dot
@@ -35,7 +27,7 @@ import org.graphstream.stream.file.FileSourceDOT;
  * @param <E> the type of the {@link Edge}s in the original graph
  * @param <G> the type of the original {@link Graph}s
  */
-public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> extends FileGraph<N, E, G> {
+public abstract class JsonGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> extends FileGraph<N, E, G> {
 
 	protected final org.graphstream.graph.Graph graph, legend;
 
@@ -47,21 +39,15 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 
 	/**
 	 * Builds a graph.
-	 * 
+	 *
 	 * @param title  the title of the graph, if any
 	 * @param legend the legend to append to the graph, if any
 	 */
-	protected DotGraph(String title, org.graphstream.graph.Graph legend) {
+	protected JsonGraph(String title, org.graphstream.graph.Graph legend) {
 		super(title, legend);
 		this.graph = new MultiGraph("graph");
 		this.legend = legend;
 		this.title = title;
-	}
-
-	private static String escape(String extraLabel) {
-		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
-		String replace = escapeHtml4.replace("\n", "<BR/>");
-		return replace.replace("\\", "\\\\");
 	}
 
 	/**
@@ -93,7 +79,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		String extraLabel = labelGenerator.apply(node);
 		if (!extraLabel.isEmpty())
 			extraLabel = extraLabel + "";
-		n.setAttribute(LABEL,  "<" + label + escape(extraLabel) + ">");
+		n.setAttribute(LABEL,  String.format("{\"instruction\" : \"%s\", \"data\" : %s", label, extraLabel));
 	}
 
 	protected void addEdge(E edge, String color, String style) {
@@ -109,21 +95,13 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * @throws IOException if an I/O error occurs while writing
 	 */
 	public void dump(Writer writer) throws IOException {
-		FileSinkDOT sink = new CustomDotSink() {
-			@Override
-			protected void outputEndOfFile() throws IOException {
-				if (DotGraph.this.legend != null) {
-					LegendClusterSink legend = new LegendClusterSink();
-					legend.setDirected(true);
-					StringWriter sw = new StringWriter();
-					legend.writeAll(DotGraph.this.legend, sw);
-					out.printf("%s%n", sw.toString());
-				}
-				super.outputEndOfFile();
-			}
-		};
-		sink.setDirected(true);
+		FileSinkJSON sink = new FileSinkJSON();
 		sink.writeAll(graph, writer);
+	}
+
+	public String toString(){
+		FileSinkJSON sink = new FileSinkJSON();
+		return sink.toString(graph);
 	}
 
 
@@ -136,56 +114,16 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * @param <G>    the type of the {@link Graph}
 	 * @param reader the reader to use for reading the graph
 	 * 
-	 * @return the {@link DotGraph} that has been read
+	 * @return the {@link JsonGraph} that has been read
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
 	public static <N extends Node<N, E, G>,
 			E extends Edge<N, E, G>,
-			G extends Graph<G, N, E>> DotGraph<N, E, G> read(
+			G extends Graph<G, N, E>> JsonGraph<N, E, G> read(
 					Reader reader) throws IOException {
-		// we have to re-add the quotes wrapping the labels, otherwise the
-		// parser will break
-		String content;
-		String sentinel = LABEL + "=<";
-		String replacement = LABEL + "=\"<";
-		String ending = ">];";
-		String endingReplacement = ">\"];";
-		try (BufferedReader br = new BufferedReader(reader); StringWriter writer = new StringWriter()) {
-			String line;
-			while ((line = br.readLine()) != null) {
-				if (line.trim().startsWith(LABEL))
-					// skip graph title
-					continue;
 
-				int i = line.indexOf(sentinel);
-				if (i != -1) {
-					writer.append(line.substring(0, i));
-					writer.append(replacement);
-					// we can do the following since we know the label will
-					// always be last
-					writer.append(line.substring(i + sentinel.length(), line.length() - ending.length()));
-					writer.append(endingReplacement);
-				} else if (line.startsWith("subgraph")) {
-					// we skip the legend
-					writer.append("}");
-					break;
-				} else
-					writer.append(line);
-				writer.append("");
-			}
-			content = writer.toString();
-		}
-		FileSourceDOT source = new FileSourceDOT();
-		DotGraph<N, E, G> graph = new DotGraph<>(null, null) {
-		};
-		source.addSink(graph.graph);
-		try (StringReader sr = new StringReader(content)) {
-			source.readAll(sr);
-		} catch (Exception e) {
-			System.out.println();
-		}
-		return graph;
+		return null;
 	}
 
 	private class CustomDotSink extends FileSinkDOT {

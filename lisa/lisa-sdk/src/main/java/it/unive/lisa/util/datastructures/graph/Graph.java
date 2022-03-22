@@ -10,6 +10,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.outputs.HtmlGraphNavigator;
+import it.unive.lisa.outputs.JsonGraph;
+import it.unive.lisa.program.cfg.statement.Statement;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -242,7 +246,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                         the given writer
 	 */
 	public void dump(Writer writer) throws IOException {
-		dumpDot(writer, node -> "");
+		dumpJSON(writer, node -> "");
 	}
 
 	/**
@@ -258,11 +262,15 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                         the given writer
 	 */
 	public void dumpDot(Writer writer, Function<N, String> labelGenerator) throws IOException {
-		toDot(labelGenerator).dumpDot(writer);
+		toDot(labelGenerator).dump(writer);
 	}
 
 	public void dumpJSON(Writer writer, Function<N, String> labelGenerator) throws IOException {
-		toDot(labelGenerator).dumpJSON(writer);
+		toJson(labelGenerator).dump(writer);
+	}
+
+	public String getJsonString(Function<N, String> labelGenerator){
+		return toJson(labelGenerator).toString();
 	}
 
 	/**
@@ -274,6 +282,8 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * @return the converted {@link DotGraph}
 	 */
 	protected abstract DotGraph<N, E, G> toDot(Function<N, String> labelGenerator);
+
+	protected abstract JsonGraph<N, E, G> toJson(Function<N, String> labelGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if

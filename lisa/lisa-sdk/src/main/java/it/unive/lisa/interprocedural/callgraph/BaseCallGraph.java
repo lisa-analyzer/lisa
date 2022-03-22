@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
 import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.JsonGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -494,6 +495,12 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 
 	@Override
 	protected DotGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toDot(
+			Function<CallGraphNode, String> labelGenerator) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	protected JsonGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toJson(
 			Function<CallGraphNode, String> labelGenerator) {
 		throw new UnsupportedOperationException();
 	}
