@@ -15,6 +15,12 @@ import it.unive.lisa.util.collections.CollectionUtilities;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
+	public enum FileType {JSON, DOT}
+	private static FileType outputType = FileType.JSON;
+
+	public static void setFileType(FileType ft){
+		outputType = ft;
+	}
 
 	@Override
 	public final int compareTo(DomainRepresentation o) {
@@ -35,10 +41,12 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 
 	@Override
 	public String toString(){
-		if (true)
+		if (outputType == FileType.JSON)
 			return toJSONString();
-		else
+		else if (outputType == FileType.DOT)
 			return toDotString();
+		else
+			return "";
 	};
 
 	protected abstract String toJSONString();

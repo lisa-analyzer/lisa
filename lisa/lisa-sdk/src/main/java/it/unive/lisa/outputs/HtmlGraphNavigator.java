@@ -308,54 +308,55 @@ public class HtmlGraphNavigator {
                 "    }\n" +
                 "\n" +
                 "    valueString(object, isValueEnvironment = false){\n" +
-                "        let out = \"\"\n" +
+                "        let out = isValueEnvironment ? \"Stack\" : \"\";\n" +
+                "\n" +
                 "        switch (object['type']){\n" +
                 "            case 'interval':{\n" +
-                "                this.formattedDetailAttributes.push(new Interval(isValueEnvironment ? 'ValueEnv' : object['variable'], object))\n" +
+                "                this.formattedDetailAttributes.push(new Interval(isValueEnvironment ? 'Stack' : object['variable'], object))\n" +
                 "                out = '%s'\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'pair':{\n" +
                 "                this.formattedDetailAttributes.push(new Pair(object['left'], object['right']))\n" +
-                "                out = '%s'\n" +
+                "                out += '%s'\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'integerConstantPropagation':{\n" +
-                "                out = `${object['variable'] || ''}: ${object['value']}`\n" +
+                "                out += `${object['variable'] || ''}: ${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'sign':{\n" +
-                "                out = `${object['variable'] || ''}: ${object['value']}`\n" +
+                "                out += `${object['variable'] || ''}: ${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'nonInterference':{\n" +
-                "                out = `${object['variable'] || ''}: ${object['value']}`\n" +
+                "                out += `${object['variable'] || ''}: ${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'inferredState':{\n" +
-                "                out = `STATE: ${object['value']}, ${object['state']}`\n" +
+                "                out += `STATE: ${object['value']}, ${object['state']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'parity':{\n" +
-                "                out = `${object['variable'] || ''}: ${object['value']}`\n" +
+                "                out += `${object['variable'] || ''}: ${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'inferredType':{\n" +
-                "                out = `${object['variable'] || ''}: ${object['value']}`\n" +
+                "                out += `${object['variable'] || ''}: ${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'typeEnvironment':{\n" +
-                "                out = 'TypeEnv:' + `${object['value']}`\n" +
+                "                out += `${object['value']}`\n" +
                 "                break;\n" +
                 "            }\n" +
                 "            case 'valueEnvironment':{\n" +
-                "                out = this.valueString(object['value'], true)\n" +
+                "                out += this.valueString(object['value'], true)\n" +
                 "                break;\n" +
                 "            }\n" +
-                "            default: out = object\n" +
+                "            default: out += object\n" +
                 "        }\n" +
                 "        return out.replace('>', '&gt;').replace('<', '&lt;') + (isValueEnvironment ? '': '<BR/>')\n" +
-                "    }\n" +
+                "    }"+
                 "\n" +
                 "    dotFileValue(){\n" +
                 "        let value = this.detail['value']\n" +
@@ -484,3 +485,6 @@ public class HtmlGraphNavigator {
     }
 
 }
+
+
+//visualizzazione dei risultati di analisi di LiSA

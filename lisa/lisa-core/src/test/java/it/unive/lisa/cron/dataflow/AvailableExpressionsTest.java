@@ -19,7 +19,7 @@ public class AvailableExpressionsTest extends AnalysisTestExecutor {
 				getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class),
 						new AvailableExpressions(),
-						getDefaultFor(TypeDomain.class))).setJsonFile(false);
+						getDefaultFor(TypeDomain.class))).setFileType(LiSAConfiguration.FileType.DOT);
 		perform("available-expressions", "available-expressions.imp", conf);
 	}
 }
