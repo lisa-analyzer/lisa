@@ -486,5 +486,3 @@ public class HtmlGraphNavigator {
 
 }
 
-
-//visualizzazione dei risultati di analisi di LiSA

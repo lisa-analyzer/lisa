@@ -88,7 +88,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return new StringRepresentation(String.format("\"type\" : \"integerConstantPropagation\", \"value\" : %s", Lattice.BOTTOM_REPR));
 		if (isTop())
 			return new StringRepresentation(String.format("\"type\" : \"integerConstantPropagation\", \"value\" : %s", Lattice.TOP_REPR));
 
