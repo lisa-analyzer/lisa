@@ -338,8 +338,14 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		}
 
 		@Override
-		public String toString() {
-			return "{{\n" + state + "\n}} -> " + expressions;
+		public String toJSONString() {
+			String outExpressions = expressions.toString();
+			if (outExpressions.endsWith(","))
+				outExpressions = outExpressions.substring(0, outExpressions.length()-1);
+			return String.format("{%s}, \"expressions\" : [%s]}", state, outExpressions);
+		}
+		public String toDotString() {
+			return "{" + state + "} -> " + expressions;
 		}
 
 		@Override

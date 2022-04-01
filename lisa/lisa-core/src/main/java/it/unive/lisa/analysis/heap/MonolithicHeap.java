@@ -38,7 +38,8 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final String MONOLITH_NAME = "heap";
 
-	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
+	private static final DomainRepresentation REPR = new StringRepresentation("\"monolith\"");
+
 
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)

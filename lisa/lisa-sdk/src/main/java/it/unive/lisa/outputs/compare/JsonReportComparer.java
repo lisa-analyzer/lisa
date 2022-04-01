@@ -201,8 +201,8 @@ public class JsonReportComparer {
 	private static boolean matchDotGraphs(File left, File right) throws IOException {
 		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
 				Reader r = new InputStreamReader(new FileInputStream(right), StandardCharsets.UTF_8)) {
-			DotGraph<Statement, Edge, CFG> lDot = DotGraph.readDot(l);
-			DotGraph<Statement, Edge, CFG> rDot = DotGraph.readDot(r);
+			DotGraph<Statement, Edge, CFG> lDot = DotGraph.read(l);
+			DotGraph<Statement, Edge, CFG> rDot = DotGraph.read(r);
 			return lDot.equals(rDot);
 		}
 	}

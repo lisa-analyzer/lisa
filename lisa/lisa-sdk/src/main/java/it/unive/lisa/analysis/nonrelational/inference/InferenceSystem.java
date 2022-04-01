@@ -201,8 +201,12 @@ public class InferenceSystem<T extends InferredValue<T>>
 		}
 
 		@Override
-		public String toString() {
-			return map + "\n[" + inferred + "]";
+		public String toJSONString() {
+			return map + "{\"type\" : \"inferredState\", " + inferred + "}";
+		}
+
+		public String toDotString() {
+			return null;
 		}
 
 		@Override

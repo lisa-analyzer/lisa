@@ -2,6 +2,7 @@ package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
@@ -14,6 +15,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
+
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSAConfiguration {
+
+	public enum FileType { JSON, DOT }
 
 	/**
 	 * The default number of fixpoint iteration on a given node after which
@@ -82,6 +87,11 @@ public class LiSAConfiguration {
 	private boolean jsonOutput;
 
 	/**
+	 * Whether the output file should be in JSON format
+	 */
+	private FileType fileType;
+
+	/**
 	 * The workdir that LiSA should use as root for all generated files (log
 	 * files excluded, use the logging configuration for controlling where those
 	 * are placed).
@@ -131,6 +141,7 @@ public class LiSAConfiguration {
 		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
 		this.openCallPolicy = WorstCasePolicy.INSTANCE;
+		this.fileType = FileType.JSON;
 	}
 
 	/**
@@ -304,6 +315,15 @@ public class LiSAConfiguration {
 		return this;
 	}
 
+	public LiSAConfiguration setFileType(FileType fileType){
+		if(this.fileType == FileType.JSON)
+			DomainRepresentation.setFileType(DomainRepresentation.FileType.JSON);
+		else if(this.fileType == FileType.DOT)
+			DomainRepresentation.setFileType(DomainRepresentation.FileType.DOT);
+		this.fileType = fileType;
+		return this;
+	}
+
 	/**
 	 * Sets the working directory for this instance of LiSA, that is, the
 	 * directory files will be created, if any. If files need to be created and
@@ -446,6 +466,10 @@ public class LiSAConfiguration {
 	 */
 	public boolean isJsonOutput() {
 		return jsonOutput;
+	}
+
+	public FileType getFileType(){
+		return fileType;
 	}
 
 	/**

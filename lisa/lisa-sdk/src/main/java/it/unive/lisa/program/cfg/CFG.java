@@ -11,6 +11,8 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.outputs.DotCFG;
+import it.unive.lisa.outputs.JsonCFG;
+import it.unive.lisa.outputs.JsonGraph;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -505,6 +507,11 @@ public class CFG extends Graph<CFG, Statement, Edge> implements CodeMember {
 	@Override
 	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
 		return DotCFG.fromCFG(this, null, labelGenerator);
+	}
+
+	@Override
+	protected JsonGraph<Statement, Edge, CFG> toJson(Function<Statement, String> labelGenerator) {
+		return JsonCFG.fromCFG(this, null, labelGenerator);
 	}
 
 	@Override

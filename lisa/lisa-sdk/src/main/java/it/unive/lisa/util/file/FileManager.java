@@ -1,10 +1,6 @@
 package it.unive.lisa.util.file;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -95,6 +91,14 @@ public class FileManager {
 	 */
 	public void mkDotFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
+	}
+
+	public void mkJSONFile(String name, WriteAction filler) throws  IOException{
+		mkOutputFile(cleanupForDotFile(name) + ".json", false, filler);
+	}
+
+	public void mkHtmlFile(String name, WriteAction filler) throws IOException{
+		mkOutputFile(cleanupForDotFile(name) + ".html", false, filler);
 	}
 
 	/**

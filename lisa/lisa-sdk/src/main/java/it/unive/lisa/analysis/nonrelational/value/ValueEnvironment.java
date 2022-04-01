@@ -10,6 +10,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Map;
+import java.util.Objects;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -153,7 +155,14 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		}
 
 		@Override
-		public String toString() {
+		public String toJSONString() {
+			if(Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
+				return map + "{\"type\" : \"typeEnvironment\", \"value\" : " + stack + "}";
+			return map + "{\"type\" : \"valueEnvironment\", \"value\" : {" + stack + "}}";
+		}
+
+		@Override
+		public String toDotString() {
 			return map + "\n[stack: " + stack + "]";
 		}
 

@@ -31,7 +31,7 @@ public class HeapLocation extends Identifier {
 
 	@Override
 	public String toString() {
-		return "heap[" + (isWeak() ? "w" : "s") + "]:" + getName();
+		return "\"heap[" + (isWeak() ? "w" : "s") + "]:" + getName() + "\"";
 	}
 
 	@Override

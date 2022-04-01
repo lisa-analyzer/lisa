@@ -30,7 +30,12 @@ public class StringRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toString() {
+	public String toJSONString() {
+		return String.valueOf(representation);
+	}
+
+	@Override
+	public String toDotString() {
 		return String.valueOf(representation);
 	}
 
