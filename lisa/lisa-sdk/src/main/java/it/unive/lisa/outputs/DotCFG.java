@@ -12,7 +12,7 @@ import org.graphstream.graph.implementations.MultiGraph;
 /**
  * An {@link DotGraph} built from a {@link CFG}. Instances of this class can be
  * created through {@link #fromCFG(CFG, String, Function)}, or read from a file
- * through {@link DotGraph#readDot(Reader)}.
+ * through {@link DotGraph#read(Reader)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

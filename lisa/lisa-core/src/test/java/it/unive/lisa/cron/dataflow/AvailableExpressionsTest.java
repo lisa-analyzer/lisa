@@ -19,7 +19,8 @@ public class AvailableExpressionsTest extends AnalysisTestExecutor {
 				getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class),
 						new AvailableExpressions(),
-						getDefaultFor(TypeDomain.class))).setFileType(LiSAConfiguration.FileType.DOT);
+						getDefaultFor(TypeDomain.class)))
+				.setGraphType(LiSAConfiguration.GraphType.DOT);
 		perform("available-expressions", "available-expressions.imp", conf);
 	}
 }

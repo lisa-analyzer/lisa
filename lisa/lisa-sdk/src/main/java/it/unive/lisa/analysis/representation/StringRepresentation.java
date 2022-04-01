@@ -35,7 +35,7 @@ public class StringRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toDotString() {
+	public String toString() {
 		return String.valueOf(representation);
 	}
 

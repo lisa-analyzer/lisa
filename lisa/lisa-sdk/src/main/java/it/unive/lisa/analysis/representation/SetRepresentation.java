@@ -4,6 +4,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -51,16 +52,17 @@ public class SetRepresentation extends DomainRepresentation {
 
 	@Override
 	public String toJSONString() {
-		StringBuilder out = new StringBuilder();
-		for(DomainRepresentation e : elements)
-			if(e.toString().startsWith("{") || e.toString().startsWith("\""))
+		StringBuilder out = new StringBuilder("{");
+		for (DomainRepresentation e : elements)
+			if (e.toString().startsWith("{") || e.toString().startsWith("\""))
 				out.append(e).append(",");
 			else
 				out.append("\"").append(e).append("\",");
 		return out.toString();
 	}
 
-	public String toDotString() {
+	@Override
+	public String toString() {
 		return "[" + StringUtils.join(elements, ", ") + "]";
 	}
 

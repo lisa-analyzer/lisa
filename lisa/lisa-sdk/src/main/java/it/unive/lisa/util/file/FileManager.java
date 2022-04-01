@@ -1,11 +1,16 @@
 package it.unive.lisa.util.file;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
+
 import org.apache.commons.io.FileUtils;
 
 /**

@@ -1,8 +1,12 @@
 package it.unive.lisa;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
@@ -16,12 +20,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 
-import java.io.File;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
  * 
@@ -29,7 +27,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LiSAConfiguration {
 
-	public enum FileType { JSON, DOT }
+	public static enum GraphType {
+		JSON, DOT
+	}
 
 	/**
 	 * The default number of fixpoint iteration on a given node after which
@@ -89,7 +89,7 @@ public class LiSAConfiguration {
 	/**
 	 * Whether the output file should be in JSON format
 	 */
-	private FileType fileType;
+	private GraphType graphType;
 
 	/**
 	 * The workdir that LiSA should use as root for all generated files (log
@@ -141,7 +141,7 @@ public class LiSAConfiguration {
 		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
 		this.openCallPolicy = WorstCasePolicy.INSTANCE;
-		this.fileType = FileType.JSON;
+		this.graphType = GraphType.JSON;
 	}
 
 	/**
@@ -315,12 +315,8 @@ public class LiSAConfiguration {
 		return this;
 	}
 
-	public LiSAConfiguration setFileType(FileType fileType){
-		if(this.fileType == FileType.JSON)
-			DomainRepresentation.setFileType(DomainRepresentation.FileType.JSON);
-		else if(this.fileType == FileType.DOT)
-			DomainRepresentation.setFileType(DomainRepresentation.FileType.DOT);
-		this.fileType = fileType;
+	public LiSAConfiguration setGraphType(GraphType fileType) {
+		this.graphType = fileType;
 		return this;
 	}
 
@@ -468,8 +464,8 @@ public class LiSAConfiguration {
 		return jsonOutput;
 	}
 
-	public FileType getFileType(){
-		return fileType;
+	public GraphType getGraphType() {
+		return graphType;
 	}
 
 	/**
@@ -515,19 +511,20 @@ public class LiSAConfiguration {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((abstractState == null) ? 0 : abstractState.hashCode());
 		result = prime * result + ((callGraph == null) ? 0 : callGraph.hashCode());
 		result = prime * result + (dumpAnalysis ? 1231 : 1237);
 		result = prime * result + (dumpCFGs ? 1231 : 1237);
 		result = prime * result + (dumpTypeInference ? 1231 : 1237);
 		result = prime * result + ((fixpointWorkingSet == null) ? 0 : fixpointWorkingSet.hashCode());
+		result = prime * result + ((graphType == null) ? 0 : graphType.hashCode());
 		result = prime * result + ((interproceduralAnalysis == null) ? 0 : interproceduralAnalysis.hashCode());
 		result = prime * result + (jsonOutput ? 1231 : 1237);
+		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
-		result = prime * result + ((abstractState == null) ? 0 : abstractState.hashCode());
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
 		result = prime * result + wideningThreshold;
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
-		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		return result;
 	}
 
@@ -540,6 +537,11 @@ public class LiSAConfiguration {
 		if (getClass() != obj.getClass())
 			return false;
 		LiSAConfiguration other = (LiSAConfiguration) obj;
+		if (abstractState == null) {
+			if (other.abstractState != null)
+				return false;
+		} else if (!abstractState.equals(other.abstractState))
+			return false;
 		if (callGraph == null) {
 			if (other.callGraph != null)
 				return false;
@@ -556,6 +558,8 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!fixpointWorkingSet.equals(other.fixpointWorkingSet))
 			return false;
+		if (graphType != other.graphType)
+			return false;
 		if (interproceduralAnalysis == null) {
 			if (other.interproceduralAnalysis != null)
 				return false;
@@ -563,15 +567,15 @@ public class LiSAConfiguration {
 			return false;
 		if (jsonOutput != other.jsonOutput)
 			return false;
+		if (openCallPolicy == null) {
+			if (other.openCallPolicy != null)
+				return false;
+		} else if (!openCallPolicy.equals(other.openCallPolicy))
+			return false;
 		if (semanticChecks == null) {
 			if (other.semanticChecks != null)
 				return false;
 		} else if (!semanticChecks.equals(other.semanticChecks))
-			return false;
-		if (abstractState == null) {
-			if (other.abstractState != null)
-				return false;
-		} else if (!abstractState.equals(other.abstractState))
 			return false;
 		if (syntacticChecks == null) {
 			if (other.syntacticChecks != null)
@@ -584,11 +588,6 @@ public class LiSAConfiguration {
 			if (other.workdir != null)
 				return false;
 		} else if (!workdir.equals(other.workdir))
-			return false;
-		if (openCallPolicy == null) {
-			if (other.openCallPolicy != null)
-				return false;
-		} else if (!openCallPolicy.equals(other.openCallPolicy))
 			return false;
 		return true;
 	}
@@ -607,6 +606,8 @@ public class LiSAConfiguration {
 				.append(dumpAnalysis)
 				.append("\n  dump json report: ")
 				.append(jsonOutput)
+				.append("\n  graph type: ")
+				.append(graphType)
 				.append("\n  ")
 				.append(syntacticChecks.size())
 				.append(" syntactic checks to execute")

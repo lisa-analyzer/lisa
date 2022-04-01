@@ -1,9 +1,16 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.outputs.DotGraph;
 import java.util.function.Function;
 
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.JsonGraph;
+
 public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
+
+	@Override
+	protected JsonGraph<TestNode, TestEdge, TestGraph> toJson(Function<TestNode, String> labelGenerator) {
+		return null;
+	}
 
 	@Override
 	protected DotGraph<TestNode, TestEdge, TestGraph> toDot(Function<TestNode, String> labelGenerator) {

@@ -51,14 +51,14 @@ public class MapRepresentation extends DomainRepresentation {
 	public String toJSONString() {
 		StringBuilder builder = new StringBuilder();
 
-		for (Entry<DomainRepresentation, DomainRepresentation> e : map.entrySet()){
+		for (Entry<DomainRepresentation, DomainRepresentation> e : map.entrySet()) {
 			String key = e.getKey().toString();
 			String value = e.getValue().toString();
 			System.out.println(key + " -- " + value);
 
-			if(!key.startsWith("\""))
+			if (!key.startsWith("\""))
 				key = "\"" + key + "\"";
-			if (value.startsWith("[")){
+			if (value.startsWith("[")) {
 				value = "\"value\" : " + value;
 			}
 			builder.append("{ \"variable\" : ").append(key).append(", ").append(value).append("},");
@@ -68,7 +68,7 @@ public class MapRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toDotString() {
+	public String toString() {
 		StringBuilder builder = new StringBuilder();
 
 		for (Entry<DomainRepresentation, DomainRepresentation> e : map.entrySet())

@@ -105,5 +105,8 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * @return the representation
 	 */
 	DomainRepresentation representation();
-	default DomainRepresentation valueRepresentation(){return null;}
+
+	default DomainRepresentation valueRepresentation() {
+		return null;
+	}
 }

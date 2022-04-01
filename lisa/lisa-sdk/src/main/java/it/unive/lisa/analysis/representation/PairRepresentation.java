@@ -51,9 +51,12 @@ public class PairRepresentation extends DomainRepresentation {
 
 	@Override
 	public String toJSONString() {
-		return String.format("{ \"type\" : \"pair\", \"left\" : \"%s\", \"right\" : \"%s\" }", left.toString().replace('"', '\''), right.toString().replace('"', '\''));
+		return String.format("{ \"type\" : \"pair\", \"left\" : \"%s\", \"right\" : \"%s\" }",
+				left.toString().replace('"', '\''), right.toString().replace('"', '\''));
 	}
-	public String toDotString() {
+
+	@Override
+	public String toString() {
 		return "(" + left + ", " + right + ")";
 	}
 

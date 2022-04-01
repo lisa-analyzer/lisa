@@ -344,8 +344,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 				outExpressions = outExpressions.substring(0, outExpressions.length()-1);
 			return String.format("{%s}, \"expressions\" : [%s]}", state, outExpressions);
 		}
-		public String toDotString() {
-			return "{" + state + "} -> " + expressions;
+
+		@Override
+		public String toString() {
+			return "{{\n" + state + "\n}} -> " + expressions;
 		}
 
 		@Override

@@ -303,7 +303,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		}
 
 		@Override
-		public String toDotString() {
+		public String toString() {
 			return "heap [[ " + heap + " ]]\nvalue [[ " + value + " ]]";
 		}
 

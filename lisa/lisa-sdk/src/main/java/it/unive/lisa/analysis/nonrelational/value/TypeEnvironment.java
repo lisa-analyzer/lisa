@@ -147,13 +147,13 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 
 		@Override
 		public String toJSONString() {
-			if(Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
+			if (Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
 				return map + "{\"type\" : \"typeEnvironment\", \"value\" : " + stack + "}";
 			return map + "{\"type\" : \"typeEnvironment\", \"value\" : {" + stack + "}}";
 		}
 
 		@Override
-		public String toDotString() {
+		public String toString() {
 			return map + "\n[stack: " + stack + "]";
 		}
 

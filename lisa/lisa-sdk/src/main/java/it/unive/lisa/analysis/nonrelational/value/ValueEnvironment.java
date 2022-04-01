@@ -156,13 +156,13 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 
 		@Override
 		public String toJSONString() {
-			if(Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
+			if (Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
 				return map + "{\"type\" : \"typeEnvironment\", \"value\" : " + stack + "}";
 			return map + "{\"type\" : \"valueEnvironment\", \"value\" : {" + stack + "}}";
 		}
 
 		@Override
-		public String toDotString() {
+		public String toString() {
 			return map + "\n[stack: " + stack + "]";
 		}
 
