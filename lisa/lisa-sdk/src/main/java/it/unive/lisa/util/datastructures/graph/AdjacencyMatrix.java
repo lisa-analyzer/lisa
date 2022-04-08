@@ -160,6 +160,18 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 		return null;
 	}
 
+	public final Collection<E> getEdgesConnecting(N source, N destination) {
+		if (!matrix.containsKey(source))
+			return Collections.emptyList();
+
+		Set<E> edges = new HashSet<>();
+		for (E e : matrix.get(source).outgoing)
+			if (e.getDestination().equals(destination))
+				edges.add(e);
+
+		return edges.isEmpty() ? Collections.emptyList() : edges;
+	}
+
 	/**
 	 * Yields the ingoing edges to the given node.
 	 * 

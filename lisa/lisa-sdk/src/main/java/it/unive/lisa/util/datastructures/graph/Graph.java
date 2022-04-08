@@ -1,7 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,8 +10,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.JsonGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
  * A generic graph, backed by an {@link AdjacencyMatrix}.<br>
@@ -184,6 +183,10 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	public final E getEdgeConnecting(N source, N destination) {
 		return adjacencyMatrix.getEdgeConnecting(source, destination);
 	}
+	
+	public final Collection<E> getEdgesConnecting(N source, N destination) {
+		return adjacencyMatrix.getEdgesConnecting(source, destination);
+	}
 
 	/**
 	 * Yields the ingoing edges to the given node.
@@ -235,54 +238,9 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 		return adjacencyMatrix.predecessorsOf(node);
 	}
 
-	/**
-	 * Dumps the content of this graph in the given writer, formatted as a dot
-	 * file.
-	 * 
-	 * @param writer the writer where the content will be written
-	 * 
-	 * @throws IOException if an exception happens while writing something to
-	 *                         the given writer
-	 */
-	public void dump(Writer writer) throws IOException {
-		dumpJSON(writer, node -> "");
+	public SerializableGraph toSerializableGraph(Function<Statement, SerializableValue> descriptionGenerator) {
+		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
 	}
-
-	/**
-	 * Dumps the content of this graph in the given writer, formatted as a dot
-	 * file. The content of each vertex will be enriched by invoking
-	 * labelGenerator on the vertex itself, to obtain an extra description to be
-	 * concatenated with the standard call to the vertex's {@link #toString()}.
-	 * 
-	 * @param writer         the writer where the content will be written
-	 * @param labelGenerator the function used to generate extra labels
-	 * 
-	 * @throws IOException if an exception happens while writing something to
-	 *                         the given writer
-	 */
-	public void dumpDot(Writer writer, Function<N, String> labelGenerator) throws IOException {
-		toDot(labelGenerator).dump(writer);
-	}
-
-	public void dumpJSON(Writer writer, Function<N, String> labelGenerator) throws IOException {
-		toJson(labelGenerator).dump(writer);
-	}
-
-	public String getJsonString(Function<N, String> labelGenerator){
-		return toJson(labelGenerator).toString();
-	}
-
-	/**
-	 * Converts this graph to a {@link DotGraph} instance.
-	 * 
-	 * @param labelGenerator the generator that the {@link DotGraph} will use to
-	 *                           enrich node labels
-	 * 
-	 * @return the converted {@link DotGraph}
-	 */
-	protected abstract DotGraph<N, E, G> toDot(Function<N, String> labelGenerator);
-
-	protected abstract JsonGraph<N, E, G> toJson(Function<N, String> labelGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if
