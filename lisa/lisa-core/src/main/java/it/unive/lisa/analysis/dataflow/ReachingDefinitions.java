@@ -1,17 +1,18 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.OutOfScopeIdentifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 
 /**
  * An implementation of the reaching definition dataflow analysis.
@@ -110,7 +111,7 @@ public class ReachingDefinitions
 
 	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
+		return new ListRepresentation(new StringRepresentation(variable), new StringRepresentation(programPoint));
 	}
 
 	@Override

@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+
 /**
  * A {@link DomainRepresentation} in the form of a single string element.
  * 
@@ -7,7 +10,7 @@ package it.unive.lisa.analysis.representation;
  */
 public class StringRepresentation extends DomainRepresentation {
 
-	private final String representation;
+	protected final String representation;
 
 	/**
 	 * Builds a new representation containing the given string.
@@ -30,8 +33,8 @@ public class StringRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toJSONString() {
-		return String.valueOf(representation);
+	public SerializableValue toSerializableValue() {
+		return new SerializableString(String.valueOf(representation));
 	}
 
 	@Override

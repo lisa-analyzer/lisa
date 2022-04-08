@@ -17,7 +17,7 @@ public interface Lattice<L extends Lattice<L>> {
 	/**
 	 * A string constant that can be used to represent top values.
 	 */
-	String TOP_STRING = "\"#TOP#\"";
+	String TOP_STRING = "#TOP#";
 
 	/**
 	 * A {@link DomainRepresentation} that can be used to represent top values.
@@ -27,7 +27,7 @@ public interface Lattice<L extends Lattice<L>> {
 	/**
 	 * A string constant that can be used to represent bottom values.
 	 */
-	String BOTTOM_STRING = "\"_|_\"";
+	String BOTTOM_STRING = "_|_";
 
 	/**
 	 * A {@link DomainRepresentation} that can be used to represent bottom

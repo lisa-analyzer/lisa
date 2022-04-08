@@ -3,6 +3,9 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -165,5 +168,9 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		for (T exp : elements)
 			mapped.add(exp.popScope(token));
 		return new ExpressionSet<>(mapped);
+	}
+
+	public DomainRepresentation representation() {
+		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

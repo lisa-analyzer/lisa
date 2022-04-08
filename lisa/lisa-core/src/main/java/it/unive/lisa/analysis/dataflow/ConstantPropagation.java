@@ -1,9 +1,14 @@
 package it.unive.lisa.analysis.dataflow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -19,10 +24,6 @@ import it.unive.lisa.symbolic.value.operator.Module;
 import it.unive.lisa.symbolic.value.operator.Multiplication;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * An implementation of the overflow-insensitive constant propagation dataflow
@@ -176,7 +177,7 @@ public class ConstantPropagation
 
 	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
+		return new ListRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}
 
 	@Override

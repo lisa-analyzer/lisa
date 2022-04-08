@@ -1,17 +1,16 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.outputs.DotCFG;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.function.Function;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -267,11 +266,6 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	@Override
 	public boolean isBottom() {
 		return entryStates.isBottom() && results.isBottom();
-	}
-
-	@Override
-	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
-		return DotCFG.fromCFG(this, id, labelGenerator);
 	}
 
 	@Override

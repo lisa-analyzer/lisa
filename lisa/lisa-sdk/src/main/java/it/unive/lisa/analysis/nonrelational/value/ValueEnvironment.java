@@ -1,18 +1,19 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
-import java.util.Objects;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalValueDomain}, that maps
@@ -141,60 +142,6 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		if (isBottom() || isTop())
 			return super.representation();
 
-		return new ValueRepresentation(super.representation(), stack.representation());
-	}
-
-	private static class ValueRepresentation extends DomainRepresentation {
-
-		private final DomainRepresentation map;
-		private final DomainRepresentation stack;
-
-		public ValueRepresentation(DomainRepresentation map, DomainRepresentation stack) {
-			this.map = map;
-			this.stack = stack;
-		}
-
-		@Override
-		public String toJSONString() {
-			if (Objects.equals(stack.toString(), "\"_|_\"") || Objects.equals(stack.toString(), "\"#TOP#\""))
-				return map + "{\"type\" : \"typeEnvironment\", \"value\" : " + stack + "}";
-			return map + "{\"type\" : \"valueEnvironment\", \"value\" : {" + stack + "}}";
-		}
-
-		@Override
-		public String toString() {
-			return map + "\n[stack: " + stack + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((stack == null) ? 0 : stack.hashCode());
-			result = prime * result + ((map == null) ? 0 : map.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			ValueRepresentation other = (ValueRepresentation) obj;
-			if (stack == null) {
-				if (other.stack != null)
-					return false;
-			} else if (!stack.equals(other.stack))
-				return false;
-			if (map == null) {
-				if (other.map != null)
-					return false;
-			} else if (!map.equals(other.map))
-				return false;
-			return true;
-		}
+		return new ObjectRepresentation(Map.of("map", super.representation(), "stack", stack.representation()));
 	}
 }

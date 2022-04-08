@@ -5,12 +5,12 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.outputs.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.compare.JsonReportComparer;
 import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
 import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
 import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.File;

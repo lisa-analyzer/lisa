@@ -1,4 +1,4 @@
-package it.unive.lisa.outputs;
+package it.unive.lisa.outputs.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;

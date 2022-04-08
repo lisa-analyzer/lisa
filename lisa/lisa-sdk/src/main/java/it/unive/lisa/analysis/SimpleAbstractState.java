@@ -1,8 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -276,43 +279,32 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new StateRepresentation(heapState.representation(), valueState.representation());
+		return new StateRepresentation(heapState.representation(), "value", valueState.representation());
 	}
 
 	@Override
 	public DomainRepresentation typeRepresentation() {
-		return new StateRepresentation(heapState.representation(), typeState.representation());
+		return new StateRepresentation(heapState.representation(), "type", typeState.representation());
 	}
 
-	/**
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	private static final class StateRepresentation extends DomainRepresentation {
-		private final DomainRepresentation heap;
-		private final DomainRepresentation value;
+	private static final class StateRepresentation extends ObjectRepresentation {
+		private final String key;
 
-		private StateRepresentation(DomainRepresentation heap, DomainRepresentation value) {
-			this.heap = heap;
-			this.value = value;
-		}
-
-		@Override
-		public String toJSONString() {
-			String out = String.format("\"heap\" : [%s], \"value\" : [%s]", heap, value);
-			return out.replaceAll(",]", "]");
+		private StateRepresentation(DomainRepresentation heap, String key, DomainRepresentation value) {
+			super(Map.of("heap", heap, key, value));
+			this.key = key;
 		}
 
 		@Override
 		public String toString() {
-			return "heap [[ " + heap + " ]]\nvalue [[ " + value + " ]]";
+			return "heap [[ " + fields.get("heap") + " ]]\n" + key + " [[ " + fields.get(key) + " ]]";
 		}
 
 		@Override
 		public int hashCode() {
 			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((heap == null) ? 0 : heap.hashCode());
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
+			int result = super.hashCode();
+			result = prime * result + ((key == null) ? 0 : key.hashCode());
 			return result;
 		}
 
@@ -320,20 +312,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		public boolean equals(Object obj) {
 			if (this == obj)
 				return true;
-			if (obj == null)
+			if (!super.equals(obj))
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
 			StateRepresentation other = (StateRepresentation) obj;
-			if (heap == null) {
-				if (other.heap != null)
+			if (key == null) {
+				if (other.key != null)
 					return false;
-			} else if (!heap.equals(other.heap))
-				return false;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
+			} else if (!key.equals(other.key))
 				return false;
 			return true;
 		}

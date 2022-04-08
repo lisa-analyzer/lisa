@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.representation;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
@@ -36,5 +37,5 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 	@Override
 	public abstract String toString();
 
-	public abstract String toJSONString();
+	public abstract SerializableValue toSerializableValue();
 }

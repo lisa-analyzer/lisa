@@ -6,6 +6,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+
 /**
  * A {@link DomainRepresentation} in the form of a key-value mapping.
  * 
@@ -13,7 +16,7 @@ import java.util.function.Function;
  */
 public class MapRepresentation extends DomainRepresentation {
 
-	private final SortedMap<DomainRepresentation, DomainRepresentation> map;
+	protected final SortedMap<DomainRepresentation, DomainRepresentation> map;
 
 	/**
 	 * Builds a new representation starting from the given map.
@@ -48,23 +51,11 @@ public class MapRepresentation extends DomainRepresentation {
 	}
 
 	@Override
-	public String toJSONString() {
-		StringBuilder builder = new StringBuilder();
-
-		for (Entry<DomainRepresentation, DomainRepresentation> e : map.entrySet()) {
-			String key = e.getKey().toString();
-			String value = e.getValue().toString();
-			System.out.println(key + " -- " + value);
-
-			if (!key.startsWith("\""))
-				key = "\"" + key + "\"";
-			if (value.startsWith("[")) {
-				value = "\"value\" : " + value;
-			}
-			builder.append("{ \"variable\" : ").append(key).append(", ").append(value).append("},");
-		}
-
-		return builder.toString().trim();
+	public SerializableValue toSerializableValue() {
+		SortedMap<String, SerializableValue> fields = new TreeMap<>();
+		for (Entry<DomainRepresentation, DomainRepresentation> e : this.map.entrySet())
+			fields.put(e.getKey().toString(), e.getValue().toSerializableValue());
+		return new SerializableObject(fields);
 	}
 
 	@Override

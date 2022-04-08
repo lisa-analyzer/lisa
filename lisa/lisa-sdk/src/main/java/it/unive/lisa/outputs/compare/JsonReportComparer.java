@@ -12,8 +12,8 @@ import java.util.Collection;
 import org.apache.commons.lang3.tuple.Pair;
 
 import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.outputs.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;

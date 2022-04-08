@@ -1,16 +1,19 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -187,58 +190,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 		if (isBottom() || isTop())
 			return super.representation();
 
-		return new SystemRepresentation(super.representation(), inferred.representation());
-	}
-
-	private static class SystemRepresentation extends DomainRepresentation {
-
-		private final DomainRepresentation map;
-		private final DomainRepresentation inferred;
-
-		public SystemRepresentation(DomainRepresentation map, DomainRepresentation inferred) {
-			this.map = map;
-			this.inferred = inferred;
-		}
-
-		@Override
-		public String toJSONString() {
-			return map + "{\"type\" : \"inferredState\", " + inferred + "}";
-		}
-
-		@Override
-		public String toString() {
-			return map + "\n[" + inferred + "]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((inferred == null) ? 0 : inferred.hashCode());
-			result = prime * result + ((map == null) ? 0 : map.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			SystemRepresentation other = (SystemRepresentation) obj;
-			if (inferred == null) {
-				if (other.inferred != null)
-					return false;
-			} else if (!inferred.equals(other.inferred))
-				return false;
-			if (map == null) {
-				if (other.map != null)
-					return false;
-			} else if (!map.equals(other.map))
-				return false;
-			return true;
-		}
+		return new ObjectRepresentation(Map.of("map", super.representation(), "inferred", inferred.representation()));
 	}
 }

@@ -1,10 +1,13 @@
 package it.unive.lisa.analysis;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -13,8 +16,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -310,8 +311,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new AnalysisStateRepresentation(state.representation(),
-				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
+		return new AnalysisStateRepresentation(state.representation(), computedExpressions.representation());
 	}
 
 	/**
@@ -324,61 +324,18 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * @return the representation
 	 */
 	public DomainRepresentation typeRepresentation() {
-		return new AnalysisStateRepresentation(state.typeRepresentation(),
-				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
+		return new AnalysisStateRepresentation(state.typeRepresentation(), computedExpressions.representation());
 	}
 
-	private static final class AnalysisStateRepresentation extends DomainRepresentation {
-		private final DomainRepresentation state;
-		private final DomainRepresentation expressions;
+	private static final class AnalysisStateRepresentation extends ObjectRepresentation {
 
 		private AnalysisStateRepresentation(DomainRepresentation state, DomainRepresentation expressions) {
-			this.state = state;
-			this.expressions = expressions;
-		}
-
-		@Override
-		public String toJSONString() {
-			String outExpressions = expressions.toString();
-			if (outExpressions.endsWith(","))
-				outExpressions = outExpressions.substring(0, outExpressions.length()-1);
-			return String.format("{%s}, \"expressions\" : [%s]}", state, outExpressions);
+			super(Map.of("state", state, "expressions", expressions));
 		}
 
 		@Override
 		public String toString() {
-			return "{{\n" + state + "\n}} -> " + expressions;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((expressions == null) ? 0 : expressions.hashCode());
-			result = prime * result + ((state == null) ? 0 : state.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			AnalysisStateRepresentation other = (AnalysisStateRepresentation) obj;
-			if (expressions == null) {
-				if (other.expressions != null)
-					return false;
-			} else if (!expressions.equals(other.expressions))
-				return false;
-			if (state == null) {
-				if (other.state != null)
-					return false;
-			} else if (!state.equals(other.state))
-				return false;
-			return true;
+			return "{{\n" + fields.get("state") + "\n}} -> " + fields.get("expressions");
 		}
 	}
 
