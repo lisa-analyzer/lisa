@@ -390,7 +390,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		for (Entry<N, NodeEdges<N, E, G>> entry : this) {
-			res.append("\"").append(entry.getKey()).append("\" -> [\n\tingoing: ");
+			res.append(entry.getKey()).append(" -> [\n\tingoing: ");
 			res.append(StringUtils.join(entry.getValue().ingoing, ", "));
 			res.append("\n\toutgoing: ");
 			res.append(StringUtils.join(entry.getValue().outgoing, ", "));

@@ -16,7 +16,8 @@ public class PointBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
 	public void fieldInsensitivePointBasedHeapTest() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						new PointBasedHeap(),
 						new Interval(),
@@ -26,7 +27,8 @@ public class PointBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
 	public void fieldSensitivePointBasedHeapTest() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						new FieldSensitivePointBasedHeap(),
 						new Interval(),

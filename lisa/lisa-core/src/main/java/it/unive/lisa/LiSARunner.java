@@ -1,5 +1,14 @@
 package it.unive.lisa;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -19,25 +28,17 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.outputs.HtmlGraphNavigator;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -98,18 +99,6 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
-		HtmlGraphNavigator nav = new HtmlGraphNavigator(program);
-		try {
-			fileManager.mkHtmlFile("index", writer -> nav.mkFile(writer));
-		} catch (IOException e) {
-			LOG.error("Exception while creating the index file");
-			LOG.error(e);
-		}
-
-		if (conf.isDumpCFGs())
-			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
-				dumpCFG(fileManager, "", cfg, st -> "", conf.getGraphType(), nav);
-
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty())
 			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
@@ -132,7 +121,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		}
 
 		if (state != null) {
-			analyze(allCFGs, fileManager, nav);
+			analyze(allCFGs, fileManager);
 			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
@@ -154,7 +143,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		return tool.getWarnings();
 	}
 
-	private void analyze(Collection<CFG> allCFGs, FileManager fileManager, HtmlGraphNavigator nav) {
+	private void analyze(Collection<CFG> allCFGs, FileManager fileManager) {
 		A state = this.state.top();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
@@ -168,16 +157,31 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					}
 				});
 
-		if (conf.isDumpAnalysis() || conf.isDumpTypeInference())
+		GraphType type = conf.getAnalysisGraphs();
+		if (conf.isSerializeResults() || type != GraphType.NONE)
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
-					String filename = result.getId() == null ? "" : result.getId().hashCode() + "_";
-					if (conf.isDumpTypeInference())
-						dumpCFG(fileManager, "typing___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).typeRepresentation().toString(), conf.getGraphType(), nav);
-					if (conf.isDumpAnalysis())
-						dumpCFG(fileManager, "analysis___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).representation().toString(), conf.getGraphType(), nav);
+					SerializableGraph graph = result.toSerializableGraph(
+							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
+					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
+					if (result.getId() != null) 
+						filename += "_" + result.getId().hashCode();
+
+					try {
+						if (conf.isSerializeResults())
+							fileManager.mkJSONFile(filename, writer -> graph.dump(writer));
+
+						if (type != GraphType.NONE) {
+							/*if (type == LiSAConfiguration.GraphType.HTML)
+								fileManager.mkHtmlFile(filename, writer -> graph.toHtml().dump(writer));
+							else*/ if (type == LiSAConfiguration.GraphType.DOT)
+								fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
+						}
+					} catch (IOException e) {
+						LOG.error("Exception while dumping the analysis results on {}",
+								cfg.getDescriptor().getFullSignature());
+						LOG.error(e);
+					}
 				}
 	}
 
@@ -198,24 +202,5 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				throw new AnalysisExecutionException("Unable to finalize target program", e);
 			}
 		});
-	}
-
-
-	private static void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
-								Function<Statement, String> labelGenerator, LiSAConfiguration.GraphType type, HtmlGraphNavigator nav) {
-		try {
-			if(type == LiSAConfiguration.GraphType.JSON){
-				fileManager.mkJSONFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
-						writer -> cfg.dumpJSON(writer, labelGenerator::apply));
-				fileManager.mkHtmlFile(cfg.getDescriptor().getFullSignatureWithParNames(), writer -> nav.mkCfgFile(writer, cfg, labelGenerator));
-			} else if (type == LiSAConfiguration.GraphType.DOT){
-				fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
-						writer -> cfg.dumpDot(writer, labelGenerator::apply));
-			}
-
-		} catch (IOException e) {
-			LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
-			LOG.error(e);
-		}
 	}
 }

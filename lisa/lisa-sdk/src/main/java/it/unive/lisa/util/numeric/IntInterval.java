@@ -355,8 +355,4 @@ public class IntInterval {
 	public String toString() {
 		return "[" + low + ", " + high + "]";
 	}
-	
-	public String toJSONString() {
-		return String.format("\"type\" : \"interval\", \"low\" : \"%s\", \"high\" : \"%s\"", low, high);
-	}
 }

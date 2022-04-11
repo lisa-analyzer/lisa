@@ -8,7 +8,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -19,45 +18,97 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 
-/**
- * An auxiliary graph built from a {@link Graph} that can be dumped in dot
- * format, together with a legend. Instances of this class can be read from a
- * file through {@link #read(Reader)}.
- * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
- * 
- * @param <N> the type of the {@link Node}s in the original graph
- * @param <E> the type of the {@link Edge}s in the original graph
- * @param <G> the type of the original {@link Graph}s
- */
-public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> extends FileGraph<N, E, G> {
+public class DotGraph extends GraphStreamWrapper {
 
-	protected final org.graphstream.graph.Graph graph, legend;
+	/**
+	 * The black color.
+	 */
+	protected static final String COLOR_BLACK = "black";
+
+	/**
+	 * The gray color.
+	 */
+	protected static final String COLOR_GRAY = "gray";
+
+	/**
+	 * The red color.
+	 */
+	protected static final String COLOR_RED = "red";
+
+	/**
+	 * The blue color.
+	 */
+	protected static final String COLOR_BLUE = "blue";
+
+	/**
+	 * The style attribute name.
+	 */
+	protected static final String STYLE = "style";
+
+	/**
+	 * The color attribute name.
+	 */
+	protected static final String COLOR = "color";
+
+	/**
+	 * The shape attribute name.
+	 */
+	protected static final String SHAPE = "shape";
+
+	/**
+	 * The label attribute name.
+	 */
+	protected static final String LABEL = "label";
+
+	/**
+	 * The name of the extra attribute identifying exit nodes.
+	 */
+	protected static final String EXIT_NODE_EXTRA_ATTR = "peripheries";
+
+	/**
+	 * The default shape of a node.
+	 */
+	protected static final String NODE_SHAPE = "rect";
+
+	/**
+	 * The value of the extra attribute identifying exit nodes.
+	 */
+	protected static final String EXIT_NODE_EXTRA_VALUE = "2";
+
+	/**
+	 * The color of a special node (entry or exit).
+	 */
+	protected static final String SPECIAL_NODE_COLOR = COLOR_BLACK;
+
+	/**
+	 * The color of a normal node.
+	 */
+	protected static final String NORMAL_NODE_COLOR = COLOR_GRAY;
+
+	/**
+	 * The style of conditional edges.
+	 */
+	protected static final String CONDITIONAL_EDGE_STYLE = "dashed";
+
+	private final org.graphstream.graph.Graph legend;
 
 	private final String title;
-
-	private final Map<N, Long> codes = new IdentityHashMap<>();
-
-	private long nextCode;
 
 	/**
 	 * Builds a graph.
 	 * 
-	 * @param title  the title of the graph, if any
-	 * @param legend the legend to append to the graph, if any
+	 * @param title the title of the graph, if any
 	 */
-	protected DotGraph(String title, org.graphstream.graph.Graph legend) {
-		super(title, legend);
-		this.graph = new MultiGraph("graph");
-		this.legend = legend;
+	public DotGraph(String title) {
+		super();
+		this.legend = new Legend().graph;
 		this.title = title;
 	}
 
-	private static String escape(String extraLabel) {
+	private static String dotEscape(String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
 		String replace = escapeHtml4.replace("\n", "<BR/>");
 		return replace.replace("\\", "\\\\");
@@ -69,15 +120,12 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * {@code labelGenerator.apply(node)} ({@link Function#apply(Object)})
 	 * through a new line.
 	 * 
-	 * @param node           the source node
-	 * @param entry          whether or not this edge is an entrypoint of the
-	 *                           graph
-	 * @param exit           whether or not this edge is an exitpoint of the
-	 *                           graph
-	 * @param labelGenerator the function that is used to enrich nodes labels
+	 * @param node  the source node
+	 * @param entry whether or not this edge is an entrypoint of the graph
+	 * @param exit  whether or not this edge is an exitpoint of the graph
 	 */
-	protected void addNode(N node, boolean entry, boolean exit, Function<N, String> labelGenerator) {
-		org.graphstream.graph.Node n = graph.addNode(nodeName(codes.computeIfAbsent(node, nn -> nextCode++)));
+	public void addNode(SerializableNode node, boolean entry, boolean exit, String label) {
+		org.graphstream.graph.Node n = graph.addNode(nodeName(node.getId()));
 
 		n.setAttribute(SHAPE, NODE_SHAPE);
 		if (entry || exit)
@@ -88,15 +136,41 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		if (exit)
 			n.setAttribute(EXIT_NODE_EXTRA_ATTR, EXIT_NODE_EXTRA_VALUE);
 
-		String label = node.toString().replace('"', '\'');
-		String extraLabel = labelGenerator.apply(node);
-		if (!extraLabel.isEmpty())
-			extraLabel = extraLabel + "";
-		n.setAttribute(LABEL,  "<" + label + escape(extraLabel) + ">");
+		String l = dotEscape(node.getText());
+		if (!label.isEmpty())
+			label = "<BR/>" + dotEscape(label);
+		n.setAttribute(LABEL, "<" + l + label + ">");
 	}
 
-	protected void addEdge(E edge, String color, String style) {
-		super.addEdge(edge, color, style, graph, codes);
+	private static String nodeName(long id) {
+		return "node" + id;
+	}
+
+	/**
+	 * Adds an edge to the graph.
+	 * 
+	 * @param edge the source edge
+	 */
+	public void addEdge(SerializableEdge edge) {
+		long id = edge.getSourceId();
+		long id1 = edge.getDestId();
+
+		org.graphstream.graph.Edge e = graph.addEdge("edge-" + id + "-" + id1, nodeName(id), nodeName(id1), true);
+
+		switch (edge.getKind()) {
+		case "TrueEdge":
+			e.setAttribute(STYLE, CONDITIONAL_EDGE_STYLE);
+			e.setAttribute(COLOR, COLOR_BLUE);
+			break;
+		case "FalseEdge":
+			e.setAttribute(STYLE, CONDITIONAL_EDGE_STYLE);
+			e.setAttribute(COLOR, COLOR_RED);
+			break;
+		case "SequentialEdge":
+		default:
+			e.setAttribute(COLOR, COLOR_BLACK);
+			break;
+		}
 	}
 
 	/**
@@ -107,6 +181,7 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 	 * 
 	 * @throws IOException if an I/O error occurs while writing
 	 */
+	@Override
 	public void dump(Writer writer) throws IOException {
 		FileSinkDOT sink = new CustomDotSink() {
 			@Override
@@ -125,24 +200,17 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 		sink.writeAll(graph, writer);
 	}
 
-
 	/**
 	 * Reads a graph through the given {@link Reader}. Any legend (i.e.,
 	 * subgraph) will be stripped from the input.
 	 * 
-	 * @param <N>    the type of {@link Node}s in the graph
-	 * @param <E>    the type of {@link Edge}s in the graph
-	 * @param <G>    the type of the {@link Graph}
 	 * @param reader the reader to use for reading the graph
 	 * 
 	 * @return the {@link DotGraph} that has been read
 	 * 
 	 * @throws IOException if an I/O error occurs while reading
 	 */
-	public static <N extends Node<N, E, G>,
-			E extends Edge<N, E, G>,
-			G extends Graph<G, N, E>> DotGraph<N, E, G> read(
-					Reader reader) throws IOException {
+	public static DotGraph readDot(Reader reader) throws IOException {
 		// we have to re-add the quotes wrapping the labels, otherwise the
 		// parser will break
 		String content;
@@ -171,12 +239,12 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 					break;
 				} else
 					writer.append(line);
-				writer.append("");
+				writer.append("\n");
 			}
 			content = writer.toString();
 		}
 		FileSourceDOT source = new FileSourceDOT();
-		DotGraph<N, E, G> graph = new DotGraph<>(null, null) {
+		DotGraph graph = new DotGraph(null) {
 		};
 		source.addSink(graph.graph);
 		try (StringReader sr = new StringReader(content)) {
@@ -245,6 +313,55 @@ public abstract class DotGraph<N extends Node<N, E, G>, E extends Edge<N, E, G>,
 			out.printf("\tlabel=\"Legend\";%n");
 			out.printf("\tstyle=dotted;%n");
 			out.printf("\tnode [shape=plaintext];%n");
+		}
+	}
+
+	private static final class Legend {
+		private final org.graphstream.graph.Graph graph;
+
+		private Legend() {
+			graph = new MultiGraph("legend");
+			org.graphstream.graph.Node l = graph.addNode("legend");
+			StringBuilder builder = new StringBuilder();
+			builder.append("<");
+			builder.append("<table border=\"0\" cellpadding=\"2\" cellspacing=\"0\" cellborder=\"0\">");
+			builder.append("<tr><td align=\"right\">node border&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(NORMAL_NODE_COLOR);
+			builder.append("\">");
+			builder.append(NORMAL_NODE_COLOR);
+			builder.append("</font>, single</td></tr>");
+			builder.append("<tr><td align=\"right\">entrypoint border&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(SPECIAL_NODE_COLOR);
+			builder.append("\">");
+			builder.append(SPECIAL_NODE_COLOR);
+			builder.append("</font>, single</td></tr>");
+			builder.append("<tr><td align=\"right\">exitpoint border&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(SPECIAL_NODE_COLOR);
+			builder.append("\">");
+			builder.append(SPECIAL_NODE_COLOR);
+			builder.append("</font>, double</td></tr>");
+			builder.append("<tr><td align=\"right\">sequential edge&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(COLOR_BLACK);
+			builder.append("\">");
+			builder.append(COLOR_BLACK);
+			builder.append("</font>, solid</td></tr>");
+			builder.append("<tr><td align=\"right\">true edge&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(COLOR_BLUE);
+			builder.append("\">");
+			builder.append(COLOR_BLUE);
+			builder.append("</font>, ");
+			builder.append(CONDITIONAL_EDGE_STYLE);
+			builder.append("</td></tr>");
+			builder.append("<tr><td align=\"right\">false edge&nbsp;</td><td align=\"left\"><font color=\"");
+			builder.append(COLOR_RED);
+			builder.append("\">");
+			builder.append(COLOR_RED);
+			builder.append("</font>, ");
+			builder.append(CONDITIONAL_EDGE_STYLE);
+			builder.append("</td></tr>");
+			builder.append("</table>");
+			builder.append(">");
+			l.setAttribute("label", builder.toString());
 		}
 	}
 }

@@ -3,6 +3,8 @@ package it.unive.lisa.outputs.serializableGraph;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 public class SerializableArray implements SerializableValue {
@@ -51,7 +53,7 @@ public class SerializableArray implements SerializableValue {
 
 	@Override
 	public String toString() {
-		return "JsonArray [elements=" + elements + "]";
+		return "[" + StringUtils.join(elements, ", ") + "]";
 	}
 
 	@Override
@@ -68,7 +70,8 @@ public class SerializableArray implements SerializableValue {
 			return cmp;
 
 		CollectionsDiffBuilder<
-				SerializableValue> builder = new CollectionsDiffBuilder<>(SerializableValue.class, elements, other.elements);
+				SerializableValue> builder = new CollectionsDiffBuilder<>(SerializableValue.class, elements,
+						other.elements);
 		builder.compute(SerializableValue::compareTo);
 
 		if (builder.sameContent())

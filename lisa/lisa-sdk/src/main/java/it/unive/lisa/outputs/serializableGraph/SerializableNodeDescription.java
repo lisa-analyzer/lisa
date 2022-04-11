@@ -2,11 +2,12 @@ package it.unive.lisa.outputs.serializableGraph;
 
 public class SerializableNodeDescription implements Comparable<SerializableNodeDescription> {
 
-	private int nodeId;
+	private final int nodeId;
 
-	private SerializableValue description;
+	private final SerializableValue description;
 
 	public SerializableNodeDescription() {
+		this(-1, null);
 	}
 
 	public SerializableNodeDescription(int id, SerializableValue description) {
@@ -18,16 +19,8 @@ public class SerializableNodeDescription implements Comparable<SerializableNodeD
 		return nodeId;
 	}
 
-	public void setNodeId(int nodeId) {
-		this.nodeId = nodeId;
-	}
-
 	public SerializableValue getDescription() {
 		return description;
-	}
-
-	public void setDescription(SerializableValue description) {
-		this.description = description;
 	}
 
 	@Override
@@ -60,7 +53,7 @@ public class SerializableNodeDescription implements Comparable<SerializableNodeD
 
 	@Override
 	public String toString() {
-		return "JsonNodeDescription [nodeId=" + nodeId + ", description=" + description + "]";
+		return nodeId + ":" + description;
 	}
 
 	@Override

@@ -48,7 +48,7 @@ public class SerializableString implements SerializableValue {
 
 	@Override
 	public String toString() {
-		return "JsonString [value=" + value + "]";
+		return value;
 	}
 
 	@Override

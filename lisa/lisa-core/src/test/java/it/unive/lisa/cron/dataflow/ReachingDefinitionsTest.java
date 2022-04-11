@@ -15,7 +15,9 @@ public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testReachingDefinitions() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true).setAbstractState(
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
+				.setAbstractState(
 				getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class),
 						new ReachingDefinitions(),

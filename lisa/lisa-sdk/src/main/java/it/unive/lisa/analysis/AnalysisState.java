@@ -311,32 +311,9 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new AnalysisStateRepresentation(state.representation(), computedExpressions.representation());
-	}
-
-	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance. This differs from {@link #representation()} by
-	 * using invoking {@link AbstractState#typeRepresentation()} instead of
-	 * {@link SemanticDomain#representation()} on the abstract state contained
-	 * inside this analysis state.
-	 * 
-	 * @return the representation
-	 */
-	public DomainRepresentation typeRepresentation() {
-		return new AnalysisStateRepresentation(state.typeRepresentation(), computedExpressions.representation());
-	}
-
-	private static final class AnalysisStateRepresentation extends ObjectRepresentation {
-
-		private AnalysisStateRepresentation(DomainRepresentation state, DomainRepresentation expressions) {
-			super(Map.of("state", state, "expressions", expressions));
-		}
-
-		@Override
-		public String toString() {
-			return "{{\n" + fields.get("state") + "\n}} -> " + fields.get("expressions");
-		}
+		return new ObjectRepresentation(Map.of(
+				"state", state.representation(),
+				"expressions", computedExpressions.representation()));
 	}
 
 	@Override

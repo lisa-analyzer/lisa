@@ -1,16 +1,18 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import java.util.Collections;
 import java.util.List;
 
 public class SerializableNode implements Comparable<SerializableNode> {
 
-	private int id;
+	private final int id;
 
-	private List<Integer> subNodes;
+	private final List<Integer> subNodes;
 
-	private String text;
+	private final String text;
 
 	public SerializableNode() {
+		this(-1, Collections.emptyList(), null);
 	}
 
 	public SerializableNode(int id, List<Integer> subNodes, String text) {
@@ -23,24 +25,12 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		return id;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
 	public List<Integer> getSubNodes() {
 		return subNodes;
 	}
 
-	public void setSubNodes(List<Integer> subNodes) {
-		this.subNodes = subNodes;
-	}
-
 	public String getText() {
 		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
 	}
 
 	@Override
@@ -84,6 +74,6 @@ public class SerializableNode implements Comparable<SerializableNode> {
 
 	@Override
 	public String toString() {
-		return "JsonNode [id=" + id + ", subNodes=" + subNodes + ", text=" + text + "]";
+		return id + "(" + subNodes + "):" + text;
 	}
 }

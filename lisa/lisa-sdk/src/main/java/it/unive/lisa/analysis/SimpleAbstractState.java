@@ -279,53 +279,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new StateRepresentation(heapState.representation(), "value", valueState.representation());
+		return new ObjectRepresentation(Map.of(
+				HEAP_REPRESENTATION_KEY, heapState.representation(), 
+				TYPE_REPRESENTATION_KEY, typeState.representation(),
+				VALUE_REPRESENTATION_KEY, valueState.representation()));
 	}
-
-	@Override
-	public DomainRepresentation typeRepresentation() {
-		return new StateRepresentation(heapState.representation(), "type", typeState.representation());
-	}
-
-	private static final class StateRepresentation extends ObjectRepresentation {
-		private final String key;
-
-		private StateRepresentation(DomainRepresentation heap, String key, DomainRepresentation value) {
-			super(Map.of("heap", heap, key, value));
-			this.key = key;
-		}
-
-		@Override
-		public String toString() {
-			return "heap [[ " + fields.get("heap") + " ]]\n" + key + " [[ " + fields.get(key) + " ]]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = super.hashCode();
-			result = prime * result + ((key == null) ? 0 : key.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (!super.equals(obj))
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			StateRepresentation other = (StateRepresentation) obj;
-			if (key == null) {
-				if (other.key != null)
-					return false;
-			} else if (!key.equals(other.key))
-				return false;
-			return true;
-		}
-	}
-
+	
 	@Override
 	public String toString() {
 		return representation().toString();

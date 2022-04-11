@@ -1,29 +1,40 @@
 package it.unive.lisa.outputs.serializableGraph;
 
 import java.io.IOException;
+import java.io.Reader;
 import java.io.Writer;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
+import it.unive.lisa.outputs.DotGraph;
+
 public class SerializableGraph {
 
-	private String name;
+	private final String name;
 
-	private String description;
+	private final String description;
 
-	private SortedSet<SerializableNode> nodes = new TreeSet<>();
+	private final SortedSet<SerializableNode> nodes;
 
-	private SortedSet<SerializableEdge> edges = new TreeSet<>();
+	private final SortedSet<SerializableEdge> edges;
 
-	private SortedSet<SerializableNodeDescription> descriptions = new TreeSet<>();
+	private final SortedSet<SerializableNodeDescription> descriptions;
 
 	public SerializableGraph() {
+		this(null, null, new TreeSet<>(), new TreeSet<>(), new TreeSet<>());
 	}
 
-	public SerializableGraph(String name, String description, SortedSet<SerializableNode> nodes,
+	public SerializableGraph(
+			String name,
+			String description,
+			SortedSet<SerializableNode> nodes,
 			SortedSet<SerializableEdge> edges,
 			SortedSet<SerializableNodeDescription> descriptions) {
 		this.name = name;
@@ -37,40 +48,20 @@ public class SerializableGraph {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getDescription() {
 		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	public SortedSet<SerializableNode> getNodes() {
 		return nodes;
 	}
 
-	public void setNodes(SortedSet<SerializableNode> nodes) {
-		this.nodes = nodes;
-	}
-
 	public SortedSet<SerializableEdge> getEdges() {
 		return edges;
 	}
 
-	public void setEdges(SortedSet<SerializableEdge> edges) {
-		this.edges = edges;
-	}
-
 	public SortedSet<SerializableNodeDescription> getDescriptions() {
 		return descriptions;
-	}
-
-	public void setDescriptions(SortedSet<SerializableNodeDescription> descriptions) {
-		this.descriptions = descriptions;
 	}
 
 	@Override
@@ -124,12 +115,12 @@ public class SerializableGraph {
 
 	@Override
 	public String toString() {
-		return "JsonGraph [name=" + name + ", description=" + description + "]";
+		return "graph [name=" + name + ", description=" + description + "]";
 	}
 
 	public void dump(Writer writer) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
-		mapper.configure(SerializationFeature.INDENT_OUTPUT, true);
+		mapper.configure(SerializationFeature.INDENT_OUTPUT, System.getProperty("lisa.json.indent") != null);
 		mapper.writeValue(writer, this);
 	}
 
@@ -143,5 +134,36 @@ public class SerializableGraph {
 
 	public void addEdge(SerializableEdge edge) {
 		edges.add(edge);
+	}
+
+	public DotGraph toDot() {
+		DotGraph graph = new DotGraph(name);
+
+		Set<Integer> hasFollows = new HashSet<>();
+		Set<Integer> hasPreds = new HashSet<>();
+		Set<Integer> inners = new HashSet<>();
+		Map<Integer, String> labels = new IdentityHashMap<>();
+
+		edges.forEach(e -> {
+			hasFollows.add(e.getSourceId());
+			hasPreds.add(e.getDestId());
+		});
+
+		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription().toString()));
+		nodes.forEach(n -> inners.addAll(n.getSubNodes()));
+
+		for (SerializableNode n : nodes)
+			if (!inners.contains(n.getId()))
+				graph.addNode(n, !hasPreds.contains(n.getId()), !hasFollows.contains(n.getId()), labels.get(n.getId()));
+
+		for (SerializableEdge e : edges)
+			graph.addEdge(e);
+
+		return graph;
+	}
+
+	public static SerializableGraph readGraph(Reader reader) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(reader, SerializableGraph.class);
 	}
 }

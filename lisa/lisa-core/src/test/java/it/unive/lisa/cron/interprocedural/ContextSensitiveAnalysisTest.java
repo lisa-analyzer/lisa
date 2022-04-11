@@ -25,7 +25,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive1", "programContextSensitive1.imp", conf);
@@ -38,7 +38,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive2", "programContextSensitive2.imp", conf);
@@ -51,7 +51,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive3", "programContextSensitive3.imp", conf);
@@ -64,7 +64,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive4", "programContextSensitive3.imp", conf);
@@ -77,7 +77,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						new PointBasedHeap(),
 						new Interval(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive5", "programContextSensitive4.imp", conf);
@@ -90,7 +90,7 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 						new PointBasedHeap(),
 						new Interval(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ContextBasedAnalysis<>())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTAContextSensitive6", "programContextSensitive5.imp", conf);

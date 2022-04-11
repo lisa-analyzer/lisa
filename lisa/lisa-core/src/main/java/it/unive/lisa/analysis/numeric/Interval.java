@@ -113,7 +113,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		if (isBottom())
 			return Lattice.BOTTOM_REPR;
 
-		return new StringRepresentation(interval.toJSONString());
+		return new StringRepresentation(interval.toString());
 	}
 
 	@Override

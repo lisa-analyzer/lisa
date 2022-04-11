@@ -4,13 +4,14 @@ import it.unive.lisa.util.collections.CollectionUtilities;
 
 public class SerializableEdge implements Comparable<SerializableEdge> {
 
-	private int sourceId;
+	private final int sourceId;
 
-	private int destId;
+	private final int destId;
 
-	private String kind;
+	private final String kind;
 
 	public SerializableEdge() {
+		this(-1, -1, null);
 	}
 
 	public SerializableEdge(int sourceId, int destId, String kind) {
@@ -23,24 +24,12 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		return sourceId;
 	}
 
-	public void setSourceId(int sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	public int getDestId() {
 		return destId;
 	}
 
-	public void setDestId(int destId) {
-		this.destId = destId;
-	}
-
 	public String getKind() {
 		return kind;
-	}
-
-	public void setKind(String kind) {
-		this.kind = kind;
 	}
 
 	@Override
@@ -76,7 +65,7 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 
 	@Override
 	public String toString() {
-		return "JsonEdge [sourceId=" + sourceId + ", destId=" + destId + ", kind=" + kind + "]";
+		return sourceId + "-" + kind + "->" + destId;
 	}
 
 	@Override

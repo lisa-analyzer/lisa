@@ -199,6 +199,9 @@ public abstract class AnalysisTestExecutor {
 
 		configuration.setJsonOutput(true);
 
+		// save disk space!
+		System.clearProperty("lisa.json.indent");
+		
 		LiSA lisa = new LiSA(configuration);
 		try {
 			lisa.run(program);

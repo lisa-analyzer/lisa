@@ -100,12 +100,12 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
-			return new StringRepresentation("\"type\" : \"inferredType\", \"value\" : [" + Lattice.TOP_REPR + "]");
+			return Lattice.TOP_REPR;
 
 		if (isBottom())
 			return Lattice.BOTTOM_REPR;
 
-		return new StringRepresentation("\"type\" : \"inferredType\", \"value\" : [" + new SetRepresentation(elements, StringRepresentation::new) + "]");
+		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 
 	@Override

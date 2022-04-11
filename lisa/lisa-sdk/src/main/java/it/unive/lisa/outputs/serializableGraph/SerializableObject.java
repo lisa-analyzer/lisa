@@ -1,5 +1,6 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
@@ -51,7 +52,12 @@ public class SerializableObject implements SerializableValue {
 
 	@Override
 	public String toString() {
-		return "JsonObject [fields=" + fields + "]";
+		StringBuilder builder = new StringBuilder();
+		for (Entry<String, SerializableValue> entry : fields.entrySet()) 
+			builder.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
+		if (builder.length() > 0)
+			builder.delete(builder.length() - 2, builder.length());
+		return "{ " + builder.toString() + " }";
 	}
 
 	@Override

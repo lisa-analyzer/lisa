@@ -10,13 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
@@ -26,6 +25,8 @@ import it.unive.lisa.util.collections.CollectionsDiffBuilder;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class JsonReportComparer {
+
+	private static final Logger LOG = LogManager.getLogger(JsonReportComparer.class);
 
 	/**
 	 * An enumeration defining the different type of reports that can be issued.
@@ -191,6 +192,11 @@ public class JsonReportComparer {
 				throw new FileNotFoundException(
 						pair.getRight() + " declared as output in the second report does not exist");
 
+			if (left.getName().endsWith(".json") && !matchJsonGraphs(left, right)) {
+				reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
+				diffFound = true;
+			}
+
 			if (left.getName().endsWith(".dot") && !matchDotGraphs(left, right)) {
 				reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
 				diffFound = true;
@@ -200,13 +206,18 @@ public class JsonReportComparer {
 		return !diffFound;
 	}
 
-	private static boolean matchDotGraphs(File left, File right) throws IOException {
+	private static boolean matchJsonGraphs(File left, File right) throws IOException {
 		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
 				Reader r = new InputStreamReader(new FileInputStream(right), StandardCharsets.UTF_8)) {
-			DotGraph<Statement, Edge, CFG> lDot = DotGraph.read(l);
-			DotGraph<Statement, Edge, CFG> rDot = DotGraph.read(r);
-			return lDot.equals(rDot);
+			SerializableGraph lg = SerializableGraph.readGraph(l);
+			SerializableGraph rg = SerializableGraph.readGraph(r);
+			return lg.equals(rg);
 		}
+	}
+
+	private static boolean matchDotGraphs(File left, File right) throws IOException {
+		LOG.info("Skipping comparison of visualization-only files: " + left.toString() + " and " + right.toString());
+		return true;
 	}
 
 	private static class BaseDiffReporter implements DiffReporter {
