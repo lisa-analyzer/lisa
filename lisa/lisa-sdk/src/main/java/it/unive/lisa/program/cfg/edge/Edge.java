@@ -112,4 +112,14 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
 	}
+
+	@Override
+	public int compareTo(Edge o) {
+		int cmp;
+		if ((cmp = source.compareTo(o.source)) != 0)
+			return cmp;
+		if ((cmp = destination.compareTo(o.destination)) != 0)
+			return cmp;
+		return getClass().getName().compareTo(o.getClass().getName());
+	}
 }

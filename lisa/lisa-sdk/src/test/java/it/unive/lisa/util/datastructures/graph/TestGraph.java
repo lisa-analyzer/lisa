@@ -46,6 +46,11 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 				return false;
 			return true;
 		}
+
+		@Override
+		public int compareTo(TestNode o) {
+			return id - o.id;
+		}
 	}
 
 	public static class TestEdge implements Edge<TestNode, TestEdge, TestGraph> {
@@ -116,6 +121,13 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 			} else if (!source.equals(other.source))
 				return false;
 			return true;
+		}
+
+		@Override
+		public int compareTo(TestEdge o) {
+			if (source.id - o.source.id != 0)
+				return source.id - o.source.id;
+			return destination.id - o.destination.id;
 		}
 	}
 }

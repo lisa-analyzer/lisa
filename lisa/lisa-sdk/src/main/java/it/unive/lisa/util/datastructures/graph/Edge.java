@@ -9,7 +9,7 @@ package it.unive.lisa.util.datastructures.graph;
  * @param <E> the type of this edge
  * @param <G> the type of {@link Graph} this edge can be used with
  */
-public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
+public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> extends Comparable<E> {
 
 	/**
 	 * Yields the node where this edge originates.

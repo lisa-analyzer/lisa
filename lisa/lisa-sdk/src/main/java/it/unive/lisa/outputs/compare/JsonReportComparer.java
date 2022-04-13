@@ -8,6 +8,9 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +19,7 @@ import org.apache.logging.log4j.Logger;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
@@ -192,32 +196,110 @@ public class JsonReportComparer {
 				throw new FileNotFoundException(
 						pair.getRight() + " declared as output in the second report does not exist");
 
-			if (left.getName().endsWith(".json") && !matchJsonGraphs(left, right)) {
-				reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
-				diffFound = true;
-			}
+			if (left.getName().endsWith(".json"))
+				diffFound |= matchJsonGraphs(reporter, left, right);
 
-			if (left.getName().endsWith(".dot") && !matchDotGraphs(left, right)) {
-				reporter.fileDiff(left.toString(), right.toString(), "Graphs are different");
-				diffFound = true;
-			}
+			if (left.getName().endsWith(".dot"))
+				LOG.info("Skipping comparison of visualization-only files: " + left.toString() + " and "
+						+ right.toString());
 		}
 
 		return !diffFound;
 	}
 
-	private static boolean matchJsonGraphs(File left, File right) throws IOException {
+	private static boolean matchJsonGraphs(DiffReporter reporter, File left, File right)
+			throws IOException, FileNotFoundException {
+		boolean diffFound = false;
+
 		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
 				Reader r = new InputStreamReader(new FileInputStream(right), StandardCharsets.UTF_8)) {
-			SerializableGraph lg = SerializableGraph.readGraph(l);
-			SerializableGraph rg = SerializableGraph.readGraph(r);
-			return lg.equals(rg);
-		}
-	}
+			SerializableGraph leftGraph = SerializableGraph.readGraph(l);
+			SerializableGraph rightGraph = SerializableGraph.readGraph(r);
+			if (!leftGraph.equals(rightGraph)) {
+				diffFound = true;
+				String leftpath = left.toString();
+				String rightpath = right.toString();
 
-	private static boolean matchDotGraphs(File left, File right) throws IOException {
-		LOG.info("Skipping comparison of visualization-only files: " + left.toString() + " and " + right.toString());
-		return true;
+				if (!leftGraph.sameStructure(rightGraph))
+					reporter.fileDiff(leftpath, rightpath, "Graphs have different structure");
+				else {
+					CollectionsDiffBuilder<SerializableNodeDescription> builder = new CollectionsDiffBuilder<>(
+							SerializableNodeDescription.class, leftGraph.getDescriptions(),
+							rightGraph.getDescriptions());
+					builder.compute(SerializableNodeDescription::compareTo);
+
+					if (builder.sameContent())
+						reporter.fileDiff(leftpath, rightpath,
+								"Graphs are different but have same structure and descriptions");
+					else {
+						Map<Integer, String> llabels = new HashMap<>();
+						Map<Integer, String> rlabels = new HashMap<>();
+						leftGraph.getNodes().forEach(d -> llabels.put(d.getId(), d.getText()));
+						rightGraph.getNodes().forEach(d -> rlabels.put(d.getId(), d.getText()));
+
+						Iterator<SerializableNodeDescription> ol = builder.getOnlyFirst().iterator();
+						Iterator<SerializableNodeDescription> or = builder.getOnlySecond().iterator();
+
+						SerializableNodeDescription currentF = null;
+						SerializableNodeDescription currentS = null;
+
+						while (ol.hasNext() && or.hasNext()) {
+							if (ol.hasNext() && currentF == null)
+								currentF = ol.next();
+							if (or.hasNext() && currentS == null)
+								currentS = or.next();
+
+							if (currentF == null) {
+								if (currentS == null)
+									break;
+								else {
+									reporter.fileDiff(leftpath, rightpath,
+											"First graph does not have a desciption for node "
+													+ currentS.getNodeId() + ": "
+													+ rlabels.get(currentS.getNodeId()));
+									currentS = null;
+									continue;
+								}
+							} else {
+								if (currentS == null) {
+									reporter.fileDiff(leftpath, rightpath,
+											"Second graph does not have a desciption for node "
+													+ currentF.getNodeId() + ": "
+													+ llabels.get(currentF.getNodeId()));
+									currentF = null;
+									continue;
+								}
+							}
+
+							int fid = currentF.getNodeId();
+							int sid = currentS.getNodeId();
+							if (fid == sid) {
+								reporter.fileDiff(leftpath, rightpath,
+										"Different desciption for node "
+												+ currentF.getNodeId() + ": "
+												+ llabels.get(currentF.getNodeId()));
+								currentF = null;
+								currentS = null;
+							} else if (fid < sid) {
+								reporter.fileDiff(leftpath, rightpath,
+										"Second graph does not have a desciption for node "
+												+ currentF.getNodeId() + ": "
+												+ llabels.get(currentF.getNodeId()));
+								currentF = null;
+							} else {
+								reporter.fileDiff(leftpath, rightpath,
+										"First graph does not have a desciption for node "
+												+ currentS.getNodeId() + ": "
+												+ rlabels.get(currentS.getNodeId()));
+								currentS = null;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return diffFound;
 	}
 
 	private static class BaseDiffReporter implements DiffReporter {

@@ -9,7 +9,8 @@ package it.unive.lisa.util.datastructures.graph;
  * @param <E> the type of {@link Edge} that this node can be connected to
  * @param <G> the type of {@link Graph} this node can be used with
  */
-public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
+public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>>
+		extends Comparable<N> {
 
 	/**
 	 * Sets the offset of this node to the given value, and then proceeds by

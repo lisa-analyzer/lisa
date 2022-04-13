@@ -156,7 +156,10 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 
 	@Override
 	public int compareTo(Statement o) {
-		return location.compareTo(o.location);
+		int cmp;
+		if ((cmp = location.compareTo(o.location)) != 0)
+			return cmp;
+		return Integer.compare(offset, o.offset);
 	}
 
 	/**

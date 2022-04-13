@@ -82,4 +82,9 @@ public class CallGraphNode implements Node<CallGraphNode, CallGraphEdge, BaseCal
 	public String toString() {
 		return cm.toString();
 	}
+	
+	@Override
+	public int compareTo(CallGraphNode o) {
+		return toString().compareTo(o.toString());
+	}
 }

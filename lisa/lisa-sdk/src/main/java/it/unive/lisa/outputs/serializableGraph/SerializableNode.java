@@ -3,6 +3,8 @@ package it.unive.lisa.outputs.serializableGraph;
 import java.util.Collections;
 import java.util.List;
 
+import it.unive.lisa.util.collections.CollectionUtilities;
+
 public class SerializableNode implements Comparable<SerializableNode> {
 
 	private final int id;
@@ -35,7 +37,17 @@ public class SerializableNode implements Comparable<SerializableNode> {
 
 	@Override
 	public int compareTo(SerializableNode o) {
-		return Integer.compare(id, o.id);
+		int cmp;
+		if ((cmp = Integer.compare(id, o.id)) != 0)
+			return cmp;
+		if ((cmp = CollectionUtilities.nullSafeCompare(true, text, o.text, String::compareTo)) != 0)
+			return cmp;
+		if ((cmp = subNodes.size() - o.subNodes.size()) != 0)
+			return cmp;
+		for (int i = 0; i < subNodes.size(); i++)
+			if ((cmp = subNodes.get(i) - o.subNodes.get(i)) != 0)
+				return cmp;
+		return 0;
 	}
 
 	@Override

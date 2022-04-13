@@ -1,7 +1,5 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,11 +11,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 
 /**
  * An adjacency matrix for a graph that has {@link Node}s as nodes and
@@ -39,7 +44,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * The matrix. The left set in the mapped value is the set of ingoing edges,
 	 * while the right one is the set of outgoing edges.
 	 */
-	private final Map<N, NodeEdges<N, E, G>> matrix;
+	private final SortedMap<N, NodeEdges<N, E, G>> matrix;
 
 	/**
 	 * The next available offset to be assigned to the next node
@@ -50,7 +55,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * Builds a new matrix.
 	 */
 	public AdjacencyMatrix() {
-		matrix = new ConcurrentHashMap<>();
+		matrix = new TreeMap<>();
 		nextOffset = 0;
 	}
 
@@ -62,7 +67,7 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @param other the matrix to copy
 	 */
 	public AdjacencyMatrix(AdjacencyMatrix<N, E, G> other) {
-		matrix = new ConcurrentHashMap<>();
+		matrix = new TreeMap<>();
 		for (Map.Entry<N, NodeEdges<N, E, G>> entry : other.matrix.entrySet())
 			matrix.put(entry.getKey(), new NodeEdges<>(entry.getValue()));
 		nextOffset = other.nextOffset;
@@ -75,8 +80,11 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 * @param node the node to add
 	 */
 	public void addNode(N node) {
+		// we have to set the offset first since offset might be used
+		// as part of the compareTo or equals implementation
+		int tmp = node.setOffset(nextOffset) + 1;
 		if (matrix.putIfAbsent(node, new NodeEdges<>()) == null)
-			nextOffset = node.setOffset(nextOffset) + 1;
+			nextOffset = tmp;
 	}
 
 	/**
@@ -568,17 +576,17 @@ public class AdjacencyMatrix<N extends Node<N, E, G>, E extends Edge<N, E, G>, G
 	 *                used in
 	 */
 	public static class NodeEdges<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
-		private final Set<E> ingoing;
-		private final Set<E> outgoing;
+		private final SortedSet<E> ingoing;
+		private final SortedSet<E> outgoing;
 
 		private NodeEdges() {
-			ingoing = new HashSet<>();
-			outgoing = new HashSet<>();
+			ingoing = new TreeSet<>();
+			outgoing = new TreeSet<>();
 		}
 
 		private NodeEdges(NodeEdges<N, E, G> other) {
-			ingoing = new HashSet<>(other.ingoing);
-			outgoing = new HashSet<>(other.outgoing);
+			ingoing = new TreeSet<>(other.ingoing);
+			outgoing = new TreeSet<>(other.outgoing);
 		}
 
 		/**

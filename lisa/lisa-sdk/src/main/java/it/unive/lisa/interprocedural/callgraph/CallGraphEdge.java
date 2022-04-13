@@ -84,4 +84,12 @@ public class CallGraphEdge implements Edge<CallGraphNode, CallGraphEdge, BaseCal
 	public String toString() {
 		return source + " --> " + destination;
 	}
+
+	@Override
+	public int compareTo(CallGraphEdge o) {
+		int cmp;
+		if ((cmp = source.toString().compareTo(o.source.toString())) != 0)
+			return cmp;
+		return destination.toString().compareTo(o.destination.toString());
+	}
 }

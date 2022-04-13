@@ -3,8 +3,8 @@ package it.unive.lisa.outputs.serializableGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -142,7 +142,7 @@ public class SerializableGraph {
 		Set<Integer> hasFollows = new HashSet<>();
 		Set<Integer> hasPreds = new HashSet<>();
 		Set<Integer> inners = new HashSet<>();
-		Map<Integer, String> labels = new IdentityHashMap<>();
+		Map<Integer, String> labels = new HashMap<>();
 
 		edges.forEach(e -> {
 			hasFollows.add(e.getSourceId());
@@ -165,5 +165,29 @@ public class SerializableGraph {
 	public static SerializableGraph readGraph(Reader reader) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(reader, SerializableGraph.class);
+	}
+
+	public boolean sameStructure(SerializableGraph other) {
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		if (description == null) {
+			if (other.description != null)
+				return false;
+		} else if (!description.equals(other.description))
+			return false;
+		if (edges == null) {
+			if (other.edges != null)
+				return false;
+		} else if (!edges.equals(other.edges))
+			return false;
+		if (nodes == null) {
+			if (other.nodes != null)
+				return false;
+		} else if (!nodes.equals(other.nodes))
+			return false;
+		return true;
 	}
 }
