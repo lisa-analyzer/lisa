@@ -201,7 +201,7 @@ public abstract class AnalysisTestExecutor {
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
-		
+
 		LiSA lisa = new LiSA(configuration);
 		try {
 			lisa.run(program);
@@ -231,11 +231,12 @@ public abstract class AnalysisTestExecutor {
 					System.err.println("- Updated report.json");
 				}
 				for (Path f : acc.removedFilePaths) {
-					Files.delete(f);
+					Files.delete(Paths.get(expectedPath.toString(), f.toString()));
 					System.err.println("- Deleted " + f);
 				}
 				for (Path f : acc.addedFilePaths) {
-					Files.copy(f, Paths.get(expectedPath.toString(), actualPath.relativize(f).toString()));
+					Files.copy(Paths.get(actualPath.toString(), f.toString()),
+							Paths.get(expectedPath.toString(), f.toString()));
 					System.err.println("- Copied (new) " + f);
 				}
 				for (Path f : acc.changedFileName) {
@@ -249,10 +250,10 @@ public abstract class AnalysisTestExecutor {
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to find report file");
+			fail("File not found: " + e.getMessage());
 		} catch (IOException e) {
 			e.printStackTrace(System.err);
-			fail("Unable to compare reports");
+			fail("Unable to compare reports: " + e.getMessage());
 		}
 
 	}
