@@ -33,13 +33,13 @@ public class AdjacencyMatrixTest {
 	}
 
 	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
-			AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix, Collection<TestNode> entries,
+			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix, Collection<TestNode> entries,
 			Collection<TestNode> exits) {
 		verify(adj, nodes, edges, matrix, entries, exits, "");
 	}
 
 	private void verify(Map<TestNode, Collection<TestNode>> adj, Collection<TestNode> nodes, Collection<TestEdge> edges,
-			AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix, Collection<TestNode> entries,
+			AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix, Collection<TestNode> entries,
 			Collection<TestNode> exits, String extra) {
 		TestNode externalNode = new TestNode(-1);
 		TestEdge externalEdge = new TestEdge(externalNode, externalNode);
@@ -129,7 +129,7 @@ public class AdjacencyMatrixTest {
 		matrix.toString();
 	}
 
-	private Map<TestNode, Collection<TestNode>> populate(AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix,
+	private Map<TestNode, Collection<TestNode>> populate(AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
 			Collection<TestNode> nodes, Collection<TestEdge> edges, Collection<TestNode> entries,
 			Collection<TestNode> exits) {
 		Random rand = new Random();
@@ -164,7 +164,7 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges = new HashSet<>();
 		Collection<TestNode> entries = new HashSet<>();
 		Collection<TestNode> exits = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 	}
@@ -175,7 +175,7 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges1 = new HashSet<>();
 		Collection<TestNode> entries1 = new HashSet<>();
 		Collection<TestNode> exits1 = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix1 = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix1 = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj1 = populate(matrix1, nodes1, edges1, entries1, exits1);
 		verify(adj1, nodes1, edges1, matrix1, entries1, exits1);
 
@@ -183,7 +183,7 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges2 = new HashSet<>();
 		Collection<TestNode> entries2 = new HashSet<>();
 		Collection<TestNode> exits2 = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix2 = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix2 = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj2 = populate(matrix2, nodes2, edges2, entries2, exits2);
 		verify(adj2, nodes2, edges2, matrix2, entries2, exits2);
 
@@ -207,7 +207,7 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges = new HashSet<>();
 		Collection<TestNode> entries = new HashSet<>();
 		Collection<TestNode> exits = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
@@ -522,13 +522,13 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges = new HashSet<>();
 		Collection<TestNode> entries = new HashSet<>();
 		Collection<TestNode> exits = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
 		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
 		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrixCopy = new AdjacencyMatrix<>(matrix);
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrixCopy = new AdjacencyMatrix<>(matrix);
 		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
 		// entries and exits stay the same, they are re-evaluated at the end
 		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
@@ -569,13 +569,13 @@ public class AdjacencyMatrixTest {
 		Collection<TestEdge> edges = new HashSet<>();
 		Collection<TestNode> entries = new HashSet<>();
 		Collection<TestNode> exits = new HashSet<>();
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrix = new AdjacencyMatrix<>();
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix = new AdjacencyMatrix<>();
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
 		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
 		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
-		AdjacencyMatrix<TestNode, TestEdge, TestGraph> matrixCopy = new AdjacencyMatrix<>(matrix);
+		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrixCopy = new AdjacencyMatrix<>(matrix);
 		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
 		// entries and exits stay the same, they are re-evaluated at the end
 		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);

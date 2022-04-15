@@ -1,17 +1,5 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.edge.FalseEdge;
-import it.unive.lisa.program.cfg.edge.TrueEdge;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,6 +7,20 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.FalseEdge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.edge.TrueEdge;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 /**
  * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
@@ -96,7 +98,7 @@ public class ControlFlowExtractor {
 		}
 
 		private void build() {
-			AdjacencyMatrix<Statement, Edge, CFG> body = new AdjacencyMatrix<>();
+			NodeList<CFG, Statement, Edge> body = new NodeList<>(new SequentialEdge());
 
 			// with empty loops, we can skip the whole reasoning
 			if (tail != conditional) {
@@ -116,11 +118,11 @@ public class ControlFlowExtractor {
 			}
 
 			Edge exit = findExitEdge(body);
-			computed.put(conditional, new Loop(target.getAdjacencyMatrix(),
+			computed.put(conditional, new Loop(target.getNodeList(),
 					conditional, exit.getDestination(), body.getNodes()));
 		}
 
-		private Edge findExitEdge(AdjacencyMatrix<Statement, Edge, CFG> body) {
+		private Edge findExitEdge(NodeList<CFG, Statement, Edge> body) {
 			Edge exit = null;
 			for (Edge out : target.getOutgoingEdges(conditional))
 				// in empty loops, the conditional is a follower of itself
@@ -141,8 +143,8 @@ public class ControlFlowExtractor {
 		private final Edge trueEdgeStartingEdge;
 		private final Edge falseEdgeStartingEdge;
 
-		private final AdjacencyMatrix<Statement, Edge, CFG> trueBranch;
-		private final AdjacencyMatrix<Statement, Edge, CFG> falseBranch;
+		private final NodeList<CFG, Statement, Edge> trueBranch;
+		private final NodeList<CFG, Statement, Edge> falseBranch;
 
 		private final Map<Statement, ControlFlowStructure> computed;
 
@@ -150,8 +152,8 @@ public class ControlFlowExtractor {
 			this.conditional = conditional;
 			this.computed = computed;
 
-			trueBranch = new AdjacencyMatrix<>();
-			falseBranch = new AdjacencyMatrix<>();
+			trueBranch = new NodeList<>(new SequentialEdge());
+			falseBranch = new NodeList<>(new SequentialEdge());
 
 			Iterator<Edge> it = target.getOutgoingEdges(conditional).iterator();
 			Edge trueEdge = it.next();
@@ -195,7 +197,7 @@ public class ControlFlowExtractor {
 					struct = computed.containsKey(trueNext.getDestination())
 							? computed.get(trueNext.getDestination())
 							: new IfReconstructor(trueNext.getDestination(), computed).build();
-					AdjacencyMatrix<Statement, Edge, CFG> completeStructure = struct.getCompleteStructure();
+					NodeList<CFG, Statement, Edge> completeStructure = struct.getCompleteStructure();
 					trueBranch.mergeWith(completeStructure);
 					trueBranch.addEdge(trueNext);
 
@@ -217,7 +219,7 @@ public class ControlFlowExtractor {
 					struct = computed.containsKey(falseNext.getDestination())
 							? computed.get(falseNext.getDestination())
 							: new IfReconstructor(falseNext.getDestination(), computed).build();
-					AdjacencyMatrix<Statement, Edge, CFG> completeStructure = struct.getCompleteStructure();
+					NodeList<CFG, Statement, Edge> completeStructure = struct.getCompleteStructure();
 					falseBranch.mergeWith(completeStructure);
 					falseBranch.addEdge(falseNext);
 
@@ -274,7 +276,7 @@ public class ControlFlowExtractor {
 						&& (trueOuts == null || trueOuts.isEmpty()) && (falseOuts == null || falseOuts.isEmpty()))
 					// we reached the end of both branches: this is just a
 					// conditional that goes on until the end of cfg
-					return store(new IfThenElse(target.getAdjacencyMatrix(), conditional, null, trueBranch.getNodes(),
+					return store(new IfThenElse(target.getNodeList(), conditional, null, trueBranch.getNodes(),
 							falseBranch.getNodes()));
 
 				first = false;
@@ -285,21 +287,21 @@ public class ControlFlowExtractor {
 			if (falseBranch.containsNode(trueNext)) {
 				// need to cut the extra part from the false branch
 				falseBranch.removeFrom(trueNext);
-				return new IfThenElse(target.getAdjacencyMatrix(), conditional, trueNext, trueBranch.getNodes(),
+				return new IfThenElse(target.getNodeList(), conditional, trueNext, trueBranch.getNodes(),
 						falseBranch.getNodes());
 			}
 
 			if (trueBranch.containsNode(falseNext)) {
 				// need to cut the extra part from the false branch
 				trueBranch.removeFrom(falseNext);
-				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),
+				return new IfThenElse(target.getNodeList(), conditional, falseNext, trueBranch.getNodes(),
 						falseBranch.getNodes());
 			}
 
 			if (trueNext.equals(falseNext))
 				// this only holds for the symmetric if - same number of
 				// statements in both branches
-				return new IfThenElse(target.getAdjacencyMatrix(), conditional, falseNext, trueBranch.getNodes(),
+				return new IfThenElse(target.getNodeList(), conditional, falseNext, trueBranch.getNodes(),
 						falseBranch.getNodes());
 
 			return null;

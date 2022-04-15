@@ -66,6 +66,7 @@ import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -97,6 +98,7 @@ import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -112,8 +114,8 @@ public class EqualityContractVerificationTest {
 	private static final CFGDescriptor descr2 = new CFGDescriptor(loc, unit2, false, "fake2");
 	private static final CFG cfg1 = new CFG(descr1);
 	private static final CFG cfg2 = new CFG(descr2);
-	private static final AdjacencyMatrix<Statement, Edge, CFG> adj1 = new AdjacencyMatrix<>();
-	private static final AdjacencyMatrix<Statement, Edge, CFG> adj2 = new AdjacencyMatrix<>();
+	private static final NodeList<CFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
+	private static final NodeList<CFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
@@ -195,7 +197,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(CFG.class, cfg1, cfg2)
 				.withPrefabValues(CFGDescriptor.class, descr1, descr2)
 				.withPrefabValues(CompilationUnit.class, unit1, unit2)
-				.withPrefabValues(AdjacencyMatrix.class, adj1, adj2)
+				.withPrefabValues(NodeList.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
@@ -233,8 +235,10 @@ public class EqualityContractVerificationTest {
 		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
 		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
-		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
+		verify(AdjacencyMatrix.class);
 		verify(NodeEdges.class);
+		verify(NodeList.class, verifier -> verifier.withIgnoredFields("nextOffset", "sequentialSingleton"));
+		verify(it.unive.lisa.util.datastructures.graph.code.NodeList.NodeEdges.class);
 
 		verify(ConcurrentFIFOWorkingSet.class);
 		verify(ConcurrentLIFOWorkingSet.class);
@@ -425,7 +429,7 @@ public class EqualityContractVerificationTest {
 		verify(SerializableNode.class);
 		verify(SerializableEdge.class);
 		verify(SerializableNodeDescription.class);
-		
+
 		Reflections scanner = mkReflections();
 		for (Class<? extends SerializableValue> struct : scanner.getSubTypesOf(SerializableValue.class))
 			verify(struct, Warning.NONFINAL_FIELDS);

@@ -3,6 +3,8 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -22,8 +24,7 @@ import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.program.cfg.statement.string.Length;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import org.junit.Test;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 public class CFGSimplificationTest {
 
@@ -120,12 +121,12 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(print, noop2));
 		first.addEdge(new SequentialEdge(noop2, ret));
 
-		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		NodeList<CFG, Statement, Edge> tbranch = new NodeList<>(new SequentialEdge());
 		tbranch.addNode(print);
-		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		NodeList<CFG, Statement, Edge> fbranch = new NodeList<>(new SequentialEdge());
 		tbranch.addNode(noop1);
 		first.addControlFlowStructure(
-				new IfThenElse(first.getAdjacencyMatrix(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
+				new IfThenElse(first.getNodeList(), gt, noop2, tbranch.getNodes(), fbranch.getNodes()));
 
 		CFG second = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
 		assign = new Assignment(second, unknownLocation,
@@ -147,11 +148,11 @@ public class CFGSimplificationTest {
 		second.addEdge(new FalseEdge(gt, ret));
 		second.addEdge(new SequentialEdge(print, ret));
 
-		tbranch = new AdjacencyMatrix<>();
+		tbranch = new NodeList<>(new SequentialEdge());
 		tbranch.addNode(print);
-		fbranch = new AdjacencyMatrix<>();
+		fbranch = new NodeList<>(new SequentialEdge());
 		second.addControlFlowStructure(
-				new IfThenElse(second.getAdjacencyMatrix(), gt, ret, tbranch.getNodes(), fbranch.getNodes()));
+				new IfThenElse(second.getNodeList(), gt, ret, tbranch.getNodes(), fbranch.getNodes()));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));
@@ -283,12 +284,12 @@ public class CFGSimplificationTest {
 		first.addEdge(new SequentialEdge(assign2, end));
 		first.addEdge(new SequentialEdge(assign3, end));
 
-		AdjacencyMatrix<Statement, Edge, CFG> tbranch = new AdjacencyMatrix<>();
+		NodeList<CFG, Statement, Edge> tbranch = new NodeList<>(new SequentialEdge());
 		tbranch.addNode(assign2);
-		AdjacencyMatrix<Statement, Edge, CFG> fbranch = new AdjacencyMatrix<>();
+		NodeList<CFG, Statement, Edge> fbranch = new NodeList<>(new SequentialEdge());
 		fbranch.addNode(assign3);
 		first.addControlFlowStructure(
-				new IfThenElse(first.getAdjacencyMatrix(), assign1, end, tbranch.getNodes(), fbranch.getNodes()));
+				new IfThenElse(first.getNodeList(), assign1, end, tbranch.getNodes(), fbranch.getNodes()));
 
 		CFG second = new CFG(new CFGDescriptor(unknown, unit, false, "foo"));
 		assign1 = new Assignment(second, unknown,
@@ -306,12 +307,12 @@ public class CFGSimplificationTest {
 		second.addEdge(new TrueEdge(assign1, assign2));
 		second.addEdge(new FalseEdge(assign1, assign3));
 
-		tbranch = new AdjacencyMatrix<>();
+		tbranch = new NodeList<>(new SequentialEdge());
 		tbranch.addNode(assign2);
-		fbranch = new AdjacencyMatrix<>();
+		fbranch = new NodeList<>(new SequentialEdge());
 		fbranch.addNode(assign3);
 		second.addControlFlowStructure(
-				new IfThenElse(second.getAdjacencyMatrix(), assign1, null, tbranch.getNodes(), fbranch.getNodes()));
+				new IfThenElse(second.getNodeList(), assign1, null, tbranch.getNodes(), fbranch.getNodes()));
 
 		first.simplify();
 		assertTrue("Different CFGs", second.isEqualTo(first));

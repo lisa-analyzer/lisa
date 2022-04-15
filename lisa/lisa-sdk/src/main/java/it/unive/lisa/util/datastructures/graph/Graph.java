@@ -1,142 +1,63 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
- * A generic graph, backed by an {@link AdjacencyMatrix}.<br>
- * <br>
- * Note that this class does not define {@link #equals(Object)} nor
- * {@link #hashCode()}, since we leave the decision to be unique instances to
- * implementers.
+ * Interface of a generic graph structure.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <G> the type of this graph
  * @param <N> the type of {@link Node}s in this graph
  * @param <E> the type of {@link Edge}s in this graph
- * @param <G> the type of this graph
  */
-public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>> {
+public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	/**
-	 * The adjacency matrix of this graph, mapping nodes to the collection of
-	 * edges attached to it.
-	 */
-	protected final AdjacencyMatrix<N, E, G> adjacencyMatrix;
-
-	/**
-	 * The nodes of this graph that are entrypoints, that is, that can be
-	 * executed from other graphs.
-	 */
-	protected final Collection<N> entrypoints;
-
-	/**
-	 * Builds the graph.
-	 */
-	protected Graph() {
-		this.adjacencyMatrix = new AdjacencyMatrix<>();
-		this.entrypoints = new HashSet<>();
-	}
-
-	/**
-	 * Builds the graph.
+	 * Yields the nodes of this graph that are entrypoints, that is, roots of
+	 * the graph. This usually contains the first node of this graph, but might
+	 * also contain other ones.
 	 * 
-	 * @param entrypoints     the nodes of this graph that will be reachable
-	 *                            from other graphs
-	 * @param adjacencyMatrix the matrix containing all the nodes and the edges
-	 *                            that will be part of this graph
+	 * @return the entrypoints of this graph
 	 */
-	protected Graph(Collection<N> entrypoints, AdjacencyMatrix<N, E, G> adjacencyMatrix) {
-		this.adjacencyMatrix = adjacencyMatrix;
-		this.entrypoints = entrypoints;
-	}
-
-	/**
-	 * Clones the given graph.
-	 * 
-	 * @param other the original graph
-	 */
-	protected Graph(G other) {
-		this.adjacencyMatrix = new AdjacencyMatrix<>(other.adjacencyMatrix);
-		this.entrypoints = new ArrayList<>(other.entrypoints);
-	}
-
-	/**
-	 * Yields the adjacency matrix backing this graph.
-	 * 
-	 * @return the matrix
-	 */
-	public AdjacencyMatrix<N, E, G> getAdjacencyMatrix() {
-		return adjacencyMatrix;
-	}
-
-	/**
-	 * Yields the nodes of this graph that are entrypoints, that is, that can be
-	 * executed from other graphs. This usually contains the first node of this
-	 * graph, but might also contain other ones.
-	 * 
-	 * @return the entrypoints of this graph.
-	 */
-	public final Collection<N> getEntrypoints() {
-		return entrypoints;
-	}
+	Collection<N> getEntrypoints();
 
 	/**
 	 * Yields the set of nodes of this graph.
 	 * 
 	 * @return the collection of nodes
 	 */
-	public final Collection<N> getNodes() {
-		return adjacencyMatrix.getNodes();
-	}
+	Collection<N> getNodes();
 
 	/**
 	 * Yields the set of edges of this graph.
 	 * 
 	 * @return the collection of edges
 	 */
-	public final Collection<E> getEdges() {
-		return adjacencyMatrix.getEdges();
-	}
+	Collection<E> getEdges();
 
 	/**
-	 * Adds the given node to the set of nodes, optionally setting that as root.
-	 * This is equivalent to invoking {@link #addNode(Node, boolean)} with
-	 * {@code false} as second parameter.
+	 * Adds the given node to the set of nodes. This is equivalent to invoking
+	 * {@link #addNode(Node, boolean)} with {@code false} as second parameter.
 	 * 
 	 * @param node the node to add
 	 */
-	public final void addNode(N node) {
-		addNode(node, false);
-	}
+	void addNode(N node);
 
 	/**
 	 * Adds the given node to the set of nodes, optionally marking this as
-	 * entrypoint (that is, reachable executable from other graphs). The first
-	 * node of a graph should always be marked as entrypoint. Besides, nodes
-	 * that might be reached through jumps from external graphs should be marked
-	 * as entrypoints as well.
+	 * entrypoint (that is, root).
 	 * 
 	 * @param node       the node to add
 	 * @param entrypoint if {@code true} causes the given node to be considered
 	 *                       as an entrypoint.
 	 */
-	public final void addNode(N node, boolean entrypoint) {
-		adjacencyMatrix.addNode(node);
-		if (entrypoint)
-			this.entrypoints.add(node);
-	}
+	void addNode(N node, boolean entrypoint);
 
 	/**
 	 * Adds an edge to this graph.
@@ -147,32 +68,47 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 *                                           the given edge are not part of
 	 *                                           this graph
 	 */
-	public void addEdge(E edge) {
-		adjacencyMatrix.addEdge(edge);
-	}
+	void addEdge(E edge);
 
 	/**
 	 * Yields the total number of nodes of this graph.
 	 * 
 	 * @return the number of nodes
 	 */
-	public final int getNodesCount() {
-		return getNodes().size();
-	}
+	int getNodesCount();
 
 	/**
 	 * Yields the total number of edges of this graph.
 	 * 
 	 * @return the number of edges
 	 */
-	public final int getEdgesCount() {
-		return getEdges().size();
-	}
+	int getEdgesCount();
+
+	/**
+	 * Yields {@code true} if the given node is contained in this graph.
+	 * 
+	 * @param node the node to check
+	 * 
+	 * @return {@code true} if the node is in this graph
+	 */
+	boolean containsNode(N node);
+
+	/**
+	 * Yields {@code true} if the given edge is contained in this graph.
+	 * 
+	 * @param edge the edge to check
+	 * 
+	 * @return {@code true} if the edge is in this graph
+	 */
+	boolean containsEdge(E edge);
 
 	/**
 	 * Yields the edge connecting the two given nodes, if any. Yields
 	 * {@code null} if such edge does not exist, or if one of the two nodes is
-	 * not inside this graph.
+	 * not inside this graph. If more than one edge connects the two nodes, this
+	 * method returns one of them arbitrarily (but consistently: successive
+	 * calls with the same parameters will always return the same edge). To
+	 * retrieve all such edges, use {@link #getEdgesConnecting(Node, Node)}.
 	 * 
 	 * @param source      the source node
 	 * @param destination the destination node
@@ -180,13 +116,19 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * @return the edge connecting {@code source} to {@code destination}, or
 	 *             {@code null}
 	 */
-	public final E getEdgeConnecting(N source, N destination) {
-		return adjacencyMatrix.getEdgeConnecting(source, destination);
-	}
-	
-	public final Collection<E> getEdgesConnecting(N source, N destination) {
-		return adjacencyMatrix.getEdgesConnecting(source, destination);
-	}
+	E getEdgeConnecting(N source, N destination);
+
+	/**
+	 * Yields all edges connecting the two given nodes, if any. Yields an empty
+	 * collection if no edge exists, or if one of the two nodes is not inside
+	 * this graph.
+	 * 
+	 * @param source      the source node
+	 * @param destination the destination node
+	 * 
+	 * @return the edges connecting {@code source} to {@code destination}
+	 */
+	Collection<E> getEdgesConnecting(N source, N destination);
 
 	/**
 	 * Yields the ingoing edges to the given node.
@@ -195,9 +137,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * 
 	 * @return the collection of ingoing edges
 	 */
-	public final Collection<E> getIngoingEdges(N node) {
-		return adjacencyMatrix.getIngoingEdges(node);
-	}
+	Collection<E> getIngoingEdges(N node);
 
 	/**
 	 * Yields the outgoing edges from the given node.
@@ -206,9 +146,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * 
 	 * @return the collection of outgoing edges
 	 */
-	public final Collection<E> getOutgoingEdges(N node) {
-		return adjacencyMatrix.getOutgoingEdges(node);
-	}
+	Collection<E> getOutgoingEdges(N node);
 
 	/**
 	 * Yields the collection of the nodes that are followers of the given one,
@@ -220,9 +158,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * 
 	 * @return the collection of followers
 	 */
-	public final Collection<N> followersOf(N node) {
-		return adjacencyMatrix.followersOf(node);
-	}
+	Collection<N> followersOf(N node);
 
 	/**
 	 * Yields the collection of the nodes that are predecessors of the given
@@ -234,13 +170,31 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * 
 	 * @return the collection of predecessors
 	 */
-	public final Collection<N> predecessorsOf(N node) {
-		return adjacencyMatrix.predecessorsOf(node);
+	Collection<N> predecessorsOf(N node);
+
+	/**
+	 * Yields an instance of {@link SerializableGraph} built from this one. The
+	 * default implementation of this method is equivalent to invoking
+	 * {@link #toSerializableGraph(Function)} with {@code null} as argument.
+	 * 
+	 * @return a {@link SerializableGraph} instance
+	 */
+	public default SerializableGraph toSerializableGraph() {
+		return toSerializableGraph(null);
 	}
 
-	public SerializableGraph toSerializableGraph(Function<Statement, SerializableValue> descriptionGenerator) {
-		throw new UnsupportedOperationException(getClass().getName() + " does not provide a serialization logic");
-	}
+	/**
+	 * Yields an instance of {@link SerializableGraph} built from this one. If
+	 * {@code descriptionGenerator} is not {@code null},
+	 * {@link SerializableNodeDescription} for each node will be generated using
+	 * it.
+	 * 
+	 * @param descriptionGenerator the function to be used for generating node
+	 *                                 descriptions, can be {@code null}
+	 * 
+	 * @return a {@link SerializableGraph} instance
+	 */
+	SerializableGraph toSerializableGraph(Function<N, SerializableValue> descriptionGenerator);
 
 	/**
 	 * Checks if this graph is effectively equal to the given one, that is, if
@@ -251,73 +205,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * @return {@code true} if this graph and the given one are effectively
 	 *             equals
 	 */
-	public boolean isEqualTo(G graph) {
-		if (this == graph)
-			return true;
-		if (graph == null)
-			return false;
-		if (getClass() != graph.getClass())
-			return false;
-		if (entrypoints == null) {
-			if (graph.entrypoints != null)
-				return false;
-		} else if (!entrypoints.equals(graph.entrypoints))
-			return false;
-		if (adjacencyMatrix == null) {
-			if (graph.adjacencyMatrix != null)
-				return false;
-		} else if (!adjacencyMatrix.equals(graph.adjacencyMatrix))
-			return false;
-		return true;
-	}
-
-	@Override
-	public String toString() {
-		return adjacencyMatrix.toString();
-	}
-
-	/**
-	 * Simplifies the adjacency matrix beneath this graph, removing all nodes
-	 * that are instances of {@code <T>} and rewriting the edge set accordingly.
-	 * This method will throw an {@link UnsupportedOperationException} if one of
-	 * the nodes being simplified has an outgoing edge that is not simplifiable,
-	 * according to {@link Edge#canBeSimplified()}.
-	 *
-	 * @param target        the class of the {@link Node} that needs to be
-	 *                          simplified
-	 * @param removedEdges  the collections of edges that got removed during the
-	 *                          simplification, filled by this method (the
-	 *                          collection will be cleared before simplifying)
-	 * @param replacedEdges the map of edges that got replaced during the
-	 *                          simplification, filled by this method (the map
-	 *                          will be cleared before simplifying); each entry
-	 *                          refers to a single simplified edge, and is in
-	 *                          the form
-	 *                          {@code <<ingoing removed, outgoing removed>, added>}
-	 * 
-	 * @return the set of nodes that have been simplified
-	 * 
-	 * @throws UnsupportedOperationException if there exists at least one node
-	 *                                           being simplified with an
-	 *                                           outgoing non-simplifiable edge
-	 */
-	protected Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
-			Map<Pair<E, E>, E> replacedEdges) {
-		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
-				.collect(Collectors.toSet());
-		targets.forEach(this::preSimplify);
-		adjacencyMatrix.simplify(targets, entrypoints, removedEdges, replacedEdges);
-		return targets;
-	}
-
-	/**
-	 * Callback that is invoked on a node before simplifying it.
-	 * 
-	 * @param node the node about to be simplified
-	 */
-	protected void preSimplify(N node) {
-		// nothing to do, but subclasses might redefine
-	}
+	boolean isEqualTo(G graph);
 
 	/**
 	 * Accepts the given {@link GraphVisitor}. This method first invokes
@@ -335,7 +223,7 @@ public abstract class Graph<G extends Graph<G, N, E>, N extends Node<N, E, G>, E
 	 * @param tool    the auxiliary tool that {@code visitor} can use
 	 */
 	@SuppressWarnings("unchecked")
-	public <V> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
+	public default <V> void accept(GraphVisitor<G, N, E, V> visitor, V tool) {
 		if (!visitor.visit(tool, (G) this))
 			return;
 

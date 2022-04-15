@@ -37,7 +37,7 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.BaseGraph;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -50,7 +50,7 @@ import it.unive.lisa.util.datastructures.graph.Graph;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
+public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 

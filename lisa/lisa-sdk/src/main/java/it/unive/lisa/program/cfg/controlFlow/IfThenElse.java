@@ -1,12 +1,13 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import java.util.Collection;
-import java.util.HashSet;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 /**
  * A {@link ControlFlowStructure} representing a if-then-else.
@@ -29,7 +30,7 @@ public class IfThenElse extends ControlFlowStructure {
 	 * @param trueBranch    the statements in the true branch
 	 * @param falseBranch   the statements in the false branch
 	 */
-	public IfThenElse(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition, Statement firstFollower,
+	public IfThenElse(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
 			Collection<Statement> trueBranch, Collection<Statement> falseBranch) {
 		super(cfgMatrix, condition, firstFollower);
 		this.trueBranch = trueBranch;
