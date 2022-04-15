@@ -237,7 +237,7 @@ public class EqualityContractVerificationTest {
 
 		verify(AdjacencyMatrix.class);
 		verify(NodeEdges.class);
-		verify(NodeList.class, verifier -> verifier.withIgnoredFields("nextOffset", "sequentialSingleton"));
+		verify(NodeList.class, verifier -> verifier.withIgnoredFields("nextOffset", "sequentialSingleton", "computeOffsets"));
 		verify(it.unive.lisa.util.datastructures.graph.code.NodeList.NodeEdges.class);
 
 		verify(ConcurrentFIFOWorkingSet.class);

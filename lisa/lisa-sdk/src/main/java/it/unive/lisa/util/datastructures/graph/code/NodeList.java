@@ -70,14 +70,29 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	private int nextOffset;
 
 	/**
+	 * If true, this list will compute offsets of its nodes. This can be turned
+	 * off for lists that serve as views of other lists, thus not representing
+	 * the whole code of a graph.
+	 */
+	private final boolean computeOffsets;
+
+	/**
 	 * Builds a new list.
 	 */
 	public NodeList(E sequentialSingleton) {
+		this(sequentialSingleton, true);
+	}
+
+	/**
+	 * Builds a new list.
+	 */
+	public NodeList(E sequentialSingleton, boolean computeOffsets) {
 		this.sequentialSingleton = sequentialSingleton;
 		nodes = new LinkedList<>();
 		cutoff = new HashSet<>();
 		extraEdges = new TreeMap<>();
 		nextOffset = 0;
+		this.computeOffsets = computeOffsets;
 	}
 
 	/**
@@ -93,21 +108,31 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		for (Entry<N, NodeEdges<G, N, E>> entry : other.extraEdges.entrySet())
 			extraEdges.put(entry.getKey(), new NodeEdges<>(entry.getValue()));
 		nextOffset = other.nextOffset;
+		computeOffsets = other.computeOffsets;
 	}
 
 	/**
 	 * Adds the given node to the list of nodes. A cutoff point is introduced
 	 * between this node and its predecessor in the list, meaning that
-	 * {@code node} will not be a follower of its predecessor in the list.
+	 * {@code node} will not be a follower of its predecessor in the list. Note
+	 * that, if the given node is already present in the list, all existing
+	 * edges are kept. <br>
+	 * <br>
+	 * Also note that adding a node to a node list sets its offset.
 	 * 
 	 * @param node the node to add
 	 */
 	public void addNode(N node) {
+		if (containsNode(node))
+			// already in the graph
+			return;
+
 		int size = nodes.size();
 		if (size != 0)
 			cutoff.add(size - 1);
 		nodes.add(node);
-		nextOffset = node.setOffset(nextOffset) + 1;
+		if (computeOffsets)
+			nextOffset = node.setOffset(nextOffset) + 1;
 	}
 
 	/**
@@ -146,18 +171,23 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 						cutoff.add(target - 1);
 				} else
 					cutoff.add(target - 1);
-			} else
-				cutoff.add(target - 1);
+			}
 
 		nodes.remove(node);
+		// need to shift all successive cutoff back by one
+		List<Integer> interesting = cutoff.stream().filter(i -> i > target).sorted().collect(Collectors.toList());
+		cutoff.removeAll(interesting);
+		interesting.forEach(i -> cutoff.add(i - 1));
 
 		recomputeOffsets();
 	}
 
 	private void recomputeOffsets() {
+		if (!computeOffsets)
+			return;
 		int of = 0;
 		for (N node : nodes)
-			of = node.setOffset(of);
+			of = node.setOffset(of) + 1;
 		nextOffset = of;
 	}
 
@@ -213,11 +243,17 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			cutoff.add(src);
 		else {
 			NodeEdges<G, N, E> edges = extraEdges.get(e.getSource());
-			if (edges != null)
+			if (edges != null) {
 				edges.outgoing.remove(e);
+				if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
+					extraEdges.remove(e.getSource());
+			}
 			edges = extraEdges.get(e.getDestination());
-			if (edges != null)
+			if (edges != null) {
 				edges.ingoing.remove(e);
+				if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
+					extraEdges.remove(e.getDestination());
+			}
 		}
 	}
 
@@ -562,10 +598,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		for (int i = 0; i < nodes.size(); i++) {
-			
+
 			N node = nodes.get(i);
 			res.append(node.getOffset()).append(": ").append(node);
-			
+
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
 			if (edges != null) {
 				String ins = null, outs = null;
@@ -576,17 +612,17 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				if (ins != null || outs != null) {
 					res.append(" [");
 					if (ins != null)
-						res.append("ins: ").append(ins);
+						res.append("in: ").append(ins);
 					if (outs != null) {
 						if (ins != null)
 							res.append(", ");
-						res.append("outs: ").append(outs);
+						res.append("out: ").append(outs);
 					}
-					
+
 					res.append("]");
 				}
 			}
-			
+
 			res.append("\n");
 			if (cutoff.contains(i))
 				res.append("-----\n");
@@ -724,8 +760,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 *                                        fail
 	 */
 	public void validate(Collection<N> entrypoints) throws ProgramValidationException {
-		Collection<N> nodes = getNodes();
-
 		// all edges should be connected to statements inside the list
 		for (N node : nodes) {
 			NodeEdges<G, N, E> edges = extraEdges.get(node);
@@ -739,7 +773,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				validateEdge(nodes, out);
 
 			// no deadcode
-			if (edges.ingoing.isEmpty() && !entrypoints.contains(node))
+			int idx = nodes.indexOf(node);
+			if (edges.ingoing.isEmpty() 
+					&& (idx == 0 || cutoff.contains(idx - 1)) 
+					&& !entrypoints.contains(node))
 				throw new ProgramValidationException(
 						"Unreachable node that is not marked as entrypoint: " + node);
 		}

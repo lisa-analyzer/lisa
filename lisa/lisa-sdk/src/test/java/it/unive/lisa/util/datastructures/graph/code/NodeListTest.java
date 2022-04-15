@@ -228,7 +228,7 @@ public class NodeListTest {
 	}
 
 	@Test
-	public void TestCodeGraph1() {
+	public void testCodeGraph1() {
 		TestCodeGraph graph = new TestCodeGraph();
 		TestCodeNode one = new TestCodeNode(1);
 		TestCodeNode two = new TestCodeNode(2);
@@ -289,7 +289,7 @@ public class NodeListTest {
 	}
 
 	@Test
-	public void TestCodeGraph2() {
+	public void testCodeGraph2() {
 		TestCodeGraph graph = new TestCodeGraph();
 		TestCodeNode r = new TestCodeNode(0);
 		TestCodeNode a = new TestCodeNode(1);
@@ -523,7 +523,7 @@ public class NodeListTest {
 	}
 
 	@Test
-	public void TestCodeNodeRemoval() {
+	public void testCodeNodeRemoval() {
 		Collection<TestCodeNode> nodes = new HashSet<>();
 		Collection<TestCodeEdge> edges = new HashSet<>();
 		Collection<TestCodeNode> entries = new HashSet<>();
@@ -570,7 +570,7 @@ public class NodeListTest {
 	}
 
 	@Test
-	public void TestCodeEdgeRemoval() {
+	public void testCodeEdgeRemoval() {
 		Collection<TestCodeNode> nodes = new HashSet<>();
 		Collection<TestCodeEdge> edges = new HashSet<>();
 		Collection<TestCodeNode> entries = new HashSet<>();

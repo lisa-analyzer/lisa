@@ -136,7 +136,7 @@ public abstract class ControlFlowStructure {
 	 * @return the matrix containing the full structure
 	 */
 	public NodeList<CFG, Statement, Edge> getCompleteStructure() {
-		NodeList<CFG, Statement, Edge> complete = new NodeList<>(new SequentialEdge());
+		NodeList<CFG, Statement, Edge> complete = new NodeList<>(new SequentialEdge(), false);
 
 		// add all nodes
 		complete.addNode(getCondition());

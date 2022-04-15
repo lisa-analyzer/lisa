@@ -98,7 +98,7 @@ public class ControlFlowExtractor {
 		}
 
 		private void build() {
-			NodeList<CFG, Statement, Edge> body = new NodeList<>(new SequentialEdge());
+			NodeList<CFG, Statement, Edge> body = new NodeList<>(new SequentialEdge(), false);
 
 			// with empty loops, we can skip the whole reasoning
 			if (tail != conditional) {
@@ -152,8 +152,8 @@ public class ControlFlowExtractor {
 			this.conditional = conditional;
 			this.computed = computed;
 
-			trueBranch = new NodeList<>(new SequentialEdge());
-			falseBranch = new NodeList<>(new SequentialEdge());
+			trueBranch = new NodeList<>(new SequentialEdge(), false);
+			falseBranch = new NodeList<>(new SequentialEdge(), false);
 
 			Iterator<Edge> it = target.getOutgoingEdges(conditional).iterator();
 			Edge trueEdge = it.next();
