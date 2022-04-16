@@ -7,6 +7,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.code.TestCodeGraph.TestCodeEdge;
+import it.unive.lisa.util.datastructures.graph.code.TestCodeGraph.TestCodeNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,13 +20,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import org.apache.commons.collections4.SetUtils;
 import org.junit.Test;
-
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.code.TestCodeGraph.TestCodeEdge;
-import it.unive.lisa.util.datastructures.graph.code.TestCodeGraph.TestCodeNode;
 
 public class NodeListTest {
 

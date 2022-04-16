@@ -18,10 +18,10 @@ public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 		LiSAConfiguration conf = new LiSAConfiguration()
 				.setSerializeResults(true)
 				.setAbstractState(
-				getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						new ReachingDefinitions(),
-						getDefaultFor(TypeDomain.class)));
+						getDefaultFor(AbstractState.class,
+								getDefaultFor(HeapDomain.class),
+								new ReachingDefinitions(),
+								getDefaultFor(TypeDomain.class)));
 		perform("reaching-definitions", "reaching-definitions.imp", conf);
 	}
 }

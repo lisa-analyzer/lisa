@@ -1,5 +1,8 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import it.unive.lisa.outputs.DotGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -9,11 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import it.unive.lisa.outputs.DotGraph;
 
 public class SerializableGraph {
 

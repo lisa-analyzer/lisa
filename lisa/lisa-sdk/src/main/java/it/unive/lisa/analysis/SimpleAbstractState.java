@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -14,6 +12,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Map;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -280,11 +279,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	@Override
 	public DomainRepresentation representation() {
 		return new ObjectRepresentation(Map.of(
-				HEAP_REPRESENTATION_KEY, heapState.representation(), 
+				HEAP_REPRESENTATION_KEY, heapState.representation(),
 				TYPE_REPRESENTATION_KEY, typeState.representation(),
 				VALUE_REPRESENTATION_KEY, valueState.representation()));
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation().toString();

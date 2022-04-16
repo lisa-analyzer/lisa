@@ -10,7 +10,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
-
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -98,11 +97,11 @@ public class FileManager {
 		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
 	}
 
-	public void mkJSONFile(String name, WriteAction filler) throws  IOException{
+	public void mkJSONFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupForDotFile(name) + ".json", false, filler);
 	}
 
-	public void mkHtmlFile(String name, WriteAction filler) throws IOException{
+	public void mkHtmlFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupForDotFile(name) + ".html", false, filler);
 	}
 

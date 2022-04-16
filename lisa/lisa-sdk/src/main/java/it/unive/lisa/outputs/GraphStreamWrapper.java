@@ -2,7 +2,6 @@ package it.unive.lisa.outputs;
 
 import java.io.IOException;
 import java.io.Writer;
-
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.MultiGraph;
 

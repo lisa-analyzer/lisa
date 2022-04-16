@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.function.Function;
-
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A {@link DomainRepresentation} in the form of a complex object with fields.
@@ -49,7 +48,7 @@ public class ObjectRepresentation extends DomainRepresentation {
 	@Override
 	public SerializableValue toSerializableValue() {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
-		for (Entry<String, DomainRepresentation> e : this.fields.entrySet()) 
+		for (Entry<String, DomainRepresentation> e : this.fields.entrySet())
 			fields.put(e.getKey(), e.getValue().toSerializableValue());
 		return new SerializableObject(fields);
 	}

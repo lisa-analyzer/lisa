@@ -1,9 +1,8 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collections;
 import java.util.List;
-
-import it.unive.lisa.util.collections.CollectionUtilities;
 
 public class SerializableNode implements Comparable<SerializableNode> {
 

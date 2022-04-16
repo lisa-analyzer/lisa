@@ -40,7 +40,6 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final DomainRepresentation REPR = new StringRepresentation("monolith");
 
-
 	@Override
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {

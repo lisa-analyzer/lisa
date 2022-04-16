@@ -1,12 +1,11 @@
 package it.unive.lisa.util.datastructures.graph;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Function;
-
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A generic {@link Graph}, backed by an {@link AdjacencyMatrix}.<br>

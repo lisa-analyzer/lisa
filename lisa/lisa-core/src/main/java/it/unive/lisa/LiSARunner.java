@@ -1,13 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -39,6 +31,12 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -164,7 +162,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					SerializableGraph graph = result.toSerializableGraph(
 							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
-					if (result.getId() != null) 
+					if (result.getId() != null)
 						filename += "_" + result.getId().hashCode();
 
 					try {
@@ -172,9 +170,11 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 							fileManager.mkJSONFile(filename, writer -> graph.dump(writer));
 
 						if (type != GraphType.NONE) {
-							/*if (type == LiSAConfiguration.GraphType.HTML)
-								fileManager.mkHtmlFile(filename, writer -> graph.toHtml().dump(writer));
-							else*/ if (type == LiSAConfiguration.GraphType.DOT)
+							/*
+							 * if (type == LiSAConfiguration.GraphType.HTML)
+							 * fileManager.mkHtmlFile(filename, writer ->
+							 * graph.toHtml().dump(writer)); else
+							 */ if (type == LiSAConfiguration.GraphType.DOT)
 								fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
 						}
 					} catch (IOException e) {

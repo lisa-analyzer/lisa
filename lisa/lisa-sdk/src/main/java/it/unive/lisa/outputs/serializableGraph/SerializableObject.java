@@ -1,10 +1,9 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 public class SerializableObject implements SerializableValue {
 
@@ -53,7 +52,7 @@ public class SerializableObject implements SerializableValue {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		for (Entry<String, SerializableValue> entry : fields.entrySet()) 
+		for (Entry<String, SerializableValue> entry : fields.entrySet())
 			builder.append(entry.getKey()).append("=").append(entry.getValue()).append(", ");
 		if (builder.length() > 0)
 			builder.delete(builder.length() - 2, builder.length());
