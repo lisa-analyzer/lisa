@@ -18,8 +18,16 @@ public abstract class GraphStreamWrapper {
 		return graph.toString();
 	}
 
+	protected static String nodeName(long id) {
+		return "node" + id;
+	}
+
+	protected static String edgeName(long src, long dest) {
+		return "edge-" + src + "-" + dest;
+	}
+
 	/**
-	 * Dumps this graph through the given {@link Writer}
+	 * Dumps this graph through the given {@link Writer}.
 	 * 
 	 * @param writer the writer to use for dumping the graph
 	 * 

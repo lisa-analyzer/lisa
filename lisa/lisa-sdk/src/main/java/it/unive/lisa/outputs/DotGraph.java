@@ -14,7 +14,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
 import org.apache.commons.text.StringEscapeUtils;
+import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
@@ -123,7 +125,7 @@ public class DotGraph extends GraphStreamWrapper {
 	 * @param exit  whether or not this edge is an exitpoint of the graph
 	 */
 	public void addNode(SerializableNode node, boolean entry, boolean exit, String label) {
-		org.graphstream.graph.Node n = graph.addNode(nodeName(node.getId()));
+		Node n = graph.addNode(nodeName(node.getId()));
 
 		n.setAttribute(SHAPE, NODE_SHAPE);
 		if (entry || exit)
@@ -140,10 +142,6 @@ public class DotGraph extends GraphStreamWrapper {
 		n.setAttribute(LABEL, "<" + l + label + ">");
 	}
 
-	private static String nodeName(long id) {
-		return "node" + id;
-	}
-
 	/**
 	 * Adds an edge to the graph.
 	 * 
@@ -153,7 +151,7 @@ public class DotGraph extends GraphStreamWrapper {
 		long id = edge.getSourceId();
 		long id1 = edge.getDestId();
 
-		org.graphstream.graph.Edge e = graph.addEdge("edge-" + id + "-" + id1, nodeName(id), nodeName(id1), true);
+		Edge e = graph.addEdge(edgeName(id, id1), nodeName(id), nodeName(id1), true);
 
 		switch (edge.getKind()) {
 		case "TrueEdge":
@@ -171,14 +169,6 @@ public class DotGraph extends GraphStreamWrapper {
 		}
 	}
 
-	/**
-	 * Dumps this graph through the given {@link Writer}. A legend will also be
-	 * added to the output, to improve its readability.
-	 * 
-	 * @param writer the writer to use for dumping the graph
-	 * 
-	 * @throws IOException if an I/O error occurs while writing
-	 */
 	@Override
 	public void dump(Writer writer) throws IOException {
 		FileSinkDOT sink = new CustomDotSink() {

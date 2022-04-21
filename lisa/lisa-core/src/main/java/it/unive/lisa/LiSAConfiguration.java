@@ -27,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class LiSAConfiguration {
 
 	public static enum GraphType {
-		NONE, HTML, DOT
+		NONE, HTML, DOT, GRAPHML
 	}
 
 	/**

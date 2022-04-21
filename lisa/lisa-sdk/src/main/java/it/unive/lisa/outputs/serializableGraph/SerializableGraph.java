@@ -1,17 +1,22 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import it.unive.lisa.outputs.DotGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.GraphmlGraph;
 
 public class SerializableGraph {
 
@@ -153,6 +158,50 @@ public class SerializableGraph {
 		for (SerializableNode n : nodes)
 			if (!inners.contains(n.getId()))
 				graph.addNode(n, !hasPreds.contains(n.getId()), !hasFollows.contains(n.getId()), labels.get(n.getId()));
+
+		for (SerializableEdge e : edges)
+			graph.addEdge(e);
+
+		return graph;
+	}
+
+	public GraphmlGraph toGraphml() {
+		GraphmlGraph graph = new GraphmlGraph(name);
+
+		Set<Integer> hasFollows = new HashSet<>();
+		Set<Integer> hasPreds = new HashSet<>();
+		Set<Integer> rootnodes = new HashSet<>();
+		Map<SerializableNode, SerializableNode> containers = new HashMap<>();
+		Map<Integer, SerializableNode> nodemap = new HashMap<>();
+		Map<Integer, String> labels = new HashMap<>();
+
+		edges.forEach(e -> {
+			hasFollows.add(e.getSourceId());
+			hasPreds.add(e.getDestId());
+		});
+
+		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription().toString()));
+		nodes.forEach(n -> nodemap.put(n.getId(), n));
+		rootnodes.addAll(nodemap.keySet());
+		nodes.forEach(n -> {
+			n.getSubNodes().forEach(sub -> containers.put(nodemap.get(sub), n));
+			rootnodes.removeAll(n.getSubNodes());
+		});
+
+		for (SerializableNode n : nodes)
+			graph.addNode(n,
+					!hasPreds.contains(n.getId()) && rootnodes.contains(n.getId()),
+					!hasFollows.contains(n.getId()) && rootnodes.contains(n.getId()),
+					labels.get(n.getId()));
+
+		while (!containers.isEmpty()) {
+			Set<Entry<SerializableNode, SerializableNode>> leaves = containers.entrySet().stream()
+					.filter(entry -> !containers.containsValue(entry.getKey())).collect(Collectors.toSet());
+			leaves.forEach(entry -> {
+				graph.markSubNode(entry.getValue(), entry.getKey());
+				containers.remove(entry.getKey());
+			});
+		}
 
 		for (SerializableEdge e : edges)
 			graph.addEdge(e);

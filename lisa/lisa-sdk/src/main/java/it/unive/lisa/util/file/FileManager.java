@@ -94,35 +94,19 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public void mkDotFile(String name, WriteAction filler) throws IOException {
-		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
+		mkOutputFile(cleanupCFGName(name) + ".dot", false, filler);
 	}
 
-	public void mkJSONFile(String name, WriteAction filler) throws IOException {
-		mkOutputFile(cleanupForDotFile(name) + ".json", false, filler);
+	public void mkJsonFile(String name, WriteAction filler) throws IOException {
+		mkOutputFile(cleanupCFGName(name) + ".json", false, filler);
+	}
+
+	public void mkGraphmlFile(String name, WriteAction filler) throws IOException {
+		mkOutputFile(cleanupCFGName(name) + ".graphml", false, filler);
 	}
 
 	public void mkHtmlFile(String name, WriteAction filler) throws IOException {
-		mkOutputFile(cleanupForDotFile(name) + ".html", false, filler);
-	}
-
-	/**
-	 * Creates a UTF-8 encoded file with the given name, appending the
-	 * {@code dot} extension. If name is a path, all missing directories will be
-	 * created as well. The name will be stripped of any characters that might
-	 * cause problems in the file name. The given name will be joined with the
-	 * workdir used to initialize this file manager, thus raising an exception
-	 * if {@code name} is absolute. {@code filler} will then be used to write to
-	 * the writer.
-	 * 
-	 * @param path   the sub-path, relative to the workdir, where the file
-	 *                   should be created
-	 * @param name   the name of the file to create
-	 * @param filler the callback to write to the file
-	 * 
-	 * @throws IOException if something goes wrong while creating the file
-	 */
-	public void mkDotFile(String path, String name, WriteAction filler) throws IOException {
-		mkOutputFile(path, cleanupForDotFile(name) + ".dot", false, filler);
+		mkOutputFile(cleanupCFGName(name) + ".html", false, filler);
 	}
 
 	/**
@@ -216,7 +200,7 @@ public class FileManager {
 		return cleanName.toString();
 	}
 
-	private static String cleanupForDotFile(String name) {
+	private static String cleanupCFGName(String name) {
 		String result = name.replace(' ', '_');
 		result = result.replace("::", ".");
 		return result;

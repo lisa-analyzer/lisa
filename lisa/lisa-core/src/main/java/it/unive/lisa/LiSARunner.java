@@ -167,16 +167,12 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 					try {
 						if (conf.isSerializeResults())
-							fileManager.mkJSONFile(filename, writer -> graph.dump(writer));
+							fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 
-						if (type != GraphType.NONE) {
-							/*
-							 * if (type == LiSAConfiguration.GraphType.HTML)
-							 * fileManager.mkHtmlFile(filename, writer ->
-							 * graph.toHtml().dump(writer)); else
-							 */ if (type == LiSAConfiguration.GraphType.DOT)
-								fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
-						}
+						if (type == LiSAConfiguration.GraphType.GRAPHML)
+							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml().dump(writer));
+						else if (type == LiSAConfiguration.GraphType.DOT)
+							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
 					} catch (IOException e) {
 						LOG.error("Exception while dumping the analysis results on {}",
 								cfg.getDescriptor().getFullSignature());
