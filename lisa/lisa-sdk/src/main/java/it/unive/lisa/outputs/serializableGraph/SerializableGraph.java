@@ -173,14 +173,14 @@ public class SerializableGraph {
 		Set<Integer> rootnodes = new HashSet<>();
 		Map<SerializableNode, SerializableNode> containers = new HashMap<>();
 		Map<Integer, SerializableNode> nodemap = new HashMap<>();
-		Map<Integer, String> labels = new HashMap<>();
+		Map<Integer, SerializableValue> labels = new HashMap<>();
 
 		edges.forEach(e -> {
 			hasFollows.add(e.getSourceId());
 			hasPreds.add(e.getDestId());
 		});
 
-		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription().toString()));
+		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription()));
 		nodes.forEach(n -> nodemap.put(n.getId(), n));
 		rootnodes.addAll(nodemap.keySet());
 		nodes.forEach(n -> {
