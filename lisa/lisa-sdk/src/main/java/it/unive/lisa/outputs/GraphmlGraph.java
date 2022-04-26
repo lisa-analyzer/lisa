@@ -10,7 +10,6 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -48,6 +47,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 
 	private final Map<String, AtomicInteger> subnodesCount = new HashMap<>();
 
+	private final String title;
+
 	/**
 	 * Builds a graph.
 	 * 
@@ -56,7 +57,12 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	public GraphmlGraph(String title) {
 		super();
 		this.graph.setAttribute(GRAPH_TITLE, title);
+		this.title = title;
 	}
+
+	public String getTitle() {
+		return title;
+	};
 
 	/**
 	 * Adds a node to the graph. The label of {@code node} will be composed by
@@ -152,7 +158,11 @@ public class GraphmlGraph extends GraphStreamWrapper {
 
 	@Override
 	public void dump(Writer writer) throws IOException {
-		FileSinkGraphML sink = new CustomGraphMLSink();
+		dump(writer, true);
+	}
+
+	public void dump(Writer writer, boolean format) throws IOException {
+		FileSinkGraphML sink = new CustomGraphMLSink(format);
 		sink.writeAll(graph, writer);
 	}
 
@@ -161,11 +171,37 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 */
 	private static class CustomGraphMLSink extends FileSinkGraphML {
 
-		private void print(String format, Object... args) throws IOException {
+		private final boolean format;
+
+		private CustomGraphMLSink(boolean format) {
+			this.format = format;
+		}
+
+		private void print(int indent, String format, Object... args) throws IOException {
+			String out = "";
+			if (this.format)
+				out += "\t".repeat(indent);
 			if (args.length == 0)
-				output.write(format);
+				out += format;
 			else
-				output.write(String.format(format, args));
+				out += String.format(format, args);
+			if (this.format)
+				out += "\n";
+			output.write(out);
+		}
+
+		@Override
+		protected void outputEndOfFile() throws IOException {
+			print(0, "</graphml>");
+		}
+
+		@Override
+		protected void outputHeader() throws IOException {
+			print(0, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+			print(0, "<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\"");
+			print(1, " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"");
+			print(1, " xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns");
+			print(1, "   http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd\">");
 		}
 
 		private static String escapeXmlString(String string) {
@@ -175,24 +211,22 @@ public class GraphmlGraph extends GraphStreamWrapper {
 
 		@Override
 		protected void exportGraph(Graph g) {
-			Map<String, Pair<String, String>> nodeAttributes = new TreeMap<>();
-			Map<String, Pair<String, String>> edgeAttributes = new TreeMap<>();
-			AtomicInteger counter = new AtomicInteger(0);
-			collectKeys(g, nodeAttributes, edgeAttributes, counter);
+			Map<String, String> nodeAttributes = new TreeMap<>();
+			Map<String, String> edgeAttributes = new TreeMap<>();
+			collectKeys(g, nodeAttributes, edgeAttributes);
 			dumpKeys(nodeAttributes, edgeAttributes);
 			dumpGraph(g, nodeAttributes, edgeAttributes);
 		}
 
-		protected void processAttribute(String key, Object value, Map<String, Pair<String, String>> attributes,
-				Map<String, Pair<String, String>> nodeAttributes, Map<String, Pair<String, String>> edgeAttributes,
-				AtomicInteger counter) {
+		protected void processAttribute(String key, Object value, Map<String, String> attributes,
+				Map<String, String> nodeAttributes, Map<String, String> edgeAttributes) {
 			String type;
 
 			if (value == null)
 				throw new OutputDumpingException("Attribute with no value are not supported");
 
 			if (value instanceof Graph) {
-				collectKeys((Graph) value, nodeAttributes, edgeAttributes, counter);
+				collectKeys((Graph) value, nodeAttributes, edgeAttributes);
 				return;
 			}
 
@@ -209,72 +243,72 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			else
 				type = "string";
 
-			if (!attributes.containsKey(key)) {
-				String id = String.format("attr%04X", counter.getAndIncrement());
-				attributes.put(key, Pair.of(id, type));
-			} else if (!attributes.get(key).getRight().equals(type))
+			if (!attributes.containsKey(key))
+				attributes.put(key, type);
+			else if (!attributes.get(key).equals(type))
 				throw new OutputDumpingException("Attributes with the same name have different value type");
 		}
 
-		protected void collectKeys(Graph g, Map<String, Pair<String, String>> nodeAttributes,
-				Map<String, Pair<String, String>> edgeAttributes, AtomicInteger counter) {
+		protected void collectKeys(Graph g, Map<String, String> nodeAttributes, Map<String, String> edgeAttributes) {
 			g.nodes().forEach(n -> n.attributeKeys().forEach(
-					k -> processAttribute(k, n.getAttribute(k), nodeAttributes, nodeAttributes, edgeAttributes,
-							counter)));
+					k -> processAttribute(k, n.getAttribute(k), nodeAttributes, nodeAttributes, edgeAttributes)));
 
 			g.edges().forEach(n -> n.attributeKeys().forEach(
-					k -> processAttribute(k, n.getAttribute(k), edgeAttributes, nodeAttributes, edgeAttributes,
-							counter)));
+					k -> processAttribute(k, n.getAttribute(k), edgeAttributes, nodeAttributes, edgeAttributes)));
 		}
 
-		protected void dumpKeys(Map<String, Pair<String, String>> nodeAttributes,
-				Map<String, Pair<String, String>> edgeAttributes) {
-			for (Entry<String, Pair<String, String>> entry : nodeAttributes.entrySet())
+		protected void dumpKeys(Map<String, String> nodeAttributes,
+				Map<String, String> edgeAttributes) {
+			for (Entry<String, String> entry : nodeAttributes.entrySet())
 				try {
-					print("\t<key id=\"%s\" for=\"node\" attr.name=\"%s\" attr.type=\"%s\"/>\n",
-							entry.getValue().getLeft(),
-							escapeXmlString(entry.getKey()), entry.getValue().getRight());
+					print(1, "<key id=\"%s\" for=\"node\" attr.name=\"%s\" attr.type=\"%s\"/>",
+							entry.getKey(),
+							entry.getKey(),
+							entry.getValue());
 				} catch (Exception ex) {
 					throw new OutputDumpingException("Exception while dumping graphml attribute key", ex);
 				}
 
-			for (Entry<String, Pair<String, String>> entry : edgeAttributes.entrySet())
+			for (Entry<String, String> entry : edgeAttributes.entrySet())
 				try {
-					print("\t<key id=\"%s\" for=\"edge\" attr.name=\"%s\" attr.type=\"%s\"/>\n",
-							entry.getValue().getLeft(),
-							escapeXmlString(entry.getKey()), entry.getValue().getRight());
+					print(1, "<key id=\"%s\" for=\"edge\" attr.name=\"%s\" attr.type=\"%s\"/>",
+							entry.getKey(),
+							entry.getKey(),
+							entry.getValue());
 				} catch (Exception ex) {
 					throw new OutputDumpingException("Exception while dumping graphml attribute key", ex);
 				}
 		}
 
-		protected void dumpGraph(Graph g, Map<String, Pair<String, String>> nodeAttributes,
-				Map<String, Pair<String, String>> edgeAttributes) {
+		protected void dumpGraph(Graph g, Map<String, String> nodeAttributes,
+				Map<String, String> edgeAttributes) {
 			try {
-				print("\t<graph id=\"%s\" edgedefault=\"directed\">\n", escapeXmlString(g.getId()));
+				print(1, "<graph id=\"%s\" edgedefault=\"directed\">", escapeXmlString(g.getId()));
 			} catch (Exception e) {
 				throw new OutputDumpingException("Exception while dumping graphml graph element", e);
 			}
 
 			g.nodes().forEach(n -> {
 				try {
-					print("\t\t<node id=\"%s\">\n", n.getId());
+					print(2, "<node id=\"%s\">", n.getId());
 
 					n.attributeKeys().forEach(k -> {
 						try {
 							Object value = n.getAttribute(k);
 
 							if (!(value instanceof Graph))
-								print("\t\t\t<data key=\"%s\">%s</data>\n", nodeAttributes.get(k).getLeft(),
-										escapeXmlString(value.toString()));
+								print(3, "<data key=\"%s\">%s</data>", k, escapeXmlString(value.toString()));
 							else {
 								Graph inner = (Graph) value;
-								CustomGraphMLSink innersink = new CustomGraphMLSink();
+								CustomGraphMLSink innersink = new CustomGraphMLSink(this.format);
 								StringWriter innerwriter = new StringWriter();
 								innersink.output = innerwriter;
 								innersink.dumpGraph(inner, nodeAttributes, edgeAttributes);
-								for (String line : innerwriter.toString().split("\n"))
-									print("\t\t" + line + "\n");
+								if (this.format)
+									for (String line : innerwriter.toString().split("\n"))
+										print(2, line);
+								else
+									print(0, innerwriter.toString());
 							}
 						} catch (IOException ex) {
 							throw new OutputDumpingException("Exception while dumping graphml node attribute element",
@@ -282,7 +316,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 						}
 					});
 
-					print("\t\t</node>\n");
+					print(2, "</node>");
 				} catch (Exception ex) {
 					throw new OutputDumpingException("Exception while dumping graphml node element", ex);
 				}
@@ -290,12 +324,12 @@ public class GraphmlGraph extends GraphStreamWrapper {
 
 			g.edges().forEach(e -> {
 				try {
-					print("\t\t<edge id=\"%s\" source=\"%s\" target=\"%s\" directed=\"%s\">\n", e.getId(),
+					print(2, "<edge id=\"%s\" source=\"%s\" target=\"%s\" directed=\"%s\">", e.getId(),
 							e.getSourceNode().getId(), e.getTargetNode().getId(), e.isDirected());
 
 					e.attributeKeys().forEach(k -> {
 						try {
-							print("\t\t\t<data key=\"%s\">%s</data>\n", edgeAttributes.get(k).getLeft(),
+							print(3, "<data key=\"%s\">%s</data>", k,
 									escapeXmlString(e.getAttribute(k).toString()));
 						} catch (IOException ex) {
 							throw new OutputDumpingException("Exception while dumping graphml edge attribute element",
@@ -303,14 +337,14 @@ public class GraphmlGraph extends GraphStreamWrapper {
 						}
 					});
 
-					print("\t\t</edge>\n");
+					print(2, "</edge>");
 				} catch (Exception ex) {
 					throw new OutputDumpingException("Exception while dumping graphml edge element", ex);
 				}
 			});
 
 			try {
-				print("\t</graph>\n");
+				print(1, "</graph>");
 			} catch (Exception e) {
 				throw new OutputDumpingException("Exception while dumping graphml graph element", e);
 			}

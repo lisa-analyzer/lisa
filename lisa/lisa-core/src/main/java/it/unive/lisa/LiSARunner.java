@@ -156,7 +156,9 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				});
 
 		GraphType type = conf.getAnalysisGraphs();
-		if (conf.isSerializeResults() || type != GraphType.NONE)
+		if (conf.isSerializeResults() || type != GraphType.NONE) {
+			int nfiles = fileManager.createdFiles().size();
+
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
 					SerializableGraph graph = result.toSerializableGraph(
@@ -171,6 +173,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 						if (type == LiSAConfiguration.GraphType.GRAPHML)
 							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml().dump(writer));
+						else if (type == LiSAConfiguration.GraphType.HTML)
+							fileManager.mkHtmlFile(filename, writer -> graph.toHtml().dump(writer));
 						else if (type == LiSAConfiguration.GraphType.DOT)
 							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
 					} catch (IOException e) {
@@ -179,6 +183,17 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						LOG.error(e);
 					}
 				}
+
+			if (type == GraphType.HTML && fileManager.createdFiles().size() != nfiles)
+				try {
+					// we dumped at least one file: need to copy the
+					// javascript files
+					fileManager.generateHtmlViewerSupportFiles();
+				} catch (IOException e) {
+					LOG.error("Exception while generating supporting files for the html viwer");
+					LOG.error(e);
+				}
+		}
 	}
 
 	private static void finalizeProgram(Program program) {

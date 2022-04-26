@@ -17,6 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.outputs.GraphmlGraph;
+import it.unive.lisa.outputs.HtmlGraph;
 
 public class SerializableGraph {
 
@@ -207,6 +208,11 @@ public class SerializableGraph {
 			graph.addEdge(e);
 
 		return graph;
+	}
+	
+	public HtmlGraph toHtml() {
+		GraphmlGraph graphml = toGraphml();
+		return new HtmlGraph(graphml);
 	}
 
 	public static SerializableGraph readGraph(Reader reader) throws IOException {

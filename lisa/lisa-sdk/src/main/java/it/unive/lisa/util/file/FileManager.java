@@ -3,6 +3,7 @@ package it.unive.lisa.util.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -11,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * A file manager that provides standard functionalities for communicating with
@@ -217,5 +219,26 @@ public class FileManager {
 		File workdir = new File(path);
 		if (workdir.exists())
 			FileUtils.forceDelete(workdir);
+	}
+
+	public void generateHtmlViewerSupportFiles() throws IOException {
+		String[] files = {
+				"js/cytoscape-3.21.1.min.js",
+				"js/cytoscape-cose-bilkent.js",
+				"js/cytoscape-expand-collapse.js",
+				"js/cytoscape-graphml-1.0.6-hier.js",
+				"js/jquery-3.0.0.min.js"
+		};
+
+		for (String file : files)
+			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-graph/" + file)) {
+				String content = IOUtils.toString(stream, StandardCharsets.UTF_8);
+				int pos = file.lastIndexOf("/");
+				if (pos == -1)
+					mkOutputFile(file, false, writer -> writer.write(content));
+				else
+					mkOutputFile(file.substring(0, pos), file.substring(pos + 1), false,
+							writer -> writer.write(content));
+			}
 	}
 }

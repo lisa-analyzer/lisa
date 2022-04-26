@@ -1,0 +1,204 @@
+<html>
+	<head>
+		<title>$$$GRAPH_TITLE$$$</title>
+
+		<meta charset="UTF-8"> 
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1"/>
+
+		<script src="js/cytoscape-3.21.1.min.js"></script>
+        <script src="js/cytoscape-cose-bilkent.js"></script>
+		<script src="js/jquery-3.0.0.min.js"></script>
+		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
+		<script src="js/cytoscape-expand-collapse.js"></script>	
+
+		<style>
+			body {
+				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+				font-size: 14px;
+				background-color: #dfdfdf;
+			}
+			
+			html, body, #full {
+			  height: 100%;
+			}
+
+			#full {
+			  display: flex;
+			  flex-direction: column;
+			}
+
+			#cy {
+				flex-grow: 1;
+				z-index: 999;
+			}
+
+			h1 {
+				opacity: 0.5;
+				font-size: 1em;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="full">
+			<div id="header">
+				<b id="collapseAll" style="cursor: pointer; color: darksalmon">Collapse all</b>
+				&nbsp;&nbsp;
+				<b id="expandAll" style="cursor: pointer; color: darksalmon">Expand all</b>
+				&nbsp;&nbsp;
+				<b id="collapseSubNodes" style="cursor: pointer; color: darksalmon">Collapse sub nodes</b>
+				&nbsp;&nbsp;
+				<b id="expandSubNodes" style="cursor: pointer; color: darksalmon">Expand sub nodes</b>
+				&nbsp;&nbsp;
+				<b id="collapseDescriptions" style="cursor: pointer; color: darksalmon">Collapse descriptions</b>
+				&nbsp;&nbsp;
+				<b id="expandDescriptions" style="cursor: pointer; color: darksalmon">Expand descriptions</b>
+			</div>
+			<div id="cy"/>
+		</div>
+		<script>			
+		var api;
+		var cy = window.cy = cytoscape({
+			container: document.getElementById('cy'),
+			minZoom: 0.3,
+			maxZoom: 100,
+			zoomingEnabled: true,
+			userZoomingEnabled: true,
+			style: [
+				{
+					selector: 'node',
+					css: {
+						'color': 'white',
+						'background-color': 'white',
+						'font-size': '12px',
+						'color': 'black',
+						'font-weight': 'bold'
+					}
+				},
+				{
+					selector: 'node[NODE_TEXT]',
+					css: {
+						'content': 'data(NODE_TEXT)'
+					}
+				},
+				{
+					selector: 'node[LABEL_TEXT]',
+					css: {
+						'content': 'data(LABEL_TEXT)'
+					}
+				},
+				{
+					selector: ':parent',
+					css: {
+						'background-opacity': '0.3'
+					}
+				},
+				{
+					selector: 'node.cy-expand-collapse-collapsed-node',
+					css: {
+						'background-color': 'darkblue',
+						'shape': 'rectangle'
+					}
+				},
+				{
+					selector: 'edge',
+					css: {
+						'curve-style': 'bezier',
+						'width': 4,
+						'line-color': 'black',
+						'target-arrow-shape': 'triangle',
+						'target-arrow-color': 'black',
+						'arrow-scale': '2'
+					}
+				},
+				{
+					selector: 'edge[EDGE_KIND = "TrueEdge"]',
+					css: {
+						'line-color': 'blue',
+						'target-arrow-color': 'blue',
+					}
+				},
+				{
+					selector: 'edge[EDGE_KIND = "FalseEdge"]',
+					css: {
+						'line-color': 'red',
+						'target-arrow-color': 'red',
+					}
+				},
+				{
+					selector: 'node[NODE_KIND = "SUBNODE"]',
+					css: {
+						'background-color': 'red',
+						'color': 'black'
+					}
+				},
+				{
+					selector: 'node[NODE_KIND = "DESCRIPTION"]',
+					css: {
+						'background-color': 'green',
+						'color': 'black'
+					}
+				},				
+			],
+			
+			ready: function () {
+				var data = '$$$GRAPH_CONTENT$$$'
+				this.graphml({layoutBy: null});
+				this.graphml(data);
+				
+				var expandCollapseOptions = {
+					fisheye: false,
+					animate: false,
+					undoable: false,
+					expandCollapseCuePosition: 'bottom-left',
+					expandCollapseCueSize: 20,
+					openSourceCodeCuePosition: 'bottom-right',
+					openSourceCodeCueSize: 20,
+				};					
+				api = this.expandCollapse(expandCollapseOptions);
+				api.collapseRecursively(this.nodes('[NODE_KIND = "SUBNODE"]'), {
+										layoutBy: function() {
+											layoutOptions = {
+												name: 'cose-bilkent',
+												randomize: false,
+												fit: true,
+												nodeRepulsion: 200,
+												gravity: 0.1,
+												nodeDimensionsIncludeLabels: true,
+												avoidOverlap: true,
+												avoidOverlapPadding: 10,
+											};
+											
+											api.setOption("layoutBy", layoutOptions);
+											
+											var layout = cy.layout(layoutOptions);
+											if (layout && layout.run) {
+												layout.run();
+											}
+										}
+									});
+			}
+		});
+		
+		document.getElementById("collapseAll").addEventListener("click", function () {
+			api.collapseAll();
+		});
+		document.getElementById("expandAll").addEventListener("click", function () {
+			api.expandAll();
+		});
+		document.getElementById("collapseSubNodes").addEventListener("click", function () {
+			api.collapseRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
+		});
+		document.getElementById("expandSubNodes").addEventListener("click", function () {
+			api.expandRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
+		});
+		document.getElementById("collapseDescriptions").addEventListener("click", function () {
+			api.collapseRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+		});
+		document.getElementById("expandDescriptions").addEventListener("click", function () {
+			api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+		});
+		</script>
+	</body>
+</html>
