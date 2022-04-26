@@ -7,20 +7,22 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class HtmlGraph extends GraphStreamWrapper {
 
 	private final GraphmlGraph graph;
 	
+	private final String description;
+	
 	/**
 	 * Builds a graph.
 	 */
-	public HtmlGraph(GraphmlGraph graph) {
+	public HtmlGraph(GraphmlGraph graph, String description) {
 		super();
 		this.graph = graph;
+		this.description = description;
 	}
-
-	
 
 	@Override
 	public void dump(Writer writer) throws IOException {
@@ -32,6 +34,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream("html-graph/viewer.html")) {
 			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
 			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
+			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", StringUtils.isNotBlank(description) ? description : "none");
 			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
 			writer.write(viewerCode);
 		}

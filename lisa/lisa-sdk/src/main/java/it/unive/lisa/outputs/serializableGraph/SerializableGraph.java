@@ -212,7 +212,7 @@ public class SerializableGraph {
 	
 	public HtmlGraph toHtml() {
 		GraphmlGraph graphml = toGraphml();
-		return new HtmlGraph(graphml);
+		return new HtmlGraph(graphml, description);
 	}
 
 	public static SerializableGraph readGraph(Reader reader) throws IOException {

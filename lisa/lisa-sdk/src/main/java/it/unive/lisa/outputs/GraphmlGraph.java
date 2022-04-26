@@ -38,6 +38,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	private static final String EDGE_KIND = "EDGE_KIND";
 	private static final String NODE_KIND = "NODE_KIND";
 	private static final String NODE_LABEL = "NODE_LABEL";
+	private static final String NODE_CONTENT = "NODE_CONTENT";
 	private static final String NODE_TEXT = "NODE_TEXT";
 	private static final String NODE_IS_EXIT = "NODE_IS_EXIT";
 	private static final String NODE_IS_ENTRY = "NODE_IS_ENTRY";
@@ -91,8 +92,12 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			String graphname = node.getId() + LABEL_QUALIFIER;
 			MultiGraph labelgraph = new MultiGraph(graphname);
 			populate(graphname, 0, labelgraph, label);
-			n.setAttribute(NODE_LABEL, labelgraph);
-			n.setAttribute(NODE_KIND, KIND_DESCRIPTION);
+			
+			MultiGraph wrappergraph = new MultiGraph(graphname + "_WRAPPER");
+			Node wrapper = wrappergraph.addNode(graphname + "_WRAPPERNODE");
+			wrapper.setAttribute(NODE_KIND, KIND_DESCRIPTION);
+			wrapper.setAttribute(NODE_CONTENT, labelgraph);
+			n.setAttribute(NODE_LABEL, wrappergraph);
 		}
 	}
 
@@ -133,14 +138,19 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		Node sub = graph.removeNode(nodeName(inner.getId()));
 		Node outer = graph.getNode(nodeName(node.getId()));
 
-		MultiGraph innergraph = new MultiGraph(node.getId() + QUALIFIER + inner.getId());
+		String graphname = node.getId() + QUALIFIER + inner.getId();
+		MultiGraph innergraph = new MultiGraph(graphname);
 		Node n = innergraph.addNode(sub.getId());
 		sub.attributeKeys().forEach(k -> n.setAttribute(k, sub.getAttribute(k)));
+		
+		MultiGraph wrappergraph = new MultiGraph(graphname + "_WRAPPER");
+		Node wrapper = wrappergraph.addNode(graphname + "_WRAPPERNODE");
+		wrapper.setAttribute(NODE_KIND, KIND_SUBNODE);
+		wrapper.setAttribute(NODE_CONTENT, innergraph);
 
 		AtomicInteger counter = subnodesCount.computeIfAbsent(nodeName(node.getId()), k -> new AtomicInteger(0));
 		int idx = counter.getAndIncrement();
-		outer.setAttribute(NODE_SUBNODE_PREFIX + idx, innergraph);
-		n.setAttribute(NODE_KIND, KIND_SUBNODE);
+		outer.setAttribute(NODE_SUBNODE_PREFIX + idx, wrappergraph);
 	}
 
 	/**
@@ -253,8 +263,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			g.nodes().forEach(n -> n.attributeKeys().forEach(
 					k -> processAttribute(k, n.getAttribute(k), nodeAttributes, nodeAttributes, edgeAttributes)));
 
-			g.edges().forEach(n -> n.attributeKeys().forEach(
-					k -> processAttribute(k, n.getAttribute(k), edgeAttributes, nodeAttributes, edgeAttributes)));
+			g.edges().forEach(e -> e.attributeKeys().forEach(
+					k -> processAttribute(k, e.getAttribute(k), edgeAttributes, nodeAttributes, edgeAttributes)));
 		}
 
 		protected void dumpKeys(Map<String, String> nodeAttributes,

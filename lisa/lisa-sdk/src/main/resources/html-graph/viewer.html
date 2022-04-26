@@ -15,50 +15,60 @@
 			body {
 				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 				font-size: 14px;
-				background-color: #dfdfdf;
+				background-color: white;
 			}
 			
 			html, body, #full {
-			  height: 100%;
+			  	height: 100%;
 			}
-
 			#full {
-			  display: flex;
-			  flex-direction: column;
+			  	display: flex;
+			  	flex-direction: column;
 			}
-
 			#cy {
 				flex-grow: 1;
-				z-index: 999;
+				z-index: 10;
 			}
-
-			h1 {
-				opacity: 0.5;
-				font-size: 1em;
-				font-weight: bold;
+			#header { 
+				width: 200px; 
+				position: fixed; 
+				z-index: 11; 
+				background-color: #e2e2e2; 
+				overflow-x: hidden; 
+				padding-top: 20px;
+				padding-bottom: 20px;
+			}
+			#header b {
+				padding: 6px 8px 6px 16px;
+				color: #333333;
+				display: block;
+				cursor: pointer; 
 			}
 		</style>
 	</head>
 
 	<body>
+		<h1>Analysis results for $$$GRAPH_TITLE$$$</h1>
+		<h2>Results qualifier: $$$GRAPH_DESCRIPTION$$$</h2>
+		<hr/>
 		<div id="full">
 			<div id="header">
-				<b id="collapseAll" style="cursor: pointer; color: darksalmon">Collapse all</b>
-				&nbsp;&nbsp;
-				<b id="expandAll" style="cursor: pointer; color: darksalmon">Expand all</b>
-				&nbsp;&nbsp;
-				<b id="collapseSubNodes" style="cursor: pointer; color: darksalmon">Collapse sub nodes</b>
-				&nbsp;&nbsp;
-				<b id="expandSubNodes" style="cursor: pointer; color: darksalmon">Expand sub nodes</b>
-				&nbsp;&nbsp;
-				<b id="collapseDescriptions" style="cursor: pointer; color: darksalmon">Collapse descriptions</b>
-				&nbsp;&nbsp;
-				<b id="expandDescriptions" style="cursor: pointer; color: darksalmon">Expand descriptions</b>
+				<b id="relayout">Reset layout</b> 
+				<hr/>
+				<b id="collapseAll">Collapse all</b> 
+				<b id="expandAll">Expand all</b> 
+				<b id="collapseSubNodes">Collapse sub nodes</b> 
+				<b id="expandSubNodes">Expand sub nodes</b> 
+				<b id="collapseDescriptions">Collapse descriptions</b> 
+				<b id="expandDescriptions">Expand descriptions</b> 
+				<hr/> 
+				<b id="defaultView">Top-level nodes only</b>
 			</div>
-			<div id="cy"/>
+			<div id="cy"></div>
 		</div>
 		<script>			
 		var api;
+		var layoutOptions;
 		var cy = window.cy = cytoscape({
 			container: document.getElementById('cy'),
 			minZoom: 0.3,
@@ -69,11 +79,14 @@
 				{
 					selector: 'node',
 					css: {
-						'color': 'white',
 						'background-color': 'white',
-						'font-size': '12px',
 						'color': 'black',
-						'font-weight': 'bold'
+						'font-size': '12px',
+						'font-weight': 'bold',
+						'shape': 'rectangle',
+						'border-width': '1px',
+						'border-style': 'solid',
+						'border-color': 'darkgray',
 					}
 				},
 				{
@@ -85,22 +98,46 @@
 				{
 					selector: 'node[LABEL_TEXT]',
 					css: {
-						'content': 'data(LABEL_TEXT)'
+						'content': 'data(LABEL_TEXT)',
+						'width': 'label',
+						'text-valign': 'center',
+						'border-width': '0px',
 					}
 				},
 				{
-					selector: ':parent',
+					selector: 'node[NODE_KIND = "SUBNODE"]',
 					css: {
-						'background-opacity': '0.3'
+						'background-color': 'red',
 					}
 				},
 				{
-					selector: 'node.cy-expand-collapse-collapsed-node',
+					selector: 'node[NODE_KIND = "DESCRIPTION"]',
 					css: {
-						'background-color': 'darkblue',
-						'shape': 'rectangle'
+						'background-color': 'green',
 					}
-				},
+				},	
+				{
+					selector: 'node[NODE_IS_ENTRY = "yes"]',
+					css: {
+						'border': '1px solid black',
+					}
+				},		
+				{
+					selector: 'node[NODE_IS_ENTRY = "yes"]',
+					css: {
+						'border-width': '5px',
+						'border-style': 'solid',
+						'border-color': 'black',
+					}
+				},	
+				{
+					selector: 'node[NODE_IS_EXIT = "yes"]',
+					css: {
+						'border-width': '5px',
+						'border-style': 'double',
+						'border-color': 'black',
+					}
+				},	
 				{
 					selector: 'edge',
 					css: {
@@ -125,21 +162,7 @@
 						'line-color': 'red',
 						'target-arrow-color': 'red',
 					}
-				},
-				{
-					selector: 'node[NODE_KIND = "SUBNODE"]',
-					css: {
-						'background-color': 'red',
-						'color': 'black'
-					}
-				},
-				{
-					selector: 'node[NODE_KIND = "DESCRIPTION"]',
-					css: {
-						'background-color': 'green',
-						'color': 'black'
-					}
-				},				
+				},			
 			],
 			
 			ready: function () {
@@ -153,34 +176,36 @@
 					undoable: false,
 					expandCollapseCuePosition: 'bottom-left',
 					expandCollapseCueSize: 20,
-					openSourceCodeCuePosition: 'bottom-right',
-					openSourceCodeCueSize: 20,
-				};					
+				};				
+				layoutOptions = {
+					name: 'cose-bilkent',
+					randomize: false,
+					fit: true,
+					nodeRepulsion: 200,
+					gravity: 0.1,
+					nodeDimensionsIncludeLabels: true,
+					avoidOverlap: true,
+					avoidOverlapPadding: 10,
+				};	
 				api = this.expandCollapse(expandCollapseOptions);
+				api.setOption("layoutBy", layoutOptions);
+				
 				api.collapseRecursively(this.nodes('[NODE_KIND = "SUBNODE"]'), {
-										layoutBy: function() {
-											layoutOptions = {
-												name: 'cose-bilkent',
-												randomize: false,
-												fit: true,
-												nodeRepulsion: 200,
-												gravity: 0.1,
-												nodeDimensionsIncludeLabels: true,
-												avoidOverlap: true,
-												avoidOverlapPadding: 10,
-											};
-											
-											api.setOption("layoutBy", layoutOptions);
-											
-											var layout = cy.layout(layoutOptions);
-											if (layout && layout.run) {
-												layout.run();
-											}
-										}
+										layoutBy: relayout
 									});
 			}
 		});
 		
+		function relayout() {
+			var layout = cy.layout(layoutOptions);
+			if (layout && layout.run) {
+				layout.run();
+			}
+		}
+		
+		document.getElementById("relayout").addEventListener("click", function () {
+			relayout();
+		});
 		document.getElementById("collapseAll").addEventListener("click", function () {
 			api.collapseAll();
 		});
@@ -198,6 +223,13 @@
 		});
 		document.getElementById("expandDescriptions").addEventListener("click", function () {
 			api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+		});
+		document.getElementById("defaultView").addEventListener("click", function () {
+			cy.batch(function() {
+				api.expandAll();
+				api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+				api.collapseRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
+			})
 		});
 		</script>
 	</body>
