@@ -1,18 +1,25 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedMap;
+
 import org.apache.commons.lang3.StringUtils;
 
-public class SerializableArray implements SerializableValue {
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+
+public class SerializableArray extends SerializableValue {
 
 	private List<SerializableValue> elements = new LinkedList<>();
 
 	public SerializableArray() {
+		super();
 	}
 
-	public SerializableArray(List<SerializableValue> elements) {
+	public SerializableArray(SortedMap<String, String> props, List<SerializableValue> elements) {
+		super(props);
 		this.elements = elements;
 	}
 
@@ -25,9 +32,17 @@ public class SerializableArray implements SerializableValue {
 	}
 
 	@Override
+	public Collection<SerializableValue> getInnerValues() {
+		Collection<SerializableValue> result = new HashSet<>(elements);
+		for (SerializableValue inner : elements)
+			result.addAll(inner.getInnerValues());
+		return result;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
 		return result;
 	}
@@ -36,7 +51,7 @@ public class SerializableArray implements SerializableValue {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

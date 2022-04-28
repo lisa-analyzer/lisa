@@ -2,17 +2,21 @@ package it.unive.lisa.outputs.serializableGraph;
 
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Map.Entry;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public class SerializableObject implements SerializableValue {
+public class SerializableObject extends SerializableValue {
 
 	private SortedMap<String, SerializableValue> fields = new TreeMap<>();
 
 	public SerializableObject() {
+		super();
 	}
 
-	public SerializableObject(SortedMap<String, SerializableValue> fields) {
+	public SerializableObject(SortedMap<String, String> props, SortedMap<String, SerializableValue> fields) {
+		super(props);
 		this.fields = fields;
 	}
 
@@ -25,9 +29,17 @@ public class SerializableObject implements SerializableValue {
 	}
 
 	@Override
+	public Collection<SerializableValue> getInnerValues() {
+		Collection<SerializableValue> result = new HashSet<>(fields.values());
+		for (SerializableValue inner : fields.values())
+			result.addAll(inner.getInnerValues());
+		return result;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((fields == null) ? 0 : fields.hashCode());
 		return result;
 	}
@@ -36,7 +48,7 @@ public class SerializableObject implements SerializableValue {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

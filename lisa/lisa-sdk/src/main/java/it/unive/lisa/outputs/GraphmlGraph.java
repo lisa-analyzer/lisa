@@ -105,11 +105,13 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		if (value instanceof SerializableString) {
 			Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 			node.setAttribute(LABEL_TEXT, value.toString());
+			value.getProps().forEach((k, v) -> node.setAttribute(k, v));
 		} else if (value instanceof SerializableArray) {
 			SerializableArray array = (SerializableArray) value;
 			if (array.getElements().stream().allMatch(SerializableString.class::isInstance)) {
 				Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 				node.setAttribute(LABEL_TEXT, value.toString());
+				value.getProps().forEach((k, v) -> node.setAttribute(k, v));
 			} else
 				for (int i = 0; i < array.getElements().size(); i++) {
 					String graphname = prefix + QUALIFIER + depth + ARRAY_QUALIFIER + QUALIFIER + i;
@@ -119,6 +121,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 					populate(graphname, depth + 1, labelgraph, array_element);
 					node.setAttribute(LABEL_ARRAY, labelgraph);
 					node.setAttribute(NODE_TEXT, "Element " + i);
+					array_element.getProps().forEach((k, v) -> node.setAttribute(k, v));
 				}
 		} else if (value instanceof SerializableObject) {
 			SerializableObject object = (SerializableObject) value;
@@ -129,6 +132,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				populate(graphname, depth + 1, labelgraph, field.getValue());
 				node.setAttribute(LABEL_FIELD_PREFIX + field.getKey(), labelgraph);
 				node.setAttribute(NODE_TEXT, field.getKey());
+				field.getValue().getProps().forEach((k, v) -> node.setAttribute(k, v));
 			}
 		} else
 			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());

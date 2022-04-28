@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.representation;
 
+import java.util.SortedMap;
+import java.util.TreeMap;
+
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
@@ -17,6 +20,18 @@ import it.unive.lisa.util.collections.CollectionUtilities;
  */
 public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
 
+	public static final String REPRESENTATION_KIND = "REPRESENTATION_KIND";
+
+	private final SortedMap<String, String> props = new TreeMap<>();
+
+	public SortedMap<String, String> getProps() {
+		return props;
+	}
+
+	public void setProp(String key, String value) {
+		this.props.put(key, value);
+	}
+
 	@Override
 	public final int compareTo(DomainRepresentation o) {
 		if (o == null)
@@ -29,10 +44,29 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 	}
 
 	@Override
-	public abstract int hashCode();
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((props == null) ? 0 : props.hashCode());
+		return result;
+	}
 
 	@Override
-	public abstract boolean equals(Object obj);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		DomainRepresentation other = (DomainRepresentation) obj;
+		if (props == null) {
+			if (other.props != null)
+				return false;
+		} else if (!props.equals(other.props))
+			return false;
+		return true;
+	}
 
 	@Override
 	public abstract String toString();

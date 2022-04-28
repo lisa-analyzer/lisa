@@ -5,23 +5,34 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.SortedSet;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.CaseUtils;
 
 public class HtmlGraph extends GraphStreamWrapper {
 
 	private final GraphmlGraph graph;
 	
 	private final String description;
+
+	private final String descriptionLabel;
+
+	private final String displayKey;
+	
+	private final SortedSet<String> displayClasses;
 	
 	/**
 	 * Builds a graph.
 	 */
-	public HtmlGraph(GraphmlGraph graph, String description) {
+	public HtmlGraph(GraphmlGraph graph, String description, String descriptionLabel, String displayKey, SortedSet<String> displayClasses) {
 		super();
 		this.graph = graph;
 		this.description = description;
+		this.descriptionLabel = descriptionLabel;
+		this.displayKey = displayKey;
+		this.displayClasses = displayClasses;
 	}
 
 	@Override
@@ -29,13 +40,44 @@ public class HtmlGraph extends GraphStreamWrapper {
 		StringWriter graphWriter = new StringWriter();
 		graph.dump(graphWriter, false);
 		String graphText = graphWriter.toString();
-		String graphTitle = graph.getTitle();
+		String graphTitle = "<h1>" + graph.getTitle() + "</h1>";
+		if (StringUtils.isNotBlank(description))
+			graphTitle += "<h3>" + description + "</h3>";
 		
 		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream("html-graph/viewer.html")) {
 			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
 			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
-			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", StringUtils.isNotBlank(description) ? description : "none");
+			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION_LABEL$$$", descriptionLabel);
 			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
+			
+			StringBuilder switches = new StringBuilder();
+			StringBuilder listeners = new StringBuilder();
+			for (String displayClass : displayClasses) {
+				String display = StringUtils.join(
+					     StringUtils.splitByCharacterTypeCamelCase(
+					    		 CaseUtils.toCamelCase(displayClass, true, '_')
+					    		 ), ' ');
+				switches.append("\t\t\t\t<span><input type=\"checkbox\" id=\"show")
+						.append(displayClass)
+						.append("\" checked/>&nbsp;&nbsp;<label for=\"show")
+						.append(displayClass)
+						.append("\"><b>Show ")
+						.append(display)
+						.append("</b></label></span>\n");
+				listeners.append("\t\tdocument.getElementById(\"show")
+						.append(displayClass)
+						.append("\").addEventListener(\"change\", function () {\n")
+						.append("\t\t\ttoggleNodesVisibility(this.checked, '")
+						.append(displayKey)
+						.append("', '")
+						.append(displayClass)
+						.append("');\n")
+						.append("\t\t});\n");
+			}
+
+			viewerCode = viewerCode.replace("$$$GRAPH_DISPLAY_SWITCHES$$$", switches.toString().trim());
+			viewerCode = viewerCode.replace("$$$GRAPH_DISPLAY_LISTENERS$$$", listeners.toString().trim());
+			
 			writer.write(viewerCode);
 		}
 	}

@@ -30,39 +30,48 @@
 				z-index: 10;
 			}
 			#header { 
-				width: 200px; 
 				position: fixed; 
 				z-index: 11; 
 				background-color: #e2e2e2; 
-				overflow-x: hidden; 
-				padding-top: 20px;
-				padding-bottom: 20px;
+				overflow-x: hidden;
+				padding: 20px 15px;
 			}
 			#header b {
-				padding: 6px 8px 6px 16px;
+				padding: 6px 0;
 				color: #333333;
 				display: block;
 				cursor: pointer; 
+			}
+			#header span {
+				padding: 6px 0;
+				display: block;
+			}
+			#header span label b {
+				padding: 0;
+				display: inline; 
+			}
+			#header span input {
+				margin: 0;
 			}
 		</style>
 	</head>
 
 	<body>
-		<h1>Analysis results for $$$GRAPH_TITLE$$$</h1>
-		<h2>Results qualifier: $$$GRAPH_DESCRIPTION$$$</h2>
+		$$$GRAPH_TITLE$$$
 		<hr/>
 		<div id="full">
 			<div id="header">
-				<b id="relayout">Reset layout</b> 
+				<b id="defaultView">Reset collapsed nodes</b>
+				<b id="relayout">Run layout</b> 
 				<hr/>
 				<b id="collapseAll">Collapse all</b> 
 				<b id="expandAll">Expand all</b> 
 				<b id="collapseSubNodes">Collapse sub nodes</b> 
 				<b id="expandSubNodes">Expand sub nodes</b> 
-				<b id="collapseDescriptions">Collapse descriptions</b> 
-				<b id="expandDescriptions">Expand descriptions</b> 
-				<hr/> 
-				<b id="defaultView">Top-level nodes only</b>
+				<b id="collapseDescriptions">Collapse $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
+				<b id="expandDescriptions">Expand $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
+				<hr/>
+				$$$GRAPH_DISPLAY_SWITCHES$$$
 			</div>
 			<div id="cy"></div>
 		</div>
@@ -107,13 +116,33 @@
 				{
 					selector: 'node[NODE_KIND = "SUBNODE"]',
 					css: {
-						'background-color': 'red',
+						'content': '',
+						'border-width': '0px',
+					}
+				},
+				{
+					selector: 'node[NODE_KIND = "SUBNODE"].cy-expand-collapse-collapsed-node',
+					css: {
+						'content': 'data(NODE_TEXT)',
+						'border-width': '1px',
+						'border-style': 'solid',
+						'border-color': 'darkgray',
 					}
 				},
 				{
 					selector: 'node[NODE_KIND = "DESCRIPTION"]',
 					css: {
-						'background-color': 'green',
+						'content': '',
+						'border-width': '0px',
+					}
+				},	
+				{
+					selector: 'node[NODE_KIND = "DESCRIPTION"].cy-expand-collapse-collapsed-node',
+					css: {
+						'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
+						'border-width': '1px',
+						'border-style': 'solid',
+						'border-color': 'darkgray',
 					}
 				},	
 				{
@@ -203,6 +232,16 @@
 			}
 		}
 		
+		function toggleNodesVisibility(visible, key, selector) {
+			targets = cy.nodes('[' + key + ' = "' + selector + '"]');
+			console.log((visible ? "showing" : "hiding") + " " + targets.size() + " nodes with '" + key + "' set to '" + selector + "'")
+			if (visible)
+				targets.style('display', 'element');
+			else
+				targets.style('display', 'none');
+			relayout();
+		}
+		
 		document.getElementById("relayout").addEventListener("click", function () {
 			relayout();
 		});
@@ -231,6 +270,7 @@
 				api.collapseRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
 			})
 		});
+		$$$GRAPH_DISPLAY_LISTENERS$$$
 		</script>
 	</body>
 </html>

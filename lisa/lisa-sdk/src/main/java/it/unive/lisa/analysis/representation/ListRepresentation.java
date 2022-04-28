@@ -55,7 +55,7 @@ public class ListRepresentation extends DomainRepresentation {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
 		for (DomainRepresentation e : elements)
 			values.add(e.toSerializableValue());
-		return new SerializableArray(values);
+		return new SerializableArray(getProps(), values);
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class ListRepresentation extends DomainRepresentation {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
 		return result;
 	}
@@ -75,7 +75,7 @@ public class ListRepresentation extends DomainRepresentation {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

@@ -34,7 +34,7 @@ public class StringRepresentation extends DomainRepresentation {
 
 	@Override
 	public SerializableValue toSerializableValue() {
-		return new SerializableString(String.valueOf(representation));
+		return new SerializableString(getProps(), String.valueOf(representation));
 	}
 
 	@Override
@@ -45,7 +45,7 @@ public class StringRepresentation extends DomainRepresentation {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((representation == null) ? 0 : representation.hashCode());
 		return result;
 	}
@@ -54,7 +54,7 @@ public class StringRepresentation extends DomainRepresentation {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

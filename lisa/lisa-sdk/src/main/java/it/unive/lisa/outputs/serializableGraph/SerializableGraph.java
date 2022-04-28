@@ -209,10 +209,22 @@ public class SerializableGraph {
 
 		return graph;
 	}
-	
-	public HtmlGraph toHtml() {
+
+	public HtmlGraph toHtml(String descriptionLabel, String displayKey) {
+		SortedSet<String> classes = new TreeSet<>();
+		for (SerializableNodeDescription descr : descriptions) {
+			for (Entry<String, String> entry : descr.getDescription().getProps().entrySet())
+				if (entry.getKey().equals(displayKey))
+					classes.add(entry.getValue());
+
+			for (SerializableValue inner : descr.getDescription().getInnerValues())
+				for (Entry<String, String> entry : inner.getProps().entrySet())
+					if (entry.getKey().equals(displayKey))
+						classes.add(entry.getValue());
+		}
+
 		GraphmlGraph graphml = toGraphml();
-		return new HtmlGraph(graphml, description);
+		return new HtmlGraph(graphml, description, descriptionLabel, displayKey, classes);
 	}
 
 	public static SerializableGraph readGraph(Reader reader) throws IOException {

@@ -1,15 +1,21 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.SortedMap;
+
 import it.unive.lisa.util.collections.CollectionUtilities;
 
-public class SerializableString implements SerializableValue {
+public class SerializableString extends SerializableValue {
 
 	private String value = null;
 
 	public SerializableString() {
+		super();
 	}
 
-	public SerializableString(String value) {
+	public SerializableString(SortedMap<String, String> props, String value) {
+		super(props);
 		this.value = value;
 	}
 
@@ -22,9 +28,14 @@ public class SerializableString implements SerializableValue {
 	}
 
 	@Override
+	public Collection<SerializableValue> getInnerValues() {
+		return Collections.emptySet();
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((value == null) ? 0 : value.hashCode());
 		return result;
 	}
@@ -33,7 +44,7 @@ public class SerializableString implements SerializableValue {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
