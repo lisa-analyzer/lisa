@@ -1,5 +1,10 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.GraphmlGraph;
+import it.unive.lisa.outputs.HtmlGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -12,13 +17,17 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.GraphmlGraph;
-import it.unive.lisa.outputs.HtmlGraph;
-
+/**
+ * A graph that can be serialized. This graph contains {@link SerializableNode}s
+ * as nodes, identified through a numeric id. This graph is compound, meaning
+ * that each node can contain subnodes, recursively. Nodes are linked by
+ * {@link SerializableEdge}s, identifying their bounds through the numeric ids,
+ * while also carrying a textual kind. Each node can be enriched with a
+ * {@link SerializableNodeDescription}, providing some extra information on each
+ * node.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableGraph {
 
 	private final String name;
@@ -31,10 +40,22 @@ public class SerializableGraph {
 
 	private final SortedSet<SerializableNodeDescription> descriptions;
 
+	/**
+	 * Builds an empty graph.
+	 */
 	public SerializableGraph() {
 		this(null, null, new TreeSet<>(), new TreeSet<>(), new TreeSet<>());
 	}
 
+	/**
+	 * Builds a graph.
+	 * 
+	 * @param name         the name of the graph
+	 * @param description  a description of the graph
+	 * @param nodes        the set of nodes
+	 * @param edges        the set of edges
+	 * @param descriptions the descriptions of the nodes
+	 */
 	public SerializableGraph(
 			String name,
 			String description,
@@ -48,22 +69,47 @@ public class SerializableGraph {
 		this.descriptions = descriptions;
 	}
 
+	/**
+	 * Yields the name of the graph.
+	 * 
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Yields the description of the graph.
+	 * 
+	 * @return the description
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * Yields the set of nodes of this graph.
+	 * 
+	 * @return the nodes
+	 */
 	public SortedSet<SerializableNode> getNodes() {
 		return nodes;
 	}
 
+	/**
+	 * Yields the set of edges of this graph.
+	 * 
+	 * @return the edges
+	 */
 	public SortedSet<SerializableEdge> getEdges() {
 		return edges;
 	}
 
+	/**
+	 * Yields the set of descriptions of the nodes of this graph.
+	 * 
+	 * @return the descriptions
+	 */
 	public SortedSet<SerializableNodeDescription> getDescriptions() {
 		return descriptions;
 	}
@@ -122,24 +168,53 @@ public class SerializableGraph {
 		return "graph [name=" + name + ", description=" + description + "]";
 	}
 
+	/**
+	 * Dumps this graph, in JSON format through the given {@link Writer}. If the
+	 * system property {@code lisa.json.indent} is set to any value, the json
+	 * will be formatted.
+	 * 
+	 * @param writer the writer to use for dumping the graph
+	 * 
+	 * @throws IOException if an I/O error occurs while writing
+	 */
 	public void dump(Writer writer) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure(SerializationFeature.INDENT_OUTPUT, System.getProperty("lisa.json.indent") != null);
 		mapper.writeValue(writer, this);
 	}
 
+	/**
+	 * Adds the given node to the graph.
+	 * 
+	 * @param node the node to add
+	 */
 	public void addNode(SerializableNode node) {
 		nodes.add(node);
 	}
 
+	/**
+	 * Adds the given node description to the graph.
+	 * 
+	 * @param desc the description to add
+	 */
 	public void addNodeDescription(SerializableNodeDescription desc) {
 		descriptions.add(desc);
 	}
 
+	/**
+	 * Adds the given edge to the graph.
+	 * 
+	 * @param edge the edge to add
+	 */
 	public void addEdge(SerializableEdge edge) {
 		edges.add(edge);
 	}
 
+	/**
+	 * Converts this graph to a {@link DotGraph}.
+	 * 
+	 * @return the converted graph
+	 */
 	public DotGraph toDot() {
 		DotGraph graph = new DotGraph(name);
 
@@ -166,6 +241,11 @@ public class SerializableGraph {
 		return graph;
 	}
 
+	/**
+	 * Converts this graph to a {@link GraphmlGraph}.
+	 * 
+	 * @return the converted graph
+	 */
 	public GraphmlGraph toGraphml() {
 		GraphmlGraph graph = new GraphmlGraph(name);
 
@@ -210,15 +290,26 @@ public class SerializableGraph {
 		return graph;
 	}
 
+	/**
+	 * Converts this graph to an {@link HtmlGraph}.
+	 * 
+	 * @param descriptionLabel the display name of the descriptions, used as
+	 *                             label in the collapse/expand toggles
+	 * @param displayKey       the name of the attribute that has to be searched
+	 *                             for classifying nodes into categories that
+	 *                             can be hidden
+	 * 
+	 * @return the converted graph
+	 */
 	public HtmlGraph toHtml(String descriptionLabel, String displayKey) {
 		SortedSet<String> classes = new TreeSet<>();
 		for (SerializableNodeDescription descr : descriptions) {
-			for (Entry<String, String> entry : descr.getDescription().getProps().entrySet())
+			for (Entry<String, String> entry : descr.getDescription().getProperties().entrySet())
 				if (entry.getKey().equals(displayKey))
 					classes.add(entry.getValue());
 
 			for (SerializableValue inner : descr.getDescription().getInnerValues())
-				for (Entry<String, String> entry : inner.getProps().entrySet())
+				for (Entry<String, String> entry : inner.getProperties().entrySet())
 					if (entry.getKey().equals(displayKey))
 						classes.add(entry.getValue());
 		}
@@ -227,11 +318,32 @@ public class SerializableGraph {
 		return new HtmlGraph(graphml, description, descriptionLabel, displayKey, classes);
 	}
 
+	/**
+	 * Reads a graph through the given {@link Reader}, deserializing it as a
+	 * JSON file.
+	 * 
+	 * @param reader the reader to use for reading the graph
+	 * 
+	 * @return the deserialized graph
+	 * 
+	 * @throws IOException if an I/O error occurs while reading
+	 */
 	public static SerializableGraph readGraph(Reader reader) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(reader, SerializableGraph.class);
 	}
 
+	/**
+	 * Checks if this graph and the given one share the same structure, that is,
+	 * if they are equal up to the descriptions of their nodes. This is
+	 * effectively the same as {@link #equals(Object)} but ignoring the
+	 * descriptions.
+	 * 
+	 * @param other the other graph
+	 * 
+	 * @return {@code true} if the given graph has the same structure as this
+	 *             one
+	 */
 	public boolean sameStructure(SerializableGraph other) {
 		if (name == null) {
 			if (other.name != null)

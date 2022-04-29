@@ -26,8 +26,33 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LiSAConfiguration {
 
+	/**
+	 * The type of graphs that can be dumped by LiSA.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	public static enum GraphType {
-		NONE, HTML, DOT, GRAPHML
+
+		/**
+		 * No graphs are dumped.
+		 */
+		NONE,
+
+		/**
+		 * Graphs are dumped as an html page using javascript to visualize the
+		 * graphs.
+		 */
+		HTML,
+
+		/**
+		 * Graphs are dumped in Dot format.
+		 */
+		DOT,
+
+		/**
+		 * Graphs are dumped in compound GraphML format.
+		 */
+		GRAPHML;
 	}
 
 	/**
@@ -261,6 +286,14 @@ public class LiSAConfiguration {
 		return this;
 	}
 
+	/**
+	 * Sets whether or not the results of the analyses should be dumped in the
+	 * form of json graphs.
+	 * 
+	 * @param serializeResults whether or not the graphs should be produced
+	 * 
+	 * @return the current (modified) configuration
+	 */
 	public LiSAConfiguration setSerializeResults(boolean serializeResults) {
 		this.serializeResults = serializeResults;
 		return this;
@@ -380,8 +413,8 @@ public class LiSAConfiguration {
 	}
 
 	/**
-	 * Yields whether or not the results a json report file should be dumped at
-	 * the end of the analysis.
+	 * Yields whether or not a json report file should be dumped at the end of
+	 * the analysis.
 	 * 
 	 * @return {@code true} if the report should be produced
 	 */
@@ -389,6 +422,12 @@ public class LiSAConfiguration {
 		return jsonOutput;
 	}
 
+	/**
+	 * Yields whether or not the results of the analyses should be dumped in the
+	 * form of json graphs.
+	 * 
+	 * @return {@code true} if the graphs should be produced
+	 */
 	public boolean isSerializeResults() {
 		return serializeResults;
 	}

@@ -16,6 +16,9 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ListRepresentation extends DomainRepresentation {
 
+	/**
+	 * The elements of contained in this list.
+	 */
 	protected final List<DomainRepresentation> elements;
 
 	/**
@@ -55,7 +58,7 @@ public class ListRepresentation extends DomainRepresentation {
 		List<SerializableValue> values = new ArrayList<>(elements.size());
 		for (DomainRepresentation e : elements)
 			values.add(e.toSerializableValue());
-		return new SerializableArray(getProps(), values);
+		return new SerializableArray(getProperties(), values);
 	}
 
 	@Override

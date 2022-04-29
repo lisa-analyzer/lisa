@@ -1,31 +1,48 @@
 package it.unive.lisa.outputs.serializableGraph;
 
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-import java.util.Map.Entry;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * A complex serializable object, represented through a set of named
+ * serializable fields.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableObject extends SerializableValue {
 
-	private SortedMap<String, SerializableValue> fields = new TreeMap<>();
+	private final SortedMap<String, SerializableValue> fields;
 
+	/**
+	 * Builds an empty object.
+	 */
 	public SerializableObject() {
 		super();
+		this.fields = new TreeMap<>();
 	}
 
-	public SerializableObject(SortedMap<String, String> props, SortedMap<String, SerializableValue> fields) {
-		super(props);
+	/**
+	 * Builds an object.
+	 * 
+	 * @param properties the additional properties to use as metadata
+	 * @param fields     the fields of this object
+	 */
+	public SerializableObject(SortedMap<String, String> properties, SortedMap<String, SerializableValue> fields) {
+		super(properties);
 		this.fields = fields;
 	}
 
+	/**
+	 * Yields the fields of this object.
+	 * 
+	 * @return the fields
+	 */
 	public SortedMap<String, SerializableValue> getFields() {
 		return fields;
-	}
-
-	public void setFields(SortedMap<String, SerializableValue> fields) {
-		this.fields = fields;
 	}
 
 	@Override
@@ -86,12 +103,18 @@ public class SerializableObject extends SerializableValue {
 				String> builder = new CollectionsDiffBuilder<>(String.class, fields.keySet(), other.fields.keySet());
 		builder.compute(String::compareTo);
 
-		if (!builder.getOnlyFirst().isEmpty())
+		if (!builder.sameContent())
 			// same size means that both have at least one element that is
 			// different
 			return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 
-		// ugly, but will do for now
-		return toString().compareTo(other.toString());
+		// same keys: just iterate over them and apply comparisons
+		// since fields is sorted, the order of iteration will be consistent
+		for (Entry<String, SerializableValue> entry : this.fields.entrySet())
+			if ((cmp = entry.getValue().compareTo(other.fields.get(entry.getKey()))) != 0)
+				return cmp;
+
+		// only properties left to check
+		return super.compareTo(o);
 	}
 }

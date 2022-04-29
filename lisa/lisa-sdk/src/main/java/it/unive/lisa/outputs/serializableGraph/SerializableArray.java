@@ -1,34 +1,48 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedMap;
-
 import org.apache.commons.lang3.StringUtils;
 
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-
+/**
+ * An array of serializable values, represented through a list.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableArray extends SerializableValue {
 
-	private List<SerializableValue> elements = new LinkedList<>();
+	private final List<SerializableValue> elements;
 
+	/**
+	 * Builds the array.
+	 */
 	public SerializableArray() {
 		super();
+		this.elements = new LinkedList<>();
 	}
 
-	public SerializableArray(SortedMap<String, String> props, List<SerializableValue> elements) {
-		super(props);
+	/**
+	 * Builds the array.
+	 * 
+	 * @param properties the additional properties to use as metadata
+	 * @param elements   the elements of the array
+	 */
+	public SerializableArray(SortedMap<String, String> properties, List<SerializableValue> elements) {
+		super(properties);
 		this.elements = elements;
 	}
 
+	/**
+	 * Yields the elements contained in this array.
+	 * 
+	 * @return the elements
+	 */
 	public List<SerializableValue> getElements() {
 		return elements;
-	}
-
-	public void setElements(List<SerializableValue> elements) {
-		this.elements = elements;
 	}
 
 	@Override
@@ -88,7 +102,8 @@ public class SerializableArray extends SerializableValue {
 		builder.compute(SerializableValue::compareTo);
 
 		if (builder.sameContent())
-			return 0;
+			// only properties left to check
+			return super.compareTo(o);
 
 		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}

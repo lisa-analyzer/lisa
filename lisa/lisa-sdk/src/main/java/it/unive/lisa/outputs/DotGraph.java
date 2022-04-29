@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
@@ -21,6 +22,11 @@ import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkDOT;
 import org.graphstream.stream.file.FileSourceDOT;
 
+/**
+ * A graph that can be dumped into Dot format.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class DotGraph extends GraphStreamWrapper {
 
 	/**
@@ -123,6 +129,8 @@ public class DotGraph extends GraphStreamWrapper {
 	 * @param node  the source node
 	 * @param entry whether or not this edge is an entrypoint of the graph
 	 * @param exit  whether or not this edge is an exitpoint of the graph
+	 * @param label the additional label that can be added to each node's text
+	 *                  (can be {@code null})
 	 */
 	public void addNode(SerializableNode node, boolean entry, boolean exit, String label) {
 		Node n = graph.addNode(nodeName(node.getId()));
@@ -137,7 +145,7 @@ public class DotGraph extends GraphStreamWrapper {
 			n.setAttribute(EXIT_NODE_EXTRA_ATTR, EXIT_NODE_EXTRA_VALUE);
 
 		String l = dotEscape(node.getText());
-		if (!label.isEmpty())
+		if (StringUtils.isNotBlank(label))
 			label = "<BR/>" + dotEscape(label);
 		n.setAttribute(LABEL, "<" + l + label + ">");
 	}

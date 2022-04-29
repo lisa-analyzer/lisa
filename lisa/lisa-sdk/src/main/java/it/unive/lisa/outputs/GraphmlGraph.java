@@ -1,5 +1,11 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -9,20 +15,17 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkGraphML;
 
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-
+/**
+ * A graph that can be dumped into compound GraphML format.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class GraphmlGraph extends GraphStreamWrapper {
 
 	private static final String QUALIFIER = "::";
@@ -61,6 +64,11 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		this.title = title;
 	}
 
+	/**
+	 * Yields the title of the graph.
+	 * 
+	 * @return the title
+	 */
 	public String getTitle() {
 		return title;
 	};
@@ -74,6 +82,8 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	 * @param node  the source node
 	 * @param entry whether or not this edge is an entrypoint of the graph
 	 * @param exit  whether or not this edge is an exitpoint of the graph
+	 * @param label the additional label that can be added to each node as a
+	 *                  subnode
 	 */
 	public void addNode(SerializableNode node, boolean entry, boolean exit, SerializableValue label) {
 		Node n = graph.addNode(nodeName(node.getId()));
@@ -92,7 +102,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 			String graphname = node.getId() + LABEL_QUALIFIER;
 			MultiGraph labelgraph = new MultiGraph(graphname);
 			populate(graphname, 0, labelgraph, label);
-			
+
 			MultiGraph wrappergraph = new MultiGraph(graphname + "_WRAPPER");
 			Node wrapper = wrappergraph.addNode(graphname + "_WRAPPERNODE");
 			wrapper.setAttribute(NODE_KIND, KIND_DESCRIPTION);
@@ -105,13 +115,13 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		if (value instanceof SerializableString) {
 			Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 			node.setAttribute(LABEL_TEXT, value.toString());
-			value.getProps().forEach((k, v) -> node.setAttribute(k, v));
+			value.getProperties().forEach((k, v) -> node.setAttribute(k, v));
 		} else if (value instanceof SerializableArray) {
 			SerializableArray array = (SerializableArray) value;
 			if (array.getElements().stream().allMatch(SerializableString.class::isInstance)) {
 				Node node = g.addNode(prefix + ELEMENT_QUALIFIER);
 				node.setAttribute(LABEL_TEXT, value.toString());
-				value.getProps().forEach((k, v) -> node.setAttribute(k, v));
+				value.getProperties().forEach((k, v) -> node.setAttribute(k, v));
 			} else
 				for (int i = 0; i < array.getElements().size(); i++) {
 					String graphname = prefix + QUALIFIER + depth + ARRAY_QUALIFIER + QUALIFIER + i;
@@ -121,7 +131,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 					populate(graphname, depth + 1, labelgraph, array_element);
 					node.setAttribute(LABEL_ARRAY, labelgraph);
 					node.setAttribute(NODE_TEXT, "Element " + i);
-					array_element.getProps().forEach((k, v) -> node.setAttribute(k, v));
+					array_element.getProperties().forEach((k, v) -> node.setAttribute(k, v));
 				}
 		} else if (value instanceof SerializableObject) {
 			SerializableObject object = (SerializableObject) value;
@@ -132,12 +142,20 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				populate(graphname, depth + 1, labelgraph, field.getValue());
 				node.setAttribute(LABEL_FIELD_PREFIX + field.getKey(), labelgraph);
 				node.setAttribute(NODE_TEXT, field.getKey());
-				field.getValue().getProps().forEach((k, v) -> node.setAttribute(k, v));
+				field.getValue().getProperties().forEach((k, v) -> node.setAttribute(k, v));
 			}
 		} else
 			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
 	}
 
+	/**
+	 * Takes note that {@code inner} is a subnode of {@code node} instead of a
+	 * proper node of the graph. This removes {@code inner} from the graph, and
+	 * adds a new subgraph to {@code node} containing {@code inner}.
+	 * 
+	 * @param node  the parent node
+	 * @param inner the subnode
+	 */
 	public void markSubNode(SerializableNode node, SerializableNode inner) {
 		Node sub = graph.removeNode(nodeName(inner.getId()));
 		Node outer = graph.getNode(nodeName(node.getId()));
@@ -146,7 +164,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		MultiGraph innergraph = new MultiGraph(graphname);
 		Node n = innergraph.addNode(sub.getId());
 		sub.attributeKeys().forEach(k -> n.setAttribute(k, sub.getAttribute(k)));
-		
+
 		MultiGraph wrappergraph = new MultiGraph(graphname + "_WRAPPER");
 		Node wrapper = wrappergraph.addNode(graphname + "_WRAPPERNODE");
 		wrapper.setAttribute(NODE_KIND, KIND_SUBNODE);
@@ -175,6 +193,15 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		dump(writer, true);
 	}
 
+	/**
+	 * This method provides the actual implementation for {@link #dump(Writer)},
+	 * optionally avoiding the xml formatting (i.e. new lines and indentations).
+	 * 
+	 * @param writer the writer to use for dumping the graph
+	 * @param format whether or not the output should be formatted
+	 * 
+	 * @throws IOException if an I/O error occurs while writing
+	 */
 	public void dump(Writer writer, boolean format) throws IOException {
 		FileSinkGraphML sink = new CustomGraphMLSink(format);
 		sink.writeAll(graph, writer);

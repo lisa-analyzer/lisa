@@ -83,12 +83,11 @@ public class FileManager {
 
 	/**
 	 * Creates a UTF-8 encoded file with the given name, appending the
-	 * {@code dot} extension. If name is a path, all missing directories will be
-	 * created as well. The name will be stripped of any characters that might
-	 * cause problems in the file name. The given name will be joined with the
-	 * workdir used to initialize this file manager, thus raising an exception
-	 * if {@code name} is absolute. {@code filler} will then be used to write to
-	 * the writer.
+	 * {@code dot} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -99,14 +98,55 @@ public class FileManager {
 		mkOutputFile(cleanupCFGName(name) + ".dot", false, filler);
 	}
 
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code json} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+
 	public void mkJsonFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".json", false, filler);
 	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code graphml} extension. The name will be stripped of any characters
+	 * that might cause problems in the file name. The given name will be joined
+	 * with the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
 
 	public void mkGraphmlFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".graphml", false, filler);
 	}
 
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code html} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
 	public void mkHtmlFile(String name, WriteAction filler) throws IOException {
 		mkOutputFile(cleanupCFGName(name) + ".html", false, filler);
 	}
@@ -221,6 +261,12 @@ public class FileManager {
 			FileUtils.forceDelete(workdir);
 	}
 
+	/**
+	 * Generates, inside the working directory, all supporting files needed for
+	 * correct visualization of graphs dumped in html format.
+	 * 
+	 * @throws IOException if an error happens during the generation
+	 */
 	public void generateHtmlViewerSupportFiles() throws IOException {
 		String[] files = {
 				"js/cytoscape-3.21.1.min.js",

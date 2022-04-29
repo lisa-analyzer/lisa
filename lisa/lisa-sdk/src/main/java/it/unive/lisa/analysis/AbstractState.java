@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -26,8 +27,25 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 		T extends TypeDomain<T>>
 		extends Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
 
+	/**
+	 * The key that should be used to store the instance of {@link HeapDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
 	public static final String HEAP_REPRESENTATION_KEY = "heap";
+
+	/**
+	 * The key that should be used to store the instance of {@link TypeDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
 	public static final String TYPE_REPRESENTATION_KEY = "type";
+
+	/**
+	 * The key that should be used to store the instance of {@link ValueDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
 	public static final String VALUE_REPRESENTATION_KEY = "value";
 
 	/**

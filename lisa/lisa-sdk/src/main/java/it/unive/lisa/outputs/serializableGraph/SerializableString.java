@@ -4,27 +4,41 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.SortedMap;
 
-import it.unive.lisa.util.collections.CollectionUtilities;
-
+/**
+ * A single serializable value, represented in its textual form.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableString extends SerializableValue {
 
-	private String value = null;
+	private final String value;
 
+	/**
+	 * Builds an empty (invalid) string.
+	 */
 	public SerializableString() {
 		super();
+		this.value = null;
 	}
 
-	public SerializableString(SortedMap<String, String> props, String value) {
-		super(props);
+	/**
+	 * Builds a string.
+	 * 
+	 * @param properties the additional properties to use as metadata
+	 * @param value      the textual representation of the value
+	 */
+	public SerializableString(SortedMap<String, String> properties, String value) {
+		super(properties);
 		this.value = value;
 	}
 
+	/**
+	 * Yields the textual representation of the value.
+	 * 
+	 * @return the text
+	 */
 	public String getValue() {
 		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
 	}
 
 	@Override
@@ -67,6 +81,12 @@ public class SerializableString extends SerializableValue {
 		if (!(o instanceof SerializableString))
 			// string first
 			return -1;
-		return CollectionUtilities.nullSafeCompare(true, value, ((SerializableString) o).value, String::compareTo);
+
+		int cmp;
+		if ((cmp = value.compareTo(((SerializableString) o).value)) != 0)
+			return cmp;
+
+		// only properties left to check
+		return super.compareTo(o);
 	}
 }

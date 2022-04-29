@@ -281,14 +281,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		DomainRepresentation h = heapState.representation();
 		DomainRepresentation t = typeState.representation();
 		DomainRepresentation v = valueState.representation();
-		
-		h.setProp(DomainRepresentation.REPRESENTATION_KIND, "HEAP_DOMAIN");
-		t.setProp(DomainRepresentation.REPRESENTATION_KIND, "TYPE_DOMAIN");
-		v.setProp(DomainRepresentation.REPRESENTATION_KIND, "VALUE_DOMAIN");
-		
+
+		h.setProperty(DomainRepresentation.REPRESENTATION_KIND, "HEAP_DOMAIN");
+		t.setProperty(DomainRepresentation.REPRESENTATION_KIND, "TYPE_DOMAIN");
+		v.setProperty(DomainRepresentation.REPRESENTATION_KIND, "VALUE_DOMAIN");
+
 		return new ObjectRepresentation(Map.of(
-				HEAP_REPRESENTATION_KEY, h, 
-				TYPE_REPRESENTATION_KEY, t, 
+				HEAP_REPRESENTATION_KEY, h,
+				TYPE_REPRESENTATION_KEY, t,
 				VALUE_REPRESENTATION_KEY, v));
 	}
 

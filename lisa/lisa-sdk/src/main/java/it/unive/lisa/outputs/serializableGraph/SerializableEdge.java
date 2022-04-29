@@ -2,6 +2,11 @@ package it.unive.lisa.outputs.serializableGraph;
 
 import it.unive.lisa.util.collections.CollectionUtilities;
 
+/**
+ * An edge of a {@link SerializableGraph}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableEdge implements Comparable<SerializableEdge> {
 
 	private final int sourceId;
@@ -10,24 +15,49 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 
 	private final String kind;
 
+	/**
+	 * Builds an empty (invalid) edge.
+	 */
 	public SerializableEdge() {
 		this(-1, -1, null);
 	}
 
+	/**
+	 * Builds an edge.
+	 * 
+	 * @param sourceId the id of the source {@link SerializableNode}
+	 * @param destId   the id of the destination {@link SerializableNode}
+	 * @param kind     the kind of this edge
+	 */
 	public SerializableEdge(int sourceId, int destId, String kind) {
 		this.sourceId = sourceId;
 		this.destId = destId;
 		this.kind = kind;
 	}
 
+	/**
+	 * Yields the id of the source {@link SerializableNode}.
+	 * 
+	 * @return the id
+	 */
 	public int getSourceId() {
 		return sourceId;
 	}
 
+	/**
+	 * Yields the id of the destination {@link SerializableNode}.
+	 * 
+	 * @return the id
+	 */
 	public int getDestId() {
 		return destId;
 	}
 
+	/**
+	 * Yields the kind of this edge.
+	 * 
+	 * @return the kind
+	 */
 	public String getKind() {
 		return kind;
 	}

@@ -15,6 +15,9 @@ import java.util.function.Function;
  */
 public class MapRepresentation extends DomainRepresentation {
 
+	/**
+	 * The mappings of contained in this map.
+	 */
 	protected final SortedMap<DomainRepresentation, DomainRepresentation> map;
 
 	/**
@@ -54,7 +57,7 @@ public class MapRepresentation extends DomainRepresentation {
 		SortedMap<String, SerializableValue> fields = new TreeMap<>();
 		for (Entry<DomainRepresentation, DomainRepresentation> e : this.map.entrySet())
 			fields.put(e.getKey().toString(), e.getValue().toSerializableValue());
-		return new SerializableObject(getProps(), fields);
+		return new SerializableObject(getProperties(), fields);
 	}
 
 	@Override

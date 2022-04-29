@@ -10,6 +10,9 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
  */
 public class StringRepresentation extends DomainRepresentation {
 
+	/**
+	 * The textual representation.
+	 */
 	protected final String representation;
 
 	/**
@@ -34,7 +37,7 @@ public class StringRepresentation extends DomainRepresentation {
 
 	@Override
 	public SerializableValue toSerializableValue() {
-		return new SerializableString(getProps(), String.valueOf(representation));
+		return new SerializableString(getProperties(), String.valueOf(representation));
 	}
 
 	@Override

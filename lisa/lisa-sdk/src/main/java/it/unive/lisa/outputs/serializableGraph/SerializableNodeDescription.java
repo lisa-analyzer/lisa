@@ -1,24 +1,52 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+/**
+ * A description for a {@link SerializableNode}, pairing it with a
+ * {@link SerializableValue}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableNodeDescription implements Comparable<SerializableNodeDescription> {
 
 	private final int nodeId;
 
 	private final SerializableValue description;
 
+	/**
+	 * Builds an empty (invalid) description.
+	 */
 	public SerializableNodeDescription() {
 		this(-1, null);
 	}
 
+	/**
+	 * Builds a description.
+	 * 
+	 * @param id          the id of the {@link SerializableNode} that this
+	 *                        description refers to
+	 * @param description the {@link SerializableValue} to be used as
+	 *                        description
+	 */
 	public SerializableNodeDescription(int id, SerializableValue description) {
 		this.nodeId = id;
 		this.description = description;
 	}
 
+	/**
+	 * Yields the id of the {@link SerializableNode} that this description
+	 * refers to.
+	 * 
+	 * @return the id
+	 */
 	public int getNodeId() {
 		return nodeId;
 	}
 
+	/**
+	 * Yields the {@link SerializableValue} to be used as description.
+	 * 
+	 * @return the description
+	 */
 	public SerializableValue getDescription() {
 		return description;
 	}

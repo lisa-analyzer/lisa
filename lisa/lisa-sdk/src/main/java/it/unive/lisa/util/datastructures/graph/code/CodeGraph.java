@@ -44,6 +44,11 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 
 	/**
 	 * Builds the graph.
+	 * 
+	 * @param sequentialSingleton an instance of an edge of this list that can
+	 *                                be used to invoke
+	 *                                {@link CodeEdge#newInstance(CodeNode, CodeNode)}
+	 *                                to obtain instances of sequential edges
 	 */
 	protected CodeGraph(E sequentialSingleton) {
 		this.list = new NodeList<>(sequentialSingleton);

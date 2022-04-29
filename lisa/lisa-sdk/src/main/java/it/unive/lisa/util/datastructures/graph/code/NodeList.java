@@ -75,7 +75,13 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	private final boolean computeOffsets;
 
 	/**
-	 * Builds a new list.
+	 * Builds a new list. Offsets of nodes added to this list will be set
+	 * automatically.
+	 * 
+	 * @param sequentialSingleton an instance of an edge of this list that can
+	 *                                be used to invoke
+	 *                                {@link CodeEdge#newInstance(CodeNode, CodeNode)}
+	 *                                to obtain instances of sequential edges
 	 */
 	public NodeList(E sequentialSingleton) {
 		this(sequentialSingleton, true);
@@ -83,6 +89,13 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 	/**
 	 * Builds a new list.
+	 * 
+	 * @param sequentialSingleton an instance of an edge of this list that can
+	 *                                be used to invoke
+	 *                                {@link CodeEdge#newInstance(CodeNode, CodeNode)}
+	 *                                to obtain instances of sequential edges
+	 * @param computeOffsets      whether or not offsets should be set to nodes
+	 *                                when added to this list
 	 */
 	public NodeList(E sequentialSingleton, boolean computeOffsets) {
 		this.sequentialSingleton = sequentialSingleton;

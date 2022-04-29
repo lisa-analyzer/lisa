@@ -175,7 +175,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						if (type == LiSAConfiguration.GraphType.GRAPHML)
 							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml().dump(writer));
 						else if (type == LiSAConfiguration.GraphType.HTML)
-							fileManager.mkHtmlFile(filename, writer -> graph.toHtml("results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
+							fileManager.mkHtmlFile(filename, writer -> graph
+									.toHtml("results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
 						else if (type == LiSAConfiguration.GraphType.DOT)
 							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
 					} catch (IOException e) {

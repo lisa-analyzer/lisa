@@ -4,6 +4,11 @@ import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A node of a {@link SerializableGraph}, represented by a numeric id.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class SerializableNode implements Comparable<SerializableNode> {
 
 	private final int id;
@@ -12,24 +17,53 @@ public class SerializableNode implements Comparable<SerializableNode> {
 
 	private final String text;
 
+	/**
+	 * Builds an empty (invalid) node.
+	 */
 	public SerializableNode() {
 		this(-1, Collections.emptyList(), null);
 	}
 
+	/**
+	 * Builds a node.
+	 * 
+	 * @param id       the id of the node
+	 * @param subNodes the id of the nodes that are subnodes of this one, in the
+	 *                     order they appear
+	 * @param text     the text of this node
+	 */
 	public SerializableNode(int id, List<Integer> subNodes, String text) {
 		this.id = id;
 		this.subNodes = subNodes;
 		this.text = text;
 	}
 
+	/**
+	 * Yields the id of this node.
+	 * 
+	 * @return the id
+	 */
 	public int getId() {
 		return id;
 	}
 
+	/**
+	 * Yields the id of the nodes that are subnodes of this one, in the order
+	 * they appear. Note that if node {@code a} contains node {@code b}, and
+	 * {@code b} contains node {@code c}, then {@code a.getSubNodes()} returns
+	 * only {@code b}, that is, the list is not recursive.
+	 * 
+	 * @return the ids of the subnodes
+	 */
 	public List<Integer> getSubNodes() {
 		return subNodes;
 	}
 
+	/**
+	 * Yields the text of this node.
+	 * 
+	 * @return the text
+	 */
 	public String getText() {
 		return text;
 	}

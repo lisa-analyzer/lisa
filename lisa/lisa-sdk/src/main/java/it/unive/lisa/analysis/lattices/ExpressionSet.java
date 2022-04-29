@@ -170,6 +170,12 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		return new ExpressionSet<>(mapped);
 	}
 
+	/**
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this set.
+	 * 
+	 * @return the representation
+	 */
 	public DomainRepresentation representation() {
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}

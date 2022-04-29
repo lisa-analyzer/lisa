@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis.representation;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * A structured representation of the abstract information present in a single
@@ -20,17 +19,42 @@ import it.unive.lisa.util.collections.CollectionUtilities;
  */
 public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
 
+	/**
+	 * Key to be used in properties to store the type of information stored in
+	 * this representation.
+	 */
 	public static final String REPRESENTATION_KIND = "REPRESENTATION_KIND";
 
-	private final SortedMap<String, String> props = new TreeMap<>();
+	private final SortedMap<String, String> properties = new TreeMap<>();
 
-	public SortedMap<String, String> getProps() {
-		return props;
+	/**
+	 * Yields the set collection of textual properties defined for this
+	 * representation.
+	 * 
+	 * @return the properties
+	 */
+	public SortedMap<String, String> getProperties() {
+		return properties;
 	}
 
-	public void setProp(String key, String value) {
-		this.props.put(key, value);
+	/**
+	 * Sets a textual property to enrich the information represented by this
+	 * instance.
+	 * 
+	 * @param key   the key of the property
+	 * @param value the value of the property
+	 */
+	public void setProperty(String key, String value) {
+		this.properties.put(key, value);
 	}
+
+	/**
+	 * Produces a serializable version of this representation.
+	 * 
+	 * @return an instance of {@link SerializableValue} containing representing
+	 *             the same information as this representation
+	 */
+	public abstract SerializableValue toSerializableValue();
 
 	@Override
 	public final int compareTo(DomainRepresentation o) {
@@ -47,7 +71,7 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((props == null) ? 0 : props.hashCode());
+		result = prime * result + ((properties == null) ? 0 : properties.hashCode());
 		return result;
 	}
 
@@ -60,16 +84,14 @@ public abstract class DomainRepresentation implements Comparable<DomainRepresent
 		if (getClass() != obj.getClass())
 			return false;
 		DomainRepresentation other = (DomainRepresentation) obj;
-		if (props == null) {
-			if (other.props != null)
+		if (properties == null) {
+			if (other.properties != null)
 				return false;
-		} else if (!props.equals(other.props))
+		} else if (!properties.equals(other.properties))
 			return false;
 		return true;
 	}
 
 	@Override
 	public abstract String toString();
-
-	public abstract SerializableValue toSerializableValue();
 }
