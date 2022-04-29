@@ -6,7 +6,9 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1"/>
 
 		<script src="js/cytoscape-3.21.1.min.js"></script>
-        <script src="js/cytoscape-cose-bilkent.js"></script>
+        <script src="js/layout-base.js"></script>
+		<script src="js/cose-base.js"></script>
+		<script src="js/cytoscape-fcose.js"></script>
 		<script src="js/jquery-3.0.0.min.js"></script>
 		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
 		<script src="js/cytoscape-expand-collapse.js"></script>	
@@ -123,7 +125,7 @@
 				{
 					selector: 'node[NODE_KIND = "SUBNODE"].cy-expand-collapse-collapsed-node',
 					css: {
-						'content': 'data(NODE_TEXT)',
+						'content': '',
 						'border-width': '1px',
 						'border-style': 'solid',
 						'border-color': 'darkgray',
@@ -207,14 +209,52 @@
 					expandCollapseCueSize: 20,
 				};				
 				layoutOptions = {
-					name: 'cose-bilkent',
-					randomize: false,
-					fit: true,
-					nodeRepulsion: 200,
-					gravity: 0.1,
-					nodeDimensionsIncludeLabels: true,
-					avoidOverlap: true,
-					avoidOverlapPadding: 10,
+						name: 'fcose',
+						  quality: "default",
+						  randomize: false, 
+						  animate: false, 
+						  fit: true, 
+						  padding: 30,
+						  nodeDimensionsIncludeLabels: true,
+						  
+						  /* spectral layout options */
+						  // False for random, true for greedy sampling
+						  samplingType: true,
+						  // Sample size to construct distance matrix
+						  sampleSize: 25,
+						  // Separation amount between nodes
+						  nodeSeparation: 100,
+						  // Power iteration tolerance
+						  piTol: 0.0000001,
+						  
+						  /* incremental layout options */
+						  
+						  // Node repulsion (non overlapping) multiplier
+						  nodeRepulsion: node => 4500,
+						  // Ideal edge (non nested) length
+						  idealEdgeLength: edge => 100,
+						  // Divisor to compute edge forces
+						  edgeElasticity: edge => 0.5,
+						  // Nesting factor (multiplier) to compute ideal edge length for nested edges
+						  nestingFactor: 0.1,
+						  // Maximum number of iterations to perform - this is a suggested value and might be adjusted by the algorithm as required
+						  numIter: 2500,
+						  // For enabling tiling
+						  tile: true,  
+						  // Represents the amount of the vertical space to put between the zero degree members during the tiling operation(can also be a function)
+						  tilingPaddingVertical: 10,
+						  // Represents the amount of the horizontal space to put between the zero degree members during the tiling operation(can also be a function)
+						  tilingPaddingHorizontal: 10,
+						  // Gravity force (constant)
+						  gravity: 0.25,
+						  // Gravity range (constant) for compounds
+						  gravityRangeCompound: 1.5,
+						  // Gravity force (constant) for compounds
+						  gravityCompound: 1.0,
+						  // Gravity range (constant)
+						  gravityRange: 3.8, 
+						  // Initial cooling factor for incremental layout  
+						  initialEnergyOnIncremental: 0.3,
 				};	
 				api = this.expandCollapse(expandCollapseOptions);
 				api.setOption("layoutBy", layoutOptions);

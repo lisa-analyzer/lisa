@@ -224,7 +224,9 @@ public class FileManager {
 	public void generateHtmlViewerSupportFiles() throws IOException {
 		String[] files = {
 				"js/cytoscape-3.21.1.min.js",
-				"js/cytoscape-cose-bilkent.js",
+				"js/layout-base.js",
+				"js/cose-base.js",
+				"js/cytoscape-fcose.js",
 				"js/cytoscape-expand-collapse.js",
 				"js/cytoscape-graphml-1.0.6-hier.js",
 				"js/jquery-3.0.0.min.js"
