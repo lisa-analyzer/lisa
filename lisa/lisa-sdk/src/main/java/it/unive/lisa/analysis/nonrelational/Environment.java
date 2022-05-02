@@ -294,10 +294,10 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_REPR;
+			return Lattice.topRepresentation();
 
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return Lattice.bottomRepresentation();
 
 		return new MapRepresentation(function, StringRepresentation::new, NonRelationalElement::representation);
 	}

@@ -10,6 +10,7 @@ import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collection;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Map.Entry;
 
 /**
  * A value that can be serialized, as part of a
@@ -110,10 +111,16 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 						o.properties.keySet());
 		builder.compute(String::compareTo);
 
-		if (!builder.getOnlyFirst().isEmpty())
+		if (!builder.sameContent())
 			// same size means that both have at least one element that is
 			// different
 			return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
+
+		// same keys: just iterate over them and apply comparisons
+		// since fields is sorted, the order of iteration will be consistent
+		for (Entry<String, String> entry : properties.entrySet())
+			if ((cmp = entry.getValue().compareTo(o.properties.get(entry.getKey()))) != 0)
+				return cmp;
 
 		return 0;
 	}
