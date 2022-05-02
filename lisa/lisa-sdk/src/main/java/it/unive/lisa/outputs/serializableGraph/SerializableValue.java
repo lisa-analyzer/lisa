@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collection;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 /**
  * A value that can be serialized, as part of a

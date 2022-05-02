@@ -4,7 +4,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEqualCollection;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.util.datastructures.graph.Edge;
@@ -24,6 +23,8 @@ import org.apache.commons.collections4.SetUtils;
 import org.junit.Test;
 
 public class NodeListTest {
+
+	private static final Random rand = new Random();
 
 	private <T> String msg(String objs, String extra, Collection<T> exp, Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
@@ -103,7 +104,10 @@ public class NodeListTest {
 
 		for (TestCodeEdge edge : edges) {
 			assertTrue("matrix does not contain " + edge, matrix.containsEdge(edge));
-			assertSame(edge + " is not connecting its endpoints", edge,
+			// equals instead of same since sequential edges are encoded in the
+			// list,
+			// end are freshly created when queried
+			assertEquals(edge + " is not connecting its endpoints", edge,
 					matrix.getEdgeConnecting(edge.getSource(), edge.getDestination()));
 		}
 
@@ -136,7 +140,6 @@ public class NodeListTest {
 			NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrix,
 			Collection<TestCodeNode> nodes, Collection<TestCodeEdge> edges, Collection<TestCodeNode> entries,
 			Collection<TestCodeNode> exits) {
-		Random rand = new Random();
 		for (int i = 20 + rand.nextInt(100); i >= 0; i--) {
 			TestCodeNode node = new TestCodeNode(i);
 			nodes.add(node);
@@ -530,37 +533,31 @@ public class NodeListTest {
 		Map<TestCodeNode, Collection<TestCodeNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
-		Collection<TestCodeNode> nodesCopy = new HashSet<>(nodes);
-		Collection<TestCodeEdge> edgesCopy = new HashSet<>(edges);
-		NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrixCopy = new NodeList<>(matrix);
-		Map<TestCodeNode, Collection<TestCodeNode>> adjCopy = new HashMap<>(adj);
-		// entries and exits stay the same, they are re-evaluated at the end
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
-
 		Collection<TestCodeNode> removed = new HashSet<>();
-		for (int i = 0; i < nodes.size() / 4; i++) {
-			TestCodeNode n = random(nodesCopy);
+		int limit = nodes.size() / 4;
+		for (int i = 0; i < limit; i++) {
+			TestCodeNode n = random(nodes);
 			removed.add(n);
-			nodesCopy.remove(n);
-			edgesCopy.removeIf(e -> e.getSource() == n || e.getDestination() == n);
-			adjCopy.remove(n);
-			adjCopy.forEach((nn, follows) -> follows.remove(n));
-			matrixCopy.removeNode(n);
+			nodes.remove(n);
+			entries.remove(n);
+			exits.remove(n);
+			edges.removeIf(e -> e.getSource() == n || e.getDestination() == n);
+			adj.remove(n);
+			adj.forEach((nn, follows) -> follows.remove(n));
+			matrix.removeNode(n);
 		}
 
-		Collection<TestCodeNode> entriesCopy = new HashSet<>(nodesCopy);
-		Collection<TestCodeNode> exitsCopy = new HashSet<>(nodesCopy);
-		for (TestCodeEdge e : edgesCopy) {
-			entriesCopy.remove(e.getDestination());
-			exitsCopy.remove(e.getSource());
+		entries = new HashSet<>(nodes);
+		exits = new HashSet<>(nodes);
+		for (TestCodeEdge e : edges) {
+			entries.remove(e.getDestination());
+			exits.remove(e.getSource());
 		}
-
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
 	private static <T> T random(Collection<T> elements) {
-		int idx = (int) (Math.random() * elements.size());
+		int idx = rand.nextInt(elements.size());
 		for (T e : elements)
 			if (--idx < 0)
 				return e;
@@ -577,30 +574,23 @@ public class NodeListTest {
 		Map<TestCodeNode, Collection<TestCodeNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
-		Collection<TestCodeNode> nodesCopy = new HashSet<>(nodes);
-		Collection<TestCodeEdge> edgesCopy = new HashSet<>(edges);
-		NodeList<TestCodeGraph, TestCodeNode, TestCodeEdge> matrixCopy = new NodeList<>(matrix);
-		Map<TestCodeNode, Collection<TestCodeNode>> adjCopy = new HashMap<>(adj);
-		// entries and exits stay the same, they are re-evaluated at the end
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
-
 		Collection<TestCodeEdge> removed = new HashSet<>();
-		for (int i = 0; i < edges.size() / 4; i++) {
-			TestCodeEdge e = random(edgesCopy);
+		int limit = edges.size() / 4;
+		for (int i = 0; i < limit; i++) {
+			TestCodeEdge e = random(edges);
 			removed.add(e);
-			edgesCopy.remove(e);
-			adjCopy.get(e.getSource()).remove(e.getDestination());
-			matrixCopy.removeEdge(e);
+			edges.remove(e);
+			adj.get(e.getSource()).remove(e.getDestination());
+			matrix.removeEdge(e);
 		}
 
-		Collection<TestCodeNode> entriesCopy = new HashSet<>(nodesCopy);
-		Collection<TestCodeNode> exitsCopy = new HashSet<>(nodesCopy);
-		for (TestCodeEdge e : edgesCopy) {
-			entriesCopy.remove(e.getDestination());
-			exitsCopy.remove(e.getSource());
+		entries = new HashSet<>(nodes);
+		exits = new HashSet<>(nodes);
+		for (TestCodeEdge e : edges) {
+			entries.remove(e.getDestination());
+			exits.remove(e.getSource());
 		}
 
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 }

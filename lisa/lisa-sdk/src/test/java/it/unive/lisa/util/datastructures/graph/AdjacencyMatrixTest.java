@@ -24,6 +24,8 @@ import org.junit.Test;
 
 public class AdjacencyMatrixTest {
 
+	private static final Random rand = new Random();
+
 	private <T> String msg(String objs, String extra, Collection<T> exp, Collection<T> act) {
 		Set<T> ex = exp instanceof Set ? (Set<T>) exp : new HashSet<>(exp);
 		Set<T> ac = act instanceof Set ? (Set<T>) act : new HashSet<>(act);
@@ -132,7 +134,6 @@ public class AdjacencyMatrixTest {
 	private Map<TestNode, Collection<TestNode>> populate(AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrix,
 			Collection<TestNode> nodes, Collection<TestEdge> edges, Collection<TestNode> entries,
 			Collection<TestNode> exits) {
-		Random rand = new Random();
 		for (int i = 20 + rand.nextInt(100); i >= 0; i--) {
 			TestNode node = new TestNode(i);
 			nodes.add(node);
@@ -526,37 +527,29 @@ public class AdjacencyMatrixTest {
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
-		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
-		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
-		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrixCopy = new AdjacencyMatrix<>(matrix);
-		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
-		// entries and exits stay the same, they are re-evaluated at the end
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
-
 		Collection<TestNode> removed = new HashSet<>();
 		for (int i = 0; i < nodes.size() / 4; i++) {
-			TestNode n = random(nodesCopy);
+			TestNode n = random(nodes);
 			removed.add(n);
-			nodesCopy.remove(n);
-			edgesCopy.removeIf(e -> e.getSource() == n || e.getDestination() == n);
-			adjCopy.remove(n);
-			adjCopy.forEach((nn, follows) -> follows.remove(n));
-			matrixCopy.removeNode(n);
+			nodes.remove(n);
+			edges.removeIf(e -> e.getSource() == n || e.getDestination() == n);
+			adj.remove(n);
+			adj.forEach((nn, follows) -> follows.remove(n));
+			matrix.removeNode(n);
 		}
 
-		Collection<TestNode> entriesCopy = new HashSet<>(nodesCopy);
-		Collection<TestNode> exitsCopy = new HashSet<>(nodesCopy);
-		for (TestEdge e : edgesCopy) {
-			entriesCopy.remove(e.getDestination());
-			exitsCopy.remove(e.getSource());
+		entries = new HashSet<>(nodes);
+		exits = new HashSet<>(nodes);
+		for (TestEdge e : edges) {
+			entries.remove(e.getDestination());
+			exits.remove(e.getSource());
 		}
 
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 
 	private static <T> T random(Collection<T> elements) {
-		int idx = (int) (Math.random() * elements.size());
+		int idx = rand.nextInt(elements.size());
 		for (T e : elements)
 			if (--idx < 0)
 				return e;
@@ -573,30 +566,22 @@ public class AdjacencyMatrixTest {
 		Map<TestNode, Collection<TestNode>> adj = populate(matrix, nodes, edges, entries, exits);
 		verify(adj, nodes, edges, matrix, entries, exits);
 
-		Collection<TestNode> nodesCopy = new HashSet<>(nodes);
-		Collection<TestEdge> edgesCopy = new HashSet<>(edges);
-		AdjacencyMatrix<TestGraph, TestNode, TestEdge> matrixCopy = new AdjacencyMatrix<>(matrix);
-		Map<TestNode, Collection<TestNode>> adjCopy = new HashMap<>(adj);
-		// entries and exits stay the same, they are re-evaluated at the end
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entries, exits);
-
 		Collection<TestEdge> removed = new HashSet<>();
 		for (int i = 0; i < edges.size() / 4; i++) {
-			TestEdge e = random(edgesCopy);
+			TestEdge e = random(edges);
 			removed.add(e);
-			edgesCopy.remove(e);
-			adjCopy.get(e.getSource()).remove(e.getDestination());
-			matrixCopy.removeEdge(e);
+			edges.remove(e);
+			adj.get(e.getSource()).remove(e.getDestination());
+			matrix.removeEdge(e);
 		}
 
-		Collection<TestNode> entriesCopy = new HashSet<>(nodesCopy);
-		Collection<TestNode> exitsCopy = new HashSet<>(nodesCopy);
-		for (TestEdge e : edgesCopy) {
-			entriesCopy.remove(e.getDestination());
-			exitsCopy.remove(e.getSource());
+		entries = new HashSet<>(nodes);
+		exits = new HashSet<>(nodes);
+		for (TestEdge e : edges) {
+			entries.remove(e.getDestination());
+			exits.remove(e.getSource());
 		}
 
-		verify(adjCopy, nodesCopy, edgesCopy, matrixCopy, entriesCopy, exitsCopy,
-				"after removing " + removed.toString());
+		verify(adj, nodes, edges, matrix, entries, exits, "after removing " + removed.toString());
 	}
 }

@@ -90,7 +90,7 @@ public class TestCodeGraph extends CodeGraph<TestCodeGraph, TestCodeGraph.TestCo
 
 		@Override
 		public boolean isUnconditional() {
-			return false;
+			return true;
 		}
 
 		@Override
