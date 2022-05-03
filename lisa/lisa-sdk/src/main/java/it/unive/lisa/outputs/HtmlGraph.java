@@ -76,7 +76,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 						StringUtils.splitByCharacterTypeCamelCase(
 								CaseUtils.toCamelCase(displayClass, true, '_')),
 						' ');
-				switches.append("\t\t\t\t<span><input type=\"checkbox\" id=\"show")
+				switches.append("\t\t\t\t\t<span><input type=\"checkbox\" id=\"show")
 						.append(displayClass)
 						.append("\" checked/>&nbsp;&nbsp;<label for=\"show")
 						.append(displayClass)

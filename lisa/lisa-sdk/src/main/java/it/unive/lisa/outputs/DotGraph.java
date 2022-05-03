@@ -1,7 +1,12 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -117,7 +122,8 @@ public class DotGraph extends GraphStreamWrapper {
 	private static String dotEscape(String extraLabel) {
 		String escapeHtml4 = StringEscapeUtils.escapeHtml4(extraLabel);
 		String replace = escapeHtml4.replace("\n", "<BR/>");
-		return replace.replace("\\", "\\\\");
+		replace = replace.replace("\\", "\\\\");
+		return replace;
 	}
 
 	/**
@@ -132,7 +138,7 @@ public class DotGraph extends GraphStreamWrapper {
 	 * @param label the additional label that can be added to each node's text
 	 *                  (can be {@code null})
 	 */
-	public void addNode(SerializableNode node, boolean entry, boolean exit, String label) {
+	public void addNode(SerializableNode node, boolean entry, boolean exit, SerializableValue label) {
 		Node n = graph.addNode(nodeName(node.getId()));
 
 		n.setAttribute(SHAPE, NODE_SHAPE);
@@ -145,9 +151,48 @@ public class DotGraph extends GraphStreamWrapper {
 			n.setAttribute(EXIT_NODE_EXTRA_ATTR, EXIT_NODE_EXTRA_VALUE);
 
 		String l = dotEscape(node.getText());
-		if (StringUtils.isNotBlank(label))
-			label = "<BR/>" + dotEscape(label);
-		n.setAttribute(LABEL, "<" + l + label + ">");
+		String extra = "";
+		if (label != null)
+			extra = "<BR/><BR/>" + dotEscape(format(label));
+		n.setAttribute(LABEL, "<" + l + extra + ">");
+	}
+
+	private static String format(SerializableValue value) {
+		if (value instanceof SerializableString) {
+			return value.toString();
+		} else if (value instanceof SerializableArray) {
+			SerializableArray array = (SerializableArray) value;
+			if (array.getElements().stream().allMatch(SerializableString.class::isInstance))
+				return "[" + StringUtils.join(array.getElements(), ", ") + "]";
+			else {
+				StringBuilder builder = new StringBuilder();
+				boolean first = true;
+				for (int i = 0; i < array.getElements().size(); i++) {
+					SerializableValue array_element = array.getElements().get(i);
+					if (!first)
+						builder.append(",\n");
+					first = false;
+					builder.append(format(array_element));
+				}
+				return builder.toString();
+			}
+		} else if (value instanceof SerializableObject) {
+			SerializableObject object = (SerializableObject) value;
+			StringBuilder builder = new StringBuilder("{ ");
+			boolean first = true;
+			for (Entry<String, SerializableValue> field : object.getFields().entrySet()) {
+				SerializableValue fieldValue = field.getValue();
+				if (!first) {
+					if (builder.toString().endsWith("\n"))
+						builder.delete(builder.length() - 1, builder.length());
+					builder.append(",\n");
+				}
+				first = false;
+				builder.append(field.getKey()).append(": ").append(format(fieldValue));
+			}
+			return builder.append(" }\n").toString();
+		} else
+			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
 	}
 
 	/**

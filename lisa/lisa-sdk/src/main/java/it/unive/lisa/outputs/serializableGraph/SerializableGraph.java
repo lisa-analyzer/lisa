@@ -221,14 +221,14 @@ public class SerializableGraph {
 		Set<Integer> hasFollows = new HashSet<>();
 		Set<Integer> hasPreds = new HashSet<>();
 		Set<Integer> inners = new HashSet<>();
-		Map<Integer, String> labels = new HashMap<>();
+		Map<Integer, SerializableValue> labels = new HashMap<>();
 
 		edges.forEach(e -> {
 			hasFollows.add(e.getSourceId());
 			hasPreds.add(e.getDestId());
 		});
 
-		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription().toString()));
+		descriptions.forEach(d -> labels.put(d.getNodeId(), d.getDescription()));
 		nodes.forEach(n -> inners.addAll(n.getSubNodes()));
 
 		for (SerializableNode n : nodes)
