@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -194,12 +195,17 @@ public class JsonReportComparer {
 				throw new FileNotFoundException(
 						pair.getRight() + " declared as output in the second report does not exist");
 
-			if (left.getName().endsWith(".json"))
+			String ext = FilenameUtils.getExtension(left.getName());
+			if (ext.endsWith("json"))
 				diffFound |= matchJsonGraphs(reporter, left, right);
-
-			if (left.getName().endsWith(".dot"))
+			else if (ext.equals("dot")
+					|| ext.equals("graphml")
+					|| ext.equals("html")
+					|| ext.equals("js"))
 				LOG.info("Skipping comparison of visualization-only files: " + left.toString() + " and "
 						+ right.toString());
+			else
+				throw new UnsupportedOperationException("Cannot compare files with extension " + ext);
 		}
 
 		return !diffFound;

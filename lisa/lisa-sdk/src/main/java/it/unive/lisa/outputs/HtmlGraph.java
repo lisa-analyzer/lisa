@@ -56,14 +56,16 @@ public class HtmlGraph extends GraphStreamWrapper {
 	public void dump(Writer writer) throws IOException {
 		StringWriter graphWriter = new StringWriter();
 		graph.dump(graphWriter, false);
-		String graphText = graphWriter.toString();
-		String graphTitle = "<h1>" + graph.getTitle() + "</h1>";
+		String graphText = graphWriter.toString().replace("&apos;", "'").replace("'", "\\'");
+		String graphTitle = graph.getTitle();
+		String graphDescription = "";
 		if (StringUtils.isNotBlank(description))
-			graphTitle += "<h3>" + description + "</h3>";
+			graphDescription = description;
 
 		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream("html-graph/viewer.html")) {
 			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
 			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
+			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", graphDescription);
 			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION_LABEL$$$", descriptionLabel);
 			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
 

@@ -174,44 +174,29 @@ public abstract class AnalysisTestExecutor {
 		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, folder);
 		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, folder);
 		Path target = Paths.get(expectedPath.toString(), source);
-
-		Program program = null;
-		try {
-			program = IMPFrontend.processFile(target.toString(), true);
-		} catch (ParsingException e) {
-			e.printStackTrace(System.err);
-			fail("Exception while parsing '" + target + "': " + e.getMessage());
-		}
-
 		if (subfolder != null) {
 			expectedPath = Paths.get(expectedPath.toString(), subfolder);
 			actualPath = Paths.get(actualPath.toString(), subfolder);
 		}
 
-		File workdir = actualPath.toFile();
-		try {
-			FileManager.forceDeleteFolder(workdir.toString());
-		} catch (IOException e) {
-			e.printStackTrace(System.err);
-			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
-		}
-		configuration.setWorkdir(workdir.toString());
+		Program program = readProgram(target);
+
+		setupWorkdir(configuration, actualPath);
 
 		configuration.setJsonOutput(true);
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
 
-		LiSA lisa = new LiSA(configuration);
-		try {
-			lisa.run(program);
-		} catch (AnalysisException e) {
-			e.printStackTrace(System.err);
-			fail("Analysis terminated with errors");
-		}
+		run(configuration, program);
 
 		File expFile = Paths.get(expectedPath.toString(), "report.json").toFile();
 		File actFile = Paths.get(actualPath.toString(), "report.json").toFile();
+
+		if (!expFile.exists())
+			// no baseline defined, we end the test here
+			return;
+
 		boolean update = "true".equals(System.getProperty("lisa.cron.update")) || forceUpdate;
 		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
 			JsonReport expected = JsonReport.read(l);
@@ -219,34 +204,19 @@ public abstract class AnalysisTestExecutor {
 			Accumulator acc = new Accumulator(expectedPath);
 			if (!update)
 				assertTrue("Results are different",
-						JsonReportComparer.compare(expected, actual, expectedPath.toFile(), actualPath.toFile()));
-			else if (!JsonReportComparer.compare(expected, actual, expectedPath.toFile(),
-					actualPath.toFile(), acc)) {
+						JsonReportComparer.compare(
+								expected,
+								actual,
+								expectedPath.toFile(),
+								actualPath.toFile()));
+			else if (!JsonReportComparer.compare(
+					expected,
+					actual,
+					expectedPath.toFile(),
+					actualPath.toFile(),
+					acc)) {
 				System.err.println("Results are different, regenerating differences");
-				boolean updateReport = !acc.addedWarning.isEmpty() || !acc.removedWarning.isEmpty()
-						|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
-						|| !acc.changedFileName.isEmpty();
-				if (updateReport) {
-					Files.copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-					System.err.println("- Updated report.json");
-				}
-				for (Path f : acc.removedFilePaths) {
-					Files.delete(Paths.get(expectedPath.toString(), f.toString()));
-					System.err.println("- Deleted " + f);
-				}
-				for (Path f : acc.addedFilePaths) {
-					Files.copy(Paths.get(actualPath.toString(), f.toString()),
-							Paths.get(expectedPath.toString(), f.toString()));
-					System.err.println("- Copied (new) " + f);
-				}
-				for (Path f : acc.changedFileName) {
-					Path fresh = Paths.get(expectedPath.toString(), f.toString());
-					Files.copy(
-							Paths.get(actualPath.toString(), f.toString()),
-							fresh,
-							StandardCopyOption.REPLACE_EXISTING);
-					System.err.println("- Copied (update) " + fresh);
-				}
+				regen(expectedPath, actualPath, expFile, actFile, acc);
 			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace(System.err);
@@ -256,6 +226,66 @@ public abstract class AnalysisTestExecutor {
 			fail("Unable to compare reports: " + e.getMessage());
 		}
 
+	}
+
+	private void regen(Path expectedPath, Path actualPath, File expFile, File actFile, Accumulator acc)
+			throws IOException {
+		boolean updateReport = !acc.addedWarning.isEmpty() || !acc.removedWarning.isEmpty()
+				|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
+				|| !acc.changedFileName.isEmpty();
+		if (updateReport) {
+			Files.copy(actFile.toPath(), expFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			System.err.println("- Updated report.json");
+		}
+		for (Path f : acc.removedFilePaths) {
+			Files.delete(Paths.get(expectedPath.toString(), f.toString()));
+			System.err.println("- Deleted " + f);
+		}
+		for (Path f : acc.addedFilePaths) {
+			Files.copy(Paths.get(actualPath.toString(), f.toString()),
+					Paths.get(expectedPath.toString(), f.toString()));
+			System.err.println("- Copied (new) " + f);
+		}
+		for (Path f : acc.changedFileName) {
+			Path fresh = Paths.get(expectedPath.toString(), f.toString());
+			Files.copy(
+					Paths.get(actualPath.toString(), f.toString()),
+					fresh,
+					StandardCopyOption.REPLACE_EXISTING);
+			System.err.println("- Copied (update) " + fresh);
+		}
+	}
+
+	private Program readProgram(Path target) {
+		Program program = null;
+		try {
+			program = IMPFrontend.processFile(target.toString(), true);
+		} catch (ParsingException e) {
+			e.printStackTrace(System.err);
+			fail("Exception while parsing '" + target + "': " + e.getMessage());
+		}
+		return program;
+	}
+
+	private void run(LiSAConfiguration configuration, Program program) {
+		LiSA lisa = new LiSA(configuration);
+		try {
+			lisa.run(program);
+		} catch (AnalysisException e) {
+			e.printStackTrace(System.err);
+			fail("Analysis terminated with errors");
+		}
+	}
+
+	private void setupWorkdir(LiSAConfiguration configuration, Path actualPath) {
+		File workdir = actualPath.toFile();
+		try {
+			FileManager.forceDeleteFolder(workdir.toString());
+		} catch (IOException e) {
+			e.printStackTrace(System.err);
+			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
+		}
+		configuration.setWorkdir(workdir.toString());
 	}
 
 	private class Accumulator implements DiffReporter {
