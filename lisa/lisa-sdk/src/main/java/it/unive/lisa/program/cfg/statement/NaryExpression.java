@@ -151,7 +151,7 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public final int setOffset(int offset) {
+	public int setOffset(int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression sub : subExpressions)

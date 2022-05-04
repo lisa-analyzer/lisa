@@ -189,6 +189,8 @@ public class SerializableGraph {
 	 * @param node the node to add
 	 */
 	public void addNode(SerializableNode node) {
+		if (nodes.stream().map(n -> n.getId()).anyMatch(i -> i == node.getId()))
+			throw new IllegalArgumentException("A node with the same id " + node.getId() + " is already in the graph");
 		nodes.add(node);
 	}
 
@@ -198,6 +200,9 @@ public class SerializableGraph {
 	 * @param desc the description to add
 	 */
 	public void addNodeDescription(SerializableNodeDescription desc) {
+		if (descriptions.stream().map(d -> d.getNodeId()).anyMatch(i -> i == desc.getNodeId()))
+			throw new IllegalArgumentException(
+					"A description for node " + desc.getNodeId() + " is already in the graph");
 		descriptions.add(desc);
 	}
 
