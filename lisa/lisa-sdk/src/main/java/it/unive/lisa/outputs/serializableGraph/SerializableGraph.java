@@ -187,6 +187,9 @@ public class SerializableGraph {
 	 * Adds the given node to the graph.
 	 * 
 	 * @param node the node to add
+	 * 
+	 * @throws IllegalArgumentException if a node with the same id already
+	 *                                      exists in the graph
 	 */
 	public void addNode(SerializableNode node) {
 		if (nodes.stream().map(n -> n.getId()).anyMatch(i -> i == node.getId()))
@@ -198,6 +201,9 @@ public class SerializableGraph {
 	 * Adds the given node description to the graph.
 	 * 
 	 * @param desc the description to add
+	 * 
+	 * @throws IllegalArgumentException if a description for the same node
+	 *                                      already exists in the graph
 	 */
 	public void addNodeDescription(SerializableNodeDescription desc) {
 		if (descriptions.stream().map(d -> d.getNodeId()).anyMatch(i -> i == desc.getNodeId()))

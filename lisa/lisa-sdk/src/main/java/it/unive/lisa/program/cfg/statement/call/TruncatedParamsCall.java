@@ -35,7 +35,7 @@ public class TruncatedParamsCall extends Call {
 				call.getParameters());
 		this.call = call;
 	}
-	
+
 	@Override
 	public int setOffset(int offset) {
 		// we do not reset the offsets here
