@@ -130,7 +130,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 					MultiGraph labelgraph = new MultiGraph(graphname);
 					populate(graphname, depth + 1, labelgraph, array_element);
 					node.setAttribute(LABEL_ARRAY, labelgraph);
-					node.setAttribute(NODE_TEXT, "Element " + i);
+					node.setAttribute(LABEL_TEXT, "Element " + i);
 					array_element.getProperties().forEach((k, v) -> node.setAttribute(k, v));
 				}
 		} else if (value instanceof SerializableObject) {
@@ -141,7 +141,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 				MultiGraph labelgraph = new MultiGraph(graphname);
 				populate(graphname, depth + 1, labelgraph, field.getValue());
 				node.setAttribute(LABEL_FIELD_PREFIX + field.getKey(), labelgraph);
-				node.setAttribute(NODE_TEXT, field.getKey());
+				node.setAttribute(LABEL_TEXT, field.getKey());
 				field.getValue().getProperties().forEach((k, v) -> node.setAttribute(k, v));
 			}
 		} else

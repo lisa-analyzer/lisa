@@ -119,16 +119,23 @@
 				{
 					selector: 'node[NODE_TEXT]',
 					css: {
-						'content': 'data(NODE_TEXT)'
+						'content': 'data(NODE_TEXT)',
+						'font-family': 'monospace',
+						'font-size': '18px',
 					}
 				},
 				{
 					selector: 'node[LABEL_TEXT]',
 					css: {
-						'content': 'data(LABEL_TEXT)',
+						'content': 'data(LABEL_TEXT)'
+					}
+				},
+				{
+					selector: 'node[^collapsed]:childless',
+					css: {
 						'width': 'label',
 						'text-valign': 'center',
-						'border-width': '0px',
+						'border-width': '0px',						
 					}
 				},
 				{
@@ -162,7 +169,7 @@
 						'border-style': 'solid',
 						'border-color': 'darkgray',
 					}
-				},	
+				},
 				{
 					selector: 'node[NODE_IS_ENTRY = "yes"]',
 					css: {
@@ -266,6 +273,15 @@
 				
 				api = this.expandCollapse(expandCollapseOptions);
 				api.setOption("layoutBy", layoutOptions);
+				
+				this.on("expandcollapse.beforecollapse", function(event) { 
+					var elem = event.target; 
+					elem.data("collapsed", "yes");
+				});
+				this.on("expandcollapse.afterexpand", function(event) {  
+					var elem = event.target; 
+					elem.data("collapsed", null);
+				});
 				
 				api.collapseRecursively(this.nodes('[NODE_KIND = "SUBNODE"]'), {
 										layoutBy: relayout
