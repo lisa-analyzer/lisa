@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 /**
@@ -214,7 +215,7 @@ public class FileManager {
 		if (!parent.exists() && !parent.mkdirs())
 			throw new IOException("Unable to create directory structure for " + file);
 
-		createdFiles.add(workdir.toPath().relativize(file.toPath()).toString());
+		createdFiles.add(FilenameUtils.separatorsToUnix(workdir.toPath().relativize(file.toPath()).toString()));
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder())) {
 			if (bom)
 				writer.write('\ufeff');
