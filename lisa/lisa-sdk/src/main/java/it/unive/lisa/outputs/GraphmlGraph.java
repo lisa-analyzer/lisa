@@ -164,15 +164,11 @@ public class GraphmlGraph extends GraphStreamWrapper {
 		MultiGraph innergraph = new MultiGraph(graphname);
 		Node n = innergraph.addNode(sub.getId());
 		sub.attributeKeys().forEach(k -> n.setAttribute(k, sub.getAttribute(k)));
-
-		MultiGraph wrappergraph = new MultiGraph(graphname + "_WRAPPER");
-		Node wrapper = wrappergraph.addNode(graphname + "_WRAPPERNODE");
-		wrapper.setAttribute(NODE_KIND, KIND_SUBNODE);
-		wrapper.setAttribute(NODE_CONTENT, innergraph);
+		n.setAttribute(NODE_KIND, KIND_SUBNODE);
 
 		AtomicInteger counter = subnodesCount.computeIfAbsent(nodeName(node.getId()), k -> new AtomicInteger(0));
 		int idx = counter.getAndIncrement();
-		outer.setAttribute(NODE_SUBNODE_PREFIX + idx, wrappergraph);
+		outer.setAttribute(NODE_SUBNODE_PREFIX + idx, innergraph);
 	}
 
 	/**

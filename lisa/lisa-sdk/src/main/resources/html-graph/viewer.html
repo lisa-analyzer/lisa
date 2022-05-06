@@ -139,37 +139,11 @@
 					}
 				},
 				{
-					selector: 'node[NODE_KIND = "SUBNODE"]',
-					css: {
-						'content': '',
-						'border-width': '0px',
-					}
-				},
-				{
-					selector: 'node[NODE_KIND = "SUBNODE"].cy-expand-collapse-collapsed-node',
-					css: {
-						'content': '',
-						'border-width': '1px',
-						'border-style': 'solid',
-						'border-color': 'darkgray',
-					}
-				},
-				{
 					selector: 'node[NODE_KIND = "DESCRIPTION"]',
 					css: {
-						'content': '',
-						'border-width': '0px',
+						'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
 					}
 				},	
-				{
-					selector: 'node[NODE_KIND = "DESCRIPTION"].cy-expand-collapse-collapsed-node',
-					css: {
-						'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
-						'border-width': '1px',
-						'border-style': 'solid',
-						'border-color': 'darkgray',
-					}
-				},
 				{
 					selector: 'node[NODE_IS_ENTRY = "yes"]',
 					css: {
