@@ -79,6 +79,7 @@
 				<div>
 					<b id="defaultView">Reset collapsed nodes</b> 
 					<b id="relayout">Run layout</b> 
+					<b id="fit">Fit to viewport</b> 
 					<span><input type="checkbox" id="tiling" checked />&nbsp;&nbsp;<label for="tiling"><b>Tile nodes</b></label></span>
 					<hr />
 					<b id="collapseAll">Collapse all</b> 
@@ -223,7 +224,7 @@
 							quality: "proof",
 							randomize: false, // random node positions at start - if false then quality must be "proof" 
 							animate: false,  
-							fit: true, // fit viewport to nodes 
+							fit: false, // fit viewport to nodes 
 							padding: 30, // padding around layout
 							nodeDimensionsIncludeLabels: true, // valid in "proof" quality
 							packComponents: false, // Whether to pack disconnected components - cytoscape-layout-utilities extension should be registered and initialized
@@ -265,8 +266,8 @@
 						var elem = event.target; 
 						elem.data("collapsed", null);
 					});
-					
 					api.collapseAll();
+					this.fit();
 				}
 			});
 			
@@ -286,7 +287,6 @@
 					targets.style('display', 'none');
 				relayout();
 			}
-			
 			document.getElementById("relayout").addEventListener("click", function () {
 				relayout();
 			});
@@ -317,6 +317,9 @@
 			});
 			document.getElementById("defaultView").addEventListener("click", function () {
 				api.collapseAll();
+			});
+			document.getElementById("fit").addEventListener("click", function () {
+				cy.fit(cy.nodes(), 50);
 			});
 			$$$GRAPH_DISPLAY_LISTENERS$$$
 			</script>
