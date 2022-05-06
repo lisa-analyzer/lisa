@@ -318,27 +318,27 @@ public class JsonReportComparer {
 			switch (component) {
 			case FILES:
 				if (isFirst)
-					System.err.println("Files only in the first report:");
+					LOG.warn("Files only in the first report:");
 				else
-					System.err.println("Files only in the second report:");
+					LOG.warn("Files only in the second report:");
 				break;
 			case WARNINGS:
 				if (isFirst)
-					System.err.println("Warnings only in the first report:");
+					LOG.warn("Warnings only in the first report:");
 				else
-					System.err.println("Warnings only in the second report:");
+					LOG.warn("Warnings only in the second report:");
 				break;
 			default:
 				break;
 			}
 
 			for (Object o : reported)
-				System.err.println("\t" + o);
+				LOG.warn("\t" + o);
 		}
 
 		@Override
 		public void fileDiff(String first, String second, String message) {
-			System.err.println("['" + first + "', '" + second + "'] " + message);
+			LOG.warn("['" + first + "', '" + second + "'] " + message);
 		}
 	}
 }
