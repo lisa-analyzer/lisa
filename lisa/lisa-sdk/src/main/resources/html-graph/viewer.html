@@ -1,321 +1,324 @@
 <html>
 	<head>
 		<title>$$$GRAPH_TITLE$$$</title>
-
-		<meta charset="UTF-8"> 
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1"/>
-
+		
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
+		
 		<script src="js/cytoscape-3.21.1.min.js"></script>
-        <script src="js/layout-base.js"></script>
+		<script src="js/layout-base.js"></script>
 		<script src="js/cose-base.js"></script>
 		<script src="js/cytoscape-fcose.js"></script>
 		<script src="js/jquery-3.0.0.min.js"></script>
 		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
-		<script src="js/cytoscape-expand-collapse.js"></script>	
-
+		<script src="js/cytoscape-expand-collapse.js"></script>
+		
 		<style>
-			body {
-				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-				font-size: 14px;
-				background-color: white;
-			}
-			
-			html, body, #full {
-			  	height: 100%;
-			}
-			#full {
-			  	display: flex;
-			  	flex-direction: column;
-			}
-			#cy {
-				flex-grow: 1;
-				z-index: 10;
-			}
-			#header { 
-				position: fixed; 
-				z-index: 11; 
-				overflow-x: hidden;
-			}
-			#header div {
-				background-color: #e2e2e2; 
-				padding: 20px 15px;
-				margin-bottom: 10px;
-			}
-			#header div b {
-				padding: 6px 0;
-				color: #333333;
-				display: block;
-				cursor: pointer; 
-			}
-			#header div span {
-				padding: 6px 0;
-				display: block;
-			}
-			#header div span label b {
-				padding: 0;
-				display: inline; 
-			}
-			#header div span input {
-				margin: 0;
-			}
+		body {
+			font-family: helvetica neue, helvetica, liberation sans, arial,
+				sans-serif;
+			font-size: 14px;
+			background-color: white;
+		}
+		
+		html, body, #full {
+			height: 100%;
+		}
+		
+		#full {
+			display: flex;
+			flex-direction: column;
+		}
+		
+		#cy {
+			flex-grow: 1;
+			z-index: 10;
+		}
+		
+		#header {
+			position: fixed;
+			z-index: 11;
+			overflow-x: hidden;
+		}
+		
+		#header div {
+			background-color: #e2e2e2;
+			padding: 20px 15px;
+			margin-bottom: 10px;
+		}
+		
+		#header div b {
+			padding: 6px 0;
+			color: #333333;
+			display: block;
+			cursor: pointer;
+		}
+		
+		#header div span {
+			padding: 6px 0;
+			display: block;
+		}
+		
+		#header div span label b {
+			padding: 0;
+			display: inline;
+		}
+		
+		#header div span input {
+			margin: 0;
+		}
 		</style>
 	</head>
 
 	<body>
 		<h1>$$$GRAPH_TITLE$$$</h1>
 		<h3>$$$GRAPH_DESCRIPTION$$$</h3>
-		<hr/>
+		<hr />
 		<div id="full">
 			<div id="header">
 				<div>
-					<b id="defaultView">Reset collapsed nodes</b>
+					<b id="defaultView">Reset collapsed nodes</b> 
 					<b id="relayout">Run layout</b> 
-					<span><input type="checkbox" id="tiling" checked/>&nbsp;&nbsp;<label for="tiling"><b>Tile nodes</b></label></span>
-					<hr/>
+					<span><input type="checkbox" id="tiling" checked />&nbsp;&nbsp;<label for="tiling"><b>Tile nodes</b></label></span>
+					<hr />
 					<b id="collapseAll">Collapse all</b> 
 					<b id="expandAll">Expand all</b> 
-					<b id="collapseSubNodes">Collapse sub nodes</b> 
-					<b id="expandSubNodes">Expand sub nodes</b> 
-					<b id="collapseDescriptions">Collapse $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
-					<b id="expandDescriptions">Expand $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
-					<hr/>
+					<b id="collapseSubNodes">Collapse visible sub nodes</b> 
+					<b id="expandSubNodes">Expand visible sub nodes</b> 
+					<b id="collapseDescriptions">Collapse visible $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
+					<b id="expandDescriptions">Expand visible $$$GRAPH_DESCRIPTION_LABEL$$$</b>
+					<hr />
 					$$$GRAPH_DISPLAY_SWITCHES$$$
 				</div>
 				<div>
-					<b>Node border: <font color="darkgray">gray</font>, single</b>
-					<b>Entrypoint border: black, single</b>
-					<b>Exitpoint border: black, double</b>
-					<b>Sequential edge: black, solid</b>
-					<b>False edge: <font color="red">red</font>, solid</b>
+					<b>Node border: <font color="darkgray">gray</font>, single</b> 
+					<b>Entrypoint border: black, single</b> 
+					<b>Exitpoint border: black, double</b> 
+					<b>Sequential edge: black, solid</b> 
+					<b>False edge: <font color="red">red</font>, solid</b> 
 					<b>True edge: <font color="blue">blue</font>, solid</b>
 				</div>
 			</div>
 			<div id="cy"></div>
 		</div>
 		<script>			
-		var api;
-		var layoutOptions;
-		var cy = window.cy = cytoscape({
-			container: document.getElementById('cy'),
-			minZoom: 0.3,
-			maxZoom: 100,
-			zoomingEnabled: true,
-			userZoomingEnabled: true,
-			style: [
-				{
-					selector: 'node',
-					css: {
-						'background-color': 'white',
-						'color': 'black',
-						'font-size': '12px',
-						'font-weight': 'bold',
-						'shape': 'rectangle',
-						'border-width': '1px',
-						'border-style': 'solid',
-						'border-color': 'darkgray',
-						'text-wrap': 'wrap'
-					}
-				},
-				{
-					selector: 'node[NODE_TEXT]',
-					css: {
-						'content': 'data(NODE_TEXT)',
-						'font-family': 'monospace',
-						'font-size': '18px',
-					}
-				},
-				{
-					selector: 'node[LABEL_TEXT]',
-					css: {
-						'content': 'data(LABEL_TEXT)'
-					}
-				},
-				{
-					selector: 'node[^collapsed]:childless',
-					css: {
-						'width': 'label',
-						'text-valign': 'center',
-						'border-width': '0px',						
-					}
-				},
-				{
-					selector: 'node[NODE_KIND = "DESCRIPTION"]',
-					css: {
-						'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
-					}
-				},	
-				{
-					selector: 'node[NODE_IS_ENTRY = "yes"]',
-					css: {
-						'border': '1px solid black',
-					}
-				},		
-				{
-					selector: 'node[NODE_IS_ENTRY = "yes"]',
-					css: {
-						'border-width': '5px',
-						'border-style': 'solid',
-						'border-color': 'black',
-					}
-				},	
-				{
-					selector: 'node[NODE_IS_EXIT = "yes"]',
-					css: {
-						'border-width': '5px',
-						'border-style': 'double',
-						'border-color': 'black',
-					}
-				},	
-				{
-					selector: 'edge',
-					css: {
-						'curve-style': 'bezier',
-						'width': 4,
-						'line-color': 'black',
-						'target-arrow-shape': 'triangle',
-						'target-arrow-color': 'black',
-						'arrow-scale': '2'
-					}
-				},
-				{
-					selector: 'edge[EDGE_KIND = "TrueEdge"]',
-					css: {
-						'line-color': 'blue',
-						'target-arrow-color': 'blue',
-					}
-				},
-				{
-					selector: 'edge[EDGE_KIND = "FalseEdge"]',
-					css: {
-						'line-color': 'red',
-						'target-arrow-color': 'red',
-					}
-				},			
-			],
+			var api;
+			var layoutOptions;
+			var cy = window.cy = cytoscape({
+				container: document.getElementById('cy'),
+				minZoom: 0.3,
+				maxZoom: 100,
+				zoomingEnabled: true,
+				userZoomingEnabled: true,
+				style: [
+					{
+						selector: 'node',
+						css: {
+							'background-color': 'white',
+							'color': 'black',
+							'font-size': '12px',
+							'font-weight': 'bold',
+							'shape': 'rectangle',
+							'border-width': '1px',
+							'border-style': 'solid',
+							'border-color': 'darkgray',
+							'text-wrap': 'wrap'
+						}
+					},
+					{
+						selector: 'node[NODE_TEXT]',
+						css: {
+							'content': 'data(NODE_TEXT)',
+							'font-family': 'monospace',
+							'font-size': '18px',
+						}
+					},
+					{
+						selector: 'node[LABEL_TEXT]',
+						css: {
+							'content': 'data(LABEL_TEXT)'
+						}
+					},
+					{
+						selector: 'node[^collapsed]:childless',
+						css: {
+							'width': 'label',
+							'text-valign': 'center',
+							'border-width': '0px',						
+						}
+					},
+					{
+						selector: 'node[NODE_KIND = "DESCRIPTION"]',
+						css: {
+							'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
+						}
+					},	
+					{
+						selector: 'node[NODE_IS_ENTRY = "yes"]',
+						css: {
+							'border': '1px solid black',
+						}
+					},		
+					{
+						selector: 'node[NODE_IS_ENTRY = "yes"]',
+						css: {
+							'border-width': '5px',
+							'border-style': 'solid',
+							'border-color': 'black',
+						}
+					},	
+					{
+						selector: 'node[NODE_IS_EXIT = "yes"]',
+						css: {
+							'border-width': '5px',
+							'border-style': 'double',
+							'border-color': 'black',
+						}
+					},	
+					{
+						selector: 'edge',
+						css: {
+							'curve-style': 'bezier',
+							'width': 4,
+							'line-color': 'black',
+							'target-arrow-shape': 'triangle',
+							'target-arrow-color': 'black',
+							'arrow-scale': '2'
+						}
+					},
+					{
+						selector: 'edge[EDGE_KIND = "TrueEdge"]',
+						css: {
+							'line-color': 'blue',
+							'target-arrow-color': 'blue',
+						}
+					},
+					{
+						selector: 'edge[EDGE_KIND = "FalseEdge"]',
+						css: {
+							'line-color': 'red',
+							'target-arrow-color': 'red',
+						}
+					},			
+				],
+				
+				ready: function () {
+					var data = '$$$GRAPH_CONTENT$$$'
+					this.graphml({layoutBy: null});
+					this.graphml(data);
+					
+					var expandCollapseOptions = {
+						fisheye: false,
+						animate: false,
+						undoable: false,
+						expandCollapseCuePosition: 'bottom-left',
+						expandCollapseCueSize: 20,
+					};
+					
+					tilingLayout = {
+							name: 'fcose',
+							// - "draft" only applies spectral layout 
+							// - "default" improves the quality with incremental layout (fast cooling rate)
+							// - "proof" improves the quality with incremental layout (slow cooling rate)
+							quality: "proof",
+							randomize: false, // random node positions at start - if false then quality must be "proof" 
+							animate: false,  
+							fit: true, // fit viewport to nodes 
+							padding: 30, // padding around layout
+							nodeDimensionsIncludeLabels: true, // valid in "proof" quality
+							packComponents: false, // Whether to pack disconnected components - cytoscape-layout-utilities extension should be registered and initialized
+							  
+							/* spectral layout options */
+							samplingType: true, // False for random, true for greedy sampling
+							sampleSize: 25, // Sample size to construct distance matrix
+							nodeSeparation: 75, // Separation amount between nodes
+							piTol: 0.0000001, // Power iteration tolerance
+							 
+							/* incremental layout options */
+							nodeRepulsion: node => 4500, // Node repulsion (non overlapping) multiplier
+							idealEdgeLength: edge => 50, // Ideal edge (non nested) length
+							edgeElasticity: edge => 0.45, // Divisor to compute edge forces
+							nestingFactor: 0.1, // Nesting factor (multiplier) to compute ideal edge length for nested edges 
+							numIter: 2500, // Maximum number of iterations to perform - this is a suggested value and might be adjusted by the algorithm as required
+							tile: true, // For enabling tiling  
+							tilingPaddingVertical: 10, // Represents the amount of the vertical space to put between the zero degree members during the tiling operation(can also be a function)
+							tilingPaddingHorizontal: 10, // Represents the amount of the horizontal space to put between the zero degree members during the tiling operation(can also be a function)
+							gravity: 0.25, // Gravity force (constant)
+							gravityRangeCompound: 1.5, // Gravity range (constant) for compounds
+							gravityCompound: 1.0, // Gravity force (constant) for compounds
+							gravityRange: 3.8, // Gravity range (constant)
+							initialEnergyOnIncremental: 0.3, // Initial cooling factor for incremental layout 
+					};
+					nonTilingLayout = {}
+					Object.assign(nonTilingLayout, tilingLayout);
+					nonTilingLayout['tile'] = false;
+					layoutOptions = tilingLayout;
+					
+					api = this.expandCollapse(expandCollapseOptions);
+					api.setOption("layoutBy", layoutOptions);
+					
+					this.on("expandcollapse.beforecollapse", function(event) { 
+						var elem = event.target; 
+						elem.data("collapsed", "yes");
+					});
+					this.on("expandcollapse.afterexpand", function(event) {  
+						var elem = event.target; 
+						elem.data("collapsed", null);
+					});
+					
+					api.collapseAll();
+				}
+			});
 			
-			ready: function () {
-				var data = '$$$GRAPH_CONTENT$$$'
-				this.graphml({layoutBy: null});
-				this.graphml(data);
-				
-				var expandCollapseOptions = {
-					fisheye: false,
-					animate: false,
-					undoable: false,
-					expandCollapseCuePosition: 'bottom-left',
-					expandCollapseCueSize: 20,
-				};
-				
-				tilingLayout = {
-						name: 'fcose',
-						// - "draft" only applies spectral layout 
-						// - "default" improves the quality with incremental layout (fast cooling rate)
-						// - "proof" improves the quality with incremental layout (slow cooling rate)
-						quality: "proof",
-						randomize: false, // random node positions at start - if false then quality must be "proof" 
-						animate: false,  
-						fit: true, // fit viewport to nodes 
-						padding: 30, // padding around layout
-						nodeDimensionsIncludeLabels: true, // valid in "proof" quality
-						packComponents: false, // Whether to pack disconnected components - cytoscape-layout-utilities extension should be registered and initialized
-						  
-						/* spectral layout options */
-						samplingType: true, // False for random, true for greedy sampling
-						sampleSize: 25, // Sample size to construct distance matrix
-						nodeSeparation: 75, // Separation amount between nodes
-						piTol: 0.0000001, // Power iteration tolerance
-						 
-						/* incremental layout options */
-						nodeRepulsion: node => 4500, // Node repulsion (non overlapping) multiplier
-						idealEdgeLength: edge => 50, // Ideal edge (non nested) length
-						edgeElasticity: edge => 0.45, // Divisor to compute edge forces
-						nestingFactor: 0.1, // Nesting factor (multiplier) to compute ideal edge length for nested edges 
-						numIter: 2500, // Maximum number of iterations to perform - this is a suggested value and might be adjusted by the algorithm as required
-						tile: true, // For enabling tiling  
-						tilingPaddingVertical: 10, // Represents the amount of the vertical space to put between the zero degree members during the tiling operation(can also be a function)
-						tilingPaddingHorizontal: 10, // Represents the amount of the horizontal space to put between the zero degree members during the tiling operation(can also be a function)
-						gravity: 0.25, // Gravity force (constant)
-						gravityRangeCompound: 1.5, // Gravity range (constant) for compounds
-						gravityCompound: 1.0, // Gravity force (constant) for compounds
-						gravityRange: 3.8, // Gravity range (constant)
-						initialEnergyOnIncremental: 0.3, // Initial cooling factor for incremental layout 
-				};
-				nonTilingLayout = {}
-				Object.assign(nonTilingLayout, tilingLayout);
-				nonTilingLayout['tile'] = false;
-				layoutOptions = tilingLayout;
-				
-				api = this.expandCollapse(expandCollapseOptions);
-				api.setOption("layoutBy", layoutOptions);
-				
-				this.on("expandcollapse.beforecollapse", function(event) { 
-					var elem = event.target; 
-					elem.data("collapsed", "yes");
-				});
-				this.on("expandcollapse.afterexpand", function(event) {  
-					var elem = event.target; 
-					elem.data("collapsed", null);
-				});
-				
-				api.collapseRecursively(this.nodes('[NODE_KIND = "SUBNODE"]'), {
-										layoutBy: relayout
-									});
+			function relayout() {
+				var layout = cy.layout(layoutOptions);
+				if (layout && layout.run) {
+					layout.run();
+				}
 			}
-		});
-		
-		function relayout() {
-			var layout = cy.layout(layoutOptions);
-			if (layout && layout.run) {
-				layout.run();
+			
+			function toggleNodesVisibility(visible, key, selector) {
+				targets = cy.nodes('[' + key + ' = "' + selector + '"]');
+				console.log((visible ? "showing" : "hiding") + " " + targets.size() + " nodes with '" + key + "' set to '" + selector + "'")
+				if (visible)
+					targets.style('display', 'element');
+				else
+					targets.style('display', 'none');
+				relayout();
 			}
-		}
-		
-		function toggleNodesVisibility(visible, key, selector) {
-			targets = cy.nodes('[' + key + ' = "' + selector + '"]');
-			console.log((visible ? "showing" : "hiding") + " " + targets.size() + " nodes with '" + key + "' set to '" + selector + "'")
-			if (visible)
-				targets.style('display', 'element');
-			else
-				targets.style('display', 'none');
-			relayout();
-		}
-		
-		document.getElementById("relayout").addEventListener("click", function () {
-			relayout();
-		});
-		document.getElementById("tiling").addEventListener("change", function () {
-			if (this.checked)
-				layoutOptions = tilingLayout;
-			else
-				layoutOptions = nonTilingLayout;
-			relayout();
-		});
-		document.getElementById("collapseAll").addEventListener("click", function () {
-			api.collapseAll();
-		});
-		document.getElementById("expandAll").addEventListener("click", function () {
-			api.expandAll();
-		});
-		document.getElementById("collapseSubNodes").addEventListener("click", function () {
-			api.collapseRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
-		});
-		document.getElementById("expandSubNodes").addEventListener("click", function () {
-			api.expandRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
-		});
-		document.getElementById("collapseDescriptions").addEventListener("click", function () {
-			api.collapseRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
-		});
-		document.getElementById("expandDescriptions").addEventListener("click", function () {
-			api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
-		});
-		document.getElementById("defaultView").addEventListener("click", function () {
-			cy.batch(function() {
+			
+			document.getElementById("relayout").addEventListener("click", function () {
+				relayout();
+			});
+			document.getElementById("tiling").addEventListener("change", function () {
+				if (this.checked)
+					layoutOptions = tilingLayout;
+				else
+					layoutOptions = nonTilingLayout;
+				relayout();
+			});
+			document.getElementById("collapseAll").addEventListener("click", function () {
+				api.collapseAll();
+			});
+			document.getElementById("expandAll").addEventListener("click", function () {
 				api.expandAll();
-				api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+			});
+			document.getElementById("collapseSubNodes").addEventListener("click", function () {
 				api.collapseRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
-			})
-		});
-		$$$GRAPH_DISPLAY_LISTENERS$$$
-		</script>
+			});
+			document.getElementById("expandSubNodes").addEventListener("click", function () {
+				api.expandRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
+			});
+			document.getElementById("collapseDescriptions").addEventListener("click", function () {
+				api.collapseRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+			});
+			document.getElementById("expandDescriptions").addEventListener("click", function () {
+				api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
+			});
+			document.getElementById("defaultView").addEventListener("click", function () {
+				api.collapseAll();
+			});
+			$$$GRAPH_DISPLAY_LISTENERS$$$
+			</script>
 	</body>
 </html>
