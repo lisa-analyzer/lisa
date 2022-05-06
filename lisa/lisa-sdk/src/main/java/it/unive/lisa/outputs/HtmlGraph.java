@@ -56,7 +56,10 @@ public class HtmlGraph extends GraphStreamWrapper {
 	public void dump(Writer writer) throws IOException {
 		StringWriter graphWriter = new StringWriter();
 		graph.dump(graphWriter, false);
-		String graphText = graphWriter.toString().replace("&apos;", "'").replace("'", "\\'");
+		String graphText = graphWriter.toString()
+				.replace("&apos;", "'")
+				.replace("'", "\\'")
+				.replace("\n", "\\n");
 		String graphTitle = graph.getTitle();
 		String graphDescription = "";
 		if (StringUtils.isNotBlank(description))
