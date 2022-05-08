@@ -4,7 +4,7 @@ public class Transition {
 	
 	private State source, destination;
 	
-	// if symbol is ' ' means it is an epsilon transaction
+	// if symbol is '' means it is an epsilon transaction
 	private char symbol;
 	 
 	public Transition(State source, State destination, char symbol) {

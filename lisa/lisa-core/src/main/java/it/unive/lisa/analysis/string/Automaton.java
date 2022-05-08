@@ -44,23 +44,35 @@ public class Automaton {
 	
 	// given a string as input the automaton validate it as part of its language or not
 	public boolean validateString(String str) {
-		// store all the possible transition from the set of currentStates with a given symbol
+		// stores all the possible transition from the set of currentStates with a given symbol
 		HashSet<Transition> tr = new HashSet<Transition>();
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
 			// for each state in currentStates add all his transitions with symbol c to tr
 			for(State S : currentStates) {
-				HashSet<Transition> ts = transitions.stream()
-	   												.filter(t -> t.getSource() == S && t.getSymbol() == c)
-	   												.collect(Collectors.toCollection(() -> new HashSet<Transition>()));
-				for(Transition t : ts)
-					tr.add(t);
+				// calcolo l'insieme degli stati raggiungibili tramite eps-transizoni a partire da S e li salvo in eps
+				// TODO: Aggiungere stati successivi
+				HashSet<Transition> epsTr = transitions.stream()
+													   .filter(t -> t.getSource() == S && t.getSymbol() == ' ')
+													   .collect(Collectors.toCollection(() -> new HashSet<Transition>()));
+				HashSet<State> eps = new HashSet<State>();
+				eps.add(S);
+				for(Transition t : epsTr)
+					eps.add(t.getDestination());
+				
+				for(State e : eps) {
+					HashSet<Transition> ts = transitions.stream()
+														.filter(t -> t.getSource() == e && t.getSymbol() == c)
+														.collect(Collectors.toCollection(() -> new HashSet<Transition>()));
+					for(Transition t : ts)
+						tr.add(t);
+				}
 			}
 			currentStates = new HashSet<State>();
 			for(Transition t : tr)
 				currentStates.add(t.getDestination());
 		}
-		//State f = (State)() -> states.stream().filter(s -> s.getId() == currentState).isFinal();
+		// ? ci possono essere epsilon transizioni che portano a stati finali? se si, ce ne puo' essere piu' di una?
 		for(State s : currentStates) {
 			if(s.isFinal())
 				return true;
@@ -68,9 +80,17 @@ public class Automaton {
 		return false;
 	}
 	
+	public void minimize() {
+		reverse();
+		determinize();
+		reach();
+		reverse();
+		determinize();
+		reach();
+	}
+	
 	// delete unreachable states from the automaton
-	// TODO: make it works also with NFA
-	public void reach() {
+	private void reach() {
 		defineAlphabet();
 		HashSet<State> RS = new HashSet<State>();
 		HashSet<State> NS = new HashSet<State>();
@@ -95,7 +115,7 @@ public class Automaton {
 	}
 	
 	// make the automaton accept his reverse language
-	public void reverse() {
+	private void reverse() {
 		for(Transition t : transitions) {
 			t = new Transition(t.getDestination(), t.getSource(), t.getSymbol());
 		}
@@ -112,7 +132,7 @@ public class Automaton {
 	}
 	
 	// make the automaton deterministic
-	public void determinize() {
+	private void determinize() {
 		// TODO: costruzione per sottoinsiemi
 	}
 	
