@@ -4,6 +4,7 @@ public class Transition {
 	
 	private State source, destination;
 	
+	// if symbol is ' ' means it is an epsilon transaction
 	private char symbol;
 	 
 	public Transition(State source, State destination, char symbol) {
@@ -22,7 +23,7 @@ public class Transition {
 		return this.symbol;
 	}
 	
-	public State doTransition() {
+	public State getDestination() {
 		return this.destination;
 	}
 }

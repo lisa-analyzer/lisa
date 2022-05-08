@@ -13,12 +13,12 @@ public class State {
 		this.isFinal = isFinal;
 	}
 	
-	public void setFinal() {
-		this.isFinal = true;
+	public void setFinal(boolean fin) {
+		this.isFinal = fin;
 	}
 	
-	public void setInitial() {
-		this.isInitial = true;
+	public void setInitial(boolean init) {
+		this.isInitial = init;
 	}
 	
 	public boolean isFinal() { 
