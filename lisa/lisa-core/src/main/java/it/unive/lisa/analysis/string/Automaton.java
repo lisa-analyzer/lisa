@@ -4,82 +4,71 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 public class Automaton {
-	
+
 	private HashSet<State> states;
-	
+
 	private HashSet<Transition> transitions;
-	
+
 	// for non deterministic automaton, I can virtually have more than one current state
 	private HashSet<State> currentStates;
-	
+
 	private State initialState;
-	
+
 	private HashSet<Character> alphabet;
-	
+
 	// constructor
 	public Automaton() {
 		states = new HashSet<State>();
-		transitions = new HashSet<Transition>();
-		currentStates = new HashSet<State>();
-		alphabet = new HashSet<Character>();
+		transitions = new HashSet<>();
+		currentStates = new HashSet<>();
+		alphabet = new HashSet<>();
 	}
-	
+
 	// add a new a transition to the automaton
 	public void addTransition(Transition t) {
 		transitions.add(t);
 	}
-	
+
 	// add a new state to the automaton 
 	public void addState(State s) {
 		if(s.isInitial())
 			setInitialState(s);
 		states.add(s);
 	}
-	
+
 	// set initial state of the automaton
 	private void setInitialState(State s) {
 		initialState = s;
 		currentStates.add(s);
 	}
-	
+
 	// given a string as input the automaton validate it as part of its language or not
 	public boolean validateString(String str) {
 		// stores all the possible transition from the set of currentStates with a given symbol
-		HashSet<Transition> tr = new HashSet<Transition>();
+		HashSet<Transition> tr = new HashSet<>();
+		HashSet<State> dest;
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
+			dest = new HashSet<>();
 			// for each state in currentStates add all his transitions with symbol c to tr
-			for(State S : currentStates) {
-				// calcolo l'insieme degli stati raggiungibili tramite eps-transizoni a partire da S e li salvo in eps
-				// TODO: Aggiungere stati successivi
-				HashSet<Transition> epsTr = transitions.stream()
-													   .filter(t -> t.getSource() == S && t.getSymbol() == ' ')
-													   .collect(Collectors.toCollection(() -> new HashSet<Transition>()));
-				HashSet<State> eps = new HashSet<State>();
-				eps.add(S);
-				for(Transition t : epsTr)
-					eps.add(t.getDestination());
-				
-				for(State e : eps) {
-					HashSet<Transition> ts = transitions.stream()
-														.filter(t -> t.getSource() == e && t.getSymbol() == c)
-														.collect(Collectors.toCollection(() -> new HashSet<Transition>()));
-					for(Transition t : ts)
-						tr.add(t);
-				}
+			currentStates = epsTransition(currentStates);
+			for(State s : currentStates) {
+				tr = transitions.stream()
+						.filter(t -> t.getSource() == s && t.getSymbol() == c)
+						.collect(Collectors.toCollection(() -> new HashSet<>()));
+				for(Transition t : tr)
+					dest.add(t.getDestination());
 			}
-			currentStates = new HashSet<State>();
-			for(Transition t : tr)
-				currentStates.add(t.getDestination());
+			currentStates = dest;
 		}
-		// ? ci possono essere epsilon transizioni che portano a stati finali? se si, ce ne puo' essere piu' di una?
+		currentStates = epsTransition(currentStates);
 		for(State s : currentStates) {
 			if(s.isFinal())
 				return true;
 		}
 		return false;
 	}
-	
+
 	public void minimize() {
 		reverse();
 		determinize();
@@ -88,23 +77,23 @@ public class Automaton {
 		determinize();
 		reach();
 	}
-	
+
 	// delete unreachable states from the automaton
 	private void reach() {
 		defineAlphabet();
-		HashSet<State> RS = new HashSet<State>();
-		HashSet<State> NS = new HashSet<State>();
+		HashSet<State> RS = new HashSet<>();
+		HashSet<State> NS = new HashSet<>();
 		RS.add(initialState);
 		do {
 			for(State S: NS) {
 				// prendo tutti gli stati in cui lo stato corrente  e' sorgente ma non destinazione
 				// NS <- T\RS ~> nello pseudocodice
 				HashSet<Transition> tr = transitions.stream()
-										   			.filter(t -> t.getSource() == S && t.getDestination() != S)
-										   			.collect(Collectors.toCollection(() -> new HashSet<Transition>()));
+						.filter(t -> t.getSource() == S && t.getDestination() != S)
+						.collect(Collectors.toCollection(() -> new HashSet<>()));
 				// creo un nuovo oggetto per poter aggiungere direttamente gli stati senza dover
 				// rimuovere quelli che c'erano gia'
-				NS = new HashSet<State>();
+				NS = new HashSet<>();
 				for(Transition t : tr) {
 					NS.add(t.getDestination());
 					RS.add(t.getDestination());
@@ -113,7 +102,7 @@ public class Automaton {
 		} while(!NS.isEmpty());
 		states = RS;
 	}
-	
+
 	// make the automaton accept his reverse language
 	private void reverse() {
 		for(Transition t : transitions) {
@@ -130,16 +119,56 @@ public class Automaton {
 			}
 		}
 	}
-	
+
 	// make the automaton deterministic
 	private void determinize() {
 		// TODO: costruzione per sottoinsiemi
 	}
-	
+
 	// get the automaton alphabet using defined transitions
 	private void defineAlphabet() {
 		for(Transition T : transitions) {
 			alphabet.add(T.getSymbol());
 		}
 	}
+
+	private HashSet<State> epsTransition(State state) {
+		// uso nc per tenere all'interno tutti gli stati per cui non ho ancora controllato
+		// se ci sono eps-transition nella catena e eps per salvare tutti gli stati su cui arrivo
+		HashSet<State> nc = new HashSet<>();
+		HashSet<State> eps = new HashSet<>();
+		State st;
+		eps.add(state);
+		nc.add(state);
+		// ? in teoria non ci dovrebbero essere cicli di eps-transizioni, se no questo approccio non va
+		do {
+			for(State s : nc) {
+				HashSet<Transition> tr = transitions.stream()
+						// ? escludo eps-transition che lasciano invariato lo stato(non sono sicuro ci possano essere)
+						.filter(t -> t.getSource() == s && t.getSymbol() == ' ' && t.getDestination() != s)
+						.collect(Collectors.toCollection(() -> new HashSet<>()));
+				
+				for(Transition t: tr) {
+					st = t.getDestination();
+					eps.add(st);
+					nc.add(st);
+				}
+				nc.remove(s);
+			}
+		} while(!nc.isEmpty());
+			
+		return eps;
+	}
+
+	private HashSet<State> epsTransition(HashSet<State> st) {
+		HashSet<State> eps = new HashSet<>();
+		
+		for(State s : st) {
+			HashSet<State> e = epsTransition(s);
+			for(State q : e)
+				eps.add(q);
+		}
+		return eps;
+	}
+
 }
