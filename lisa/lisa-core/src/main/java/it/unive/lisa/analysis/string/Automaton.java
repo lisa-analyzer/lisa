@@ -132,37 +132,35 @@ public class Automaton {
 		}
 	}
 
+	// ? mi sembra ok, ma nella pratica non funziona
+	// compute all the states reachable using epsilon transition from a given state
 	private HashSet<State> epsTransition(State state) {
-		// uso nc per tenere all'interno tutti gli stati per cui non ho ancora controllato
-		// se ci sono eps-transition nella catena e eps per salvare tutti gli stati su cui arrivo
-		HashSet<State> nc = new HashSet<>();
 		HashSet<State> eps = new HashSet<>();
-		State st;
+		HashSet<Transition> tr = transitions.stream()
+				.filter(t -> t.getSource() == state && t.getSymbol() == ' ')
+				.collect(Collectors.toCollection(()->new HashSet<>()));
+		
+		// caso base: se non ho eps-transition restituisco l'insieme vuoto
+		if(tr.isEmpty())
+			return eps;
+		
+		// aggiungo lo stato corrente a eps
 		eps.add(state);
-		nc.add(state);
-		// ? in teoria non ci dovrebbero essere cicli di eps-transizioni, se no questo approccio non va
-		do {
-			for(State s : nc) {
-				HashSet<Transition> tr = transitions.stream()
-						// ? escludo eps-transition che lasciano invariato lo stato(non sono sicuro ci possano essere)
-						.filter(t -> t.getSource() == s && t.getSymbol() == ' ' && t.getDestination() != s)
-						.collect(Collectors.toCollection(() -> new HashSet<>()));
-				
-				for(Transition t: tr) {
-					st = t.getDestination();
-					eps.add(st);
-					nc.add(st);
-				}
-				nc.remove(s);
-			}
-		} while(!nc.isEmpty());
-			
+		
+		// per ogni stato calcolo le eps-transition dello stato stesso
+		for(Transition t : tr) {
+			State s = t.getDestination();
+			for(State e : epsTransition(s))
+				eps.add(e);
+		}
+
 		return eps;
 	}
 
+	// compute the epsilon transitions for a set of given states
 	private HashSet<State> epsTransition(HashSet<State> st) {
 		HashSet<State> eps = new HashSet<>();
-		
+
 		for(State s : st) {
 			HashSet<State> e = epsTransition(s);
 			for(State q : e)
