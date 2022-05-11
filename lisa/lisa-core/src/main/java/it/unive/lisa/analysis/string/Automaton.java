@@ -1,26 +1,23 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Automaton {
 
-	private HashSet<State> states;
+	private final Set<State> states;
 
-	private HashSet<Transition> transitions;
-
-	// for non deterministic automaton, I can virtually have more than one current state
-	private HashSet<State> currentStates;
+	private final Set<Transition> transitions;
 
 	private State initialState;
 
-	private HashSet<Character> alphabet;
+	private final Set<Character> alphabet;
 
 	// constructor
 	public Automaton() {
-		states = new HashSet<State>();
+		states = new HashSet<>();
 		transitions = new HashSet<>();
-		currentStates = new HashSet<>();
 		alphabet = new HashSet<>();
 	}
 
@@ -36,17 +33,11 @@ public class Automaton {
 		states.add(s);
 	}
 
-	// set initial state of the automaton
-	private void setInitialState(State s) {
-		initialState = s;
-		currentStates.add(s);
-	}
-
 	// given a string as input the automaton validate it as part of its language or not
 	public boolean validateString(String str) {
 		// stores all the possible transition from the set of currentStates with a given symbol
-		HashSet<Transition> tr = new HashSet<>();
-		HashSet<State> dest;
+		Set<Transition> tr = new HashSet<>();
+		Set<State> dest;
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
 			dest = new HashSet<>();
@@ -134,11 +125,12 @@ public class Automaton {
 
 	// ? mi sembra ok, ma nella pratica non funziona
 	// compute all the states reachable using epsilon transition from a given state
-	private HashSet<State> epsTransition(State state) {
-		HashSet<State> eps = new HashSet<>();
-		HashSet<Transition> tr = transitions.stream()
-				.filter(t -> t.getSource() == state && t.getSymbol() == ' ')
-				.collect(Collectors.toCollection(()->new HashSet<>()));
+	private Set<State> epsTransition(State state) {
+		Set<State> eps = new HashSet<>();
+		Set<State> tr = transitions.stream()
+				.filter(t -> t.getSource().equals(state) && t.getSymbol() == ' ')
+				.map(t -> t.getSource())
+				.collect(Collectors.toSet());
 		
 		// caso base: se non ho eps-transition restituisco l'insieme vuoto
 		if(tr.isEmpty())
@@ -152,17 +144,16 @@ public class Automaton {
 			State s = t.getDestination();
 			for(State e : epsTransition(s))
 				eps.add(e);
-		}
 
 		return eps;
 	}
 
 	// compute the epsilon transitions for a set of given states
-	private HashSet<State> epsTransition(HashSet<State> st) {
-		HashSet<State> eps = new HashSet<>();
+	private Set<State> epsTransition(Set<State> st) {
+		Set<State> eps = new HashSet<>();
 
 		for(State s : st) {
-			HashSet<State> e = epsTransition(s);
+			Set<State> e = epsTransition(s);
 			for(State q : e)
 				eps.add(q);
 		}
