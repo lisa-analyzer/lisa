@@ -3,7 +3,18 @@ package it.unive.lisa.analysis.string;
 import java.util.Objects;
 
 public class State {
-@Override
+
+	private final int id;
+	
+	private final boolean isFinal, isInitial;
+	
+	public State(int id, boolean isInitial, boolean isFinal) {
+		this.id = id;
+		this.isInitial = isInitial;
+		this.isFinal = isFinal;
+	}
+	
+	@Override
 	public int hashCode() {
 		return Objects.hash(id, isFinal, isInitial);
 	}
@@ -18,26 +29,6 @@ public class State {
 			return false;
 		State other = (State) obj;
 		return id == other.id && isFinal == other.isFinal && isInitial == other.isInitial;
-	}
-
-	// per avere q0, q1, ..., qn in maniera indipendente
-	// dalla memorizzazione
-	private int id;
-	
-	private boolean isFinal, isInitial;
-	
-	public State(int id, boolean isInitial, boolean isFinal) {
-		this.id = id;
-		this.isInitial = isInitial;
-		this.isFinal = isFinal;
-	}
-	
-	public void setFinal(boolean fin) {
-		this.isFinal = fin;
-	}
-	
-	public void setInitial(boolean init) {
-		this.isInitial = init;
 	}
 	
 	public boolean isFinal() { 
