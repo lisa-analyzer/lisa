@@ -1,5 +1,7 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collections;
 import java.util.List;
@@ -55,6 +57,7 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	 * 
 	 * @return the ids of the subnodes
 	 */
+	@JsonInclude(value = Include.NON_EMPTY)
 	public List<Integer> getSubNodes() {
 		return subNodes;
 	}

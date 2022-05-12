@@ -1,8 +1,6 @@
 package it.unive.lisa.outputs.serializableGraph;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
@@ -44,7 +42,6 @@ public abstract class SerializableValue implements Comparable<SerializableValue>
 	 * 
 	 * @return the properties
 	 */
-	@JsonInclude(value = Include.NON_EMPTY)
 	public SortedMap<String, String> getProperties() {
 		return properties;
 	}
