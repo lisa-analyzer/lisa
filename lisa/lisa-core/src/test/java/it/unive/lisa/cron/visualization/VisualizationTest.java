@@ -64,9 +64,23 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void testGRAPHML_WITH_SUBNODES() throws AnalysisSetupException {
+		LiSAConfiguration conf = config();
+		conf.setDumpAnalysis(GraphType.GRAPHML_WITH_SUBNODES);
+		perform("visualization", "graphml-sub", "program.imp", conf);
+	}
+
+	@Test
 	public void testHTML() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
 		conf.setDumpAnalysis(GraphType.HTML);
 		perform("visualization", "html", "program.imp", conf);
+	}
+
+	@Test
+	public void testHTML_WITH_SUBNODES() throws AnalysisSetupException {
+		LiSAConfiguration conf = config();
+		conf.setDumpAnalysis(GraphType.HTML_WITH_SUBNODES);
+		perform("visualization", "html-sub", "program.imp", conf);
 	}
 }

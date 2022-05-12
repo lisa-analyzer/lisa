@@ -40,9 +40,19 @@ public class LiSAConfiguration {
 
 		/**
 		 * Graphs are dumped as an html page using javascript to visualize the
-		 * graphs.
+		 * graphs. Only root-level nodes are included in the graph: to get a
+		 * complete graph with subn-odes, use {@link #HTML_WITH_SUBNODES}.
 		 */
 		HTML,
+
+		/**
+		 * Graphs are dumped as an html page using javascript to visualize the
+		 * graphs. All nodes, including sub-nodes, are part of the visualized,
+		 * creating a compound graph. Note: graphs generated with this option
+		 * are big: files will have larger dimension and the viewer will be
+		 * slower. For a lighter alternative, use {@link #HTML}.
+		 */
+		HTML_WITH_SUBNODES,
 
 		/**
 		 * Graphs are dumped in Dot format.
@@ -50,9 +60,20 @@ public class LiSAConfiguration {
 		DOT,
 
 		/**
-		 * Graphs are dumped in compound GraphML format.
+		 * Graphs are dumped in compound GraphML format. Only root-level nodes
+		 * are included in the graph: to get a complete graph with sub-nodes,
+		 * use {@link #GRAPHML_WITH_SUBNODES}.
 		 */
-		GRAPHML;
+		GRAPHML,
+
+		/**
+		 * Graphs are dumped in compound GraphML format.All nodes, including
+		 * sub-nodes, are part of the graph, creating a compound graph. Note:
+		 * graphs generated with this option are big: files will have larger
+		 * dimension and the viewer will be slower. For a lighter alternative,
+		 * use {@link #GRAPHML}.
+		 */
+		GRAPHML_WITH_SUBNODES;
 	}
 
 	/**

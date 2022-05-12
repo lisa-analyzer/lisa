@@ -255,9 +255,12 @@ public class SerializableGraph {
 	/**
 	 * Converts this graph to a {@link GraphmlGraph}.
 	 * 
+	 * @param includeSubnodes whether or not sub-nodes should be part of the
+	 *                            graph
+	 * 
 	 * @return the converted graph
 	 */
-	public GraphmlGraph toGraphml() {
+	public GraphmlGraph toGraphml(boolean includeSubnodes) {
 		GraphmlGraph graph = new GraphmlGraph(name);
 
 		Set<Integer> hasFollows = new HashSet<>();
@@ -281,22 +284,25 @@ public class SerializableGraph {
 		});
 
 		for (SerializableNode n : nodes)
-			graph.addNode(n,
-					!hasPreds.contains(n.getId()) && rootnodes.contains(n.getId()),
-					!hasFollows.contains(n.getId()) && rootnodes.contains(n.getId()),
-					labels.get(n.getId()));
+			if (includeSubnodes || rootnodes.contains(n.getId()))
+				graph.addNode(n,
+						!hasPreds.contains(n.getId()) && rootnodes.contains(n.getId()),
+						!hasFollows.contains(n.getId()) && rootnodes.contains(n.getId()),
+						labels.get(n.getId()));
 
-		while (!containers.isEmpty()) {
-			Set<Entry<SerializableNode, SerializableNode>> leaves = containers.entrySet().stream()
-					.filter(entry -> !containers.containsValue(entry.getKey())).collect(Collectors.toSet());
-			leaves.forEach(entry -> {
-				graph.markSubNode(entry.getValue(), entry.getKey());
-				containers.remove(entry.getKey());
-			});
-		}
+		if (includeSubnodes)
+			while (!containers.isEmpty()) {
+				Set<Entry<SerializableNode, SerializableNode>> leaves = containers.entrySet().stream()
+						.filter(entry -> !containers.containsValue(entry.getKey())).collect(Collectors.toSet());
+				leaves.forEach(entry -> {
+					graph.markSubNode(entry.getValue(), entry.getKey());
+					containers.remove(entry.getKey());
+				});
+			}
 
 		for (SerializableEdge e : edges)
-			graph.addEdge(e);
+			if (includeSubnodes || (rootnodes.contains(e.getSourceId()) && rootnodes.contains(e.getDestId())))
+				graph.addEdge(e);
 
 		return graph;
 	}
@@ -304,6 +310,8 @@ public class SerializableGraph {
 	/**
 	 * Converts this graph to an {@link HtmlGraph}.
 	 * 
+	 * @param includeSubnodes  whether or not sub-nodes should be part of the
+	 *                             graph
 	 * @param descriptionLabel the display name of the descriptions, used as
 	 *                             label in the collapse/expand toggles
 	 * @param displayKey       the name of the attribute that has to be searched
@@ -312,7 +320,7 @@ public class SerializableGraph {
 	 * 
 	 * @return the converted graph
 	 */
-	public HtmlGraph toHtml(String descriptionLabel, String displayKey) {
+	public HtmlGraph toHtml(boolean includeSubnodes, String descriptionLabel, String displayKey) {
 		SortedSet<String> classes = new TreeSet<>();
 		for (SerializableNodeDescription descr : descriptions) {
 			for (Entry<String, String> entry : descr.getDescription().getProperties().entrySet())
@@ -325,7 +333,7 @@ public class SerializableGraph {
 						classes.add(entry.getValue());
 		}
 
-		GraphmlGraph graphml = toGraphml();
+		GraphmlGraph graphml = toGraphml(includeSubnodes);
 		return new HtmlGraph(graphml, description, descriptionLabel, displayKey, classes);
 	}
 

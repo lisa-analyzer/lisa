@@ -159,6 +159,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		GraphType type = conf.getAnalysisGraphs();
 		if (conf.isSerializeResults() || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
+			boolean htmlViewer = false;
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -172,13 +173,31 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						if (conf.isSerializeResults())
 							fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 
-						if (type == LiSAConfiguration.GraphType.GRAPHML)
-							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml().dump(writer));
-						else if (type == LiSAConfiguration.GraphType.HTML)
-							fileManager.mkHtmlFile(filename, writer -> graph
-									.toHtml("results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
-						else if (type == LiSAConfiguration.GraphType.DOT)
+						switch (type) {
+						case DOT:
 							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
+							break;
+						case GRAPHML:
+							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(false).dump(writer));
+							break;
+						case GRAPHML_WITH_SUBNODES:
+							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
+							break;
+						case HTML:
+							fileManager.mkHtmlFile(filename, writer -> graph
+									.toHtml(false, "results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
+							htmlViewer = true;
+							break;
+						case HTML_WITH_SUBNODES:
+							fileManager.mkHtmlFile(filename, writer -> graph
+									.toHtml(true, "results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
+							htmlViewer = true;
+							break;
+						case NONE:
+							break;
+						default:
+							throw new AnalysisExecutionException("Unknown graph type: " + type);
+						}
 					} catch (IOException e) {
 						LOG.error("Exception while dumping the analysis results on {}",
 								cfg.getDescriptor().getFullSignature());
@@ -186,7 +205,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					}
 				}
 
-			if (type == GraphType.HTML && fileManager.createdFiles().size() != nfiles)
+			if (htmlViewer && fileManager.createdFiles().size() != nfiles)
 				try {
 					// we dumped at least one file: need to copy the
 					// javascript files

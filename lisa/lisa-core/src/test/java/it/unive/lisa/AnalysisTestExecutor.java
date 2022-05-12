@@ -193,9 +193,11 @@ public abstract class AnalysisTestExecutor {
 		File expFile = Paths.get(expectedPath.toString(), "report.json").toFile();
 		File actFile = Paths.get(actualPath.toString(), "report.json").toFile();
 
-		if (!expFile.exists())
+		if (!expFile.exists()) {
 			// no baseline defined, we end the test here
+			System.out.println("No 'report.json' found in the expected folder, exiting...");
 			return;
+		}
 
 		boolean update = "true".equals(System.getProperty("lisa.cron.update")) || forceUpdate;
 		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
