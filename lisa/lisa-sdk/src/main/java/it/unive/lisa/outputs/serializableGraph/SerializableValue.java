@@ -3,9 +3,8 @@ package it.unive.lisa.outputs.serializableGraph;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collection;
 import java.util.Map.Entry;
@@ -18,12 +17,8 @@ import java.util.TreeMap;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.PROPERTY, property = "@type")
-@JsonSubTypes({
-		@JsonSubTypes.Type(value = SerializableArray.class, name = "array"),
-		@JsonSubTypes.Type(value = SerializableObject.class, name = "object"),
-		@JsonSubTypes.Type(value = SerializableString.class, name = "string")
-})
+@JsonSerialize(using = ValueSerializer.class)
+@JsonDeserialize(using = ValueDeserializer.class)
 public abstract class SerializableValue implements Comparable<SerializableValue> {
 
 	private final SortedMap<String, String> properties;
