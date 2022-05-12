@@ -6,19 +6,51 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import java.io.IOException;
 import java.util.SortedMap;
 
+/**
+ * Custom Jackson serializer for {@link SerializableValue}s that tries to reduce
+ * the size of the generated json files.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ValueSerializer extends StdSerializer<SerializableValue> {
 
 	private static final long serialVersionUID = 2323974954619016107L;
 
+	/**
+	 * Field name to represent {@link SerializableObject}s' fields when
+	 * properties are present, thus preventing field-less serialization.
+	 */
 	static final String OBJECT_ELEMENTS_FIELD = "fields";
+
+	/**
+	 * Field name to represent {@link SerializableArray}s' elements when
+	 * properties are present, thus preventing field-less serialization.
+	 */
 	static final String ARRAY_ELEMENTS_FIELD = "elements";
+
+	/**
+	 * Field name to represent {@link SerializableString}s' values when
+	 * properties are present, thus preventing field-less serialization.
+	 */
 	static final String STRING_VALUE_FIELD = "value";
+
+	/**
+	 * Field name for the general properties of values.
+	 */
 	static final String LISA_PROPERTIES_FIELD = "lisaproperties";
 
+	/**
+	 * Builds the serializer.
+	 */
 	public ValueSerializer() {
 		this(null);
 	}
 
+	/**
+	 * Builds the serializer.
+	 * 
+	 * @param t the class to be serialized
+	 */
 	public ValueSerializer(Class<SerializableValue> t) {
 		super(t);
 	}

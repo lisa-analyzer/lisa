@@ -13,15 +13,29 @@ import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * Custom Jackson deserializer for {@link SerializableValue}s, built to read
+ * back what is serialized by {@link ValueSerializer}.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class ValueDeserializer extends StdDeserializer<SerializableValue> {
 
 	private static final long serialVersionUID = -5817422267160292909L;
 
+	/**
+	 * Builds the deserializer.
+	 */
 	public ValueDeserializer() {
 		this(null);
 	}
 
-	protected ValueDeserializer(Class<SerializableValue> t) {
+	/**
+	 * Builds the deserializer.
+	 * 
+	 * @param t the class to be deserialized
+	 */
+	public ValueDeserializer(Class<SerializableValue> t) {
 		super(t);
 	}
 
