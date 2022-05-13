@@ -12,7 +12,7 @@ public class ValidateString {
 
 	// testing dfa
 	@Test
-	public void dfa() {
+	public void testDfa() {
 		Set<State> states = new HashSet<>();
 		Set<State> initialStates = new HashSet<>();
 		Set<State> finalStates = new HashSet<>();
@@ -42,7 +42,6 @@ public class ValidateString {
 		transitions.add(new Transition(st[2], st[3], 'b'));
 		transitions.add(new Transition(st[3], st[4], 'a'));
 
-		// accepts {a^n b^m}^p cba
 		Automaton dfa = new Automaton(states, transitions, initialStates, finalStates);
 
 		assertTrue(dfa.validateString("aabbababcba"));
@@ -53,19 +52,20 @@ public class ValidateString {
 		assertFalse(dfa.validateString("cabcba"));
 	}
 
+	// testing nfa
 	@Test
-	public void dfa1() {
+	public void testNfa() {
 		Set<State> states = new HashSet<>();
 		Set<State> initialStates = new HashSet<>();
 		Set<State> finalStates = new HashSet<>();
-		State[] st = new State[7];
+		State[] st = new State[6];
 		State s;
-		for(int i = 0; i < 7; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			if(i == 0) {
 				s = new State(i, true, false);
 				initialStates.add(s);
 			}
-			else if(i == 5 || i == 6) {
+			else if(i == 1 || i == 2) {
 				s = new State(i, false, true); 
 				finalStates.add(s);
 			}
@@ -76,46 +76,27 @@ public class ValidateString {
 			states.add(s);
 		}
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[1], 'a'));
-		transitions.add(new Transition(st[1], st[2], 'b'));
-		transitions.add(new Transition(st[2], st[3], 'c'));
-		transitions.add(new Transition(st[3], st[3], 'd'));
-		transitions.add(new Transition(st[3], st[4], 'c'));
-		transitions.add(new Transition(st[4], st[5], 'b'));
-		transitions.add(new Transition(st[5], st[5], 'b'));
-		transitions.add(new Transition(st[5], st[6], 'a'));
-		transitions.add(new Transition(st[6], st[6], 'a'));
+		transitions.add(new Transition(st[0], st[0], 'a'));
+		transitions.add(new Transition(st[0], st[2], 'a'));
+		transitions.add(new Transition(st[1], st[3], 'a'));
+		transitions.add(new Transition(st[2], st[5], 'b'));
+		transitions.add(new Transition(st[3], st[4], 'a'));
+		transitions.add(new Transition(st[4], st[1], 'b'));
+		transitions.add(new Transition(st[5], st[2], 'a'));
 
-
-		// accepts abcd^ncb^na^n
 		Automaton dfa = new Automaton(states, transitions, initialStates, finalStates);
 
-		assertTrue(dfa.validateString("abcdddcbbaa"));
-		assertTrue(dfa.validateString("abcdddcbbbb"));
+		assertTrue(dfa.validateString("ababababababa"));
+		assertTrue(dfa.validateString("ababababababab"));
 
-		assertFalse(dfa.validateString("abcdcdbba"));
-		assertFalse(dfa.validateString("abcdcbbab"));
-	}
-
-	// testing nfa
-	@Test
-	public void nfa() {
-		
-	}
-
-	@Test
-	public void nfa1() {
-
+		assertFalse(dfa.validateString("bababababab"));
+		assertFalse(dfa.validateString("abababababb"));
 	}
 
 	// testing epsilon nfa
 	@Test
-	public void enfa() {
+	public void testEpsNfa() {
 
 	}
 
-	@Test
-	public void enfa1() {
-
-	}
 }
