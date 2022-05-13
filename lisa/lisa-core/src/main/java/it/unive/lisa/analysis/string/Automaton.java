@@ -49,7 +49,7 @@ public class Automaton {
 		Set<State> currentStates = epsClosure(initialStates);
 		// stores all the states reached after char computation
 		Set<State> dest = new HashSet<>();
-
+		
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
 			for(State s : currentStates) {
@@ -158,22 +158,33 @@ public class Automaton {
 	// compute all the states reachable using epsilon closures from a given state
 	private Set<State> epsClosure(State state) {
 		Set<State> eps = new HashSet<>();
+		eps.add(state);
+		// used to make sure that a state isn't checked twice
 		Set<State> checked = new HashSet<>();
-		Set<State> ce;
+		// collect all the possible destination from the current state
 		Set<State> dest;
+		// used to collect new states that have to be added to esp inside for loop
+		Set<State> temp;
 		// add current state
 		do {
-			ce = new HashSet<>();
+			temp = new HashSet<>();
 			for(State s : eps) {
+				if(checked.contains(s))
+					continue;
+				
 				checked.add(s);
+				
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-				ce.addAll(dest);
+				
+				temp.addAll(dest);	
 			}
-			eps.addAll(ce);
-		} while(!checked.equals(eps));
+			
+			eps.addAll(temp);
+			
+		} while(!checked.containsAll(eps));
 		
 		return eps;
 	}
