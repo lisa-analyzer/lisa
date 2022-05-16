@@ -10,6 +10,7 @@ import java.util.SortedMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
@@ -30,7 +31,7 @@ public class HtmlGraph extends GraphStreamWrapper {
 
 	private final String description;
 
-	private final SortedMap<String, SerializableNodeDescription> descriptions;
+	private final SortedMap<Integer, Pair<String, SerializableNodeDescription>> descriptions;
 
 	private final String descriptionLabel;
 
@@ -42,19 +43,18 @@ public class HtmlGraph extends GraphStreamWrapper {
 	 * @param graph            the wrapped {@link GraphmlGraph}
 	 * @param includeSubnodes  whether or not sub-nodes should be part of the
 	 *                             graph
-	 * @param descriptions     a map from a node text to their
-	 *                             {@link SerializableNodeDescription}s
+	 * @param map              a map from a node id to its text and description
 	 * @param description      the description of the graph, used as subtitle
 	 *                             (can be {@code null})
 	 * @param descriptionLabel the display name of the descriptions, used as
 	 *                             label in the collapse/expand toggles
 	 */
 	public HtmlGraph(GraphmlGraph graph, boolean includeSubnodes,
-			SortedMap<String, SerializableNodeDescription> descriptions,
+			SortedMap<Integer, Pair<String, SerializableNodeDescription>> map,
 			String description, String descriptionLabel) {
 		super();
 		this.graph = graph;
-		this.descriptions = descriptions;
+		this.descriptions = map;
 		this.description = description;
 		this.descriptionLabel = descriptionLabel;
 		this.includeSubnodes = includeSubnodes;
@@ -82,19 +82,20 @@ public class HtmlGraph extends GraphStreamWrapper {
 			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
 
 			StringBuilder descrs = new StringBuilder();
-			for (Entry<String, SerializableNodeDescription> d : descriptions.entrySet()) {
-				String nodeName = nodeName(d.getValue().getNodeId());
+			for (Entry<Integer, Pair<String, SerializableNodeDescription>> d : descriptions.entrySet()) {
+				String nodeName = nodeName(d.getKey());
 				if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
 					descrs.append("\t\t\t\t<div id=\"header-")
 							.append(nodeName)
 							.append("\" class=\"header-hidden\">\n");
-					descrs.append("\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
+					descrs.append(
+							"\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
 							.append(StringUtils.capitalize(descriptionLabel))
 							.append(" for ")
 							.append("</span><span class=\"description-title-text\">")
-							.append(d.getKey())
+							.append(d.getValue().getLeft())
 							.append("</span></div>\n");
-					populate(descrs, 5, d.getValue().getDescription());
+					populate(descrs, 5, d.getValue().getRight().getDescription());
 					descrs.append("\t\t\t\t</div>\n");
 				}
 			}

@@ -1,10 +1,5 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.GraphmlGraph;
-import it.unive.lisa.outputs.HtmlGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -19,6 +14,15 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.GraphmlGraph;
+import it.unive.lisa.outputs.HtmlGraph;
 
 /**
  * A graph that can be serialized. This graph contains {@link SerializableNode}s
@@ -324,11 +328,11 @@ public class SerializableGraph {
 		SerializableGraph g = new SerializableGraph(name, description, nodes, edges, Collections.emptySortedSet());
 		GraphmlGraph graphml = g.toGraphml(includeSubnodes);
 		
-		SortedMap<String, SerializableNodeDescription> map = new TreeMap<>();
+		SortedMap<Integer, Pair<String, SerializableNodeDescription>> map = new TreeMap<>();
 		for (SerializableNodeDescription d : descriptions)
 			for (SerializableNode n : nodes)
 				if (d.getNodeId() == n.getId()) {
-					map.put(n.getText(), d);
+					map.put(n.getId(), Pair.of(n.getText(), d));
 					break;
 				}
 		return new HtmlGraph(graphml, includeSubnodes, map, description, descriptionLabel);
