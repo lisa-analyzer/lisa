@@ -265,8 +265,12 @@ public class FileManager {
 	}
 
 	/**
-	 * Generates, inside the working directory, all supporting files needed for
-	 * correct visualization of graphs dumped in html format.
+	 * Generates, inside the working directory, all supporting files (mostly
+	 * cytoscape.js) needed for correct visualization of graphs dumped in html
+	 * format.
+	 * 
+	 * @param compound whether the support files need to include
+	 *                     compound-related cytoscape layouts
 	 * 
 	 * @throws IOException if an error happens during the generation
 	 */
