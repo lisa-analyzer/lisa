@@ -160,7 +160,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		GraphType type = conf.getAnalysisGraphs();
 		if (conf.isSerializeResults() || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
-			boolean htmlViewer = false;
+			boolean htmlViewer = false, subnodes = false;
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -183,6 +183,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 							break;
 						case GRAPHML_WITH_SUBNODES:
 							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
+							subnodes = true;
 							break;
 						case HTML:
 							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
@@ -191,6 +192,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						case HTML_WITH_SUBNODES:
 							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
 							htmlViewer = true;
+							subnodes = true;
 							break;
 						case NONE:
 							break;
@@ -208,7 +210,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				try {
 					// we dumped at least one file: need to copy the
 					// javascript files
-					fileManager.generateHtmlViewerSupportFiles();
+					fileManager.generateHtmlViewerSupportFiles(subnodes);
 				} catch (IOException e) {
 					LOG.error("Exception while generating supporting files for the html viwer");
 					LOG.error(e);

@@ -8,8 +8,10 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -268,16 +270,17 @@ public class FileManager {
 	 * 
 	 * @throws IOException if an error happens during the generation
 	 */
-	public void generateHtmlViewerSupportFiles() throws IOException {
-		String[] files = {
-				"js/cytoscape-3.21.1.min.js",
-				"js/layout-base.js",
-				"js/cose-base.js",
-				"js/cytoscape-fcose.js",
-				"js/cytoscape-expand-collapse.js",
-				"js/cytoscape-graphml-1.0.6-hier.js",
-				"js/jquery-3.0.0.min.js"
-		};
+	public void generateHtmlViewerSupportFiles(boolean compound) throws IOException {
+		List<String> files = new ArrayList<>();
+		files.add("js/cytoscape-3.21.1.min.js");
+		files.add("js/cytoscape-graphml-1.0.6-hier.js");
+		files.add("js/jquery-3.0.0.min.js");
+		if (compound) {
+			files.add("js/layout-base.js");
+			files.add("js/cose-base.js");
+			files.add("js/cytoscape-fcose.js");
+			files.add("js/cytoscape-expand-collapse.js");
+		}
 
 		for (String file : files)
 			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-graph/" + file)) {

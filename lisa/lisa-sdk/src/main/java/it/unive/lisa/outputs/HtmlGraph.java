@@ -73,7 +73,8 @@ public class HtmlGraph extends GraphStreamWrapper {
 		if (StringUtils.isNotBlank(description))
 			graphDescription = description;
 
-		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream("html-graph/viewer.html")) {
+		String file = includeSubnodes ? "html-graph/viewer-compound.html" : "html-graph/viewer.html";
+		try (InputStream viewer = getClass().getClassLoader().getResourceAsStream(file)) {
 			String viewerCode = IOUtils.toString(viewer, StandardCharsets.UTF_8);
 			viewerCode = viewerCode.replace("$$$GRAPH_TITLE$$$", graphTitle);
 			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION$$$", graphDescription);

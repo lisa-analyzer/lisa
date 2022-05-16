@@ -6,8 +6,12 @@
 		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1" />
 		
 		<script src="js/cytoscape-3.21.1.min.js"></script>
+		<script src="js/layout-base.js"></script>
+		<script src="js/cose-base.js"></script>
+		<script src="js/cytoscape-fcose.js"></script>
 		<script src="js/jquery-3.0.0.min.js"></script>
 		<script src="js/cytoscape-graphml-1.0.6-hier.js"></script>
+		<script src="js/cytoscape-expand-collapse.js"></script>
 		
 		<style>
 		body {
@@ -119,6 +123,9 @@
 				<div>
 					<b id="relayout">Run layout</b> 
 					<b id="fit">Fit to viewport</b>
+					<hr/>
+					<b id="collapseAll">Collapse all</b> 
+					<b id="expandAll">Expand all</b> 
 				</div>
 			</div>
 			<div id="cy"></div>
@@ -202,16 +209,27 @@
 					this.graphml({layoutBy: null});
 					this.graphml(data);
 					
-					layoutOptions = {
-							name: 'breadthfirst',
-							fit: false,
-							directed: true,
-							spacingFactor: 2.5,
+					var expandCollapseOptions = {
+						fisheye: false,
+						animate: false,
+						undoable: false,
+						expandCollapseCuePosition: 'bottom-left',
+						expandCollapseCueSize: 20,
 					};
-					var layout = this.layout(layoutOptions);
-					if (layout && layout.run) {
-						layout.run();
-					}
+					
+					layoutOptions = {
+							name: 'fcose',
+							quality: "proof",
+							randomize: false, 
+							animate: false,  
+							fit: false, 
+							nodeDimensionsIncludeLabels: true,
+							packComponents: false,
+					};
+					
+					api = this.expandCollapse(expandCollapseOptions);
+					api.setOption("layoutBy", layoutOptions);
+					api.collapseAll();
 					this.fit();
 				}
 			});
@@ -224,6 +242,12 @@
 			}
 			document.getElementById("relayout").addEventListener("click", function () {
 				relayout();
+			});
+			document.getElementById("collapseAll").addEventListener("click", function () {
+				api.collapseAll();
+			});
+			document.getElementById("expandAll").addEventListener("click", function () {
+				api.expandAll();
 			});
 			document.getElementById("fit").addEventListener("click", function () {
 				cy.fit(cy.nodes(), 50);
