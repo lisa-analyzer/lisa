@@ -1,11 +1,18 @@
 package it.unive.lisa;
 
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -32,12 +39,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -184,13 +185,11 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
 							break;
 						case HTML:
-							fileManager.mkHtmlFile(filename, writer -> graph
-									.toHtml(false, "results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
+							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
 							htmlViewer = true;
 							break;
 						case HTML_WITH_SUBNODES:
-							fileManager.mkHtmlFile(filename, writer -> graph
-									.toHtml(true, "results", DomainRepresentation.REPRESENTATION_KIND).dump(writer));
+							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
 							htmlViewer = true;
 							break;
 						case NONE:

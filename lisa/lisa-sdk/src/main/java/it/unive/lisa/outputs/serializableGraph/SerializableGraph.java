@@ -8,12 +8,15 @@ import it.unive.lisa.outputs.HtmlGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -314,27 +317,21 @@ public class SerializableGraph {
 	 *                             graph
 	 * @param descriptionLabel the display name of the descriptions, used as
 	 *                             label in the collapse/expand toggles
-	 * @param displayKey       the name of the attribute that has to be searched
-	 *                             for classifying nodes into categories that
-	 *                             can be hidden
 	 * 
 	 * @return the converted graph
 	 */
-	public HtmlGraph toHtml(boolean includeSubnodes, String descriptionLabel, String displayKey) {
-		SortedSet<String> classes = new TreeSet<>();
-		for (SerializableNodeDescription descr : descriptions) {
-			for (Entry<String, String> entry : descr.getDescription().getProperties().entrySet())
-				if (entry.getKey().equals(displayKey))
-					classes.add(entry.getValue());
-
-			for (SerializableValue inner : descr.getDescription().getInnerValues())
-				for (Entry<String, String> entry : inner.getProperties().entrySet())
-					if (entry.getKey().equals(displayKey))
-						classes.add(entry.getValue());
-		}
-
-		GraphmlGraph graphml = toGraphml(includeSubnodes);
-		return new HtmlGraph(graphml, description, descriptionLabel, displayKey, classes);
+	public HtmlGraph toHtml(boolean includeSubnodes, String descriptionLabel) {
+		SerializableGraph g = new SerializableGraph(name, description, nodes, edges, Collections.emptySortedSet());
+		GraphmlGraph graphml = g.toGraphml(includeSubnodes);
+		
+		SortedMap<String, SerializableNodeDescription> map = new TreeMap<>();
+		for (SerializableNodeDescription d : descriptions)
+			for (SerializableNode n : nodes)
+				if (d.getNodeId() == n.getId()) {
+					map.put(n.getText(), d);
+					break;
+				}
+		return new HtmlGraph(graphml, includeSubnodes, map, description, descriptionLabel);
 	}
 
 	/**

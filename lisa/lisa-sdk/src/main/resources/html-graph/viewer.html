@@ -27,12 +27,13 @@
 		
 		#full {
 			display: flex;
-			flex-direction: column;
+			flex-direction: row;
 		}
 		
 		#cy {
-			flex-grow: 1;
+			flex-grow: 0.5;
 			z-index: 10;
+			max-width: 70%;
 		}
 		
 		#header {
@@ -67,6 +68,41 @@
 		#header div span input {
 			margin: 0;
 		}
+		#descriptions {
+			flex-grow: 0.5;
+			z-index: 11;
+			overflow: auto;
+			font-size: 18px;
+		}
+		.description-header {
+    		font-weight: bold;
+		}
+		#descriptions ul {
+		    padding-left: inherit;
+		    margin: 5px 0;
+		}
+		.description-nest {
+			padding-left: 15px;
+		}
+		.header-hidden {
+			display: none;
+		}
+		.description-title-wrapper {
+    		margin-top: 0.83em;
+    		margin-bottom: 0.83em;
+		}
+		.description-title {
+		    font-size: 1.5em;
+		    font-weight: bold;
+		}
+		.description-title-text {
+		    font-size: 1.5em;
+		    font-family: monospace;
+		}
+		#header-none {
+    		margin-top: 0.83em;
+    		margin-bottom: 0.83em;
+		}
 		</style>
 	</head>
 
@@ -77,21 +113,6 @@
 		<div id="full">
 			<div id="header">
 				<div>
-					<b id="defaultView">Reset collapsed nodes</b> 
-					<b id="relayout">Run layout</b> 
-					<b id="fit">Fit to viewport</b> 
-					<span><input type="checkbox" id="tiling" checked />&nbsp;&nbsp;<label for="tiling"><b>Tile nodes</b></label></span>
-					<hr />
-					<b id="collapseAll">Collapse all</b> 
-					<b id="expandAll">Expand all</b> 
-					<b id="collapseSubNodes">Collapse visible sub nodes</b> 
-					<b id="expandSubNodes">Expand visible sub nodes</b> 
-					<b id="collapseDescriptions">Collapse visible $$$GRAPH_DESCRIPTION_LABEL$$$</b> 
-					<b id="expandDescriptions">Expand visible $$$GRAPH_DESCRIPTION_LABEL$$$</b>
-					<hr />
-					$$$GRAPH_DISPLAY_SWITCHES$$$
-				</div>
-				<div>
 					<b>Node border: <font color="darkgray">gray</font>, single</b> 
 					<b>Entrypoint border: black, single</b> 
 					<b>Exitpoint border: black, double</b> 
@@ -99,8 +120,24 @@
 					<b>False edge: <font color="red">red</font>, solid</b> 
 					<b>True edge: <font color="blue">blue</font>, solid</b>
 				</div>
+				<div>
+					<b id="relayout">Run layout</b> 
+					<b id="fit">Fit to viewport</b>
+					<hr/>
+					<b id="defaultView">Reset collapsed nodes</b> 
+					<b id="collapseAll">Collapse all</b> 
+					<b id="expandAll">Expand all</b> 
+					<b id="collapseSubNodes">Collapse visible sub nodes</b> 
+					<b id="expandSubNodes">Expand visible sub nodes</b>
+				</div>
 			</div>
 			<div id="cy"></div>
+			<div id="descriptions">
+				<div id="header-none">
+				No node selected. Select a node to show its $$$GRAPH_DESCRIPTION_LABEL$$$.
+				</div>
+				$$$GRAPH_DESCRIPTIONS$$$
+			</div>
 		</div>
 		<script>			
 			var api;
@@ -117,53 +154,21 @@
 						css: {
 							'background-color': 'white',
 							'color': 'black',
-							'font-size': '12px',
-							'font-weight': 'bold',
 							'shape': 'rectangle',
 							'border-width': '1px',
 							'border-style': 'solid',
 							'border-color': 'darkgray',
-							'text-wrap': 'wrap'
-						}
-					},
-					{
-						selector: 'node[NODE_TEXT]',
-						css: {
 							'content': 'data(NODE_TEXT)',
 							'font-family': 'monospace',
 							'font-size': '18px',
+							'font-weight': 'bold',
+							'text-wrap': 'wrap',
 						}
 					},
-					{
-						selector: 'node[LABEL_TEXT]',
-						css: {
-							'content': 'data(LABEL_TEXT)'
-						}
-					},
-					{
-						selector: 'node[^collapsed]:childless',
-						css: {
-							'width': 'label',
-							'text-valign': 'center',
-							'border-width': '0px',						
-						}
-					},
-					{
-						selector: 'node[NODE_KIND = "DESCRIPTION"]',
-						css: {
-							'content': '$$$GRAPH_DESCRIPTION_LABEL$$$',
-						}
-					},	
 					{
 						selector: 'node[NODE_IS_ENTRY = "yes"]',
 						css: {
-							'border': '1px solid black',
-						}
-					},		
-					{
-						selector: 'node[NODE_IS_ENTRY = "yes"]',
-						css: {
-							'border-width': '5px',
+							'border-width': '3px',
 							'border-style': 'solid',
 							'border-color': 'black',
 						}
@@ -216,7 +221,7 @@
 						expandCollapseCueSize: 20,
 					};
 					
-					tilingLayout = {
+					layoutOptions = {
 							name: 'fcose',
 							// - "draft" only applies spectral layout 
 							// - "default" improves the quality with incremental layout (fast cooling rate)
@@ -250,22 +255,9 @@
 							gravityRange: 3.8, // Gravity range (constant)
 							initialEnergyOnIncremental: 0.3, // Initial cooling factor for incremental layout 
 					};
-					nonTilingLayout = {}
-					Object.assign(nonTilingLayout, tilingLayout);
-					nonTilingLayout['tile'] = false;
-					layoutOptions = tilingLayout;
 					
 					api = this.expandCollapse(expandCollapseOptions);
 					api.setOption("layoutBy", layoutOptions);
-					
-					this.on("expandcollapse.beforecollapse", function(event) { 
-						var elem = event.target; 
-						elem.data("collapsed", "yes");
-					});
-					this.on("expandcollapse.afterexpand", function(event) {  
-						var elem = event.target; 
-						elem.data("collapsed", null);
-					});
 					api.collapseAll();
 					this.fit();
 				}
@@ -277,24 +269,7 @@
 					layout.run();
 				}
 			}
-			
-			function toggleNodesVisibility(visible, key, selector) {
-				targets = cy.nodes('[' + key + ' = "' + selector + '"]');
-				console.log((visible ? "showing" : "hiding") + " " + targets.size() + " nodes with '" + key + "' set to '" + selector + "'")
-				if (visible)
-					targets.style('display', 'element');
-				else
-					targets.style('display', 'none');
-				relayout();
-			}
 			document.getElementById("relayout").addEventListener("click", function () {
-				relayout();
-			});
-			document.getElementById("tiling").addEventListener("change", function () {
-				if (this.checked)
-					layoutOptions = tilingLayout;
-				else
-					layoutOptions = nonTilingLayout;
 				relayout();
 			});
 			document.getElementById("collapseAll").addEventListener("click", function () {
@@ -309,19 +284,18 @@
 			document.getElementById("expandSubNodes").addEventListener("click", function () {
 				api.expandRecursively(cy.nodes('[NODE_KIND = "SUBNODE"]'));
 			});
-			document.getElementById("collapseDescriptions").addEventListener("click", function () {
-				api.collapseRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
-			});
-			document.getElementById("expandDescriptions").addEventListener("click", function () {
-				api.expandRecursively(cy.nodes('[NODE_KIND = "DESCRIPTION"]'));
-			});
 			document.getElementById("defaultView").addEventListener("click", function () {
 				api.collapseAll();
 			});
 			document.getElementById("fit").addEventListener("click", function () {
 				cy.fit(cy.nodes(), 50);
 			});
-			$$$GRAPH_DISPLAY_LISTENERS$$$
+			
+			cy.on('select', 'node', function(event) {
+		    	var id = event.target.id();
+				$('[id^=header-]').addClass('header-hidden');
+				$('#header-' + id).removeClass('header-hidden');
+			});
 			</script>
 	</body>
 </html>

@@ -5,10 +5,17 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.SortedSet;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.text.CaseUtils;
+
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped as an html page using javascript to visualize the
@@ -23,33 +30,34 @@ public class HtmlGraph extends GraphStreamWrapper {
 
 	private final String description;
 
+	private final SortedMap<String, SerializableNodeDescription> descriptions;
+
 	private final String descriptionLabel;
 
-	private final String displayKey;
-
-	private final SortedSet<String> displayClasses;
+	private final boolean includeSubnodes;
 
 	/**
 	 * Builds the graph.
 	 * 
 	 * @param graph            the wrapped {@link GraphmlGraph}
+	 * @param includeSubnodes  whether or not sub-nodes should be part of the
+	 *                             graph
+	 * @param descriptions     a map from a node text to their
+	 *                             {@link SerializableNodeDescription}s
 	 * @param description      the description of the graph, used as subtitle
 	 *                             (can be {@code null})
 	 * @param descriptionLabel the display name of the descriptions, used as
 	 *                             label in the collapse/expand toggles
-	 * @param displayKey       the name of the attribute that has to be searched
-	 *                             for classifying nodes into categories that
-	 *                             can be hidden
-	 * @param displayClasses   the possible values for {@code displayKey}
 	 */
-	public HtmlGraph(GraphmlGraph graph, String description, String descriptionLabel, String displayKey,
-			SortedSet<String> displayClasses) {
+	public HtmlGraph(GraphmlGraph graph, boolean includeSubnodes,
+			SortedMap<String, SerializableNodeDescription> descriptions,
+			String description, String descriptionLabel) {
 		super();
 		this.graph = graph;
+		this.descriptions = descriptions;
 		this.description = description;
 		this.descriptionLabel = descriptionLabel;
-		this.displayKey = displayKey;
-		this.displayClasses = displayClasses;
+		this.includeSubnodes = includeSubnodes;
 	}
 
 	@Override
@@ -72,35 +80,79 @@ public class HtmlGraph extends GraphStreamWrapper {
 			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTION_LABEL$$$", descriptionLabel);
 			viewerCode = viewerCode.replace("$$$GRAPH_CONTENT$$$", graphText);
 
-			StringBuilder switches = new StringBuilder();
-			StringBuilder listeners = new StringBuilder();
-			for (String displayClass : displayClasses) {
-				String display = StringUtils.join(
-						StringUtils.splitByCharacterTypeCamelCase(
-								CaseUtils.toCamelCase(displayClass, true, '_')),
-						' ');
-				switches.append("\t\t\t\t\t<span><input type=\"checkbox\" id=\"show")
-						.append(displayClass)
-						.append("\" checked/>&nbsp;&nbsp;<label for=\"show")
-						.append(displayClass)
-						.append("\"><b>Show ")
-						.append(display)
-						.append("</b></label></span>\n");
-				listeners.append("\t\tdocument.getElementById(\"show")
-						.append(displayClass)
-						.append("\").addEventListener(\"change\", function () {\n")
-						.append("\t\t\ttoggleNodesVisibility(this.checked, '")
-						.append(displayKey)
-						.append("', '")
-						.append(displayClass)
-						.append("');\n")
-						.append("\t\t});\n");
+			StringBuilder descrs = new StringBuilder();
+			for (Entry<String, SerializableNodeDescription> d : descriptions.entrySet()) {
+				String nodeName = nodeName(d.getValue().getNodeId());
+				if (includeSubnodes || graph.graph.getNode(nodeName) != null) {
+					descrs.append("\t\t\t\t<div id=\"header-")
+							.append(nodeName)
+							.append("\" class=\"header-hidden\">\n");
+					descrs.append("\t\t\t\t\t<div class=\"description-title-wrapper\"><span class=\"description-title\">")
+							.append(StringUtils.capitalize(descriptionLabel))
+							.append(" for ")
+							.append("</span><span class=\"description-title-text\">")
+							.append(d.getKey())
+							.append("</span></div>\n");
+					populate(descrs, 5, d.getValue().getDescription());
+					descrs.append("\t\t\t\t</div>\n");
+				}
 			}
 
-			viewerCode = viewerCode.replace("$$$GRAPH_DISPLAY_SWITCHES$$$", switches.toString().trim());
-			viewerCode = viewerCode.replace("$$$GRAPH_DISPLAY_LISTENERS$$$", listeners.toString().trim());
+			viewerCode = viewerCode.replace("$$$GRAPH_DESCRIPTIONS$$$", descrs.toString().trim());
 
 			writer.write(viewerCode);
 		}
+	}
+
+	private static void populate(StringBuilder descrs, int depth, SerializableValue value) {
+		if (value instanceof SerializableString) {
+			descrs.append(value.toString());
+		} else if (value instanceof SerializableArray) {
+			SerializableArray array = (SerializableArray) value;
+			if (array.getElements().stream().allMatch(SerializableString.class::isInstance)) {
+				descrs.append("[");
+				for (int i = 0; i < array.getElements().size(); i++) {
+					if (i != 0)
+						descrs.append(", ");
+					populate(descrs, depth + 1, array.getElements().get(i));
+				}
+				descrs.append("]");
+			} else {
+				for (int i = 0; i < array.getElements().size(); i++) {
+					descrs.append("\t".repeat(depth))
+							.append("<span class=\"description-header\">Element ")
+							.append(i)
+							.append(":</span><br/>\n");
+					descrs.append("\t".repeat(depth))
+							.append("<div class=\"description-nest\">\n");
+					populate(descrs, depth + 1, array.getElements().get(i));
+					descrs.append("\t".repeat(depth)).append("</div>\n");
+				}
+			}
+		} else if (value instanceof SerializableObject) {
+			SerializableObject object = (SerializableObject) value;
+			for (Entry<String, SerializableValue> field : object.getFields().entrySet()) {
+				descrs.append("\t".repeat(depth))
+						.append("<span class=\"description-header\">")
+						.append(field.getKey())
+						.append(": </span>");
+				if (isStringLike(field.getValue())) {
+					populate(descrs, depth + 1, field.getValue());
+					descrs.append("<br/>\n");
+				} else {
+					descrs.append("<br/>\n");
+					descrs.append("\t".repeat(depth)).append("<div class=\"description-nest\">\n");
+					populate(descrs, depth + 1, field.getValue());
+					descrs.append("\t".repeat(depth)).append("</div>\n");
+				}
+			}
+		} else
+			throw new IllegalArgumentException("Unknown value type: " + value.getClass().getName());
+	}
+
+	private static boolean isStringLike(SerializableValue value) {
+		return value instanceof SerializableString
+				|| (value instanceof SerializableArray && ((SerializableArray) value).getElements().stream()
+						.allMatch(SerializableString.class::isInstance));
 	}
 }

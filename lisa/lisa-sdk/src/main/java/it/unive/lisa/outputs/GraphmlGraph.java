@@ -42,7 +42,7 @@ public class GraphmlGraph extends GraphStreamWrapper {
 	private static final String NODE_KIND = "NODE_KIND";
 	private static final String NODE_LABEL = "NODE_LABEL";
 	private static final String NODE_CONTENT = "NODE_CONTENT";
-	private static final String NODE_TEXT = "NODE_TEXT";
+	public static final String NODE_TEXT = "NODE_TEXT";
 	private static final String NODE_IS_EXIT = "NODE_IS_EXIT";
 	private static final String NODE_IS_ENTRY = "NODE_IS_ENTRY";
 	private static final String GRAPH_TITLE = "GRAPH_TITLE";
