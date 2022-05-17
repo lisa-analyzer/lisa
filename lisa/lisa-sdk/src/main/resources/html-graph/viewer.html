@@ -163,6 +163,13 @@
 							'text-wrap': 'wrap',
 						}
 					},
+				    {
+					    selector: 'node:selected',
+					    css: {
+							'border-color': 'orange',
+							'border-width': '2px',
+					    }
+					},
 					{
 						selector: 'node[NODE_IS_ENTRY = "yes"]',
 						css: {
@@ -241,13 +248,10 @@
 			var lastsearchresult = [];
 			var lastshownelement = -1;
 			function centerToSearch() {
-				cy.animate({
-					center: { 
-							eles: lastsearchresult[lastshownelement]
-						}
-					}, {
-					  	duration: 0
-					});
+				var target = lastsearchresult[lastshownelement];
+				cy.$('node:selected').unselect();
+				target.select();
+				cy.animate({ center: { eles: target } }, { duration: 0 });
 			}
 
 			$('#search').on('input', function (e) {
@@ -260,6 +264,7 @@
 					e.target.classList.remove('no-results');
 				} else {
 					lastshownelement = -1;
+					cy.$('node:selected').unselect();
 					e.target.classList.add('no-results');  
 				}
 				
