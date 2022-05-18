@@ -19,12 +19,6 @@ import java.util.TreeMap;
  */
 public abstract class DomainRepresentation implements Comparable<DomainRepresentation> {
 
-	/**
-	 * Key to be used in properties to store the type of information stored in
-	 * this representation.
-	 */
-	public static final String REPRESENTATION_KIND = "REPRESENTATION_KIND";
-
 	private final SortedMap<String, String> properties = new TreeMap<>();
 
 	/**

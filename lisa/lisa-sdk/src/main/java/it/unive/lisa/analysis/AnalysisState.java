@@ -312,8 +312,6 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	public DomainRepresentation representation() {
 		DomainRepresentation stateRepr = state.representation();
 		DomainRepresentation exprRepr = computedExpressions.representation();
-		stateRepr.setProperty(DomainRepresentation.REPRESENTATION_KIND, "ABSTRACT_STATE");
-		exprRepr.setProperty(DomainRepresentation.REPRESENTATION_KIND, "STACK_EXPRESSIONS");
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
 	}
 
