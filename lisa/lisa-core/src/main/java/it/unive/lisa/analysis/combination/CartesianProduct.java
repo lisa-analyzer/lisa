@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -130,7 +130,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 
 	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(left.representation(), right.representation());
+		return new ListRepresentation(left.representation(), right.representation());
 	}
 
 	@Override

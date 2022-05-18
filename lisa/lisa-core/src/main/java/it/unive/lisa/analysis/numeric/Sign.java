@@ -73,9 +73,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return Lattice.bottomRepresentation();
 		if (isTop())
-			return Lattice.TOP_REPR;
+			return Lattice.topRepresentation();
 
 		String repr;
 		if (this == ZERO)

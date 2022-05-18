@@ -6,7 +6,7 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.outputs.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;

@@ -16,6 +16,13 @@ import it.unive.lisa.program.cfg.statement.Statement;
 public class SequentialEdge extends Edge {
 
 	/**
+	 * Builds an "empty" edge, meaning that it does not have endpoints.
+	 */
+	public SequentialEdge() {
+		super();
+	}
+
+	/**
 	 * Builds the edge.
 	 * 
 	 * @param source      the source statement
@@ -40,7 +47,7 @@ public class SequentialEdge extends Edge {
 	}
 
 	@Override
-	public boolean canBeSimplified() {
+	public boolean isUnconditional() {
 		return true;
 	}
 

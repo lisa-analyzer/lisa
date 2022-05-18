@@ -15,7 +15,8 @@ public class TypeBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testTypeBasedHeap() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						new TypeBasedHeap(),
 						new Interval(),

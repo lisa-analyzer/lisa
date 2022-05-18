@@ -19,7 +19,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testSign() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Sign(),
 						new TypeEnvironment<>(new InferredTypes())));
 		perform("sign", "program.imp", conf);
@@ -27,7 +28,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testParity() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Parity(),
 						new TypeEnvironment<>(new InferredTypes())));
 		perform("parity", "program.imp", conf);
@@ -35,7 +37,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testInterval() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 						new TypeEnvironment<>(new InferredTypes())));
 		perform("interval", "program.imp", conf);
@@ -43,7 +46,8 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testIntegerConstantPropagation() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class),
 						new IntegerConstantPropagation(),
 						new TypeEnvironment<>(new InferredTypes())));

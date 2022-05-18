@@ -76,9 +76,9 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 					throws SemanticException {
 		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (middle.getRuntimeTypes().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (right.getRuntimeTypes().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

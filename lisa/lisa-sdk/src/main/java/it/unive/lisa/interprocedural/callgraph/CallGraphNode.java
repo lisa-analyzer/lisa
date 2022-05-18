@@ -9,7 +9,7 @@ import it.unive.lisa.util.datastructures.graph.Node;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphNode implements Node<CallGraphNode, CallGraphEdge, BaseCallGraph> {
+public class CallGraphNode implements Node<BaseCallGraph, CallGraphNode, CallGraphEdge> {
 
 	private final BaseCallGraph graph;
 	private final CodeMember cm;
@@ -41,11 +41,6 @@ public class CallGraphNode implements Node<CallGraphNode, CallGraphEdge, BaseCal
 	 */
 	public BaseCallGraph getGraph() {
 		return graph;
-	}
-
-	@Override
-	public int setOffset(int offset) {
-		return offset;
 	}
 
 	@Override

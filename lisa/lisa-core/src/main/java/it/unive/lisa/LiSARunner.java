@@ -1,5 +1,6 @@
 package it.unive.lisa;
 
+import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -19,11 +20,11 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
@@ -34,7 +35,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -97,10 +97,6 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		Collection<CFG> allCFGs = program.getAllCFGs();
 
-		if (conf.isDumpCFGs())
-			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input CFGs", "cfgs"))
-				dumpCFG(fileManager, "", cfg, st -> "");
-
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty())
 			ChecksExecutor.executeAll(tool, program, conf.getSyntacticChecks());
@@ -159,17 +155,65 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					}
 				});
 
-		if (conf.isDumpAnalysis() || conf.isDumpTypeInference())
+		GraphType type = conf.getAnalysisGraphs();
+		if (conf.isSerializeResults() || type != GraphType.NONE) {
+			int nfiles = fileManager.createdFiles().size();
+			boolean htmlViewer = false, subnodes = false;
+
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
-					String filename = result.getId() == null ? "" : result.getId().hashCode() + "_";
-					if (conf.isDumpTypeInference())
-						dumpCFG(fileManager, "typing___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).typeRepresentation().toString());
-					if (conf.isDumpAnalysis())
-						dumpCFG(fileManager, "analysis___" + filename, result,
-								st -> result.getAnalysisStateAfter(st).representation().toString());
+					SerializableGraph graph = result.toSerializableGraph(
+							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
+					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
+					if (result.getId() != null)
+						filename += "_" + result.getId().hashCode();
+
+					try {
+						if (conf.isSerializeResults())
+							fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
+
+						switch (type) {
+						case DOT:
+							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
+							break;
+						case GRAPHML:
+							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(false).dump(writer));
+							break;
+						case GRAPHML_WITH_SUBNODES:
+							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
+							subnodes = true;
+							break;
+						case HTML:
+							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
+							htmlViewer = true;
+							break;
+						case HTML_WITH_SUBNODES:
+							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
+							htmlViewer = true;
+							subnodes = true;
+							break;
+						case NONE:
+							break;
+						default:
+							throw new AnalysisExecutionException("Unknown graph type: " + type);
+						}
+					} catch (IOException e) {
+						LOG.error("Exception while dumping the analysis results on {}",
+								cfg.getDescriptor().getFullSignature());
+						LOG.error(e);
+					}
 				}
+
+			if (htmlViewer && fileManager.createdFiles().size() != nfiles)
+				try {
+					// we dumped at least one file: need to copy the
+					// javascript files
+					fileManager.generateHtmlViewerSupportFiles(subnodes);
+				} catch (IOException e) {
+					LOG.error("Exception while generating supporting files for the html viwer");
+					LOG.error(e);
+				}
+		}
 	}
 
 	private static void finalizeProgram(Program program) {
@@ -189,16 +233,5 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				throw new AnalysisExecutionException("Unable to finalize target program", e);
 			}
 		});
-	}
-
-	private static void dumpCFG(FileManager fileManager, String filePrefix, CFG cfg,
-			Function<Statement, String> labelGenerator) {
-		try {
-			fileManager.mkDotFile(filePrefix + cfg.getDescriptor().getFullSignatureWithParNames(),
-					writer -> cfg.dump(writer, labelGenerator::apply));
-		} catch (IOException e) {
-			LOG.error("Exception while dumping the analysis results on {}", cfg.getDescriptor().getFullSignature());
-			LOG.error(e);
-		}
 	}
 }

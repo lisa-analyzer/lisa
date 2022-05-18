@@ -111,7 +111,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return Lattice.bottomRepresentation();
 
 		return new StringRepresentation(interval.toString());
 	}

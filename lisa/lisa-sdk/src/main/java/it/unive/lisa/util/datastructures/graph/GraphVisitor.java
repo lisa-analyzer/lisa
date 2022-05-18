@@ -18,7 +18,7 @@ package it.unive.lisa.util.datastructures.graph;
  * @param <V> the type of auxiliary tool that the callbacks provided by this
  *                visitor can use while visiting the graph
  */
-public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>, V> {
+public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, V> {
 
 	/**
 	 * Visits a graph, inspecting its structure and signature, but

@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
@@ -13,7 +15,10 @@ import java.util.function.Function;
  */
 public class MapRepresentation extends DomainRepresentation {
 
-	private final SortedMap<DomainRepresentation, DomainRepresentation> map;
+	/**
+	 * The mappings of contained in this map.
+	 */
+	protected final SortedMap<DomainRepresentation, DomainRepresentation> map;
 
 	/**
 	 * Builds a new representation starting from the given map.
@@ -48,6 +53,14 @@ public class MapRepresentation extends DomainRepresentation {
 	}
 
 	@Override
+	public SerializableValue toSerializableValue() {
+		SortedMap<String, SerializableValue> fields = new TreeMap<>();
+		for (Entry<DomainRepresentation, DomainRepresentation> e : this.map.entrySet())
+			fields.put(e.getKey().toString(), e.getValue().toSerializableValue());
+		return new SerializableObject(getProperties(), fields);
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 
@@ -60,7 +73,7 @@ public class MapRepresentation extends DomainRepresentation {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((map == null) ? 0 : map.hashCode());
 		return result;
 	}
@@ -69,7 +82,7 @@ public class MapRepresentation extends DomainRepresentation {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

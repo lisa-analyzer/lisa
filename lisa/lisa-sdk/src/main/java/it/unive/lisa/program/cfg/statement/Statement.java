@@ -13,7 +13,7 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.util.datastructures.graph.Node;
+import it.unive.lisa.util.datastructures.graph.code.CodeNode;
 import java.util.Objects;
 
 /**
@@ -21,7 +21,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPoint, Comparable<Statement> {
+public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint, Comparable<Statement> {
 
 	/**
 	 * The cfg containing this statement.
@@ -33,6 +33,9 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 	 */
 	protected int offset;
 
+	/**
+	 * The location where this statement happens.
+	 */
 	private final CodeLocation location;
 
 	/**
@@ -55,11 +58,7 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 		return cfg;
 	}
 
-	/**
-	 * Yields the offset of this statement relative to its containing cfg.
-	 * 
-	 * @return the offset
-	 */
+	@Override
 	public final int getOffset() {
 		return offset;
 	}
@@ -156,7 +155,10 @@ public abstract class Statement implements Node<Statement, Edge, CFG>, ProgramPo
 
 	@Override
 	public int compareTo(Statement o) {
-		return location.compareTo(o.location);
+		int cmp;
+		if ((cmp = location.compareTo(o.location)) != 0)
+			return cmp;
+		return Integer.compare(offset, o.offset);
 	}
 
 	/**

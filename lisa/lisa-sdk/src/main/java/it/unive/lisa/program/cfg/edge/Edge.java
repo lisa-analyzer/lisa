@@ -9,6 +9,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
+import it.unive.lisa.util.datastructures.graph.code.CodeEdge;
 import java.util.Objects;
 
 /**
@@ -16,7 +17,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, CFG> {
+public abstract class Edge implements CodeEdge<CFG, Statement, Edge> {
 
 	/**
 	 * The source node.
@@ -27,6 +28,14 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	 * The destination node.
 	 */
 	private final Statement destination;
+
+	/**
+	 * Builds an "empty" edge, meaning that it does not have endpoints.
+	 */
+	protected Edge() {
+		this.source = null;
+		this.destination = null;
+	}
 
 	/**
 	 * Builds the edge.
@@ -111,5 +120,15 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	@Override
 	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
+	}
+
+	@Override
+	public int compareTo(Edge o) {
+		int cmp;
+		if ((cmp = source.compareTo(o.source)) != 0)
+			return cmp;
+		if ((cmp = destination.compareTo(o.destination)) != 0)
+			return cmp;
+		return getClass().getName().compareTo(o.getClass().getName());
 	}
 }

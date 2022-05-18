@@ -1,9 +1,1 @@
-.github/*                       @lucaneg
-LICENSE                         @lucaneg
-*.md                            @lucaneg
-logo.png                        @lucaneg
-*.gradle                		@lucaneg
-checkstyle-config.xml     		@lucaneg
-spotless-formatting.xml   		@lucaneg
-**/gradle/*                  	@lucaneg
-*                               @lucaneg @VincenzoArceri
+*                               @lucaneg

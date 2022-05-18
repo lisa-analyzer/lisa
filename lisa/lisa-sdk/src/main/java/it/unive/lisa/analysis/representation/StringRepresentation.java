@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+
 /**
  * A {@link DomainRepresentation} in the form of a single string element.
  * 
@@ -7,7 +10,10 @@ package it.unive.lisa.analysis.representation;
  */
 public class StringRepresentation extends DomainRepresentation {
 
-	private final String representation;
+	/**
+	 * The textual representation.
+	 */
+	protected final String representation;
 
 	/**
 	 * Builds a new representation containing the given string.
@@ -30,6 +36,11 @@ public class StringRepresentation extends DomainRepresentation {
 	}
 
 	@Override
+	public SerializableValue toSerializableValue() {
+		return new SerializableString(getProperties(), String.valueOf(representation));
+	}
+
+	@Override
 	public String toString() {
 		return String.valueOf(representation);
 	}
@@ -37,7 +48,7 @@ public class StringRepresentation extends DomainRepresentation {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((representation == null) ? 0 : representation.hashCode());
 		return result;
 	}
@@ -46,7 +57,7 @@ public class StringRepresentation extends DomainRepresentation {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
