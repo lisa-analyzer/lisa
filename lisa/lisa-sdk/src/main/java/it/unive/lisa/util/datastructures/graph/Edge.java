@@ -5,11 +5,11 @@ package it.unive.lisa.util.datastructures.graph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <G> the type of {@link Graph} this edge can be used with
  * @param <N> the type of {@link Node}s connected to this edge
  * @param <E> the type of this edge
- * @param <G> the type of {@link Graph} this edge can be used with
  */
-public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
+public interface Edge<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	/**
 	 * Yields the node where this edge originates.
@@ -24,25 +24,6 @@ public interface Edge<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extend
 	 * @return the destination node
 	 */
 	N getDestination();
-
-	/**
-	 * Yields {@code true} if and only if this edge could be simplified if one
-	 * of the nodes connected to it is simplified (i.e., removed from the
-	 * graph).
-	 * 
-	 * @return whether or not this edge can be simplified
-	 */
-	boolean canBeSimplified();
-
-	/**
-	 * Builds a new instance of this edge, connecting the given nodes.
-	 * 
-	 * @param source      the source node
-	 * @param destination the destination node
-	 * 
-	 * @return a new instance of this edge, connecting the given nodes
-	 */
-	E newInstance(N source, N destination);
 
 	/**
 	 * Accepts the given {@link GraphVisitor}. Implementors of this method are

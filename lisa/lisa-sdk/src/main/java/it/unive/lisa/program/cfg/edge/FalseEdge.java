@@ -57,7 +57,7 @@ public class FalseEdge extends Edge {
 	}
 
 	@Override
-	public boolean canBeSimplified() {
+	public boolean isUnconditional() {
 		return false;
 	}
 

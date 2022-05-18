@@ -2,9 +2,10 @@ package it.unive.lisa.program.cfg.controlFlow;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -18,7 +19,7 @@ public abstract class ControlFlowStructure {
 	/**
 	 * The matrix of the cfg containing this structure.
 	 */
-	protected final AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix;
+	protected final NodeList<CFG, Statement, Edge> cfgMatrix;
 
 	private final Statement condition;
 
@@ -31,7 +32,7 @@ public abstract class ControlFlowStructure {
 	 * @param condition     the condition of the structure
 	 * @param firstFollower the first statement after the structure exits
 	 */
-	protected ControlFlowStructure(AdjacencyMatrix<Statement, Edge, CFG> cfgMatrix, Statement condition,
+	protected ControlFlowStructure(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition,
 			Statement firstFollower) {
 		this.cfgMatrix = cfgMatrix;
 		this.condition = condition;
@@ -127,14 +128,14 @@ public abstract class ControlFlowStructure {
 	}
 
 	/**
-	 * Yields an {@link AdjacencyMatrix} containing the full structure (nodes
-	 * and edges) represented by this conditional structure. The returned matrix
+	 * Yields an {@link NodeList} containing the full structure (nodes and
+	 * edges) represented by this conditional structure. The returned matrix
 	 * will also contain the condition and the first follower, if any.
 	 * 
 	 * @return the matrix containing the full structure
 	 */
-	public AdjacencyMatrix<Statement, Edge, CFG> getCompleteStructure() {
-		AdjacencyMatrix<Statement, Edge, CFG> complete = new AdjacencyMatrix<>();
+	public NodeList<CFG, Statement, Edge> getCompleteStructure() {
+		NodeList<CFG, Statement, Edge> complete = new NodeList<>(new SequentialEdge(), false);
 
 		// add all nodes
 		complete.addNode(getCondition());

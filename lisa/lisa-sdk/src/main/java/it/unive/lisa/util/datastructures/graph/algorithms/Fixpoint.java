@@ -18,12 +18,12 @@ import java.util.Map;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <G> the type of the source {@link Graph}
  * @param <N> the type of the {@link Node}s in the source graph
  * @param <E> the type of the {@link Edge}s in the source graph
- * @param <G> the type of the source {@link Graph}
  * @param <T> the type of data computed by the fixpoint
  */
-public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>, T> {
+public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
 
 	private static final String ERROR = "Exception while %s of '%s' in '%s'";
 
@@ -177,7 +177,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<N, E, G>, E exten
 
 			if (current == null)
 				throw new FixpointException("null node encountered during fixpoint in '" + graph + "'");
-			if (!graph.getAdjacencyMatrix().containsNode(current))
+			if (!graph.containsNode(current))
 				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
 
 			T entrystate = getEntryState(current, startingPoints.get(current), implementation);

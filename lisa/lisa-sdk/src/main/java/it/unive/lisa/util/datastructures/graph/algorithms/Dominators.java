@@ -20,15 +20,15 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <G> the type of the target {@link Graph}s
  * @param <N> the type of {@link Node}s in the target graphs
  * @param <E> the type of {@link Edge}s in the target graphs
- * @param <G> the type of the target graphs
  * 
  * @see <a href=
  *          "https://en.wikipedia.org/wiki/Dominator_(graph_theory)">Dominators
  *          (graph theory)</a>
  */
-public class Dominators<G extends Graph<G, N, E>, N extends Node<N, E, G>, E extends Edge<N, E, G>> {
+public class Dominators<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	private final Map<N, Set<N>> dominators;
 

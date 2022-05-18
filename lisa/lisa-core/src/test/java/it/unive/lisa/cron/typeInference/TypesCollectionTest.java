@@ -15,7 +15,8 @@ import org.junit.Test;
 public class TypesCollectionTest extends AnalysisTestExecutor {
 	@Test
 	public void testTypesCollection() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpTypeInference(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class,
 						getDefaultFor(HeapDomain.class),
 						getDefaultFor(ValueDomain.class),

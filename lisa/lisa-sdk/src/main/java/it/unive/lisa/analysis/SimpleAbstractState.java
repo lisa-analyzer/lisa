@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -11,6 +12,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Map;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -276,61 +278,13 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new StateRepresentation(heapState.representation(), valueState.representation());
-	}
-
-	@Override
-	public DomainRepresentation typeRepresentation() {
-		return new StateRepresentation(heapState.representation(), typeState.representation());
-	}
-
-	/**
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	private static final class StateRepresentation extends DomainRepresentation {
-		private final DomainRepresentation heap;
-		private final DomainRepresentation value;
-
-		private StateRepresentation(DomainRepresentation heap, DomainRepresentation value) {
-			this.heap = heap;
-			this.value = value;
-		}
-
-		@Override
-		public String toString() {
-			return "heap [[ " + heap + " ]]\nvalue [[ " + value + " ]]";
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((heap == null) ? 0 : heap.hashCode());
-			result = prime * result + ((value == null) ? 0 : value.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			StateRepresentation other = (StateRepresentation) obj;
-			if (heap == null) {
-				if (other.heap != null)
-					return false;
-			} else if (!heap.equals(other.heap))
-				return false;
-			if (value == null) {
-				if (other.value != null)
-					return false;
-			} else if (!value.equals(other.value))
-				return false;
-			return true;
-		}
+		DomainRepresentation h = heapState.representation();
+		DomainRepresentation t = typeState.representation();
+		DomainRepresentation v = valueState.representation();
+		return new ObjectRepresentation(Map.of(
+				HEAP_REPRESENTATION_KEY, h,
+				TYPE_REPRESENTATION_KEY, t,
+				VALUE_REPRESENTATION_KEY, v));
 	}
 
 	@Override

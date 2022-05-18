@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis.representation;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -13,7 +17,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class SetRepresentation extends DomainRepresentation {
 
-	private final SortedSet<DomainRepresentation> elements;
+	/**
+	 * The elements of contained in this set.
+	 */
+	protected final SortedSet<DomainRepresentation> elements;
 
 	/**
 	 * Builds a new representation starting from the given set. {@code mapper}
@@ -50,6 +57,14 @@ public class SetRepresentation extends DomainRepresentation {
 	}
 
 	@Override
+	public SerializableValue toSerializableValue() {
+		List<SerializableValue> values = new ArrayList<>(elements.size());
+		for (DomainRepresentation e : elements)
+			values.add(e.toSerializableValue());
+		return new SerializableArray(getProperties(), values);
+	}
+
+	@Override
 	public String toString() {
 		return "[" + StringUtils.join(elements, ", ") + "]";
 	}
@@ -57,7 +72,7 @@ public class SetRepresentation extends DomainRepresentation {
 	@Override
 	public int hashCode() {
 		final int prime = 31;
-		int result = 1;
+		int result = super.hashCode();
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
 		return result;
 	}
@@ -66,7 +81,7 @@ public class SetRepresentation extends DomainRepresentation {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (obj == null)
+		if (!super.equals(obj))
 			return false;
 		if (getClass() != obj.getClass())
 			return false;

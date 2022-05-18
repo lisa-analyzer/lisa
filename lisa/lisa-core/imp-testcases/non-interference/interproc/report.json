@@ -6,5 +6,5 @@
   }, {
     "message" : "['imp-testcases/non-interference/interproc/program.imp':20:7] on 'untyped Integrity::confidentiality_lec6_declassified(Integrity* this)': [EXPRESSION] This assignment, located in a HIGH confidentiality block, assigns a LOW confidentiality variable, thus violating non-interference"
   } ],
-  "files" : [ "analysis___-2057990561_untyped_Integrity.confidentiality_lec6_declassified(Integrity__this).dot", "analysis___-2086616829_untyped_Integrity.confidentiality_lec5ex1_declassified(Integrity__this).dot", "analysis___-509664780_untyped_Integrity.declassify(Integrity__this,_untyped_y).dot", "analysis___119339351_untyped_Integrity.declassify(Integrity__this,_untyped_y).dot", "analysis___untyped_Integrity.main(Integrity__this).dot" ]
+  "files" : [ "untyped_Integrity.confidentiality_lec5ex1_declassified(Integrity__this)_-2086616829.json", "untyped_Integrity.confidentiality_lec6_declassified(Integrity__this)_-2057990561.json", "untyped_Integrity.declassify(Integrity__this,_untyped_y)_-509664780.json", "untyped_Integrity.declassify(Integrity__this,_untyped_y)_119339351.json", "untyped_Integrity.main(Integrity__this).json" ]
 }

@@ -110,7 +110,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public DomainRepresentation representation() {
-		return isBottom() ? Lattice.BOTTOM_REPR : REPR;
+		return isBottom() ? Lattice.bottomRepresentation() : REPR;
 	}
 
 	@Override

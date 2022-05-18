@@ -5,7 +5,6 @@ import it.unive.lisa.analysis.symbols.NameSymbol;
 import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
 import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.outputs.DotGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -25,7 +24,7 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.BaseGraph;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -50,7 +48,8 @@ import org.apache.logging.log4j.Logger;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
+public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
+		implements CallGraph {
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
@@ -490,11 +489,5 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
-	}
-
-	@Override
-	protected DotGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toDot(
-			Function<CallGraphNode, String> labelGenerator) {
-		throw new UnsupportedOperationException();
 	}
 }

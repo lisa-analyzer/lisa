@@ -3,14 +3,19 @@ package it.unive.lisa.util.file;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.TreeSet;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 
 /**
  * A file manager that provides standard functionalities for communicating with
@@ -81,12 +86,11 @@ public class FileManager {
 
 	/**
 	 * Creates a UTF-8 encoded file with the given name, appending the
-	 * {@code dot} extension. If name is a path, all missing directories will be
-	 * created as well. The name will be stripped of any characters that might
-	 * cause problems in the file name. The given name will be joined with the
-	 * workdir used to initialize this file manager, thus raising an exception
-	 * if {@code name} is absolute. {@code filler} will then be used to write to
-	 * the writer.
+	 * {@code dot} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
 	 * 
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
@@ -94,27 +98,60 @@ public class FileManager {
 	 * @throws IOException if something goes wrong while creating the file
 	 */
 	public void mkDotFile(String name, WriteAction filler) throws IOException {
-		mkOutputFile(cleanupForDotFile(name) + ".dot", false, filler);
+		mkOutputFile(cleanupCFGName(name) + ".dot", false, filler);
 	}
 
 	/**
 	 * Creates a UTF-8 encoded file with the given name, appending the
-	 * {@code dot} extension. If name is a path, all missing directories will be
-	 * created as well. The name will be stripped of any characters that might
-	 * cause problems in the file name. The given name will be joined with the
-	 * workdir used to initialize this file manager, thus raising an exception
-	 * if {@code name} is absolute. {@code filler} will then be used to write to
-	 * the writer.
+	 * {@code json} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
 	 * 
-	 * @param path   the sub-path, relative to the workdir, where the file
-	 *                   should be created
 	 * @param name   the name of the file to create
 	 * @param filler the callback to write to the file
 	 * 
 	 * @throws IOException if something goes wrong while creating the file
 	 */
-	public void mkDotFile(String path, String name, WriteAction filler) throws IOException {
-		mkOutputFile(path, cleanupForDotFile(name) + ".dot", false, filler);
+
+	public void mkJsonFile(String name, WriteAction filler) throws IOException {
+		mkOutputFile(cleanupCFGName(name) + ".json", false, filler);
+	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code graphml} extension. The name will be stripped of any characters
+	 * that might cause problems in the file name. The given name will be joined
+	 * with the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+
+	public void mkGraphmlFile(String name, WriteAction filler) throws IOException {
+		mkOutputFile(cleanupCFGName(name) + ".graphml", false, filler);
+	}
+
+	/**
+	 * Creates a UTF-8 encoded file with the given name, appending the
+	 * {@code html} extension. The name will be stripped of any characters that
+	 * might cause problems in the file name. The given name will be joined with
+	 * the workdir used to initialize this file manager, thus raising an
+	 * exception if {@code name} is absolute. {@code filler} will then be used
+	 * to write to the writer.
+	 * 
+	 * @param name   the name of the file to create
+	 * @param filler the callback to write to the file
+	 * 
+	 * @throws IOException if something goes wrong while creating the file
+	 */
+	public void mkHtmlFile(String name, WriteAction filler) throws IOException {
+		mkOutputFile(cleanupCFGName(name) + ".html", false, filler);
 	}
 
 	/**
@@ -180,7 +217,7 @@ public class FileManager {
 		if (!parent.exists() && !parent.mkdirs())
 			throw new IOException("Unable to create directory structure for " + file);
 
-		createdFiles.add(workdir.toPath().relativize(file.toPath()).toString());
+		createdFiles.add(FilenameUtils.separatorsToUnix(workdir.toPath().relativize(file.toPath()).toString()));
 		try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), StandardCharsets.UTF_8.newEncoder())) {
 			if (bom)
 				writer.write('\ufeff');
@@ -208,7 +245,7 @@ public class FileManager {
 		return cleanName.toString();
 	}
 
-	private static String cleanupForDotFile(String name) {
+	private static String cleanupCFGName(String name) {
 		String result = name.replace(' ', '_');
 		result = result.replace("::", ".");
 		return result;
@@ -225,5 +262,39 @@ public class FileManager {
 		File workdir = new File(path);
 		if (workdir.exists())
 			FileUtils.forceDelete(workdir);
+	}
+
+	/**
+	 * Generates, inside the working directory, all supporting files (mostly
+	 * cytoscape.js) needed for correct visualization of graphs dumped in html
+	 * format.
+	 * 
+	 * @param compound whether the support files need to include
+	 *                     compound-related cytoscape layouts
+	 * 
+	 * @throws IOException if an error happens during the generation
+	 */
+	public void generateHtmlViewerSupportFiles(boolean compound) throws IOException {
+		List<String> files = new ArrayList<>();
+		files.add("js/cytoscape-3.21.1.min.js");
+		files.add("js/cytoscape-graphml-1.0.6-hier.js");
+		files.add("js/jquery-3.0.0.min.js");
+		if (compound) {
+			files.add("js/layout-base.js");
+			files.add("js/cose-base.js");
+			files.add("js/cytoscape-fcose.js");
+			files.add("js/cytoscape-expand-collapse.js");
+		}
+
+		for (String file : files)
+			try (InputStream stream = getClass().getClassLoader().getResourceAsStream("html-graph/" + file)) {
+				String content = IOUtils.toString(stream, StandardCharsets.UTF_8);
+				int pos = file.lastIndexOf("/");
+				if (pos == -1)
+					mkOutputFile(file, false, writer -> writer.write(content));
+				else
+					mkOutputFile(file.substring(0, pos), file.substring(pos + 1), false,
+							writer -> writer.write(content));
+			}
 	}
 }
