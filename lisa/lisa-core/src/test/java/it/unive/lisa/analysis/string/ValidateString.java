@@ -71,14 +71,14 @@ public class ValidateString {
 		transitions.add(new Transition(st[0], st[0], 'b'));
 		transitions.add(new Transition(st[0], st[1], 'b'));
 
-		// accepts language a^nb^n
+		// accepts language {a^nb^m}^p
 		Automaton nfa = new Automaton(states, transitions, initialStates, finalStates);
 
-		assertTrue(nfa.validateString("ababababababa"));
-		assertTrue(nfa.validateString("ababababababab"));
+		assertTrue(nfa.validateString("ababababababb"));
+		assertTrue(nfa.validateString("babababababab"));
 
-		assertFalse(nfa.validateString("bababababab"));
-		assertFalse(nfa.validateString("abababababb"));
+		assertFalse(nfa.validateString("abbabaaaba"));
+		assertFalse(nfa.validateString("baababbaaa"));
 	}
 
 	// testing epsilon nfa

@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.stream.Collectors;	
 
 public class Automaton {
 
@@ -49,19 +49,24 @@ public class Automaton {
 		Set<State> currentStates = epsClosure(initialStates);
 		// stores all the states reached after char computation
 		Set<State> dest = new HashSet<>();
-		
+		// stores temporally the new currentStates
+		Set<State> newCurr;
+
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
+			newCurr = new HashSet<>();
 			for(State s : currentStates) {
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == c)
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-				dest = epsClosure(dest);
+				if(!dest.isEmpty()) {
+					dest = epsClosure(dest);
+					newCurr.addAll(dest);
+				}
 			}
-			currentStates = dest;
+			currentStates = newCurr;
 		}
-		currentStates = epsClosure(currentStates);
 
 		// checks if there is at least one final state in the set of possible reached states at the end of the validation process
 		for(State s : currentStates)
@@ -144,8 +149,12 @@ public class Automaton {
 
 	// create a new deterministic automaton from this
 	private Automaton determinize() {
-		// TODO: costruzione per sottoinsiemi
-		return new Automaton();
+		Set<Transition> tr = new HashSet<>();
+		Set<State> fs = new HashSet<>();
+		Set<State> is = new HashSet<>();
+		Set<State> st = new HashSet<>();
+		
+		return new Automaton(st, tr, is, fs);
 	}
 
 	// get the automaton alphabet using defined transitions
@@ -171,21 +180,21 @@ public class Automaton {
 			for(State s : eps) {
 				if(checked.contains(s))
 					continue;
-				
+
 				checked.add(s);
-				
+
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-				
+
 				temp.addAll(dest);	
 			}
-			
+
 			eps.addAll(temp);
-			
+
 		} while(!checked.containsAll(eps));
-		
+
 		return eps;
 	}
 
