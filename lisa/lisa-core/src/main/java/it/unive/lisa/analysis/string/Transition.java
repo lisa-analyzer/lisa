@@ -3,17 +3,18 @@ package it.unive.lisa.analysis.string;
 import java.util.Objects;
 
 public final class Transition {
-	
+
 	private final State source, destination;
-	
+
 	// if symbol is ' ' means it is an epsilon transition
 	private final char symbol;
-	 
+
 	public Transition(State source, State destination, char symbol) {
 		this.source = source;
 		this.destination = destination;
 		this.symbol = symbol;
 	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(destination, source, symbol);
@@ -35,11 +36,11 @@ public final class Transition {
 	public State getSource() {
 		return this.source;
 	}
-	
+
 	public char getSymbol() {
 		return this.symbol;
 	}
-	
+
 	public State getDestination() {
 		return this.destination;
 	}

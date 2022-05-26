@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;	
+import java.util.stream.Collectors;
 
 public final class Automaton {
 
@@ -10,24 +12,18 @@ public final class Automaton {
 
 	private final Set<Transition> transitions;
 
-	private final Set<State> initialStates, finalStates;
-
 	private final Set<Character> alphabet;
 
 	// constructor
 	public Automaton() {
 		states = new HashSet<>();
 		transitions = new HashSet<>();
-		initialStates = new HashSet<>();
-		finalStates = new HashSet<>();
 		alphabet = new HashSet<>();
 	}
 
-	public Automaton(Set<State> states, Set<Transition> transitions, Set<State> initialStates, Set<State> finalStates) {
+	public Automaton(Set<State> states, Set<Transition> transitions) {
 		this.states = states;
 		this.transitions = transitions;
-		this.initialStates = initialStates;
-		this.finalStates = finalStates;
 		this.alphabet = new HashSet<>();
 	}
 
@@ -36,35 +32,32 @@ public final class Automaton {
 		transitions.add(t);
 	}
 
-	// add a new state to the automaton 
+	// add a new state to the automaton
 	public void addState(State s) {
-		if(s.isInitial())
-			initialStates.add(s);
 		states.add(s);
 	}
 
-	// given a string as input the automaton checks if it is part of its language
+	// given a string as input the automaton checks if it is part of its
+	// language
 	public boolean validateString(String str) {
-		// stores all the possible states reached by the automaton after each input char
-		Set<State> currentStates = epsClosure(initialStates);
+		// stores all the possible states reached by the automaton after each
+		// input char
+		Set<State> currentStates = epsClosure(states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()));
 		// stores all the states reached after char computation
 		Set<State> dest = new HashSet<>();
 		// stores temporally the new currentStates
 		Set<State> newCurr;
 
-		for(int i = 0; i < str.length(); ++i) {
+		for (int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
-			System.out.print("Char: " + c + " currentStates: ");
-			for(State s : currentStates)
-				System.out.print(s.getId() + ", ");
-			System.out.println();
+
 			newCurr = new HashSet<>();
-			for(State s : currentStates) {
+			for (State s : currentStates) {
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == c)
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-				if(!dest.isEmpty()) {
+				if (!dest.isEmpty()) {
 					dest = epsClosure(dest);
 					newCurr.addAll(dest);
 				}
@@ -72,12 +65,9 @@ public final class Automaton {
 			currentStates = newCurr;
 		}
 
-		// checks if there is at least one final state in the set of possible reached states at the end of the validation process
-		for(State s : currentStates)
-			if(finalStates.contains(s))
-				return true;
-
-		return false;
+		// checks if there is at least one final state in the set of possible
+		// reached states at the end of the validation process
+		return currentStates.stream().anyMatch(s -> s.isFinal());
 	}
 
 	// Brzozowski minimization algorithm
@@ -90,15 +80,15 @@ public final class Automaton {
 		defineAlphabet();
 		Set<State> RS = new HashSet<>();
 		Set<State> NS = new HashSet<>();
-		Set<State> is = new HashSet<>();
-		Set<State> fs = new HashSet<>();
 		Set<State> T;
+		Set<State> initialStates = states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet());
+
 		RS.addAll(initialStates);
 		NS.addAll(initialStates);
 		do {
 			T = new HashSet<>();
 
-			for(State q : NS) {
+			for (State q : NS) {
 				T.addAll(transitions.stream()
 						.filter(t -> t.getSource().equals(q))
 						.map(t -> t.getDestination())
@@ -107,18 +97,13 @@ public final class Automaton {
 			}
 			NS = T;
 			RS.addAll(T);
-		}  while(!NS.isEmpty());
+		} while (!NS.isEmpty());
 		Set<Transition> tr = transitions;
-		for(Transition t : tr)
-			if(!RS.contains(t.getSource()) || !RS.contains(t.getDestination()))
+		for (Transition t : tr)
+			if (!RS.contains(t.getSource()) || !RS.contains(t.getDestination()))
 				tr.remove(t);
-		for(State s : RS) {
-			if(s.isInitial())
-				is.add(s);
-			if(s.isFinal())
-				fs.add(s);
-		}
-		return new Automaton(RS, tr, is, fs);
+
+		return new Automaton(RS, tr);
 	}
 
 	// create a new automaton that accepts the reverse language of this
@@ -127,75 +112,100 @@ public final class Automaton {
 		Set<State> st = new HashSet<>();
 		Set<State> is = new HashSet<>();
 		Set<State> fs = new HashSet<>();
-		for(Transition t : transitions) {
+		for (Transition t : transitions) {
 			tr.add(new Transition(t.getDestination(), t.getSource(), t.getSymbol()));
 		}
-		for(State s : states) {
+		for (State s : states) {
 			int id = 0;
 			boolean fin = false, init = false;
-			if(s.isInitial())
+			if (s.isInitial())
 				fin = true;
-			if(s.isFinal())
+			if (s.isFinal())
 				init = true;
 			st.add(new State(id, init, fin));
 			++id;
 		}
 
-		for(State s : st) {
-			if(s.isInitial())
+		for (State s : st) {
+			if (s.isInitial())
 				is.add(s);
-			if(s.isFinal())
+			if (s.isFinal())
 				fs.add(s);
 		}
 
-		return new Automaton(st, tr, is, fs);
+		return new Automaton(st, tr);
 	}
 
 	// create a new deterministic automaton from this
 	private Automaton determinize() {
 		Set<Transition> tr = new HashSet<>();
-		Set<State> fs = new HashSet<>();
-		Set<State> is = new HashSet<>();
 		Set<State> st = new HashSet<>();
 		
-		// vorrei una struttura dati che riesce che mi dia una relazione di ordine per fare in modo di mappare uno a uno gli stati del dfa
-		
-		return new Automaton(st, tr, is, fs);
+		// TODO vorrei una struttura dati che riesce che mi dia una relazione di
+		// ordine per fare in modo di mappare uno a uno gli stati del dfa
+
+		return new Automaton(st, tr);
 	}
 
 	// get the automaton alphabet using defined transitions
 	private void defineAlphabet() {
-		for(Transition T : transitions) {
+		for (Transition T : transitions) {
 			alphabet.add(T.getSymbol());
 		}
 	}
 
-	// compute all the states reachable using epsilon closures from a given state
-	private Set<State> epsClosure(State state) {
+	/**
+	 * Computes the epsilon closure of this automaton starting from its initial
+	 * states, namely the set of states that are reachable from all the initial
+	 * states just with epsilon transitions.
+	 * 
+	 * @return the set of states that are reachable from all the initial states
+	 *             just with epsilon transitions.
+	 */
+	Set<State> epsClosure() {
+		return epsClosure(states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()));
+	}
+
+	// compute all the states reachable using epsilon closures from a given
+	// state
+
+	/**
+	 * Computes the epsilon closure of this automaton starting from
+	 * {@code state}, namely the set of states that are reachable from
+	 * {@code state} just with epsilon transitions.
+	 * 
+	 * @param state the state from which the method starts to compute the
+	 *                  epsilon closure
+	 * 
+	 * @return the set of states that are reachable from {@code state} just with
+	 *             epsilon transitions.
+	 */
+	Set<State> epsClosure(State state) {
 		Set<State> eps = new HashSet<>();
 		eps.add(state);
 		// used to make sure that a state isn't checked twice
 		Set<State> checked = new HashSet<>();
 		// collect all the possible destination from the current state
 		Set<State> dest;
-		// used to collect new states that have to be added to eps inside for loop
+		// used to collect new states that have to be added to eps inside for
+		// loop
 		Set<State> temp;
 		// add current state
 		do {
 			temp = new HashSet<>();
-			for(State s : eps) {
-				if(checked.contains(s))
+			for (State s : eps) {
+				if (checked.contains(s))
 					continue;
 
 				checked.add(s);
-				
+
 				// stream vuoto non trova risultati anche se ci sono
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-				
-				for(State st : dest)
+
+				for (State st : dest)
 					System.out.println(st.getId());
 
 				temp.addAll(dest);
@@ -203,7 +213,7 @@ public final class Automaton {
 
 			eps.addAll(temp);
 
-		} while(!checked.containsAll(eps));
+		} while (!checked.containsAll(eps));
 
 		return eps;
 	}
@@ -212,7 +222,7 @@ public final class Automaton {
 	private Set<State> epsClosure(Set<State> st) {
 		Set<State> eps = new HashSet<>();
 
-		for(State s : st) {
+		for (State s : st) {
 			Set<State> e = epsClosure(s);
 			eps.addAll(e);
 		}
