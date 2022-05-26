@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
 
-public class Transition {
+public final class Transition {
 	
 	private final State source, destination;
 	

@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
 
-public class State {
+public final class State {
 
 	private final int id;
 	

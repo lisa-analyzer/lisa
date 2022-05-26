@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;	
 
-public class Automaton {
+public final class Automaton {
 
 	private final Set<State> states;
 
@@ -158,6 +158,8 @@ public class Automaton {
 		Set<State> is = new HashSet<>();
 		Set<State> st = new HashSet<>();
 		
+		// vorrei una struttura dati che riesce che mi dia una relazione di ordine per fare in modo di mappare uno a uno gli stati del dfa
+		
 		return new Automaton(st, tr, is, fs);
 	}
 
@@ -186,13 +188,17 @@ public class Automaton {
 					continue;
 
 				checked.add(s);
-
+				
+				// stream vuoto non trova risultati anche se ci sono
 				dest = transitions.stream()
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
+				
+				for(State st : dest)
+					System.out.println(st.getId());
 
-				temp.addAll(dest);	
+				temp.addAll(dest);
 			}
 
 			eps.addAll(temp);
