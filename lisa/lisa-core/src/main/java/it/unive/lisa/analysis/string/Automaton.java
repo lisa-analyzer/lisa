@@ -54,6 +54,10 @@ public class Automaton {
 
 		for(int i = 0; i < str.length(); ++i) {
 			char c = str.charAt(i);
+			System.out.print("Char: " + c + " currentStates: ");
+			for(State s : currentStates)
+				System.out.print(s.getId() + ", ");
+			System.out.println();
 			newCurr = new HashSet<>();
 			for(State s : currentStates) {
 				dest = transitions.stream()
@@ -172,7 +176,7 @@ public class Automaton {
 		Set<State> checked = new HashSet<>();
 		// collect all the possible destination from the current state
 		Set<State> dest;
-		// used to collect new states that have to be added to esp inside for loop
+		// used to collect new states that have to be added to eps inside for loop
 		Set<State> temp;
 		// add current state
 		do {
@@ -204,8 +208,7 @@ public class Automaton {
 
 		for(State s : st) {
 			Set<State> e = epsClosure(s);
-			for(State q : e)
-				eps.add(q);
+			eps.addAll(e);
 		}
 		return eps;
 	}
