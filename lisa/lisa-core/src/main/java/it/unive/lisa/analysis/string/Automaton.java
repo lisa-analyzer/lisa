@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * TODO
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
+ */
 public final class Automaton {
 
 	private final Set<State> states;
