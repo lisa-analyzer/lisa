@@ -1,50 +1,39 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * TODO
+ * A class that describes an generic automaton(dfa, nfa, epsilon nfa).
  * 
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public final class Automaton {
-
+	
 	private final Set<State> states;
-
+	
 	private final Set<Transition> transitions;
 
 	private final Set<Character> alphabet;
 
-	// constructor
-	public Automaton() {
-		states = new HashSet<>();
-		transitions = new HashSet<>();
-		alphabet = new HashSet<>();
-	}
-
+	/**
+	 * Build a new automaton with given {@code states} and {@code transitions}.
+	 * @param states the set of states of the new automaton
+	 * @param transitions the set of the transitions of the new automaton
+	 */
 	public Automaton(Set<State> states, Set<Transition> transitions) {
 		this.states = states;
 		this.transitions = transitions;
 		this.alphabet = new HashSet<>();
 	}
 
-	// add a new a transition to the automaton
-	public void addTransition(Transition t) {
-		transitions.add(t);
-	}
-
-	// add a new state to the automaton
-	public void addState(State s) {
-		states.add(s);
-	}
-
-	// given a string as input the automaton checks if it is part of its
-	// language
+	/**
+	 * Computes all the automaton transitions to validate a given string {@code str}.
+	 * @param str String that has to be checked.
+	 * @return a boolean value that indicates either if {@code str} has been accepted or not.
+	 */
 	public boolean validateString(String str) {
 		// stores all the possible states reached by the automaton after each
 		// input char
@@ -210,9 +199,6 @@ public final class Automaton {
 						.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
-
-				for (State st : dest)
-					System.out.println(st.getId());
 
 				temp.addAll(dest);
 			}
