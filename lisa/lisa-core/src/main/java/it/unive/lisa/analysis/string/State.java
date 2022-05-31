@@ -1,13 +1,24 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
-
+/**
+ * A class that describes an Automaton state.
+ * 
+ * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public final class State {
 
 	private final int id;
 
 	private final boolean isFinal, isInitial;
 
+	/**
+	 * State constructor, it creates a new state with the given informations.
+	 * @param id identifier of the new state.
+	 * @param isInitial indicates if the state is initial.
+	 * @param isFinal indicates if the state is final.
+	 */
 	public State(int id, boolean isInitial, boolean isFinal) {
 		this.id = id;
 		this.isInitial = isInitial;
@@ -42,15 +53,27 @@ public final class State {
 		else
 			return "[" + id + ", initial, final]";
 	}
-
+	
+	/**
+	 * Tells if the state is either final or not.
+	 * @return boolean value that indicates if it is a final state.
+	 */
 	public boolean isFinal() {
 		return isFinal;
 	}
 
+	/**
+	 * Tells if the state is either initial or not.
+	 * @return boolean value that indicates if it is an initial state.
+	 */
 	public boolean isInitial() {
 		return isInitial;
 	}
 
+	/**
+	 * Tells the id of the state such that it is possible to distinguish it from other states.
+	 * @return state id
+	 */
 	public int getId() {
 		return id;
 	}
