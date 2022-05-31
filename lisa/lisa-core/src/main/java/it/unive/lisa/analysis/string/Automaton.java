@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,12 +12,27 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public final class Automaton {
-	
+
 	private final Set<State> states;
-	
+
 	private final Set<Transition> transitions;
 
-	private final Set<Character> alphabet;
+	@Override
+	public int hashCode() {
+		return Objects.hash(states, transitions);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Automaton other = (Automaton) obj;
+		return Objects.equals(states, other.states) && Objects.equals(transitions, other.transitions);
+	}
 
 	/**
 	 * Build a new automaton with given {@code states} and {@code transitions}.
@@ -26,7 +42,6 @@ public final class Automaton {
 	public Automaton(Set<State> states, Set<Transition> transitions) {
 		this.states = states;
 		this.transitions = transitions;
-		this.alphabet = new HashSet<>();
 	}
 
 	/**
@@ -65,14 +80,19 @@ public final class Automaton {
 		return currentStates.stream().anyMatch(s -> s.isFinal());
 	}
 
-	// Brzozowski minimization algorithm
+	/**
+	 * Brzozowski minimization algorithm.
+	 * @return the minimum automaton that accepts the same language as {@code this}.
+	 */
 	public Automaton minimize() {
 		return reverse().determinize().reach().reverse().determinize().reach();
 	}
 
-	// delete unreachable states from the automaton
+	/**
+	 * Remove all the unreachable states from the current automaton.
+	 * @return a newly created automaton without the unreachable states of {@code this}.
+	 */
 	private Automaton reach() {
-		defineAlphabet();
 		Set<State> RS = new HashSet<>();
 		Set<State> NS = new HashSet<>();
 		Set<State> T;
@@ -101,7 +121,10 @@ public final class Automaton {
 		return new Automaton(RS, tr);
 	}
 
-	// create a new automaton that accepts the reverse language of this
+	/**
+	 * Creates an automaton that accept the reverse language.
+	 * @return a newly created automaton that accepts the reverse language of {@code this}.
+	 */
 	private Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
 		Set<State> st = new HashSet<>();
@@ -131,22 +154,16 @@ public final class Automaton {
 		return new Automaton(st, tr);
 	}
 
-	// create a new deterministic automaton from this
+	/**
+	 * Creates a deterministic automaton from the current automaton.
+	 * @return a newly deterministic automaton that accepts the same language as {@code this}.
+	 */
 	private Automaton determinize() {
 		Set<Transition> tr = new HashSet<>();
 		Set<State> st = new HashSet<>();
-		
-		// TODO vorrei una struttura dati che riesce che mi dia una relazione di
-		// ordine per fare in modo di mappare uno a uno gli stati del dfa
+		// use LinkedList<HashSet<State>>
 
 		return new Automaton(st, tr);
-	}
-
-	// get the automaton alphabet using defined transitions
-	private void defineAlphabet() {
-		for (Transition T : transitions) {
-			alphabet.add(T.getSymbol());
-		}
 	}
 
 	/**
@@ -210,7 +227,16 @@ public final class Automaton {
 		return eps;
 	}
 
-	// compute the epsilon closures for a set of given states
+	/**
+	 * Computes the epsilon closure of this automaton starting from
+	 * {@code state}, namely the set of states that are reachable from
+	 * {@code st} just with epsilon transitions.
+	 * 
+	 * @param st the set of states from which the epsilon closure is computed.
+	 * 
+	 * @return the set of states that are reachable from {@code state} just with
+	 *             epsilon transitions.
+	 */
 	private Set<State> epsClosure(Set<State> st) {
 		Set<State> eps = new HashSet<>();
 
@@ -220,5 +246,4 @@ public final class Automaton {
 		}
 		return eps;
 	}
-
 }
