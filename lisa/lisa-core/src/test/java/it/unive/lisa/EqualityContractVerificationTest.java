@@ -16,6 +16,8 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.State;
+import it.unive.lisa.analysis.string.Transition;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -118,6 +120,10 @@ public class EqualityContractVerificationTest {
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
+	private static final State st1 = new State(0, false, false);
+	private static final State st2 = new State(1, false, false);
+	private static final Transition t1 = new Transition(st1, st2, 'a');
+	private static final Transition t2 = new Transition(st1, st2, 'b');
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
 			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
 			"foo");
@@ -201,7 +207,9 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(ExternalSet.class, s1, s2)
-				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
+				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
+				.withPrefabValues(State.class, st1, st2)
+				.withPrefabValues(Transition.class, t1, t2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();

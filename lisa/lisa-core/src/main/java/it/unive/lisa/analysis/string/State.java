@@ -2,7 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
 /**
- * A class that describes an Automaton state.
+ * A class that describes an {@link Automaton} state.
  * 
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
