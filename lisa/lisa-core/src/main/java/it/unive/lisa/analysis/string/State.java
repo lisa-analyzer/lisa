@@ -11,7 +11,7 @@ public final class State {
 
 	private final int id;
 
-	private final boolean isFinal, isInitial;
+	private boolean isFinal, isInitial;
 
 	/**
 	 * State constructor, it creates a new state with the given informations.
@@ -53,7 +53,7 @@ public final class State {
 		else
 			return "[" + id + ", initial, final]";
 	}
-	
+
 	/**
 	 * Tells if the state is either final or not.
 	 * @return boolean value that indicates if it is a final state.
@@ -77,4 +77,19 @@ public final class State {
 	public int getId() {
 		return id;
 	}
+	
+	/**
+	 * Sets {@code this} as a final state.
+	 */
+	public void setFinal() {
+		this.isFinal = true;
+	}
+	
+	/**
+	 * Sets {@code this} as an initial state.
+	 */
+	public void setInitial() {
+		this.isInitial = true;
+	}
+	
 }
