@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -155,15 +156,75 @@ public final class Automaton {
 	}
 
 	/**
-	 * Creates a deterministic automaton from the current automaton.
+	 * Creates a deterministic automaton starting from {@code this}.
 	 * @return a newly deterministic automaton that accepts the same language as {@code this}.
 	 */
-	private Automaton determinize() {
-		Set<Transition> tr = new HashSet<>();
-		Set<State> st = new HashSet<>();
-		// use LinkedList<HashSet<State>>
+	Automaton determinize() {
+		// transitions of the new deterministic automaton
+		Set<Transition> delta = new HashSet<>();
+		// states of the new deterministic automaton
+		Set<State> states = new HashSet<>();
+		// store the macrostates of the new Automaton
+		ArrayList<HashSet<State>> detStates = new ArrayList<>();
+		// stores the already controlled states
+		Set<State> marked = new HashSet<>();
+		// stores number of states of the new Automaton
+		int count = 0;
+		// automaton alphabet
+		Set<Character> alphabet = transitions.stream()
+				.filter(t -> t.getSymbol() != ' ')
+				.map(t -> t.getSymbol())
+				.collect(Collectors.toSet());
 
-		return new Automaton(st, tr);
+		detStates.add((HashSet<State>) epsClosure());
+		states.add(new State(count, true, false));
+		count++;
+
+		while(!marked.equals(states)) {
+			int current = -1;
+			for(State s : states) {
+				if(marked.contains(s))
+					continue;
+				marked.add(s);
+				current = s.getId();
+				break;
+			}
+			Set<State> currStates = detStates.get(current);
+			for(Character c : alphabet) {
+				Set<State> R = epsClosure(transitions.stream()
+						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol() == c && t.getSymbol() != ' ')
+						.map(t -> t.getDestination())
+						.collect(Collectors.toSet()));
+				if(!detStates.contains(R) && !R.isEmpty()) {
+					detStates.add((HashSet<State>) R);
+					states.add(new State(count, false, false));
+					count++;
+				}
+				State source = null;
+				State destination = null;
+				for(State s : states) {
+					if(s.getId() == detStates.indexOf(R)) {
+						destination = s;
+					}
+					if(s.getId() == current)
+						source = s;
+				}
+				if(source != null && destination != null)
+					delta.add(new Transition(source, destination, c));
+			}
+		}
+
+		for(State s : states) {
+			Set<State> macroState = detStates.get(s.getId());
+			for(State q : macroState) {
+				if(q.isFinal()) {
+					s.setFinal();
+					break;
+				}
+			}
+		}
+
+		return new Automaton(states, delta);
 	}
 
 	/**
