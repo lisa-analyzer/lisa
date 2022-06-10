@@ -53,11 +53,91 @@ public class EpsilonClosureTest {
 
 		// a | b | c
 		Automaton a = new Automaton(states, delta);
-		Set<State> expected = new HashSet<State>();
+		Set<State> expected = new HashSet<>();
 		expected.add(q0);
 		expected.add(q1);
 		expected.add(q2);
 
 		assertEquals(expected, a.epsClosure());
 	}
+	
+	@Test
+	public void testEpsClosure003() {
+		Set<State> states = new HashSet<>();
+		State q0 = new State(0, true, true);
+		states.add(q0);
+		
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(q0, q0, 'a'));
+		
+		// a*
+		Automaton a = new Automaton(states, delta);
+		Set<State> expected = new HashSet<>();
+		expected.add(q0);
+		
+		assertEquals(expected, a.epsClosure());
+	}
+	
+	@Test
+	public void testEpsClosure004() {
+		Set<State> states = new HashSet<>();
+		State q0 = new State(0, true, true);
+		states.add(q0);
+		
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(q0, q0, 'a'));
+		delta.add(new Transition(q0, q0, ' '));
+		
+		// eps | a*
+		Automaton a = new Automaton(states, delta);
+		Set<State> expected = new HashSet<>();
+		expected.add(q0);
+		
+		assertEquals(expected, a.epsClosure());
+	}
+	
+	@Test
+	public void testEpsClosure005() {
+		Set<State> states = new HashSet<>();
+		State q0 = new State(0, true, true);
+		states.add(q0);
+		
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(q0, q0, 'a'));
+		delta.add(new Transition(q0, q0, 'b'));
+		delta.add(new Transition(q0, q0, ' '));
+		
+		// (a | b | eps)
+		Automaton a = new Automaton(states, delta);
+		Set<State> expected = new HashSet<>();
+		expected.add(q0);
+		
+		assertEquals(expected, a.epsClosure());
+	}
+	
+	@Test
+	public void testEpsClosure006() {
+		Set<State> states = new HashSet<>();
+		State q0 = new State(0, true, false);
+		State q1 = new State(1, false, true);
+		states.add(q0);
+		states.add(q1);
+		
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(q0,q1,'a'));
+		delta.add(new Transition(q0,q1,'b'));
+		delta.add(new Transition(q0,q1,' '));
+		delta.add(new Transition(q1,q1,'a'));
+		delta.add(new Transition(q1,q1,'b'));
+		delta.add(new Transition(q1,q1,' '));
+		
+		// (a | b | eps)+
+		Automaton a = new Automaton(states, delta);
+		Set<State> expected = new HashSet<>();
+		expected.add(q0);
+		expected.add(q1);
+		
+		assertEquals(expected, a.epsClosure());
+	}
+	
 }
