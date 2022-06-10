@@ -45,6 +45,13 @@ public final class Transition {
 				&& symbol == other.symbol;
 	}
 	
+	
+
+	@Override
+	public String toString() {
+		return "[" + source + " -> " + destination + " : " + symbol + "]";
+	}
+
 	/**
 	 * Tells transition's source state.
 	 * @return source of {@code this} transition.
