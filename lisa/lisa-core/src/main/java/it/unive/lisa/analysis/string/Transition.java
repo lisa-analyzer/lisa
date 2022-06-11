@@ -17,9 +17,12 @@ public final class Transition {
 
 	/**
 	 * Creates a new transition for a generic automaton.
-	 * @param source state from which the transition could be applied.
+	 * 
+	 * @param source      state from which the transition could be applied.
 	 * @param destination state reached after the transition execution.
-	 * @param symbol the character that have to be read to execute the transition. {@code ' '} is used for epsilon transitions.
+	 * @param symbol      the character that have to be read to execute the
+	 *                        transition. {@code ' '} is used for epsilon
+	 *                        transitions.
 	 */
 	public Transition(State source, State destination, char symbol) {
 		this.source = source;
@@ -44,8 +47,6 @@ public final class Transition {
 		return Objects.equals(destination, other.destination) && Objects.equals(source, other.source)
 				&& symbol == other.symbol;
 	}
-	
-	
 
 	@Override
 	public String toString() {
@@ -54,6 +55,7 @@ public final class Transition {
 
 	/**
 	 * Tells transition's source state.
+	 * 
 	 * @return source of {@code this} transition.
 	 */
 	public State getSource() {
@@ -62,6 +64,7 @@ public final class Transition {
 
 	/**
 	 * Tells input symbol for {@code this} transition.
+	 * 
 	 * @return symbol needed to execute {@code this} transition.
 	 */
 	public char getSymbol() {
@@ -70,6 +73,7 @@ public final class Transition {
 
 	/**
 	 * Tells transition's destination state.
+	 * 
 	 * @return destination of {@code this} transition.
 	 */
 	public State getDestination() {

@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
 public class DeterminizeTest {
@@ -14,11 +13,11 @@ public class DeterminizeTest {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		State s;
-		for(int i = 0; i < 5; ++i) {
-			if(i == 0) 
+		for (int i = 0; i < 5; ++i) {
+			if (i == 0)
 				s = new State(i, true, false);
 
-			else if(i == 4) 
+			else if (i == 4)
 				s = new State(i, false, true);
 
 			else
@@ -42,7 +41,8 @@ public class DeterminizeTest {
 
 	}
 
-	// TODO: capire perché fallisce, dal debug ottengo esattamente l'automa expected 
+	// TODO: capire perché fallisce, dal debug ottengo esattamente l'automa
+	// expected
 	@Test
 	public void testNfa() {
 		Set<State> states = new HashSet<>();
@@ -60,7 +60,7 @@ public class DeterminizeTest {
 
 		// accepts language {a^nb^m}^p
 		Automaton nfa = new Automaton(states, transitions);
-		
+
 		Set<State> expStates = new HashSet<>();
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
@@ -75,7 +75,7 @@ public class DeterminizeTest {
 		assertEquals(expected, nfa.determinize());
 
 	}
-	
+
 	@Test
 	public void testEpsNfa() {
 		Set<State> states = new HashSet<>();

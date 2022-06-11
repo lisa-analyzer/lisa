@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
 public class EpsilonClosureTest {
@@ -124,12 +123,12 @@ public class EpsilonClosureTest {
 		states.add(q1);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0,q1,'a'));
-		delta.add(new Transition(q0,q1,'b'));
-		delta.add(new Transition(q0,q1,' '));
-		delta.add(new Transition(q1,q1,'a'));
-		delta.add(new Transition(q1,q1,'b'));
-		delta.add(new Transition(q1,q1,' '));
+		delta.add(new Transition(q0, q1, 'a'));
+		delta.add(new Transition(q0, q1, 'b'));
+		delta.add(new Transition(q0, q1, ' '));
+		delta.add(new Transition(q1, q1, 'a'));
+		delta.add(new Transition(q1, q1, 'b'));
+		delta.add(new Transition(q1, q1, ' '));
 
 		// (a | b | eps)+
 		Automaton a = new Automaton(states, delta);

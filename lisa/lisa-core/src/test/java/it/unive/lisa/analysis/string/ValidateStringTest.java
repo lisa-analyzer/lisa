@@ -15,11 +15,11 @@ public class ValidateStringTest {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		State s;
-		for(int i = 0; i < 5; ++i) {
-			if(i == 0) 
+		for (int i = 0; i < 5; ++i) {
+			if (i == 0)
 				s = new State(i, true, false);
 
-			else if(i == 4) 
+			else if (i == 4)
 				s = new State(i, false, true);
 
 			else
