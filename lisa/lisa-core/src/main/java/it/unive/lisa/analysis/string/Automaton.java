@@ -14,9 +14,25 @@ import java.util.stream.Collectors;
  */
 public final class Automaton {
 
+	/**
+	 * The states of the automaton
+	 */
 	private final Set<State> states;
 
+	/**
+	 * The transitions of the automaton
+	 */
 	private final Set<Transition> transitions;
+
+	/**
+	 * Set to {@code true} if and only if the automaton is determinized
+	 */
+	private boolean IS_DETERMINIZED;
+
+	/**
+	 * Set to {@code true} if and only if the automaton is minimum
+	 */
+	private boolean IS_MINIMIZED;
 
 	@Override
 	public int hashCode() {
@@ -37,7 +53,8 @@ public final class Automaton {
 
 	/**
 	 * Build a new automaton with given {@code states} and {@code transitions}.
-	 * @param states the set of states of the new automaton
+	 * 
+	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
 	 */
 	public Automaton(Set<State> states, Set<Transition> transitions) {
@@ -46,9 +63,13 @@ public final class Automaton {
 	}
 
 	/**
-	 * Computes all the automaton transitions to validate a given string {@code str}.
+	 * Computes all the automaton transitions to validate a given string
+	 * {@code str}.
+	 * 
 	 * @param str String that has to be checked.
-	 * @return a boolean value that indicates either if {@code str} has been accepted or not.
+	 * 
+	 * @return a boolean value that indicates either if {@code str} has been
+	 *             accepted or not.
 	 */
 	public boolean validateString(String str) {
 		// stores all the possible states reached by the automaton after each
@@ -83,15 +104,23 @@ public final class Automaton {
 
 	/**
 	 * Brzozowski minimization algorithm.
-	 * @return the minimum automaton that accepts the same language as {@code this}.
+	 * 
+	 * @return the minimum automaton that accepts the same language as
+	 *             {@code this}.
 	 */
 	public Automaton minimize() {
-		return reverse().determinize().reach().reverse().determinize().reach();
+		if (IS_MINIMIZED)
+			return this;
+		Automaton min = reverse().determinize().reach().reverse().determinize().reach();
+		min.IS_MINIMIZED = true;
+		return min;
 	}
 
 	/**
 	 * Remove all the unreachable states from the current automaton.
-	 * @return a newly created automaton without the unreachable states of {@code this}.
+	 * 
+	 * @return a newly created automaton without the unreachable states of
+	 *             {@code this}.
 	 */
 	private Automaton reach() {
 		Set<State> RS = new HashSet<>();
@@ -124,7 +153,9 @@ public final class Automaton {
 
 	/**
 	 * Creates an automaton that accept the reverse language.
-	 * @return a newly created automaton that accepts the reverse language of {@code this}.
+	 * 
+	 * @return a newly created automaton that accepts the reverse language of
+	 *             {@code this}.
 	 */
 	private Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
@@ -157,9 +188,14 @@ public final class Automaton {
 
 	/**
 	 * Creates a deterministic automaton starting from {@code this}.
-	 * @return a newly deterministic automaton that accepts the same language as {@code this}.
+	 * 
+	 * @return a newly deterministic automaton that accepts the same language as
+	 *             {@code this}.
 	 */
 	Automaton determinize() {
+		if (IS_DETERMINIZED)
+			return this;
+
 		// transitions of the new deterministic automaton
 		Set<Transition> delta = new HashSet<>();
 		// states of the new deterministic automaton
@@ -180,51 +216,53 @@ public final class Automaton {
 		states.add(new State(count, true, false));
 		count++;
 
-		while(!marked.equals(states)) {
+		while (!marked.equals(states)) {
 			int current = -1;
-			for(State s : states) {
-				if(marked.contains(s))
+			for (State s : states) {
+				if (marked.contains(s))
 					continue;
 				marked.add(s);
 				current = s.getId();
 				break;
 			}
 			Set<State> currStates = detStates.get(current);
-			for(Character c : alphabet) {
+			for (Character c : alphabet) {
 				Set<State> R = epsClosure(transitions.stream()
 						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol() == c && t.getSymbol() != ' ')
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet()));
-				if(!detStates.contains(R) && !R.isEmpty()) {
+				if (!detStates.contains(R) && !R.isEmpty()) {
 					detStates.add((HashSet<State>) R);
 					states.add(new State(count, false, false));
 					count++;
 				}
 				State source = null;
 				State destination = null;
-				for(State s : states) {
-					if(s.getId() == detStates.indexOf(R)) {
+				for (State s : states) {
+					if (s.getId() == detStates.indexOf(R)) {
 						destination = s;
 					}
-					if(s.getId() == current)
+					if (s.getId() == current)
 						source = s;
 				}
-				if(source != null && destination != null)
+				if (source != null && destination != null)
 					delta.add(new Transition(source, destination, c));
 			}
 		}
 
-		for(State s : states) {
+		for (State s : states) {
 			Set<State> macroState = detStates.get(s.getId());
-			for(State q : macroState) {
-				if(q.isFinal()) {
+			for (State q : macroState) {
+				if (q.isFinal()) {
 					s.setFinal();
 					break;
 				}
 			}
 		}
 
-		return new Automaton(states, delta);
+		Automaton det = new Automaton(states, delta);
+		det.IS_DETERMINIZED = true;
+		return det;
 	}
 
 	/**
@@ -307,4 +345,5 @@ public final class Automaton {
 		}
 		return eps;
 	}
+
 }

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
+
 /**
  * A class that describes an {@link Automaton} state.
  * 
@@ -15,9 +16,10 @@ public final class State {
 
 	/**
 	 * State constructor, it creates a new state with the given informations.
-	 * @param id identifier of the new state.
+	 * 
+	 * @param id        identifier of the new state.
 	 * @param isInitial indicates if the state is initial.
-	 * @param isFinal indicates if the state is final.
+	 * @param isFinal   indicates if the state is final.
 	 */
 	public State(int id, boolean isInitial, boolean isFinal) {
 		this.id = id;
@@ -56,6 +58,7 @@ public final class State {
 
 	/**
 	 * Tells if the state is either final or not.
+	 * 
 	 * @return boolean value that indicates if it is a final state.
 	 */
 	public boolean isFinal() {
@@ -64,6 +67,7 @@ public final class State {
 
 	/**
 	 * Tells if the state is either initial or not.
+	 * 
 	 * @return boolean value that indicates if it is an initial state.
 	 */
 	public boolean isInitial() {
@@ -71,25 +75,27 @@ public final class State {
 	}
 
 	/**
-	 * Tells the id of the state such that it is possible to distinguish it from other states.
+	 * Tells the id of the state such that it is possible to distinguish it from
+	 * other states.
+	 * 
 	 * @return state id
 	 */
 	public int getId() {
 		return id;
 	}
-	
+
 	/**
 	 * Sets {@code this} as a final state.
 	 */
 	public void setFinal() {
 		this.isFinal = true;
 	}
-	
+
 	/**
 	 * Sets {@code this} as an initial state.
 	 */
 	public void setInitial() {
 		this.isInitial = true;
 	}
-	
+
 }
