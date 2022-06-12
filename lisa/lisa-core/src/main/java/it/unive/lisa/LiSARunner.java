@@ -1,13 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -39,6 +31,12 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -122,7 +120,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager);
-			Map<ImplementedCFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
+			Map<ImplementedCFG,
+					Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (ImplementedCFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 

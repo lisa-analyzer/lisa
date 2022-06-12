@@ -161,7 +161,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			return Collections.emptySet();
 	}
 
-
 	private Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> getEntryAndExit(ImplementedCFG cfg)
 			throws SemanticException {
 		if (!results.contains(cfg))

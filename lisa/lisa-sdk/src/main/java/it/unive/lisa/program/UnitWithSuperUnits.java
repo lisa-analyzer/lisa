@@ -1,11 +1,9 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CodeMember;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
-
-import it.unive.lisa.program.cfg.CodeMember;
 
 public abstract class UnitWithSuperUnits extends Unit {
 
@@ -33,7 +31,7 @@ public abstract class UnitWithSuperUnits extends Unit {
 	 * @return the collection of instance code members
 	 */
 	public abstract Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy);
-	
+
 	/**
 	 * Yields the collection of {@link CompilationUnit}s that are instances of
 	 * this one, including itself. In other words, this method returns the

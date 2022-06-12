@@ -95,7 +95,6 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 */
 	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(ImplementedCFG cfg);
 
-
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible
 	 * targets considering that they were given {@code parameters} as actual

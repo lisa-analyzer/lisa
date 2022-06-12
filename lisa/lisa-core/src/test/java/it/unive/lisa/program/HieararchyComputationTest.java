@@ -389,6 +389,6 @@ public class HieararchyComputationTest {
 		isInstance(second, third);
 		notInstance(third, second);
 		notInstance(third, first);
-		notInstance(second, first);	
+		notInstance(second, first);
 	}
 }

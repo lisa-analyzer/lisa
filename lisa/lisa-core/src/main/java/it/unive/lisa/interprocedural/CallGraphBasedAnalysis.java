@@ -32,9 +32,9 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * @param <T> The type domain
  */
 public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>,
-H extends HeapDomain<H>,
-V extends ValueDomain<V>,
-T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
+		H extends HeapDomain<H>,
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 
 	/**
 	 * The call graph used to resolve method calls.
@@ -78,7 +78,7 @@ T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 	 */
 	protected AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState,
 			ImplementedCFG cfg)
-					throws SemanticException {
+			throws SemanticException {
 		AnalysisState<A, H, V, T> prepared = entryState;
 
 		for (Parameter arg : cfg.getDescriptor().getFormals()) {
@@ -97,7 +97,7 @@ T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
 			StatementStore<A, H, V, T> expressions)
-					throws SemanticException {
+			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
 }

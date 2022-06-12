@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -11,6 +7,9 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -29,9 +28,11 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * @param <T> the type of {@link TypeDomain} embedded into the computed abstract
  *                state
  */
-public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>, H extends HeapDomain<H>, V extends ValueDomain<V>, T extends TypeDomain<T>>
+public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
+		H extends HeapDomain<H>,
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
 		extends ImplementedCFG implements Lattice<CFGWithAnalysisResults<A, H, V, T>> {
-
 
 	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
 

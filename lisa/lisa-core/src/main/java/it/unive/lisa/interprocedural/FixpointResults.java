@@ -33,7 +33,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
 		extends FunctionalLattice<FixpointResults<A, H, V, T>, ImplementedCFG, CFGResults<A, H, V, T>> {
-	
+
 	/**
 	 * Builds a new result.
 	 * 
@@ -65,7 +65,8 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ImplementedCFG cfg, ContextSensitivityToken token,
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ImplementedCFG cfg,
+			ContextSensitivityToken token,
 			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
 		CFGResults<A, H, V, T> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));

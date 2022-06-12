@@ -82,7 +82,8 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType callType,
+	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			CallType callType,
 			String qualifier, String targetName, Collection<ImplementedCFG> targets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, parameters);
@@ -108,7 +109,8 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType callType,
+	public CFGCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			CallType callType,
 			String qualifier, String targetName, EvaluationOrder order, Collection<ImplementedCFG> targets,
 			Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,

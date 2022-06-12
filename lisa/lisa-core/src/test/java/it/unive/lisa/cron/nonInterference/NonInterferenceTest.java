@@ -126,7 +126,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-						ImplementedCFG graph) {
+				ImplementedCFG graph) {
 			return true;
 		}
 
@@ -139,7 +139,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-						ImplementedCFG graph, Statement node) {
+				ImplementedCFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
@@ -182,7 +182,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-						ImplementedCFG graph, Edge edge) {
+				ImplementedCFG graph, Edge edge) {
 			return true;
 		}
 

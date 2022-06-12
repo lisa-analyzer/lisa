@@ -96,7 +96,8 @@ public abstract class Call extends NaryExpression {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	protected Call(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType type,
+	protected Call(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+			CallType type,
 			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");

@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg.edge;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -12,6 +10,7 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.code.CodeEdge;
+import java.util.Objects;
 
 /**
  * An edge of a control flow graph, connecting two statements.

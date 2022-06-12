@@ -1,14 +1,13 @@
 package it.unive.lisa.program.cfg.statement.call.traversal;
 
+import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.cfg.statement.call.Call;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
-
-import it.unive.lisa.program.UnitWithSuperUnits;
-import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * A {@link HierarcyTraversalStrategy} that assumes a single super unit per each

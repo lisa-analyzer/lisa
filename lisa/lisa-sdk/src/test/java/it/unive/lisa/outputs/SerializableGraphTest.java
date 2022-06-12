@@ -2,14 +2,6 @@ package it.unive.lisa.outputs;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.junit.Test;
-
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -28,6 +20,12 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.junit.Test;
 
 public class SerializableGraphTest {
 
@@ -142,7 +140,8 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testIfWithEmptyBranch() {
-		 ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
+		ImplementedCFG cfg = new ImplementedCFG(
+				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -199,7 +198,8 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testAsymmetricIf() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
+		ImplementedCFG cfg = new ImplementedCFG(
+				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -266,7 +266,8 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleLoop() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
+		ImplementedCFG cfg = new ImplementedCFG(
+				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -323,7 +324,8 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyLoop() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
+		ImplementedCFG cfg = new ImplementedCFG(
+				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);

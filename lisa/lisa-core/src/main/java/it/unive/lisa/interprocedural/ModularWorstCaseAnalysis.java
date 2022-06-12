@@ -70,7 +70,6 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	 */
 	private final Map<ImplementedCFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
 
-
 	/**
 	 * Builds the interprocedural analysis.
 	 */
