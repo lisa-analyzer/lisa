@@ -2,7 +2,10 @@ package it.unive.lisa.program;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
+
+import it.unive.lisa.program.cfg.CodeMember;
 
 public abstract class UnitWithSuperUnits extends Unit {
 
@@ -19,6 +22,18 @@ public abstract class UnitWithSuperUnits extends Unit {
 
 	}
 
+	/**
+	 * Yields the collection of instance {@link CodeMember}s defined in this
+	 * unit. This method returns the union of {@link #getInstanceCFGs(boolean)}
+	 * and {@link #getInstanceConstructs(boolean)}.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns instance code
+	 *                              members from superunits, transitively
+	 * 
+	 * @return the collection of instance code members
+	 */
+	public abstract Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy);
+	
 	/**
 	 * Yields the collection of {@link CompilationUnit}s that are instances of
 	 * this one, including itself. In other words, this method returns the

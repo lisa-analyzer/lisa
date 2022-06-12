@@ -132,6 +132,9 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	public OpenCall(UnresolvedCall source) {
 		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(),
 				source.getTargetName(), source.getOrder(), source.getStaticType(), source.getParameters());
+		for (Expression param : source.getParameters())
+			// make sure they stay linked to the original call
+			param.setParentStatement(source);
 	}
 
 	@Override

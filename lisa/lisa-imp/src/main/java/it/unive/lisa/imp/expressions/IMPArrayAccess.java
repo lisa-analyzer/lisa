@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.ImplementedCFG;
@@ -15,6 +16,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
+import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
@@ -54,20 +56,19 @@ public class IMPArrayAccess extends BinaryExpression {
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		Type recType = left.getDynamicType();
-		Type arrayType;
-		if (recType.isUntyped()) {
-			arrayType = recType;
-		} else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isArrayType)) {
-			ExternalSet<Type> inner = recType.asPointerType().getInnerTypes();
-			arrayType = inner.reduce(inner.first(), (r, t) -> r.commonSupertype(t));
-		} else
+		ExternalSet<Type> arraytypes = Caches.types().mkEmptySet();
+		for (Type t : left.getRuntimeTypes())
+			if (t.isPointerType() && t.asPointerType().getInnerTypes().anyMatch(Type::isArrayType))
+				arraytypes.addAll(t.asPointerType().getInnerTypes().filter(Type::isArrayType));
+
+		if (arraytypes.isEmpty())
 			return state.bottom();
-		// it is not possible to detect the correct type of the field without
-		// resolving it. we rely on the rewriting that will happen inside heap
-		// domain to translate this into a variable that will have its correct
-		// type
-		HeapDereference deref = new HeapDereference(arrayType, left, getLocation());
-		return state.smallStepSemantics(new AccessChild(getStaticType(), deref, right, getLocation()), this);
+
+		ArrayType arraytype = arraytypes.reduce(arraytypes.first(), (r, t) -> r.commonSupertype(t)).asArrayType();
+		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
+		container.setRuntimeTypes(arraytypes);
+
+		return state.smallStepSemantics(new AccessChild(arraytype.getInnerType(), container, right, getLocation()),
+				this);
 	}
 }

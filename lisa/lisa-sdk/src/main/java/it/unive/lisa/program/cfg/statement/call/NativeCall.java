@@ -137,6 +137,9 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.getCallType(), source.getQualifier(),
 				source.getTargetName(), targets, source.getParameters());
+		for (Expression param : source.getParameters())
+			// make sure they stay linked to the original call
+			param.setParentStatement(source);
 	}
 
 	private static Type getCommonReturnType(Collection<NativeCFG> targets) {

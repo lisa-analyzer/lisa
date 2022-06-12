@@ -4,7 +4,7 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -25,8 +25,7 @@ public class Loop extends ControlFlowStructure {
 	 * @param firstFollower the first statement after the loop exits
 	 * @param body          the statements in the loop body
 	 */
-	public Loop(AdjacencyMatrix<Statement, Edge, ImplementedCFG> cfgMatrix, Statement condition,
-			Statement firstFollower,
+	public Loop(NodeList<ImplementedCFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
 			Collection<Statement> body) {
 		super(cfgMatrix, condition, firstFollower);
 		this.body = body;

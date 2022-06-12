@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call.traversal;
 
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.UnitWithSuperUnits;
 import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
@@ -28,5 +29,5 @@ public interface HierarcyTraversalStrategy {
 	 * @return an iterable that contains the units in order in which they must
 	 *             be visited
 	 */
-	Iterable<CompilationUnit> traverse(Call call, CompilationUnit start);
+	Iterable<UnitWithSuperUnits> traverse(Call call, UnitWithSuperUnits start);
 }

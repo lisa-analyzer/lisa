@@ -1,13 +1,14 @@
 package it.unive.lisa.program.cfg.statement.call.traversal;
 
-import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.cfg.statement.call.Call;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
+
+import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.cfg.statement.call.Call;
 
 /**
  * A {@link HierarcyTraversalStrategy} that assumes a single super unit per each
@@ -26,25 +27,25 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 	}
 
 	@Override
-	public Iterable<CompilationUnit> traverse(Call call, CompilationUnit start) {
-		return new Iterable<CompilationUnit>() {
+	public Iterable<UnitWithSuperUnits> traverse(Call call, UnitWithSuperUnits start) {
+		return new Iterable<UnitWithSuperUnits>() {
 
 			@Override
-			public Iterator<CompilationUnit> iterator() {
+			public Iterator<UnitWithSuperUnits> iterator() {
 				return new SingleInheritanceIterator(start);
 			}
 		};
 	}
 
-	private class SingleInheritanceIterator implements Iterator<CompilationUnit> {
+	private class SingleInheritanceIterator implements Iterator<UnitWithSuperUnits> {
 
-		private CompilationUnit current;
+		private UnitWithSuperUnits current;
 
-		private final Deque<CompilationUnit> remaining;
+		private final Deque<UnitWithSuperUnits> remaining;
 
-		private final Set<CompilationUnit> seen;
+		private final Set<UnitWithSuperUnits> seen;
 
-		private SingleInheritanceIterator(CompilationUnit start) {
+		private SingleInheritanceIterator(UnitWithSuperUnits start) {
 			current = start;
 			remaining = new LinkedList<>(start.getSuperUnits());
 			remaining.addFirst(start);
@@ -57,11 +58,11 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 		}
 
 		@Override
-		public CompilationUnit next() {
+		public UnitWithSuperUnits next() {
 			if (remaining.isEmpty())
 				throw new NoSuchElementException();
 
-			CompilationUnit cu = remaining.pop();
+			UnitWithSuperUnits cu = remaining.pop();
 
 			if (remaining.isEmpty())
 				if (current.getSuperUnits().isEmpty())

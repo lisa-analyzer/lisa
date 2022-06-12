@@ -15,11 +15,13 @@ public class ConstantPropagationDFTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testConstantPropagation() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true).setAbstractState(
-				getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						new ConstantPropagation(),
-						getDefaultFor(TypeDomain.class)));
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
+				.setAbstractState(
+						getDefaultFor(AbstractState.class,
+								getDefaultFor(HeapDomain.class),
+								new ConstantPropagation(),
+								getDefaultFor(TypeDomain.class)));
 		perform("constant-propagation-df", "constant-propagation.imp", conf);
 	}
 }

@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg.edge;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -9,14 +11,14 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
-import java.util.Objects;
+import it.unive.lisa.util.datastructures.graph.code.CodeEdge;
 
 /**
  * An edge of a control flow graph, connecting two statements.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Edge<Statement, Edge, ImplementedCFG> {
+public abstract class Edge implements CodeEdge<ImplementedCFG, Statement, Edge> {
 
 	/**
 	 * The source node.
@@ -27,6 +29,14 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	 * The destination node.
 	 */
 	private final Statement destination;
+
+	/**
+	 * Builds an "empty" edge, meaning that it does not have endpoints.
+	 */
+	protected Edge() {
+		this.source = null;
+		this.destination = null;
+	}
 
 	/**
 	 * Builds the edge.
@@ -111,5 +121,15 @@ public abstract class Edge implements it.unive.lisa.util.datastructures.graph.Ed
 	@Override
 	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, source.getCFG(), this);
+	}
+
+	@Override
+	public int compareTo(Edge o) {
+		int cmp;
+		if ((cmp = source.compareTo(o.source)) != 0)
+			return cmp;
+		if ((cmp = destination.compareTo(o.destination)) != 0)
+			return cmp;
+		return getClass().getName().compareTo(o.getClass().getName());
 	}
 }

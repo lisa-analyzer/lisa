@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
@@ -597,6 +598,17 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	@Override
 	public final String toString() {
 		return representation().toString();
+	}
+
+	@Override
+	public boolean tracksIdentifiers(Identifier id) {
+		// As default, base inferred values tracks only non-pointer identifier
+		return canProcess(id);
+	}
+
+	@Override
+	public boolean canProcess(SymbolicExpression expression) {
+		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
 	}
 
 	@Override

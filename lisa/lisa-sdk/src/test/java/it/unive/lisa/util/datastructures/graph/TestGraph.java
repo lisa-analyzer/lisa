@@ -1,26 +1,13 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import it.unive.lisa.outputs.DotGraph;
-import java.util.function.Function;
+public class TestGraph extends BaseGraph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
 
-public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.TestEdge> {
-
-	@Override
-	protected DotGraph<TestNode, TestEdge, TestGraph> toDot(Function<TestNode, String> labelGenerator) {
-		return null;
-	}
-
-	public static class TestNode implements Node<TestNode, TestEdge, TestGraph> {
+	public static class TestNode implements Node<TestGraph, TestNode, TestEdge> {
 
 		private final int id;
 
 		public TestNode(int id) {
 			this.id = id;
-		}
-
-		@Override
-		public int setOffset(int offset) {
-			return offset;
 		}
 
 		@Override
@@ -56,7 +43,7 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 		}
 	}
 
-	public static class TestEdge implements Edge<TestNode, TestEdge, TestGraph> {
+	public static class TestEdge implements Edge<TestGraph, TestNode, TestEdge> {
 
 		private final TestNode source, destination;
 
@@ -73,16 +60,6 @@ public class TestGraph extends Graph<TestGraph, TestGraph.TestNode, TestGraph.Te
 		@Override
 		public TestNode getDestination() {
 			return destination;
-		}
-
-		@Override
-		public boolean canBeSimplified() {
-			return false;
-		}
-
-		@Override
-		public TestEdge newInstance(TestNode source, TestNode destination) {
-			return new TestEdge(source, destination);
 		}
 
 		@Override

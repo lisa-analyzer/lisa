@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.LogicalOr;
 import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.common.BoolType;
 
 /**
@@ -49,10 +50,9 @@ public class Or extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		// we allow untyped for the type inference phase
-		if (!left.getDynamicType().isBooleanType() && !left.getDynamicType().isUntyped())
+		if (left.getRuntimeTypes().noneMatch(Type::isBooleanType))
 			return state.bottom();
-		if (!right.getDynamicType().isBooleanType() && !right.getDynamicType().isUntyped())
+		if (right.getRuntimeTypes().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

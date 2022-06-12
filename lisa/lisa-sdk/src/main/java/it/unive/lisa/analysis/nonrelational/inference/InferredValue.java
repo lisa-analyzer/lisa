@@ -5,9 +5,10 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by
@@ -179,29 +180,8 @@ public interface InferredValue<T extends InferredValue<T>>
 		 * @return the representation
 		 */
 		public DomainRepresentation representation() {
-			return new InferredPairRepresentation(this);
-		}
-	}
-
-	/**
-	 * A {@link PairRepresentation} for an {@link InferredPair}.
-	 * 
-	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 */
-	class InferredPairRepresentation extends PairRepresentation {
-
-		/**
-		 * Builds a new representation.
-		 * 
-		 * @param pair the inferred pair to represent
-		 */
-		public InferredPairRepresentation(InferredPair<?> pair) {
-			super(pair.inferred.representation(), pair.state.representation());
-		}
-
-		@Override
-		public String toString() {
-			return "inferred: " + left + ", state: " + right;
+			return new ObjectRepresentation(
+					Map.of("value", inferred.representation(), "state", state.representation()));
 		}
 	}
 }

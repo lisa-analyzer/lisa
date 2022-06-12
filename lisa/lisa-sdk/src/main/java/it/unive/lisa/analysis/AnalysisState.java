@@ -3,8 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -14,6 +13,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -59,32 +59,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	 * @param state              the {@link AbstractState} to embed in this
 	 *                               analysis state
 	 * @param computedExpression the expression that has been computed
-	 */
-	public AnalysisState(A state, SymbolicExpression computedExpression) {
-		this(state, new ExpressionSet<>(computedExpression), new SymbolAliasing());
-	}
-
-	/**
-	 * Builds a new state.
-	 * 
-	 * @param state              the {@link AbstractState} to embed in this
-	 *                               analysis state
-	 * @param computedExpression the expression that has been computed
 	 * @param aliasing           the symbol aliasing information
 	 */
 	public AnalysisState(A state, SymbolicExpression computedExpression, SymbolAliasing aliasing) {
 		this(state, new ExpressionSet<>(computedExpression), aliasing);
-	}
-
-	/**
-	 * Builds a new state.
-	 * 
-	 * @param state               the {@link AbstractState} to embed in this
-	 *                                analysis state
-	 * @param computedExpressions the expressions that have been computed
-	 */
-	public AnalysisState(A state, ExpressionSet<SymbolicExpression> computedExpressions) {
-		this(state, computedExpressions, new SymbolAliasing());
 	}
 
 	/**
@@ -332,68 +310,9 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public DomainRepresentation representation() {
-		return new AnalysisStateRepresentation(state.representation(),
-				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
-	}
-
-	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance. This differs from {@link #representation()} by
-	 * using invoking {@link AbstractState#typeRepresentation()} instead of
-	 * {@link SemanticDomain#representation()} on the abstract state contained
-	 * inside this analysis state.
-	 * 
-	 * @return the representation
-	 */
-	public DomainRepresentation typeRepresentation() {
-		return new AnalysisStateRepresentation(state.typeRepresentation(),
-				new SetRepresentation(computedExpressions.elements(), StringRepresentation::new));
-	}
-
-	private static final class AnalysisStateRepresentation extends DomainRepresentation {
-		private final DomainRepresentation state;
-		private final DomainRepresentation expressions;
-
-		private AnalysisStateRepresentation(DomainRepresentation state, DomainRepresentation expressions) {
-			this.state = state;
-			this.expressions = expressions;
-		}
-
-		@Override
-		public String toString() {
-			return "{{\n" + state + "\n}} -> " + expressions;
-		}
-
-		@Override
-		public int hashCode() {
-			final int prime = 31;
-			int result = 1;
-			result = prime * result + ((expressions == null) ? 0 : expressions.hashCode());
-			result = prime * result + ((state == null) ? 0 : state.hashCode());
-			return result;
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null)
-				return false;
-			if (getClass() != obj.getClass())
-				return false;
-			AnalysisStateRepresentation other = (AnalysisStateRepresentation) obj;
-			if (expressions == null) {
-				if (other.expressions != null)
-					return false;
-			} else if (!expressions.equals(other.expressions))
-				return false;
-			if (state == null) {
-				if (other.state != null)
-					return false;
-			} else if (!state.equals(other.state))
-				return false;
-			return true;
-		}
+		DomainRepresentation stateRepr = state.representation();
+		DomainRepresentation exprRepr = computedExpressions.representation();
+		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));
 	}
 
 	@Override

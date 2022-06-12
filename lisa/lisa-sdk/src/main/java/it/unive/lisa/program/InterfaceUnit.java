@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -206,5 +207,19 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 					result.put(sup.getName(), sup);
 
 		return result.values();
+	}
+
+	@Override
+	public boolean isInstanceOf(UnitWithSuperUnits unit) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
+		Set<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
+		all.addAll(getSignatureCFGs(traverseHierarchy));
+//		all.addAll(getInstanceConstructs(traverseHierarchy));
+		return all;
 	}
 }

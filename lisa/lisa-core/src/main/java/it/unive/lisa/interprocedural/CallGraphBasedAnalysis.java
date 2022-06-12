@@ -88,7 +88,7 @@ T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 		}
 
 		// the stack has to be empty
-		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>());
+		return new AnalysisState<>(prepared.getState(), new ExpressionSet<>(), new SymbolAliasing());
 	}
 
 	@Override

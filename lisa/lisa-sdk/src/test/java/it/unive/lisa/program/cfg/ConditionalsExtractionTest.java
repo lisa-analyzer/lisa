@@ -18,6 +18,13 @@ import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.call.assignment.OrderPreservingAssigningStrategy;
+import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrategy;
+import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Collection;
@@ -393,5 +400,39 @@ public class ConditionalsExtractionTest {
 
 		assertIf(if_condition, loop_a2, collect(if_a1, if_a3), collect(if_a2), ith);
 		assertLoop(loop_condition, ret, collect(loop_a1, if_condition, if_a1, if_a3, if_a2, loop_a2), loop);
+	}
+
+	@Test
+	public void testIssue188() {
+		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
+		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
+		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
+		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef inner = new VariableRef(cfg, unknown, "l");
+		UnresolvedCall a1 = new UnresolvedCall(cfg, unknown,
+				OrderPreservingAssigningStrategy.INSTANCE,
+				JavaLikeMatchingStrategy.INSTANCE,
+				SingleInheritanceTraversalStrategy.INSTANCE,
+				CallType.STATIC,
+				null,
+				"foo",
+				inner);
+		Call resolved = new OpenCall(a1);
+		resolved.setSource(a1);
+		Assignment a2 = new Assignment(cfg, unknown,
+				new VariableRef(cfg, unknown, "r"), constant);
+		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
+		cfg.addNode(condition, true);
+		cfg.addNode(a1);
+		cfg.addNode(a2);
+		cfg.addNode(ret);
+
+		cfg.addEdge(new TrueEdge(condition, a1));
+		cfg.addEdge(new SequentialEdge(a1, condition));
+		cfg.addEdge(new FalseEdge(condition, a2));
+		cfg.addEdge(new SequentialEdge(a2, ret));
+
+		assertTrue("No guards registered for inner expression", cfg.getGuards(inner).contains(condition));
+		assertTrue("No guards registered for resolved call", cfg.getGuards(resolved).contains(condition));
 	}
 }

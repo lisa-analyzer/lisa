@@ -49,7 +49,7 @@ public class TrueEdge extends Edge {
 	}
 
 	@Override
-	public boolean canBeSimplified() {
+	public boolean isUnconditional() {
 		return false;
 	}
 

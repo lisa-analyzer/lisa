@@ -13,6 +13,7 @@ import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -134,7 +135,7 @@ public class BaseNonRelationalTypeDomainTest {
 			}
 
 			@Override
-			public CFG getCFG() {
+			public ImplementedCFG getCFG() {
 				return null;
 			}
 

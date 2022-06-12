@@ -100,10 +100,10 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_REPR;
+			return Lattice.topRepresentation();
 
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return Lattice.bottomRepresentation();
 
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}
@@ -129,7 +129,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new InferredTypes(constant.getDynamicType());
+		return new InferredTypes(constant.getStaticType());
 	}
 
 	@Override

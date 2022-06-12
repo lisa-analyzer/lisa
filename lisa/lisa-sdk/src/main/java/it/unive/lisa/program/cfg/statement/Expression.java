@@ -1,5 +1,4 @@
 package it.unive.lisa.program.cfg.statement;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -8,6 +7,8 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
@@ -136,18 +137,36 @@ public abstract class Expression extends Statement {
 	 * @return the statement that contains this expression, if any
 	 */
 	public final Statement getParentStatement() {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return original.getParentStatement();
+		}
+
 		return parent;
 	}
 
 	/**
 	 * Yields the outer-most {@link Statement} containing this expression, that
 	 * is used as a node in the cfg. If this expression is used a command, then
-	 * this method return {@code this}.
+	 * this method return {@code this}. If this expression is a {@link Call}
+	 * built as a resolved version of an {@link UnresolvedCall} {@code uc}, then
+	 * {@code uc.getRootStatement()} is returned.
 	 * 
 	 * @return the outer-most statement containing this expression, or
 	 *             {@code this}
 	 */
 	public final Statement getRootStatement() {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return original.getRootStatement();
+		}
+
 		if (parent == null)
 			return this;
 
@@ -155,5 +174,21 @@ public abstract class Expression extends Statement {
 			return parent;
 
 		return ((Expression) parent).getRootStatement();
+	}
+
+	@Override
+	protected Statement getStatementEvaluatedBefore(Statement other) {
+		if (this instanceof Call) {
+			Call original = (Call) this;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != this)
+				return original.getStatementEvaluatedBefore(other);
+		}
+
+		if (other != this || parent == null)
+			return null;
+
+		return parent.getStatementEvaluatedBefore(this);
 	}
 }

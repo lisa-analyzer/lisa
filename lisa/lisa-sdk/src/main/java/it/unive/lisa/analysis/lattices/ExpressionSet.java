@@ -3,6 +3,9 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticExceptionWrapper;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionUtilities;
@@ -21,8 +24,6 @@ import java.util.stream.Collectors;
  * @param <T> the type of the tracked symbolic expressions
  */
 public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<ExpressionSet<T>, T> {
-
-	private final boolean isTop;
 
 	/**
 	 * Builds the empty set lattice element.
@@ -54,23 +55,12 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	}
 
 	private ExpressionSet(Set<T> set, boolean isTop) {
-		super(set);
-		this.isTop = isTop;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
+		super(set, isTop);
 	}
 
 	@Override
 	public ExpressionSet<T> top() {
 		return new ExpressionSet<>(true);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return !isTop && elements.isEmpty();
 	}
 
 	@Override
@@ -178,5 +168,15 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 		for (T exp : elements)
 			mapped.add(exp.popScope(token));
 		return new ExpressionSet<>(mapped);
+	}
+
+	/**
+	 * Yields a {@link DomainRepresentation} of the information contained in
+	 * this set.
+	 * 
+	 * @return the representation
+	 */
+	public DomainRepresentation representation() {
+		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 }

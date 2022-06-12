@@ -28,6 +28,27 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 		extends Lattice<A>, SemanticDomain<A, SymbolicExpression, Identifier> {
 
 	/**
+	 * The key that should be used to store the instance of {@link HeapDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String HEAP_REPRESENTATION_KEY = "heap";
+
+	/**
+	 * The key that should be used to store the instance of {@link TypeDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String TYPE_REPRESENTATION_KEY = "type";
+
+	/**
+	 * The key that should be used to store the instance of {@link ValueDomain}
+	 * inside the {@link DomainRepresentation} returned by
+	 * {@link #representation()}.
+	 */
+	public static final String VALUE_REPRESENTATION_KEY = "value";
+
+	/**
 	 * Yields the instance of {@link HeapDomain} that contains the information
 	 * on heap structures contained in this abstract state.
 	 * 
@@ -51,14 +72,4 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 	 * @return the type domain
 	 */
 	T getTypeState();
-
-	/**
-	 * Yields a {@link DomainRepresentation} of the information contained in
-	 * this domain's instance. This differs from {@link #representation()} by
-	 * using the type state instead of the value state to build the
-	 * representation.
-	 * 
-	 * @return the representation
-	 */
-	DomainRepresentation typeRepresentation();
 }

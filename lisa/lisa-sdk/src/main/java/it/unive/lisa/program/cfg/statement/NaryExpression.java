@@ -152,12 +152,27 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	public final int setOffset(int offset) {
+	public int setOffset(int offset) {
 		this.offset = offset;
 		int off = offset;
 		for (Expression sub : subExpressions)
 			off = sub.setOffset(off + 1);
 		return off;
+	}
+
+	@Override
+	protected Statement getStatementEvaluatedBefore(Statement other) {
+		int len = subExpressions.length;
+		if (other == this)
+			return len == 0 ? null : subExpressions[order.last(len)];
+
+		for (int i = 0; i < len; i++)
+			if (subExpressions[i] == other)
+				if (i == order.first(len))
+					return null;
+				else
+					return subExpressions[order.previous(i, len)];
+		return null;
 	}
 
 	@Override

@@ -20,9 +20,14 @@ public interface Lattice<L extends Lattice<L>> {
 	String TOP_STRING = "#TOP#";
 
 	/**
-	 * A {@link DomainRepresentation} that can be used to represent top values.
+	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
+	 * top values.
+	 * 
+	 * @return the representation
 	 */
-	DomainRepresentation TOP_REPR = new StringRepresentation(TOP_STRING);
+	public static DomainRepresentation topRepresentation() {
+		return new StringRepresentation(TOP_STRING);
+	}
 
 	/**
 	 * A string constant that can be used to represent bottom values.
@@ -30,10 +35,14 @@ public interface Lattice<L extends Lattice<L>> {
 	String BOTTOM_STRING = "_|_";
 
 	/**
-	 * A {@link DomainRepresentation} that can be used to represent bottom
-	 * values.
+	 * Yields a fresh {@link DomainRepresentation} that can be used to represent
+	 * bottom values.
+	 * 
+	 * @return the representation
 	 */
-	DomainRepresentation BOTTOM_REPR = new StringRepresentation(BOTTOM_STRING);
+	public static DomainRepresentation bottomRepresentation() {
+		return new StringRepresentation(BOTTOM_STRING);
+	}
 
 	/**
 	 * Performs the least upper bound operation between this lattice element and

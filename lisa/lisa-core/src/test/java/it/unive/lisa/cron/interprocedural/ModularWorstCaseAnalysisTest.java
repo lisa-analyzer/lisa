@@ -24,7 +24,7 @@ public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ModularWorstCaseAnalysis())
 				.setCallGraph(new CHACallGraph());
 		perform("interprocedural", "CHA", "program.imp", conf);
@@ -37,7 +37,7 @@ public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 						getDefaultFor(HeapDomain.class),
 						new Sign(),
 						getDefaultFor(TypeDomain.class)))
-				.setDumpAnalysis(true)
+				.setSerializeResults(true)
 				.setInterproceduralAnalysis(new ModularWorstCaseAnalysis())
 				.setCallGraph(new RTACallGraph());
 		perform("interprocedural", "RTA", "program.imp", conf);

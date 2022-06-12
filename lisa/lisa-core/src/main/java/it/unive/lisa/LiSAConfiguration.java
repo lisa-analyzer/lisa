@@ -9,7 +9,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
@@ -25,6 +25,56 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class LiSAConfiguration {
+
+	/**
+	 * The type of graphs that can be dumped by LiSA.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static enum GraphType {
+
+		/**
+		 * No graphs are dumped.
+		 */
+		NONE,
+
+		/**
+		 * Graphs are dumped as an html page using javascript to visualize the
+		 * graphs. Only root-level nodes are included in the graph: to get a
+		 * complete graph with subn-odes, use {@link #HTML_WITH_SUBNODES}.
+		 */
+		HTML,
+
+		/**
+		 * Graphs are dumped as an html page using javascript to visualize the
+		 * graphs. All nodes, including sub-nodes, are part of the visualized,
+		 * creating a compound graph. Note: graphs generated with this option
+		 * are big: files will have larger dimension and the viewer will be
+		 * slower. For a lighter alternative, use {@link #HTML}.
+		 */
+		HTML_WITH_SUBNODES,
+
+		/**
+		 * Graphs are dumped in Dot format.
+		 */
+		DOT,
+
+		/**
+		 * Graphs are dumped in compound GraphML format. Only root-level nodes
+		 * are included in the graph: to get a complete graph with sub-nodes,
+		 * use {@link #GRAPHML_WITH_SUBNODES}.
+		 */
+		GRAPHML,
+
+		/**
+		 * Graphs are dumped in compound GraphML format.All nodes, including
+		 * sub-nodes, are part of the graph, creating a compound graph. Note:
+		 * graphs generated with this option are big: files will have larger
+		 * dimension and the viewer will be slower. For a lighter alternative,
+		 * use {@link #GRAPHML}.
+		 */
+		GRAPHML_WITH_SUBNODES;
+	}
 
 	/**
 	 * The default number of fixpoint iteration on a given node after which
@@ -59,22 +109,16 @@ public class LiSAConfiguration {
 	private AbstractState<?, ?, ?, ?> abstractState;
 
 	/**
-	 * Whether or not the input cfgs should be dumped to dot format. This is
-	 * useful for checking if the inputs that reach LiSA are well formed.
-	 */
-	private boolean dumpCFGs;
-
-	/**
-	 * Whether or not the result of type inference should be dumped to dot
+	 * Whether or not the result of the analysos should be dumped, and in what
 	 * format, if it is executed
 	 */
-	private boolean dumpTypeInference;
+	private GraphType analysisGraphs;
 
 	/**
-	 * Whether or not the result of the analysis should be dumped to dot format,
-	 * if it is executed
+	 * Whether or not the result of the analysis should be dumped in json
+	 * format, if it is executed
 	 */
-	private boolean dumpAnalysis;
+	private boolean serializeResults;
 
 	/**
 	 * Whether or not the warning list should be dumped to a json file
@@ -114,10 +158,8 @@ public class LiSAConfiguration {
 	 * <li>no {@link CallGraph} is set for the analysis</li>
 	 * <li>no {@link InterproceduralAnalysis} is set for the analysis</li>
 	 * <li>the workdir is the one where LiSA was executed</li>
-	 * <li>the input program will not be dumped</li>
-	 * <li>no type inference will be run</li>
-	 * <li>the type inference will not be dumped</li>
 	 * <li>the results of the analysis will not be dumped</li>
+	 * <li>the results of the analysis will not be serialized</li>
 	 * <li>the json report will not be dumped</li>
 	 * <li>the default warning threshold ({@value #DEFAULT_WIDENING_THRESHOLD})
 	 * will be used</li>
@@ -131,6 +173,7 @@ public class LiSAConfiguration {
 		this.wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
 		this.openCallPolicy = WorstCasePolicy.INSTANCE;
+		this.analysisGraphs = GraphType.NONE;
 	}
 
 	/**
@@ -225,63 +268,23 @@ public class LiSAConfiguration {
 	}
 
 	/**
-	 * Sets whether or not dot files, named {@code <cfg name>.dot}, should be
-	 * created and dumped in the working directory at the start of the
-	 * execution. These files will contain a dot graph representing the each
-	 * input {@link ImplementedCFG}s' structure.<br>
+	 * Sets whether or not graph files, named
+	 * {@code analysis__<cfg name>.<format>}, should be created and dumped in
+	 * the working directory at the end of the analysis. These files will
+	 * contain a graph representing each input {@link CFG}s' structure, and
+	 * whose nodes will contain a representation of the results of the semantic
+	 * analysis on each {@link Statement}.<br>
 	 * <br>
 	 * To customize where the graphs should be generated, use
 	 * {@link #setWorkdir(String)}.
 	 * 
-	 * @param dumpCFGs if {@code true}, a dot graph will be generated before
-	 *                     starting the analysis for each input cfg
+	 * @param analysisGraphs whether graphs will be generated containing the
+	 *                           results of the analysis, and in what format
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration setDumpCFGs(boolean dumpCFGs) {
-		this.dumpCFGs = dumpCFGs;
-		return this;
-	}
-
-	/**
-	 * Sets whether or not dot files, named {@code typing__<cfg name>.dot},
-	 * should be created and dumped in the working directory at the end of the
-	 * type inference. These files will contain a dot graph representing the
-	 * each input {@link ImplementedCFG}s' structure, and whose nodes will
-	 * contain a textual representation of the results of the type inference on
-	 * each {@link Statement}.<br>
-	 * <br>
-	 * To customize where the graphs should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param dumpTypeInference if {@code true}, a dot graph will be generated
-	 *                              after the type inference for each input cfg
-	 * 
-	 * @return the current (modified) configuration
-	 */
-	public LiSAConfiguration setDumpTypeInference(boolean dumpTypeInference) {
-		this.dumpTypeInference = dumpTypeInference;
-		return this;
-	}
-
-	/**
-	 * Sets whether or not dot files, named {@code analysis__<cfg name>.dot},
-	 * should be created and dumped in the working directory at the end of the
-	 * analysis. These files will contain a dot graph representing the each
-	 * input {@link ImplementedCFG}s' structure, and whose nodes will contain a
-	 * textual representation of the results of the semantic analysis on each
-	 * {@link Statement}.<br>
-	 * <br>
-	 * To customize where the graphs should be generated, use
-	 * {@link #setWorkdir(String)}.
-	 * 
-	 * @param dumpAnalysis if {@code true}, a dot graph will be generated after
-	 *                         the semantic analysis for each input cfg
-	 * 
-	 * @return the current (modified) configuration
-	 */
-	public LiSAConfiguration setDumpAnalysis(boolean dumpAnalysis) {
-		this.dumpAnalysis = dumpAnalysis;
+	public LiSAConfiguration setDumpAnalysis(GraphType analysisGraphs) {
+		this.analysisGraphs = analysisGraphs;
 		return this;
 	}
 
@@ -301,6 +304,19 @@ public class LiSAConfiguration {
 	 */
 	public LiSAConfiguration setJsonOutput(boolean jsonOutput) {
 		this.jsonOutput = jsonOutput;
+		return this;
+	}
+
+	/**
+	 * Sets whether or not the results of the analyses should be dumped in the
+	 * form of json graphs.
+	 * 
+	 * @param serializeResults whether or not the graphs should be produced
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setSerializeResults(boolean serializeResults) {
+		this.serializeResults = serializeResults;
 		return this;
 	}
 
@@ -408,45 +424,33 @@ public class LiSAConfiguration {
 	}
 
 	/**
-	 * Yields whether or not the input program should be dumped in the form of
-	 * dot files representing single {@link ImplementedCFG}s.
-	 * 
-	 * @return {@code true} if input program should be dumped
-	 */
-	public boolean isDumpCFGs() {
-		return dumpCFGs;
-	}
-
-	/**
-	 * Yields whether or not the results of type inference, if run, should be
-	 * dumped in the form of dot files representing results on single
-	 * {@link ImplementedCFG}s.
-	 * 
-	 * @return {@code true} if type inference should be dumped
-	 */
-	public boolean isDumpTypeInference() {
-		return dumpTypeInference;
-	}
-
-	/**
 	 * Yields whether or not the results of analysis, if run, should be dumped
-	 * in the form of dot files representing results on single
-	 * {@link ImplementedCFG}s.
+	 * in the form of graphs representing results on single {@link CFG}s.
 	 * 
-	 * @return {@code true} if the analysis should be dumped
+	 * @return whether or not the graphs should be dumped, and in what format
 	 */
-	public boolean isDumpAnalysis() {
-		return dumpAnalysis;
+	public GraphType getAnalysisGraphs() {
+		return analysisGraphs;
 	}
 
 	/**
-	 * Yields whether or not the results a json report file should be dumped at
-	 * the end of the analysis.
+	 * Yields whether or not a json report file should be dumped at the end of
+	 * the analysis.
 	 * 
 	 * @return {@code true} if the report should be produced
 	 */
 	public boolean isJsonOutput() {
 		return jsonOutput;
+	}
+
+	/**
+	 * Yields whether or not the results of the analyses should be dumped in the
+	 * form of json graphs.
+	 * 
+	 * @return {@code true} if the graphs should be produced
+	 */
+	public boolean isSerializeResults() {
+		return serializeResults;
 	}
 
 	/**
@@ -492,19 +496,18 @@ public class LiSAConfiguration {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((abstractState == null) ? 0 : abstractState.hashCode());
+		result = prime * result + ((analysisGraphs == null) ? 0 : analysisGraphs.hashCode());
 		result = prime * result + ((callGraph == null) ? 0 : callGraph.hashCode());
-		result = prime * result + (dumpAnalysis ? 1231 : 1237);
-		result = prime * result + (dumpCFGs ? 1231 : 1237);
-		result = prime * result + (dumpTypeInference ? 1231 : 1237);
 		result = prime * result + ((fixpointWorkingSet == null) ? 0 : fixpointWorkingSet.hashCode());
 		result = prime * result + ((interproceduralAnalysis == null) ? 0 : interproceduralAnalysis.hashCode());
 		result = prime * result + (jsonOutput ? 1231 : 1237);
+		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
-		result = prime * result + ((abstractState == null) ? 0 : abstractState.hashCode());
+		result = prime * result + (serializeResults ? 1231 : 1237);
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
 		result = prime * result + wideningThreshold;
 		result = prime * result + ((workdir == null) ? 0 : workdir.hashCode());
-		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		return result;
 	}
 
@@ -517,16 +520,17 @@ public class LiSAConfiguration {
 		if (getClass() != obj.getClass())
 			return false;
 		LiSAConfiguration other = (LiSAConfiguration) obj;
+		if (abstractState == null) {
+			if (other.abstractState != null)
+				return false;
+		} else if (!abstractState.equals(other.abstractState))
+			return false;
+		if (analysisGraphs != other.analysisGraphs)
+			return false;
 		if (callGraph == null) {
 			if (other.callGraph != null)
 				return false;
 		} else if (!callGraph.equals(other.callGraph))
-			return false;
-		if (dumpAnalysis != other.dumpAnalysis)
-			return false;
-		if (dumpCFGs != other.dumpCFGs)
-			return false;
-		if (dumpTypeInference != other.dumpTypeInference)
 			return false;
 		if (fixpointWorkingSet == null) {
 			if (other.fixpointWorkingSet != null)
@@ -540,15 +544,17 @@ public class LiSAConfiguration {
 			return false;
 		if (jsonOutput != other.jsonOutput)
 			return false;
+		if (openCallPolicy == null) {
+			if (other.openCallPolicy != null)
+				return false;
+		} else if (!openCallPolicy.equals(other.openCallPolicy))
+			return false;
 		if (semanticChecks == null) {
 			if (other.semanticChecks != null)
 				return false;
 		} else if (!semanticChecks.equals(other.semanticChecks))
 			return false;
-		if (abstractState == null) {
-			if (other.abstractState != null)
-				return false;
-		} else if (!abstractState.equals(other.abstractState))
+		if (serializeResults != other.serializeResults)
 			return false;
 		if (syntacticChecks == null) {
 			if (other.syntacticChecks != null)
@@ -562,11 +568,6 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!workdir.equals(other.workdir))
 			return false;
-		if (openCallPolicy == null) {
-			if (other.openCallPolicy != null)
-				return false;
-		} else if (!openCallPolicy.equals(other.openCallPolicy))
-			return false;
 		return true;
 	}
 
@@ -576,12 +577,10 @@ public class LiSAConfiguration {
 		res.append("LiSA configuration:")
 				.append("\n  workdir: ")
 				.append(String.valueOf(workdir))
-				.append("\n  dump input cfgs: ")
-				.append(dumpCFGs)
-				.append("\n  dump inferred types: ")
-				.append(dumpTypeInference)
-				.append("\n  dump analysis results: ")
-				.append(dumpAnalysis)
+				.append("\n  serialize results: ")
+				.append(serializeResults)
+				.append("\n  analysis results format: ")
+				.append(analysisGraphs)
 				.append("\n  dump json report: ")
 				.append(jsonOutput)
 				.append("\n  ")

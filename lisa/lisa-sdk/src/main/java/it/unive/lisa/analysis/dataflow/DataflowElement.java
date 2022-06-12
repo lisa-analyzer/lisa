@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticEvaluator;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.Collection;
@@ -137,4 +138,14 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 	 * @see SemanticDomain#popScope(ScopeToken)
 	 */
 	E popScope(ScopeToken token) throws SemanticException;
+
+	@Override
+	default boolean tracksIdentifiers(Identifier id) {
+		return canProcess(id);
+	}
+
+	@Override
+	default boolean canProcess(SymbolicExpression expression) {
+		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+	}
 }

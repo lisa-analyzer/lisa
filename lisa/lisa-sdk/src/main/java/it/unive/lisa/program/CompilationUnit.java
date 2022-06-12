@@ -1,5 +1,17 @@
 package it.unive.lisa.program;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
@@ -10,15 +22,6 @@ import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.SignatureCFG;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A compilation unit of the program to analyze. A compilation unit is a
@@ -529,18 +532,9 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return all;
 	}
 
-	/**
-	 * Yields the collection of instance {@link CodeMember}s defined in this
-	 * unit. This method returns the union of {@link #getInstanceCFGs(boolean)}
-	 * and {@link #getInstanceConstructs(boolean)}.
-	 * 
-	 * @param traverseHierarchy if {@code true}, also returns instance code
-	 *                              members from superunits, transitively
-	 * 
-	 * @return the collection of instance code members
-	 */
+	@Override
 	public final Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
-		HashSet<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
+		Set<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
 		all.addAll(getSignatureCFGs(traverseHierarchy));
 		all.addAll(getInstanceConstructs(traverseHierarchy));
 		return all;

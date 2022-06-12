@@ -131,6 +131,9 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.getCallType(), source.getQualifier(),
 				source.getTargetName(), targets, source.getParameters());
+		for (Expression param : source.getParameters())
+			// make sure they stay linked to the original call
+			param.setParentStatement(source);
 	}
 
 	private static Type getCommonReturnType(Collection<ImplementedCFG> targets) {

@@ -11,6 +11,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -56,7 +57,7 @@ public class CFGFixpointTest {
 						new MonolithicHeap(),
 						new ValueEnvironment<>(new Sign()),
 						new TypeEnvironment<>(new InferredTypes())),
-				new ExpressionSet<>());
+				new ExpressionSet<>(), new SymbolAliasing());
 	}
 
 	@Test
@@ -102,7 +103,7 @@ public class CFGFixpointTest {
 	public void testMetaVariablesOfRootExpressions()
 			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
 		Program program = new Program();
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
+		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);
 

@@ -37,6 +37,13 @@ public class TruncatedParamsCall extends Call {
 	}
 
 	@Override
+	public int setOffset(int offset) {
+		// we do not reset the offsets here
+		Expression[] params = getParameters();
+		return params[params.length - 1].getOffset();
+	}
+
+	@Override
 	public void setSource(UnresolvedCall source) {
 		super.setSource(source);
 		call.setSource(source);

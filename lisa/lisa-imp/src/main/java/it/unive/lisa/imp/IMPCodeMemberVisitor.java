@@ -97,7 +97,7 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -120,7 +120,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
-	private final AdjacencyMatrix<Statement, Edge, ImplementedCFG> matrix;
+	private final NodeList<ImplementedCFG, Statement, Edge> list;
 
 	private final Collection<Statement> entrypoints;
 
@@ -142,11 +142,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	IMPCodeMemberVisitor(String file, CFGDescriptor descriptor) {
 		this.file = file;
 		this.descriptor = descriptor;
-		matrix = new AdjacencyMatrix<>();
+		list = new NodeList<>(new SequentialEdge());
 		entrypoints = new HashSet<>();
 		cfs = new LinkedList<>();
 		// side effects on entrypoints and matrix will affect the cfg
-		cfg = new ImplementedCFG(descriptor, entrypoints, matrix);
+		cfg = new ImplementedCFG(descriptor, entrypoints, list);
 
 		visibleIds = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
@@ -162,27 +162,27 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 * @return the {@link ImplementedCFG} built from the block
 	 */
 	ImplementedCFG visitCodeMember(BlockContext ctx) {
-		Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visited = visitBlock(ctx);
+		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
-		matrix.mergeWith(visited.getMiddle());
+		list.mergeWith(visited.getMiddle());
 		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
 
 		if (cfg.getAllExitpoints().isEmpty()) {
 			Ret ret = new Ret(cfg, descriptor.getLocation());
 			if (cfg.getNodesCount() == 0) {
 				// empty method, so the ret is also the entrypoint
-				matrix.addNode(ret);
+				list.addNode(ret);
 				entrypoints.add(ret);
 			} else {
 				// every non-throwing instruction that does not have a follower
 				// is ending the method
 				Collection<Statement> preExits = new LinkedList<>();
-				for (Statement st : matrix.getNodes())
-					if (!st.stopsExecution() && matrix.followersOf(st).isEmpty())
+				for (Statement st : list.getNodes())
+					if (!st.stopsExecution() && list.followersOf(st).isEmpty())
 						preExits.add(st);
-				matrix.addNode(ret);
+				list.addNode(ret);
 				for (Statement st : preExits)
-					matrix.addEdge(new SequentialEdge(st, ret));
+					list.addEdge(new SequentialEdge(st, ret));
 
 				for (VariableTableEntry entry : descriptor.getVariables())
 					if (preExits.contains(entry.getScopeEnd()))
@@ -195,15 +195,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitBlock(BlockContext ctx) {
+	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, Pair<VariableRef,
-				Annotations>> backup = new HashMap<>(visibleIds);
-		AdjacencyMatrix<Statement, Edge, ImplementedCFG> block = new AdjacencyMatrix<>();
+		Annotations>> backup = new HashMap<>(visibleIds);
+
+		NodeList<ImplementedCFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-			Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>,
-					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
+
+			Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getMiddle());
 			if (first == null)
 				first = st.getLeft();
@@ -235,7 +236,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitBlockOrStatement(
+	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitBlockOrStatement(
 			BlockOrStatementContext ctx) {
 		if (ctx.statement() != null)
 			return visitStatement(ctx.statement());
@@ -244,8 +245,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitStatement(
-			StatementContext ctx) {
+
+	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitStatement(StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
 			st = visitLocalDeclaration(ctx.localDeclaration());
@@ -271,24 +272,23 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
 
-		AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj = new AdjacencyMatrix<>();
+		NodeList<ImplementedCFG, Statement, Edge> adj = new NodeList<>(new SequentialEdge());
 		adj.addNode(st);
 		return Triple.of(st, adj, st);
 	}
 
-	private Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitIf(
-			StatementContext ctx) {
-		AdjacencyMatrix<Statement, Edge, ImplementedCFG> ite = new AdjacencyMatrix<>();
+
+	private Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitIf(StatementContext ctx) {
+		NodeList<ImplementedCFG, Statement, Edge> ite = new NodeList<>(new SequentialEdge());
 
 		Statement condition = visitParExpr(ctx.parExpr());
 		ite.addNode(condition);
 
-		Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>,
-				Statement> then = visitBlockOrStatement(ctx.then);
+		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> then = visitBlockOrStatement(ctx.then);
 		ite.mergeWith(then.getMiddle());
 		ite.addEdge(new TrueEdge(condition, then.getLeft()));
 
-		Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> otherwise = null;
+		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> otherwise = null;
 		if (ctx.otherwise != null) {
 			otherwise = visitBlockOrStatement(ctx.otherwise);
 			ite.mergeWith(otherwise.getMiddle());
@@ -303,7 +303,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			ite.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new IfThenElse(matrix, condition, noop, then.getMiddle().getNodes(),
+		cfs.add(new IfThenElse(list, condition, noop, then.getMiddle().getNodes(),
 				otherwise == null ? Collections.emptyList() : otherwise.getMiddle().getNodes()));
 
 		return Triple.of(condition, ite, noop);
@@ -331,22 +331,23 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitLoop(LoopContext ctx) {
-		if (ctx.whileLoop() != null)
-			return visitWhileLoop(ctx.whileLoop());
-		else
-			return visitForLoop(ctx.forLoop());
-	}
 
-	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitWhileLoop(
-			WhileLoopContext ctx) {
-		AdjacencyMatrix<Statement, Edge, ImplementedCFG> loop = new AdjacencyMatrix<>();
+				public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitLoop(LoopContext ctx) {
+	if (ctx.whileLoop() != null)
+		return visitWhileLoop(ctx.whileLoop());
+	else
+		return visitForLoop(ctx.forLoop());
+		}
+
+		@Override
+		
+					public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitWhileLoop(WhileLoopContext ctx) {
+				NodeList<ImplementedCFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
 
-		Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>,
-				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,
+		Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
 		loop.addEdge(new SequentialEdge(body.getRight(), condition));
@@ -355,382 +356,380 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		loop.addNode(noop);
 		loop.addEdge(new FalseEdge(condition, noop));
 
-		cfs.add(new Loop(matrix, condition, noop, body.getMiddle().getNodes()));
+		cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
 
 		return Triple.of(condition, loop, noop);
-	}
+			}
 
-	@Override
-	public Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>, Statement> visitForLoop(
-			ForLoopContext ctx) {
-		AdjacencyMatrix<Statement, Edge, ImplementedCFG> loop = new AdjacencyMatrix<>();
-		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
-		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
-		ExpressionContext cond = ctx.forDeclaration().condition;
-		ExpressionContext post = ctx.forDeclaration().post;
+			@Override
+						public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitForLoop(ForLoopContext ctx) {
+					NodeList<ImplementedCFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
+			LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
+			ExpressionContext initExpr = ctx.forDeclaration().initExpr;
+			ExpressionContext cond = ctx.forDeclaration().condition;
+			ExpressionContext post = ctx.forDeclaration().post;
 
-		Statement first = null, last = null;
-		if (initDecl != null) {
-			Statement init = visitLocalDeclaration(initDecl);
-			loop.addNode(init);
-			first = init;
-		} else if (initExpr != null) {
-			Statement init = visitExpression(initExpr);
-			loop.addNode(init);
-			first = init;
-		}
+			Statement first = null, last = null;
+			if (initDecl != null) {
+				Statement init = visitLocalDeclaration(initDecl);
+				loop.addNode(init);
+				first = init;
+			} else if (initExpr != null) {
+				Statement init = visitExpression(initExpr);
+				loop.addNode(init);
+				first = init;
+			}
 
-		Statement condition;
-		if (cond != null)
-			condition = visitExpression(cond);
-		else
-			condition = new TrueLiteral(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
-		loop.addNode(condition);
-		if (first == null)
-			first = condition;
-		else
-			loop.addEdge(new SequentialEdge(first, condition));
-
-		Triple<Statement, AdjacencyMatrix<Statement, Edge, ImplementedCFG>,
-				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
-		loop.mergeWith(body.getMiddle());
-		loop.addEdge(new TrueEdge(condition, body.getLeft()));
-		last = body.getRight();
-
-		if (post != null) {
-			Statement inc = visitExpression(post);
-			loop.addNode(inc);
-			loop.addEdge(new SequentialEdge(body.getRight(), inc));
-			last = inc;
-		}
-
-		loop.addEdge(new SequentialEdge(last, condition));
-
-		Statement noop = new NoOp(cfg, condition.getLocation());
-		loop.addNode(noop);
-		loop.addEdge(new FalseEdge(condition, noop));
-
-		if (post == null)
-			cfs.add(new Loop(matrix, condition, noop, body.getMiddle().getNodes()));
-		else {
-			AdjacencyMatrix<Statement, Edge, ImplementedCFG> tmp = new AdjacencyMatrix<>(body.getMiddle());
-			tmp.addNode(last);
-			loop.addEdge(new SequentialEdge(body.getRight(), last));
-			cfs.add(new Loop(matrix, condition, noop, tmp.getNodes()));
-		}
-
-		return Triple.of(first, loop, noop);
-	}
-
-	@Override
-	public Assignment visitAssignment(AssignmentContext ctx) {
-		Expression expression = visitExpression(ctx.expression());
-		Expression target = null;
-		if (ctx.IDENTIFIER() != null)
-			target = visitVar(ctx.IDENTIFIER(), true);
-		else if (ctx.fieldAccess() != null)
-			target = visitFieldAccess(ctx.fieldAccess());
-		else if (ctx.arrayAccess() != null)
-			target = visitArrayAccess(ctx.arrayAccess());
-		else
-			throw new IMPSyntaxException("Target of the assignment at " + expression.getLocation()
-					+ " is neither an identifier, a field access or an array access");
-
-		return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
-	}
-
-	private VariableRef visitVar(TerminalNode identifier, boolean localReference) {
-		VariableRef ref = new VariableRef(cfg,
-				new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
-				identifier.getText(), Untyped.INSTANCE);
-		if (localReference && !visibleIds.containsKey(ref.getName()))
-			throw new IMPSyntaxException(
-					"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
-		return ref;
-	}
-
-	@Override
-	public AccessInstanceGlobal visitFieldAccess(FieldAccessContext ctx) {
-		Expression receiver = visitReceiver(ctx.receiver());
-		Global id = new Global(new SourceCodeLocation(file, getLine(ctx.name), getCol(ctx.name)), ctx.name.getText(),
-				Untyped.INSTANCE);
-		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver, id);
-	}
-
-	@Override
-	public Expression visitReceiver(ReceiverContext ctx) {
-		if (ctx.THIS() != null)
-			return visitVar(ctx.THIS(), false);
-		else if (ctx.SUPER() != null)
-			return visitVar(ctx.SUPER(), false);
-		else
-			return visitVar(ctx.IDENTIFIER(), true);
-	}
-
-	@Override
-	public IMPArrayAccess visitArrayAccess(ArrayAccessContext ctx) {
-		Expression receiver = visitReceiver(ctx.receiver());
-		Expression result = receiver;
-		for (IndexContext i : ctx.index())
-			result = new IMPArrayAccess(cfg, file, getLine(i), getCol(i), result, visitIndex(i));
-
-		return (IMPArrayAccess) result;
-	}
-
-	@Override
-	public Expression visitIndex(IndexContext ctx) {
-		if (ctx.IDENTIFIER() != null)
-			return visitVar(ctx.IDENTIFIER(), true);
-		else
-			return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-					Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
-	}
-
-	@Override
-	public Expression visitExpression(ExpressionContext ctx) {
-		int line = getLine(ctx);
-		int col = getCol(ctx);
-		if (ctx.paren != null)
-			return visitExpression(ctx.paren);
-		else if (ctx.assignment() != null)
-			return visitAssignment(ctx.assignment());
-		else if (ctx.basicExpr() != null)
-			return visitBasicExpr(ctx.basicExpr());
-		else if (ctx.nested != null)
-			if (ctx.NOT() != null)
-				return new Not(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
+			Statement condition;
+			if (cond != null)
+				condition = visitExpression(cond);
 			else
-				return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
-		else if (ctx.left != null && ctx.right != null)
-			if (ctx.MUL() != null)
-				return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.DIV() != null)
-				return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.MOD() != null)
-				return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.ADD() != null)
-				return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
-			else if (ctx.SUB() != null)
-				return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.GT() != null)
-				return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.GE() != null)
-				return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.LT() != null)
-				return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.LE() != null)
-				return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.EQUAL() != null)
-				return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.NOTEQUAL() != null)
-				return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-			else if (ctx.AND() != null)
-				return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
+				condition = new TrueLiteral(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)));
+			loop.addNode(condition);
+			if (first == null)
+				first = condition;
 			else
-				return new Or(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
-						visitExpression(ctx.right));
-		else if (ctx.NEW() != null)
-			if (ctx.newBasicArrayExpr() != null)
-				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
-			else
-				return visitNewReferenceType(ctx.newReferenceType());
-		else if (ctx.arrayAccess() != null)
-			return visitArrayAccess(ctx.arrayAccess());
-		else if (ctx.fieldAccess() != null)
-			return visitFieldAccess(ctx.fieldAccess());
-		else if (ctx.methodCall() != null)
-			return visitMethodCall(ctx.methodCall());
-		else if (ctx.stringExpr() != null)
-			return visitStringExpr(ctx.stringExpr());
+				loop.addEdge(new SequentialEdge(first, condition));
 
-		throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
-	}
+			Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
+			loop.mergeWith(body.getMiddle());
+			loop.addEdge(new TrueEdge(condition, body.getLeft()));
+			last = body.getRight();
 
-	@Override
-	public Expression visitStringExpr(StringExprContext ctx) {
-		Expression returned = null;
-		if (ctx.unaryStringExpr() != null)
-			returned = visitUnaryStringExpr(ctx.unaryStringExpr());
-		else if (ctx.binaryStringExpr() != null)
-			returned = visitBinaryStringExpr(ctx.binaryStringExpr());
-		else if (ctx.ternaryStringExpr() != null)
-			returned = visitTernaryStringExpr(ctx.ternaryStringExpr());
-		else
-			throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+			if (post != null) {
+				Statement inc = visitExpression(post);
+				loop.addNode(inc);
+				loop.addEdge(new SequentialEdge(body.getRight(), inc));
+				last = inc;
+			}
 
-		if (returned instanceof PluggableStatement)
-			// These string operations are also native constructs
-			((PluggableStatement) returned).setOriginatingStatement(returned);
+			loop.addEdge(new SequentialEdge(last, condition));
 
-		return returned;
-	}
+			Statement noop = new NoOp(cfg, condition.getLocation());
+			loop.addNode(noop);
+			loop.addEdge(new FalseEdge(condition, noop));
 
-	@Override
-	public Expression visitUnaryStringExpr(UnaryStringExprContext ctx) {
-		if (ctx.STRLEN() != null)
-			return new StringLength.IMPStringLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
-	}
+			if (post == null)
+				cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
+			else {
+						NodeList<ImplementedCFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
+				tmp.addNode(last);
+				loop.addEdge(new SequentialEdge(body.getRight(), last));
+				cfs.add(new Loop(list, condition, noop, tmp.getNodes()));
+			}
 
-	@Override
-	public Expression visitBinaryStringExpr(BinaryStringExprContext ctx) {
-		if (ctx.STRCAT() != null)
-			return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.right));
-		else if (ctx.STRCONTAINS() != null)
-			return new StringContains.IMPStringContains(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.right));
-		else if (ctx.STRENDS() != null)
-			return new StringEndsWith.IMPStringEndsWith(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.right));
-		else if (ctx.STREQ() != null)
-			return new StringEquals.IMPStringEquals(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.right));
-		else if (ctx.STRINDEXOF() != null)
-			return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.right));
-		else if (ctx.STRSTARTS() != null)
-			return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
-					visitExpression(ctx.left), visitExpression(ctx.right));
+			return Triple.of(first, loop, noop);
+				}
 
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
-	}
+				@Override
+				public Assignment visitAssignment(AssignmentContext ctx) {
+					Expression expression = visitExpression(ctx.expression());
+					Expression target = null;
+					if (ctx.IDENTIFIER() != null)
+						target = visitVar(ctx.IDENTIFIER(), true);
+					else if (ctx.fieldAccess() != null)
+						target = visitFieldAccess(ctx.fieldAccess());
+					else if (ctx.arrayAccess() != null)
+						target = visitArrayAccess(ctx.arrayAccess());
+					else
+						throw new IMPSyntaxException("Target of the assignment at " + expression.getLocation()
+						+ " is neither an identifier, a field access or an array access");
 
-	@Override
-	public Expression visitTernaryStringExpr(TernaryStringExprContext ctx) {
-		if (ctx.STRREPLACE() != null)
-			return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
-		else if (ctx.STRSUB() != null)
-			return new StringSubstring.IMPStringSubstring(cfg, file, getLine(ctx), getCol(ctx),
-					visitExpression(ctx.left),
-					visitExpression(ctx.middle), visitExpression(ctx.right));
+					return new Assignment(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), target, expression);
+				}
 
-		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
-	}
+				private VariableRef visitVar(TerminalNode identifier, boolean localReference) {
+					VariableRef ref = new VariableRef(cfg,
+							new SourceCodeLocation(file, getLine(identifier.getSymbol()), getCol(identifier.getSymbol())),
+							identifier.getText(), Untyped.INSTANCE);
+					if (localReference && !visibleIds.containsKey(ref.getName()))
+						throw new IMPSyntaxException(
+								"Referencing undeclared variable '" + ref.getName() + "' at " + ref.getLocation());
+					return ref;
+				}
 
-	@Override
-	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
-		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
-	}
+				@Override
+				public AccessInstanceGlobal visitFieldAccess(FieldAccessContext ctx) {
+					Expression receiver = visitReceiver(ctx.receiver());
+					Global id = new Global(new SourceCodeLocation(file, getLine(ctx.name), getCol(ctx.name)), ctx.name.getText(),
+							Untyped.INSTANCE);
+					return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver, id);
+				}
 
-	@Override
-	public Expression[] visitArrayCreatorRest(ArrayCreatorRestContext ctx) {
-		Expression[] result = new Expression[ctx.index().size()];
-		for (int i = 0; i < result.length; i++)
-			result[i] = visitIndex(ctx.index(i));
-		return result;
-	}
+				@Override
+				public Expression visitReceiver(ReceiverContext ctx) {
+					if (ctx.THIS() != null)
+						return visitVar(ctx.THIS(), false);
+					else if (ctx.SUPER() != null)
+						return visitVar(ctx.SUPER(), false);
+					else
+						return visitVar(ctx.IDENTIFIER(), true);
+				}
 
-	@Override
-	public Type visitPrimitiveType(PrimitiveTypeContext ctx) {
-		if (ctx.BOOLEAN() != null)
-			return BoolType.INSTANCE;
-		else if (ctx.INT() != null)
-			return Int32.INSTANCE;
-		else
-			return Float32.INSTANCE;
-	}
+				@Override
+				public IMPArrayAccess visitArrayAccess(ArrayAccessContext ctx) {
+					Expression receiver = visitReceiver(ctx.receiver());
+					Expression result = receiver;
+					for (IndexContext i : ctx.index())
+						result = new IMPArrayAccess(cfg, file, getLine(i), getCol(i), result, visitIndex(i));
 
-	@Override
-	public Expression visitNewReferenceType(NewReferenceTypeContext ctx) {
-		// null since we do not want to create a new one, class types should
-		// have been created during the preprocessing
-		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
-		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base,
-					visitArrayCreatorRest(ctx.arrayCreatorRest()));
-		else
-			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
-	}
+					return (IMPArrayAccess) result;
+				}
 
-	@Override
-	public Expression[] visitArguments(ArgumentsContext ctx) {
-		Expression[] args = new Expression[ctx.arg().size()];
-		int i = 0;
-		for (ArgContext arg : ctx.arg())
-			args[i++] = visitArg(arg);
-		return args;
-	}
+				@Override
+				public Expression visitIndex(IndexContext ctx) {
+					if (ctx.IDENTIFIER() != null)
+						return visitVar(ctx.IDENTIFIER(), true);
+					else
+						return new Int32Literal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+								Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+				}
 
-	@Override
-	public Expression visitArg(ArgContext ctx) {
-		if (ctx.literal() != null)
-			return visitLiteral(ctx.literal());
-		else if (ctx.fieldAccess() != null)
-			return visitFieldAccess(ctx.fieldAccess());
-		else if (ctx.arrayAccess() != null)
-			return visitArrayAccess(ctx.arrayAccess());
-		else if (ctx.methodCall() != null)
-			return visitMethodCall(ctx.methodCall());
-		else if (ctx.IDENTIFIER() != null)
-			return visitVar(ctx.IDENTIFIER(), true);
-		else
-			return visitVar(ctx.THIS(), false);
-	}
+				@Override
+				public Expression visitExpression(ExpressionContext ctx) {
+					int line = getLine(ctx);
+					int col = getCol(ctx);
+					if (ctx.paren != null)
+						return visitExpression(ctx.paren);
+					else if (ctx.assignment() != null)
+						return visitAssignment(ctx.assignment());
+					else if (ctx.basicExpr() != null)
+						return visitBasicExpr(ctx.basicExpr());
+					else if (ctx.nested != null)
+						if (ctx.NOT() != null)
+							return new Not(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
+						else
+							return new Negation(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.nested));
+					else if (ctx.left != null && ctx.right != null)
+						if (ctx.MUL() != null)
+							return new Multiplication(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.DIV() != null)
+							return new Division(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.MOD() != null)
+							return new Remainder(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.ADD() != null)
+							return new IMPAddOrConcat(cfg, file, line, col, visitExpression(ctx.left), visitExpression(ctx.right));
+						else if (ctx.SUB() != null)
+							return new Subtraction(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.GT() != null)
+							return new GreaterThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.GE() != null)
+							return new GreaterOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.LT() != null)
+							return new LessThan(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.LE() != null)
+							return new LessOrEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.EQUAL() != null)
+							return new Equal(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.NOTEQUAL() != null)
+							return new NotEqual(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else if (ctx.AND() != null)
+							return new And(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+						else
+							return new Or(cfg, new SourceCodeLocation(file, line, col), visitExpression(ctx.left),
+									visitExpression(ctx.right));
+					else if (ctx.NEW() != null)
+						if (ctx.newBasicArrayExpr() != null)
+							return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
+						else
+							return visitNewReferenceType(ctx.newReferenceType());
+					else if (ctx.arrayAccess() != null)
+						return visitArrayAccess(ctx.arrayAccess());
+					else if (ctx.fieldAccess() != null)
+						return visitFieldAccess(ctx.fieldAccess());
+					else if (ctx.methodCall() != null)
+						return visitMethodCall(ctx.methodCall());
+					else if (ctx.stringExpr() != null)
+						return visitStringExpr(ctx.stringExpr());
 
-	@Override
-	public Expression visitMethodCall(MethodCallContext ctx) {
-		Expression receiver = visitReceiver(ctx.receiver());
-		String name = ctx.name.getText();
-		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY,
-				CallType.INSTANCE, null, name, args);
-	}
+					throw new UnsupportedOperationException("Type of expression not supported: " + ctx);
+				}
 
-	@Override
-	public Expression visitBasicExpr(BasicExprContext ctx) {
-		if (ctx.literal() != null)
-			return visitLiteral(ctx.literal());
-		else if (ctx.THIS() != null)
-			return visitVar(ctx.THIS(), false);
-		else if (ctx.SUPER() != null)
-			return visitVar(ctx.SUPER(), false);
-		else
-			return visitVar(ctx.IDENTIFIER(), true);
-	}
+				@Override
+				public Expression visitStringExpr(StringExprContext ctx) {
+					Expression returned = null;
+					if (ctx.unaryStringExpr() != null)
+						returned = visitUnaryStringExpr(ctx.unaryStringExpr());
+					else if (ctx.binaryStringExpr() != null)
+						returned = visitBinaryStringExpr(ctx.binaryStringExpr());
+					else if (ctx.ternaryStringExpr() != null)
+						returned = visitTernaryStringExpr(ctx.ternaryStringExpr());
+					else
+						throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 
-	@Override
-	public Literal<?> visitLiteral(LiteralContext ctx) {
-		int line = getLine(ctx);
-		int col = getCol(ctx);
-		if (ctx.LITERAL_NULL() != null)
-			return new NullLiteral(cfg, new SourceCodeLocation(file, line, col));
-		else if (ctx.LITERAL_BOOL() != null)
-			if (ctx.LITERAL_BOOL().getText().equals("true"))
-				return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
-			else
-				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
-		else if (ctx.LITERAL_STRING() != null)
-			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
-		else if (ctx.LITERAL_FLOAT() != null)
-			if (ctx.SUB() != null)
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
-						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
-			else
-				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
-						Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
-		else if (ctx.LITERAL_DECIMAL() != null)
-			if (ctx.SUB() != null)
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
-						-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
-			else
-				return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
-						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+					if (returned instanceof PluggableStatement)
+						// These string operations are also native constructs
+						((PluggableStatement) returned).setOriginatingStatement(returned);
 
-		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
-	}
-}
+					return returned;
+				}
+
+				@Override
+				public Expression visitUnaryStringExpr(UnaryStringExprContext ctx) {
+					if (ctx.STRLEN() != null)
+						return new StringLength.IMPStringLength(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.op));
+					throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+				}
+
+				@Override
+				public Expression visitBinaryStringExpr(BinaryStringExprContext ctx) {
+					if (ctx.STRCAT() != null)
+						return new StringConcat.IMPStringConcat(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.right));
+					else if (ctx.STRCONTAINS() != null)
+						return new StringContains.IMPStringContains(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.right));
+					else if (ctx.STRENDS() != null)
+						return new StringEndsWith.IMPStringEndsWith(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.right));
+					else if (ctx.STREQ() != null)
+						return new StringEquals.IMPStringEquals(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.right));
+					else if (ctx.STRINDEXOF() != null)
+						return new StringIndexOf.IMPStringIndexOf(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.right));
+					else if (ctx.STRSTARTS() != null)
+						return new StringStartsWith.IMPStringStartsWith(cfg, file, getLine(ctx), getCol(ctx),
+								visitExpression(ctx.left), visitExpression(ctx.right));
+
+					throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+				}
+
+				@Override
+				public Expression visitTernaryStringExpr(TernaryStringExprContext ctx) {
+					if (ctx.STRREPLACE() != null)
+						return new StringReplace.IMPStringReplace(cfg, file, getLine(ctx), getCol(ctx), visitExpression(ctx.left),
+								visitExpression(ctx.middle), visitExpression(ctx.right));
+					else if (ctx.STRSUB() != null)
+						return new StringSubstring.IMPStringSubstring(cfg, file, getLine(ctx), getCol(ctx),
+								visitExpression(ctx.left),
+								visitExpression(ctx.middle), visitExpression(ctx.right));
+
+					throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
+				}
+
+				@Override
+				public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
+					return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
+							visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				}
+
+				@Override
+				public Expression[] visitArrayCreatorRest(ArrayCreatorRestContext ctx) {
+					Expression[] result = new Expression[ctx.index().size()];
+					for (int i = 0; i < result.length; i++)
+						result[i] = visitIndex(ctx.index(i));
+					return result;
+				}
+
+				@Override
+				public Type visitPrimitiveType(PrimitiveTypeContext ctx) {
+					if (ctx.BOOLEAN() != null)
+						return BoolType.INSTANCE;
+					else if (ctx.INT() != null)
+						return Int32.INSTANCE;
+					else
+						return Float32.INSTANCE;
+				}
+
+				@Override
+				public Expression visitNewReferenceType(NewReferenceTypeContext ctx) {
+					// null since we do not want to create a new one, class types should
+					// have been created during the preprocessing
+					Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+					if (ctx.arrayCreatorRest() != null)
+						return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base,
+								visitArrayCreatorRest(ctx.arrayCreatorRest()));
+					else
+						return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
+				}
+
+				@Override
+				public Expression[] visitArguments(ArgumentsContext ctx) {
+					Expression[] args = new Expression[ctx.arg().size()];
+					int i = 0;
+					for (ArgContext arg : ctx.arg())
+						args[i++] = visitArg(arg);
+					return args;
+				}
+
+				@Override
+				public Expression visitArg(ArgContext ctx) {
+					if (ctx.literal() != null)
+						return visitLiteral(ctx.literal());
+					else if (ctx.fieldAccess() != null)
+						return visitFieldAccess(ctx.fieldAccess());
+					else if (ctx.arrayAccess() != null)
+						return visitArrayAccess(ctx.arrayAccess());
+					else if (ctx.methodCall() != null)
+						return visitMethodCall(ctx.methodCall());
+					else if (ctx.IDENTIFIER() != null)
+						return visitVar(ctx.IDENTIFIER(), true);
+					else
+						return visitVar(ctx.THIS(), false);
+				}
+
+				@Override
+				public Expression visitMethodCall(MethodCallContext ctx) {
+					Expression receiver = visitReceiver(ctx.receiver());
+					String name = ctx.name.getText();
+					Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
+					return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+							IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY,
+							CallType.INSTANCE, null, name, args);
+				}
+
+				@Override
+				public Expression visitBasicExpr(BasicExprContext ctx) {
+					if (ctx.literal() != null)
+						return visitLiteral(ctx.literal());
+					else if (ctx.THIS() != null)
+						return visitVar(ctx.THIS(), false);
+					else if (ctx.SUPER() != null)
+						return visitVar(ctx.SUPER(), false);
+					else
+						return visitVar(ctx.IDENTIFIER(), true);
+				}
+
+				@Override
+				public Literal<?> visitLiteral(LiteralContext ctx) {
+					int line = getLine(ctx);
+					int col = getCol(ctx);
+					if (ctx.LITERAL_NULL() != null)
+						return new NullLiteral(cfg, new SourceCodeLocation(file, line, col));
+					else if (ctx.LITERAL_BOOL() != null)
+						if (ctx.LITERAL_BOOL().getText().equals("true"))
+							return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
+						else
+							return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
+					else if (ctx.LITERAL_STRING() != null)
+						return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
+					else if (ctx.LITERAL_FLOAT() != null)
+						if (ctx.SUB() != null)
+							return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+									-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
+						else
+							return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
+									Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
+					else if (ctx.LITERAL_DECIMAL() != null)
+						if (ctx.SUB() != null)
+							return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+									-Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+						else
+							return new Int32Literal(cfg, new SourceCodeLocation(file, line, col),
+									Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
+
+					throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+				}
+			}

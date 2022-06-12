@@ -32,8 +32,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	private static final AllocationSites TOP = new AllocationSites(new HashSet<>(), true);
 	private static final AllocationSites BOTTOM = new AllocationSites(new HashSet<>(), false);
 
-	private final boolean isTop;
-
 	/**
 	 * Builds an instance of HeapIdentiferSetLattice, corresponding to the top
 	 * element.
@@ -49,18 +47,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	 * @param isTop whether this instance is the top of the lattice
 	 */
 	AllocationSites(Set<AllocationSite> set, boolean isTop) {
-		super(set);
-		this.isTop = isTop;
-	}
-
-	@Override
-	public boolean isTop() {
-		return isTop;
-	}
-
-	@Override
-	public boolean isBottom() {
-		return !isTop && elements.isEmpty();
+		super(set, isTop);
 	}
 
 	@Override
@@ -93,28 +80,6 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	public Satisfiability satisfies(SymbolicExpression expression,
 			HeapEnvironment<AllocationSites> environment, ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
-		result = prime * result + (isTop ? 1231 : 1237);
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!super.equals(obj))
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		AllocationSites other = (AllocationSites) obj;
-		if (isTop != other.isTop)
-			return false;
-		return true;
 	}
 
 	@Override

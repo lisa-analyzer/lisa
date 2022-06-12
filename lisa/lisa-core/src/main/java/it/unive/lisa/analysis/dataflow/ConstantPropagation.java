@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.dataflow;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.PairRepresentation;
+import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -175,18 +175,8 @@ public class ConstantPropagation
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
-		return !id.getDynamicType().isPointerType();
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
-	}
-
-	@Override
 	public DomainRepresentation representation() {
-		return new PairRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
+		return new ListRepresentation(new StringRepresentation(id), new StringRepresentation(constant));
 	}
 
 	@Override

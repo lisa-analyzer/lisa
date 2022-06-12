@@ -8,7 +8,7 @@ import it.unive.lisa.util.datastructures.graph.GraphVisitor;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CallGraphEdge implements Edge<CallGraphNode, CallGraphEdge, BaseCallGraph> {
+public class CallGraphEdge implements Edge<BaseCallGraph, CallGraphNode, CallGraphEdge> {
 
 	private final CallGraphNode source;
 	private final CallGraphNode destination;
@@ -32,16 +32,6 @@ public class CallGraphEdge implements Edge<CallGraphNode, CallGraphEdge, BaseCal
 	@Override
 	public CallGraphNode getDestination() {
 		return destination;
-	}
-
-	@Override
-	public boolean canBeSimplified() {
-		return false;
-	}
-
-	@Override
-	public CallGraphEdge newInstance(CallGraphNode source, CallGraphNode destination) {
-		return new CallGraphEdge(source, destination);
 	}
 
 	@Override

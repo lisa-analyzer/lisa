@@ -34,16 +34,17 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						new MonolithicHeap(),
 						new InferenceSystem<>(new NonInterference()),
 						new TypeEnvironment<>(new InferredTypes()));
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
-				.setAbstractState(
-						s)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
+				.setAbstractState(s)
 				.addSemanticCheck(new NICheck());
 		perform("non-interference/confidentiality", "program.imp", conf);
 	}
 
 	@Test
 	public void testIntegrityNI() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(
 						new SimpleAbstractState<>(
 								new MonolithicHeap(),
@@ -55,7 +56,8 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testDeclassification() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+		LiSAConfiguration conf = new LiSAConfiguration()
+				.setSerializeResults(true)
 				.setAbstractState(
 						new SimpleAbstractState<>(
 								new MonolithicHeap(),

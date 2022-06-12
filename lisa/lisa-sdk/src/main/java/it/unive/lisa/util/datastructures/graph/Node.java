@@ -5,22 +5,11 @@ package it.unive.lisa.util.datastructures.graph;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
+ * @param <G> the type of {@link Graph} this node can be used with
  * @param <N> the type of this node
  * @param <E> the type of {@link Edge} that this node can be connected to
- * @param <G> the type of {@link Graph} this node can be used with
  */
-public interface Node<N extends Node<N, E, G>, E extends Edge<N, E, G>, G extends Graph<G, N, E>> {
-
-	/**
-	 * Sets the offset of this node to the given value, and then proceeds by
-	 * setting the one of its nested nodes (if any) to subsequent values. The
-	 * last offset used is returned.
-	 * 
-	 * @param offset the offset to set
-	 * 
-	 * @return the last offset used while setting the offsets of nested nodes
-	 */
-	int setOffset(int offset);
+public interface Node<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>> {
 
 	/**
 	 * Accepts the given {@link GraphVisitor}. Implementors of this method are

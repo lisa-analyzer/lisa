@@ -24,9 +24,13 @@ import it.unive.lisa.interprocedural.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.FixpointResults;
 import it.unive.lisa.interprocedural.callgraph.CallGraphEdge;
 import it.unive.lisa.interprocedural.callgraph.CallGraphNode;
-import it.unive.lisa.outputs.DotCFG;
-import it.unive.lisa.outputs.JsonReport;
-import it.unive.lisa.outputs.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
@@ -47,6 +51,7 @@ import it.unive.lisa.program.cfg.SignatureCFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -78,6 +83,7 @@ import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.lang.reflect.Modifier;
@@ -114,8 +120,9 @@ public class EqualityContractVerificationTest {
 	private static final CFGDescriptor signDescr2 = new CFGDescriptor(loc, interface1, true, "fake2");
 	private static final SignatureCFG signCfg1 = new SignatureCFG(signDescr1);
 	private static final SignatureCFG signCfg2 = new SignatureCFG(signDescr2);
-	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj1 = new AdjacencyMatrix<>();
-	private static final AdjacencyMatrix<Statement, Edge, ImplementedCFG> adj2 = new AdjacencyMatrix<>();
+	private static final NodeList<ImplementedCFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
+	private static final NodeList<ImplementedCFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
+
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
@@ -200,7 +207,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(CompilationUnit.class, unit1, unit2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
-				.withPrefabValues(AdjacencyMatrix.class, adj1, adj2)
+				.withPrefabValues(NodeList.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
@@ -238,8 +245,11 @@ public class EqualityContractVerificationTest {
 		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
 		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
-		verify(AdjacencyMatrix.class, verifier -> verifier.withIgnoredFields("nextOffset"));
+		verify(AdjacencyMatrix.class);
 		verify(NodeEdges.class);
+		verify(NodeList.class,
+				verifier -> verifier.withIgnoredFields("nextOffset", "sequentialSingleton", "computeOffsets"));
+		verify(it.unive.lisa.util.datastructures.graph.code.NodeList.NodeEdges.class);
 
 		verify(ConcurrentFIFOWorkingSet.class);
 		verify(ConcurrentLIFOWorkingSet.class);
@@ -425,10 +435,15 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testOutputs() {
 		verify(JsonReport.class);
-		// the fields are ignored since they are only used to build up the
-		// underlying graph, and equality testing the graph will take them into
-		// account
-		verify(DotCFG.class, verifier -> verifier.withIgnoredFields("legend", "title", "codes", "nextCode"));
+
+		verify(SerializableGraph.class);
+		verify(SerializableNode.class);
+		verify(SerializableEdge.class);
+		verify(SerializableNodeDescription.class);
+
+		Reflections scanner = mkReflections();
+		for (Class<? extends SerializableValue> struct : scanner.getSubTypesOf(SerializableValue.class))
+			verify(struct, Warning.NONFINAL_FIELDS);
 	}
 
 	@Test

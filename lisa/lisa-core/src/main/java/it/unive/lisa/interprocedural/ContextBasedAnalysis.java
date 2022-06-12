@@ -94,7 +94,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		this.wideningThreshold = wideningThreshold;
 
 		if (program.getEntryPoints().isEmpty())
-			throw new FixpointException("The program contains no entrypoints");
+			throw new NoEntryPointException();
 
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold));

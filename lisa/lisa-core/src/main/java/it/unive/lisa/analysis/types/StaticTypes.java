@@ -79,10 +79,10 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	@Override
 	public DomainRepresentation representation() {
 		if (isTop())
-			return Lattice.TOP_REPR;
+			return Lattice.topRepresentation();
 
 		if (isBottom())
-			return Lattice.BOTTOM_REPR;
+			return Lattice.bottomRepresentation();
 
 		return new SetRepresentation(new HashSet<>(type.allInstances()), StringRepresentation::new);
 	}
@@ -108,7 +108,7 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 
 	@Override
 	protected StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new StaticTypes(constant.getDynamicType());
+		return new StaticTypes(constant.getStaticType());
 	}
 
 	@Override

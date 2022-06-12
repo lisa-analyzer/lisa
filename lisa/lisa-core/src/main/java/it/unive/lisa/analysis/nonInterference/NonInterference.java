@@ -11,7 +11,6 @@ import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.matcher.BasicAnnotationMatcher;
 import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -191,8 +190,9 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	@Override
 	public DomainRepresentation representation() {
-		return isBottom() ? Lattice.BOTTOM_REPR
-				: new StringRepresentation((isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L"));
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		return new StringRepresentation((isHighConfidentiality() ? "H" : "L") + (isHighIntegrity() ? "H" : "L"));
 	}
 
 	private NonInterference state(NonInterference state, ProgramPoint pp) throws SemanticException {
@@ -284,11 +284,6 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	@Override
 	public boolean tracksIdentifiers(Identifier id) {
 		return true;
-	}
-
-	@Override
-	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
 	}
 
 	@Override

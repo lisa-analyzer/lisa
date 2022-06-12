@@ -67,7 +67,6 @@ import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStra
 import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.ReferenceType;
-import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;

@@ -152,6 +152,9 @@ public class MultiCall extends Call {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
 				source.getCallType(), source.getQualifier(),
 				source.getTargetName(), List.of(calls), source.getParameters());
+		for (Expression param : source.getParameters())
+			// make sure they stay linked to the original call
+			param.setParentStatement(source);
 	}
 
 	/**

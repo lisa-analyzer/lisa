@@ -1,34 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.value.TypeDomain;
-import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.outputs.DotCFG;
-import it.unive.lisa.program.ProgramValidationException;
-import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
-import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
-import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
-import it.unive.lisa.program.cfg.controlFlow.Loop;
-import it.unive.lisa.program.cfg.edge.Edge;
-import it.unive.lisa.program.cfg.edge.SequentialEdge;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.NoOp;
-import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
-import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
-import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,9 +11,44 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.StatementStore;
+import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
+import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
+import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
+import it.unive.lisa.program.cfg.controlFlow.Loop;
+import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.NoOp;
+import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
+import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
+import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 /**
  * An implemented control flow graph, that has {@link Statement}s as nodes and
@@ -53,9 +59,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> implements CFG {
+public class ImplementedCFG extends CodeGraph<ImplementedCFG, Statement, Edge> implements CodeMember, CFG {
 
-	private static final Logger LOG = LogManager.getLogger(ImplementedCFG.class);
+	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
 	/**
 	 * The descriptor of this control flow graph.
@@ -79,7 +85,7 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @param descriptor the descriptor of this cfg
 	 */
 	public ImplementedCFG(CFGDescriptor descriptor) {
-		super();
+		super(new SequentialEdge());
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
 		this.cfsExtracted = false;
@@ -88,15 +94,15 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	/**
 	 * Builds the control flow graph.
 	 * 
-	 * @param descriptor      the descriptor of this cfg
-	 * @param entrypoints     the statements of this cfg that will be reachable
-	 *                            from other cfgs
-	 * @param adjacencyMatrix the matrix containing all the statements and the
-	 *                            edges that will be part of this cfg
+	 * @param descriptor  the descriptor of this cfg
+	 * @param entrypoints the statements of this cfg that will be reachable from
+	 *                        other cfgs
+	 * @param list        the node list containing all the statements and the
+	 *                        edges that will be part of this cfg
 	 */
 	public ImplementedCFG(CFGDescriptor descriptor, Collection<Statement> entrypoints,
-			AdjacencyMatrix<Statement, Edge, ImplementedCFG> adjacencyMatrix) {
-		super(entrypoints, adjacencyMatrix);
+			NodeList<ImplementedCFG, Statement, Edge> list) {
+		super(entrypoints, list);
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
 		this.cfsExtracted = false;
@@ -108,7 +114,7 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @param other the original cfg
 	 */
 	protected ImplementedCFG(ImplementedCFG other) {
-		super(other.entrypoints, other.adjacencyMatrix);
+		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
 		this.cfsExtracted = other.cfsExtracted;
@@ -133,7 +139,7 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @return the normal exitpoints of this cfg.
 	 */
 	public final Collection<Statement> getNormalExitpoints() {
-		return adjacencyMatrix.getNodes().stream().filter(st -> st.stopsExecution() && !st.throwsError())
+		return list.getNodes().stream().filter(st -> st.stopsExecution() && !st.throwsError())
 				.collect(Collectors.toList());
 	}
 
@@ -147,7 +153,7 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @return the exitpoints of this cfg.
 	 */
 	public final Collection<Statement> getAllExitpoints() {
-		return adjacencyMatrix.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
+		return list.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
 				.collect(Collectors.toList());
 	}
 
@@ -230,6 +236,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
 	 * @param entryState      the entry states to apply to each
 	 *                            {@link Statement} returned by
 	 *                            {@link #getEntrypoints()}
@@ -287,6 +295,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @param <H>             the type of {@link HeapDomain} contained into the
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
+	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
 	 *                            computed abstract state
 	 * @param entrypoints     the collection of {@link Statement}s that to use
 	 *                            as a starting point of the computation (that
@@ -346,6 +356,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 *                            computed abstract state
 	 * @param <V>             the type of {@link ValueDomain} contained into the
 	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis
 	 *                            to run, used to retrieve top and bottom values
@@ -388,8 +400,9 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fix = new Fixpoint<>(this);
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> starting = new HashMap<>();
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
-		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
-				new CFGFixpoint<>(widenAfter, interprocedural));
+		Map<Statement,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
+						new CFGFixpoint<>(widenAfter, interprocedural));
 
 		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
 		for (Entry<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> e : fixpoint.entrySet()) {
@@ -423,6 +436,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> entrystate) throws SemanticException {
 			StatementStore<A, H, V, T> expressions = new StatementStore<>(entrystate.getLeft().bottom());
 			AnalysisState<A, H, V, T> approx = node.semantics(entrystate.getLeft(), interprocedural, expressions);
+			if (node instanceof Expression)
+				approx = approx.forgetIdentifiers(((Expression) node).getMetaVariables());
 			return Pair.of(approx, expressions);
 		}
 
@@ -493,8 +508,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	}
 
 	@Override
-	protected DotCFG toDot(Function<Statement, String> labelGenerator) {
-		return DotCFG.fromCFG(this, null, labelGenerator);
+	public SerializableGraph toSerializableGraph(Function<Statement, SerializableValue> descriptionGenerator) {
+		return SerializableCFG.fromCFG(this, descriptionGenerator);
 	}
 
 	@Override
@@ -650,10 +665,9 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 * @throws ProgramValidationException if one of the aforementioned checks
 	 *                                        fail
 	 */
-	@Override
 	public void validate() throws ProgramValidationException {
 		try {
-			adjacencyMatrix.validate(entrypoints);
+			list.validate(entrypoints);
 		} catch (ProgramValidationException e) {
 			throw new ProgramValidationException("The matrix behind " + this + " is invalid", e);
 		}
@@ -662,25 +676,26 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 			for (Statement st : struct.allStatements())
 				// we tolerate null values only if its the follower
 				if ((st == null && struct.getFirstFollower() != null)
-						|| (st != null && !adjacencyMatrix.containsNode(st)))
+						|| (st != null && !list.containsNode(st)))
 					throw new ProgramValidationException(this + " has a conditional structure (" + struct
 							+ ") that contains a node not in the graph: " + st);
 		}
 
-		for (Entry<Statement, AdjacencyMatrix.NodeEdges<Statement, Edge, ImplementedCFG>> st : adjacencyMatrix) {
+		for (Statement st : list) {
 			// no outgoing edges in execution-terminating statements
-			if (st.getKey().stopsExecution() && !st.getValue().getOutgoing().isEmpty())
+			Collection<Edge> outs = list.getOutgoingEdges(st);
+			if (st.stopsExecution() && !outs.isEmpty())
 				throw new ProgramValidationException(
-						this + " contains an execution-stopping node that has followers: " + st.getKey());
-			if (st.getValue().getOutgoing().isEmpty() && !st.getKey().stopsExecution() && !st.getKey().throwsError())
+						this + " contains an execution-stopping node that has followers: " + st);
+			if (outs.isEmpty() && !st.stopsExecution() && !st.throwsError())
 				throw new ProgramValidationException(
-						this + " contains a node with no followers that is not execution-stopping: " + st.getKey());
+						this + " contains a node with no followers that is not execution-stopping: " + st);
 		}
 
 		// all entrypoints should be within the cfg
-		if (!adjacencyMatrix.getNodes().containsAll(entrypoints))
+		if (!list.getNodes().containsAll(entrypoints))
 			throw new ProgramValidationException(this + " has entrypoints that are not part of the graph: "
-					+ new HashSet<>(entrypoints).retainAll(adjacencyMatrix.getNodes()));
+					+ new HashSet<>(entrypoints).retainAll(list.getNodes()));
 	}
 
 	private Collection<ControlFlowStructure> getControlFlowsContaining(ProgramPoint pp) {
@@ -694,8 +709,16 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 			return Collections.emptyList();
 
 		Statement st = (Statement) pp;
+		if (st instanceof Call) {
+			Call original = (Call) st;
+			while (original.getSource() != null)
+				original = original.getSource();
+			if (original != st)
+				st = original;
+		}
 		if (st instanceof Expression)
 			st = ((Expression) st).getRootStatement();
+
 		Collection<ControlFlowStructure> res = new LinkedList<>();
 		for (ControlFlowStructure cf : cfStructs)
 			if (cf.contains(st))
