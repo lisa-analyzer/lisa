@@ -1,7 +1,6 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.analysis.SemanticDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -207,6 +206,6 @@ public class Parameter implements CodeElement {
 	 * @return the variable representing this parameter
 	 */
 	public Variable toSymbolicVariable() {
-		return new Variable(Caches.types().mkSet(getStaticType().allInstances()), name, annotations, location);
+		return new Variable(staticType, name, annotations, location);
 	}
 }

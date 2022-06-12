@@ -8,8 +8,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -42,10 +43,12 @@ import org.apache.logging.log4j.Logger;
  * @param <A> the abstract state of the analysis
  * @param <H> the heap domain
  * @param <V> the value domain
+ * @param <T> the type domain
  */
-public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
+public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
-		V extends ValueDomain<V>> implements InterproceduralAnalysis<A, H, V> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>> implements InterproceduralAnalysis<A, H, V, T> {
 
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
@@ -65,7 +68,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
-	private final Map<ImplementedCFG, Optional<CFGWithAnalysisResults<A, H, V>>> results;
+	private final Map<ImplementedCFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
+
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -75,19 +79,20 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public void fixpoint(AnalysisState<A, H, V> entryState,
+	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException {
 		for (ImplementedCFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(),
 				"Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
-				AnalysisState<A, H, V> prepared = entryState;
+				AnalysisState<A, H, V, T> prepared = entryState;
 
 				for (Parameter arg : cfg.getDescriptor().getFormals()) {
-					ExternalSet<Type> all = Caches.types().mkSet(arg.getStaticType().allInstances());
-					Variable id = new Variable(all, arg.getName(), arg.getAnnotations(), arg.getLocation());
-					prepared = prepared.assign(id, new PushAny(all, arg.getLocation()), cfg.getGenericProgramPoint());
+					Variable id = new Variable(arg.getStaticType(), arg.getName(), arg.getAnnotations(),
+							arg.getLocation());
+					prepared = prepared.assign(id, new PushAny(arg.getStaticType(), arg.getLocation()),
+							cfg.getGenericProgramPoint());
 				}
 
 				results.put(cfg, Optional
@@ -98,28 +103,28 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V>> getAnalysisResultsOf(ImplementedCFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(ImplementedCFG cfg) {
 		return Collections.singleton(results.get(cfg).orElse(null));
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(
+	public AnalysisState<A, H, V, T> getAbstractResultOf(
 			CFGCall call,
-			AnalysisState<A, H, V> entryState,
+			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V> expressions)
+			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
+		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(),
 				call.getTargetName(), call.getStaticType(), call.getParameters());
 		return getAbstractResultOf(open, entryState, parameters, expressions);
 	}
 
 	@Override
-	public AnalysisState<A, H, V> getAbstractResultOf(
+	public AnalysisState<A, H, V, T> getAbstractResultOf(
 			OpenCall call,
-			AnalysisState<A, H, V> entryState,
+			AnalysisState<A, H, V, T> entryState,
 			ExpressionSet<SymbolicExpression>[] parameters,
-			StatementStore<A, H, V> expressions)
+			StatementStore<A, H, V, T> expressions)
 			throws SemanticException {
 		return policy.apply(call, entryState, parameters);
 	}
@@ -132,10 +137,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V>,
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) throws CallResolutionException {
-		OpenCall open = new OpenCall(call.getCFG(), call.getLocation(), call.isInstanceCall(), call.getQualifier(),
-				call.getTargetName(), call.getStaticType(), call.getParameters());
-		open.setRuntimeTypes(call.getRuntimeTypes());
-		return open;
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException {
+		return new OpenCall(call);
 	}
 }

@@ -6,7 +6,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression converting that push any possible value on the stack. This is
@@ -19,12 +18,12 @@ public class PushAny extends ValueExpression {
 	/**
 	 * Builds the push any.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param location the code location of the statement that has generated
-	 *                     this expression
+	 * @param staticType the static type of this expression
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public PushAny(ExternalSet<Type> types, CodeLocation location) {
-		super(types, location);
+	public PushAny(Type staticType, CodeLocation location) {
+		super(staticType, location);
 	}
 
 	@Override

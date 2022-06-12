@@ -5,7 +5,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An expression that accesses a memory location that is a <i>child</i> of
@@ -28,15 +27,15 @@ public class AccessChild extends HeapExpression {
 	/**
 	 * Builds the child access.
 	 * 
-	 * @param types     the runtime types of this expression
-	 * @param container the expression representing the parent
-	 * @param child     the expression representing the child
-	 * @param location  the code location of the statement that has generated
-	 *                      this expression
+	 * @param staticType the static type of this expression
+	 * @param container  the expression representing the parent
+	 * @param child      the expression representing the child
+	 * @param location   the code location of the statement that has generated
+	 *                       this expression
 	 */
-	public AccessChild(ExternalSet<Type> types, SymbolicExpression container, SymbolicExpression child,
+	public AccessChild(Type staticType, SymbolicExpression container, SymbolicExpression child,
 			CodeLocation location) {
-		super(types, location);
+		super(staticType, location);
 		this.container = container;
 		this.child = child;
 	}

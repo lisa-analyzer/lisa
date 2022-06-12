@@ -1,29 +1,43 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
-import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.CFGCall;
-import it.unive.lisa.program.cfg.statement.call.Call;
-import it.unive.lisa.program.cfg.statement.call.HybridCall;
-import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.Set;
 import java.util.stream.Collectors;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import it.unive.lisa.analysis.symbols.Aliases;
+import it.unive.lisa.analysis.symbols.NameSymbol;
+import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
+import it.unive.lisa.analysis.symbols.QualifierSymbol;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.statement.Expression;
+import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.MultiCall;
+import it.unive.lisa.program.cfg.statement.call.NativeCall;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -36,7 +50,10 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a> and
  *             <a href="mailto:pietro.ferrara@unive.it">Pietro Ferrara</a>
  */
-public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, CallGraphEdge> implements CallGraph {
+public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNode, CallGraphEdge>
+		implements CallGraph {
+
+	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
 	private Program program;
 
@@ -71,26 +88,99 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	}
 
 	@Override
-	public Call resolve(UnresolvedCall call) throws CallResolutionException {
+	@SuppressWarnings("unchecked")
+	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
 		if (cached != null)
 			return cached;
 
-		Collection<ImplementedCFG> targets = new ArrayList<>();
-		Collection<NativeCFG> nativeTargets = new ArrayList<>();
+		if (types == null)
+			// we allow types to be null only for calls that we already resolved
+			throw new CallResolutionException("Cannot resolve call without runtime types");
+		if (aliasing == null)
+			// we allow aliasing to be null only for calls that we already
+			// resolved
+			throw new CallResolutionException("Cannot resolve call without symbol aliasing");
 
-		if (call.isInstanceCall())
-			resolveInstance(call, targets, nativeTargets);
-		else
-			resolveNonInstance(call, targets, nativeTargets);
+		Collection<ImplementedCFG> targets = new HashSet<>();
+		Collection<NativeCFG> nativeTargets = new HashSet<>();
+		Collection<ImplementedCFG> targetsNoRec = new HashSet<>();
+		Collection<NativeCFG> nativeTargetsNoRec = new HashSet<>();
+
+		Expression[] params = call.getParameters();
+		switch (call.getCallType()) {
+		case INSTANCE:
+			resolveInstance(call, types, targets, nativeTargets, aliasing);
+			break;
+		case STATIC:
+			resolveNonInstance(call, types, targets, nativeTargets, aliasing);
+			break;
+		case UNKNOWN:
+		default:
+			UnresolvedCall tempCall = new UnresolvedCall(
+					call.getCFG(),
+					call.getLocation(),
+					call.getAssigningStrategy(),
+					call.getMatchingStrategy(),
+					call.getTraversalStrategy(),
+					CallType.INSTANCE,
+					call.getQualifier(),
+					call.getTargetName(),
+					call.getOrder(),
+					params);
+			resolveInstance(tempCall, types, targets, nativeTargets, aliasing);
+
+			if (!(params[0] instanceof VariableRef)) {
+				LOG.debug(call
+						+ ": solving unknown-type calls as static-type requires the first parameter to be a reference to a variable, skipping");
+				break;
+			}
+
+			Expression[] truncatedParams = new Expression[params.length - 1];
+			ExternalSet<Type>[] truncatedTypes = new ExternalSet[types.length - 1];
+			System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
+			System.arraycopy(types, 1, truncatedTypes, 0, types.length - 1);
+			tempCall = new UnresolvedCall(
+					call.getCFG(),
+					call.getLocation(),
+					call.getAssigningStrategy(),
+					call.getMatchingStrategy(),
+					call.getTraversalStrategy(),
+					CallType.STATIC,
+					((VariableRef) params[0]).getName(),
+					call.getTargetName(),
+					call.getOrder(),
+					truncatedParams);
+			resolveNonInstance(tempCall, truncatedTypes, targetsNoRec, nativeTargetsNoRec, aliasing);
+			break;
+		}
 
 		Call resolved;
-		if (targets.isEmpty() && nativeTargets.isEmpty())
+		CFGCall cfgcall = new CFGCall(call, targets);
+		NativeCall nativecall = new NativeCall(call, nativeTargets);
+		TruncatedParamsCall cfgcallnorec = new CFGCall(call, targetsNoRec).removeFirstParameter();
+		TruncatedParamsCall nativecallnorec = new NativeCall(call, nativeTargetsNoRec).removeFirstParameter();
+		if (noTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
 			resolved = new OpenCall(call);
-		else if (nativeTargets.isEmpty())
-			resolved = new CFGCall(call, targets);
+		else if (onlyNonRewritingCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = cfgcall;
+		else if (onlyNonRewritingNativeTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = nativecall;
+		else if (onlyNonRewritingTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcall, nativecall);
+		else if (onlyRewritingCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = cfgcallnorec;
+		else if (onlyRewritingNativeTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = nativecallnorec;
+		else if (onlyRewritingTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcallnorec, nativecallnorec);
+		else if (onlyCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, cfgcall, cfgcallnorec);
+		else if (onlyNativeCFGTargets(targets, nativeTargets, targetsNoRec, nativeTargetsNoRec))
+			resolved = new MultiCall(call, nativecall, nativecallnorec);
 		else
-			resolved = new HybridCall(call, targets, nativeTargets);
+			resolved = new MultiCall(call, cfgcall, cfgcallnorec, nativecall, nativecallnorec);
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
@@ -119,106 +209,272 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 		return resolved;
 	}
 
+	private boolean onlyNativeCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingNativeTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& !nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyRewritingCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& !targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingNativeTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& !nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean onlyNonRewritingCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return !targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
+	private boolean noTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<ImplementedCFG> targetsNoRec,
+			Collection<NativeCFG> nativeTargetsNoRec) {
+		return targets.isEmpty()
+				&& nativeTargets.isEmpty()
+				&& targetsNoRec.isEmpty()
+				&& nativeTargetsNoRec.isEmpty();
+	}
+
 	/**
 	 * Resolves the given call as regular (non-instance) call.
 	 * 
-	 * @param call    the call to resolve
-	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link ImplementedCFG}s
-	 *                    targeted by the call
-	 * @param natives the list of targets that, after the execution of this
-	 *                    method, will contain the {@link NativeCFG}s targeted
-	 *                    by the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, Collection<ImplementedCFG> targets,
-			Collection<NativeCFG> natives)
+	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<ImplementedCFG> targets,
+			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
-			if (!cm.getDescriptor().isInstance()
-					&& matchCFGName(call, cm)
-					&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(), call.getParameters()))
-				if (cm instanceof ImplementedCFG)
-					targets.add((ImplementedCFG) cm);
-				else
-					natives.add((NativeCFG) cm);
+			checkMember(call, types, targets, natives, aliasing, cm, false);
 	}
 
 	/**
 	 * Resolves the given call as an instance call.
 	 * 
-	 * @param call    the call to resolve
-	 * @param targets the list of targets that, after the execution of this
-	 *                    method, will contain the {@link ImplementedCFG}s
-	 *                    targeted by the call
-	 * @param natives the list of targets that, after the execution of this
-	 *                    method, will contain the {@link NativeCFG}s targeted
-	 *                    by the call
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, Collection<ImplementedCFG> targets,
-			Collection<NativeCFG> natives)
+	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<ImplementedCFG> targets,
+			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
 			throw new CallResolutionException(
 					"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
-		for (Type recType : getPossibleTypesOfReceiver(receiver)) {
-			if (!recType.isUnitType())
+		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
+			Collection<CompilationUnit> units;
+			if (recType.isUnitType())
+				units = Collections.singleton(recType.asUnitType().getUnit());
+			else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isUnitType))
+				units = recType.asPointerType()
+						.getInnerTypes()
+						.stream()
+						.filter(Type::isUnitType)
+						.map(Type::asUnitType)
+						.map(UnitType::getUnit)
+						.collect(Collectors.toSet());
+			else
 				continue;
 
-			// TODO: fix here: we should check that the unit returned
-			// is a compilation unit
-			CompilationUnit unit = (CompilationUnit) recType.asUnitType().getUnit();
-			for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit)) {
-				// we inspect only the ones of the current unit
-				Collection<CodeMember> candidates = cu.getInstanceCodeMembersByName(call.getTargetName(), false);
-				for (CodeMember cm : candidates)
-					if (cm.getDescriptor().isInstance()
-							&& call.getMatchingStrategy().matches(call, cm.getDescriptor().getFormals(),
-									call.getParameters()))
-						if (cm instanceof ImplementedCFG)
-							targets.add((ImplementedCFG) cm);
-						else
-							natives.add((NativeCFG) cm);
-			}
+			Set<CompilationUnit> seen = new HashSet<>();
+			for (CompilationUnit unit : units)
+				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit))
+					if (seen.add(unit))
+						// we inspect only the ones of the current unit
+						for (CodeMember cm : cu.getInstanceCodeMembers(false))
+							checkMember(call, types, targets, natives, aliasing, cm, true);
 		}
+	}
+
+	/**
+	 * Checks if the given code member {@code cm} is a candidate target for the
+	 * given call, and proceeds to add it to the set of targets if it is.
+	 * Aliasing information is used here to match code members that have been
+	 * aliased and that can be targeted by calls that refer to other names.
+	 * 
+	 * @param call     the call to match
+	 * @param types    the runtime types of the parameters of the call
+	 * @param targets  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     call
+	 * @param natives  the list of targets that, after the execution of this
+	 *                     method, will contain the {@link NativeCFG}s targeted
+	 *                     by the call
+	 * @param aliasing the symbol aliasing information
+	 * @param cm       the code member to match
+	 * @param instance whether or not the only instance or non-instance members
+	 *                     should be matched
+	 */
+	protected void checkMember(
+			UnresolvedCall call,
+			ExternalSet<Type>[] types,
+			Collection<ImplementedCFG> targets,
+			Collection<NativeCFG> natives,
+			SymbolAliasing aliasing,
+			CodeMember cm,
+			boolean instance) {
+		CFGDescriptor descr = cm.getDescriptor();
+		if (instance != descr.isInstance())
+			return;
+
+		String qualifier = descr.getUnit().getName();
+		String name = descr.getName();
+
+		Aliases nAlias = aliasing.getState(new NameSymbol(name));
+		Aliases qAlias = aliasing.getState(new QualifierSymbol(qualifier));
+		Aliases qnAlias = aliasing.getState(new QualifiedNameSymbol(qualifier, name));
+
+		boolean add = false;
+		// we first check the qualified name, then the qualifier and the
+		// name individually
+		if (!qnAlias.isEmpty()) {
+			for (QualifiedNameSymbol alias : qnAlias.castElements(QualifiedNameSymbol.class))
+				if (matchCodeMemberName(call, alias.getQualifier(), alias.getName())) {
+					add = true;
+					break;
+				}
+		}
+
+		if (!add && !qAlias.isEmpty()) {
+			for (QualifierSymbol alias : qAlias.castElements(QualifierSymbol.class))
+				if (matchCodeMemberName(call, alias.getQualifier(), name)) {
+					add = true;
+					break;
+				}
+		}
+
+		if (!add && !nAlias.isEmpty()) {
+			for (NameSymbol alias : nAlias.castElements(NameSymbol.class))
+				if (matchCodeMemberName(call, qualifier, alias.getName())) {
+					add = true;
+					break;
+				}
+		}
+
+		if (!add)
+			add = matchCodeMemberName(call, qualifier, name);
+
+		if (add && call.getMatchingStrategy().matches(call, descr.getFormals(), call.getParameters(), types))
+			add(targets, natives, cm);
+	}
+
+	private void add(Collection<ImplementedCFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
+		if (cm instanceof ImplementedCFG)
+			targets.add((ImplementedCFG) cm);
+		else
+			natives.add((NativeCFG) cm);
 	}
 
 	/**
 	 * Matches the name (qualifier + target name) of the given call against the
 	 * given code member.
 	 * 
-	 * @param call the call to match
-	 * @param cm   the code member being matched
+	 * @param call      the call to match
+	 * @param qualifier the qualifier (name of the defining unit) of the code
+	 *                      member
+	 * @param name      the name of the code member
 	 * 
-	 * @return {@code true} if the name of {@code cm} is compatible with the one
-	 *             of the call's target
+	 * @return {@code true} if the qualifier and name are compatible with the
+	 *             ones of the call's target
 	 */
-	protected boolean matchCFGName(UnresolvedCall call, CodeMember cm) {
-		if (!cm.getDescriptor().getName().equals(call.getTargetName()))
+	protected boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
+		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))
 			return true;
-		return cm.getDescriptor().getUnit().getName().equals(call.getQualifier());
+		return qualifier.equals(call.getQualifier());
 	}
 
 	/**
-	 * Returns all the possible types of the given expression, that is a
-	 * receiver of a method call. How we choose this set varies from the call
-	 * graph algorithm we decide to adopt (e.g., CHA, RTA, 0-CFA, ...)
+	 * Returns all the possible types of the given expression that should be
+	 * considered as possible receivers of the call. How we choose this set
+	 * varies from the call graph algorithm we decide to adopt (e.g., CHA, RTA,
+	 * 0-CFA, ...)
 	 * 
 	 * @param receiver an expression
+	 * @param types    the runtime types of the receiver
 	 * 
-	 * @return the possible types of the given expression
+	 * @return the possible types to use as receivers
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver) throws CallResolutionException;
+	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+			throws CallResolutionException;
 
 	@Override
 	public Collection<CodeMember> getCallees(CodeMember cm) {
@@ -235,11 +491,5 @@ public abstract class BaseCallGraph extends Graph<BaseCallGraph, CallGraphNode, 
 	@Override
 	public Collection<Call> getCallSites(CodeMember cm) {
 		return callsites.getOrDefault(cm, Collections.emptyList());
-	}
-
-	@Override
-	protected DotGraph<CallGraphNode, CallGraphEdge, BaseCallGraph> toDot(
-			Function<CallGraphNode, String> labelGenerator) {
-		throw new UnsupportedOperationException();
 	}
 }

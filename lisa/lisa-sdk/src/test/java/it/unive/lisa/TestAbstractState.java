@@ -10,7 +10,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
 public class TestAbstractState extends BaseLattice<TestAbstractState>
-		implements AbstractState<TestAbstractState, TestHeapDomain, TestValueDomain> {
+		implements AbstractState<TestAbstractState, TestHeapDomain, TestValueDomain, TestTypeDomain> {
 
 	public TestAbstractState(TestHeapDomain heap, TestValueDomain value) {
 	}
@@ -114,6 +114,16 @@ public class TestAbstractState extends BaseLattice<TestAbstractState>
 
 	@Override
 	public String toString() {
+		return null;
+	}
+
+	@Override
+	public TestTypeDomain getTypeState() {
+		return null;
+	}
+
+	@Override
+	public DomainRepresentation typeRepresentation() {
 		return null;
 	}
 }

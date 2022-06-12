@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -31,47 +32,44 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	/**
 	 * Builds the open call, happening at the given location in the program.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance cfg of a
-	 *                         unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this open call
-	 * @param parameters   the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this open call
+	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
-			String targetName,
+
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, parameters);
 	}
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance cfg of a
-	 *                         unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this open call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param parameters   the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this open call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param parameters the parameters of this call
 	 */
-	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
-			String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName, order,
 				Untyped.INSTANCE,
 				parameters);
 	}
@@ -81,49 +79,46 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance cfg of a
-	 *                         unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this open call
-	 * @param parameters   the parameters of this call
-	 * @param staticType   the static type of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this open call
+	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
-			String targetName,
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		this(cfg, location, instanceCall, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
+		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, staticType,
 				parameters);
 	}
 
 	/**
 	 * Builds the open call, happening at the given location in the program.
 	 * 
-	 * @param cfg          the cfg that this expression belongs to
-	 * @param location     the location where the expression is defined within
-	 *                         the program
-	 * @param instanceCall whether or not this is a call to an instance cfg of a
-	 *                         unit (that can be overridden) or not
-	 * @param qualifier    the optional qualifier of the call (can be null or
-	 *                         empty - see {@link #getFullTargetName()} for more
-	 *                         info)
-	 * @param targetName   the name of the target of this open call
-	 * @param order        the evaluation order of the sub-expressions
-	 * @param parameters   the parameters of this call
-	 * @param staticType   the static type of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this open call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param parameters the parameters of this call
+	 * @param staticType the static type of this call
 	 */
-	public OpenCall(ImplementedCFG cfg, CodeLocation location, boolean instanceCall, String qualifier,
-			String targetName,
+
+	public OpenCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Type staticType, Expression... parameters) {
 		// if a call is open we don't really care if it's instance or not and we
 		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, instanceCall, qualifier, targetName, order,
+		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName, order,
 				staticType,
 				parameters);
 	}
@@ -135,7 +130,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 * @param source the unresolved call to copy
 	 */
 	public OpenCall(UnresolvedCall source) {
-		this(source.getCFG(), source.getLocation(), source.isInstanceCall(), source.getQualifier(),
+		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(),
 				source.getTargetName(), source.getOrder(), source.getStaticType(), source.getParameters());
 	}
 
@@ -146,16 +141,17 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		return new Variable(getRuntimeTypes(), "open_call_ret_value@" + getLocation(), getLocation());
+		return new Variable(getStaticType(), "open_call_ret_value@" + getLocation(), getLocation());
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V>,
+	protected <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> compute(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					StatementStore<A, H, V> expressions,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(
+					AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					StatementStore<A, H, V, T> expressions,
 					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);

@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -16,6 +17,7 @@ import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 
 /**
@@ -44,21 +46,23 @@ public class IMPNewArray extends NaryExpression {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> state,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
 					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V> expressions)
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		HeapAllocation alloc = new HeapAllocation(getRuntimeTypes(), getLocation());
-		AnalysisState<A, H, V> sem = state.smallStepSemantics(alloc, this);
+		HeapAllocation alloc = new HeapAllocation(getStaticType(), getLocation());
+		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
-		AnalysisState<A, H, V> result = state.bottom();
+		AnalysisState<A, H, V, T> result = state.bottom();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			HeapReference ref = new HeapReference(loc.getTypes(), loc, getLocation());
-			AnalysisState<A, H, V> refSem = sem.smallStepSemantics(ref, this);
+			HeapReference ref = new HeapReference(new ReferenceType(loc.getRuntimeTypes()), loc,
+					getLocation());
+			AnalysisState<A, H, V, T> refSem = sem.smallStepSemantics(ref, this);
 			result = result.lub(refSem);
 		}
 

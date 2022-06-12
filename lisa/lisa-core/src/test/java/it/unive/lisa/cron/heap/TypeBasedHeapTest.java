@@ -8,14 +8,18 @@ import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.TypeBasedHeap;
 import it.unive.lisa.analysis.numeric.Interval;
+import it.unive.lisa.analysis.value.TypeDomain;
 import org.junit.Test;
 
 public class TypeBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testTypeBasedHeap() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true).setInferTypes(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, new TypeBasedHeap(), new Interval()));
+		LiSAConfiguration conf = new LiSAConfiguration().setDumpAnalysis(true)
+				.setAbstractState(getDefaultFor(AbstractState.class,
+						new TypeBasedHeap(),
+						new Interval(),
+						getDefaultFor(TypeDomain.class)));
 		perform("heap/type-based-heap", "program.imp", conf);
 	}
 }

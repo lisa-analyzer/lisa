@@ -1,19 +1,22 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.Unit;
-import it.unive.lisa.type.PointerType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.UnitType;
-import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.type.InMemoryType;
+import it.unive.lisa.type.PointerType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 
 /**
  * A type representing an IMP class defined in an IMP program. ClassTypes are
@@ -24,7 +27,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ClassType implements PointerType, UnitType {
+public final class ClassType implements InMemoryType, UnitType {
 
 	private static final Map<String, ClassType> types = new HashMap<>();
 
@@ -55,15 +58,15 @@ public final class ClassType implements PointerType, UnitType {
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(String name, CompilationUnit unit) {
+	public static ClassType lookup(String name, UnitWithSuperUnits unit) {
 		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
 	}
 
 	private final String name;
 
-	private final CompilationUnit unit;
+	private final UnitWithSuperUnits unit;
 
-	private ClassType(String name, CompilationUnit unit) {
+	private ClassType(String name, UnitWithSuperUnits unit) {
 		Objects.requireNonNull(name, "The name of a class type cannot be null");
 		Objects.requireNonNull(unit, "The unit of a class type cannot be null");
 		this.name = name;
@@ -71,7 +74,7 @@ public final class ClassType implements PointerType, UnitType {
 	}
 
 	@Override
-	public CompilationUnit getUnit() {
+	public UnitWithSuperUnits getUnit() {
 		return unit;
 	}
 

@@ -5,7 +5,6 @@ import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * An identifier of a program variable, representing either a program variable
@@ -32,21 +31,21 @@ public abstract class Identifier extends ValueExpression {
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param types    the runtime types of this expression
-	 * @param name     the name of the identifier
-	 * @param weak     whether or not this identifier is weak, meaning that it
-	 *                     should only receive weak assignments
-	 * @param location the code location of the statement that has generated
-	 *                     this identifier
+	 * @param staticType the static type of this expression
+	 * @param name       the name of the identifier
+	 * @param weak       whether or not this identifier is weak, meaning that it
+	 *                       should only receive weak assignments
+	 * @param location   the code location of the statement that has generated
+	 *                       this identifier
 	 */
-	protected Identifier(ExternalSet<Type> types, String name, boolean weak, CodeLocation location) {
-		this(types, name, weak, new Annotations(), location);
+	protected Identifier(Type staticType, String name, boolean weak, CodeLocation location) {
+		this(staticType, name, weak, new Annotations(), location);
 	}
 
 	/**
 	 * Builds the identifier.
 	 * 
-	 * @param types       the runtime types of this expression
+	 * @param staticType  the static type of this expression
 	 * @param name        the name of the identifier
 	 * @param weak        whether or not this identifier is weak, meaning that
 	 *                        it should only receive weak assignments
@@ -54,9 +53,9 @@ public abstract class Identifier extends ValueExpression {
 	 * @param location    the code location of the statement that has generated
 	 *                        this identifier
 	 */
-	protected Identifier(ExternalSet<Type> types, String name, boolean weak, Annotations annotations,
+	protected Identifier(Type staticType, String name, boolean weak, Annotations annotations,
 			CodeLocation location) {
-		super(types, location);
+		super(staticType, location);
 		this.name = name;
 		this.weak = weak;
 		this.annotations = annotations;

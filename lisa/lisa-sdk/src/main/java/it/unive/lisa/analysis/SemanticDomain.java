@@ -394,4 +394,29 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @return the representation
 	 */
 	DomainRepresentation representation();
+
+	/**
+	 * Yields the instance of a specific domain, of class {@code domain},
+	 * contained inside the domain. If this domain is an instance of the
+	 * specified class, then {@code this} is returned. Otherwise, inner domains
+	 * are recursively checked (enabling retrieval of semantic domains through
+	 * Cartesian products or other types of combinations), returning the first
+	 * that is instance of {@code domain}.<br>
+	 * <br>
+	 * The default implementation of this method returns {@code this} if
+	 * {@code domain.isAssignableFrom(getClass()) == true}, otherwise it returns
+	 * {@code null}.
+	 * 
+	 * @param <T>    the type of domain to retrieve
+	 * @param domain the class of the domain instance to retrieve
+	 * 
+	 * @return the instance of that domain, or {@code null}
+	 */
+	@SuppressWarnings("unchecked")
+	default <T> T getDomainInstance(Class<T> domain) {
+		if (domain.isAssignableFrom(getClass()))
+			return (T) this;
+
+		return null;
+	}
 }

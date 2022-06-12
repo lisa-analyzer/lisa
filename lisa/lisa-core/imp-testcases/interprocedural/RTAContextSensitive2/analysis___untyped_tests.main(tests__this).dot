@@ -1,0 +1,22 @@
+digraph {
+	"node0" [shape="rect",color="black",label=<a = new A()<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ <BR/>[stack: _|_] ]]<BR/>}} -&gt; [a]>];
+	"node1" [shape="rect",color="gray",label=<top = helper(this, one, a)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: +<BR/>top: +<BR/>[stack: +] ]]<BR/>}} -&gt; [top]>];
+	"node2" [shape="rect",color="black",peripheries="2",label=<ret<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: +<BR/>top: +<BR/>[stack: _|_] ]]<BR/>}} -&gt; [skip]>];
+	"node3" [shape="rect",color="gray",label=<positive = identity(a, one)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ one: +<BR/>positive: +<BR/>[stack: +] ]]<BR/>}} -&gt; [positive]>];
+	"node4" [shape="rect",color="gray",label=<minusone = -1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>one: +<BR/>positive: +<BR/>[stack: -] ]]<BR/>}} -&gt; [minusone]>];
+	"node5" [shape="rect",color="gray",label=<one = 1<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ one: +<BR/>[stack: +] ]]<BR/>}} -&gt; [one]>];
+	"node6" [shape="rect",color="gray",label=<negative = identity(a, minusone)<BR/>{{<BR/>heap [[ monolith ]]<BR/>value [[ minusone: -<BR/>negative: -<BR/>one: +<BR/>positive: +<BR/>[stack: -] ]]<BR/>}} -&gt; [negative]>];
+	"node1" -> "node2" [color="black"];
+	"node3" -> "node4" [color="black"];
+	"node4" -> "node6" [color="black"];
+	"node5" -> "node3" [color="black"];
+	"node6" -> "node1" [color="black"];
+	"node0" -> "node5" [color="black"];
+subgraph cluster_legend {
+	label="Legend";
+	style=dotted;
+	node [shape=plaintext];
+	"legend" [label=<<table border="0" cellpadding="2" cellspacing="0" cellborder="0"><tr><td align="right">node border&nbsp;</td><td align="left"><font color="gray">gray</font>, single</td></tr><tr><td align="right">entrypoint border&nbsp;</td><td align="left"><font color="black">black</font>, single</td></tr><tr><td align="right">exitpoint border&nbsp;</td><td align="left"><font color="black">black</font>, double</td></tr><tr><td align="right">sequential edge&nbsp;</td><td align="left"><font color="black">black</font>, solid</td></tr><tr><td align="right">true edge&nbsp;</td><td align="left"><font color="blue">blue</font>, dashed</td></tr><tr><td align="right">false edge&nbsp;</td><td align="left"><font color="red">red</font>, dashed</td></tr></table>>];
+}
+
+}

@@ -8,7 +8,7 @@ import it.unive.lisa.program.Unit;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public interface UnitType extends Type {
+public interface UnitType extends InMemoryType {
 
 	/**
 	 * Yields the {@link Unit} that induces this type.

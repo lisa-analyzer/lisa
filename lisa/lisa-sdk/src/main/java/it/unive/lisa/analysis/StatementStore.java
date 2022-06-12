@@ -2,6 +2,7 @@ package it.unive.lisa.analysis;
 
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Map;
@@ -16,16 +17,20 @@ import java.util.Map;
  * @param <A> the type of {@link AbstractState}
  * @param <H> the type of the {@link HeapDomain}
  * @param <V> the type of the {@link ValueDomain}
+ * @param <T> the type of {@link TypeDomain}
  */
-public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDomain<H>, V extends ValueDomain<V>>
-		extends FunctionalLattice<StatementStore<A, H, V>, Statement, AnalysisState<A, H, V>> {
+public class StatementStore<A extends AbstractState<A, H, V, T>,
+		H extends HeapDomain<H>,
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		extends FunctionalLattice<StatementStore<A, H, V, T>, Statement, AnalysisState<A, H, V, T>> {
 
 	/**
 	 * Builds the store.
 	 * 
 	 * @param state an instance of the underlying lattice
 	 */
-	public StatementStore(AnalysisState<A, H, V> state) {
+	public StatementStore(AnalysisState<A, H, V, T> state) {
 		super(state);
 	}
 
@@ -34,7 +39,7 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	 * 
 	 * @param state an instance of the underlying lattice
 	 */
-	private StatementStore(AnalysisState<A, H, V> state, Map<Statement, AnalysisState<A, H, V>> function) {
+	private StatementStore(AnalysisState<A, H, V, T> state, Map<Statement, AnalysisState<A, H, V, T>> function) {
 		super(state, function);
 	}
 
@@ -48,12 +53,21 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	 * 
 	 * @return the previous state mapped to {@code expression}, or {@code null}
 	 */
-	public AnalysisState<A, H, V> put(Statement st, AnalysisState<A, H, V> state) {
+	public AnalysisState<A, H, V, T> put(Statement st, AnalysisState<A, H, V, T> state) {
 		return function.put(st, state);
 	}
 
+	/**
+	 * Removes the stored state for the given statement.
+	 * 
+	 * @param st the statement whose state needs to be forgotten
+	 */
+	public void forget(Statement st) {
+		function.remove(st);
+	}
+
 	@Override
-	public StatementStore<A, H, V> top() {
+	public StatementStore<A, H, V, T> top() {
 		return new StatementStore<>(lattice.top());
 	}
 
@@ -63,7 +77,7 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	}
 
 	@Override
-	public StatementStore<A, H, V> bottom() {
+	public StatementStore<A, H, V, T> bottom() {
 		return new StatementStore<>(lattice.bottom());
 	}
 
@@ -73,8 +87,8 @@ public class StatementStore<A extends AbstractState<A, H, V>, H extends HeapDoma
 	}
 
 	@Override
-	protected StatementStore<A, H, V> mk(AnalysisState<A, H, V> lattice,
-			Map<Statement, AnalysisState<A, H, V>> function) {
+	protected StatementStore<A, H, V, T> mk(AnalysisState<A, H, V, T> lattice,
+			Map<Statement, AnalysisState<A, H, V, T>> function) {
 		return new StatementStore<>(lattice, function);
 	}
 }

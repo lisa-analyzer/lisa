@@ -1,10 +1,13 @@
 package it.unive.lisa.interprocedural.callgraph;
 
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 
 /**
@@ -29,14 +32,17 @@ public interface CallGraph {
 	 * Yields a {@link Call} implementation that corresponds to the resolution
 	 * of the given {@link UnresolvedCall}.
 	 * 
-	 * @param call the call to resolve
+	 * @param call     the call to resolve
+	 * @param types    the runtime types of the parameters of the call
+	 * @param aliasing the symbol aliasing information
 	 * 
 	 * @return a collection of all the possible runtime targets
 	 * 
 	 * @throws CallResolutionException if this call graph is unable to resolve
 	 *                                     the given call
 	 */
-	Call resolve(UnresolvedCall call) throws CallResolutionException;
+	Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+			throws CallResolutionException;
 
 	/**
 	 * Registers an already resolved {@link CFGCall} in this {@link CallGraph}.

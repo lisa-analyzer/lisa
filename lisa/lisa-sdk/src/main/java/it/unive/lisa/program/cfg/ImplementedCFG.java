@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.outputs.DotCFG;
@@ -253,15 +254,16 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V>,
+	public final <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+					AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter)
 					throws FixpointException {
-		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
+		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, widenAfter);
 	}
@@ -311,14 +313,15 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V>,
+	public final <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V> entryState,
-					InterproceduralAnalysis<A, H, V> interprocedural,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+					Collection<Statement> entrypoints, AnalysisState<A, H, V, T> entryState,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter) throws FixpointException {
-		Map<Statement, AnalysisState<A, H, V>> start = new HashMap<>();
+		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, widenAfter);
 	}
@@ -370,61 +373,63 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V>,
+	public final <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> CFGWithAnalysisResults<A, H, V> fixpoint(
-					AnalysisState<A, H, V> singleton,
-					Map<Statement, AnalysisState<A, H, V>> startingPoints,
-					InterproceduralAnalysis<A, H, V> interprocedural,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+					AnalysisState<A, H, V, T> singleton,
+					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter)
 					throws FixpointException {
 
 		Fixpoint<ImplementedCFG, Statement, Edge,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> fix = new Fixpoint<>(this);
-		Map<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> starting = new HashMap<>();
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fix = new Fixpoint<>(this);
+		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> starting = new HashMap<>();
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
-		Map<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> fixpoint = fix.fixpoint(starting, ws,
+		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
 				new CFGFixpoint<>(widenAfter, interprocedural));
 
-		HashMap<Statement, AnalysisState<A, H, V>> finalResults = new HashMap<>(fixpoint.size());
-		for (Entry<Statement, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> e : fixpoint.entrySet()) {
+		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
+		for (Entry<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> e : fixpoint.entrySet()) {
 			finalResults.put(e.getKey(), e.getValue().getLeft());
-			for (Entry<Statement, AnalysisState<A, H, V>> ee : e.getValue().getRight())
+			for (Entry<Statement, AnalysisState<A, H, V, T>> ee : e.getValue().getRight())
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
 		return new CFGWithAnalysisResults<>(this, singleton, startingPoints, finalResults);
 	}
 
-	private final class CFGFixpoint<A extends AbstractState<A, H, V>,
+	private final class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>>
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>>
 			implements FixpointImplementation<Statement, Edge,
-					Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>>> {
+					Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> {
 
-		private final InterproceduralAnalysis<A, H, V> interprocedural;
+		private final InterproceduralAnalysis<A, H, V, T> interprocedural;
 		private final int widenAfter;
 		private final Map<Statement, Integer> lubs;
 
-		private CFGFixpoint(int widenAfter, InterproceduralAnalysis<A, H, V> interprocedural) {
+		private CFGFixpoint(int widenAfter, InterproceduralAnalysis<A, H, V, T> interprocedural) {
 			this.widenAfter = widenAfter;
 			this.interprocedural = interprocedural;
 			this.lubs = new HashMap<>(ImplementedCFG.this.getNodesCount());
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> semantics(Statement node,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
-			StatementStore<A, H, V> expressions = new StatementStore<>(entrystate.getLeft().bottom());
-			AnalysisState<A, H, V> approx = node.semantics(entrystate.getLeft(), interprocedural, expressions);
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> semantics(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> entrystate) throws SemanticException {
+			StatementStore<A, H, V, T> expressions = new StatementStore<>(entrystate.getLeft().bottom());
+			AnalysisState<A, H, V, T> approx = node.semantics(entrystate.getLeft(), interprocedural, expressions);
 			return Pair.of(approx, expressions);
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> traverse(Edge edge,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> entrystate) throws SemanticException {
-			AnalysisState<A, H, V> approx = edge.traverse(entrystate.getLeft());
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> traverse(Edge edge,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> entrystate) throws SemanticException {
+			AnalysisState<A, H, V, T> approx = edge.traverse(entrystate.getLeft());
 
 			// we remove out of scope variables here
 			List<VariableTableEntry> toRemove = new LinkedList<>();
@@ -446,18 +451,18 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> union(Statement node,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> left,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> right) throws SemanticException {
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> union(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> left,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> right) throws SemanticException {
 			return Pair.of(left.getLeft().lub(right.getLeft()), left.getRight().lub(right.getRight()));
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> join(Statement node,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
-			AnalysisState<A, H, V> newApprox = approx.getLeft(), oldApprox = old.getLeft();
-			StatementStore<A, H, V> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> join(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
+			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
 
 			if (widenAfter == 0) {
 				newApprox = newApprox.lub(oldApprox);
@@ -481,8 +486,8 @@ public class ImplementedCFG extends Graph<ImplementedCFG, Statement, Edge> imple
 		}
 
 		@Override
-		public boolean equality(Statement node, Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> approx,
-				Pair<AnalysisState<A, H, V>, StatementStore<A, H, V>> old) throws SemanticException {
+		public boolean equality(Statement node, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
 			return approx.getLeft().lessOrEqual(old.getLeft()) && approx.getRight().lessOrEqual(old.getRight());
 		}
 	}

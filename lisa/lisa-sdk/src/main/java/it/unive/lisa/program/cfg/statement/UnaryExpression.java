@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -101,15 +102,16 @@ public abstract class UnaryExpression extends NaryExpression {
 	}
 
 	@Override
-	public final <A extends AbstractState<A, H, V>,
+	public final <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> expressionSemantics(
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> state,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> expressionSemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
 					ExpressionSet<SymbolicExpression>[] params,
-					StatementStore<A, H, V> expressions)
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V> result = state.bottom();
+		AnalysisState<A, H, V, T> result = state.bottom();
 		for (SymbolicExpression expr : params[0])
 			result = result.lub(unarySemantics(interprocedural, state, expr, expressions));
 		return result;
@@ -123,6 +125,7 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
 	 * @param <V>             the type of the {@link ValueDomain}
+	 * @param <T>             the type of {@link TypeDomain}
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the expression is to be evaluated
@@ -138,12 +141,13 @@ public abstract class UnaryExpression extends NaryExpression {
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <A extends AbstractState<A, H, V>,
+	protected abstract <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> unarySemantics(
-					InterproceduralAnalysis<A, H, V> interprocedural,
-					AnalysisState<A, H, V> state,
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
 					SymbolicExpression expr,
-					StatementStore<A, H, V> expressions)
+					StatementStore<A, H, V, T> expressions)
 					throws SemanticException;
 }

@@ -3,9 +3,9 @@ package it.unive.lisa.analysis.types;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.nonrelational.inference.BaseInferredValue;
-import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
+import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
@@ -37,13 +37,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class InferredTypes extends BaseInferredValue<InferredTypes> {
+public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes TOP = new InferredTypes(Caches.types().mkUniversalSet());
 
 	private static final InferredTypes BOTTOM = new InferredTypes(Caches.types().mkEmptySet());
-
-	private static final InferredPair<InferredTypes> BOTTOM_PAIR = new InferredPair<>(BOTTOM, BOTTOM, BOTTOM);
 
 	private final ExternalSet<Type> elements;
 
@@ -52,7 +50,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	 * represents an empty set of types.
 	 */
 	public InferredTypes() {
-		this(Caches.types().mkEmptySet());
+		this(Caches.types().mkUniversalSet());
 	}
 
 	/**
@@ -74,12 +72,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		this.elements = types;
 	}
 
-	/**
-	 * Yields the {@link ExternalSet} containing the types held by this
-	 * instance.
-	 * 
-	 * @return the set of types inside this instance
-	 */
+	@Override
 	public ExternalSet<Type> getRuntimeTypes() {
 		return elements;
 	}
@@ -90,8 +83,18 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
+	public boolean isTop() {
+		return super.isTop() || elements.equals(TOP.elements);
+	}
+
+	@Override
 	public InferredTypes bottom() {
 		return BOTTOM;
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() || elements.equals(BOTTOM.elements);
 	}
 
 	@Override
@@ -105,66 +108,60 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 		return new SetRepresentation(elements, StringRepresentation::new);
 	}
 
-	private InferredPair<InferredTypes> mk(InferredTypes types) {
-		return new InferredPair<>(this, types, BOTTOM);
-	}
-
 	@Override
-	protected InferredPair<InferredTypes> evalIdentifier(Identifier id, InferenceSystem<InferredTypes> environment,
+	protected InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
-		InferredPair<InferredTypes> eval = super.evalIdentifier(id, environment, pp);
-		if (!eval.getInferred().isTop() && !eval.getInferred().isBottom())
+		InferredTypes eval = super.evalIdentifier(id, environment, pp);
+		if (!eval.isTop() && !eval.isBottom())
 			return eval;
-		return mk(new InferredTypes(id.getTypes()));
+		return new InferredTypes(id.getRuntimeTypes());
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalPushAny(PushAny pushAny, InferredTypes state, ProgramPoint pp) {
-		return mk(new InferredTypes(pushAny.getTypes()));
+	protected InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+		return new InferredTypes(pushAny.getRuntimeTypes());
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalNullConstant(InferredTypes state, ProgramPoint pp) {
-		return mk(new InferredTypes(NullType.INSTANCE));
+	protected InferredTypes evalNullConstant(ProgramPoint pp) {
+		return new InferredTypes(NullType.INSTANCE);
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalNonNullConstant(Constant constant, InferredTypes state, ProgramPoint pp) {
-		return mk(new InferredTypes(constant.getDynamicType()));
+	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+		return new InferredTypes(constant.getDynamicType());
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
-			InferredTypes state, ProgramPoint pp) {
+	protected InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
+			ProgramPoint pp) {
 		ExternalSet<Type> inferred = operator.typeInference(arg.elements);
 		if (inferred.isEmpty())
-			return BOTTOM_PAIR;
-		return mk(new InferredTypes(inferred));
+			return BOTTOM;
+		return new InferredTypes(inferred);
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalBinaryExpression(BinaryOperator operator, InferredTypes left,
-			InferredTypes right, InferredTypes state,
-			ProgramPoint pp) {
+	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left,
+			InferredTypes right, ProgramPoint pp) {
 		ExternalSet<Type> inferred = operator.typeInference(left.elements, right.elements);
 		if (inferred.isEmpty())
-			return BOTTOM_PAIR;
-		return mk(new InferredTypes(inferred));
+			return BOTTOM;
+		return new InferredTypes(inferred);
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalTernaryExpression(TernaryOperator operator, InferredTypes left,
-			InferredTypes middle,
-			InferredTypes right, InferredTypes state, ProgramPoint pp) {
+	protected InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left,
+			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
 		ExternalSet<Type> inferred = operator.typeInference(left.elements, middle.elements, right.elements);
 		if (inferred.isEmpty())
-			return BOTTOM_PAIR;
-		return mk(new InferredTypes(inferred));
+			return BOTTOM;
+		return new InferredTypes(inferred);
 	}
 
 	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
-			InferredTypes right, InferredTypes state, ProgramPoint pp) {
+			InferredTypes right, ProgramPoint pp) {
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE) {
 			if (!left.elements.allMatch(Type::isTypeTokenType) || !right.elements.allMatch(Type::isTypeTokenType))
 				// if there is at least one element that is not a type
@@ -195,7 +192,7 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 					return Satisfiability.UNKNOWN;
 			}
 		} else if (operator == TypeCheck.INSTANCE) {
-			if (evalBinaryExpression(TypeCast.INSTANCE, left, right, state, pp).isBottom())
+			if (evalBinaryExpression(TypeCast.INSTANCE, left, right, pp).isBottom())
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
 			AtomicBoolean mightFail = new AtomicBoolean();
@@ -282,21 +279,21 @@ public class InferredTypes extends BaseInferredValue<InferredTypes> {
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
-			InferredTypes state, ProgramPoint pp) {
+	protected InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
+			ProgramPoint pp) {
 		ExternalSet<Type> inferred = cast.getOperator().typeInference(left.elements, right.elements);
 		if (inferred.isEmpty())
-			return BOTTOM_PAIR;
-		return mk(new InferredTypes(inferred));
+			return BOTTOM;
+		return new InferredTypes(inferred);
 	}
 
 	@Override
-	protected InferredPair<InferredTypes> evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
-			InferredTypes state, ProgramPoint pp) {
+	protected InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
+			ProgramPoint pp) {
 		ExternalSet<Type> inferred = conv.getOperator().typeInference(left.elements, right.elements);
 		if (inferred.isEmpty())
-			return BOTTOM_PAIR;
-		return mk(new InferredTypes(inferred));
+			return BOTTOM;
+		return new InferredTypes(inferred);
 	}
 
 	@Override

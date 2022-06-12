@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -32,19 +33,22 @@ public class ReturnTopPolicy implements OpenCallPolicy {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> apply(
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> apply(
 					OpenCall call,
-					AnalysisState<A, H, V> entryState,
+					AnalysisState<A, H, V, T> entryState,
 					ExpressionSet<SymbolicExpression>[] params)
 					throws SemanticException {
 
 		if (call.getStaticType().isVoidType())
 			return entryState.smallStepSemantics(new Skip(call.getLocation()), call);
-		else
-			return entryState.assign(new Variable(call.getRuntimeTypes(), RETURNED_VARIABLE_NAME, call.getLocation()),
-					new PushAny(call.getRuntimeTypes(), call.getLocation()), call);
+		else {
+			PushAny pushany = new PushAny(call.getStaticType(), call.getLocation());
+			Variable var = new Variable(call.getStaticType(), RETURNED_VARIABLE_NAME, call.getLocation());
+			return entryState.assign(var, pushany, call);
+		}
 	}
 
 }

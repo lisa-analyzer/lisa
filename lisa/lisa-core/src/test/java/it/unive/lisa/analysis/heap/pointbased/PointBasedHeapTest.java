@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -30,14 +29,13 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collections;
 import java.util.HashSet;
 import org.junit.Test;
 
 public class PointBasedHeapTest {
-	private final ExternalSet<Type> untyped = Caches.types().mkSingletonSet(Untyped.INSTANCE);
-	private final ExternalSet<Type> intType = Caches.types().mkSingletonSet(Int32.INSTANCE);
+	private final Type untyped = Untyped.INSTANCE;
+	private final Type intType = Int32.INSTANCE;
 
 	private final CodeLocation loc1 = new SourceCodeLocation("fake", 1, 1);
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);
@@ -104,7 +102,7 @@ public class PointBasedHeapTest {
 				one, fakeProgramPoint);
 
 		// constants do not affect heap abstract domain
-		assertEquals(assignResult, topHeap);
+		assertEquals(topHeap, assignResult);
 
 		assignResult = topHeap.assign(x,
 				new BinaryExpression(intType, one, zero, NumericNonOverflowingAdd.INSTANCE, fakeLocation),
@@ -122,7 +120,7 @@ public class PointBasedHeapTest {
 
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1), false);
 		HeapEnvironment<AllocationSites> expectedEnv = emptyHeapEnv.putState(x, xSites);
-		assertEquals(xAssign, new PointBasedHeap(expectedEnv));
+		assertEquals(new PointBasedHeap(expectedEnv), xAssign);
 
 		// from x -> pp1, assignment x = *(pp2)
 		// expected: x -> pp2
@@ -363,20 +361,6 @@ public class PointBasedHeapTest {
 	}
 
 	@Test
-	public void testRepresentation() throws SemanticException {
-		assertEquals(topHeap.representation().toString(), "#TOP#");
-		assertEquals(bottomHeap.representation().toString(), "_|_");
-		assertEquals(emptyHeap.representation().toString(), "[]");
-
-		PointBasedHeap result = topHeap.assign(x,
-				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
-				pp1);
-
-		assertEquals(result.representation().toString(), "[heap[w]:pp@'fake':1:1]");
-	}
-
-	@Test
 	public void testPushScope() throws SemanticException {
 		ScopeToken token = new ScopeToken(new CodeElement() {
 
@@ -427,7 +411,7 @@ public class PointBasedHeapTest {
 				pp1);
 
 		// [scoped]x -> pp1 popScope = x -> pp1
-		assertEquals(xScopedAssign.popScope(token), xAssign);
+		assertEquals(xAssign, xScopedAssign.popScope(token));
 
 		// x -> pp1 popScope = empty environment
 		assertEquals(xAssign.popScope(token), emptyHeap);
@@ -442,12 +426,12 @@ public class PointBasedHeapTest {
 		// x.y rewritten in x -> pp1 = pp1
 		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
 
-		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(alloc1);
-		assertEquals(xAssign.rewrite(accessChild, fakeProgramPoint), expectedRewritten);
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<>(alloc1);
+		assertEquals(expectedRewritten, xAssign.rewrite(accessChild, fakeProgramPoint));
 
 		// y.x rewritten in x -> pp1 = empty set
 		accessChild = new AccessChild(untyped, y, x, loc1);
-		assertEquals(xAssign.rewrite(accessChild, fakeProgramPoint), new ExpressionSet<ValueExpression>());
+		assertEquals(new ExpressionSet<>(), xAssign.rewrite(accessChild, fakeProgramPoint));
 	}
 
 	@Test
@@ -457,13 +441,13 @@ public class PointBasedHeapTest {
 						new HeapAllocation(untyped, loc1), fakeLocation),
 				pp1);
 		// x rewritten in x -> pp1 = pp1
-		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<>(
 				new MemoryPointer(untyped, alloc1, fakeLocation));
 		assertEquals(xAssign.rewrite(x, fakeProgramPoint), expectedRewritten);
 
 		// y rewritten in x -> pp1 = {y}
 		// TODO to verify
-		assertEquals(xAssign.rewrite(y, fakeProgramPoint), new ExpressionSet<ValueExpression>(y));
+		assertEquals(xAssign.rewrite(y, fakeProgramPoint), new ExpressionSet<>(y));
 	}
 
 	@Test
@@ -472,9 +456,8 @@ public class PointBasedHeapTest {
 		HeapDereference deref = new HeapDereference(untyped, new HeapReference(untyped,
 				new HeapAllocation(untyped, loc1), loc1), loc1);
 
-		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<ValueExpression>(
-				new MemoryPointer(untyped, alloc1, fakeLocation));
-		assertEquals(topHeap.rewrite(deref, fakeProgramPoint), expectedRewritten);
+		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<>(alloc1);
+		assertEquals(expectedRewritten, topHeap.rewrite(deref, fakeProgramPoint));
 
 		// *(x) rewritten in x -> pp1 -> pp1
 		PointBasedHeap xAssign = topHeap.assign(x,
@@ -482,13 +465,12 @@ public class PointBasedHeapTest {
 						new HeapAllocation(untyped, loc1), fakeLocation),
 				pp1);
 		deref = new HeapDereference(untyped, x, loc1);
-		expectedRewritten = new ExpressionSet<ValueExpression>(
-				new MemoryPointer(untyped, alloc1, fakeLocation));
-		assertEquals(xAssign.rewrite(deref, fakeProgramPoint), expectedRewritten);
+		expectedRewritten = new ExpressionSet<>(alloc1);
+		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 
 		// *(y) rewritten in x -> pp1 -> empty set
 		deref = new HeapDereference(untyped, y, loc1);
-		expectedRewritten = new ExpressionSet<ValueExpression>();
-		assertEquals(xAssign.rewrite(deref, fakeProgramPoint), expectedRewritten);
+		expectedRewritten = new ExpressionSet<>();
+		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 	}
 }

@@ -59,16 +59,31 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
-			for (ValueExpression contRewritten : receiver)
-				if (contRewritten instanceof MemoryPointer) {
-					AllocationSite site = (AllocationSite) ((MemoryPointer) contRewritten).getReferencedLocation();
-					for (SymbolicExpression childRewritten : child)
-						result.add(new AllocationSite(expression.getTypes(), site.getLocationName(), childRewritten,
-								site.isWeak(),
-								site.getCodeLocation()));
+			for (ValueExpression rec : receiver)
+				if (rec instanceof MemoryPointer) {
+					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
+					populate(expression, child, result, site);
+				} else if (rec instanceof AllocationSite) {
+					AllocationSite site = (AllocationSite) rec;
+					populate(expression, child, result, site);
 				}
 
 			return new ExpressionSet<>(result);
+		}
+
+		protected void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
+				Set<ValueExpression> result, AllocationSite site) {
+			for (SymbolicExpression target : child) {
+				AllocationSite e = new AllocationSite(
+						expression.getStaticType(),
+						site.getLocationName(),
+						target,
+						site.isWeak(),
+						site.getCodeLocation());
+				if (expression.hasRuntimeTypes())
+					e.setRuntimeTypes(expression.getRuntimeTypes());
+				result.add(e);
+			}
 		}
 
 		@Override
@@ -76,12 +91,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				throws SemanticException {
 			String pp = expression.getCodeLocation().getCodeLocation();
 
+			boolean weak;
 			if (alreadyAllocated(pp) != null)
-				return new ExpressionSet<>(
-						new AllocationSite(expression.getTypes(), pp, true, expression.getCodeLocation()));
+				weak = true;
 			else
-				return new ExpressionSet<>(
-						new AllocationSite(expression.getTypes(), pp, false, expression.getCodeLocation()));
+				weak = false;
+			AllocationSite e = new AllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			if (expression.hasRuntimeTypes())
+				e.setRuntimeTypes(expression.getRuntimeTypes());
+			return new ExpressionSet<>(e);
 		}
 
 		private AllocationSite alreadyAllocated(String id) {

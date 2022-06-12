@@ -3,6 +3,8 @@ package it.unive.lisa.program.cfg.statement.call.resolution;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A resolution strategy that does not permit by-name (e.g. Python style)
@@ -13,12 +15,12 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
-	public final boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
+	public final boolean matches(Call call, Parameter[] formals, Expression[] actuals, ExternalSet<Type>[] types) {
 		if (formals.length != actuals.length)
 			return false;
 
 		for (int i = 0; i < formals.length; i++)
-			if (!matches(call, i, formals[i], actuals[i]))
+			if (!matches(call, i, formals[i], actuals[i], types[i]))
 				return false;
 
 		return true;
@@ -33,8 +35,10 @@ public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStr
 	 * @param pos    the position of the parameter being evaluated
 	 * @param formal the parameter definition of the cfg
 	 * @param actual the expression that is used as parameter
+	 * @param types  the runtome types of the actual parameter
 	 * 
 	 * @return {@code true} if and only if that condition holds
 	 */
-	protected abstract boolean matches(Call call, int pos, Parameter formal, Expression actual);
+	protected abstract boolean matches(Call call, int pos, Parameter formal, Expression actual,
+			ExternalSet<Type> types);
 }

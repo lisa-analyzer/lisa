@@ -1,17 +1,16 @@
 package it.unive.lisa.program.cfg.statement;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
 
 /**
  * An expression that is part of a statement of the program.
@@ -24,12 +23,6 @@ public abstract class Expression extends Statement {
 	 * The static type of this expression.
 	 */
 	private final Type staticType;
-
-	/**
-	 * The set of runtime types of this expression, only computed if type
-	 * inference is executed.
-	 */
-	private ExternalSet<Type> runtimeTypes;
 
 	/**
 	 * The statement (or expression) that contains this expression.
@@ -77,64 +70,6 @@ public abstract class Expression extends Statement {
 	 */
 	public final Type getStaticType() {
 		return staticType;
-	}
-
-	/**
-	 * Sets the runtime types of this expression.
-	 * 
-	 * @param runtimeTypes the set of concrete types that this expression can
-	 *                         have at runtime
-	 */
-	public final void setRuntimeTypes(ExternalSet<Type> runtimeTypes) {
-		if (runtimeTypes == null)
-			return;
-
-		if (this.runtimeTypes != null && (this.runtimeTypes == runtimeTypes || this.runtimeTypes.equals(runtimeTypes)))
-			return;
-
-		if (this.runtimeTypes != null && runtimeTypes.isEmpty())
-			this.runtimeTypes.clear();
-		else
-			this.runtimeTypes = runtimeTypes.copy();
-	}
-
-	/**
-	 * The concrete types that this expression can have at runtime. If type
-	 * inference has not been executed, this method returns a singleton set
-	 * containing the static type of this expression.
-	 * 
-	 * @return the set of runtime types
-	 */
-	public final ExternalSet<Type> getRuntimeTypes() {
-		if (runtimeTypes == null)
-			return Caches.types().mkSet(staticType.allInstances());
-		return runtimeTypes;
-	}
-
-	/**
-	 * Yields the dynamic type of this expression, that is, the most specific
-	 * common supertype of all its runtime types (available through
-	 * {@link #getRuntimeTypes()}.
-	 * 
-	 * @return the dynamic type of this expression
-	 */
-	public final Type getDynamicType() {
-		if (runtimeTypes == null || runtimeTypes.isEmpty())
-			// tweak 1: if runtime types have not been computed,
-			// the static type is for sure a sound dynamic type
-			// TODO: if runtime types are empty, this usually
-			// means that the expression is unreachable. How do
-			// we signal this situation?
-			return staticType;
-
-		ExternalSet<Type> runtimes = getRuntimeTypes();
-		return runtimes.reduce(runtimes.first(), (result, t) -> {
-			if (result.canBeAssignedTo(t))
-				return t;
-			if (t.canBeAssignedTo(result))
-				return result;
-			return t.commonSupertype(result);
-		});
 	}
 
 	/**

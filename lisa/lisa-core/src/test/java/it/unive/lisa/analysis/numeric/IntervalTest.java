@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ImplementedCFG;
@@ -49,10 +48,8 @@ public class IntervalTest {
 			return null;
 		}
 	};
-	private final Variable variable = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "x",
-			pp.getLocation());
-	private final Variable varAux = new Variable(Caches.types().mkSingletonSet(Int32.INSTANCE), "aux",
-			pp.getLocation());
+	private final Variable variable = new Variable(Int32.INSTANCE, "x", pp.getLocation());
+	private final Variable varAux = new Variable(Int32.INSTANCE, "aux", pp.getLocation());
 
 	@Test
 	public void testEvalConstant() {

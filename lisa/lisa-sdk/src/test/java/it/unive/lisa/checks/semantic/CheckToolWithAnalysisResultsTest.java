@@ -5,10 +5,12 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestAbstractState;
 import it.unive.lisa.TestHeapDomain;
+import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
@@ -35,6 +37,8 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -56,10 +60,6 @@ public class CheckToolWithAnalysisResultsTest {
 	private static final ImplementedCFG cfg2 = new ImplementedCFG(descriptor2);
 
 	private static final CallGraph fakeCallGraph = new CallGraph() {
-		@Override
-		public Call resolve(UnresolvedCall call) throws CallResolutionException {
-			return null;
-		}
 
 		@Override
 		public void registerCall(CFGCall call) {
@@ -81,6 +81,12 @@ public class CheckToolWithAnalysisResultsTest {
 
 		@Override
 		public Collection<Call> getCallSites(CodeMember cm) {
+			return null;
+		}
+
+		@Override
+		public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+				throws CallResolutionException {
 			return null;
 		}
 	};
@@ -114,7 +120,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testCopy() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
+				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -143,7 +149,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testSimpleFill() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
+				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -159,7 +165,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testDisjointWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
+				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -173,7 +179,7 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testDuplicateWarnings() {
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
+				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(Map.of(), fakeCallGraph);
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -190,21 +196,21 @@ public class CheckToolWithAnalysisResultsTest {
 	@Test
 	public void testResultRetrieval() {
 		AnalysisState<TestAbstractState, TestHeapDomain,
-				TestValueDomain> singleton = new AnalysisState<>(
+				TestValueDomain, TestTypeDomain> singleton = new AnalysisState<>(
 						new TestAbstractState(new TestHeapDomain(), new TestValueDomain()),
 						new ExpressionSet<>());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
+				TestValueDomain, TestTypeDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
 		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
+				TestValueDomain, TestTypeDomain> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		CheckToolWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain> tool = new CheckToolWithAnalysisResults<>(
+				TestValueDomain, TestTypeDomain> tool = new CheckToolWithAnalysisResults<>(
 						Map.of(cfg, Collections.singleton(res1), cfg2, Collections.singleton(res2)), fakeCallGraph);
 
 		assertEquals(res1, tool.getResultOf(cfg).iterator().next());

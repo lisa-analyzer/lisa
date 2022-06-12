@@ -546,16 +546,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return all;
 	}
 
-	/**
-	 * Yields {@code true} if and only if this unit is an instance of the given
-	 * one. This method works correctly even if {@link #validateAndFinalize()}
-	 * has not been called yet, and thus the if collection of instances of the
-	 * given unit is not yet available.
-	 * 
-	 * @param unit the other unit
-	 * 
-	 * @return {@code true} only if that condition holds
-	 */
+	@Override
 	public final boolean isInstanceOf(UnitWithSuperUnits unit) {
 		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
 				: superCompilationUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));

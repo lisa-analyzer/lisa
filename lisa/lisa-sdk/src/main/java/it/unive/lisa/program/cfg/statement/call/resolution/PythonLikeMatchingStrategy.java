@@ -1,9 +1,12 @@
 package it.unive.lisa.program.cfg.statement.call.resolution;
 
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * A Python-like matching strategy. Specifically, actual parameters are
@@ -56,21 +59,35 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 	}
 
 	@Override
-	public boolean matches(Call call, Parameter[] formals, Expression[] actuals) {
+	@SuppressWarnings("unchecked")
+	public boolean matches(Call call, Parameter[] formals, Expression[] actuals, ExternalSet<Type>[] types) {
 		Expression[] slots = new Expression[formals.length];
+		ExternalSet<Type>[] slotTypes = new ExternalSet[formals.length];
+
 		Expression[] defaults = new Expression[formals.length];
+		ExternalSet<Type>[] defaultTypes = new ExternalSet[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
-			if (def != null)
+			if (def != null) {
 				defaults[pos] = def;
+				defaultTypes[pos] = Caches.types().mkSet(def.getStaticType().allInstances());
+			}
 		}
 
-		Boolean logic = PythonLikeMatchingStrategy.pythonLogic(formals, actuals, actuals,
-				defaults, slots, false);
+		Boolean logic = PythonLikeMatchingStrategy.pythonLogic(
+				formals,
+				actuals,
+				actuals,
+				types,
+				defaults,
+				defaultTypes,
+				slots,
+				slotTypes,
+				false);
 		if (logic != null)
 			return logic;
 
-		return delegate.matches(call, formals, slots);
+		return delegate.matches(call, formals, slots, slotTypes);
 	}
 
 	/**
@@ -83,16 +100,24 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 	 * parameters from {@code given}, and lastly with default values from
 	 * {@code defaults}.
 	 * 
-	 * @param <T>      the type of elements in {@code slots}
-	 * @param <F>      the type of the element returned if the preparation fails
-	 * @param formals  the formal parameters
-	 * @param actuals  the actual parameters
-	 * @param given    the value to use for each parameter, positional or named
-	 * @param defaults the default values for each parameter if no explicit
-	 *                     value is provided
-	 * @param slots    the slots that represent final values to use as
-	 *                     parameters
-	 * @param failure  what to return in case of failure
+	 * @param <T>          the type of elements in {@code slots}
+	 * @param <F>          the type of the element returned if the preparation
+	 *                         fails
+	 * @param formals      the formal parameters
+	 * @param actuals      the actual parameters
+	 * @param given        the value to use for each parameter, positional or
+	 *                         named
+	 * @param givenTypes   the types of the value to use for each parameter,
+	 *                         positional or named
+	 * @param defaults     the default values for each parameter if no explicit
+	 *                         value is provided
+	 * @param defaultTypes the types of the default values for each parameter if
+	 *                         no explicit value is provided
+	 * @param slots        the slots that represent final values to use as
+	 *                         parameters
+	 * @param slotTypes    the types of the slots that represent final values to
+	 *                         use as parameters
+	 * @param failure      what to return in case of failure
 	 * 
 	 * @return {@code failure} if the preparation fails, {@code null} otherwise
 	 * 
@@ -100,7 +125,15 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 	 *          "https://docs.python.org/3/reference/expressions.html#calls">Python
 	 *          Language Reference: calls</a>
 	 */
-	public static <T, F> F pythonLogic(Parameter[] formals, Expression[] actuals, T[] given, T[] defaults, T[] slots,
+	public static <T, F> F pythonLogic(
+			Parameter[] formals,
+			Expression[] actuals,
+			T[] given,
+			ExternalSet<Type>[] givenTypes,
+			T[] defaults,
+			ExternalSet<Type>[] defaultTypes,
+			T[] slots,
+			ExternalSet<Type>[] slotTypes,
 			F failure) {
 		if (formals.length < actuals.length)
 			// too many arguments!
@@ -113,8 +146,10 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 		for (; pos < actuals.length; pos++)
 			if (actuals[pos] instanceof NamedParameterExpression)
 				break;
-			else
+			else {
 				slots[pos] = given[pos];
+				slotTypes[pos] = givenTypes[pos];
+			}
 
 		// second phase: keyword arguments
 		for (; pos < actuals.length; pos++) {
@@ -124,8 +159,10 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 					if (slots[i] != null)
 						// already filled -> TypeError
 						return failure;
-					else
+					else {
 						slots[i] = given[pos];
+						slotTypes[i] = givenTypes[pos];
+					}
 					break;
 				}
 		}
@@ -133,12 +170,13 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 		// third phase: default values
 		for (pos = 0; pos < slots.length; pos++)
 			if (slots[pos] == null) {
-				Expression def = formals[pos].getDefaultValue();
-				if (def == null)
+				if (defaults[pos] == null)
 					// unfilled and no default value -> TypeError
 					return failure;
-				else
+				else {
 					slots[pos] = defaults[pos];
+					slotTypes[pos] = defaultTypes[pos];
+				}
 			}
 
 		return null;

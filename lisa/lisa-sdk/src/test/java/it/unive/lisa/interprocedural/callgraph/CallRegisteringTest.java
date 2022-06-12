@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -15,11 +16,13 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import org.junit.Test;
 
@@ -33,9 +36,11 @@ public class CallRegisteringTest {
 		CallGraph cg = new BaseCallGraph() {
 
 			@Override
-			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver) throws CallResolutionException {
+			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+					throws CallResolutionException {
 				return receiver.getStaticType().allInstances();
 			}
+
 		};
 
 		Program p = new Program();
@@ -45,7 +50,7 @@ public class CallRegisteringTest {
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
 				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
 				SingleInheritanceTraversalStrategy.INSTANCE,
-				false, p.getName(), "cfg2");
+				CallType.STATIC, p.getName(), "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);
@@ -60,7 +65,8 @@ public class CallRegisteringTest {
 		p.validateAndFinalize();
 
 		cg.init(p);
-		CFGCall resolved = (CFGCall) cg.resolve(call);
+		@SuppressWarnings("unchecked")
+		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
 		cg.registerCall(resolved);
 
 		Collection<CodeMember> callees = cg.getCallees(cfg1);

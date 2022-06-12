@@ -46,4 +46,16 @@ public abstract class UnitWithSuperUnits extends Unit {
 	 *             of the call
 	 */
 	public abstract boolean addSuperUnit(UnitWithSuperUnits unit);
+
+	/**
+	 * Yields {@code true} if and only if this unit is an instance of the given
+	 * one. This method works correctly even if {@link #validateAndFinalize()}
+	 * has not been called yet, and thus the if collection of instances of the
+	 * given unit is not yet available.
+	 * 
+	 * @param unit the other unit
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
+	public abstract boolean isInstanceOf(UnitWithSuperUnits unit);
 }

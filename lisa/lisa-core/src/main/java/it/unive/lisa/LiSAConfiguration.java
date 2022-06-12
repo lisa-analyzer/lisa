@@ -12,17 +12,12 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -46,7 +41,7 @@ public class LiSAConfiguration {
 	/**
 	 * The collection of semantic checks to execute
 	 */
-	private final Collection<SemanticCheck<?, ?, ?>> semanticChecks;
+	private final Collection<SemanticCheck<?, ?, ?, ?>> semanticChecks;
 
 	/**
 	 * The callgraph to use during the analysis
@@ -56,30 +51,12 @@ public class LiSAConfiguration {
 	/**
 	 * The interprocedural analysis to use during the analysis
 	 */
-	private InterproceduralAnalysis<?, ?, ?> interproceduralAnalysis;
-
-	/**
-	 * The abstract state to run during the type inference
-	 */
-	private AbstractState<?, ?, ?> typeInferenceState;
-
-	/**
-	 * The function that, given a state computed during type inference, yield
-	 * the set of types computed for the processed {@link SymbolicExpression}.
-	 * This value will be considered as the set of runtime types for the
-	 * {@link Statement} that generated such expression.
-	 */
-	private Function<AbstractState<?, ?, ?>, ExternalSet<Type>> typeExtractor;
+	private InterproceduralAnalysis<?, ?, ?, ?> interproceduralAnalysis;
 
 	/**
 	 * The abstract state to run during the analysis
 	 */
-	private AbstractState<?, ?, ?> abstractState;
-
-	/**
-	 * Whether or not type inference should be executed before the analysis
-	 */
-	private boolean inferTypes;
+	private AbstractState<?, ?, ?, ?> abstractState;
 
 	/**
 	 * Whether or not the input cfgs should be dumped to dot format. This is
@@ -190,7 +167,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration addSemanticCheck(SemanticCheck<?, ?, ?> check) {
+	public LiSAConfiguration addSemanticCheck(SemanticCheck<?, ?, ?, ?> check) {
 		semanticChecks.add(check);
 		return this;
 	}
@@ -203,7 +180,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration addSemanticChecks(Collection<SemanticCheck<?, ?, ?>> checks) {
+	public LiSAConfiguration addSemanticChecks(Collection<SemanticCheck<?, ?, ?, ?>> checks) {
 		semanticChecks.addAll(checks);
 		return this;
 	}
@@ -229,33 +206,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration setInterproceduralAnalysis(InterproceduralAnalysis<?, ?, ?> analysis) {
+	public LiSAConfiguration setInterproceduralAnalysis(InterproceduralAnalysis<?, ?, ?, ?> analysis) {
 		this.interproceduralAnalysis = analysis;
-		return this;
-	}
-
-	/**
-	 * Sets the {@link AbstractState} to use for the type inference. Any
-	 * existing value is overwritten.
-	 * 
-	 * @param state         the abstract state to use
-	 * @param typeExtractor the function that, given a state computed during
-	 *                          type inference, yield the set of types computed
-	 *                          for the processed {@link SymbolicExpression}.
-	 *                          This value will be considered as the set of
-	 *                          runtime types for the {@link Statement} that
-	 *                          generated such expression.
-	 * 
-	 * @return the current (modified) configuration
-	 */
-	public LiSAConfiguration setTypeInferenceState(AbstractState<?, ?, ?> state,
-			Function<AbstractState<?, ?, ?>, ExternalSet<Type>> typeExtractor) {
-		this.typeInferenceState = state;
-		this.typeExtractor = typeExtractor;
-
-		if (state != null)
-			Objects.requireNonNull(typeExtractor, "A type extractor is needed for a custom type inference state");
-
 		return this;
 	}
 
@@ -267,23 +219,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the current (modified) configuration
 	 */
-	public LiSAConfiguration setAbstractState(AbstractState<?, ?, ?> state) {
+	public LiSAConfiguration setAbstractState(AbstractState<?, ?, ?, ?> state) {
 		this.abstractState = state;
-		return this;
-	}
-
-	/**
-	 * Sets whether or not runtime types should be inferred before executing the
-	 * semantic analysis. If type inference is not executed, the runtime types
-	 * of expressions will correspond to their static type.
-	 * 
-	 * @param inferTypes if {@code true}, type inference will be ran before the
-	 *                       semantic analysis
-	 * 
-	 * @return the current (modified) configuration
-	 */
-	public LiSAConfiguration setInferTypes(boolean inferTypes) {
-		this.inferTypes = inferTypes;
 		return this;
 	}
 
@@ -313,9 +250,6 @@ public class LiSAConfiguration {
 	 * each input {@link ImplementedCFG}s' structure, and whose nodes will
 	 * contain a textual representation of the results of the type inference on
 	 * each {@link Statement}.<br>
-	 * <br>
-	 * To decide whether or not the type inference should be executed, use
-	 * {@link #setInferTypes(boolean)}.<br>
 	 * <br>
 	 * To customize where the graphs should be generated, use
 	 * {@link #setWorkdir(String)}.
@@ -439,31 +373,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the interprocedural analysis for the analysis
 	 */
-	public InterproceduralAnalysis<?, ?, ?> getInterproceduralAnalysis() {
+	public InterproceduralAnalysis<?, ?, ?, ?> getInterproceduralAnalysis() {
 		return interproceduralAnalysis;
-	}
-
-	/**
-	 * Yields the {@link AbstractState} for the type inference. Might be
-	 * {@code null} if none was set. If this is not {@code null}, then
-	 * {@link #getTypeExtractor()} is not {@code null} either.
-	 * 
-	 * @return the abstract state for the type inference
-	 */
-	public AbstractState<?, ?, ?> getTypeInferenceState() {
-		return typeInferenceState;
-	}
-
-	/**
-	 * Yields the function that, given a state computed during type inference,
-	 * yield the set of types computed for the processed
-	 * {@link SymbolicExpression}. This value will be considered as the set of
-	 * runtime types for the {@link Statement} that generated such expression.
-	 * 
-	 * @return the function that is used to extract types
-	 */
-	public Function<AbstractState<?, ?, ?>, ExternalSet<Type>> getTypeExtractor() {
-		return typeExtractor;
 	}
 
 	/**
@@ -472,7 +383,7 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the abstract state for the analysis
 	 */
-	public AbstractState<?, ?, ?> getAbstractState() {
+	public AbstractState<?, ?, ?, ?> getAbstractState() {
 		return abstractState;
 	}
 
@@ -492,17 +403,8 @@ public class LiSAConfiguration {
 	 * 
 	 * @return the semantic checks
 	 */
-	public Collection<SemanticCheck<?, ?, ?>> getSemanticChecks() {
+	public Collection<SemanticCheck<?, ?, ?, ?>> getSemanticChecks() {
 		return semanticChecks;
-	}
-
-	/**
-	 * Yields whether or not type inference should be run.
-	 * 
-	 * @return {@code true} if type inference should be run
-	 */
-	public boolean isInferTypes() {
-		return inferTypes;
 	}
 
 	/**
@@ -595,12 +497,9 @@ public class LiSAConfiguration {
 		result = prime * result + (dumpCFGs ? 1231 : 1237);
 		result = prime * result + (dumpTypeInference ? 1231 : 1237);
 		result = prime * result + ((fixpointWorkingSet == null) ? 0 : fixpointWorkingSet.hashCode());
-		result = prime * result + (inferTypes ? 1231 : 1237);
 		result = prime * result + ((interproceduralAnalysis == null) ? 0 : interproceduralAnalysis.hashCode());
 		result = prime * result + (jsonOutput ? 1231 : 1237);
 		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
-		result = prime * result + ((typeInferenceState == null) ? 0 : typeInferenceState.hashCode());
-		result = prime * result + ((typeExtractor == null) ? 0 : typeExtractor.hashCode());
 		result = prime * result + ((abstractState == null) ? 0 : abstractState.hashCode());
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
 		result = prime * result + wideningThreshold;
@@ -634,8 +533,6 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!fixpointWorkingSet.equals(other.fixpointWorkingSet))
 			return false;
-		if (inferTypes != other.inferTypes)
-			return false;
 		if (interproceduralAnalysis == null) {
 			if (other.interproceduralAnalysis != null)
 				return false;
@@ -647,16 +544,6 @@ public class LiSAConfiguration {
 			if (other.semanticChecks != null)
 				return false;
 		} else if (!semanticChecks.equals(other.semanticChecks))
-			return false;
-		if (typeInferenceState == null) {
-			if (other.typeInferenceState != null)
-				return false;
-		} else if (!typeInferenceState.equals(other.typeInferenceState))
-			return false;
-		if (typeExtractor == null) {
-			if (other.typeExtractor != null)
-				return false;
-		} else if (!typeExtractor.equals(other.typeExtractor))
 			return false;
 		if (abstractState == null) {
 			if (other.abstractState != null)
@@ -691,8 +578,6 @@ public class LiSAConfiguration {
 				.append(String.valueOf(workdir))
 				.append("\n  dump input cfgs: ")
 				.append(dumpCFGs)
-				.append("\n  infer types: ")
-				.append(inferTypes)
 				.append("\n  dump inferred types: ")
 				.append(dumpTypeInference)
 				.append("\n  dump analysis results: ")
@@ -711,7 +596,7 @@ public class LiSAConfiguration {
 				.append(semanticChecks.size())
 				.append(" semantic checks to execute")
 				.append((semanticChecks.isEmpty() ? "" : ":"));
-		for (SemanticCheck<?, ?, ?> check : semanticChecks)
+		for (SemanticCheck<?, ?, ?, ?> check : semanticChecks)
 			res.append("\n      ")
 					.append(check.getClass().getSimpleName());
 		return res.toString();

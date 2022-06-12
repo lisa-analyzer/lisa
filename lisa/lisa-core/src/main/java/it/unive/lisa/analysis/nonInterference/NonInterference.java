@@ -288,7 +288,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
-		return !expression.getDynamicType().isPointerType();
+		return !expression.getDynamicType().isPointerType() && !expression.getDynamicType().isInMemoryType();
 	}
 
 	@Override

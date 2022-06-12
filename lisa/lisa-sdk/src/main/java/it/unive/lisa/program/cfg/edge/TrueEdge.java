@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -34,12 +35,14 @@ public class TrueEdge extends Edge {
 	}
 
 	@Override
-	public <A extends AbstractState<A, H, V>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
-			V extends ValueDomain<V>> AnalysisState<A, H, V> traverse(
-					AnalysisState<A, H, V> sourceState) throws SemanticException {
+			V extends ValueDomain<V>,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> traverse(
+					AnalysisState<A, H, V, T> sourceState)
+					throws SemanticException {
 		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
-		AnalysisState<A, H, V> result = sourceState.bottom();
+		AnalysisState<A, H, V, T> result = sourceState.bottom();
 		for (SymbolicExpression expr : exprs)
 			result = result.lub(sourceState.assume(expr, getSource()));
 		return result;

@@ -3,6 +3,26 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.atn.PredictionMode;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.imp.antlr.IMPLexer;
 import it.unive.lisa.imp.antlr.IMPParser;
 import it.unive.lisa.imp.antlr.IMPParser.ClassUnitContext;
@@ -46,30 +66,13 @@ import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrat
 import it.unive.lisa.program.cfg.statement.call.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32;
 import it.unive.lisa.type.common.Int32;
 import it.unive.lisa.type.common.StringType;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.atn.PredictionMode;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the IMP code building a
@@ -179,7 +182,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private final Program program;
 
-	private Unit currentUnit;
+	private UnitWithSuperUnits currentUnit;
 
 	private final boolean onlyMain;
 
@@ -476,11 +479,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
-		Type unitType = currentUnit instanceof InterfaceUnit
-				? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit)
-				: ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
+//		Type unitType = currentUnit instanceof InterfaceUnit
+//				? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit)
+//				: ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this", unitType);
+//<<<<<<< HEAD
+//		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this", unitType);
+//=======
+		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
+				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
+//>>>>>>> refs/heads/master
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);
