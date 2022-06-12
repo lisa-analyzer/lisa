@@ -22,8 +22,7 @@ public abstract class UnitWithSuperUnits extends Unit {
 
 	/**
 	 * Yields the collection of instance {@link CodeMember}s defined in this
-	 * unit. This method returns the union of {@link #getInstanceCFGs(boolean)}
-	 * and {@link #getInstanceConstructs(boolean)}.
+	 * unit.
 	 * 
 	 * @param traverseHierarchy if {@code true}, also returns instance code
 	 *                              members from superunits, transitively

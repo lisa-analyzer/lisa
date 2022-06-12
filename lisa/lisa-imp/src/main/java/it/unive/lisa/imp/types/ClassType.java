@@ -1,6 +1,5 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.UnitWithSuperUnits;
 import it.unive.lisa.type.InMemoryType;
@@ -21,7 +20,7 @@ import java.util.Set;
  * A type representing an IMP class defined in an IMP program. ClassTypes are
  * instances of {@link PointerType} and {@link UnitType}, and are identified by
  * their name. To ensure uniqueness of ClassType objects,
- * {@link #lookup(String, CompilationUnit)} must be used to retrieve existing
+ * {@link #lookup(String, UnitWithSuperUnits)} must be used to retrieve existing
  * instances (or automatically create one if no matching instance exists).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

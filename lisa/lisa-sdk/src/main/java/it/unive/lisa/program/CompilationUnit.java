@@ -530,6 +530,12 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return all;
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This method returns the union of {@link #getInstanceCFGs(boolean)} and
+	 * {@link #getInstanceConstructs(boolean)}.
+	 */
 	@Override
 	public final Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
 		Set<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
