@@ -344,5 +344,36 @@ public final class Automaton {
 
 		return eps;
 	}
+	
+	/**
+	 * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+	 * @param other the other automaton
+	 * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
+	 */
+	public Automaton union(Automaton other) {
+		if (this == other)
+			return this;
+		
+		Set<State> sts = new HashSet<>();
+		Set<Transition> ts = new HashSet<>();
+		
+		for (State s : this.states)
+			sts.add(s);
+		
+		for (Transition t : this.transitions)
+			ts.add(t);
+			
+		State q0 = new State(0, true, false);
+		
+		for (State s : sts)
+			if (s.isInitial())
+				ts.add(new Transition(q0, s, ' '));
+		
+		sts.add(q0);
+		Automaton result = new Automaton(sts, ts);
+		result.IS_DETERMINIZED = false;
+		result.IS_MINIMIZED = false;
+		return result;
+	}
 
 }

@@ -9,10 +9,21 @@ import java.util.Objects;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public final class State {
-
+	
+	/**
+	 * Identifier of this state
+	 */
 	private final int id;
 
-	private boolean isFinal, isInitial;
+	/**
+	 * Whether this state is final
+	 */
+	private final boolean isFinal;
+	
+	/**
+	 * Whether this state is initial
+	 */
+	private final boolean isInitial;
 
 	/**
 	 * State constructor, it creates a new state with the given informations.
@@ -83,19 +94,4 @@ public final class State {
 	public int getId() {
 		return id;
 	}
-
-	/**
-	 * Sets {@code this} as a final state.
-	 */
-	public void setFinal() {
-		this.isFinal = true;
-	}
-
-	/**
-	 * Sets {@code this} as an initial state.
-	 */
-	public void setInitial() {
-		this.isInitial = true;
-	}
-
 }
