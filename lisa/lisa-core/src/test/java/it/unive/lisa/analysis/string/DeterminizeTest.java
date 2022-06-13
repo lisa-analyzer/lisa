@@ -64,6 +64,8 @@ public class DeterminizeTest {
 		Set<State> expStates = new HashSet<>();
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
+		expStates.add(q0);
+		expStates.add(q1);
 		Set<Transition> expDelta = new HashSet<>();
 		expDelta.add(new Transition(q0, q0, 'a'));
 		expDelta.add(new Transition(q0, q1, 'b'));
