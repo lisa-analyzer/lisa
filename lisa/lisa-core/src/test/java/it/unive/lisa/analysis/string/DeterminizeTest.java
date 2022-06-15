@@ -36,12 +36,11 @@ public class DeterminizeTest {
 		transitions.add(new Transition(st[3], st[4], 'a'));
 
 		// accepts language {a^nb^m}^pcba
-		Automaton dfa = new Automaton(states, transitions);
+		Automaton dfa = new Automaton(states, transitions, true, false);
 		assertEquals(dfa, dfa.determinize());
 
 	}
 
-	// TODO: capire perché fallisce, dal debug ottengo esattamente l'automa
 	// expected
 	@Test
 	public void testNfa() {
@@ -73,7 +72,7 @@ public class DeterminizeTest {
 		expDelta.add(new Transition(q1, q1, 'b'));
 
 		// accepts language {a^nb^m}^p
-		Automaton expected = new Automaton(expStates, expDelta);
+		Automaton expected = new Automaton(expStates, expDelta, true, false);
 		assertEquals(expected, nfa.determinize());
 
 	}
@@ -143,7 +142,7 @@ public class DeterminizeTest {
 		expDelta.add(new Transition(s4, s1, 'a'));
 		expDelta.add(new Transition(s4, s2, 'b'));
 		// {a,b}^n abb
-		Automaton expected = new Automaton(expStates, expDelta);
+		Automaton expected = new Automaton(expStates, expDelta, true, false);
 
 		assertEquals(expected, a.determinize());
 	}

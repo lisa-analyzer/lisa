@@ -63,6 +63,16 @@ public final class Automaton {
 	public Automaton(Set<State> states, Set<Transition> transitions) {
 		this.states = states;
 		this.transitions = transitions;
+		this.IS_DETERMINIZED = false;
+		this.IS_MINIMIZED = false;
+	}
+	
+	// TODO: capire se va bene, serve solo per il testing, per poter creare automi gia determinized
+	Automaton(Set<State> states, Set<Transition> transitions, boolean isDeterminized, boolean isMinimized) {
+		this.states = states;
+		this.transitions = transitions;
+		this.IS_DETERMINIZED = isDeterminized;
+		this.IS_MINIMIZED = isMinimized;
 	}
 
 	/**
@@ -255,16 +265,23 @@ public final class Automaton {
 			}
 		}
 
-		for (State s : states) {
-			Set<State> macroState = detStates.get(s.getId());
-			for (State q : macroState)
-				if (q.isFinal()) {
-					s.setFinal();
+		Set<State> sts = new HashSet<>();
+		for(State s : states) {
+			HashSet<State> macroState = detStates.get(s.getId());
+			State st = null;
+			for(State q : macroState) {
+				if(q.isFinal()) {
+					st = new State(s.getId(), s.isInitial(), true);
 					break;
 				}
+			}
+			if(st == null)
+				sts.add(s);
+			else
+				sts.add(st);
 		}
 
-		Automaton det = new Automaton(states, delta);
+		Automaton det = new Automaton(sts, delta);
 		det.IS_DETERMINIZED = true;
 		return det;
 	}
@@ -374,6 +391,55 @@ public final class Automaton {
 		result.IS_DETERMINIZED = false;
 		result.IS_MINIMIZED = false;
 		return result;
+	}
+	
+	/**
+	 * Returns a set of string containing all the strings accepted by {@code this} of length from 1 to {@code length}.
+	 * @param length the maximum length of the strings to be returned
+	 * @return a set containing the subset of strings accepted by {@code this}
+	 */
+	public HashSet<String> getLanguageAtMost(int length) {
+		HashSet<String> lang = new HashSet<>();
+		
+		Set<State> initialStates = states.stream()
+				.filter(s -> s.isInitial())
+				.collect(Collectors.toSet());
+		
+		for(State s : initialStates) {
+			for(String str : getLanguageAtMost(s, length))
+				lang.add(str);
+		}
+		
+		return lang;
+	}
+	
+	/**
+	 * Returns a set of string containing all the string accepted by {@code this} of length from 1 to {@code length} from a given state.
+	 * @param q state from which the strings are computed
+	 * @param length maximum length of the computed strings
+	 * @return a set containing a subset of strings accepted by {@code this} starting from the state {@code q} of maximum length {@code length}.
+	 */
+	public HashSet<String> getLanguageAtMost(State q, int length) {
+		HashSet<String> lang = new HashSet<>();
+		
+		if(length == 0)
+			return lang;
+		
+		Set<Transition> outgoing = transitions.stream()
+				.filter(t -> t.getSource() == q)
+				.collect(Collectors.toSet());
+		
+		for(Transition t : outgoing) {
+			String partial = "" + t.getSymbol();
+			
+			if(getLanguageAtMost(t.getDestination(), length - 1).isEmpty())
+				lang.add(partial);
+			else
+				for(String next : getLanguageAtMost(t.getDestination(), length - 1))
+					lang.add(partial + next);
+		}
+		
+		return lang;
 	}
 
 }
