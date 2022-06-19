@@ -12,8 +12,8 @@ public final class Transition {
 
 	private final State source, destination;
 
-	// if symbol is ' ' means it is an epsilon transition
-	private final char symbol;
+	// "" means epsilon transition
+	private final String symbol;
 
 	/**
 	 * Creates a new transition for a generic automaton.
@@ -24,7 +24,7 @@ public final class Transition {
 	 *                        transition. {@code ' '} is used for epsilon
 	 *                        transitions.
 	 */
-	public Transition(State source, State destination, char symbol) {
+	public Transition(State source, State destination, String symbol) {
 		this.source = source;
 		this.destination = destination;
 		this.symbol = symbol;
@@ -67,7 +67,7 @@ public final class Transition {
 	 * 
 	 * @return symbol needed to execute {@code this} transition.
 	 */
-	public char getSymbol() {
+	public String getSymbol() {
 		return this.symbol;
 	}
 

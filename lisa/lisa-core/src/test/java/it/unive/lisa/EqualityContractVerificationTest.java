@@ -122,8 +122,8 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final State st1 = new State(0, false, false);
 	private static final State st2 = new State(1, false, false);
-	private static final Transition t1 = new Transition(st1, st2, 'a');
-	private static final Transition t2 = new Transition(st1, st2, 'b');
+	private static final Transition t1 = new Transition(st1, st2, "a");
+	private static final Transition t2 = new Transition(st1, st2, "b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
 			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
 			"foo");

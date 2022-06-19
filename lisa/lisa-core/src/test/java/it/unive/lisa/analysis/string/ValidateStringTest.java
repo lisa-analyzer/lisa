@@ -29,13 +29,13 @@ public class ValidateStringTest {
 			states.add(s);
 		}
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[0], 'a'));
-		transitions.add(new Transition(st[0], st[1], 'b'));
-		transitions.add(new Transition(st[1], st[0], 'a'));
-		transitions.add(new Transition(st[1], st[1], 'b'));
-		transitions.add(new Transition(st[1], st[2], 'c'));
-		transitions.add(new Transition(st[2], st[3], 'b'));
-		transitions.add(new Transition(st[3], st[4], 'a'));
+		transitions.add(new Transition(st[0], st[0], "a"));
+		transitions.add(new Transition(st[0], st[1], "b"));
+		transitions.add(new Transition(st[1], st[0], "a"));
+		transitions.add(new Transition(st[1], st[1], "b"));
+		transitions.add(new Transition(st[1], st[2], "c"));
+		transitions.add(new Transition(st[2], st[3], "b"));
+		transitions.add(new Transition(st[3], st[4], "a"));
 
 		// accepts language {a^nb^m}^pcba
 		Automaton dfa = new Automaton(states, transitions);
@@ -60,9 +60,9 @@ public class ValidateStringTest {
 		states.add(st[1]);
 
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[0], 'a'));
-		transitions.add(new Transition(st[0], st[0], 'b'));
-		transitions.add(new Transition(st[0], st[1], 'b'));
+		transitions.add(new Transition(st[0], st[0], "a"));
+		transitions.add(new Transition(st[0], st[0], "b"));
+		transitions.add(new Transition(st[0], st[1], "b"));
 
 		// accepts language {a^nb^m}^p
 		Automaton nfa = new Automaton(states, transitions);
@@ -94,19 +94,19 @@ public class ValidateStringTest {
 		}
 
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[1], ' '));
-		transitions.add(new Transition(st[0], st[7], ' '));
-		transitions.add(new Transition(st[1], st[2], ' '));
-		transitions.add(new Transition(st[1], st[4], ' '));
-		transitions.add(new Transition(st[2], st[3], 'a'));
-		transitions.add(new Transition(st[3], st[6], ' '));
-		transitions.add(new Transition(st[4], st[5], 'b'));
-		transitions.add(new Transition(st[5], st[6], ' '));
-		transitions.add(new Transition(st[6], st[1], ' '));
-		transitions.add(new Transition(st[6], st[7], ' '));
-		transitions.add(new Transition(st[7], st[8], 'a'));
-		transitions.add(new Transition(st[8], st[9], 'b'));
-		transitions.add(new Transition(st[9], st[10], 'b'));
+		transitions.add(new Transition(st[0], st[1], ""));
+		transitions.add(new Transition(st[0], st[7], ""));
+		transitions.add(new Transition(st[1], st[2], ""));
+		transitions.add(new Transition(st[1], st[4], ""));
+		transitions.add(new Transition(st[2], st[3], "a"));
+		transitions.add(new Transition(st[3], st[6], ""));
+		transitions.add(new Transition(st[4], st[5], "b"));
+		transitions.add(new Transition(st[5], st[6], ""));
+		transitions.add(new Transition(st[6], st[1], ""));
+		transitions.add(new Transition(st[6], st[7], ""));
+		transitions.add(new Transition(st[7], st[8], "a"));
+		transitions.add(new Transition(st[8], st[9], "b"));
+		transitions.add(new Transition(st[9], st[10], "b"));
 
 		// accepts {a^nb^m}^pabb
 		Automaton enfa = new Automaton(states, transitions);

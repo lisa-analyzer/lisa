@@ -27,16 +27,16 @@ public class DeterminizeTest {
 			states.add(s);
 		}
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[0], 'a'));
-		transitions.add(new Transition(st[0], st[1], 'b'));
-		transitions.add(new Transition(st[1], st[0], 'a'));
-		transitions.add(new Transition(st[1], st[1], 'b'));
-		transitions.add(new Transition(st[1], st[2], 'c'));
-		transitions.add(new Transition(st[2], st[3], 'b'));
-		transitions.add(new Transition(st[3], st[4], 'a'));
+		transitions.add(new Transition(st[0], st[0], "a"));
+		transitions.add(new Transition(st[0], st[1], "b"));
+		transitions.add(new Transition(st[1], st[0], "a"));
+		transitions.add(new Transition(st[1], st[1], "b"));
+		transitions.add(new Transition(st[1], st[2], "c"));
+		transitions.add(new Transition(st[2], st[3], "b"));
+		transitions.add(new Transition(st[3], st[4], "a"));
 
 		// accepts language {a^nb^m}^pcba
-		Automaton dfa = new Automaton(states, transitions, true, false);
+		Automaton dfa = new Automaton(states, transitions);
 		assertEquals(dfa, dfa.determinize());
 
 	}
@@ -53,9 +53,9 @@ public class DeterminizeTest {
 		states.add(st[1]);
 
 		Set<Transition> transitions = new HashSet<>();
-		transitions.add(new Transition(st[0], st[0], 'a'));
-		transitions.add(new Transition(st[0], st[0], 'b'));
-		transitions.add(new Transition(st[0], st[1], 'b'));
+		transitions.add(new Transition(st[0], st[0], "a"));
+		transitions.add(new Transition(st[0], st[0], "b"));
+		transitions.add(new Transition(st[0], st[1], "b"));
 
 		// accepts language {a^nb^m}^p
 		Automaton nfa = new Automaton(states, transitions);
@@ -66,13 +66,13 @@ public class DeterminizeTest {
 		expStates.add(q0);
 		expStates.add(q1);
 		Set<Transition> expDelta = new HashSet<>();
-		expDelta.add(new Transition(q0, q0, 'a'));
-		expDelta.add(new Transition(q0, q1, 'b'));
-		expDelta.add(new Transition(q1, q0, 'a'));
-		expDelta.add(new Transition(q1, q1, 'b'));
+		expDelta.add(new Transition(q0, q0, "a"));
+		expDelta.add(new Transition(q0, q1, "b"));
+		expDelta.add(new Transition(q1, q0, "a"));
+		expDelta.add(new Transition(q1, q1, "b"));
 
 		// accepts language {a^nb^m}^p
-		Automaton expected = new Automaton(expStates, expDelta, true, false);
+		Automaton expected = new Automaton(expStates, expDelta);
 		assertEquals(expected, nfa.determinize());
 
 	}
@@ -103,19 +103,19 @@ public class DeterminizeTest {
 		states.add(q8);
 		states.add(q9);
 		states.add(q10);
-		delta.add(new Transition(q0, q1, ' '));
-		delta.add(new Transition(q0, q7, ' '));
-		delta.add(new Transition(q1, q2, ' '));
-		delta.add(new Transition(q1, q4, ' '));
-		delta.add(new Transition(q2, q3, 'a'));
-		delta.add(new Transition(q3, q6, ' '));
-		delta.add(new Transition(q4, q5, 'b'));
-		delta.add(new Transition(q5, q6, ' '));
-		delta.add(new Transition(q6, q1, ' '));
-		delta.add(new Transition(q6, q7, ' '));
-		delta.add(new Transition(q7, q8, 'a'));
-		delta.add(new Transition(q8, q9, 'b'));
-		delta.add(new Transition(q9, q10, 'b'));
+		delta.add(new Transition(q0, q1, ""));
+		delta.add(new Transition(q0, q7, ""));
+		delta.add(new Transition(q1, q2, ""));
+		delta.add(new Transition(q1, q4, ""));
+		delta.add(new Transition(q2, q3, "a"));
+		delta.add(new Transition(q3, q6, ""));
+		delta.add(new Transition(q4, q5, "b"));
+		delta.add(new Transition(q5, q6, ""));
+		delta.add(new Transition(q6, q1, ""));
+		delta.add(new Transition(q6, q7, ""));
+		delta.add(new Transition(q7, q8, "a"));
+		delta.add(new Transition(q8, q9, "b"));
+		delta.add(new Transition(q9, q10, "b"));
 		// {a ,b}^n abb
 		Automaton a = new Automaton(states, delta);
 
@@ -131,18 +131,18 @@ public class DeterminizeTest {
 		expStates.add(s2);
 		expStates.add(s3);
 		expStates.add(s4);
-		expDelta.add(new Transition(s0, s1, 'a'));
-		expDelta.add(new Transition(s0, s2, 'b'));
-		expDelta.add(new Transition(s1, s1, 'a'));
-		expDelta.add(new Transition(s1, s3, 'b'));
-		expDelta.add(new Transition(s2, s1, 'a'));
-		expDelta.add(new Transition(s2, s2, 'b'));
-		expDelta.add(new Transition(s3, s1, 'a'));
-		expDelta.add(new Transition(s3, s4, 'b'));
-		expDelta.add(new Transition(s4, s1, 'a'));
-		expDelta.add(new Transition(s4, s2, 'b'));
+		expDelta.add(new Transition(s0, s1, "a"));
+		expDelta.add(new Transition(s0, s2, "b"));
+		expDelta.add(new Transition(s1, s1, "a"));
+		expDelta.add(new Transition(s1, s3, "b"));
+		expDelta.add(new Transition(s2, s1, "a"));
+		expDelta.add(new Transition(s2, s2, "b"));
+		expDelta.add(new Transition(s3, s1, "a"));
+		expDelta.add(new Transition(s3, s4, "b"));
+		expDelta.add(new Transition(s4, s1, "a"));
+		expDelta.add(new Transition(s4, s2, "b"));
 		// {a,b}^n abb
-		Automaton expected = new Automaton(expStates, expDelta, true, false);
+		Automaton expected = new Automaton(expStates, expDelta);
 
 		assertEquals(expected, a.determinize());
 	}

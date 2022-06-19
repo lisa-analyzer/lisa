@@ -19,9 +19,9 @@ public class EpsilonClosureTest {
 		states.add(q2);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q1, ' '));
-		delta.add(new Transition(q1, q2, 'b'));
-		delta.add(new Transition(q1, q2, 'a'));
+		delta.add(new Transition(q0, q1, ""));
+		delta.add(new Transition(q1, q2, "b"));
+		delta.add(new Transition(q1, q2, "a"));
 
 		// a | b
 		Automaton a = new Automaton(states, delta);
@@ -44,11 +44,11 @@ public class EpsilonClosureTest {
 		states.add(q2);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q1, ' '));
-		delta.add(new Transition(q1, q2, ' '));
-		delta.add(new Transition(q2, q3, 'b'));
-		delta.add(new Transition(q2, q3, 'a'));
-		delta.add(new Transition(q2, q3, 'c'));
+		delta.add(new Transition(q0, q1, ""));
+		delta.add(new Transition(q1, q2, ""));
+		delta.add(new Transition(q2, q3, "b"));
+		delta.add(new Transition(q2, q3, "a"));
+		delta.add(new Transition(q2, q3, "c"));
 
 		// a | b | c
 		Automaton a = new Automaton(states, delta);
@@ -67,7 +67,7 @@ public class EpsilonClosureTest {
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q0, 'a'));
+		delta.add(new Transition(q0, q0, "a"));
 
 		// a*
 		Automaton a = new Automaton(states, delta);
@@ -84,8 +84,8 @@ public class EpsilonClosureTest {
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q0, 'a'));
-		delta.add(new Transition(q0, q0, ' '));
+		delta.add(new Transition(q0, q0, "a"));
+		delta.add(new Transition(q0, q0, ""));
 
 		// eps | a*
 		Automaton a = new Automaton(states, delta);
@@ -102,9 +102,9 @@ public class EpsilonClosureTest {
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q0, 'a'));
-		delta.add(new Transition(q0, q0, 'b'));
-		delta.add(new Transition(q0, q0, ' '));
+		delta.add(new Transition(q0, q0, "a"));
+		delta.add(new Transition(q0, q0, "b"));
+		delta.add(new Transition(q0, q0, ""));
 
 		// (a | b | eps)
 		Automaton a = new Automaton(states, delta);
@@ -123,12 +123,12 @@ public class EpsilonClosureTest {
 		states.add(q1);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(q0, q1, 'a'));
-		delta.add(new Transition(q0, q1, 'b'));
-		delta.add(new Transition(q0, q1, ' '));
-		delta.add(new Transition(q1, q1, 'a'));
-		delta.add(new Transition(q1, q1, 'b'));
-		delta.add(new Transition(q1, q1, ' '));
+		delta.add(new Transition(q0, q1, "a"));
+		delta.add(new Transition(q0, q1, "b"));
+		delta.add(new Transition(q0, q1, ""));
+		delta.add(new Transition(q1, q1, "a"));
+		delta.add(new Transition(q1, q1, "b"));
+		delta.add(new Transition(q1, q1, ""));
 
 		// (a | b | eps)+
 		Automaton a = new Automaton(states, delta);
