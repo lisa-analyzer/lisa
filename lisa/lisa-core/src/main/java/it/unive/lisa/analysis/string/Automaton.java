@@ -66,14 +66,6 @@ public final class Automaton {
 		this.IS_DETERMINIZED = false;
 		this.IS_MINIMIZED = false;
 	}
-	
-	// TODO: capire se va bene, serve solo per il testing, per poter creare automi gia determinized
-	Automaton(Set<State> states, Set<Transition> transitions, boolean isDeterminized, boolean isMinimized) {
-		this.states = states;
-		this.transitions = transitions;
-		this.IS_DETERMINIZED = isDeterminized;
-		this.IS_MINIMIZED = isMinimized;
-	}
 
 	/**
 	 * Computes all the automaton transitions to validate a given string
@@ -90,7 +82,8 @@ public final class Automaton {
 		Set<State> currentStates = epsClosure(states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()));
 
 		for (int i = 0; i < str.length(); ++i) {
-			char c = str.charAt(i);
+			// TODO chiedere al prof per correttezza o se usare qualche funzione
+			String c = "" + str.charAt(i);
 
 			// stores temporally the new currentStates
 			Set<State> newCurr = new HashSet<>();
@@ -98,7 +91,7 @@ public final class Automaton {
 
 				// stores all the states reached after char computation
 				Set<State> dest = transitions.stream()
-						.filter(t -> t.getSource().equals(s) && t.getSymbol() == c)
+						.filter(t -> t.getSource().equals(s) && t.getSymbol().equals(c))
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet());
 				if (!dest.isEmpty()) {
@@ -221,8 +214,8 @@ public final class Automaton {
 		// stores number of states of the new Automaton
 		int count = 0;
 		// automaton alphabet
-		Set<Character> alphabet = transitions.stream()
-				.filter(t -> t.getSymbol() != ' ')
+		Set<String> alphabet = transitions.stream()
+				.filter(t -> !t.getSymbol().equals(""))
 				.map(t -> t.getSymbol())
 				.collect(Collectors.toSet());
 
@@ -241,9 +234,9 @@ public final class Automaton {
 			}
 
 			Set<State> currStates = detStates.get(current);
-			for (Character c : alphabet) {
+			for (String c : alphabet) {
 				Set<State> R = epsClosure(transitions.stream()
-						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol() == c && t.getSymbol() != ' ')
+						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol().equals(c) && !t.getSymbol().equals(""))
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet()));
 				if (!detStates.contains(R) && !R.isEmpty()) {
@@ -267,7 +260,7 @@ public final class Automaton {
 
 		Set<State> sts = new HashSet<>();
 		for(State s : states) {
-			HashSet<State> macroState = detStates.get(s.getId());
+			Set<State> macroState = detStates.get(s.getId());
 			State st = null;
 			for(State q : macroState) {
 				if(q.isFinal()) {
@@ -280,8 +273,22 @@ public final class Automaton {
 			else
 				sts.add(st);
 		}
+		
+		// update transitions with final states where needed
+		Set<Transition> tr = new HashSet<>();
+		for(Transition t : delta) {
+			State source = t.getSource();
+			State dest = t.getDestination();
+			for(State q : sts) {
+				if(q.getId() == t.getSource().getId() && q.isFinal())
+					source = q;
+				if(q.getId() == t.getDestination().getId() && q.isFinal())
+					dest = q;
+			}
+			tr.add(new Transition(source, dest, t.getSymbol()));
+		}
 
-		Automaton det = new Automaton(sts, delta);
+		Automaton det = new Automaton(sts, tr);
 		det.IS_DETERMINIZED = true;
 		return det;
 	}
@@ -328,7 +335,7 @@ public final class Automaton {
 					// collect all the possible destination from the current
 					// state
 					Set<State> dest = transitions.stream()
-							.filter(t -> t.getSource().equals(s) && t.getSymbol() == ' ')
+							.filter(t -> t.getSource().equals(s) && t.getSymbol().equals(""))
 							.map(t -> t.getDestination())
 							.collect(Collectors.toSet());
 
@@ -384,7 +391,7 @@ public final class Automaton {
 		
 		for (State s : sts)
 			if (s.isInitial())
-				ts.add(new Transition(q0, s, ' '));
+				ts.add(new Transition(q0, s, ""));
 		
 		sts.add(q0);
 		Automaton result = new Automaton(sts, ts);
@@ -398,8 +405,8 @@ public final class Automaton {
 	 * @param length the maximum length of the strings to be returned
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
-	public HashSet<String> getLanguageAtMost(int length) {
-		HashSet<String> lang = new HashSet<>();
+	public Set<String> getLanguageAtMost(int length) {
+		Set<String> lang = new HashSet<>();
 		
 		Set<State> initialStates = states.stream()
 				.filter(s -> s.isInitial())
@@ -419,8 +426,8 @@ public final class Automaton {
 	 * @param length maximum length of the computed strings
 	 * @return a set containing a subset of strings accepted by {@code this} starting from the state {@code q} of maximum length {@code length}.
 	 */
-	public HashSet<String> getLanguageAtMost(State q, int length) {
-		HashSet<String> lang = new HashSet<>();
+	public Set<String> getLanguageAtMost(State q, int length) {
+		Set<String> lang = new HashSet<>();
 		
 		if(length == 0)
 			return lang;
