@@ -9,7 +9,7 @@ import java.util.Objects;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public final class State {
-	
+
 	/**
 	 * Identifier of this state
 	 */
@@ -19,7 +19,7 @@ public final class State {
 	 * Whether this state is final
 	 */
 	private final boolean isFinal;
-	
+
 	/**
 	 * Whether this state is initial
 	 */

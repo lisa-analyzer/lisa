@@ -236,7 +236,8 @@ public final class Automaton {
 			Set<State> currStates = detStates.get(current);
 			for (String c : alphabet) {
 				Set<State> R = epsClosure(transitions.stream()
-						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol().equals(c) && !t.getSymbol().equals(""))
+						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol().equals(c)
+								&& !t.getSymbol().equals(""))
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet()));
 				if (!detStates.contains(R) && !R.isEmpty()) {
@@ -259,30 +260,30 @@ public final class Automaton {
 		}
 
 		Set<State> sts = new HashSet<>();
-		for(State s : states) {
+		for (State s : states) {
 			Set<State> macroState = detStates.get(s.getId());
 			State st = null;
-			for(State q : macroState) {
-				if(q.isFinal()) {
+			for (State q : macroState) {
+				if (q.isFinal()) {
 					st = new State(s.getId(), s.isInitial(), true);
 					break;
 				}
 			}
-			if(st == null)
+			if (st == null)
 				sts.add(s);
 			else
 				sts.add(st);
 		}
-		
+
 		// update transitions with final states where needed
 		Set<Transition> tr = new HashSet<>();
-		for(Transition t : delta) {
+		for (Transition t : delta) {
 			State source = t.getSource();
 			State dest = t.getDestination();
-			for(State q : sts) {
-				if(q.getId() == t.getSource().getId() && q.isFinal())
+			for (State q : sts) {
+				if (q.getId() == t.getSource().getId() && q.isFinal())
 					source = q;
-				if(q.getId() == t.getDestination().getId() && q.isFinal())
+				if (q.getId() == t.getDestination().getId() && q.isFinal())
 					dest = q;
 			}
 			tr.add(new Transition(source, dest, t.getSymbol()));
@@ -368,84 +369,94 @@ public final class Automaton {
 
 		return eps;
 	}
-	
+
 	/**
-	 * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+	 * Yields the automaton recognizing the language that is the union of the
+	 * languages recognized by {@code this} and {@code other}.
+	 * 
 	 * @param other the other automaton
-	 * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
+	 * 
+	 * @return Yields the automaton recognizing the language that is the union
+	 *             of the languages recognized by {@code this} and {@code other}
 	 */
 	public Automaton union(Automaton other) {
 		if (this == other)
 			return this;
-		
+
 		Set<State> sts = new HashSet<>();
 		Set<Transition> ts = new HashSet<>();
-		
+
 		for (State s : this.states)
 			sts.add(s);
-		
+
 		for (Transition t : this.transitions)
 			ts.add(t);
-			
+
 		State q0 = new State(0, true, false);
-		
+
 		for (State s : sts)
 			if (s.isInitial())
 				ts.add(new Transition(q0, s, ""));
-		
 		sts.add(q0);
 		Automaton result = new Automaton(sts, ts);
 		result.IS_DETERMINIZED = false;
 		result.IS_MINIMIZED = false;
 		return result;
 	}
-	
+
 	/**
-	 * Returns a set of string containing all the strings accepted by {@code this} of length from 1 to {@code length}.
+	 * Returns a set of string containing all the strings accepted by
+	 * {@code this} of length from 1 to {@code length}.
+	 * 
 	 * @param length the maximum length of the strings to be returned
+	 * 
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
 	public Set<String> getLanguageAtMost(int length) {
 		Set<String> lang = new HashSet<>();
-		
 		Set<State> initialStates = states.stream()
 				.filter(s -> s.isInitial())
 				.collect(Collectors.toSet());
-		
-		for(State s : initialStates) {
-			for(String str : getLanguageAtMost(s, length))
+
+		for (State s : initialStates) {
+			for (String str : getLanguageAtMost(s, length))
 				lang.add(str);
 		}
-		
+
 		return lang;
 	}
-	
+
 	/**
-	 * Returns a set of string containing all the string accepted by {@code this} of length from 1 to {@code length} from a given state.
-	 * @param q state from which the strings are computed
+	 * Returns a set of string containing all the string accepted by
+	 * {@code this} of length from 1 to {@code length} from a given state.
+	 * 
+	 * @param q      state from which the strings are computed
 	 * @param length maximum length of the computed strings
-	 * @return a set containing a subset of strings accepted by {@code this} starting from the state {@code q} of maximum length {@code length}.
+	 * 
+	 * @return a set containing a subset of strings accepted by {@code this}
+	 *             starting from the state {@code q} of maximum length
+	 *             {@code length}.
 	 */
 	public Set<String> getLanguageAtMost(State q, int length) {
 		Set<String> lang = new HashSet<>();
-		
-		if(length == 0)
+
+		if (length == 0)
 			return lang;
-		
+
 		Set<Transition> outgoing = transitions.stream()
 				.filter(t -> t.getSource() == q)
 				.collect(Collectors.toSet());
-		
-		for(Transition t : outgoing) {
+
+		for (Transition t : outgoing) {
 			String partial = "" + t.getSymbol();
-			
-			if(getLanguageAtMost(t.getDestination(), length - 1).isEmpty())
+
+			if (getLanguageAtMost(t.getDestination(), length - 1).isEmpty())
 				lang.add(partial);
 			else
-				for(String next : getLanguageAtMost(t.getDestination(), length - 1))
+				for (String next : getLanguageAtMost(t.getDestination(), length - 1))
 					lang.add(partial + next);
 		}
-		
+
 		return lang;
 	}
 
