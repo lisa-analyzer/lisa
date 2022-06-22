@@ -1,12 +1,15 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -373,65 +376,64 @@ public final class Automaton {
 	}
 
 	/**
-    * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
-    * @param other the other automaton
-    * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
-    */
+	 * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+	 * @param other the other automaton
+	 * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
+	 */
 
-   public Automaton union(Automaton other) {
+	public Automaton union(Automaton other) {
+		if (this == other)
+			return this;
 
-       if (this == other)
-           return this;
+		Set<State> sts = new HashSet<>();
+		Set<Transition> ts = new HashSet<>();
 
-       Set<State> sts = new HashSet<>();
-       Set<Transition> ts = new HashSet<>();
+		Map<State, State> thisInitMapping = new HashMap<>();
+		Map<State, State> otherInitMapping = new HashMap<>();
 
-       Map<State, State> thisInitMapping = new HashMap<>();
-       Map<State, State> otherInitMapping = new HashMap<>();
+		for (State s : states)
+			if (s.isInitial()) {
+				State st = new State(s.getId(), false, s.isFinal());
+				sts.add(st);
+				thisInitMapping.put(s, st);
+			} else
+				sts.add(s);
 
-       for (State s : states)
-           if (s.isInitial()) {
-               State st = new State(s.getId(), false, s.isFinal());
-               sts.add(st);
-               thisInitMapping.put(s, st);
-           } else
-               sts.add(s);
+		for (State s : other.states)
+			if (s.isInitial()) {
+				State st = new State(s.getId(), false, s.isFinal());
+				sts.add(st);
+				otherInitMapping.put(s, st);
+			} else
+				sts.add(s);
 
-       for (State s : other.states)
-           if (s.isInitial()) {
-               State st = new State(s.getId(), false, s.isFinal());
-               sts.add(st);
-               otherInitMapping.put(s, st);
-           } else
-               sts.add(s);
+		State q0 = new State(0, true, false);
 
-       State q0 = new State(0, true, false);
+		for (State s : sts)
 
-       for (State s : sts)
+			if (thisInitMapping.values().contains(s) || otherInitMapping.values().contains(s))
+				ts.add(new Transition(q0, s, ""));
 
-           if (thisInitMapping.values().contains(s) || otherInitMapping.values().contains(s))
-               ts.add(new Transition(q0, s, ""));
+		sts.add(q0);
 
-       sts.add(q0);
+		for (Transition t : transitions) {
+			State source = thisInitMapping.keySet().contains(t.getSource()) ? thisInitMapping.get(t.getSource()) : t.getSource();
+			State dest = thisInitMapping.keySet().contains(t.getDestination()) ? thisInitMapping.get(t.getDestination()) : t.getDestination();
+			ts.add(new Transition(source, dest, t.getSymbol()));
+		}
 
-       for (Transition t : transitions) {
-           State source = thisInitMapping.keySet().contains(t.getSource()) ? thisInitMapping.get(t.getSource()) : t.getSource();
-           State dest = thisInitMapping.keySet().contains(t.getDestination()) ? thisInitMapping.get(t.getDestination()) : t.getDestination();
-           ts.add(new Transition(source, dest, t.getSymbol()));
-       }
+		for (Transition t : other.transitions) {
+			State source = otherInitMapping.keySet().contains(t.getSource()) ? otherInitMapping.get(t.getSource()) : t.getSource();
+			State dest = otherInitMapping.keySet().contains(t.getDestination()) ? otherInitMapping.get(t.getDestination()) : t.getDestination();
+			ts.add(new Transition(source, dest, t.getSymbol()));
+		}
 
-       for (Transition t : other.transitions) {
-           State source = otherInitMapping.keySet().contains(t.getSource()) ? otherInitMapping.get(t.getSource()) : t.getSource();
-           State dest = otherInitMapping.keySet().contains(t.getDestination()) ? otherInitMapping.get(t.getDestination()) : t.getDestination();
-           ts.add(new Transition(source, dest, t.getSymbol()));
-       }
+		Automaton result = new Automaton(sts, ts);
+		result.IS_DETERMINIZED = false;
+		result.IS_MINIMIZED = false;
+		return result;
+	}	
 
-       Automaton result = new Automaton(sts, ts);
-       result.IS_DETERMINIZED = false;
-       result.IS_MINIMIZED = false;
-       return result;
-   }	
-	
 	/**
 	 * Returns a set of string containing all the strings accepted by
 	 * {@code this} of length from 1 to {@code length}.
@@ -446,10 +448,9 @@ public final class Automaton {
 				.filter(s -> s.isInitial())
 				.collect(Collectors.toSet());
 
-		for (State s : initialStates) {
-			for (String str : getLanguageAtMost(s, length))
-				lang.add(str);
-		}
+		for (State s : initialStates) 
+			lang.addAll(getLanguageAtMost(s, length));
+
 
 		return lang;
 	}
@@ -466,26 +467,38 @@ public final class Automaton {
 	 *             {@code length}.
 	 */
 	public Set<String> getLanguageAtMost(State q, int length) {
-		Set<String> lang = new HashSet<>();
 
 		if (length == 0)
+			return new HashSet<>();;
+
+			Set<State> ws = Collections.singleton(q);
+			Set<String> lang = new HashSet<>();
+			lang.add("");
+
+			while (length > 0) {
+
+				Set<Transition> outgoing = new HashSet<>();;
+				for (State s : ws)
+					outgoing.addAll(getOutgoingTranstionsFrom(s));
+
+				Set<String> newStrings = new HashSet<>();
+				for (Transition t : outgoing)
+					for (String s : lang)
+						newStrings.add(s + t.getSymbol());
+
+				lang.addAll(newStrings);
+				ws = outgoing.stream().map(t -> t.getDestination()).collect(Collectors.toSet());
+				length--;
+			}
+
 			return lang;
 
-		Set<Transition> outgoing = transitions.stream()
-				.filter(t -> t.getSource() == q)
+	}
+
+	private Set<Transition> getOutgoingTranstionsFrom(State q) {
+		return transitions.stream()
+				.filter(t -> t.getSource().equals(q))
 				.collect(Collectors.toSet());
-
-		for (Transition t : outgoing) {
-			String partial = "" + t.getSymbol();
-
-			if (getLanguageAtMost(t.getDestination(), length - 1).isEmpty())
-				lang.add(partial);
-			else
-				for (String next : getLanguageAtMost(t.getDestination(), length - 1))
-					lang.add(partial + next);
-		}
-
-		return lang;
 	}
 
 }
