@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -371,39 +373,65 @@ public final class Automaton {
 	}
 
 	/**
-	 * Yields the automaton recognizing the language that is the union of the
-	 * languages recognized by {@code this} and {@code other}.
-	 * 
-	 * @param other the other automaton
-	 * 
-	 * @return Yields the automaton recognizing the language that is the union
-	 *             of the languages recognized by {@code this} and {@code other}
-	 */
-	public Automaton union(Automaton other) {
-		if (this == other)
-			return this;
+    * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+    * @param other the other automaton
+    * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
+    */
 
-		Set<State> sts = new HashSet<>();
-		Set<Transition> ts = new HashSet<>();
+   public Automaton union(Automaton other) {
 
-		for (State s : this.states)
-			sts.add(s);
+       if (this == other)
+           return this;
 
-		for (Transition t : this.transitions)
-			ts.add(t);
+       Set<State> sts = new HashSet<>();
+       Set<Transition> ts = new HashSet<>();
 
-		State q0 = new State(0, true, false);
+       Map<State, State> thisInitMapping = new HashMap<>();
+       Map<State, State> otherInitMapping = new HashMap<>();
 
-		for (State s : sts)
-			if (s.isInitial())
-				ts.add(new Transition(q0, s, ""));
-		sts.add(q0);
-		Automaton result = new Automaton(sts, ts);
-		result.IS_DETERMINIZED = false;
-		result.IS_MINIMIZED = false;
-		return result;
-	}
+       for (State s : states)
+           if (s.isInitial()) {
+               State st = new State(s.getId(), false, s.isFinal());
+               sts.add(st);
+               thisInitMapping.put(s, st);
+           } else
+               sts.add(s);
 
+       for (State s : other.states)
+           if (s.isInitial()) {
+               State st = new State(s.getId(), false, s.isFinal());
+               sts.add(st);
+               otherInitMapping.put(s, st);
+           } else
+               sts.add(s);
+
+       State q0 = new State(0, true, false);
+
+       for (State s : sts)
+
+           if (thisInitMapping.values().contains(s) || otherInitMapping.values().contains(s))
+               ts.add(new Transition(q0, s, ""));
+
+       sts.add(q0);
+
+       for (Transition t : transitions) {
+           State source = thisInitMapping.keySet().contains(t.getSource()) ? thisInitMapping.get(t.getSource()) : t.getSource();
+           State dest = thisInitMapping.keySet().contains(t.getDestination()) ? thisInitMapping.get(t.getDestination()) : t.getDestination();
+           ts.add(new Transition(source, dest, t.getSymbol()));
+       }
+
+       for (Transition t : other.transitions) {
+           State source = otherInitMapping.keySet().contains(t.getSource()) ? otherInitMapping.get(t.getSource()) : t.getSource();
+           State dest = otherInitMapping.keySet().contains(t.getDestination()) ? otherInitMapping.get(t.getDestination()) : t.getDestination();
+           ts.add(new Transition(source, dest, t.getSymbol()));
+       }
+
+       Automaton result = new Automaton(sts, ts);
+       result.IS_DETERMINIZED = false;
+       result.IS_MINIMIZED = false;
+       return result;
+   }	
+	
 	/**
 	 * Returns a set of string containing all the strings accepted by
 	 * {@code this} of length from 1 to {@code length}.
