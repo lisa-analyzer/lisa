@@ -15,13 +15,13 @@ public class DeterminizeTest {
 		State s;
 		for (int i = 0; i < 5; ++i) {
 			if (i == 0)
-				s = new State(i, true, false);
+				s = new State(true, false);
 
 			else if (i == 4)
-				s = new State(i, false, true);
+				s = new State(false, true);
 
 			else
-				s = new State(i, false, false);
+				s = new State(false, false);
 
 			st[i] = s;
 			states.add(s);
@@ -46,8 +46,8 @@ public class DeterminizeTest {
 	public void testNfa() {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[2];
-		st[0] = new State(0, true, false);
-		st[1] = new State(1, false, true);
+		st[0] = new State(true, false);
+		st[1] = new State(false, true);
 
 		states.add(st[0]);
 		states.add(st[1]);
@@ -61,8 +61,8 @@ public class DeterminizeTest {
 		Automaton nfa = new Automaton(states, transitions);
 
 		Set<State> expStates = new HashSet<>();
-		State q0 = new State(0, true, false);
-		State q1 = new State(1, false, true);
+		State q0 = new State(true, false);
+		State q1 = new State(false, true);
 		expStates.add(q0);
 		expStates.add(q1);
 		Set<Transition> expDelta = new HashSet<>();
@@ -81,17 +81,17 @@ public class DeterminizeTest {
 	public void testEpsNfa() {
 		Set<State> states = new HashSet<>();
 		Set<Transition> delta = new HashSet<>();
-		State q0 = new State(0, true, false);
-		State q1 = new State(1, false, false);
-		State q2 = new State(2, false, false);
-		State q3 = new State(3, false, false);
-		State q4 = new State(4, false, false);
-		State q5 = new State(5, false, false);
-		State q6 = new State(6, false, false);
-		State q7 = new State(7, false, false);
-		State q8 = new State(8, false, false);
-		State q9 = new State(9, false, false);
-		State q10 = new State(10, false, true);
+		State q0 = new State(true, false);
+		State q1 = new State(false, false);
+		State q2 = new State(false, false);
+		State q3 = new State(false, false);
+		State q4 = new State(false, false);
+		State q5 = new State(false, false);
+		State q6 = new State(false, false);
+		State q7 = new State(false, false);
+		State q8 = new State(false, false);
+		State q9 = new State(false, false);
+		State q10 = new State(false, true);
 		states.add(q0);
 		states.add(q1);
 		states.add(q2);
@@ -121,11 +121,11 @@ public class DeterminizeTest {
 
 		Set<State> expStates = new HashSet<>();
 		Set<Transition> expDelta = new HashSet<>();
-		State s0 = new State(0, true, false);
-		State s1 = new State(1, false, false);
-		State s2 = new State(2, false, false);
-		State s3 = new State(3, false, false);
-		State s4 = new State(4, false, true);
+		State s0 = new State(true, false);
+		State s1 = new State(false, false);
+		State s2 = new State(false, false);
+		State s3 = new State(false, false);
+		State s4 = new State(false, true);
 		expStates.add(s0);
 		expStates.add(s1);
 		expStates.add(s2);

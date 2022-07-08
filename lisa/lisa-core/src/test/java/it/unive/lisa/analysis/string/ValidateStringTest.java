@@ -17,13 +17,13 @@ public class ValidateStringTest {
 		State s;
 		for (int i = 0; i < 5; ++i) {
 			if (i == 0)
-				s = new State(i, true, false);
+				s = new State(true, false);
 
 			else if (i == 4)
-				s = new State(i, false, true);
+				s = new State(false, true);
 
 			else
-				s = new State(i, false, false);
+				s = new State(false, false);
 
 			st[i] = s;
 			states.add(s);
@@ -53,8 +53,8 @@ public class ValidateStringTest {
 	public void testNfa() {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[2];
-		st[0] = new State(0, true, false);
-		st[1] = new State(1, false, true);
+		st[0] = new State(true, false);
+		st[1] = new State(false, true);
 
 		states.add(st[0]);
 		states.add(st[1]);
@@ -83,11 +83,11 @@ public class ValidateStringTest {
 
 		for (int i = 0; i < 11; ++i) {
 			if (i == 0)
-				s = new State(i, true, false);
+				s = new State(true, false);
 			else if (i == 10)
-				s = new State(i, false, true);
+				s = new State(false, true);
 			else
-				s = new State(i, false, false);
+				s = new State(false, false);
 
 			st[i] = s;
 			states.add(s);

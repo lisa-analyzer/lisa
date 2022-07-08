@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Objects;
-
 /**
  * A class that describes an {@link Automaton} state.
  * 
@@ -9,11 +7,6 @@ import java.util.Objects;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public final class State {
-
-	/**
-	 * Identifier of this state
-	 */
-	private final int id;
 
 	/**
 	 * Whether this state is final
@@ -32,39 +25,31 @@ public final class State {
 	 * @param isInitial indicates if the state is initial.
 	 * @param isFinal   indicates if the state is final.
 	 */
-	public State(int id, boolean isInitial, boolean isFinal) {
-		this.id = id;
+	public State(boolean isInitial, boolean isFinal) {
 		this.isInitial = isInitial;
 		this.isFinal = isFinal;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, isFinal, isInitial);
+		return System.identityHashCode(this);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		State other = (State) obj;
-		return id == other.id && isFinal == other.isFinal && isInitial == other.isInitial;
+		return this == obj;
 	}
 
 	@Override
 	public String toString() {
 		if (!isFinal && !isInitial)
-			return "[" + id + "]";
+			return "[" + this.hashCode() + "]";
 		else if (!isFinal)
-			return "[" + id + ", initial]";
+			return "[" + this.hashCode() + ", initial]";
 		else if (!isInitial)
-			return "[" + id + ", final]";
+			return "[" + this.hashCode() + ", final]";
 		else
-			return "[" + id + ", initial, final]";
+			return "[" + this.hashCode() + ", initial, final]";
 	}
 
 	/**
@@ -83,15 +68,5 @@ public final class State {
 	 */
 	public boolean isInitial() {
 		return isInitial;
-	}
-
-	/**
-	 * Tells the id of the state such that it is possible to distinguish it from
-	 * other states.
-	 * 
-	 * @return state id
-	 */
-	public int getId() {
-		return id;
 	}
 }

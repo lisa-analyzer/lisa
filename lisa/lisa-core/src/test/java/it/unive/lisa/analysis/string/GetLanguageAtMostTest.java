@@ -17,7 +17,7 @@ public class GetLanguageAtMostTest {
 		expected.add("aa");
 		expected.add("aaa");
 
-		State q0 = new State(0, true, true);
+		State q0 = new State(true, true);
 		Set<State> sts = new HashSet<>();
 		sts.add(q0);
 

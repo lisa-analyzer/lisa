@@ -11,9 +11,9 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure001() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, false);
-		State q1 = new State(1, false, false);
-		State q2 = new State(2, false, true);
+		State q0 = new State(true, false);
+		State q1 = new State(false, false);
+		State q2 = new State(false, true);
 		states.add(q0);
 		states.add(q1);
 		states.add(q2);
@@ -35,10 +35,10 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure002() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, false);
-		State q1 = new State(1, false, false);
-		State q2 = new State(2, false, false);
-		State q3 = new State(3, false, true);
+		State q0 = new State(true, false);
+		State q1 = new State(false, false);
+		State q2 = new State(false, false);
+		State q3 = new State(false, true);
 		states.add(q0);
 		states.add(q1);
 		states.add(q2);
@@ -63,7 +63,7 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure003() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, true);
+		State q0 = new State(true, true);
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
@@ -80,7 +80,7 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure004() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, true);
+		State q0 = new State(true, true);
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
@@ -98,7 +98,7 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure005() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, true);
+		State q0 = new State(true, true);
 		states.add(q0);
 
 		Set<Transition> delta = new HashSet<>();
@@ -117,8 +117,8 @@ public class EpsilonClosureTest {
 	@Test
 	public void testEpsClosure006() {
 		Set<State> states = new HashSet<>();
-		State q0 = new State(0, true, false);
-		State q1 = new State(1, false, true);
+		State q0 = new State(true, false);
+		State q1 = new State(false, true);
 		states.add(q0);
 		states.add(q1);
 
