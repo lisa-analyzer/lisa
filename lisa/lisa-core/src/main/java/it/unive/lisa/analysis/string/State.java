@@ -20,8 +20,7 @@ public final class State {
 
 	/**
 	 * State constructor, it creates a new state with the given informations.
-	 * 
-	 * @param id        identifier of the new state.
+	 *
 	 * @param isInitial indicates if the state is initial.
 	 * @param isFinal   indicates if the state is final.
 	 */
