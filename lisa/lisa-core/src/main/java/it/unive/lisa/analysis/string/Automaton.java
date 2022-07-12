@@ -479,6 +479,11 @@ public final class Automaton {
 
 	}
 
+	/**
+	 * Returns all the outgoing transitions from a given state.
+	 * @param q the source of the transitions.
+	 * @return a Set containing all the outgoing transitions from the state q.
+	 */
 	private Set<Transition> getOutgoingTranstionsFrom(State q) {
 		return transitions.stream()
 				.filter(t -> t.getSource().equals(q))
