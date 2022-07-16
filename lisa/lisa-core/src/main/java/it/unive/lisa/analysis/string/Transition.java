@@ -32,20 +32,12 @@ public final class Transition {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(destination, source, symbol);
+		return System.identityHashCode(this);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Transition other = (Transition) obj;
-		return Objects.equals(destination, other.destination) && Objects.equals(source, other.source)
-				&& symbol == other.symbol;
+		return this == obj;
 	}
 
 	@Override
