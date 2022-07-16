@@ -1,13 +1,6 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -516,13 +509,37 @@ public final class Automaton {
 		if(hasCycle())
 			return lang;
 
-
+		// stack used to keep track of transitions that will be "visited"
+        // each element is a pair to keep track of old String and next Transition
+		LinkedList<AbstractMap.SimpleImmutableEntry<String, Transition>> stack = new LinkedList<>();
+		Set<State> initialStates = states.stream()
+				.filter(s -> s.isInitial())
+				.collect(Collectors.toSet());
+		// add initial states transitions to stack
+		for(State q : initialStates) {
+			for(Transition t : getOutgoingTranstionsFrom(q)) {
+				stack.addFirst(new AbstractMap.SimpleImmutableEntry<>("", t));
+			}
+		}
+		// generate all the strings and add them to lang
+		while(!stack.isEmpty()) {
+			AbstractMap.SimpleImmutableEntry<String, Transition> top = stack.removeFirst();
+			String currentString = top.getKey();
+			Transition tr = top.getValue();
+			// when there it finds a final state it adds the generated string to the language
+			if(tr.getDestination().isFinal())
+				lang.add(currentString + tr.getSymbol());
+			// adds all the possible path from current transition destination to the stack
+			else
+				for(Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
+					stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString, t));
+		}
 
 		return lang;
 	}
 
 	/**
-	 * Creates a new {@code Automaton} that is the same {@code this} but is complete.
+	 * Creates a new {@code Automaton} that is the same as {@code this} but is complete.
 	 */
 	public Automaton complete() {
 		Automaton result = new Automaton(this.states, this.transitions);
