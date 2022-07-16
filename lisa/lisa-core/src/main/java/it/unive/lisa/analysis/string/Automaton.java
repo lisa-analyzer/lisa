@@ -487,14 +487,25 @@ public final class Automaton {
 	 * Checks if the Automaton {@code this} has any cycle.
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
-	private boolean hasCycle() {
-		// collects the already visited states
+	boolean hasCycle() {
+		// visit the automaton to check if there is any cycle
+		Set<State> currentStates = states.stream()
+				.filter(s -> s.isInitial())
+				.collect(Collectors.toSet());
 		Set<State> visited = new HashSet<>();
-		for(State s : states) {
-			visited.add(s);
-			for(Transition t : getOutgoingTranstionsFrom(s))
-				if(visited.contains(t.getDestination()))
+		while(!visited.containsAll(states)) {
+			Set<State> temp = new HashSet<>();
+			for(State s : currentStates) {
+				temp.addAll(transitions.stream()
+						.filter(t -> t.getSource().equals(s))
+						.map(t -> t.getDestination())
+						.collect(Collectors.toSet()));
+			}
+			for(State s : temp)
+				if(visited.contains(s))
 					return true;
+			visited.addAll(currentStates);
+			currentStates = temp;
 		}
 
 		return false;
@@ -532,7 +543,7 @@ public final class Automaton {
 			// adds all the possible path from current transition destination to the stack
 			else
 				for(Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
-					stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString, t));
+					stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString + tr.getSymbol(), t));
 		}
 
 		return lang;
