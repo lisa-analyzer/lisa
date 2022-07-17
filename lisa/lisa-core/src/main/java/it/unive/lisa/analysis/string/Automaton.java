@@ -132,7 +132,7 @@ public final class Automaton {
 		Set<State> NS = new HashSet<>();
 		// used to store temporarily the states reached from the states in NS
 		Set<State> T;
-		Set<State> initialStates = (HashSet<State>) epsClosure();
+		Set<State> initialStates = epsClosure();
 
 		RS.addAll(initialStates);
 		NS.addAll(initialStates);
@@ -570,5 +570,36 @@ public final class Automaton {
 					result.transitions.add(new Transition(s, garbage, c));
 
 		return result;
+	}
+
+	/**
+	 * Return a new Automaton that accept a language that is the complementary language of {@code this}.
+	 * @return the complement Automaton of {@code this}.
+	 */
+	public Automaton complement() {
+		// states and transitions for the newly created automaton
+		Set<State> sts = new HashSet<>();
+		Set<Transition> delta = new HashSet<>();
+		// keep track of the corresponding newly created states
+		Map<State, State> oldToNew = new HashMap<>();
+
+		// creates all the new states
+		for(State s : states) {
+			boolean isInitial = false, isFinal = false;
+			if(s.isInitial())
+				isFinal = true;
+			if(s.isFinal())
+				isInitial = true;
+			State q = new State(isInitial, isFinal);
+			sts.add(q);
+			oldToNew.put(s, q);
+		}
+
+		// creates all the new transitions
+		for(Transition t : transitions) {
+			delta.add(new Transition(oldToNew.get(t.getSource()), oldToNew.get(t.getDestination()), t.getSymbol()));
+		}
+
+		return new Automaton(sts, delta);
 	}
 }
