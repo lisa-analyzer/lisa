@@ -540,9 +540,8 @@ public final class Automaton {
 			if(tr.getDestination().isFinal())
 				lang.add(currentString + tr.getSymbol());
 			// adds all the possible path from current transition destination to the stack
-			else
-				for(Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
-					stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString + tr.getSymbol(), t));
+			for(Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
+				stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString + tr.getSymbol(), t));
 		}
 
 		return lang;
@@ -551,24 +550,29 @@ public final class Automaton {
 	/**
 	 * Creates a new {@code Automaton} that is the same as {@code this} but is complete.
 	 */
-	public Automaton complete() {
-		Automaton result = new Automaton(this.states, this.transitions);
+	private Automaton complete() {
+		Set<State> newStates = new HashSet<>();
+		newStates.addAll(states);
+		Set<Transition> newTransitions = new HashSet<>();
+		newTransitions.addAll(transitions);
 		// add a new "garbage" state
 		State garbage = new State(false, false);
-		result.states.add(garbage);
+		newStates.add(garbage);
 		Set<String> alphabet = transitions.stream()
 				.map(Transition::getSymbol)
 				.collect(Collectors.toSet());
 
 		// adds all the transitions to the garbage state
-		for(State s : result.states)
-			for(String c : alphabet)
-				if(transitions.stream()
-						.map(t -> t.getSymbol())
-						.collect(Collectors.toSet()).isEmpty())
-					result.transitions.add(new Transition(s, garbage, c));
-
-		return result;
+		for(State s : newStates) {
+			for(String c : alphabet) {
+				Set<Transition> curr = newTransitions.stream()
+						.filter(t -> t.getSymbol().equals(c) && t.getSource().equals(s))
+						.collect(Collectors.toSet());
+				if (curr.isEmpty())
+					newTransitions.add(new Transition(s, garbage, c));
+			}
+		}
+		return new Automaton(newStates, newTransitions);
 	}
 
 	/**
@@ -581,7 +585,7 @@ public final class Automaton {
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
-		Automaton r = complete();
+		Automaton r = this.complete();
 
 		// creates all the new states
 		for(State s : r.states) {
