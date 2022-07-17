@@ -143,7 +143,6 @@ public final class Automaton {
 				T.addAll(transitions.stream()
 						.filter(t -> t.getSource().equals(q))
 						.map(t -> t.getDestination())
-						.filter(s -> !RS.contains(s))
 						.collect(Collectors.toSet()));
 			}
 			NS = T;
@@ -164,7 +163,7 @@ public final class Automaton {
 	 * @return a newly created automaton that accepts the reverse language of
 	 *             {@code this}.
 	 */
-	private Automaton reverse() {
+	public Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
 		Set<State> st = new HashSet<>();
 		// used to associate states of the Automaton this to the reverse one
