@@ -157,4 +157,27 @@ public class getLanguageTest {
 		Automaton a = new Automaton(states, delta);
 		assertEquals(a.getLanguage(), exp);
 	}
+
+	@Test
+	public void test07() {
+		Set<State> states = new HashSet<>();
+		State[] st = new State[4];
+		st[0] = new State(true, false);
+		st[1] = new State(false, true);
+		st[2] = new State(false, false);
+		st[3] = new State(false, true);
+		Collections.addAll(states, st);
+
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(st[0], st[1], "a"));
+		delta.add(new Transition(st[1], st[2], "b"));
+		delta.add(new Transition(st[2], st[3], "c"));
+
+		Set<String> exp = new HashSet<>();
+		exp.add("a");
+		exp.add("abc");
+
+		Automaton a = new Automaton(states, delta);
+		assertEquals(exp, a.getLanguage());
+	}
 }
