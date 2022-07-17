@@ -53,6 +53,13 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 */
 	private boolean hierarchyComputed;
 
+	/**
+	 * Builds an interface unit, defined at the given location.
+	 * 
+	 * @param location the location where the unit is define within the source
+	 *                     file
+	 * @param name     the name of the unit
+	 */
 	public InterfaceUnit(CodeLocation location, String name) {
 		super(name);
 		this.location = location;
@@ -67,16 +74,55 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return false;
 	}
 
+	/**
+	 * Yields the collection of instance {@link SignatureCFG}s defined in this
+	 * unit. Each cfg is uniquely identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
+	 * signature cfgs having the same signature in each unit. Signature cfgs
+	 * must be overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns signature cfgs
+	 *                              from superunits, transitively
+	 * 
+	 * @return the collection of signature cfgs
+	 */
 	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
 	}
 
+	/**
+	 * Yields the collection of instance {@link ImplementedCFG}s defined in this
+	 * unit. Each cfg is uniquely identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
+	 * instance cfgs having the same signature in each unit. Instance cfgs can
+	 * be overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
+	 *                              superunits, transitively
+	 * 
+	 * @return the collection of instance cfgs
+	 */
 	public final Collection<ImplementedCFG> getImplementedCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
 	}
 
+	/**
+	 * Yields the collection of instance {@link CFG}s defined in this unit. Each
+	 * cfg is uniquely identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
+	 * instance cfgs having the same signature in each unit. Instance cfgs can
+	 * be overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns cfgs from
+	 *                              superunits, transitively
+	 * 
+	 * @return the collection of cfgs
+	 */
 	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> true, true, false, traverseHierarchy);
+		return searchCodeMembers(cm -> cm instanceof CFG, true, false, traverseHierarchy);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -156,6 +202,18 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		hierarchyComputed = true;
 	}
 
+	/**
+	 * Adds a new instance {@link CFG}, identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), to this unit. Cfgs can be
+	 * overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param cfg the cfg to add
+	 * 
+	 * @return {@code true} if there was no cfg previously associated with the
+	 *             same signature, {@code false} otherwise. If this method
+	 *             returns {@code false}, the given cfg is discarded.
+	 */
 	public final boolean addInstanceCFG(CFG cfg) {
 		return instanceCFG.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
@@ -165,6 +223,14 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return superInterfaceUnits;
 	}
 
+	/**
+	 * Adds an instance unit to this interface unit.
+	 * 
+	 * @param unit the unit to be added
+	 * 
+	 * @throws ProgramValidationException if this interface unit already
+	 *                                        contains the unit to be added
+	 */
 	protected final void addInstance(Unit unit) throws ProgramValidationException {
 		if (superInterfaceUnits.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
@@ -175,7 +241,8 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 			sup.addInstance(unit);
 	}
 
-	public final boolean isInstanceOf(InterfaceUnit unit) {
+	@Override
+	public final boolean isInstanceOf(UnitWithSuperUnits unit) {
 		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
 				: superInterfaceUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
 	}
@@ -185,6 +252,16 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		return location;
 	}
 
+	/**
+	 * Yields the collection of instance {@link Global}s defined in this unit.
+	 * Each global is uniquely identified by its name, meaning that there are no
+	 * two instance globals having the same name in each unit.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns instance globals
+	 *                              from superunits, transitively
+	 * 
+	 * @return the collection of instance globals
+	 */
 	public final Collection<Global> getInstanceGlobals(boolean traverseHierarchy) {
 		return searchGlobals(g -> true, traverseHierarchy);
 	}
@@ -210,16 +287,9 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	@Override
-	public boolean isInstanceOf(UnitWithSuperUnits unit) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	@Override
 	public Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
 		Set<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
 		all.addAll(getSignatureCFGs(traverseHierarchy));
-//		all.addAll(getInstanceConstructs(traverseHierarchy));
 		return all;
 	}
 }

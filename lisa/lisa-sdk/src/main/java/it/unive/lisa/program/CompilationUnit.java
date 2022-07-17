@@ -185,6 +185,19 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
 	}
 
+	/**
+	 * Yields the collection of instance {@link SignatureCFG}s defined in this
+	 * unit. Each cfg is uniquely identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
+	 * signature cfgs having the same signature in each unit. Signature cfgs
+	 * must be overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns signature cfgs
+	 *                              from superunits, transitively
+	 * 
+	 * @return the collection of signature cfgs
+	 */
 	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
 	}
@@ -699,6 +712,18 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		return !abstractUnit;
 	}
 
+	/**
+	 * Adds a new instance {@link SignatureCFG}, identified by its signature
+	 * ({@link CFGDescriptor#getSignature()}), to this unit. Signature cfgs must
+	 * be overridden inside subunits, according to
+	 * {@link CFGDescriptor#isOverridable()}.
+	 * 
+	 * @param cfg the cfg to add
+	 * 
+	 * @return {@code true} if there was no signature cfg previously associated
+	 *             with the same signature, {@code false} otherwise. If this
+	 *             method returns {@code false}, the given cfg is discarded.
+	 */
 	public boolean addSignatureCFG(SignatureCFG cfg) {
 		SignatureCFG c = signatureCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
 		if (c == null)

@@ -14,22 +14,30 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-//TODO: consider to remove this class and keep the ClassType type
+/**
+ * A type representing an IMP interface defined in an IMP program. Interface
+ * type are instances of {@link UnitType}, and are identified by their name. To
+ * ensure uniqueness of InterfaceType objects,
+ * {@link #lookup(String, InterfaceUnit)} must be used to retrieve existing
+ * instances (or automatically create one if no matching instance exists).
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ */
 public final class InterfaceType implements UnitType {
 
 	private static final Map<String, InterfaceType> types = new HashMap<>();
 
 	/**
-	 * Clears the cache of {@link ClassType}s created up to now.
+	 * Clears the cache of {@link InterfaceType}s created up to now.
 	 */
 	public static void clearAll() {
 		types.clear();
 	}
 
 	/**
-	 * Yields all the {@link ClassType}s defined up to now.
+	 * Yields all the {@link InterfaceType}s defined up to now.
 	 * 
-	 * @return the collection of all the class types
+	 * @return the collection of all the interface types
 	 */
 	public static Collection<InterfaceType> all() {
 		return types.values();
@@ -37,14 +45,14 @@ public final class InterfaceType implements UnitType {
 
 	/**
 	 * Yields a unique instance (either an existing one or a fresh one) of
-	 * {@link ClassType} representing a class with the given {@code name},
-	 * representing the given {@code unit}.
+	 * {@link InterfaceType} representing an interface with the given
+	 * {@code name}, representing the given {@code unit}.
 	 * 
-	 * @param name the name of the class
+	 * @param name the name of the interface
 	 * @param unit the unit underlying this type
 	 * 
-	 * @return the unique instance of {@link ClassType} representing the class
-	 *             with the given name
+	 * @return the unique instance of {@link InterfaceType} representing the
+	 *             interface with the given name
 	 */
 	public static InterfaceType lookup(String name, InterfaceUnit unit) {
 		return types.computeIfAbsent(name, x -> new InterfaceType(name, unit));
@@ -148,7 +156,7 @@ public final class InterfaceType implements UnitType {
 			if (un instanceof InterfaceUnit)
 				instances.add(lookup(un.getName(), null));
 			else
-				instances.add(ClassType.lookup(un.getName(), null));
+				instances.add(InterfaceType.lookup(un.getName(), null));
 		return instances;
 	}
 }

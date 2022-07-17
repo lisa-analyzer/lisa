@@ -5,15 +5,25 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * An unit of the program to analyze with super unit.
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
+ */
 public abstract class UnitWithSuperUnits extends Unit {
 
 	/**
 	 * The lazily computed collection of instances of this unit, that is, the
 	 * collection of compilation units that directly or indirectly inherit from
-	 * this unit
+	 * this unit.
 	 */
 	protected final Collection<Unit> instances;
 
+	/**
+	 * Builds an unit with super unit.
+	 * 
+	 * @param name the name of the unit
+	 */
 	protected UnitWithSuperUnits(String name) {
 		super(name);
 		instances = Collections.newSetFromMap(new ConcurrentHashMap<>());
@@ -47,6 +57,13 @@ public abstract class UnitWithSuperUnits extends Unit {
 		return instances;
 	}
 
+	/**
+	 * Yields the collection of {@link UnitWithSuperUnits}s that are superunit
+	 * of this one, including itself.
+	 * 
+	 * @return the collection of units that are superunits of this one,
+	 *             including this unit itself
+	 */
 	public abstract Collection<? extends UnitWithSuperUnits> getSuperUnits();
 
 	/**

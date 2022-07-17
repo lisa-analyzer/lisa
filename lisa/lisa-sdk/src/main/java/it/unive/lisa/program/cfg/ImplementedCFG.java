@@ -27,7 +27,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
@@ -646,8 +645,7 @@ public class ImplementedCFG extends CodeGraph<ImplementedCFG, Statement, Edge> i
 	}
 
 	/**
-	 * Validates this cfg, ensuring that the code contained in it is well
-	 * formed. This method checks that:
+	 * {@inheritDoc} This method checks that:
 	 * <ul>
 	 * <li>the underlying adjacency matrix is valid, through
 	 * {@link AdjacencyMatrix#validate(Collection)}</li>
@@ -659,10 +657,8 @@ public class ImplementedCFG extends CodeGraph<ImplementedCFG, Statement, Edge> i
 	 * execution (according to {@link Statement#stopsExecution()})</li>
 	 * <li>all entrypoints are effectively part of this cfg</li>
 	 * </ul>
-	 * 
-	 * @throws ProgramValidationException if one of the aforementioned checks
-	 *                                        fail
 	 */
+	@Override
 	public void validate() throws ProgramValidationException {
 		try {
 			list.validate(entrypoints);
