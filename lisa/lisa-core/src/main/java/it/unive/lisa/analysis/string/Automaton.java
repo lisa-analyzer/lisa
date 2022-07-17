@@ -564,7 +564,7 @@ public final class Automaton {
 		for(State s : result.states)
 			for(String c : alphabet)
 				if(transitions.stream()
-						.map(Transition::getSymbol)
+						.map(t -> t.getSymbol())
 						.collect(Collectors.toSet()).isEmpty())
 					result.transitions.add(new Transition(s, garbage, c));
 
@@ -581,21 +581,18 @@ public final class Automaton {
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
+		Automaton r = complete();
 
 		// creates all the new states
-		for(State s : states) {
-			boolean isInitial = false, isFinal = false;
-			if(s.isInitial())
-				isFinal = true;
-			if(s.isFinal())
-				isInitial = true;
-			State q = new State(isInitial, isFinal);
+		for(State s : r.states) {
+			// make final as non final and non final as final
+			State q = new State(s.isInitial(), !s.isFinal());
 			sts.add(q);
 			oldToNew.put(s, q);
 		}
 
 		// creates all the new transitions
-		for(Transition t : transitions) {
+		for(Transition t : r.transitions) {
 			delta.add(new Transition(oldToNew.get(t.getSource()), oldToNew.get(t.getDestination()), t.getSymbol()));
 		}
 
