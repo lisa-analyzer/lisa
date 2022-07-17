@@ -563,15 +563,12 @@ public final class Automaton {
 				.collect(Collectors.toSet());
 
 		// adds all the transitions to the garbage state
-		for(State s : newStates) {
-			for(String c : alphabet) {
-				Set<Transition> curr = newTransitions.stream()
+		for(State s : newStates)
+			for(String c : alphabet)
+				if (newTransitions.stream()
 						.filter(t -> t.getSymbol().equals(c) && t.getSource().equals(s))
-						.collect(Collectors.toSet());
-				if (curr.isEmpty())
+						.collect(Collectors.toSet()).isEmpty())
 					newTransitions.add(new Transition(s, garbage, c));
-			}
-		}
 		return new Automaton(newStates, newTransitions);
 	}
 
