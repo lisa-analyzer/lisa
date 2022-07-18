@@ -599,4 +599,17 @@ public final class Automaton {
 
 		return new Automaton(sts, delta);
 	}
+
+	/**
+	 * Returns the Automaton that accepts the language that is the intersection between the language of {@code this} and another Automaton.
+	 * @param other the Automaton used for intersection with this.
+	 * @return a new Automaton accepting the language which is the intersection between the language of {@code this} and {@code other}'s langauge.
+	 */
+	public Automaton intersection(Automaton other) {
+		if(this == other)
+			return this;
+
+		// De Morgan's rule A && B = ¬(¬A || ¬B)
+		return complement().union(other.complement()).complement();
+	}
 }
