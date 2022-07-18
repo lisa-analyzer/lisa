@@ -593,9 +593,8 @@ public final class Automaton {
 		}
 
 		// creates all the new transitions
-		for(Transition t : r.transitions) {
+		for(Transition t : r.transitions)
 			delta.add(new Transition(oldToNew.get(t.getSource()), oldToNew.get(t.getDestination()), t.getSymbol()));
-		}
 
 		return new Automaton(sts, delta);
 	}
