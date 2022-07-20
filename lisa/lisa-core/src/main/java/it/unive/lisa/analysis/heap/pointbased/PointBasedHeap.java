@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -111,6 +112,11 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	@Override
 	public PointBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
 		return from(new PointBasedHeap(heapEnv.forgetIdentifier(id)));
+	}
+
+	@Override
+	public PointBasedHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		return from(new PointBasedHeap(heapEnv.forgetIdentifiersIf(test)));
 	}
 
 	@Override

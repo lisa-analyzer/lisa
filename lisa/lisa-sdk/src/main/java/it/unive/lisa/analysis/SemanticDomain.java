@@ -4,6 +4,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.function.Predicate;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -77,6 +78,19 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	D forgetIdentifier(Identifier id) throws SemanticException;
+
+	/**
+	 * Forgets all {@link Identifier}s that match the given predicate. This
+	 * means that all information regarding the those identifiers will be lost.
+	 * This method should be invoked whenever an identifier gets out of scope.
+	 * 
+	 * @param test the test to identify the targets of the removal
+	 * 
+	 * @return the semantic domain without information about the ids
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	D forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException;
 
 	/**
 	 * Forgets all the given {@link Identifier}s. The default implementation of
