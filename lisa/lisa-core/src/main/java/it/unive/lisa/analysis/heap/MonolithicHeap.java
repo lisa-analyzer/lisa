@@ -23,6 +23,7 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -80,6 +81,11 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	@Override
 	public MonolithicHeap forgetIdentifier(Identifier id) throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public MonolithicHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		return this;
 	}
 
