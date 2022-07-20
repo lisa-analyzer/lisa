@@ -17,7 +17,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -287,6 +289,19 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		M result = copy();
 		if (result.function.containsKey(id))
 			result.function.remove(id);
+
+		return result;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public M forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		if (isTop() || isBottom())
+			return (M) this;
+
+		M result = copy();
+		Set<Identifier> keys = result.function.keySet().stream().filter(test::test).collect(Collectors.toSet());
+		keys.forEach(result.function::remove);
 
 		return result;
 	}

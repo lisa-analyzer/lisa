@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -269,6 +270,11 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	@Override
 	public AnalysisState<A, H, V, T> forgetIdentifier(Identifier id) throws SemanticException {
 		return new AnalysisState<>(state.forgetIdentifier(id), computedExpressions, aliasing);
+	}
+
+	@Override
+	public AnalysisState<A, H, V, T> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		return new AnalysisState<>(state.forgetIdentifiersIf(test), computedExpressions, aliasing);
 	}
 
 	@Override

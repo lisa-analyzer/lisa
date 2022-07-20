@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.function.Predicate;
 
 /**
  * A generic Cartesian product abstract domain between two non-communicating
@@ -158,6 +159,13 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	public C forgetIdentifier(Identifier id) throws SemanticException {
 		T1 newLeft = left.forgetIdentifier(id);
 		T2 newRight = right.forgetIdentifier(id);
+		return mk(newLeft, newRight);
+	}
+
+	@Override
+	public C forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		T1 newLeft = left.forgetIdentifiersIf(test);
+		T2 newRight = right.forgetIdentifiersIf(test);
 		return mk(newLeft, newRight);
 	}
 

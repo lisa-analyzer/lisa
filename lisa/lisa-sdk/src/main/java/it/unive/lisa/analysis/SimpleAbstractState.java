@@ -13,6 +13,7 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the
@@ -237,6 +238,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				heapState.forgetIdentifier(id),
 				valueState.forgetIdentifier(id),
 				typeState.forgetIdentifier(id));
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.forgetIdentifiersIf(test),
+				valueState.forgetIdentifiersIf(test),
+				typeState.forgetIdentifiersIf(test));
 	}
 
 	@Override
