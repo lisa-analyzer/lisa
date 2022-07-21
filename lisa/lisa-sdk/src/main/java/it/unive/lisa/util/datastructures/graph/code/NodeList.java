@@ -167,10 +167,17 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 			cutoff.remove(target);
 		}
 
+		nodes.remove(node);
+		// need to shift all successive cutoff back by one
+		List<Integer> interesting = cutoff.stream().filter(i -> i >= target).sorted().collect(Collectors.toList());
+		cutoff.removeAll(interesting);
+		interesting.forEach(i -> cutoff.add(i - 1));
+
 		if (target != 0)
-			if (target != nodes.size() - 1) {
+			if (target != nodes.size()) { // we don't remove 1 since we want to
+											// compare wrt the 'old' position
 				N pred = nodes.get(target - 1);
-				N succ = nodes.get(target + 1);
+				N succ = nodes.get(target); // before was at target+1
 				NodeEdges<G, N, E> predEdges = extraEdges.get(pred);
 				if (predEdges != null) {
 					E seq = sequentialSingleton.newInstance(pred, succ);
@@ -183,12 +190,6 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 				} else
 					cutoff.add(target - 1);
 			}
-
-		nodes.remove(node);
-		// need to shift all successive cutoff back by one
-		List<Integer> interesting = cutoff.stream().filter(i -> i > target).sorted().collect(Collectors.toList());
-		cutoff.removeAll(interesting);
-		interesting.forEach(i -> cutoff.add(i - 1));
 
 		recomputeOffsets();
 	}
@@ -252,19 +253,20 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 		if (e.isUnconditional() && src == dest - 1)
 			// just add the cutoff
 			cutoff.add(src);
-		else {
-			NodeEdges<G, N, E> edges = extraEdges.get(e.getSource());
-			if (edges != null) {
-				edges.outgoing.remove(e);
-				if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
-					extraEdges.remove(e.getSource());
-			}
-			edges = extraEdges.get(e.getDestination());
-			if (edges != null) {
-				edges.ingoing.remove(e);
-				if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
-					extraEdges.remove(e.getDestination());
-			}
+
+		// the edge might still be inside the extraEdges
+		// if this method has been invoked by removeNode
+		NodeEdges<G, N, E> edges = extraEdges.get(e.getSource());
+		if (edges != null) {
+			edges.outgoing.remove(e);
+			if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
+				extraEdges.remove(e.getSource());
+		}
+		edges = extraEdges.get(e.getDestination());
+		if (edges != null) {
+			edges.ingoing.remove(e);
+			if (edges.ingoing.isEmpty() && edges.outgoing.isEmpty())
+				extraEdges.remove(e.getDestination());
 		}
 	}
 

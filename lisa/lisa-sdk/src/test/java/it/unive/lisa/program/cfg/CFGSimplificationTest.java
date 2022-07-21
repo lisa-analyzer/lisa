@@ -315,4 +315,38 @@ public class CFGSimplificationTest {
 		ControlFlowStructure act = first.getControlFlowStructures().iterator().next();
 		assertEquals("Simplification did not update control flow structures", exp, act);
 	}
+
+	@Test
+	public void testIssue210() throws ProgramValidationException {
+		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
+		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
+		CompilationUnit unit = new CompilationUnit(unknownLocation, "foo", false);
+		CFG first = new CFG(new CFGDescriptor(unknownLocation, unit, true, "foo"));
+		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Int32Literal(first, unknownLocation, 5));
+		GreaterThan gt = new GreaterThan(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
+				new Int32Literal(first, unknownLocation, 2));
+		NoOp noop = new NoOp(first, unknownLocation);
+		Length print1 = new Length(first, unknownLocation, new StringLiteral(first, unknownLocation, "f"));
+		Return ret1 = new Return(first, unknownLocation, new VariableRef(first, unknownLocation, "x"));
+
+		Length print2 = new Length(first, unknownLocation2, new StringLiteral(first, unknownLocation2, "f"));
+		Return ret2 = new Return(first, unknownLocation2, new VariableRef(first, unknownLocation2, "f"));
+
+		first.addNode(assign, true);
+		first.addNode(gt);
+		first.addNode(noop);
+		first.addNode(print1);
+		first.addNode(ret1);
+		first.addNode(print2);
+		first.addNode(ret2);
+		first.addEdge(new SequentialEdge(assign, gt));
+		first.addEdge(new TrueEdge(gt, print1));
+		first.addEdge(new SequentialEdge(print1, ret1));
+		first.addEdge(new FalseEdge(gt, print2));
+		first.addEdge(new SequentialEdge(print2, ret2));
+
+		first.simplify();
+		first.validate();
+	}
 }
