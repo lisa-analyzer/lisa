@@ -633,7 +633,7 @@ public final class Automaton {
 	 * @return a boolean value that points out if the automaton is contained or not
 	 */
 	public boolean contains(Automaton other) {
-		return intersection(other.complement()).acceptsEmptyLanguage();
+		return intersection(other.complement()).getLanguage().isEmpty();
 	}
 
 	public boolean isEqual(Automaton other) {
