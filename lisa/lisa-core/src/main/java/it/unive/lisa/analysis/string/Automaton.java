@@ -141,8 +141,8 @@ public final class Automaton {
 
 			for (State q : NS) {
 				T.addAll(transitions.stream()
-						.filter(t -> t.getSource().equals(q))
-						.map(t -> t.getDestination())
+						.filter(t -> t.getSource().equals(q) && !RS.contains(t.getDestination()))
+						.map(Transition::getDestination)
 						.collect(Collectors.toSet()));
 			}
 			NS = T;
@@ -180,6 +180,7 @@ public final class Automaton {
 			// add association between the newly created state and the state of the automaton this
 			revStates.put(s, q);
 		}
+
 		// create transitions using the new states of the reverse automaton
 		for (Transition t : transitions)
 			tr.add(new Transition(revStates.get(t.getDestination()), revStates.get(t.getSource()), t.getSymbol()));
@@ -200,12 +201,12 @@ public final class Automaton {
 		// transitions of the new deterministic automaton
 		Set<Transition> delta = new HashSet<>();
 		// states of the new deterministic automaton
-		Set<State> states = new HashSet<>();
+		Set<State> sts = new HashSet<>();
 		// store the macrostates of the new Automaton
-		List<HashSet<State>> detStates = new ArrayList<>();
+		List<Set<State>> detStates = new ArrayList<>();
 		// used to map the macrostate with the corresponding state of the new automaton
-		Map<State, HashSet<State>> stateToMacro = new HashMap<>();
-		Map<HashSet<State>, State> macroToState = new HashMap<>();
+		Map<State, Set<State>> stateToMacro = new HashMap<>();
+		Map<Set<State>, State> macroToState = new HashMap<>();
 		// stores the already controlled states
 		Set<State> marked = new HashSet<>();
 		// automaton alphabet
@@ -215,7 +216,7 @@ public final class Automaton {
 				.collect(Collectors.toSet());
 
 		// the first macrostate is the one associated with the epsilon closure of the initial states
-		HashSet<State> initialStates = (HashSet<State>) epsClosure();
+		Set<State> initialStates = epsClosure();
 		detStates.add(initialStates);
 		State q = null;
 		for(State s : initialStates)
@@ -225,15 +226,15 @@ public final class Automaton {
 			}
 		if(q == null)
 			q = new State(true, false);
-		states.add(q);
+		sts.add(q);
 		stateToMacro.put(q, initialStates);
 		macroToState.put(initialStates, q);
 		// used to keep track of current state
 		State current = q;
 
 		// iterate until all the states have been checked
-		while (!marked.equals(states)) {
-			for (State s : states) {
+		while (!marked.equals(sts)) {
+			for (State s : sts) {
 				// get the first state that has not been checked yet
 				if (!marked.contains(s)) {
 					marked.add(s);
@@ -258,21 +259,22 @@ public final class Automaton {
 					// make nq final if any of the state in the correspondent macrostate is final
 					for(State s : R)
 						if(s.isFinal()) {
-							nq = new State(true, true);
+							nq = new State(false, true);
 							break;
 						}
 					if(nq == null)
-						nq = new State(true, false);
-					states.add(nq);
+						nq = new State(false, false);
+					sts.add(nq);
 					stateToMacro.put(nq, currentStates);
 					macroToState.put(currentStates, nq);
 				}
 				// add transition from currStates macrostate to R that is destination macrostate
-				delta.add(new Transition(macroToState.get(currStates), macroToState.get(R), c));
+				if(!R.isEmpty())
+					delta.add(new Transition(macroToState.get(currStates), macroToState.get(R), c));
 			}
 		}
 
-		Automaton det = new Automaton(states, delta);
+		Automaton det = new Automaton(sts, delta);
 		det.IS_DETERMINIZED = true;
 		return det;
 	}
@@ -582,7 +584,7 @@ public final class Automaton {
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
-		Automaton r = this.complete();
+		Automaton r = this.determinize().complete();
 
 		// creates all the new states
 		for(State s : r.states) {
@@ -609,6 +611,6 @@ public final class Automaton {
 			return this;
 
 		// De Morgan's rule A && B = ¬(¬A || ¬B)
-		return complement().union(other.complement()).complement();
+		return complement().union(other.complement()).minimize().complement();
 	}
 }
