@@ -70,9 +70,8 @@ public final class Automaton {
 	 * {@code str}.
 	 *
 	 * @param str String that has to be checked.
-	 *
 	 * @return a boolean value that indicates either if {@code str} has been
-	 *             accepted or not.
+	 * accepted or not.
 	 */
 	public boolean validateString(String str) {
 		// stores all the possible states reached by the automaton after each
@@ -108,7 +107,7 @@ public final class Automaton {
 	 * Brzozowski minimization algorithm.
 	 *
 	 * @return the minimum automaton that accepts the same language as
-	 *             {@code this}.
+	 * {@code this}.
 	 */
 	public Automaton minimize() {
 		if (IS_MINIMIZED)
@@ -123,7 +122,7 @@ public final class Automaton {
 	 * Remove all the unreachable states from the current automaton.
 	 *
 	 * @return a newly created automaton without the unreachable states of
-	 *             {@code this}.
+	 * {@code this}.
 	 */
 	private Automaton reach() {
 		// stores the reached states of the automaton
@@ -161,7 +160,7 @@ public final class Automaton {
 	 * Creates an automaton that accept the reverse language.
 	 *
 	 * @return a newly created automaton that accepts the reverse language of
-	 *             {@code this}.
+	 * {@code this}.
 	 */
 	public Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
@@ -192,7 +191,7 @@ public final class Automaton {
 	 * Creates a deterministic automaton starting from {@code this}.
 	 *
 	 * @return a newly deterministic automaton that accepts the same language as
-	 *             {@code this}.
+	 * {@code this}.
 	 */
 	Automaton determinize() {
 		if (IS_DETERMINIZED)
@@ -219,12 +218,12 @@ public final class Automaton {
 		Set<State> initialStates = epsClosure();
 		detStates.add(initialStates);
 		State q = null;
-		for(State s : initialStates)
-			if(s.isFinal()) {
+		for (State s : initialStates)
+			if (s.isFinal()) {
 				q = new State(true, true);
 				break;
 			}
-		if(q == null)
+		if (q == null)
 			q = new State(true, false);
 		sts.add(q);
 		stateToMacro.put(q, initialStates);
@@ -257,19 +256,19 @@ public final class Automaton {
 					detStates.add(currentStates);
 					State nq = null;
 					// make nq final if any of the state in the correspondent macrostate is final
-					for(State s : R)
-						if(s.isFinal()) {
+					for (State s : R)
+						if (s.isFinal()) {
 							nq = new State(false, true);
 							break;
 						}
-					if(nq == null)
+					if (nq == null)
 						nq = new State(false, false);
 					sts.add(nq);
 					stateToMacro.put(nq, currentStates);
 					macroToState.put(currentStates, nq);
 				}
 				// add transition from currStates macrostate to R that is destination macrostate
-				if(!R.isEmpty())
+				if (!R.isEmpty())
 					delta.add(new Transition(macroToState.get(currStates), macroToState.get(R), c));
 			}
 		}
@@ -285,7 +284,7 @@ public final class Automaton {
 	 * states just with epsilon transitions.
 	 *
 	 * @return the set of states that are reachable from all the initial states
-	 *             just with epsilon transitions.
+	 * just with epsilon transitions.
 	 */
 	Set<State> epsClosure() {
 		return epsClosure(states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()));
@@ -297,10 +296,9 @@ public final class Automaton {
 	 * {@code state} just with epsilon transitions.
 	 *
 	 * @param state the state from which the method starts to compute the
-	 *                  epsilon closure
-	 *
+	 *              epsilon closure
 	 * @return the set of states that are reachable from {@code state} just with
-	 *             epsilon transitions.
+	 * epsilon transitions.
 	 */
 	Set<State> epsClosure(State state) {
 		Set<State> eps = new HashSet<>();
@@ -342,9 +340,8 @@ public final class Automaton {
 	 * {@code st} just with epsilon transitions.
 	 *
 	 * @param st the set of states from which the epsilon closure is computed.
-	 *
 	 * @return the set of states that are reachable from {@code state} just with
-	 *             epsilon transitions.
+	 * epsilon transitions.
 	 */
 	private Set<State> epsClosure(Set<State> st) {
 		Set<State> eps = new HashSet<>();
@@ -357,6 +354,7 @@ public final class Automaton {
 
 	/**
 	 * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+	 *
 	 * @param other the other automaton
 	 * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
 	 */
@@ -419,7 +417,6 @@ public final class Automaton {
 	 * {@code this} of length from 1 to {@code length}.
 	 *
 	 * @param length the maximum length of the strings to be returned
-	 *
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
 	public Set<String> getLanguageAtMost(int length) {
@@ -439,15 +436,15 @@ public final class Automaton {
 	 *
 	 * @param q      state from which the strings are computed
 	 * @param length maximum length of the computed strings
-	 *
 	 * @return a set containing a subset of strings accepted by {@code this}
-	 *             starting from the state {@code q} of maximum length
-	 *             {@code length}.
+	 * starting from the state {@code q} of maximum length
+	 * {@code length}.
 	 */
 	public Set<String> getLanguageAtMost(State q, int length) {
 
 		if (length == 0)
-			return new HashSet<>();;
+			return new HashSet<>();
+		;
 
 		Set<State> ws = Collections.singleton(q);
 		Set<String> lang = new HashSet<>();
@@ -455,7 +452,8 @@ public final class Automaton {
 
 		while (length > 0) {
 
-			Set<Transition> outgoing = new HashSet<>();;
+			Set<Transition> outgoing = new HashSet<>();
+			;
 			for (State s : ws)
 				outgoing.addAll(getOutgoingTranstionsFrom(s));
 
@@ -475,6 +473,7 @@ public final class Automaton {
 
 	/**
 	 * Returns all the outgoing transitions from a given state.
+	 *
 	 * @param q the source of the transitions.
 	 * @return a Set containing all the outgoing transitions from the state q.
 	 */
@@ -486,6 +485,7 @@ public final class Automaton {
 
 	/**
 	 * Checks if the Automaton {@code this} has any cycle.
+	 *
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	boolean hasCycle() {
@@ -494,16 +494,16 @@ public final class Automaton {
 				.filter(s -> s.isInitial())
 				.collect(Collectors.toSet());
 		Set<State> visited = new HashSet<>();
-		while(!visited.containsAll(states)) {
+		while (!visited.containsAll(states)) {
 			Set<State> temp = new HashSet<>();
-			for(State s : currentStates) {
+			for (State s : currentStates) {
 				temp.addAll(transitions.stream()
 						.filter(t -> t.getSource().equals(s))
 						.map(t -> t.getDestination())
 						.collect(Collectors.toSet()));
 			}
-			for(State s : temp)
-				if(visited.contains(s))
+			for (State s : temp)
+				if (visited.contains(s))
 					return true;
 			visited.addAll(currentStates);
 			currentStates = temp;
@@ -514,35 +514,36 @@ public final class Automaton {
 
 	/**
 	 * Returns the language accepted by {@code this}.
+	 *
 	 * @return a set representing the language accepted by the Automaton {@code this}.
 	 */
 	Set<String> getLanguage() {
 		Set<String> lang = new HashSet<>();
-		if(hasCycle())
+		if (hasCycle())
 			return lang;
 
 		// stack used to keep track of transitions that will be "visited"
-        // each element is a pair to keep track of old String and next Transition
+		// each element is a pair to keep track of old String and next Transition
 		LinkedList<AbstractMap.SimpleImmutableEntry<String, Transition>> stack = new LinkedList<>();
 		Set<State> initialStates = states.stream()
 				.filter(s -> s.isInitial())
 				.collect(Collectors.toSet());
 		// add initial states transitions to stack
-		for(State q : initialStates) {
-			for(Transition t : getOutgoingTranstionsFrom(q)) {
+		for (State q : initialStates) {
+			for (Transition t : getOutgoingTranstionsFrom(q)) {
 				stack.addFirst(new AbstractMap.SimpleImmutableEntry<>("", t));
 			}
 		}
 		// generate all the strings and add them to lang
-		while(!stack.isEmpty()) {
+		while (!stack.isEmpty()) {
 			AbstractMap.SimpleImmutableEntry<String, Transition> top = stack.removeFirst();
 			String currentString = top.getKey();
 			Transition tr = top.getValue();
 			// when there it finds a final state it adds the generated string to the language
-			if(tr.getDestination().isFinal())
+			if (tr.getDestination().isFinal())
 				lang.add(currentString + tr.getSymbol());
 			// adds all the possible path from current transition destination to the stack
-			for(Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
+			for (Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
 				stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString + tr.getSymbol(), t));
 		}
 
@@ -565,8 +566,8 @@ public final class Automaton {
 				.collect(Collectors.toSet());
 
 		// adds all the transitions to the garbage state
-		for(State s : newStates)
-			for(String c : alphabet)
+		for (State s : newStates)
+			for (String c : alphabet)
 				if (newTransitions.stream()
 						.filter(t -> t.getSymbol().equals(c) && t.getSource().equals(s))
 						.collect(Collectors.toSet()).isEmpty())
@@ -576,6 +577,7 @@ public final class Automaton {
 
 	/**
 	 * Return a new Automaton that accept a language that is the complementary language of {@code this}.
+	 *
 	 * @return the complement Automaton of {@code this}.
 	 */
 	public Automaton complement() {
@@ -587,15 +589,14 @@ public final class Automaton {
 		Automaton r = this.determinize().complete();
 
 		// creates all the new states
-		for(State s : r.states) {
+		for (State s : r.states) {
 			// make final as non final and non final as final
 			State q = new State(s.isInitial(), !s.isFinal());
 			sts.add(q);
 			oldToNew.put(s, q);
 		}
-
 		// creates all the new transitions
-		for(Transition t : r.transitions)
+		for (Transition t : r.transitions)
 			delta.add(new Transition(oldToNew.get(t.getSource()), oldToNew.get(t.getDestination()), t.getSymbol()));
 
 		return new Automaton(sts, delta);
@@ -603,14 +604,39 @@ public final class Automaton {
 
 	/**
 	 * Returns the Automaton that accepts the language that is the intersection between the language of {@code this} and another Automaton.
+	 *
 	 * @param other the Automaton used for intersection with this.
 	 * @return a new Automaton accepting the language which is the intersection between the language of {@code this} and {@code other}'s langauge.
 	 */
 	public Automaton intersection(Automaton other) {
-		if(this == other)
+		if (this == other)
 			return this;
 
 		// De Morgan's rule A && B = ¬(¬A || ¬B)
 		return complement().union(other.complement()).minimize().complement();
+	}
+
+	public boolean acceptsEmptyLanguage() {
+
+		for(State s : states.stream()
+				.filter(q -> q.isInitial())
+				.collect(Collectors.toSet()))
+			if(s.isFinal())
+				return true;
+
+		return false;
+	}
+
+	/**
+	 * Checks if the automaton {@code this} contains the automaton {@code other}
+	 * @param other the other automaton
+	 * @return a boolean value that points out if the automaton is contained or not
+	 */
+	public boolean contains(Automaton other) {
+		return intersection(other.complement()).acceptsEmptyLanguage();
+	}
+
+	public boolean isEqual(Automaton other) {
+		return contains(other) && other.contains(this);
 	}
 }
