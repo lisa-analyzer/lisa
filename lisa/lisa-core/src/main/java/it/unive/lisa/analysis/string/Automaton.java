@@ -369,42 +369,45 @@ public final class Automaton {
 		Map<State, State> thisInitMapping = new HashMap<>();
 		Map<State, State> otherInitMapping = new HashMap<>();
 
-		for (State s : states)
+		Map<State, State> thisMapping = new HashMap<>();
+		Map<State, State> otherMapping = new HashMap<>();
+
+		for (State s : states) {
+			State st = new State(false, s.isFinal());
+			thisMapping.put(s, st);
 			if (s.isInitial()) {
-				State st = new State(false, s.isFinal());
 				sts.add(st);
 				thisInitMapping.put(s, st);
 			} else
-				sts.add(s);
+				sts.add(st);
+		}
 
-		for (State s : other.states)
+		for (State s : other.states) {
+			State st = new State(false, s.isFinal());
+			otherMapping.put(s, st);
 			if (s.isInitial()) {
-				State st = new State(false, s.isFinal());
 				sts.add(st);
 				otherInitMapping.put(s, st);
-			} else
-				sts.add(s);
+			} else {
+				sts.add(st);
+			}
+		}
 
 		State q0 = new State(true, false);
+		sts.add(q0);
 
 		for (State s : sts)
-
 			if (thisInitMapping.values().contains(s) || otherInitMapping.values().contains(s))
 				ts.add(new Transition(q0, s, ""));
 
-		sts.add(q0);
 
-		for (Transition t : transitions) {
-			State source = thisInitMapping.keySet().contains(t.getSource()) ? thisInitMapping.get(t.getSource()) : t.getSource();
-			State dest = thisInitMapping.keySet().contains(t.getDestination()) ? thisInitMapping.get(t.getDestination()) : t.getDestination();
-			ts.add(new Transition(source, dest, t.getSymbol()));
-		}
+		for (Transition t : transitions) 
+			ts.add(new Transition(thisMapping.get(t.getSource()), thisMapping.get(t.getDestination()), t.getSymbol()));
 
-		for (Transition t : other.transitions) {
-			State source = otherInitMapping.keySet().contains(t.getSource()) ? otherInitMapping.get(t.getSource()) : t.getSource();
-			State dest = otherInitMapping.keySet().contains(t.getDestination()) ? otherInitMapping.get(t.getDestination()) : t.getDestination();
-			ts.add(new Transition(source, dest, t.getSymbol()));
-		}
+
+		for (Transition t : other.transitions) 
+			ts.add(new Transition(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()), t.getSymbol()));
+
 
 		Automaton result = new Automaton(sts, ts);
 		result.IS_DETERMINIZED = false;
@@ -520,7 +523,7 @@ public final class Automaton {
 	Set<String> getLanguage() {
 		Set<String> lang = new HashSet<>();
 		if (hasCycle())
-			return lang;
+			throw new RuntimeException("Cannot compute the language on cyclic automata.");
 
 		// stack used to keep track of transitions that will be "visited"
 		// each element is a pair to keep track of old String and next Transition
@@ -564,6 +567,8 @@ public final class Automaton {
 		Set<String> alphabet = transitions.stream()
 				.map(Transition::getSymbol)
 				.collect(Collectors.toSet());
+		alphabet.add("a");
+		alphabet.add("b");
 
 		// adds all the transitions to the garbage state
 		for (State s : newStates)
@@ -586,7 +591,7 @@ public final class Automaton {
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
-		Automaton r = this.determinize().complete();
+		Automaton r = this;//.minimize().complete();
 
 		// creates all the new states
 		for (State s : r.states) {
@@ -599,7 +604,7 @@ public final class Automaton {
 		for (Transition t : r.transitions)
 			delta.add(new Transition(oldToNew.get(t.getSource()), oldToNew.get(t.getDestination()), t.getSymbol()));
 
-		return new Automaton(sts, delta);
+		return new Automaton(sts, delta).minimize();
 	}
 
 	/**
@@ -617,26 +622,22 @@ public final class Automaton {
 	}
 
 	public boolean acceptsEmptyLanguage() {
-
-		for(State s : states.stream()
-				.filter(q -> q.isInitial())
-				.collect(Collectors.toSet()))
-			if(s.isFinal())
-				return true;
-
-		return false;
+		// if there's no final state this automaton accepts the empty language
+		return states.stream().allMatch(s -> !s.isFinal());
 	}
-
 	/**
 	 * Checks if the automaton {@code this} contains the automaton {@code other}
 	 * @param other the other automaton
 	 * @return a boolean value that points out if the automaton is contained or not
 	 */
 	public boolean contains(Automaton other) {
-		return intersection(other.complement()).getLanguage().isEmpty();
+		Automaton intersection = intersection(other.complement()).minimize();
+		return intersection.acceptsEmptyLanguage();
 	}
 
 	public boolean isEqual(Automaton other) {
-		return contains(other) && other.contains(this);
+		if (!contains(other))
+			return false;
+		return other.contains(this);
 	}
 }
