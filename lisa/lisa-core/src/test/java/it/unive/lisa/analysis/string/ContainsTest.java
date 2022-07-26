@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class containsTest {
+public class ContainsTest {
 
 	@Test
 	public void simpleTest() {
@@ -39,8 +39,8 @@ public class containsTest {
         // a
         Automaton a2 = new Automaton(states2, delta2);
 
-        assertTrue(a.contains(a2));
-        assertTrue(a2.contains(a));
+        assertTrue(a2.isContained(a));
+        assertTrue(!a.isContained(a2));
     }
 	
     @Test
@@ -77,6 +77,7 @@ public class containsTest {
         // ab
         Automaton a2 = new Automaton(states2, delta2);
 
-        assertTrue(a2.contains(a));
+        assertTrue(a2.isContained(a));
+        assertTrue(!a.isContained(a2));
     }
 }

@@ -24,7 +24,7 @@ public class IsEqualsTest {
         st[3] = new State(false, true);
         Collections.addAll(thisStates, st);
 
-        st2[0] = new State(false, false);
+        st2[0] = new State(true, false);
         st2[1] = new State(false, false);
         st2[2] = new State(false, true);
         Collections.addAll(otherStates, st2);

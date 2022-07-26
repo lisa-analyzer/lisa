@@ -27,7 +27,7 @@ public class getLanguageTest {
 		assertEquals(exp, a.getLanguage());
 	}
 
-	@Test
+	@Test(expected = RuntimeException.class)
 	public void test02() {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[2];

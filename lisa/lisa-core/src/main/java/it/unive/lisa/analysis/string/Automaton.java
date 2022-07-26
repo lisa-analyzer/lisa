@@ -400,14 +400,11 @@ public final class Automaton {
 			if (thisInitMapping.values().contains(s) || otherInitMapping.values().contains(s))
 				ts.add(new Transition(q0, s, ""));
 
-
 		for (Transition t : transitions) 
 			ts.add(new Transition(thisMapping.get(t.getSource()), thisMapping.get(t.getDestination()), t.getSymbol()));
 
-
 		for (Transition t : other.transitions) 
 			ts.add(new Transition(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()), t.getSymbol()));
-
 
 		Automaton result = new Automaton(sts, ts);
 		result.IS_DETERMINIZED = false;
@@ -556,7 +553,7 @@ public final class Automaton {
 	/**
 	 * Creates a new {@code Automaton} that is the same as {@code this} but is complete.
 	 */
-	private Automaton complete() {
+	private Automaton complete(Set<String> sigma) {
 		Set<State> newStates = new HashSet<>();
 		newStates.addAll(states);
 		Set<Transition> newTransitions = new HashSet<>();
@@ -564,15 +561,10 @@ public final class Automaton {
 		// add a new "garbage" state
 		State garbage = new State(false, false);
 		newStates.add(garbage);
-		Set<String> alphabet = transitions.stream()
-				.map(Transition::getSymbol)
-				.collect(Collectors.toSet());
-		alphabet.add("a");
-		alphabet.add("b");
-
+	
 		// adds all the transitions to the garbage state
 		for (State s : newStates)
-			for (String c : alphabet)
+			for (String c : sigma)
 				if (newTransitions.stream()
 						.filter(t -> t.getSymbol().equals(c) && t.getSource().equals(s))
 						.collect(Collectors.toSet()).isEmpty())
@@ -585,13 +577,13 @@ public final class Automaton {
 	 *
 	 * @return the complement Automaton of {@code this}.
 	 */
-	public Automaton complement() {
+	public Automaton complement(Set<String> sigma) {
 		// states and transitions for the newly created automaton
 		Set<State> sts = new HashSet<>();
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
-		Automaton r = this.determinize().complete();
+		Automaton r = this.determinize().complete(sigma);
 
 		// creates all the new states
 		for (State s : r.states) {
@@ -616,9 +608,9 @@ public final class Automaton {
 	public Automaton intersection(Automaton other) {
 		if (this == other)
 			return this;
-
+		Set<String> sigma = commonAlphabet(other);
 		// De Morgan's rule A && B = ¬(¬A || ¬B)
-		return complement().union(other.complement()).minimize().complement();
+		return complement(sigma).union(other.complement(sigma)).minimize().complement(sigma);
 	}
 
 	public boolean acceptsEmptyLanguage() {
@@ -630,14 +622,24 @@ public final class Automaton {
 	 * @param other the other automaton
 	 * @return a boolean value that points out if the automaton is contained or not
 	 */
-	public boolean contains(Automaton other) {
-		Automaton intersection = intersection(other.complement()).minimize();
+	public boolean isContained(Automaton other) {
+		Automaton intersection = intersection(other.complement(commonAlphabet(other))).minimize();
 		return intersection.acceptsEmptyLanguage();
 	}
 
 	public boolean isEqual(Automaton other) {
-		if (!contains(other))
+		if (!isContained(other))
 			return false;
-		return other.contains(this);
+		return other.isContained(this);
+	}
+	
+	private Set<String> commonAlphabet(Automaton other) {
+		Set<String> result = new HashSet<>();
+		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
+		result.addAll(other.transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
+		
+		// remove the empty string
+		result.remove("");
+		return result;
 	}
 }

@@ -37,7 +37,7 @@ public class DeterminizeTest {
 
 		// accepts language {a^nb^m}^pcba
 		Automaton dfa = new Automaton(states, transitions);
-		assertEquals(dfa, dfa.determinize());
+		assertTrue(dfa.isEqual(dfa.determinize()));
 
 	}
 
@@ -73,8 +73,7 @@ public class DeterminizeTest {
 
 		// accepts language {a^nb^m}^p
 		Automaton expected = new Automaton(expStates, expDelta);
-		assertEquals(expected, nfa.determinize());
-
+		assertTrue(expected.isEqual(nfa.determinize()));
 	}
 
 	@Test
@@ -144,7 +143,6 @@ public class DeterminizeTest {
 		// {a,b}^n abb
 		Automaton expected = new Automaton(expStates, expDelta);
 
-		assertEquals(expected, a.determinize());
+		assertTrue(expected.isEqual(a.determinize()));
 	}
-
 }
