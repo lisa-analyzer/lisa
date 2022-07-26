@@ -40,6 +40,7 @@ public class containsTest {
         Automaton a2 = new Automaton(states2, delta2);
 
         assertTrue(a.contains(a2));
+        assertTrue(a2.contains(a));
     }
 	
     @Test

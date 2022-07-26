@@ -591,7 +591,7 @@ public final class Automaton {
 		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
-		Automaton r = this;//.minimize().complete();
+		Automaton r = this.determinize().complete();
 
 		// creates all the new states
 		for (State s : r.states) {
