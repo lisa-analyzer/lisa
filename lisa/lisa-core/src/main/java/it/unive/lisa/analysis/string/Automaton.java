@@ -627,12 +627,22 @@ public final class Automaton {
 		return intersection.acceptsEmptyLanguage();
 	}
 
+	/**
+	 * Checks if the automaton {@code this} accepts the same language as {@code other}.
+	 * @param other the other automaton
+	 * @return a boolean value that points out if the automata are equivalent
+	 */
 	public boolean isEqual(Automaton other) {
 		if (!isContained(other))
 			return false;
 		return other.isContained(this);
 	}
 	
+	/**
+	 * Yelds the common alphabet of the automata {@code this} and {@code other}.
+	 * @param other the other automaton
+	 * @return a set of strings representing the common alphabet.
+	 */
 	private Set<String> commonAlphabet(Automaton other) {
 		Set<String> result = new HashSet<>();
 		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
