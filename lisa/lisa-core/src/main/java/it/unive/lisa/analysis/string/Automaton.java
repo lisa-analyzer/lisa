@@ -639,7 +639,7 @@ public final class Automaton {
 	}
 	
 	/**
-	 * Yelds the common alphabet of the automata {@code this} and {@code other}.
+	 * Yields the common alphabet of the automata {@code this} and {@code other}.
 	 * @param other the other automaton
 	 * @return a set of strings representing the common alphabet.
 	 */
