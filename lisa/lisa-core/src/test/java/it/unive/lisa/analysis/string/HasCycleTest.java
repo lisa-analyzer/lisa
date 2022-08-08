@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string;
 
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,9 +17,7 @@ public class HasCycleTest {
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
-
-		states.add(st[0]);
-		states.add(st[1]);
+		Collections.addAll(states, st);
 
 		Set<Transition> transitions = new HashSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
@@ -32,17 +31,16 @@ public class HasCycleTest {
 
 	@Test
 	public void test02() {
-		Set<State> st = new HashSet<>();
+		Set<State> states = new HashSet<>();
 		Set<Transition> tr = new HashSet<>();
-		State q0 = new State(true, false);
-		State q1 = new State(false, false);
-		State q2 = new State(false, true);
-		st.add(q0);
-		st.add(q1);
-		st.add(q2);
-		tr.add(new Transition(q0, q1, "a"));
-		tr.add(new Transition(q1, q2, "b"));
-		Automaton a = new Automaton(st, tr);
+		State[] st = new State[3];
+		st[0] = new State(true, false);
+		st[1] = new State(false, false);
+		st[2] = new State(false, true);
+		Collections.addAll(states, st);
+		tr.add(new Transition(st[0], st[1], "a"));
+		tr.add(new Transition(st[1], st[2], "b"));
+		Automaton a = new Automaton(states, tr);
 		assertFalse(a.hasCycle());
 	}
 }

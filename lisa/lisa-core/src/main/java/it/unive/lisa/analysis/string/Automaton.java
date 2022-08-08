@@ -124,7 +124,7 @@ public final class Automaton {
 	 * @return a newly created automaton without the unreachable states of
 	 * {@code this}.
 	 */
-	private Automaton reach() {
+	Automaton reach() {
 		// stores the reached states of the automaton
 		Set<State> RS = new HashSet<>();
 		// states that will be checked in the following iteration

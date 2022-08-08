@@ -7,21 +7,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class getLanguageTest {
+public class GetLanguageTest {
 
 	@Test
 	public void test01() throws CyclicAutomatonException{
-		Set<State> st = new HashSet<>();
+		Set<State> states = new HashSet<>();
 		Set<Transition> tr = new HashSet<>();
-		State q0 = new State(true, false);
-		State q1 = new State(false, false);
-		State q2 = new State(false, true);
-		st.add(q0);
-		st.add(q1);
-		st.add(q2);
-		tr.add(new Transition(q0, q1, "a"));
-		tr.add(new Transition(q1, q2, "b"));
-		Automaton a = new Automaton(st, tr);
+		State[] st = new State[3];
+		st[0] = new State(true, false);
+		st[1] = new State(false, false);
+		st[2] = new State(false, true);
+		Collections.addAll(states, st);
+
+		tr.add(new Transition(st[0], st[1], "a"));
+		tr.add(new Transition(st[1], st[2], "b"));
+		Automaton a = new Automaton(states, tr);
 		Set<String> exp = new HashSet<>();
 		exp.add("ab");
 		assertEquals(exp, a.getLanguage());
@@ -33,9 +33,7 @@ public class getLanguageTest {
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
-
-		states.add(st[0]);
-		states.add(st[1]);
+		Collections.addAll(states, st);
 
 		Set<Transition> transitions = new HashSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
@@ -83,8 +81,8 @@ public class getLanguageTest {
 		st[2] = new State(false, false);
 		st[3] = new State(false, true);
 		st[4] = new State(false, true);
-
 		Collections.addAll(states, st);
+
 		Set<Transition> delta = new HashSet<>();
 		delta.add(new Transition(st[0], st[1], ""));
 		delta.add(new Transition(st[0], st[2], ""));

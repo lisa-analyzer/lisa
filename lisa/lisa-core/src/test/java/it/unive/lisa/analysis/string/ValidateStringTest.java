@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import org.junit.Test;
@@ -14,20 +15,13 @@ public class ValidateStringTest {
 	public void testDfa() {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
-		State s;
-		for (int i = 0; i < 5; ++i) {
-			if (i == 0)
-				s = new State(true, false);
+		st[0] = new State(true, false);
+		st[1] = new State(false, false);
+		st[2] = new State(false, false);
+		st[3] = new State(false, false);
+		st[4] = new State(false, true);
+		Collections.addAll(states, st);
 
-			else if (i == 4)
-				s = new State(false, true);
-
-			else
-				s = new State(false, false);
-
-			st[i] = s;
-			states.add(s);
-		}
 		Set<Transition> transitions = new HashSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[1], "b"));
@@ -55,9 +49,7 @@ public class ValidateStringTest {
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
-
-		states.add(st[0]);
-		states.add(st[1]);
+		Collections.addAll(states, st);
 
 		Set<Transition> transitions = new HashSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
@@ -79,19 +71,18 @@ public class ValidateStringTest {
 	public void testEpsNfa() {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[11];
-		State s;
-
-		for (int i = 0; i < 11; ++i) {
-			if (i == 0)
-				s = new State(true, false);
-			else if (i == 10)
-				s = new State(false, true);
-			else
-				s = new State(false, false);
-
-			st[i] = s;
-			states.add(s);
-		}
+		st[0] = new State(true, false);
+		st[1] = new State(false, false);
+		st[2] = new State(false, false);
+		st[3] = new State(false, false);
+		st[4] = new State(false, false);
+		st[5] = new State(false, false);
+		st[6] = new State(false, false);
+		st[7] = new State(false, false);
+		st[8] = new State(false, false);
+		st[9] = new State(false, false);
+		st[10] = new State(false, true);
+		Collections.addAll(states, st);
 
 		Set<Transition> transitions = new HashSet<>();
 		transitions.add(new Transition(st[0], st[1], ""));

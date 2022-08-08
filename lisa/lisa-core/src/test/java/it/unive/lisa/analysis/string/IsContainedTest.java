@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class ContainsTest {
+public class IsContainedTest {
 
 	@Test
 	public void simpleTest() {

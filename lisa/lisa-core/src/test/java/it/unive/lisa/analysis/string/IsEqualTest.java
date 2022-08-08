@@ -8,7 +8,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertTrue;
 
-public class IsEqualsTest {
+public class IsEqualTest {
 
     @Test
     public void test01() {
