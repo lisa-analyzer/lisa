@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class ReverseTest {
 
 	@Test
-	public void test01() {
+	public void test01() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
@@ -33,7 +33,7 @@ public class ReverseTest {
 	}
 
 	@Test
-	public void test02() {
+	public void test02() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
@@ -58,7 +58,7 @@ public class ReverseTest {
 	}
 
 	@Test
-	public void test03() {
+	public void test03() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[7];
 		st[0] = new State(true, false);

@@ -10,7 +10,7 @@ import java.util.Set;
 public class getLanguageTest {
 
 	@Test
-	public void test01() {
+	public void test01() throws CyclicAutomatonException{
 		Set<State> st = new HashSet<>();
 		Set<Transition> tr = new HashSet<>();
 		State q0 = new State(true, false);
@@ -27,8 +27,8 @@ public class getLanguageTest {
 		assertEquals(exp, a.getLanguage());
 	}
 
-	@Test(expected = RuntimeException.class)
-	public void test02() {
+	@Test(expected = CyclicAutomatonException.class)
+	public void test02() throws CyclicAutomatonException{
 		Set<State> states = new HashSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
@@ -48,7 +48,7 @@ public class getLanguageTest {
 	}
 
 	@Test
-	public void test03() {
+	public void test03() throws CyclicAutomatonException{
 		Set<State> states = new HashSet<>();
 		State[] st = new State[6];
 		st[0] = new State(true, false);
@@ -75,7 +75,7 @@ public class getLanguageTest {
 	}
 
 	@Test
-	public void test04() {
+	public void test04() throws CyclicAutomatonException{
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
@@ -101,7 +101,7 @@ public class getLanguageTest {
 	}
 
 	@Test
-	public void test05() {
+	public void test05() throws CyclicAutomatonException{
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
@@ -127,7 +127,7 @@ public class getLanguageTest {
 	}
 
 	@Test
-	public void test06() {
+	public void test06() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[8];
 		st[0] = new State(true, false);
@@ -159,7 +159,7 @@ public class getLanguageTest {
 	}
 
 	@Test
-	public void test07() {
+	public void test07() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);

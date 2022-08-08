@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class UnionTest {
 
 	@Test
-	public void test01() {
+	public void test01() throws CyclicAutomatonException {
 		Set<State> states1 = new HashSet<>();
 		Set<State> states2 = new HashSet<>();
 		State[] st1 = new State[3];
@@ -43,7 +43,7 @@ public class UnionTest {
 	}
 
 	@Test
-	public void test02() {
+	public void test02() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st1 = new State[3];
 		st1[0] = new State(true, false);
@@ -65,7 +65,7 @@ public class UnionTest {
 	}
 
 	@Test
-	public void test03() {
+	public void test03() throws CyclicAutomatonException {
 		Set<State> states1 = new HashSet<>();
 		Set<State> states2 = new HashSet<>();
 		State[] st1 = new State[4];
