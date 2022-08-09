@@ -523,7 +523,7 @@ public final class Automaton {
 	public Set<String> getLanguage() throws CyclicAutomatonException {
 		Set<String> lang = new HashSet<>();
 		if (hasCycle())
-			throw new CyclicAutomatonException("Cannot compute the language on cyclic automata.");
+			throw new CyclicAutomatonException();
 
 		// stack used to keep track of transitions that will be "visited"
 		// each element is a pair to keep track of old String and next Transition
