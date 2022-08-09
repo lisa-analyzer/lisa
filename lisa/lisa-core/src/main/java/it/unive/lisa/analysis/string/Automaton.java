@@ -158,7 +158,7 @@ public final class Automaton {
 	 * @return a newly created automaton that accepts the reverse language of
 	 * {@code this}.
 	 */
-	public Automaton reverse() {
+	Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
 		Set<State> st = new HashSet<>();
 		// used to associate states of the Automaton this to the reverse one
@@ -614,6 +614,10 @@ public final class Automaton {
 		return complement(sigma).union(other.complement(sigma)).minimize().complement(sigma);
 	}
 
+	/**
+	 * Checks if the Automaton {@code this} accepts the empty language
+	 * @return a boolean value that points out if {@code this} accepts the empty language
+	 */
 	public boolean acceptsEmptyLanguage() {
 		// if there's no final state this automaton accepts the empty language
 		return states.stream().noneMatch(State::isFinal);
@@ -644,7 +648,7 @@ public final class Automaton {
 	 * @param other the other automaton
 	 * @return a set of strings representing the common alphabet.
 	 */
-	private Set<String> commonAlphabet(Automaton other) {
+	 Set<String> commonAlphabet(Automaton other) {
 		Set<String> result = new HashSet<>();
 		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 		result.addAll(other.transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
