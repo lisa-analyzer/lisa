@@ -706,6 +706,7 @@ public final class Automaton {
 			}
 		}
 
-		return new Automaton(newStates, newTransitions);
+		Automaton automaton = new Automaton(newStates, newTransitions);
+		return automaton.minimize();
 	}
 }
