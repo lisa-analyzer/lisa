@@ -657,4 +657,55 @@ public final class Automaton {
 		result.remove("");
 		return result;
 	}
+
+	/**
+	 * Creates a new automaton that represent the widening operator between {@code this} and {@code other} automata.
+	 * @param other the other automaton.
+	 * @param n the parameter of the widening operator.
+	 * @return a newly created automaton representing the widening between two automata.
+	 */
+	public Automaton widening(Automaton other, int n) {
+
+		// stores all the powerstates
+		Set<AbstractMap.SimpleImmutableEntry<State, State>> powerStates = new HashSet<>();
+		Set<State> newStates = new HashSet<>();
+		// used to store a mapping between the powerstate and the new state
+		Map<AbstractMap.SimpleImmutableEntry<State, State>, State> powerToNew = new HashMap<>();
+		// used to store languages to improve performance
+		Map<State, Set<String>> languages = new HashMap<>();
+		// generate all the languages for the states
+		for(State s : states)
+			languages.put(s, getLanguageAtMost(s, n));
+		for(State s : other.states)
+			languages.put(s, getLanguageAtMost(s, n));
+
+		// create the powerstates for the new automaton
+		for(State s : states) {
+			for(State q : other.states) {
+					if(languages.get(s) == languages.get(q)) {
+						AbstractMap.SimpleImmutableEntry<State, State> ps = new AbstractMap.SimpleImmutableEntry<>(s, q);
+						State newState = new State(s.isInitial() || q.isInitial(), s.isFinal() || q.isFinal());
+						powerStates.add(ps);
+						powerToNew.put(ps, newState);
+				}
+			}
+		}
+
+		// create the new transitions for the new automaton
+		Set<Transition> newTransitions = new HashSet<>();
+		for(Transition t : transitions) {
+			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
+				State source = null;
+				State destination = null;
+				if (t.getSource() == ps.getKey() || t.getSource() == ps.getValue())
+					source = powerToNew.get(ps);
+				if (t.getDestination() == ps.getKey() || t.getDestination() == ps.getValue())
+					destination = powerToNew.get(ps);
+				if (source != null && destination != null)
+					newTransitions.add(new Transition(source, destination, t.getSymbol()));
+			}
+		}
+
+		return new Automaton(newStates, newTransitions);
+	}
 }
