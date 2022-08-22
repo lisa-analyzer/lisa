@@ -673,6 +673,8 @@ public final class Automaton {
 		Map<AbstractMap.SimpleImmutableEntry<State, State>, State> powerToNew = new HashMap<>();
 		// used to store languages to improve performance
 		Map<State, Set<String>> languages = new HashMap<>();
+		// stores the "singleton" states
+		Set<State> singletonStates = new HashSet<>();
 		// generate all the languages for the states
 		for(State s : states)
 			languages.put(s, getLanguageAtMost(s, n));
@@ -691,8 +693,28 @@ public final class Automaton {
 			}
 		}
 
+		// add the states that are not in a powerstate
+		for(State s : states){
+			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
+				if(!s.equals(ps.getKey()) && !s.equals(ps.getValue())) {
+					newStates.add(s);
+					singletonStates.add(s);
+				}
+			}
+		}
+
+		for(State s : other.states){
+			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
+				if(!s.equals(ps.getKey()) && !s.equals(ps.getValue())) {
+					newStates.add(s);
+					singletonStates.add(s);
+				}
+			}
+		}
+
 		// create the new transitions for the new automaton
 		Set<Transition> newTransitions = new HashSet<>();
+		// add transitions between powerstates of the automaton this
 		for(Transition t : transitions) {
 			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
 				State source = null;
@@ -703,6 +725,55 @@ public final class Automaton {
 					destination = powerToNew.get(ps);
 				if (source != null && destination != null)
 					newTransitions.add(new Transition(source, destination, t.getSymbol()));
+			}
+		}
+
+		// add transitions between powerstates of the automaton other
+		for(Transition t : other.transitions) {
+			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
+				State source = null;
+				State destination = null;
+				if (t.getSource().equals(ps.getKey()) || t.getSource().equals(ps.getValue()))
+					source = powerToNew.get(ps);
+				if (t.getDestination().equals(ps.getKey()) || t.getDestination().equals(ps.getValue()))
+					destination = powerToNew.get(ps);
+				if (source != null && destination != null)
+					newTransitions.add(new Transition(source, destination, t.getSymbol()));
+			}
+		}
+
+		// add transitions related to the singleton states
+		for(State s : singletonStates) {
+			if(states.contains(s)) {
+				for(Transition t : transitions) {
+					if(t.getSource().equals(s)) {
+						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
+							if (ps.getKey().equals(t.getDestination()) || ps.getValue().equals(t.getDestination())) {
+								newTransitions.add(new Transition(s, powerToNew.get(ps), t.getSymbol()));
+							}
+					}
+					if(t.getDestination().equals(s)) {
+						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
+							if (ps.getKey().equals(t.getSource()) || ps.getValue().equals(t.getSource())) {
+								newTransitions.add(new Transition(powerToNew.get(ps), s, t.getSymbol()));
+							}
+					}
+				}
+			} else {
+				for(Transition t : other.transitions) {
+					if(t.getSource().equals(s)) {
+						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
+							if (ps.getKey().equals(t.getDestination()) || ps.getValue().equals(t.getDestination())) {
+								newTransitions.add(new Transition(s, powerToNew.get(ps), t.getSymbol()));
+							}
+					}
+					if(t.getDestination().equals(s)) {
+						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
+							if (ps.getKey().equals(t.getSource()) || ps.getValue().equals(t.getSource())) {
+								newTransitions.add(new Transition(powerToNew.get(ps), s, t.getSymbol()));
+							}
+					}
+				}
 			}
 		}
 
