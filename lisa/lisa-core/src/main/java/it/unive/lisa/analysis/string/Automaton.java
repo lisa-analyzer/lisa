@@ -659,125 +659,85 @@ public final class Automaton {
 	}
 
 	/**
-	 * Creates a new automaton that represent the widening operator between {@code this} and {@code other} automata.
-	 * @param other the other automaton.
+	 * Creates a new automaton that represent the widening operator applied on the automaton {@code this}
 	 * @param n the parameter of the widening operator.
-	 * @return a newly created automaton representing the widening between two automata.
+	 * @return a newly created automaton representing the widening automaton.
 	 */
-	public Automaton widening(Automaton other, int n) {
+	public Automaton widening(int n) {
 
-		// stores all the powerstates
-		Set<AbstractMap.SimpleImmutableEntry<State, State>> powerStates = new HashSet<>();
 		Set<State> newStates = new HashSet<>();
+		// stores all the powerstates
+		Set<Set<State>> powerStates = new HashSet<>();
 		// used to store a mapping between the powerstate and the new state
-		Map<AbstractMap.SimpleImmutableEntry<State, State>, State> powerToNew = new HashMap<>();
+		Map<Set<State>, State> powerToNew = new HashMap<>();
 		// used to store languages to improve performance
 		Map<State, Set<String>> languages = new HashMap<>();
-		// stores the "singleton" states
-		Set<State> singletonStates = new HashSet<>();
 		// generate all the languages for the states
 		for(State s : states)
 			languages.put(s, getLanguageAtMost(s, n));
-		for(State s : other.states)
-			languages.put(s, getLanguageAtMost(s, n));
 
-		// create the powerstates for the new automaton
+		// create the new states for the new automaton
 		for(State s : states) {
-			for(State q : other.states) {
-					if(languages.get(s) == languages.get(q)) {
-						AbstractMap.SimpleImmutableEntry<State, State> ps = new AbstractMap.SimpleImmutableEntry<>(s, q);
-						State newState = new State(s.isInitial() || q.isInitial(), s.isFinal() || q.isFinal());
-						powerStates.add(ps);
-						powerToNew.put(ps, newState);
-				}
+			Set<State> ps = new HashSet<>();
+			ps.add(s);
+			for(State q : states)
+				if(!q.equals(s) && languages.get(s).equals(languages.get(q)))
+					ps.add(q);
+
+			boolean isInitial = false, isFinal = false;
+			for(State q : ps) {
+				if (q.isInitial())
+					isInitial = true;
+				if (q.isFinal())
+					isFinal = true;
 			}
+
+			State ns = new State(isInitial, isFinal);
+			powerStates.add(ps);
+			powerToNew.put(ps, ns);
+			newStates.add(ns);
 		}
 
-		// add the states that are not in a powerstate
-		for(State s : states){
-			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
-				if(!s.equals(ps.getKey()) && !s.equals(ps.getValue())) {
-					newStates.add(s);
-					singletonStates.add(s);
-				}
-			}
-		}
-
-		for(State s : other.states){
-			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
-				if(!s.equals(ps.getKey()) && !s.equals(ps.getValue())) {
-					newStates.add(s);
-					singletonStates.add(s);
-				}
-			}
-		}
-
-		// create the new transitions for the new automaton
+		// add transitions between the new states
 		Set<Transition> newTransitions = new HashSet<>();
-		// add transitions between powerstates of the automaton this
-		for(Transition t : transitions) {
-			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
-				State source = null;
-				State destination = null;
-				if (t.getSource() == ps.getKey() || t.getSource() == ps.getValue())
-					source = powerToNew.get(ps);
-				if (t.getDestination() == ps.getKey() || t.getDestination() == ps.getValue())
-					destination = powerToNew.get(ps);
-				if (source != null && destination != null)
-					newTransitions.add(new Transition(source, destination, t.getSymbol()));
-			}
-		}
-
-		// add transitions between powerstates of the automaton other
-		for(Transition t : other.transitions) {
-			for(AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates) {
-				State source = null;
-				State destination = null;
-				if (t.getSource().equals(ps.getKey()) || t.getSource().equals(ps.getValue()))
-					source = powerToNew.get(ps);
-				if (t.getDestination().equals(ps.getKey()) || t.getDestination().equals(ps.getValue()))
-					destination = powerToNew.get(ps);
-				if (source != null && destination != null)
-					newTransitions.add(new Transition(source, destination, t.getSymbol()));
-			}
-		}
-
-		// add transitions related to the singleton states
-		for(State s : singletonStates) {
-			if(states.contains(s)) {
-				for(Transition t : transitions) {
-					if(t.getSource().equals(s)) {
-						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
-							if (ps.getKey().equals(t.getDestination()) || ps.getValue().equals(t.getDestination())) {
-								newTransitions.add(new Transition(s, powerToNew.get(ps), t.getSymbol()));
-							}
-					}
-					if(t.getDestination().equals(s)) {
-						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
-							if (ps.getKey().equals(t.getSource()) || ps.getValue().equals(t.getSource())) {
-								newTransitions.add(new Transition(powerToNew.get(ps), s, t.getSymbol()));
-							}
-					}
-				}
-			} else {
-				for(Transition t : other.transitions) {
-					if(t.getSource().equals(s)) {
-						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
-							if (ps.getKey().equals(t.getDestination()) || ps.getValue().equals(t.getDestination())) {
-								newTransitions.add(new Transition(s, powerToNew.get(ps), t.getSymbol()));
-							}
-					}
-					if(t.getDestination().equals(s)) {
-						for (AbstractMap.SimpleImmutableEntry<State, State> ps : powerStates)
-							if (ps.getKey().equals(t.getSource()) || ps.getValue().equals(t.getSource())) {
-								newTransitions.add(new Transition(powerToNew.get(ps), s, t.getSymbol()));
-							}
-					}
-				}
-			}
-		}
+		for(Transition t : transitions)
+			for(Set<State> ps : powerStates)
+				if(ps.contains(t.getSource()))
+					for(Set<State> psd : powerStates)
+						if(psd.contains(t.getDestination()))
+							newTransitions.add(new Transition(powerToNew.get(ps), powerToNew.get(psd), t.getSymbol()));
 
 		Automaton automaton = new Automaton(newStates, newTransitions);
 		return automaton.minimize();
+	}
+
+	/**
+	 * Create a new automaton representing the concatenation of {@code this} and {@code other}.
+	 * @param other the other automaton.
+	 * @return a newly created automaton representing the concatenation of the given automata.
+	 */
+	public Automaton concat(Automaton other) {
+		Set<State> newStates = new HashSet<>();
+		Set<Transition> newTransitions = new HashSet<>();
+
+		newStates.addAll(states);
+		newStates.addAll(other.states);
+
+		newTransitions.addAll(transitions);
+		newTransitions.addAll(other.transitions);
+
+		Set<State> thisFinalStates = states.stream()
+				.filter(State::isFinal)
+				.collect(Collectors.toSet());
+
+		Set<State> otherInitialStates = states.stream()
+				.filter(State::isInitial)
+				.collect(Collectors.toSet());
+
+		for(State f : thisFinalStates)
+			for(State i : otherInitialStates)
+				newTransitions.add(new Transition(f, i, ""));
+
+		return new Automaton(newStates, newTransitions).minimize();
 	}
 }
