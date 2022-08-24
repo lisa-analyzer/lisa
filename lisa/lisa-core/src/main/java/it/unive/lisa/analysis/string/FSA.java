@@ -83,7 +83,7 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
     protected FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
         // TODO: costruttore automaton con stringa
         if(constant.getValue() instanceof String) {
-
+            return new FSA(new Automaton((String) constant.getValue()));
         }
         return top();
     }
