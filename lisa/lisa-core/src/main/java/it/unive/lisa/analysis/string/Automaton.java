@@ -53,7 +53,7 @@ public final class Automaton {
 	}
 
 	/**
-	 * Build a new automaton with given {@code states} and {@code transitions}.
+	 * Builds a new automaton with given {@code states} and {@code transitions}.
 	 *
 	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
@@ -63,6 +63,27 @@ public final class Automaton {
 		this.transitions = transitions;
 		this.IS_DETERMINIZED = false;
 		this.IS_MINIMIZED = false;
+	}
+
+	/**
+	 * Builds a new automaton that accepts a given string.
+	 * @param s the only string accepted by the automaton.
+	 */
+	public Automaton(String s) {
+		states = new HashSet<>();
+		transitions = new HashSet<>();
+		State last = new State(true, false);
+		State next = null;
+		states.add(last);
+		for(int i = 0; i < s.length(); ++i) {
+			if(i != s.length() -1)
+				next = new State(false, false);
+			else
+				next = new State(false, true);
+
+			transitions.add(new Transition(last, next, "" + s.charAt(i)));
+			last = next;
+		}
 	}
 
 	/**
@@ -719,24 +740,57 @@ public final class Automaton {
 	public Automaton concat(Automaton other) {
 		Set<State> newStates = new HashSet<>();
 		Set<Transition> newTransitions = new HashSet<>();
-
-		newStates.addAll(states);
-		newStates.addAll(other.states);
-
-		newTransitions.addAll(transitions);
-		newTransitions.addAll(other.transitions);
+		Map<State, State> oldToNew = new HashMap<>();
 
 		Set<State> thisFinalStates = states.stream()
 				.filter(State::isFinal)
 				.collect(Collectors.toSet());
 
-		Set<State> otherInitialStates = states.stream()
+		Set<State> otherInitialStates = other.states.stream()
 				.filter(State::isInitial)
 				.collect(Collectors.toSet());
 
+		for(State s : states) {
+			if(!s.isFinal())
+				newStates.add(s);
+			else {
+				State q = new State(s.isInitial(), false);
+				oldToNew.put(s, q);
+				newStates.add(q);
+			}
+		}
+		for(State s : other.states) {
+			if(!s.isInitial())
+				newStates.add(s);
+			else {
+				State q = new State(false, s.isFinal());
+				oldToNew.put(s, q);
+				newStates.add(q);
+			}
+		}
+
+		for(Transition t : transitions) {
+			State source = t.getSource();
+			State dest = t.getDestination();
+			if(thisFinalStates.contains(t.getSource()))
+				source = oldToNew.get(t.getSource());
+			if(thisFinalStates.contains(t.getDestination()))
+				dest = oldToNew.get(t.getDestination());
+			newTransitions.add(new Transition(source, dest, t.getSymbol()));
+		}
+		for(Transition t : other.transitions) {
+			State source = t.getSource();
+			State dest = t.getDestination();
+			if(otherInitialStates.contains(t.getSource()))
+				source = oldToNew.get(t.getSource());
+			if(otherInitialStates.contains(t.getDestination()))
+				dest = oldToNew.get(t.getDestination());
+			newTransitions.add(new Transition(source, dest, t.getSymbol()));
+		}
+
 		for(State f : thisFinalStates)
-			for(State i : otherInitialStates)
-				newTransitions.add(new Transition(f, i, ""));
+			for (State i : otherInitialStates)
+				newTransitions.add(new Transition(oldToNew.get(f), oldToNew.get(i), ""));
 
 		return new Automaton(newStates, newTransitions).minimize();
 	}
