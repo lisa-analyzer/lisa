@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 /**
@@ -508,6 +509,17 @@ public final class Automaton {
 	}
 
 	/**
+	 * Returns all the ingoing transitions to a given state.
+	 * @param q the destination of the transitions.
+	 * @return a Set containing all the ingoing transitions to the state q.
+	 */
+	private Set<Transition> getIngoingTransitionTo(State q) {
+		return transitions.stream()
+				.filter(t -> t.getDestination().equals(q))
+				.collect(Collectors.toSet());
+	}
+
+	/**
 	 * Checks if the Automaton {@code this} has any cycle.
 	 *
 	 * @return a boolean value that tells if {@code this} has any cycle.
@@ -793,5 +805,90 @@ public final class Automaton {
 				newTransitions.add(new Transition(oldToNew.get(f), oldToNew.get(i), ""));
 
 		return new Automaton(newStates, newTransitions).minimize();
+	}
+
+	/**
+	 * Creates and return the regex that represent the accepted language by the automaton {@code this}.
+	 * @return a String representing that is the regex that represent the accepted language.
+	 */
+	public String toRegex() {
+		// this algorithm works only with deterministic automata
+		Automaton a = this.determinize();
+		// used to store mappings between old and new states
+		Map<State, State> oldToNew = new HashMap<>();
+
+		// states and transitions of the automaton used to compute the regex
+		Set<State> regStates = new HashSet<>();
+		Set<Transition> regTransitions = new HashSet<>();
+
+		State initialState = a.states.stream()
+				.filter(State::isInitial)
+				.findFirst()
+				.get();
+
+		regStates.addAll(a.states);
+		// add a new state if the initial state has ingoing transitions
+		if(!a.getIngoingTransitionTo(initialState).isEmpty()) {
+			State newInitial = new State(true, false);
+			State q = new State(false, initialState.isFinal());
+			regStates.remove(initialState);
+			regStates.add(newInitial);
+			regStates.add(q);
+			oldToNew.put(initialState, q);
+			regTransitions.add(new Transition(newInitial, q, ""));
+		}
+
+		Set<State> finalStates = states.stream()
+				.filter(State::isFinal)
+				.collect(Collectors.toSet());
+
+		// if the automaton has more than one final state, add a new final state
+		if(finalStates.size() > 1) {
+			State newFinal = new State(false, true);
+			regStates.add(newFinal);
+			for(State s : finalStates) {
+				State q = new State(s.isInitial(), false);
+				oldToNew.put(s, q);
+				regStates.add(q);
+				regStates.remove(s);
+				regTransitions.add(new Transition(q, newFinal, ""));
+			}
+		}
+		// if the final state has any outgoing transition, add a new final state
+		else if(finalStates.size() == 1) {
+			State finalState = finalStates.stream().findFirst().get();
+			if(!getOutgoingTranstionsFrom(finalState).isEmpty()) {
+				State newFinal = new State(false, true);
+				State q = new State(finalState.isInitial(), false);
+				oldToNew.put(finalState, q);
+				regStates.add(q);
+				regStates.add(newFinal);
+				regTransitions.add(new Transition(q, newFinal, ""));
+			}
+		}
+
+		// update all the transitions with regard for the new states
+		for(Transition t : a.transitions) {
+			State source = t.getSource();
+			State dest = t.getDestination();
+			if(t.getSource().equals(initialState))
+				source = oldToNew.get(initialState);
+			if(t.getDestination().equals(initialState))
+				dest = oldToNew.get(initialState);
+			for(State s : finalStates) {
+				if(t.getSource().equals(s))
+					source = oldToNew.get(s);
+				if(t.getDestination().equals(s))
+					dest = oldToNew.get(s);
+			}
+			regTransitions.add(new Transition(source, dest, t.getSymbol()));
+		}
+
+		// create the automaton for the regex computation
+		Automaton reg = new Automaton(regStates, regTransitions);
+
+		// TODO: add regex computation
+
+		return reg.transitions.stream().findFirst().get().getSymbol();
 	}
 }
