@@ -814,80 +814,188 @@ public final class Automaton {
 	public String toRegex() {
 		// this algorithm works only with deterministic automata
 		Automaton a = this.determinize();
-		// used to store mappings between old and new states
-		Map<State, State> oldToNew = new HashMap<>();
-
+		// automaton with one state
+		if(a.states.size() == 1) {
+			StringBuilder string = new StringBuilder("(");
+			for(Transition t : a.transitions)
+				string.append(t.getSymbol()).append(" | ");
+			string.delete(string.length() - 3, string.length());
+			string.append(")*");
+			return string.toString();
+		}
 		// states and transitions of the automaton used to compute the regex
 		Set<State> regStates = new HashSet<>();
 		Set<Transition> regTransitions = new HashSet<>();
+		// stores mapping between old and new states
+		Map<State, State> oldToNew = new HashMap<>();
 
 		State initialState = a.states.stream()
 				.filter(State::isInitial)
 				.findFirst()
 				.get();
 
+		Set<State> finalStates = a.states.stream()
+				.filter(State::isFinal)
+				.collect(Collectors.toSet());
+
+		Set<Transition> initialStateIngoing = a.transitions.stream()
+				.filter(t -> !t.getSource().equals(t.getDestination()) && t.getDestination().equals(initialState))
+				.collect(Collectors.toSet());
+
+		Set<Transition> finalStateOutgoing = a.transitions.stream()
+				.filter(t -> !t.getSource().equals(t.getDestination()) && finalStates.contains(t.getSource()))
+				.collect(Collectors.toSet());
+
 		regStates.addAll(a.states);
-		// add a new state if the initial state has ingoing transitions
-		if(!a.getIngoingTransitionTo(initialState).isEmpty()) {
+
+		if(!initialStateIngoing.isEmpty()) {
 			State newInitial = new State(true, false);
 			State q = new State(false, initialState.isFinal());
 			regStates.remove(initialState);
-			regStates.add(newInitial);
 			regStates.add(q);
+			regStates.add(newInitial);
 			oldToNew.put(initialState, q);
 			regTransitions.add(new Transition(newInitial, q, ""));
 		}
 
-		Set<State> finalStates = states.stream()
-				.filter(State::isFinal)
-				.collect(Collectors.toSet());
-
-		// if the automaton has more than one final state, add a new final state
 		if(finalStates.size() > 1) {
 			State newFinal = new State(false, true);
 			regStates.add(newFinal);
 			for(State s : finalStates) {
 				State q = new State(s.isInitial(), false);
-				oldToNew.put(s, q);
-				regStates.add(q);
 				regStates.remove(s);
+				regStates.add(q);
 				regTransitions.add(new Transition(q, newFinal, ""));
+				oldToNew.put(s, q);
 			}
-		}
-		// if the final state has any outgoing transition, add a new final state
-		else if(finalStates.size() == 1) {
-			State finalState = finalStates.stream().findFirst().get();
-			if(!getOutgoingTranstionsFrom(finalState).isEmpty()) {
+		} else {
+			if(!finalStateOutgoing.isEmpty()) {
 				State newFinal = new State(false, true);
+				State finalState = finalStates.stream().findFirst().get();
+				regStates.remove(finalState);
 				State q = new State(finalState.isInitial(), false);
-				oldToNew.put(finalState, q);
 				regStates.add(q);
 				regStates.add(newFinal);
 				regTransitions.add(new Transition(q, newFinal, ""));
+				oldToNew.put(finalState, q);
 			}
 		}
 
-		// update all the transitions with regard for the new states
 		for(Transition t : a.transitions) {
 			State source = t.getSource();
 			State dest = t.getDestination();
-			if(t.getSource().equals(initialState))
-				source = oldToNew.get(initialState);
-			if(t.getDestination().equals(initialState))
-				dest = oldToNew.get(initialState);
-			for(State s : finalStates) {
-				if(t.getSource().equals(s))
-					source = oldToNew.get(s);
-				if(t.getDestination().equals(s))
-					dest = oldToNew.get(s);
+			if(!initialStateIngoing.isEmpty()) {
+				if (t.getSource().equals(initialState))
+					source = oldToNew.get(initialState);
+				if (t.getDestination().equals(initialState))
+					dest = oldToNew.get(initialState);
+			}
+			if(finalStates.size() > 1 || !finalStateOutgoing.isEmpty()) {
+				if(finalStates.contains(t.getSource()))
+					source = oldToNew.get(t.getSource());
+				if(finalStates.contains(t.getDestination()))
+					dest = oldToNew.get(t.getDestination());
 			}
 			regTransitions.add(new Transition(source, dest, t.getSymbol()));
 		}
 
-		// create the automaton for the regex computation
+		// the automaton used to compute the regex
 		Automaton reg = new Automaton(regStates, regTransitions);
 
-		// TODO: add regex computation
+		// reg initial state
+		State regInitialState = reg.states.stream()
+				.filter(State::isInitial)
+				.findFirst()
+				.get();
+
+		// reg final state
+		State regFinalState = reg.states.stream()
+				.filter(State::isFinal)
+				.findFirst()
+				.get();
+
+		do {
+
+			Set<State> newLevel = reg.transitions.stream()
+					.filter(t -> t.getSource().equals(regInitialState))
+					.map(Transition::getDestination)
+					.collect(Collectors.toSet());
+			reg.states.removeAll(newLevel);
+
+			for(State s : newLevel) {
+				Set<State> nextLevel = reg.transitions.stream()
+						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
+						.map(Transition::getDestination)
+						.collect(Collectors.toSet());
+				Set<Transition> outgoingTransitions = reg.transitions.stream()
+						.filter(t -> t.getSource().equals(s) && !t.getDestination().equals(s))
+						.collect(Collectors.toSet());
+				Set<Transition> ingoingTransitions = reg.transitions.stream()
+						.filter(t -> !t.getSource().equals(s) && t.getDestination().equals(s))
+						.collect(Collectors.toSet());
+				Set<Transition> selfTransitions= reg.transitions.stream()
+						.filter(t -> t.getDestination().equals(t.getSource()) && t.getDestination().equals(s))
+						.collect(Collectors.toSet());
+
+				StringBuilder selfString = new StringBuilder();
+				// compute the string generated by self transitions
+				if(!selfTransitions.isEmpty()) {
+					selfString.append("(");
+					for (Transition t : selfTransitions)
+						selfString.append(t.getSymbol()).append("|");
+					selfString.delete(selfString.length() - 1, selfString.length());
+					selfString.append(")*");
+					reg.transitions.removeAll(selfTransitions);
+				}
+
+				StringBuilder outgoingString = new StringBuilder();
+				// compute the string generated by outgoing transitions
+				if(!outgoingTransitions.isEmpty()) {
+					if(!(outgoingTransitions.size() == 1 && outgoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
+						outgoingString.append("(");
+						for (Transition t : outgoingTransitions)
+							if (!t.getSymbol().equals(""))
+								outgoingString.append(t.getSymbol()).append("|");
+						outgoingString.delete(outgoingString.length() - 1, outgoingString.length());
+						outgoingString.append(")");
+					}
+					reg.transitions.removeAll(outgoingTransitions);
+					for (State q : nextLevel)
+						if(reg.states.size() != 2)
+							reg.transitions.add(new Transition(regInitialState, q, selfString.toString() + outgoingString));
+				}
+
+				StringBuilder ingoingString = new StringBuilder();
+				if(!ingoingTransitions.isEmpty()) {
+					if(!(ingoingTransitions.size() == 1 && ingoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
+						ingoingString.append("(");
+						for (Transition t : ingoingTransitions)
+							if (!t.getSymbol().equals(""))
+								ingoingString.append(t.getSymbol()).append("|");
+						ingoingString.delete(ingoingString.length() - 1, ingoingString.length());
+						ingoingString.append(")");
+					}
+					reg.transitions.removeAll(ingoingTransitions);
+					for (Transition t : ingoingTransitions)
+						if(reg.states.size() > 2 && !t.getSource().equals(regInitialState))
+							reg.transitions.add(new Transition(t.getSource(), t.getSource(), ingoingString.toString() + selfString + outgoingString));
+						else if(reg.states.size() == 2)
+							reg.transitions.add(new Transition(regInitialState, regFinalState, ingoingString.toString() + selfString + outgoingString));
+				}
+			}
+			if(reg.states.size() == 2) {
+				if(reg.transitions.size() > 1) {
+					StringBuilder finalValue = new StringBuilder("(");
+					for(Transition t : reg.transitions)
+						finalValue.append(t.getSymbol()).append("|");
+					finalValue.delete(finalValue.length() - 1, finalValue.length());
+					finalValue.append(")");
+					reg.transitions.clear();
+					reg.transitions.add(new Transition(regInitialState, regFinalState, finalValue.toString()));
+				}
+
+			}
+		} while(reg.states.size() > 2);
 
 		return reg.transitions.stream().findFirst().get().getSymbol();
 	}
