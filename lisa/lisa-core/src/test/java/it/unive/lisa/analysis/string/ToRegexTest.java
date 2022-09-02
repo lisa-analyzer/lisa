@@ -3,7 +3,7 @@ package it.unive.lisa.analysis.string;
 import org.junit.Test;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -15,12 +15,12 @@ public class ToRegexTest {
 
     @Test
     public void test01() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[1];
         st[0] = new State(true, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[0], "a"));
 
         Automaton a = new Automaton(states, delta);
@@ -30,13 +30,13 @@ public class ToRegexTest {
 
     @Test
     public void test02() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[2];
         st[0] = new State(true, false);
         st[1] = new State(false, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[0], "c"));
         delta.add(new Transition(st[0], st[1], "a"));
         delta.add(new Transition(st[1], st[0], "b"));
@@ -49,7 +49,7 @@ public class ToRegexTest {
 
     @Test
     public void test03() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[3];
 
         st[0] = new State(true, false);
@@ -57,7 +57,7 @@ public class ToRegexTest {
         st[2] = new State(false, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[1], "a"));
         delta.add(new Transition(st[0], st[2], "c"));
 
@@ -68,14 +68,14 @@ public class ToRegexTest {
 
     @Test
     public void test04() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[3];
         st[0] = new State(true, false);
         st[1] = new State(false, false);
         st[2] = new State(false, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[1], "a"));
         delta.add(new Transition(st[1], st[2], "b"));
 
@@ -85,9 +85,9 @@ public class ToRegexTest {
 
     @Test
     public void test05() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[5];
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
 
         st[0] = new State(true, false);
         st[1] = new State(false, false);
@@ -109,7 +109,7 @@ public class ToRegexTest {
 
     @Test
     public void test06() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[4];
         st[0] = new State(true, false);
         st[1] = new State(false, false);
@@ -117,7 +117,7 @@ public class ToRegexTest {
         st[3] = new State(false, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[1], ""));
         delta.add(new Transition(st[1], st[2], "a"));
         delta.add(new Transition(st[1], st[3], "b"));
@@ -131,7 +131,7 @@ public class ToRegexTest {
 
     @Test
     public void test07() {
-        Set<State> states = new LinkedHashSet<>();
+        Set<State> states = new HashSet<>();
         State[] st = new State[4];
         st[0] = new State(true, false);
         st[1] = new State(false, false);
@@ -139,7 +139,7 @@ public class ToRegexTest {
         st[3] = new State(false, true);
         Collections.addAll(states, st);
 
-        Set<Transition> delta = new LinkedHashSet<>();
+        Set<Transition> delta = new HashSet<>();
         delta.add(new Transition(st[0], st[1], "a"));
         delta.add(new Transition(st[0], st[2], "a"));
         delta.add(new Transition(st[1], st[3], "b"));

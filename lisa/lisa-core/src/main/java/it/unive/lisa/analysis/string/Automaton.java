@@ -72,8 +72,8 @@ public final class Automaton {
 	 * @param s the only string accepted by the automaton.
 	 */
 	public Automaton(String s) {
-		states = new LinkedHashSet<>();
-		transitions = new LinkedHashSet<>();
+		states = new HashSet<>();
+		transitions = new HashSet<>();
 		State last = new State(true, false);
 		State next;
 		states.add(last);
@@ -105,7 +105,7 @@ public final class Automaton {
 			String c = "" + str.charAt(i);
 
 			// stores temporally the new currentStates
-			Set<State> newCurr = new LinkedHashSet<>();
+			Set<State> newCurr = new HashSet<>();
 			for (State s : currentStates) {
 
 				// stores all the states reached after char computation
@@ -152,12 +152,12 @@ public final class Automaton {
 		Set<State> T;
 		Set<State> initialStates = epsClosure();
 		// stores the reached states of the automaton
-		Set<State> RS = new LinkedHashSet<>(initialStates);
+		Set<State> RS = new HashSet<>(initialStates);
 		// states that will be checked in the following iteration
-		Set<State> NS = new LinkedHashSet<>(initialStates);
+		Set<State> NS = new HashSet<>(initialStates);
 
 		do {
-			T = new LinkedHashSet<>();
+			T = new HashSet<>();
 
 			for (State q : NS) {
 				T.addAll(transitions.stream()
@@ -182,8 +182,8 @@ public final class Automaton {
 	 * {@code this}.
 	 */
 	Automaton reverse() {
-		Set<Transition> tr = new LinkedHashSet<>();
-		Set<State> st = new LinkedHashSet<>();
+		Set<Transition> tr = new HashSet<>();
+		Set<State> st = new HashSet<>();
 		// used to associate states of the Automaton this to the reverse one
 		Map<State, State> revStates = new HashMap<>();
 
@@ -217,16 +217,16 @@ public final class Automaton {
 			return this;
 
 		// transitions of the new deterministic automaton
-		Set<Transition> delta = new LinkedHashSet<>();
+		Set<Transition> delta = new HashSet<>();
 		// states of the new deterministic automaton
-		Set<State> sts = new LinkedHashSet<>();
+		Set<State> sts = new HashSet<>();
 		// store the macrostates of the new Automaton
 		List<Set<State>> detStates = new ArrayList<>();
 		// used to map the macrostate with the corresponding state of the new automaton
 		Map<State, Set<State>> stateToMacro = new HashMap<>();
 		Map<Set<State>, State> macroToState = new HashMap<>();
 		// stores the already controlled states
-		Set<State> marked = new LinkedHashSet<>();
+		Set<State> marked = new HashSet<>();
 		// automaton alphabet
 		Set<String> alphabet = transitions.stream()
 				.map(Transition::getSymbol)
@@ -271,7 +271,7 @@ public final class Automaton {
 						.collect(Collectors.toSet()));
 				// add R to detStates only if it is a new macrostate
 				if (!detStates.contains(R) && !R.isEmpty()) {
-					LinkedHashSet<State> currentStates = (LinkedHashSet<State>) R;
+					HashSet<State> currentStates = (HashSet<State>) R;
 					detStates.add(currentStates);
 					State nq = null;
 					// make nq final if any of the state in the correspondent macrostate is final
@@ -320,17 +320,17 @@ public final class Automaton {
 	 * epsilon transitions.
 	 */
 	Set<State> epsClosure(State state) {
-		Set<State> eps = new LinkedHashSet<>();
+		Set<State> eps = new HashSet<>();
 		eps.add(state);
 		// used to make sure that a state isn't checked twice
-		Set<State> checked = new LinkedHashSet<>();
+		Set<State> checked = new HashSet<>();
 
 		// add current state
 		do {
 			// used to collect new states that have to be added to eps inside
 			// for
 			// loop
-			Set<State> temp = new LinkedHashSet<>();
+			Set<State> temp = new HashSet<>();
 			for (State s : eps) {
 				if (!checked.contains(s)) {
 					checked.add(s);
@@ -363,7 +363,7 @@ public final class Automaton {
 	 * epsilon transitions.
 	 */
 	private Set<State> epsClosure(Set<State> st) {
-		Set<State> eps = new LinkedHashSet<>();
+		Set<State> eps = new HashSet<>();
 
 		for (State s : st)
 			eps.addAll(epsClosure(s));
@@ -382,8 +382,8 @@ public final class Automaton {
 		if (this == other)
 			return this;
 
-		Set<State> sts = new LinkedHashSet<>();
-		Set<Transition> ts = new LinkedHashSet<>();
+		Set<State> sts = new HashSet<>();
+		Set<Transition> ts = new HashSet<>();
 
 		Map<State, State> thisInitMapping = new HashMap<>();
 		Map<State, State> otherInitMapping = new HashMap<>();
@@ -439,7 +439,7 @@ public final class Automaton {
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
 	public Set<String> getLanguageAtMost(int length) {
-		Set<String> lang = new LinkedHashSet<>();
+		Set<String> lang = new HashSet<>();
 		Set<State> initialStates = epsClosure();
 
 		for (State s : initialStates)
@@ -462,10 +462,10 @@ public final class Automaton {
 	public Set<String> getLanguageAtMost(State q, int length) {
 
 		if (length == 0)
-			return new LinkedHashSet<>();
+			return new HashSet<>();
 
 		// the set representing the accepted language
-		Set<String> lang = new LinkedHashSet<>();
+		Set<String> lang = new HashSet<>();
 		lang.add("");
 		// used to keep track of every single possible path
 		LinkedList<AbstractMap.SimpleImmutableEntry<String, State>> stack = new LinkedList<>();
@@ -519,9 +519,9 @@ public final class Automaton {
 		Set<State> currentStates = states.stream()
 				.filter(State::isInitial)
 				.collect(Collectors.toSet());
-		Set<State> visited = new LinkedHashSet<>();
+		Set<State> visited = new HashSet<>();
 		while (!visited.containsAll(states)) {
-			Set<State> temp = new LinkedHashSet<>();
+			Set<State> temp = new HashSet<>();
 			for (State s : currentStates) {
 				temp.addAll(transitions.stream()
 						.filter(t -> t.getSource().equals(s))
@@ -544,7 +544,7 @@ public final class Automaton {
 	 * @throws CyclicAutomatonException thrown if the automaton is cyclic.
 	 */
 	public Set<String> getLanguage() throws CyclicAutomatonException {
-		Set<String> lang = new LinkedHashSet<>();
+		Set<String> lang = new HashSet<>();
 		if (hasCycle())
 			throw new CyclicAutomatonException();
 
@@ -580,8 +580,8 @@ public final class Automaton {
 	 * Creates a new {@code Automaton} that is the same as {@code this} but is complete.
 	 */
 	private Automaton complete(Set<String> sigma) {
-		Set<State> newStates = new LinkedHashSet<>(states);
-		Set<Transition> newTransitions = new LinkedHashSet<>(transitions);
+		Set<State> newStates = new HashSet<>(states);
+		Set<Transition> newTransitions = new HashSet<>(transitions);
 		// add a new "garbage" state
 		State garbage = new State(false, false);
 		newStates.add(garbage);
@@ -603,8 +603,8 @@ public final class Automaton {
 	 */
 	public Automaton complement(Set<String> sigma) {
 		// states and transitions for the newly created automaton
-		Set<State> sts = new LinkedHashSet<>();
-		Set<Transition> delta = new LinkedHashSet<>();
+		Set<State> sts = new HashSet<>();
+		Set<Transition> delta = new HashSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
 		Automaton r = this.determinize().complete(sigma);
@@ -672,7 +672,7 @@ public final class Automaton {
 	 * @return a set of strings representing the common alphabet.
 	 */
 	 Set<String> commonAlphabet(Automaton other) {
-		Set<String> result = new LinkedHashSet<>();
+		Set<String> result = new HashSet<>();
 		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 		result.addAll(other.transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 		
@@ -688,9 +688,9 @@ public final class Automaton {
 	 */
 	public Automaton widening(int n) {
 
-		Set<State> newStates = new LinkedHashSet<>();
+		Set<State> newStates = new HashSet<>();
 		// stores all the powerstates
-		Set<Set<State>> powerStates = new LinkedHashSet<>();
+		Set<Set<State>> powerStates = new HashSet<>();
 		// used to store a mapping between the powerstate and the new state
 		Map<Set<State>, State> powerToNew = new HashMap<>();
 		// used to store languages to improve performance
@@ -701,7 +701,7 @@ public final class Automaton {
 
 		// create the new states for the new automaton
 		for(State s : states) {
-			Set<State> ps = new LinkedHashSet<>();
+			Set<State> ps = new HashSet<>();
 			ps.add(s);
 			for(State q : states)
 				if(!q.equals(s) && languages.get(s).equals(languages.get(q)))
@@ -722,7 +722,7 @@ public final class Automaton {
 		}
 
 		// add transitions between the new states
-		Set<Transition> newTransitions = new LinkedHashSet<>();
+		Set<Transition> newTransitions = new HashSet<>();
 		for(Transition t : transitions)
 			for(Set<State> ps : powerStates)
 				if(ps.contains(t.getSource()))
@@ -740,8 +740,8 @@ public final class Automaton {
 	 * @return a newly created automaton representing the concatenation of the given automata.
 	 */
 	public Automaton concat(Automaton other) {
-		Set<State> newStates = new LinkedHashSet<>();
-		Set<Transition> newTransitions = new LinkedHashSet<>();
+		Set<State> newStates = new HashSet<>();
+		Set<Transition> newTransitions = new HashSet<>();
 		Map<State, State> oldToNew = new HashMap<>();
 
 		Set<State> thisFinalStates = states.stream()
@@ -818,8 +818,8 @@ public final class Automaton {
 			return string.toString();
 		}
 		// states and transitions of the automaton used to compute the regex
-		Set<State> regStates = new LinkedHashSet<>(a.states);
-		Set<Transition> regTransitions = new LinkedHashSet<>();
+		Set<State> regStates = new HashSet<>(a.states);
+		Set<Transition> regTransitions = new HashSet<>();
 		// stores mapping between old and new states
 		Map<State, State> oldToNew = new HashMap<>();
 
