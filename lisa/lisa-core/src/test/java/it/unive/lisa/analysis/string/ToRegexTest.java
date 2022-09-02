@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.Assert.assertEquals;
 
 public class ToRegexTest {
@@ -41,7 +44,7 @@ public class ToRegexTest {
 
         Automaton a = new Automaton(states, delta);
 
-        assertEquals("c*a(d|bc*a)*", a.toRegex());
+        assertThat(a.toRegex(), anyOf(is("c*a(d|bc*a)*"), is("c*a(bc*a|d)*")));
     }
 
     @Test
@@ -60,7 +63,7 @@ public class ToRegexTest {
 
         // ab | cc
         Automaton a = new Automaton(states, delta);
-        assertEquals("c|a", a.toRegex());
+        assertThat(a.toRegex(), anyOf(is("a|c"), is("c|a")));
     }
 
     @Test
@@ -101,7 +104,7 @@ public class ToRegexTest {
         // ab | cc
         Automaton a = new Automaton(states, delta);
 
-        assertEquals("ab|cc", a.toRegex());
+        assertThat(a.toRegex(), anyOf(is("ab|cc"), is("cc|ab")));
     }
 
     @Test
@@ -123,7 +126,7 @@ public class ToRegexTest {
 
         Automaton a = new Automaton(states, delta);
 
-        assertEquals("ac*|bc*", a.toRegex());
+        assertThat(a.toRegex(), anyOf(is("ac*|bc*"), is("bc*|ac*")));
     }
 
     @Test
@@ -143,6 +146,6 @@ public class ToRegexTest {
         delta.add(new Transition(st[2], st[3], "c"));
 
         Automaton a = new Automaton(states, delta);
-        assertEquals("a(c|b)", a.toRegex());
+        assertThat(a.toRegex(), anyOf(is("a(b|c)"), is("a(c|b)")));
     }
 }
