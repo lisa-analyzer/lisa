@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import it.unive.lisa.program.cfg.statement.string.Substring;
-
 import java.util.*;
 import java.util.stream.Collectors;
 
