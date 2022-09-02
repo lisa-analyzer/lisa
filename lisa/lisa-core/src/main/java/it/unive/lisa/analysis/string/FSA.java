@@ -4,10 +4,12 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
@@ -15,6 +17,12 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A class that represent the Finite State Automaton domain for strings.
+ *
+ * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
+ * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ */
 public class FSA extends BaseNonRelationalValueDomain<FSA> {
     private final Automaton a;
     private static final FSA TOP = new FSA();
@@ -76,12 +84,11 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 
     @Override
     public DomainRepresentation representation() {
-        return null;
+        return new StringRepresentation(this.a.toRegex());
     }
 
     @Override
     protected FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
-        // TODO: costruttore automaton con stringa
         if(constant.getValue() instanceof String) {
             return new FSA(new Automaton((String) constant.getValue()));
         }
@@ -109,7 +116,28 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 
     @Override
     protected SemanticDomain.Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp) throws SemanticException {
-        // TODO
-        return super.satisfiesBinaryExpression(operator, left, right, pp);
+        if(operator == StringContains.INSTANCE) {
+            if(right.a.acceptsEmptyLanguage())
+                return SemanticDomain.Satisfiability.SATISFIED;
+            if(right.a.hasCycle() || left.a.hasCycle())
+                return SemanticDomain.Satisfiability.UNKNOWN;
+            try {
+                for(String sub : right.a.getLanguage()) {
+                    Boolean isContained = false;
+                    for(String s : left.a.getLanguage()) {
+                        if(s.contains(sub)) {
+                            isContained = true;
+                            break;
+                        }
+                    }
+                    if(!isContained)
+                        return SemanticDomain.Satisfiability.UNKNOWN;
+                }
+                return SemanticDomain.Satisfiability.SATISFIED;
+            } catch(CyclicAutomatonException e) {
+                e.printStackTrace();
+            }
+        }
+        return SemanticDomain.Satisfiability.UNKNOWN;
     }
 }
