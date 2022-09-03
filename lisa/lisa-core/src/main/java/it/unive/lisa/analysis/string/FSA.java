@@ -117,20 +117,40 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
     @Override
     protected SemanticDomain.Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp) throws SemanticException {
         if(operator == StringContains.INSTANCE) {
-            if(right.a.acceptsEmptyLanguage())
-                return SemanticDomain.Satisfiability.SATISFIED;
-            if(right.a.hasCycle() || left.a.hasCycle())
-                return SemanticDomain.Satisfiability.UNKNOWN;
             try {
-                for(String sub : right.a.getLanguage()) {
-                    Boolean isContained = false;
-                    for(String s : left.a.getLanguage()) {
+                Set<String> rightLang = right.a.getLanguage();
+                Set<String> leftLang = left.a.getLanguage();
+                // right accepts only the empty string
+                if(rightLang.size() == 1 && rightLang.contains(""))
+                    return SemanticDomain.Satisfiability.SATISFIED;
+
+                boolean noneContained = true;
+                for(String sub : rightLang) {
+                    for(String s : leftLang) {
                         if(s.contains(sub)) {
+                            noneContained = false;
+                            break;
+                        }
+                        if(!noneContained)
+                            break;
+                    }
+                }
+                if(noneContained)
+                    return SemanticDomain.Satisfiability.NOT_SATISFIED;
+                // either left or right is cyclic
+                if(right.a.hasCycle() || left.a.hasCycle())
+                    return SemanticDomain.Satisfiability.UNKNOWN;
+
+                // all the strings accepted by right are substring of at least one string accpeted by left
+                for(String sub : rightLang) {
+                    boolean isContained = false;
+                    for (String s : leftLang) {
+                        if (s.contains(sub)) {
                             isContained = true;
                             break;
                         }
                     }
-                    if(!isContained)
+                    if (!isContained)
                         return SemanticDomain.Satisfiability.UNKNOWN;
                 }
                 return SemanticDomain.Satisfiability.SATISFIED;
