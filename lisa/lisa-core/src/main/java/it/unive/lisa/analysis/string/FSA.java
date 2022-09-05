@@ -33,7 +33,7 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
         this.a = new Automaton(null, null);
     }
 
-    private FSA(Automaton a) {
+    FSA(Automaton a) {
         this.a = a;
     }
 
@@ -137,9 +137,6 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
                 }
                 if(noneContained)
                     return SemanticDomain.Satisfiability.NOT_SATISFIED;
-                // either left or right is cyclic
-                if(right.a.hasCycle() || left.a.hasCycle())
-                    return SemanticDomain.Satisfiability.UNKNOWN;
 
                 // all the strings accepted by right are substring of at least one string accpeted by left
                 for(String sub : rightLang) {
@@ -155,7 +152,7 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
                 }
                 return SemanticDomain.Satisfiability.SATISFIED;
             } catch(CyclicAutomatonException e) {
-                e.printStackTrace();
+                return SemanticDomain.Satisfiability.UNKNOWN;
             }
         }
         return SemanticDomain.Satisfiability.UNKNOWN;
