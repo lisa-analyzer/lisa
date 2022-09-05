@@ -43,4 +43,16 @@ public class HasCycleTest {
 		Automaton a = new Automaton(states, tr);
 		assertFalse(a.hasCycle());
 	}
+
+	@Test
+	public void test03() {
+		Set<State> states = new HashSet<>();
+		Set<Transition> delta = new HashSet<>();
+		State q = new State(true, true);
+		delta.add(new Transition(q,q,"a"));
+		states.add(q);
+
+		Automaton a = new Automaton(states, delta);
+		assertTrue(a.hasCycle());
+	}
 }

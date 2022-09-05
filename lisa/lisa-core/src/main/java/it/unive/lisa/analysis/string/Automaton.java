@@ -513,6 +513,12 @@ public final class Automaton {
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	boolean hasCycle() {
+		if(states.size() == 1) {
+			for(Transition t : transitions) {
+				if(t.getSource() == t.getDestination())
+					return true;
+			}
+		}
 		// visit the automaton to check if there is any cycle
 		Set<State> currentStates = states.stream()
 				.filter(State::isInitial)
