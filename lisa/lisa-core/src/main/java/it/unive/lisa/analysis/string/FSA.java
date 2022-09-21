@@ -39,7 +39,7 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 
     @Override
     protected FSA lubAux(FSA other) throws SemanticException {
-        return null;
+        return new FSA(this.a.union(other.a).minimize());
     }
 
     @Override
