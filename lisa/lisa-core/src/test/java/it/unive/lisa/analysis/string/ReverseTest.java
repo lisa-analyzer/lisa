@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis.string;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class ReverseTest {
 
@@ -44,10 +43,10 @@ public class ReverseTest {
 		Collections.addAll(states, st);
 
 		Set<Transition> delta = new HashSet<>();
-		delta.add(new Transition(st[0], st[1],"a"));
-		delta.add(new Transition(st[0], st[2],"b"));
-		delta.add(new Transition(st[1], st[3],"c"));
-		delta.add(new Transition(st[2], st[4],"b"));
+		delta.add(new Transition(st[0], st[1], "a"));
+		delta.add(new Transition(st[0], st[2], "b"));
+		delta.add(new Transition(st[1], st[3], "c"));
+		delta.add(new Transition(st[2], st[4], "b"));
 
 		Set<String> exp = new HashSet<>();
 		exp.add("ca");

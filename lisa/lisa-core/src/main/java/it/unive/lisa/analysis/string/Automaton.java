@@ -30,8 +30,8 @@ public final class Automaton {
 
 	/**
 	 * Set to {@code true} if and only if the automaton is minimum, i.e., the
-	 * method {@link Automaton#minimize} has been called on {@code this}.
-	 * This field is not used inside {@link Automaton#equals}.
+	 * method {@link Automaton#minimize} has been called on {@code this}. This
+	 * field is not used inside {@link Automaton#equals}.
 	 */
 	private boolean IS_MINIMIZED;
 
@@ -67,6 +67,7 @@ public final class Automaton {
 
 	/**
 	 * Builds a new automaton that accepts a given string.
+	 * 
 	 * @param s the only string accepted by the automaton.
 	 */
 	public Automaton(String s) {
@@ -75,8 +76,8 @@ public final class Automaton {
 		State last = new State(true, false);
 		State next;
 		states.add(last);
-		for(int i = 0; i < s.length(); ++i) {
-			if(i != s.length() -1)
+		for (int i = 0; i < s.length(); ++i) {
+			if (i != s.length() - 1)
 				next = new State(false, false);
 			else
 				next = new State(false, true);
@@ -91,8 +92,9 @@ public final class Automaton {
 	 * {@code str}.
 	 *
 	 * @param str String that has to be checked.
+	 * 
 	 * @return a boolean value that indicates either if {@code str} has been
-	 * accepted or not.
+	 *             accepted or not.
 	 */
 	public boolean validateString(String str) {
 		// stores all the possible states reached by the automaton after each
@@ -128,7 +130,7 @@ public final class Automaton {
 	 * Brzozowski minimization algorithm.
 	 *
 	 * @return the minimum automaton that accepts the same language as
-	 * {@code this}.
+	 *             {@code this}.
 	 */
 	public Automaton minimize() {
 		if (IS_MINIMIZED)
@@ -143,7 +145,7 @@ public final class Automaton {
 	 * Remove all the unreachable states from the current automaton.
 	 *
 	 * @return a newly created automaton without the unreachable states of
-	 * {@code this}.
+	 *             {@code this}.
 	 */
 	Automaton reach() {
 		// used to store temporarily the states reached from the states in NS
@@ -166,7 +168,8 @@ public final class Automaton {
 			NS = T;
 			RS.addAll(T);
 		} while (!NS.isEmpty());
-		// add to the new automaton only the transitions between the states of the new Automaton
+		// add to the new automaton only the transitions between the states of
+		// the new Automaton
 		Set<Transition> tr = transitions;
 		tr.removeIf(t -> !RS.contains(t.getSource()) || !RS.contains(t.getDestination()));
 
@@ -177,7 +180,7 @@ public final class Automaton {
 	 * Creates an automaton that accept the reverse language.
 	 *
 	 * @return a newly created automaton that accepts the reverse language of
-	 * {@code this}.
+	 *             {@code this}.
 	 */
 	Automaton reverse() {
 		Set<Transition> tr = new HashSet<>();
@@ -193,7 +196,8 @@ public final class Automaton {
 				init = true;
 			State q = new State(init, fin);
 			st.add(q);
-			// add association between the newly created state and the state of the automaton this
+			// add association between the newly created state and the state of
+			// the automaton this
 			revStates.put(s, q);
 		}
 
@@ -208,7 +212,7 @@ public final class Automaton {
 	 * Creates a deterministic automaton starting from {@code this}.
 	 *
 	 * @return a newly deterministic automaton that accepts the same language as
-	 * {@code this}.
+	 *             {@code this}.
 	 */
 	Automaton determinize() {
 		if (IS_DETERMINIZED)
@@ -220,7 +224,8 @@ public final class Automaton {
 		Set<State> sts = new HashSet<>();
 		// store the macrostates of the new Automaton
 		List<Set<State>> detStates = new ArrayList<>();
-		// used to map the macrostate with the corresponding state of the new automaton
+		// used to map the macrostate with the corresponding state of the new
+		// automaton
 		Map<State, Set<State>> stateToMacro = new HashMap<>();
 		Map<Set<State>, State> macroToState = new HashMap<>();
 		// stores the already controlled states
@@ -231,7 +236,8 @@ public final class Automaton {
 				.filter(s -> !s.equals(""))
 				.collect(Collectors.toSet());
 
-		// the first macrostate is the one associated with the epsilon closure of the initial states
+		// the first macrostate is the one associated with the epsilon closure
+		// of the initial states
 		Set<State> initialStates = epsClosure();
 		detStates.add(initialStates);
 		State q = null;
@@ -260,7 +266,8 @@ public final class Automaton {
 			}
 			// macrostate corresponding to the current state
 			Set<State> currStates = stateToMacro.get(current);
-			// find all the destination states of any non epsilon transaction starting from a current state
+			// find all the destination states of any non epsilon transaction
+			// starting from a current state
 			for (String c : alphabet) {
 				Set<State> R = epsClosure(transitions.stream()
 						.filter(t -> currStates.contains(t.getSource()) && t.getSymbol().equals(c)
@@ -272,7 +279,8 @@ public final class Automaton {
 					HashSet<State> currentStates = (HashSet<State>) R;
 					detStates.add(currentStates);
 					State nq = null;
-					// make nq final if any of the state in the correspondent macrostate is final
+					// make nq final if any of the state in the correspondent
+					// macrostate is final
 					for (State s : R)
 						if (s.isFinal()) {
 							nq = new State(false, true);
@@ -284,7 +292,8 @@ public final class Automaton {
 					stateToMacro.put(nq, currentStates);
 					macroToState.put(currentStates, nq);
 				}
-				// add transition from currStates macrostate to R that is destination macrostate
+				// add transition from currStates macrostate to R that is
+				// destination macrostate
 				if (!R.isEmpty())
 					delta.add(new Transition(macroToState.get(currStates), macroToState.get(R), c));
 			}
@@ -301,7 +310,7 @@ public final class Automaton {
 	 * states just with epsilon transitions.
 	 *
 	 * @return the set of states that are reachable from all the initial states
-	 * just with epsilon transitions.
+	 *             just with epsilon transitions.
 	 */
 	Set<State> epsClosure() {
 		return epsClosure(states.stream().filter(State::isInitial).collect(Collectors.toSet()));
@@ -313,9 +322,10 @@ public final class Automaton {
 	 * {@code state} just with epsilon transitions.
 	 *
 	 * @param state the state from which the method starts to compute the
-	 *              epsilon closure
+	 *                  epsilon closure
+	 * 
 	 * @return the set of states that are reachable from {@code state} just with
-	 * epsilon transitions.
+	 *             epsilon transitions.
 	 */
 	Set<State> epsClosure(State state) {
 		Set<State> eps = new HashSet<>();
@@ -357,8 +367,9 @@ public final class Automaton {
 	 * {@code st} just with epsilon transitions.
 	 *
 	 * @param st the set of states from which the epsilon closure is computed.
+	 * 
 	 * @return the set of states that are reachable from {@code state} just with
-	 * epsilon transitions.
+	 *             epsilon transitions.
 	 */
 	private Set<State> epsClosure(Set<State> st) {
 		Set<State> eps = new HashSet<>();
@@ -370,10 +381,13 @@ public final class Automaton {
 	}
 
 	/**
-	 * Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}.
+	 * Yields the automaton recognizing the language that is the union of the
+	 * languages recognized by {@code this} and {@code other}.
 	 *
 	 * @param other the other automaton
-	 * @return Yields the automaton recognizing the language that is the union of the languages recognized by {@code this} and {@code other}
+	 * 
+	 * @return Yields the automaton recognizing the language that is the union
+	 *             of the languages recognized by {@code this} and {@code other}
 	 */
 
 	public Automaton union(Automaton other) {
@@ -417,11 +431,12 @@ public final class Automaton {
 			if (thisInitMapping.containsValue(s) || otherInitMapping.containsValue(s))
 				ts.add(new Transition(q0, s, ""));
 
-		for (Transition t : transitions) 
+		for (Transition t : transitions)
 			ts.add(new Transition(thisMapping.get(t.getSource()), thisMapping.get(t.getDestination()), t.getSymbol()));
 
-		for (Transition t : other.transitions) 
-			ts.add(new Transition(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()), t.getSymbol()));
+		for (Transition t : other.transitions)
+			ts.add(new Transition(otherMapping.get(t.getSource()), otherMapping.get(t.getDestination()),
+					t.getSymbol()));
 
 		Automaton result = new Automaton(sts, ts);
 		result.IS_DETERMINIZED = false;
@@ -434,6 +449,7 @@ public final class Automaton {
 	 * {@code this} of length from 1 to {@code length}.
 	 *
 	 * @param length the maximum length of the strings to be returned
+	 * 
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
 	public Set<String> getLanguageAtMost(int length) {
@@ -442,7 +458,6 @@ public final class Automaton {
 
 		for (State s : initialStates)
 			lang.addAll(getLanguageAtMost(s, length));
-
 
 		return lang;
 	}
@@ -453,9 +468,10 @@ public final class Automaton {
 	 *
 	 * @param q      state from which the strings are computed
 	 * @param length maximum length of the computed strings
+	 * 
 	 * @return a set containing a subset of strings accepted by {@code this}
-	 * starting from the state {@code q} of maximum length
-	 * {@code length}.
+	 *             starting from the state {@code q} of maximum length
+	 *             {@code length}.
 	 */
 	public Set<String> getLanguageAtMost(State q, int length) {
 
@@ -477,8 +493,8 @@ public final class Automaton {
 					.filter(t -> t.getSource().equals(top.getValue()))
 					.map(Transition::getSymbol)
 					.collect(Collectors.toSet());
-			for(String c : newChars) {
-				String newString =  currentString + c;
+			for (String c : newChars) {
+				String newString = currentString + c;
 				lang.add(newString);
 
 				if (newString.length() < length) {
@@ -499,6 +515,7 @@ public final class Automaton {
 	 * Returns all the outgoing transitions from a given state.
 	 *
 	 * @param q the source of the transitions.
+	 * 
 	 * @return a Set containing all the outgoing transitions from the state q.
 	 */
 	private Set<Transition> getOutgoingTranstionsFrom(State q) {
@@ -513,9 +530,9 @@ public final class Automaton {
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	boolean hasCycle() {
-		if(states.size() == 1) {
-			for(Transition t : transitions) {
-				if(t.getSource() == t.getDestination())
+		if (states.size() == 1) {
+			for (Transition t : transitions) {
+				if (t.getSource() == t.getDestination())
 					return true;
 			}
 		}
@@ -544,7 +561,10 @@ public final class Automaton {
 
 	/**
 	 * Returns the language accepted by {@code this}.
-	 * @return a set representing the language accepted by the Automaton {@code this}.
+	 * 
+	 * @return a set representing the language accepted by the Automaton
+	 *             {@code this}.
+	 * 
 	 * @throws CyclicAutomatonException thrown if the automaton is cyclic.
 	 */
 	public Set<String> getLanguage() throws CyclicAutomatonException {
@@ -553,7 +573,8 @@ public final class Automaton {
 			throw new CyclicAutomatonException();
 
 		// stack used to keep track of transitions that will be "visited"
-		// each element is a pair to keep track of old String and next Transition
+		// each element is a pair to keep track of old String and next
+		// Transition
 		LinkedList<AbstractMap.SimpleImmutableEntry<String, Transition>> stack = new LinkedList<>();
 		Set<State> initialStates = states.stream()
 				.filter(State::isInitial)
@@ -569,10 +590,12 @@ public final class Automaton {
 			AbstractMap.SimpleImmutableEntry<String, Transition> top = stack.removeFirst();
 			String currentString = top.getKey();
 			Transition tr = top.getValue();
-			// when it finds a final state it adds the generated string to the language
+			// when it finds a final state it adds the generated string to the
+			// language
 			if (tr.getDestination().isFinal())
 				lang.add(currentString + tr.getSymbol());
-			// adds all the possible path from current transition destination to the stack
+			// adds all the possible path from current transition destination to
+			// the stack
 			for (Transition t : getOutgoingTranstionsFrom(tr.getDestination()))
 				stack.addFirst(new AbstractMap.SimpleImmutableEntry<>(currentString + tr.getSymbol(), t));
 		}
@@ -581,7 +604,8 @@ public final class Automaton {
 	}
 
 	/**
-	 * Creates a new {@code Automaton} that is the same as {@code this} but is complete.
+	 * Creates a new {@code Automaton} that is the same as {@code this} but is
+	 * complete.
 	 */
 	private Automaton complete(Set<String> sigma) {
 		Set<State> newStates = new HashSet<>(states);
@@ -589,7 +613,7 @@ public final class Automaton {
 		// add a new "garbage" state
 		State garbage = new State(false, false);
 		newStates.add(garbage);
-	
+
 		// adds all the transitions to the garbage state
 		for (State s : newStates)
 			for (String c : sigma)
@@ -601,8 +625,11 @@ public final class Automaton {
 	}
 
 	/**
-	 * Return a new Automaton that accept a language that is the complementary language of {@code this}.
+	 * Return a new Automaton that accept a language that is the complementary
+	 * language of {@code this}.
+	 * 
 	 * @param sigma the alphabet used for automaton completion.
+	 * 
 	 * @return the complement Automaton of {@code this}.
 	 */
 	public Automaton complement(Set<String> sigma) {
@@ -628,10 +655,14 @@ public final class Automaton {
 	}
 
 	/**
-	 * Returns the Automaton that accepts the language that is the intersection between the language of {@code this} and another Automaton.
+	 * Returns the Automaton that accepts the language that is the intersection
+	 * between the language of {@code this} and another Automaton.
 	 *
 	 * @param other the Automaton used for intersection with this.
-	 * @return a new Automaton accepting the language which is the intersection between the language of {@code this} and {@code other}'s langauge.
+	 * 
+	 * @return a new Automaton accepting the language which is the intersection
+	 *             between the language of {@code this} and {@code other}'s
+	 *             langauge.
 	 */
 	public Automaton intersection(Automaton other) {
 		if (this == other)
@@ -643,16 +674,22 @@ public final class Automaton {
 
 	/**
 	 * Checks if the Automaton {@code this} accepts the empty language
-	 * @return a boolean value that points out if {@code this} accepts the empty language
+	 * 
+	 * @return a boolean value that points out if {@code this} accepts the empty
+	 *             language
 	 */
 	public boolean acceptsEmptyLanguage() {
 		// if there's no final state this automaton accepts the empty language
 		return states.stream().noneMatch(State::isFinal);
 	}
+
 	/**
 	 * Checks if the automaton {@code this} contains the automaton {@code other}
+	 * 
 	 * @param other the other automaton
-	 * @return a boolean value that points out if the automaton is contained or not
+	 * 
+	 * @return a boolean value that points out if the automaton is contained or
+	 *             not
 	 */
 	public boolean isContained(Automaton other) {
 		Automaton intersection = intersection(other.complement(commonAlphabet(other))).minimize();
@@ -660,8 +697,11 @@ public final class Automaton {
 	}
 
 	/**
-	 * Checks if the automaton {@code this} accepts the same language as {@code other}.
+	 * Checks if the automaton {@code this} accepts the same language as
+	 * {@code other}.
+	 * 
 	 * @param other the other automaton
+	 * 
 	 * @return a boolean value that points out if the automata are equivalent
 	 */
 	public boolean isEqual(Automaton other) {
@@ -669,25 +709,31 @@ public final class Automaton {
 			return false;
 		return other.isContained(this);
 	}
-	
+
 	/**
-	 * Yields the common alphabet of the automata {@code this} and {@code other}.
+	 * Yields the common alphabet of the automata {@code this} and
+	 * {@code other}.
+	 * 
 	 * @param other the other automaton
+	 * 
 	 * @return a set of strings representing the common alphabet.
 	 */
-	 Set<String> commonAlphabet(Automaton other) {
+	Set<String> commonAlphabet(Automaton other) {
 		Set<String> result = new HashSet<>();
 		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 		result.addAll(other.transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
-		
+
 		// remove the empty string
 		result.remove("");
 		return result;
 	}
 
 	/**
-	 * Creates a new automaton that represent the widening operator applied on the automaton {@code this}
+	 * Creates a new automaton that represent the widening operator applied on
+	 * the automaton {@code this}
+	 * 
 	 * @param n the parameter of the widening operator.
+	 * 
 	 * @return a newly created automaton representing the widening automaton.
 	 */
 	public Automaton widening(int n) {
@@ -700,19 +746,19 @@ public final class Automaton {
 		// used to store languages to improve performance
 		Map<State, Set<String>> languages = new HashMap<>();
 		// generate all the languages for the states
-		for(State s : states)
+		for (State s : states)
 			languages.put(s, getLanguageAtMost(s, n));
 
 		// create the new states for the new automaton
-		for(State s : states) {
+		for (State s : states) {
 			Set<State> ps = new HashSet<>();
 			ps.add(s);
-			for(State q : states)
-				if(!q.equals(s) && languages.get(s).equals(languages.get(q)))
+			for (State q : states)
+				if (!q.equals(s) && languages.get(s).equals(languages.get(q)))
 					ps.add(q);
 
 			boolean isInitial = false, isFinal = false;
-			for(State q : ps) {
+			for (State q : ps) {
 				if (q.isInitial())
 					isInitial = true;
 				if (q.isFinal())
@@ -727,11 +773,11 @@ public final class Automaton {
 
 		// add transitions between the new states
 		Set<Transition> newTransitions = new HashSet<>();
-		for(Transition t : transitions)
-			for(Set<State> ps : powerStates)
-				if(ps.contains(t.getSource()))
-					for(Set<State> psd : powerStates)
-						if(psd.contains(t.getDestination()))
+		for (Transition t : transitions)
+			for (Set<State> ps : powerStates)
+				if (ps.contains(t.getSource()))
+					for (Set<State> psd : powerStates)
+						if (psd.contains(t.getDestination()))
 							newTransitions.add(new Transition(powerToNew.get(ps), powerToNew.get(psd), t.getSymbol()));
 
 		Automaton automaton = new Automaton(newStates, newTransitions);
@@ -739,9 +785,13 @@ public final class Automaton {
 	}
 
 	/**
-	 * Create a new automaton representing the concatenation of {@code this} and {@code other}.
+	 * Create a new automaton representing the concatenation of {@code this} and
+	 * {@code other}.
+	 * 
 	 * @param other the other automaton.
-	 * @return a newly created automaton representing the concatenation of the given automata.
+	 * 
+	 * @return a newly created automaton representing the concatenation of the
+	 *             given automata.
 	 */
 	public Automaton concat(Automaton other) {
 		Set<State> newStates = new HashSet<>();
@@ -756,8 +806,8 @@ public final class Automaton {
 				.filter(State::isInitial)
 				.collect(Collectors.toSet());
 
-		for(State s : states) {
-			if(!s.isFinal())
+		for (State s : states) {
+			if (!s.isFinal())
 				newStates.add(s);
 			else {
 				State q = new State(s.isInitial(), false);
@@ -765,8 +815,8 @@ public final class Automaton {
 				newStates.add(q);
 			}
 		}
-		for(State s : other.states) {
-			if(!s.isInitial())
+		for (State s : other.states) {
+			if (!s.isInitial())
 				newStates.add(s);
 			else {
 				State q = new State(false, s.isFinal());
@@ -775,26 +825,26 @@ public final class Automaton {
 			}
 		}
 
-		for(Transition t : transitions) {
+		for (Transition t : transitions) {
 			State source = t.getSource();
 			State dest = t.getDestination();
-			if(thisFinalStates.contains(t.getSource()))
+			if (thisFinalStates.contains(t.getSource()))
 				source = oldToNew.get(t.getSource());
-			if(thisFinalStates.contains(t.getDestination()))
+			if (thisFinalStates.contains(t.getDestination()))
 				dest = oldToNew.get(t.getDestination());
 			newTransitions.add(new Transition(source, dest, t.getSymbol()));
 		}
-		for(Transition t : other.transitions) {
+		for (Transition t : other.transitions) {
 			State source = t.getSource();
 			State dest = t.getDestination();
-			if(otherInitialStates.contains(t.getSource()))
+			if (otherInitialStates.contains(t.getSource()))
 				source = oldToNew.get(t.getSource());
-			if(otherInitialStates.contains(t.getDestination()))
+			if (otherInitialStates.contains(t.getDestination()))
 				dest = oldToNew.get(t.getDestination());
 			newTransitions.add(new Transition(source, dest, t.getSymbol()));
 		}
 
-		for(State f : thisFinalStates)
+		for (State f : thisFinalStates)
 			for (State i : otherInitialStates)
 				newTransitions.add(new Transition(oldToNew.get(f), oldToNew.get(i), ""));
 
@@ -802,21 +852,24 @@ public final class Automaton {
 	}
 
 	/**
-	 * Creates and return the regex that represent the accepted language by the automaton {@code this}.
-	 * @return a String representing that is the regex that represent the accepted language.
+	 * Creates and return the regex that represent the accepted language by the
+	 * automaton {@code this}.
+	 * 
+	 * @return a String representing that is the regex that represent the
+	 *             accepted language.
 	 */
 	public String toRegex() {
 		// this algorithm works only with deterministic automata
 		Automaton a = this.determinize();
 		// automaton with one state
-		if(a.states.size() == 1) {
+		if (a.states.size() == 1) {
 			StringBuilder string = new StringBuilder();
-			if(a.transitions.size() > 1)
+			if (a.transitions.size() > 1)
 				string.append("(");
-			for(Transition t : a.transitions)
+			for (Transition t : a.transitions)
 				string.append(t.getSymbol()).append(" | ");
 			string.delete(string.length() - 3, string.length());
-			if(a.transitions.size() > 1)
+			if (a.transitions.size() > 1)
 				string.append(")");
 			string.append("*");
 			return string.toString();
@@ -844,7 +897,7 @@ public final class Automaton {
 				.filter(t -> !t.getSource().equals(t.getDestination()) && finalStates.contains(t.getSource()))
 				.collect(Collectors.toSet());
 
-		if(!initialStateIngoing.isEmpty()) {
+		if (!initialStateIngoing.isEmpty()) {
 			State newInitial = new State(true, false);
 			State q = new State(false, initialState.isFinal());
 			regStates.remove(initialState);
@@ -854,10 +907,10 @@ public final class Automaton {
 			regTransitions.add(new Transition(newInitial, q, ""));
 		}
 
-		if(finalStates.size() > 1) {
+		if (finalStates.size() > 1) {
 			State newFinal = new State(false, true);
 			regStates.add(newFinal);
-			for(State s : finalStates) {
+			for (State s : finalStates) {
 				State q = new State(s.isInitial(), false);
 				regStates.remove(s);
 				regStates.add(q);
@@ -865,7 +918,7 @@ public final class Automaton {
 				oldToNew.put(s, q);
 			}
 		} else {
-			if(!finalStateOutgoing.isEmpty()) {
+			if (!finalStateOutgoing.isEmpty()) {
 				State newFinal = new State(false, true);
 				State finalState = finalStates.stream().findFirst().get();
 				regStates.remove(finalState);
@@ -877,19 +930,19 @@ public final class Automaton {
 			}
 		}
 
-		for(Transition t : a.transitions) {
+		for (Transition t : a.transitions) {
 			State source = t.getSource();
 			State dest = t.getDestination();
-			if(!initialStateIngoing.isEmpty()) {
+			if (!initialStateIngoing.isEmpty()) {
 				if (t.getSource().equals(initialState))
 					source = oldToNew.get(initialState);
 				if (t.getDestination().equals(initialState))
 					dest = oldToNew.get(initialState);
 			}
-			if(finalStates.size() > 1 || !finalStateOutgoing.isEmpty()) {
-				if(finalStates.contains(t.getSource()))
+			if (finalStates.size() > 1 || !finalStateOutgoing.isEmpty()) {
+				if (finalStates.contains(t.getSource()))
 					source = oldToNew.get(t.getSource());
-				if(finalStates.contains(t.getDestination()))
+				if (finalStates.contains(t.getDestination()))
 					dest = oldToNew.get(t.getDestination());
 			}
 			regTransitions.add(new Transition(source, dest, t.getSymbol()));
@@ -918,7 +971,7 @@ public final class Automaton {
 					.collect(Collectors.toSet());
 			reg.states.removeAll(newLevel);
 
-			for(State s : newLevel) {
+			for (State s : newLevel) {
 				Set<State> nextLevel = reg.transitions.stream()
 						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
 						.map(Transition::getDestination)
@@ -929,7 +982,7 @@ public final class Automaton {
 				Set<Transition> ingoingTransitions = reg.transitions.stream()
 						.filter(t -> !t.getSource().equals(s) && t.getDestination().equals(s))
 						.collect(Collectors.toSet());
-				Set<Transition> selfTransitions= reg.transitions.stream()
+				Set<Transition> selfTransitions = reg.transitions.stream()
 						.filter(t -> t.getDestination().equals(t.getSource()) && t.getDestination().equals(s))
 						.collect(Collectors.toSet());
 
@@ -938,28 +991,29 @@ public final class Automaton {
 				StringBuilder ingoingString = new StringBuilder();
 
 				// compute the string generated by self transitions
-				if(!selfTransitions.isEmpty()) {
-					if(selfTransitions.size() > 1)
+				if (!selfTransitions.isEmpty()) {
+					if (selfTransitions.size() > 1)
 						selfString.append("(");
 					for (Transition t : selfTransitions)
 						selfString.append(t.getSymbol()).append("|");
 					selfString.delete(selfString.length() - 1, selfString.length());
-					if(selfTransitions.size() > 1)
+					if (selfTransitions.size() > 1)
 						selfString.append(")");
 					selfString.append("*");
 					reg.transitions.removeAll(selfTransitions);
 				}
 
 				// compute the string generated by outgoing transitions
-				if(!outgoingTransitions.isEmpty()) {
-					if(!(outgoingTransitions.size() == 1 && outgoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
-						if(outgoingTransitions.size() > 1)
+				if (!outgoingTransitions.isEmpty()) {
+					if (!(outgoingTransitions.size() == 1
+							&& outgoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
+						if (outgoingTransitions.size() > 1)
 							outgoingString.append("(");
 						for (Transition t : outgoingTransitions)
 							if (!t.getSymbol().equals(""))
 								outgoingString.append(t.getSymbol()).append("|");
 						outgoingString.delete(outgoingString.length() - 1, outgoingString.length());
-						if(outgoingTransitions.size() > 1)
+						if (outgoingTransitions.size() > 1)
 							outgoingString.append(")");
 					}
 					reg.transitions.removeAll(outgoingTransitions);
@@ -967,20 +1021,22 @@ public final class Automaton {
 					for (Transition t : ingoingTransitions)
 						if (!t.getSymbol().equals("") && t.getSource().equals(regInitialState))
 							ingString.append(t.getSymbol()).append("|");
-					if(!ingString.toString().equals(""))
+					if (!ingString.toString().equals(""))
 						ingString.delete(ingString.length() - 1, ingString.length());
-					if(ingString.length() > 1) {
+					if (ingString.length() > 1) {
 						ingString.insert(0, "(");
 						ingString.append(")");
 					}
 					for (State q : nextLevel)
-						if(reg.states.size() != 2)
-							reg.transitions.add(new Transition(regInitialState, q, selfString.toString() + ingString + outgoingString));
+						if (reg.states.size() != 2)
+							reg.transitions.add(new Transition(regInitialState, q,
+									selfString.toString() + ingString + outgoingString));
 				}
 
 				// compute the string generated by ingoing transitions
-				if(!ingoingTransitions.isEmpty()) {
-					if(!(ingoingTransitions.size() == 1 && ingoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
+				if (!ingoingTransitions.isEmpty()) {
+					if (!(ingoingTransitions.size() == 1
+							&& ingoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
 						for (Transition t : ingoingTransitions)
 							if (!t.getSymbol().equals(""))
 								ingoingString.append(t.getSymbol()).append("|");
@@ -988,24 +1044,26 @@ public final class Automaton {
 					}
 					reg.transitions.removeAll(ingoingTransitions);
 					for (Transition t : ingoingTransitions)
-						if(reg.states.size() > 2 && !t.getSource().equals(regInitialState))
-							reg.transitions.add(new Transition(t.getSource(), t.getSource(), ingoingString.toString() + selfString + outgoingString));
-						else if(reg.states.size() == 2)
-							reg.transitions.add(new Transition(regInitialState, regFinalState, ingoingString.toString() + selfString + outgoingString));
+						if (reg.states.size() > 2 && !t.getSource().equals(regInitialState))
+							reg.transitions.add(new Transition(t.getSource(), t.getSource(),
+									ingoingString.toString() + selfString + outgoingString));
+						else if (reg.states.size() == 2)
+							reg.transitions.add(new Transition(regInitialState, regFinalState,
+									ingoingString.toString() + selfString + outgoingString));
 				}
 			}
 
-			if(reg.states.size() == 2) {
-				if(reg.transitions.size() > 1) {
+			if (reg.states.size() == 2) {
+				if (reg.transitions.size() > 1) {
 					StringBuilder finalValue = new StringBuilder();
-					for(Transition t : reg.transitions)
+					for (Transition t : reg.transitions)
 						finalValue.append(t.getSymbol()).append("|");
 					finalValue.delete(finalValue.length() - 1, finalValue.length());
 					reg.transitions.clear();
 					reg.transitions.add(new Transition(regInitialState, regFinalState, finalValue.toString()));
 				}
 			}
-		} while(reg.states.size() > 2);
+		} while (reg.states.size() > 2);
 
 		return reg.transitions.stream().findFirst().get().getSymbol();
 	}

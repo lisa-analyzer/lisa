@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis.string;
 
-import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.junit.Test;
 
 public class HasCycleTest {
 
@@ -49,7 +48,7 @@ public class HasCycleTest {
 		Set<State> states = new HashSet<>();
 		Set<Transition> delta = new HashSet<>();
 		State q = new State(true, true);
-		delta.add(new Transition(q,q,"a"));
+		delta.add(new Transition(q, q, "a"));
 		states.add(q);
 
 		Automaton a = new Automaton(states, delta);

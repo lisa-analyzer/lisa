@@ -1,16 +1,16 @@
 package it.unive.lisa.analysis.string;
 
-import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import org.junit.Test;
 
 public class GetLanguageTest {
 
 	@Test
-	public void test01() throws CyclicAutomatonException{
+	public void test01() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		Set<Transition> tr = new HashSet<>();
 		State[] st = new State[3];
@@ -28,7 +28,7 @@ public class GetLanguageTest {
 	}
 
 	@Test(expected = CyclicAutomatonException.class)
-	public void test02() throws CyclicAutomatonException{
+	public void test02() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
@@ -46,7 +46,7 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test03() throws CyclicAutomatonException{
+	public void test03() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[6];
 		st[0] = new State(true, false);
@@ -73,7 +73,7 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test04() throws CyclicAutomatonException{
+	public void test04() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
@@ -99,7 +99,7 @@ public class GetLanguageTest {
 	}
 
 	@Test
-	public void test05() throws CyclicAutomatonException{
+	public void test05() throws CyclicAutomatonException {
 		Set<State> states = new HashSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);

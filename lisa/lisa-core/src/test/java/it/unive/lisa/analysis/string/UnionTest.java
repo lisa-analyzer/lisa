@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis.string;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class UnionTest {
 
@@ -51,7 +50,7 @@ public class UnionTest {
 		st1[2] = new State(false, true);
 		Collections.addAll(states, st1);
 
-    	Set<Transition> delta = new HashSet<>();
+		Set<Transition> delta = new HashSet<>();
 		delta.add(new Transition(st1[0], st1[1], "a"));
 		delta.add(new Transition(st1[1], st1[2], "b"));
 
