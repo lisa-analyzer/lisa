@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import org.apache.commons.collections4.SetUtils;
 
 /**
@@ -75,6 +76,11 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 
 	@Override
 	public TypeBasedHeap forgetIdentifier(Identifier id) throws SemanticException {
+		return this;
+	}
+
+	@Override
+	public TypeBasedHeap forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		return this;
 	}
 

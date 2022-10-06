@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
 
 /**
  * A dataflow domain that collects instances of {@link DataflowElement}. A
@@ -129,6 +130,25 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 		Collection<E> toRemove = new LinkedList<>();
 		for (E e : elements)
 			if (e.getInvolvedIdentifiers().contains(id))
+				toRemove.add(e);
+
+		if (toRemove.isEmpty())
+			return (D) this;
+
+		Set<E> updated = new HashSet<>(elements);
+		updated.removeAll(toRemove);
+		return mk(domain, updated, false, false);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public D forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+		if (isTop())
+			return (D) this;
+
+		Collection<E> toRemove = new LinkedList<>();
+		for (E e : elements)
+			if (e.getInvolvedIdentifiers().stream().anyMatch(test::test))
 				toRemove.add(e);
 
 		if (toRemove.isEmpty())

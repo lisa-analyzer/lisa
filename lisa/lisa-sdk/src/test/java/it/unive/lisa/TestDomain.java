@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression> extends BaseLattice<T>
@@ -39,6 +40,11 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 
 	@Override
 	public T forgetIdentifier(Identifier id) throws SemanticException {
+		return (T) this;
+	}
+
+	@Override
+	public T forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
 		return (T) this;
 	}
 

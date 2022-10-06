@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Predicate;
 import org.junit.Test;
 
 public class SubstitutionTest {
@@ -63,6 +64,11 @@ public class SubstitutionTest {
 			Collector rem = new Collector(this);
 			rem.removed.elements().add(id);
 			return rem;
+		}
+
+		@Override
+		public Collector forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
+			return null;
 		}
 
 		@Override
