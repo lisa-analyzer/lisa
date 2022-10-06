@@ -16,6 +16,7 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.Automaton;
 import it.unive.lisa.analysis.string.State;
 import it.unive.lisa.analysis.string.Transition;
 import it.unive.lisa.analysis.symbols.Symbol;
@@ -120,10 +121,6 @@ public class EqualityContractVerificationTest {
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
-	private static final State st1 = new State(false, false);
-	private static final State st2 = new State(false, false);
-	private static final Transition t1 = new Transition(st1, st2, "a");
-	private static final Transition t2 = new Transition(st1, st2, "b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
 			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
 			"foo");
@@ -207,9 +204,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(ExternalSet.class, s1, s2)
-				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
-				.withPrefabValues(State.class, st1, st2)
-				.withPrefabValues(Transition.class, t1, t2);
+				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -237,7 +232,7 @@ public class EqualityContractVerificationTest {
 		// caches are unique: we are fine in using object's equality and not
 		// caring about fields
 		verify(ExternalSetCache.class, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
-		// suppress nullity: the cache will never be null..
+		// suppress nullity: the cache will never be null
 		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
 		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
@@ -252,6 +247,16 @@ public class EqualityContractVerificationTest {
 		verify(FIFOWorkingSet.class);
 		verify(LIFOWorkingSet.class);
 		verify(VisitOnceWorkingSet.class);
+	}
+
+	@Test
+	public void testAutomatonClasses() {
+		verify(State.class, Warning.IDENTICAL_COPY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(Transition.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(Automaton.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
 	}
 
 	@Test
