@@ -16,9 +16,9 @@ categories:
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 template: |
-  [Milestone with issues list](https://github.com/UniVE-SSV/lisa/milestone/###MILESTONE_NUMBER###) 
-  [Maven (sdk)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-sdk/###TARGET_VERSION###/jar) - [Maven (core)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-core/###TARGET_VERSION###/jar) - [Maven (imp)](https://search.maven.org/artifact/com.github.unive-ssv/lisa-imp/###TARGET_VERSION###/jar)
-  [Javadoc (sdk)](https://javadoc.io/doc/com.github.unive-ssv/lisa-sdk/###TARGET_VERSION###) - [Javadoc (core)](https://javadoc.io/doc/com.github.unive-ssv/lisa-core/###TARGET_VERSION###) - [Javadoc (imp)](https://javadoc.io/doc/com.github.unive-ssv/lisa-imp/###TARGET_VERSION###)
+  [Milestone with issues list](https://github.com/lisa-analyzer/lisa/milestone/###MILESTONE_NUMBER###) 
+  [Maven (sdk)](https://search.maven.org/artifact/io.github.lisa-analyzer/lisa-sdk/###TARGET_VERSION###/jar) - [Maven (core)](https://search.maven.org/artifact/io.github.lisa-analyzer/lisa-core/###TARGET_VERSION###/jar) - [Maven (imp)](https://search.maven.org/artifact/io.github.lisa-analyzer/lisa-imp/###TARGET_VERSION###/jar)
+  [Javadoc (sdk)](https://javadoc.io/doc/io.github.lisa-analyzer/lisa-sdk/###TARGET_VERSION###) - [Javadoc (core)](https://javadoc.io/doc/io.github.lisa-analyzer/lisa-core/###TARGET_VERSION###) - [Javadoc (imp)](https://javadoc.io/doc/io.github.lisa-analyzer/lisa-imp/###TARGET_VERSION###)
   
   ## Changes
 

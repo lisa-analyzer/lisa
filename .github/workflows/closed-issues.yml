@@ -13,4 +13,4 @@ jobs:
       uses: andymckay/labeler@22d5392de2b725cea4b284df5824125054049d84
       with:
         add-labels: 'resolution:resolved'
-        repo-token: ${{ secrets.SSVPAT }}
+        repo-token: ${{ secrets.LISA_PAT }}
