@@ -24,10 +24,3 @@ jobs:
       run: chmod +x lisa/gradlew
     - name: 'Gradle: full build and run cron tests'
       run: cd lisa && ./gradlew cron
-    - name: 'Publish unit test results'
-      uses: EnricoMi/publish-unit-test-result-action@v1.6
-      if: always()
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        check_name: 'Cron Test Results'
-        files: lisa/lisa-*/build/test-results/**/TEST-*.xml
