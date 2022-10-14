@@ -44,4 +44,4 @@ Contributions to LiSA are always welcome! Thank you for taking time to make LiSA
 + [GitHub pull request docs](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request)
 + [LiSA issues][issues]
 
-[issues]:https://github.com/UniVE-SSV/lisa/issues 
+[issues]:https://github.com/lisa-analyzer/lisa/issues 

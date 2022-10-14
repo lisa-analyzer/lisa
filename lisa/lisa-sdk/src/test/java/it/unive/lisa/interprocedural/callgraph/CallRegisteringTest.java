@@ -29,7 +29,7 @@ import org.junit.Test;
 public class CallRegisteringTest {
 
 	/**
-	 * @see <a href="https://github.com/UniVE-SSV/lisa/issues/145">#145</a>
+	 * @see <a href="https://github.com/lisa-analyzer/lisa/issues/145">#145</a>
 	 */
 	@Test
 	public void issue145() throws CallResolutionException, ProgramValidationException, CallGraphConstructionException {
