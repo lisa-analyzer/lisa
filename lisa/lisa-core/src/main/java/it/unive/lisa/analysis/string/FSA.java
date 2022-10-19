@@ -23,15 +23,30 @@ import java.util.Set;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 public class FSA extends BaseNonRelationalValueDomain<FSA> {
+  /**
+   * Used to store the string representation
+   */
 	private final Automaton a;
+  /**
+   * Top element of the domain
+   */
 	private static final FSA TOP = new FSA();
+  /**
+   * The paramater used for the widening operator
+   */
 	public static final int WIDENING_TH = 3;
 
+  /**
+   * Creates a new FSA object representing the TOP element
+   */
 	public FSA() {
 		// top
 		this.a = new Automaton(null, null);
 	}
 
+  /**
+   * Creates a new FSA object using a string
+  */
 	FSA(Automaton a) {
 		this.a = a;
 	}
