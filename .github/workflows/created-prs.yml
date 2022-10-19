@@ -16,9 +16,9 @@ jobs:
       with:
         project: LiSA
         column: PR-WIP
-        repo-token: ${{ secrets.SSVPAT }}
+        repo-token: ${{ secrets.LISA_PAT }}
     - name: add label
       uses: andymckay/labeler@22d5392de2b725cea4b284df5824125054049d84
       with:
         add-labels: 'resolution:wip'
-        repo-token: ${{ secrets.SSVPAT }}
+        repo-token: ${{ secrets.LISA_PAT }}

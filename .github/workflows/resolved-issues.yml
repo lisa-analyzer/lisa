@@ -15,4 +15,4 @@ jobs:
       with:
         project: LiSA
         column: DONE
-        repo-token: ${{ secrets.SSVPAT }}
+        repo-token: ${{ secrets.LISA_PAT }}
