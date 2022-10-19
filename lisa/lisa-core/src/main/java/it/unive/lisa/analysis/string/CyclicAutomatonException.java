@@ -5,7 +5,7 @@ package it.unive.lisa.analysis.string;
  */
 public class CyclicAutomatonException extends Exception {
 	/**
-	 * Default constructor for CyclicAutomatonException
+	 * Default constructor for CyclicAutomatonException.
 	 */
 	public CyclicAutomatonException() {
 		super("The automaton is cyclic");

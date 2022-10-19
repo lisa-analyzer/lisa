@@ -673,7 +673,7 @@ public final class Automaton {
 	}
 
 	/**
-	 * Checks if the Automaton {@code this} accepts the empty language
+	 * Checks if the Automaton {@code this} accepts the empty language.
 	 * 
 	 * @return a boolean value that points out if {@code this} accepts the empty
 	 *             language
@@ -684,7 +684,7 @@ public final class Automaton {
 	}
 
 	/**
-	 * Checks if the automaton {@code this} contains the automaton {@code other}
+	 * Checks if the automaton {@code this} contains the automaton {@code other}.
 	 * 
 	 * @param other the other automaton
 	 * 
@@ -730,7 +730,7 @@ public final class Automaton {
 
 	/**
 	 * Creates a new automaton that represent the widening operator applied on
-	 * the automaton {@code this}
+	 * the automaton {@code this}.
 	 * 
 	 * @param n the parameter of the widening operator.
 	 * 
