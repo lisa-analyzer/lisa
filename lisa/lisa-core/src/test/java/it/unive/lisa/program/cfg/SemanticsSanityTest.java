@@ -167,7 +167,7 @@ public class SemanticsSanityTest {
 		if (param == boolean.class || param == Boolean.class)
 			return false;
 		if (param == Global.class)
-			return new Global(new SourceCodeLocation("unknown", 0, 0), "foo");
+			return new Global(new SourceCodeLocation("unknown", 0, 0), unit, "foo", false);
 		if (param == Object.class)
 			return new Object();
 		if (param == Type.class)

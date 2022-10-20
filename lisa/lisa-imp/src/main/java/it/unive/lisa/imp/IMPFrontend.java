@@ -415,8 +415,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
-		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
-				Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), currentUnit, ctx.name.getText(),
+				true, Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
 	}
 
 	@Override

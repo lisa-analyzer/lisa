@@ -28,7 +28,7 @@ public class CheckToolTest {
 
 	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("fake", 1, 0), "fake",
 			false);
-	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), "fake");
+	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation("fake", 2, 0), unit, false,
 			"foo");
 	private static final CFG cfg = new CFG(descriptor);

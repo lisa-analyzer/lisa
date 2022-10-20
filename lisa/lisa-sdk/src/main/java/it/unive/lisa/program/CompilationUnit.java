@@ -335,6 +335,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the instance global with the given name, or {@code null}
 	 */
+	@Override
 	public final Global getInstanceGlobal(String name, boolean traverseHierarchy) {
 		Collection<Global> res = searchGlobals(cm -> cm.getName().equals(name), traverseHierarchy);
 		if (res.isEmpty())

@@ -23,8 +23,8 @@ public class WarningsTest {
 	private static final CompilationUnit unit2 = new CompilationUnit(new SourceCodeLocation("fake", 1, 1), "fake2",
 			false);
 
-	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), "fake1");
-	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), "fake2");
+	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
+	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);
 
 	private static final CFGDescriptor descriptor1 = new CFGDescriptor(new SourceCodeLocation("fake", 2, 0), unit1,
 			false, "foo1");

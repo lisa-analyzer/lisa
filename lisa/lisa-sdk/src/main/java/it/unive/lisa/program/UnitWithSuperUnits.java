@@ -40,6 +40,18 @@ public abstract class UnitWithSuperUnits extends Unit {
 	 * @return the collection of instance code members
 	 */
 	public abstract Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy);
+	
+	/**
+	 * Yields the instance {@link Global} defined in this unit having the given
+	 * name ({@link Global#getName()}), if any.
+	 * 
+	 * @param name              the name of the global to find
+	 * @param traverseHierarchy if {@code true}, also returns instance globals
+	 *                              from superunits, transitively
+	 * 
+	 * @return the instance global with the given name, or {@code null}
+	 */
+	public abstract Global getInstanceGlobal(String name, boolean traverseHierarchy);
 
 	/**
 	 * Yields the collection of {@link CompilationUnit}s that are instances of

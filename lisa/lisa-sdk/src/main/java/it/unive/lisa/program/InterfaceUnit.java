@@ -292,4 +292,10 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		all.addAll(getSignatureCFGs(traverseHierarchy));
 		return all;
 	}
+
+	@Override
+	public Global getInstanceGlobal(String name, boolean traverseHierarchy) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
