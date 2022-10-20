@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
@@ -127,7 +127,7 @@ public class BaseNonRelationalValueDomainTest {
 			}
 
 			@Override
-			public ImplementedCFG getCFG() {
+			public CFG getCFG() {
 				return null;
 			}
 

@@ -45,9 +45,9 @@ import it.unive.lisa.program.annotations.values.AnnotationValue;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.SignatureCFG;
+import it.unive.lisa.program.cfg.AbstractCFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
@@ -114,14 +114,14 @@ public class EqualityContractVerificationTest {
 	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, "fake2");
 	private static final CFGDescriptor descr1 = new CFGDescriptor(loc, unit1, false, "fake1");
 	private static final CFGDescriptor descr2 = new CFGDescriptor(loc, unit2, false, "fake2");
-	private static final ImplementedCFG cfg1 = new ImplementedCFG(descr1);
-	private static final ImplementedCFG cfg2 = new ImplementedCFG(descr2);
+	private static final CFG cfg1 = new CFG(descr1);
+	private static final CFG cfg2 = new CFG(descr2);
 	private static final CFGDescriptor signDescr1 = new CFGDescriptor(loc, interface1, true, "fake1");
 	private static final CFGDescriptor signDescr2 = new CFGDescriptor(loc, interface1, true, "fake2");
-	private static final SignatureCFG signCfg1 = new SignatureCFG(signDescr1);
-	private static final SignatureCFG signCfg2 = new SignatureCFG(signDescr2);
-	private static final NodeList<ImplementedCFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
-	private static final NodeList<ImplementedCFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
+	private static final AbstractCFG signCfg1 = new AbstractCFG(signDescr1);
+	private static final AbstractCFG signCfg2 = new AbstractCFG(signDescr2);
+	private static final NodeList<CFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
+	private static final NodeList<CFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
 
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
@@ -201,8 +201,8 @@ public class EqualityContractVerificationTest {
 
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
-				.withPrefabValues(ImplementedCFG.class, cfg1, cfg2)
-				.withPrefabValues(SignatureCFG.class, signCfg1, signCfg2)
+				.withPrefabValues(CFG.class, cfg1, cfg2)
+				.withPrefabValues(AbstractCFG.class, signCfg1, signCfg2)
 				.withPrefabValues(CFGDescriptor.class, descr1, descr2)
 				.withPrefabValues(CompilationUnit.class, unit1, unit2)
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)

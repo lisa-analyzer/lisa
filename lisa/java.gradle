@@ -85,7 +85,7 @@ tasks.register('completeBuild') {
 }
 
 jacocoTestReport {
-	// TODO: depend also on cron
+	// we do not depend also on cron for now
     dependsOn test // tests are required to run before generating the report
     afterEvaluate {
     	// this will effectively hide exception classes from the report

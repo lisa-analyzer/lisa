@@ -8,7 +8,7 @@ import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -28,19 +28,19 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 		}
 
 		@Override
-		public boolean visit(CheckTool tool, ImplementedCFG graph, Statement node) {
+		public boolean visit(CheckTool tool, CFG graph, Statement node) {
 			if (node instanceof VariableRef && ((VariableRef) node).getName().equals("i"))
 				tool.warnOn(node, "Found variable i");
 			return true;
 		}
 
 		@Override
-		public boolean visit(CheckTool tool, ImplementedCFG g) {
+		public boolean visit(CheckTool tool, CFG g) {
 			return true;
 		}
 
 		@Override
-		public boolean visit(CheckTool tool, ImplementedCFG graph, Edge edge) {
+		public boolean visit(CheckTool tool, CFG graph, Edge edge) {
 			return true;
 		}
 

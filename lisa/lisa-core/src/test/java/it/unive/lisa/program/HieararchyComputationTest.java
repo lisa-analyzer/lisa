@@ -6,9 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.ImplementedCFG;
-import it.unive.lisa.program.cfg.SignatureCFG;
+import it.unive.lisa.program.cfg.AbstractCFG;
 import org.junit.Test;
 
 public class HieararchyComputationTest {
@@ -19,32 +19,32 @@ public class HieararchyComputationTest {
 		return unit;
 	}
 
-	private static ImplementedCFG findCFG(CompilationUnit unit, String name) {
-		ImplementedCFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static CFG findCFG(CompilationUnit unit, String name) {
+		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static SignatureCFG findSignatureCFG(CompilationUnit unit, String name) {
-		SignatureCFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static AbstractCFG findSignatureCFG(CompilationUnit unit, String name) {
+		AbstractCFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static CFG findSignatureCFG(InterfaceUnit unit, String name) {
-		CFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static ICFG findSignatureCFG(InterfaceUnit unit, String name) {
+		ICFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static CFG findImplementedCFG(InterfaceUnit unit, String name) {
-		CFG cfg = unit.getImplementedCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static ICFG findImplementedCFG(InterfaceUnit unit, String name) {
+		ICFG cfg = unit.getImplementedCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
@@ -72,7 +72,7 @@ public class HieararchyComputationTest {
 					unit.getSuperUnits().contains(sup));
 	}
 
-	private static void overrides(CFG sup, CFG cfg) {
+	private static void overrides(ICFG sup, ICFG cfg) {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -83,7 +83,7 @@ public class HieararchyComputationTest {
 				cfg.getDescriptor().overrides().contains(sup));
 	}
 
-	private static void notOverrides(ImplementedCFG sup, ImplementedCFG cfg) {
+	private static void notOverrides(CFG sup, CFG cfg) {
 		assertFalse(
 				"'" + sup.getDescriptor().getFullName() + "' is overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -114,8 +114,8 @@ public class HieararchyComputationTest {
 		isInstance(first, second);
 		notInstance(second, first);
 
-		ImplementedCFG fooFirst = findCFG(first, "foo");
-		ImplementedCFG fooSecond = findCFG(second, "foo");
+		CFG fooFirst = findCFG(first, "foo");
+		CFG fooSecond = findCFG(second, "foo");
 
 		overrides(fooFirst, fooSecond);
 	}
@@ -179,11 +179,11 @@ public class HieararchyComputationTest {
 		notInstance(fourth, third);
 		notInstance(fifth, third);
 
-		ImplementedCFG fooFirst = findCFG(first, "foo");
-		ImplementedCFG fooSecond = findCFG(second, "foo");
-		ImplementedCFG fooThird = findCFG(third, "foo");
-		ImplementedCFG fooFourth = findCFG(fourth, "foo");
-		ImplementedCFG fooFifth = findCFG(fifth, "foo");
+		CFG fooFirst = findCFG(first, "foo");
+		CFG fooSecond = findCFG(second, "foo");
+		CFG fooThird = findCFG(third, "foo");
+		CFG fooFourth = findCFG(fourth, "foo");
+		CFG fooFifth = findCFG(fifth, "foo");
 
 		overrides(fooFirst, fooSecond);
 		overrides(fooFirst, fooThird);
@@ -210,8 +210,8 @@ public class HieararchyComputationTest {
 		isInstance(first, third);
 		isInstance(second, third);
 
-		ImplementedCFG fooFirst = findCFG(first, "foo");
-		ImplementedCFG fooThird = findCFG(third, "foo");
+		CFG fooFirst = findCFG(first, "foo");
+		CFG fooThird = findCFG(third, "foo");
 
 		overrides(fooFirst, fooThird);
 	}
@@ -226,13 +226,13 @@ public class HieararchyComputationTest {
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
 		findCFG(first, "foo");
-		ImplementedCFG aFirst = findCFG(first, "a");
-		ImplementedCFG bFirst = findCFG(first, "b");
-		ImplementedCFG cFirst = findCFG(first, "c");
+		CFG aFirst = findCFG(first, "a");
+		CFG bFirst = findCFG(first, "b");
+		CFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aJ = (SignatureCFG) findSignatureCFG(j, "a");
-		SignatureCFG bI = (SignatureCFG) findSignatureCFG(i, "b");
-		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
+		AbstractCFG aJ = (AbstractCFG) findSignatureCFG(j, "a");
+		AbstractCFG bI = (AbstractCFG) findSignatureCFG(i, "b");
+		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
 
 		overrides(aJ, aFirst);
 		overrides(bI, bFirst);
@@ -250,13 +250,13 @@ public class HieararchyComputationTest {
 		InterfaceUnit k = (InterfaceUnit) findUnit(prog, "k");
 
 		findCFG(first, "foo");
-		ImplementedCFG aFirst = findCFG(first, "a");
-		ImplementedCFG bFirst = findCFG(first, "b");
-		ImplementedCFG cFirst = findCFG(first, "c");
+		CFG aFirst = findCFG(first, "a");
+		CFG bFirst = findCFG(first, "b");
+		CFG cFirst = findCFG(first, "c");
 
-		SignatureCFG aI = (SignatureCFG) findSignatureCFG(i, "a");
-		SignatureCFG bJ = (SignatureCFG) findSignatureCFG(j, "b");
-		SignatureCFG cK = (SignatureCFG) findSignatureCFG(k, "c");
+		AbstractCFG aI = (AbstractCFG) findSignatureCFG(i, "a");
+		AbstractCFG bJ = (AbstractCFG) findSignatureCFG(j, "b");
+		AbstractCFG cK = (AbstractCFG) findSignatureCFG(k, "c");
 
 		overrides(aI, aFirst);
 		overrides(bJ, bFirst);
@@ -278,11 +278,11 @@ public class HieararchyComputationTest {
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
 		findImplementedCFG(j, "a");
-		ImplementedCFG bFirst = findCFG(first, "b");
-		ImplementedCFG cFirst = findCFG(first, "c");
+		CFG bFirst = findCFG(first, "b");
+		CFG cFirst = findCFG(first, "c");
 
-		SignatureCFG bI = (SignatureCFG) findSignatureCFG(i, "b");
-		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
+		AbstractCFG bI = (AbstractCFG) findSignatureCFG(i, "b");
+		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
 		findImplementedCFG(i, "d");
 
 		overrides(bI, bFirst);
@@ -313,13 +313,13 @@ public class HieararchyComputationTest {
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
 		findImplementedCFG(j, "a");
-		ImplementedCFG bJ = (ImplementedCFG) findImplementedCFG(j, "b");
+		CFG bJ = (CFG) findImplementedCFG(j, "b");
 
-		SignatureCFG cI = (SignatureCFG) findSignatureCFG(i, "c");
+		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
 		findImplementedCFG(i, "d");
 
-		ImplementedCFG bFirst = findCFG(first, "b");
-		ImplementedCFG cFirst = findCFG(first, "c");
+		CFG bFirst = findCFG(first, "b");
+		CFG cFirst = findCFG(first, "c");
 
 		overrides(bJ, bFirst);
 		overrides(cI, cFirst);
@@ -357,8 +357,8 @@ public class HieararchyComputationTest {
 
 		assertFalse(first.canBeInstantiated());
 
-		SignatureCFG aFirst = findSignatureCFG(first, "a");
-		ImplementedCFG aSecond = findCFG(second, "a");
+		AbstractCFG aFirst = findSignatureCFG(first, "a");
+		CFG aSecond = findCFG(second, "a");
 
 		overrides(aFirst, aSecond);
 
@@ -379,8 +379,8 @@ public class HieararchyComputationTest {
 		assertFalse(first.canBeInstantiated());
 		assertFalse(second.canBeInstantiated());
 
-		SignatureCFG aFirst = findSignatureCFG(first, "a");
-		ImplementedCFG aThird = findCFG(third, "a");
+		AbstractCFG aFirst = findSignatureCFG(first, "a");
+		CFG aThird = findCFG(third, "a");
 
 		overrides(aFirst, aThird);
 

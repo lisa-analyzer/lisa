@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
@@ -30,12 +30,12 @@ public class And extends it.unive.lisa.program.cfg.statement.BinaryExpression {
 	/**
 	 * Builds the logical conjunction.
 	 * 
-	 * @param cfg      the {@link ImplementedCFG} where this operation lies
+	 * @param cfg      the {@link CFG} where this operation lies
 	 * @param location the location where this literal is defined
 	 * @param left     the left-hand side of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public And(ImplementedCFG cfg, CodeLocation location, Expression left, Expression right) {
+	public And(CFG cfg, CodeLocation location, Expression left, Expression right) {
 		super(cfg, location, "&&", BoolType.INSTANCE, left, right);
 	}
 

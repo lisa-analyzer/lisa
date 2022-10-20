@@ -11,7 +11,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -41,7 +41,7 @@ public class VariableRef extends Expression {
 	 * @param location the location of this variable reference
 	 * @param name     the name of this variable reference
 	 */
-	public VariableRef(ImplementedCFG cfg, CodeLocation location, String name) {
+	public VariableRef(CFG cfg, CodeLocation location, String name) {
 		this(cfg, location, name, Untyped.INSTANCE);
 	}
 
@@ -55,7 +55,7 @@ public class VariableRef extends Expression {
 	 * @param name     the name of this variable
 	 * @param type     the type of this variable
 	 */
-	public VariableRef(ImplementedCFG cfg, CodeLocation location, String name, Type type) {
+	public VariableRef(CFG cfg, CodeLocation location, String name, Type type) {
 		super(cfg, location, type);
 		Objects.requireNonNull(name, "The name of a variable cannot be null");
 		this.name = name;
@@ -130,7 +130,7 @@ public class VariableRef extends Expression {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 

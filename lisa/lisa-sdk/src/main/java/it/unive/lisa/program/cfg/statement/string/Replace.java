@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -51,13 +51,13 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	/**
 	 * Builds the replace.
 	 * 
-	 * @param cfg      the {@link ImplementedCFG} where this operation lies
+	 * @param cfg      the {@link CFG} where this operation lies
 	 * @param location the code location where this operation is defined
 	 * @param left     the left-hand side of this operation
 	 * @param middle   the middle operand of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Replace(ImplementedCFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
+	public Replace(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
 		super(cfg, location, "replace", StringType.INSTANCE, left, middle, right);
 	}
 

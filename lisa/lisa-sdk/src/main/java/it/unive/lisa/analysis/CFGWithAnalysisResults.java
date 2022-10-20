@@ -3,7 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -32,7 +32,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends ImplementedCFG implements Lattice<CFGWithAnalysisResults<A, H, V, T>> {
+		extends CFG implements Lattice<CFGWithAnalysisResults<A, H, V, T>> {
 
 	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
 
@@ -63,7 +63,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public CFGWithAnalysisResults(ImplementedCFG cfg, AnalysisState<A, H, V, T> singleton) {
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton) {
 		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
 
@@ -78,7 +78,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public CFGWithAnalysisResults(ImplementedCFG cfg, AnalysisState<A, H, V, T> singleton,
+	public CFGWithAnalysisResults(CFG cfg, AnalysisState<A, H, V, T> singleton,
 			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
 			Map<Statement, AnalysisState<A, H, V, T>> results) {
 		super(cfg);
@@ -88,7 +88,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		entryStates.forEach(this.entryStates::put);
 	}
 
-	private CFGWithAnalysisResults(ImplementedCFG cfg, StatementStore<A, H, V, T> entryStates,
+	private CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V, T> entryStates,
 			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;

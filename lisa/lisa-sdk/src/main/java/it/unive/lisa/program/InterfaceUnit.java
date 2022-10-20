@@ -1,11 +1,11 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
-import it.unive.lisa.program.cfg.SignatureCFG;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.AbstractCFG;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * The instance cfgs defined in this interface unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, CFG> instanceCFG;
+	private final Map<String, ICFG> instanceCFG;
 
 	/**
 	 * The collection of interface units this unit directly inherits from.
@@ -75,7 +75,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Yields the collection of instance {@link SignatureCFG}s defined in this
+	 * Yields the collection of instance {@link AbstractCFG}s defined in this
 	 * unit. Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * signature cfgs having the same signature in each unit. Signature cfgs
@@ -87,12 +87,12 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of signature cfgs
 	 */
-	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
+	public final Collection<AbstractCFG> getSignatureCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof AbstractCFG, true, false, traverseHierarchy);
 	}
 
 	/**
-	 * Yields the collection of instance {@link ImplementedCFG}s defined in this
+	 * Yields the collection of instance {@link CFG}s defined in this
 	 * unit. Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * instance cfgs having the same signature in each unit. Instance cfgs can
@@ -104,12 +104,12 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of instance cfgs
 	 */
-	public final Collection<ImplementedCFG> getImplementedCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
+	public final Collection<CFG> getImplementedCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof CFG, true, false, traverseHierarchy);
 	}
 
 	/**
-	 * Yields the collection of instance {@link CFG}s defined in this unit. Each
+	 * Yields the collection of instance {@link ICFG}s defined in this unit. Each
 	 * cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * instance cfgs having the same signature in each unit. Instance cfgs can
@@ -121,8 +121,8 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of cfgs
 	 */
-	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof CFG, true, false, traverseHierarchy);
+	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof ICFG, true, false, traverseHierarchy);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,7 +131,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 		Collection<T> result = new HashSet<>();
 
 		if (cfgs) {
-			for (CFG cfg : instanceCFG.values())
+			for (ICFG cfg : instanceCFG.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
 		}
@@ -203,7 +203,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Adds a new instance {@link CFG}, identified by its signature
+	 * Adds a new instance {@link ICFG}, identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), to this unit. Cfgs can be
 	 * overridden inside subunits, according to
 	 * {@link CFGDescriptor#isOverridable()}.
@@ -214,7 +214,7 @@ public class InterfaceUnit extends UnitWithSuperUnits implements CodeElement {
 	 *             same signature, {@code false} otherwise. If this method
 	 *             returns {@code false}, the given cfg is discarded.
 	 */
-	public final boolean addInstanceCFG(CFG cfg) {
+	public final boolean addInstanceCFG(ICFG cfg) {
 		return instanceCFG.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
 	}
 

@@ -2,14 +2,14 @@ package it.unive.lisa.program;
 
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.SignatureCFG;
+import it.unive.lisa.program.cfg.AbstractCFG;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,13 +56,13 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * The instance cfgs defined in this unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, ImplementedCFG> instanceCfgs;
+	private final Map<String, CFG> instanceCfgs;
 
 	/**
 	 * The instance cfgs defined in this unit, indexed by
 	 * {@link CFGDescriptor#getSignature()}
 	 */
-	private final Map<String, SignatureCFG> signatureCfgs;
+	private final Map<String, AbstractCFG> signatureCfgs;
 
 	/**
 	 * The instance constructs ({@link NativeCFG}s) defined in this unit,
@@ -169,7 +169,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Yields the collection of instance {@link ImplementedCFG}s defined in this
+	 * Yields the collection of instance {@link CFG}s defined in this
 	 * unit. Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * instance cfgs having the same signature in each unit. Instance cfgs can
@@ -181,12 +181,12 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of instance cfgs
 	 */
-	public final Collection<ImplementedCFG> getInstanceCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof ImplementedCFG, true, false, traverseHierarchy);
+	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof CFG, true, false, traverseHierarchy);
 	}
 
 	/**
-	 * Yields the collection of instance {@link SignatureCFG}s defined in this
+	 * Yields the collection of instance {@link AbstractCFG}s defined in this
 	 * unit. Each cfg is uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * signature cfgs having the same signature in each unit. Signature cfgs
@@ -198,8 +198,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of signature cfgs
 	 */
-	public final Collection<SignatureCFG> getSignatureCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof SignatureCFG, true, false, traverseHierarchy);
+	public final Collection<AbstractCFG> getSignatureCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof AbstractCFG, true, false, traverseHierarchy);
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Adds a new instance {@link ImplementedCFG}, identified by its signature
+	 * Adds a new instance {@link CFG}, identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), to this unit. Instance cfgs can
 	 * be overridden inside subunits, according to
 	 * {@link CFGDescriptor#isOverridable()}.
@@ -254,8 +254,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 *             with the same signature, {@code false} otherwise. If this
 	 *             method returns {@code false}, the given cfg is discarded.
 	 */
-	public final boolean addInstanceCFG(ImplementedCFG cfg) {
-		ImplementedCFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
+	public final boolean addInstanceCFG(CFG cfg) {
+		CFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
 		if (sealed)
 			if (c == null)
 				cfg.getDescriptor().setOverridable(false);
@@ -288,7 +288,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Yields the instance {@link ImplementedCFG} defined in this unit having
+	 * Yields the instance {@link CFG} defined in this unit having
 	 * the given signature ({@link CFGDescriptor#getSignature()}), if any.
 	 * 
 	 * @param signature         the signature of the cfg to find
@@ -297,10 +297,10 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the instance cfg with the given signature, or {@code null}
 	 */
-	public final ImplementedCFG getInstanceCFG(String signature, boolean traverseHierarchy) {
+	public final CFG getInstanceCFG(String signature, boolean traverseHierarchy) {
 		Collection<
-				ImplementedCFG> res = searchCodeMembers(
-						cm -> cm instanceof ImplementedCFG && cm.getDescriptor().getSignature().equals(signature), true,
+				CFG> res = searchCodeMembers(
+						cm -> cm instanceof CFG && cm.getDescriptor().getSignature().equals(signature), true,
 						false, traverseHierarchy);
 		if (res.isEmpty())
 			return null;
@@ -364,7 +364,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Yields the collection of all instance {@link ImplementedCFG}s defined in
+	 * Yields the collection of all instance {@link CFG}s defined in
 	 * this unit that have the given name.
 	 * 
 	 * @param name              the name of the constructs to include
@@ -373,8 +373,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of instance cfgs with the given name
 	 */
-	public final Collection<ImplementedCFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof ImplementedCFG && cm.getDescriptor().getName().equals(name), true,
+	public final Collection<CFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof CFG && cm.getDescriptor().getName().equals(name), true,
 				false, traverseHierarchy);
 	}
 
@@ -447,11 +447,11 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		Collection<T> result = new HashSet<>();
 
 		if (cfgs) {
-			for (ImplementedCFG cfg : instanceCfgs.values())
+			for (CFG cfg : instanceCfgs.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
 
-			for (SignatureCFG cfg : signatureCfgs.values())
+			for (AbstractCFG cfg : signatureCfgs.values())
 				if (filter.test(cfg))
 					result.add((T) cfg);
 		}
@@ -512,8 +512,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * This method also returns all the instance cfgs defined in this unit.
 	 */
 	@Override
-	public Collection<ImplementedCFG> getAllCFGs() {
-		Collection<ImplementedCFG> all = super.getAllCFGs();
+	public Collection<CFG> getAllCFGs() {
+		Collection<CFG> all = super.getAllCFGs();
 		instanceCfgs.values().forEach(all::add);
 		return all;
 	}
@@ -642,14 +642,14 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 			}
 
 		for (InterfaceUnit i : superInterfaceUnits)
-			for (CFG sup : i.getInstanceCFGs(true)) {
+			for (ICFG sup : i.getInstanceCFGs(true)) {
 				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
 				if (implementing.size() > 1)
 					throw new ProgramValidationException(
 							sup.getDescriptor().getSignature() + " is implemented multiple times in unit " + this + ": "
 									+ StringUtils.join(", ", implementing));
 				else if (implementing.isEmpty()) {
-					if (sup instanceof SignatureCFG)
+					if (sup instanceof AbstractCFG)
 						throw new ProgramValidationException(
 								this + " implements the interface " + i.getName() + " but does not implements the cfg "
 										+ sup.getDescriptor().getSignature());
@@ -713,7 +713,7 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	}
 
 	/**
-	 * Adds a new instance {@link SignatureCFG}, identified by its signature
+	 * Adds a new instance {@link AbstractCFG}, identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), to this unit. Signature cfgs must
 	 * be overridden inside subunits, according to
 	 * {@link CFGDescriptor#isOverridable()}.
@@ -724,8 +724,8 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 *             with the same signature, {@code false} otherwise. If this
 	 *             method returns {@code false}, the given cfg is discarded.
 	 */
-	public boolean addSignatureCFG(SignatureCFG cfg) {
-		SignatureCFG c = signatureCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
+	public boolean addSignatureCFG(AbstractCFG cfg) {
+		AbstractCFG c = signatureCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
 		if (c == null)
 			cfg.getDescriptor().setOverridable(true);
 		else

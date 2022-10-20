@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
@@ -30,7 +30,7 @@ public class Ret extends Statement {
 	 * @param location the location where the statement is defined within the
 	 *                     program
 	 */
-	public Ret(ImplementedCFG cfg, CodeLocation location) {
+	public Ret(CFG cfg, CodeLocation location) {
 		super(cfg, location);
 	}
 
@@ -78,7 +78,7 @@ public class Ret extends Statement {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 }

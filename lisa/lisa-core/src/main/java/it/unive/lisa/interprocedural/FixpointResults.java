@@ -7,12 +7,12 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link FunctionalLattice} from {@link ImplementedCFG}s to
+ * A {@link FunctionalLattice} from {@link CFG}s to
  * {@link CFGResults}s. This class is meant to store all fixpoint results on all
  * token generated during the interprocedural analysis for each cfg under
  * analysis.
@@ -32,7 +32,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends FunctionalLattice<FixpointResults<A, H, V, T>, ImplementedCFG, CFGResults<A, H, V, T>> {
+		extends FunctionalLattice<FixpointResults<A, H, V, T>, CFG, CFGResults<A, H, V, T>> {
 
 	/**
 	 * Builds a new result.
@@ -44,7 +44,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 		super(lattice);
 	}
 
-	private FixpointResults(CFGResults<A, H, V, T> lattice, Map<ImplementedCFG, CFGResults<A, H, V, T>> function) {
+	private FixpointResults(CFGResults<A, H, V, T> lattice, Map<CFG, CFGResults<A, H, V, T>> function) {
 		super(lattice, function);
 	}
 
@@ -55,7 +55,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * with the given {@code token} and {@code result} on the {@link CFGResults}
 	 * instance corresponding to {@code cfg}.
 	 * 
-	 * @param cfg    the {@link ImplementedCFG} on which the result has been
+	 * @param cfg    the {@link CFG} on which the result has been
 	 *                   computed
 	 * @param token  the {@link ContextSensitivityToken} that identifying the
 	 *                   result
@@ -65,7 +65,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ImplementedCFG cfg,
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg,
 			ContextSensitivityToken token,
 			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
@@ -76,11 +76,11 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields {@code true} if a result exists for the given {@code cfg}.
 	 * 
-	 * @param cfg the {@link ImplementedCFG} whose result is to be checked
+	 * @param cfg the {@link CFG} whose result is to be checked
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(ImplementedCFG cfg) {
+	public boolean contains(CFG cfg) {
 		return function != null && function.containsKey(cfg);
 	}
 
@@ -105,17 +105,17 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	/**
-	 * Forgets all results about the given {@link ImplementedCFG}.
+	 * Forgets all results about the given {@link CFG}.
 	 * 
 	 * @param cfg the cfg to forget
 	 */
-	public void forget(ImplementedCFG cfg) {
+	public void forget(CFG cfg) {
 		function.remove(cfg);
 	}
 
 	@Override
 	protected FixpointResults<A, H, V, T> mk(CFGResults<A, H, V, T> lattice,
-			Map<ImplementedCFG, CFGResults<A, H, V, T>> function) {
+			Map<CFG, CFGResults<A, H, V, T>> function) {
 		return new FixpointResults<>(lattice, function);
 	}
 }

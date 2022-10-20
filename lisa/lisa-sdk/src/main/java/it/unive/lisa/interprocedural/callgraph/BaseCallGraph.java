@@ -7,10 +7,10 @@ import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.UnitWithSuperUnits;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -76,7 +76,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
-		for (ImplementedCFG cfg : call.getTargets()) {
+		for (CFG cfg : call.getTargets()) {
 			callsites.computeIfAbsent(cfg, cm -> new HashSet<>()).add(call);
 
 			CallGraphNode t = new CallGraphNode(this, cfg);
@@ -102,9 +102,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			// resolved
 			throw new CallResolutionException("Cannot resolve call without symbol aliasing");
 
-		Collection<ImplementedCFG> targets = new HashSet<>();
+		Collection<CFG> targets = new HashSet<>();
 		Collection<NativeCFG> nativeTargets = new HashSet<>();
-		Collection<ImplementedCFG> targetsNoRec = new HashSet<>();
+		Collection<CFG> targetsNoRec = new HashSet<>();
 		Collection<NativeCFG> nativeTargetsNoRec = new HashSet<>();
 
 		Expression[] params = call.getParameters();
@@ -189,7 +189,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
-		for (ImplementedCFG target : targets) {
+		for (CFG target : targets) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
 				addNode(t, program.getEntryPoints().contains(call.getCFG()));
@@ -208,8 +208,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		return resolved;
 	}
 
-	private boolean onlyNativeCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyNativeCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& !nativeTargets.isEmpty()
@@ -217,8 +217,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -226,8 +226,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -235,8 +235,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingNativeTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -244,8 +244,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& !nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyRewritingCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -253,8 +253,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyNonRewritingTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
 				&& !nativeTargets.isEmpty()
@@ -262,9 +262,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingNativeTargets(Collection<ImplementedCFG> targets,
+	private boolean onlyNonRewritingNativeTargets(Collection<CFG> targets,
 			Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& !nativeTargets.isEmpty()
@@ -272,8 +272,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingCFGTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean onlyNonRewritingCFGTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return !targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -281,8 +281,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean noTargets(Collection<ImplementedCFG> targets, Collection<NativeCFG> nativeTargets,
-			Collection<ImplementedCFG> targetsNoRec,
+	private boolean noTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
+			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
 				&& nativeTargets.isEmpty()
@@ -296,7 +296,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to resolve
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     method, will contain the {@link ICFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted
@@ -307,7 +307,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 *                                     the call
 	 */
 	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types,
-			Collection<ImplementedCFG> targets,
+			Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
@@ -320,7 +320,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to resolve
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     method, will contain the {@link ICFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted
@@ -330,7 +330,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<ImplementedCFG> targets,
+	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
@@ -371,7 +371,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to match
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link CFG}s targeted by the
+	 *                     method, will contain the {@link ICFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted
@@ -384,7 +384,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	protected void checkMember(
 			UnresolvedCall call,
 			ExternalSet<Type>[] types,
-			Collection<ImplementedCFG> targets,
+			Collection<CFG> targets,
 			Collection<NativeCFG> natives,
 			SymbolAliasing aliasing,
 			CodeMember cm,
@@ -434,9 +434,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			add(targets, natives, cm);
 	}
 
-	private void add(Collection<ImplementedCFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
-		if (cm instanceof ImplementedCFG)
-			targets.add((ImplementedCFG) cm);
+	private void add(Collection<CFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
+		if (cm instanceof CFG)
+			targets.add((CFG) cm);
 		else
 			natives.add((NativeCFG) cm);
 	}

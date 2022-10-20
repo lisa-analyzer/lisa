@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -56,7 +56,7 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 * @param targets    the NativeCFGs that are targeted by this CFG call
 	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Collection<NativeCFG> targets, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, targets, parameters);
@@ -83,7 +83,7 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public NativeCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName,
 			Collection<NativeCFG> targets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
@@ -111,7 +111,7 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 *                              call
 	 * @param parameters        the parameters of this call
 	 */
-	public NativeCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName, EvaluationOrder order,
 			Collection<NativeCFG> targets, Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,

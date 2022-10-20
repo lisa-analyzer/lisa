@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -33,14 +33,14 @@ public class IMPNewArray extends NaryExpression {
 	/**
 	 * Builds the array allocation.
 	 * 
-	 * @param cfg        the {@link ImplementedCFG} where this operation lies
+	 * @param cfg        the {@link CFG} where this operation lies
 	 * @param sourceFile the source file name where this operation is defined
 	 * @param line       the line number where this operation is defined
 	 * @param col        the column where this operation is defined
 	 * @param type       the type of the array's elements
 	 * @param dimensions the dimensions of the array
 	 */
-	public IMPNewArray(ImplementedCFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
+	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]",
 				ArrayType.lookup(type, dimensions.length), dimensions);
 	}

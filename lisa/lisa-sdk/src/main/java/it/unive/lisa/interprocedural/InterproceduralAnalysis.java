@@ -14,7 +14,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -61,13 +61,13 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
-	 * {@link CFGWithAnalysisResults} for each {@link ImplementedCFG} contained
+	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained
 	 * in this analysis. Each result is computed with
-	 * {@link ImplementedCFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, int)}
+	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, int)}
 	 * or one of its overloads. Results of individual cfgs are then available
-	 * through {@link #getAnalysisResultsOf(ImplementedCFG)}.
+	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState         the entry state for the {@link ImplementedCFG}s
+	 * @param entryState         the entry state for the {@link CFG}s
 	 *                               that are the entrypoints of the computation
 	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
 	 *                               used in fixpoints.
@@ -85,7 +85,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
-	 * given {@link ImplementedCFG}. Results are provided as
+	 * given {@link CFG}. Results are provided as
 	 * {@link CFGWithAnalysisResults}.
 	 * 
 	 * @param cfg the cfg whose fixpoint results needs to be retrieved
@@ -93,7 +93,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(ImplementedCFG cfg);
+	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible

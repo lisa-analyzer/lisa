@@ -3,7 +3,7 @@ package it.unive.lisa.program.cfg.statement;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -45,7 +45,7 @@ public abstract class Expression extends Statement {
 	 * @param location the location where the expression is defined within the
 	 *                     program
 	 */
-	protected Expression(ImplementedCFG cfg, CodeLocation location) {
+	protected Expression(CFG cfg, CodeLocation location) {
 		this(cfg, location, Untyped.INSTANCE);
 	}
 
@@ -57,7 +57,7 @@ public abstract class Expression extends Statement {
 	 *                       the program
 	 * @param staticType the static type of this expression
 	 */
-	protected Expression(ImplementedCFG cfg, CodeLocation location, Type staticType) {
+	protected Expression(CFG cfg, CodeLocation location, Type staticType) {
 		super(cfg, location);
 		Objects.requireNonNull(staticType, "The expression type of a CFG cannot be null");
 		this.staticType = staticType;

@@ -10,7 +10,7 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
@@ -90,7 +90,7 @@ public class CheckTool {
 	 * @param cfg     the cfg to warn on
 	 * @param message the message of the warning
 	 */
-	public void warnOn(ImplementedCFG cfg, String message) {
+	public void warnOn(CFG cfg, String message) {
 		warnings.add(new CFGWarning(cfg, message));
 	}
 

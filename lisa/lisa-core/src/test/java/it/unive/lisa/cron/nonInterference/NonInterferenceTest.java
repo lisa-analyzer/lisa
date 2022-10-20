@@ -18,7 +18,7 @@ import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -126,7 +126,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-				ImplementedCFG graph) {
+				CFG graph) {
 			return true;
 		}
 
@@ -139,7 +139,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-				ImplementedCFG graph, Statement node) {
+				CFG graph, Statement node) {
 			if (!(node instanceof Assignment))
 				return true;
 
@@ -182,7 +182,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						MonolithicHeap,
 						InferenceSystem<NonInterference>,
 						TypeEnvironment<InferredTypes>> tool,
-				ImplementedCFG graph, Edge edge) {
+				CFG graph, Edge edge) {
 			return true;
 		}
 

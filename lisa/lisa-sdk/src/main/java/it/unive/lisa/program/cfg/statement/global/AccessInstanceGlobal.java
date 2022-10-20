@@ -12,7 +12,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -44,7 +44,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessInstanceGlobal(ImplementedCFG cfg, CodeLocation location, Expression receiver, Global target) {
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
 		super(cfg, location, "::", target.getStaticType(), receiver);
 		this.target = target;
 		receiver.setParentStatement(this);

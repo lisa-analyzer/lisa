@@ -86,7 +86,7 @@ public class NativeCFG implements CodeMember {
 			throws CallResolutionException {
 
 		try {
-			Method builder = construct.getDeclaredMethod("build", ImplementedCFG.class, CodeLocation.class,
+			Method builder = construct.getDeclaredMethod("build", CFG.class, CodeLocation.class,
 					Expression[].class);
 			NaryExpression instance = (NaryExpression) builder.invoke(null, original.getCFG(), original.getLocation(),
 					params);

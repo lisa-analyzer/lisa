@@ -1,12 +1,12 @@
 package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A {@link Statement} that can be dynamically plugged into a
- * {@link ImplementedCFG} in place of another statement. This is used for
+ * {@link CFG} in place of another statement. This is used for
  * resolving calls to native constructs ({@link NativeCFG}s) that get rewritten
  * into {@link NaryExpression}s. <br>
  * <br>
@@ -14,7 +14,7 @@ import it.unive.lisa.program.cfg.NativeCFG;
  * following contract is satisfied.</b> Classes implementing this interface
  * should provide a public static method named <i>build</i>, returning a
  * {@link NaryExpression} and with the following parameters:
- * {@link ImplementedCFG}, {@link CodeLocation}, {@link Expression}{@code []}.
+ * {@link CFG}, {@link CodeLocation}, {@link Expression}{@code []}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

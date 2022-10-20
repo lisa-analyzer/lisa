@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.NoOp;
@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 
 /**
- * A control flow structure of a {@link ImplementedCFG}.
+ * A control flow structure of a {@link CFG}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -19,7 +19,7 @@ public abstract class ControlFlowStructure {
 	/**
 	 * The matrix of the cfg containing this structure.
 	 */
-	protected final NodeList<ImplementedCFG, Statement, Edge> cfgMatrix;
+	protected final NodeList<CFG, Statement, Edge> cfgMatrix;
 
 	private final Statement condition;
 
@@ -32,7 +32,7 @@ public abstract class ControlFlowStructure {
 	 * @param condition     the condition of the structure
 	 * @param firstFollower the first statement after the structure exits
 	 */
-	protected ControlFlowStructure(NodeList<ImplementedCFG, Statement, Edge> cfgMatrix, Statement condition,
+	protected ControlFlowStructure(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition,
 			Statement firstFollower) {
 		this.cfgMatrix = cfgMatrix;
 		this.condition = condition;
@@ -134,8 +134,8 @@ public abstract class ControlFlowStructure {
 	 * 
 	 * @return the matrix containing the full structure
 	 */
-	public NodeList<ImplementedCFG, Statement, Edge> getCompleteStructure() {
-		NodeList<ImplementedCFG, Statement, Edge> complete = new NodeList<>(new SequentialEdge(), false);
+	public NodeList<CFG, Statement, Edge> getCompleteStructure() {
+		NodeList<CFG, Statement, Edge> complete = new NodeList<>(new SequentialEdge(), false);
 
 		// add all nodes
 		complete.addNode(getCondition());

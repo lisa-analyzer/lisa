@@ -10,7 +10,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -45,7 +45,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param parameters        the parameters of this call
 	 */
 
-	public CallWithResult(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order, staticType, parameters);

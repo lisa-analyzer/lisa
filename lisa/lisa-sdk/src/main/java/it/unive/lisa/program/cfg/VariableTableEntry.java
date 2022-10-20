@@ -220,14 +220,14 @@ public class VariableTableEntry implements CodeElement {
 
 	/**
 	 * Creates a {@link VariableRef} for the variable depicted by this entry,
-	 * happening in the given {@link ImplementedCFG} at the location of its
+	 * happening in the given {@link CFG} at the location of its
 	 * descriptor.
 	 * 
 	 * @param cfg the cfg that the returned variable reference will be linked to
 	 * 
 	 * @return a reference to the variable depicted by this entry
 	 */
-	public VariableRef createReference(ImplementedCFG cfg) {
+	public VariableRef createReference(CFG cfg) {
 		return new VariableRef(cfg, cfg.getDescriptor().getLocation(), name, staticType);
 	}
 

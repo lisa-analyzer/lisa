@@ -11,7 +11,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -45,7 +45,7 @@ public class AccessGlobal extends Expression {
 	 * @param container the unit containing the accessed global
 	 * @param target    the accessed global
 	 */
-	public AccessGlobal(ImplementedCFG cfg, CodeLocation location, Unit container, Global target) {
+	public AccessGlobal(CFG cfg, CodeLocation location, Unit container, Global target) {
 		super(cfg, location, target.getStaticType());
 		this.container = container;
 		this.target = target;
@@ -76,7 +76,7 @@ public class AccessGlobal extends Expression {
 	}
 
 	@Override
-	public <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
+	public <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		return visitor.visit(tool, getCFG(), this);
 	}
 

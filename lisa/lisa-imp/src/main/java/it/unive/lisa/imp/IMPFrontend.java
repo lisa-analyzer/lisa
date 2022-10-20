@@ -36,9 +36,9 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.UnitWithSuperUnits;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.SignatureCFG;
+import it.unive.lisa.program.cfg.AbstractCFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -329,14 +329,14 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (MethodDeclarationContext decl : ctx.interfaceMemberDeclarations().methodDeclaration())
 			unit.addInstanceCFG(visitMethodDeclaration(decl));
 
-		for (ImplementedCFG cfg : unit.getImplementedCFGs(false)) {
+		for (CFG cfg : unit.getImplementedCFGs(false)) {
 			if (unit.getImplementedCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
 				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
 		}
 
-		for (SignatureCFG cfg : unit.getSignatureCFGs(false)) {
+		for (AbstractCFG cfg : unit.getSignatureCFGs(false)) {
 			if (unit.getSignatureCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
@@ -379,7 +379,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (SignatureDeclarationContext decl : ctx.classMemberDeclarations().signatureDeclaration())
 			unit.addSignatureCFG(visitSignatureDeclaration(decl));
 
-		for (ImplementedCFG cfg : unit.getInstanceCFGs(false)) {
+		for (CFG cfg : unit.getInstanceCFGs(false)) {
 			if (unit.getInstanceCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
@@ -388,7 +388,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				program.addEntryPoint(cfg);
 		}
 
-		for (SignatureCFG cfg : unit.getSignatureCFGs(false)) {
+		for (AbstractCFG cfg : unit.getSignatureCFGs(false)) {
 			if (unit.getSignatureCFGs(false).stream()
 					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
 							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
@@ -406,7 +406,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return unit;
 	}
 
-	private boolean isEntryPoint(ImplementedCFG cfg) {
+	private boolean isEntryPoint(CFG cfg) {
 		if (!onlyMain)
 			return true;
 		else
@@ -420,7 +420,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ImplementedCFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
+	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
 		CFGDescriptor descr = mkDescriptor(ctx);
 		if (!currentUnit.getName().equals(descr.getName()))
 			throw new IMPSyntaxException("Constructor does not have the same name as its containing class");
@@ -428,15 +428,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public ImplementedCFG visitMethodDeclaration(MethodDeclarationContext ctx) {
+	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
 		CFGDescriptor descr = mkDescriptor(ctx);
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
 	}
 
 	@Override
-	public SignatureCFG visitSignatureDeclaration(SignatureDeclarationContext ctx) {
+	public AbstractCFG visitSignatureDeclaration(SignatureDeclarationContext ctx) {
 		CFGDescriptor descr = mkDescriptor(ctx);
-		return new SignatureCFG(descr);
+		return new AbstractCFG(descr);
 	}
 
 	private CFGDescriptor mkDescriptor(SignatureDeclarationContext ctx) {

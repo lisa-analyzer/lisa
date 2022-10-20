@@ -4,7 +4,7 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -60,7 +60,7 @@ public class StringSubstring extends NativeCFG {
 		 * 
 		 * @return the newly-built call
 		 */
-		public static IMPStringSubstring build(ImplementedCFG cfg, CodeLocation location, Expression... params) {
+		public static IMPStringSubstring build(CFG cfg, CodeLocation location, Expression... params) {
 			return new IMPStringSubstring(cfg, location, params[0], params[1], params[2]);
 		}
 
@@ -72,7 +72,7 @@ public class StringSubstring extends NativeCFG {
 		/**
 		 * Builds the substring.
 		 * 
-		 * @param cfg        the {@link ImplementedCFG} where this operation
+		 * @param cfg        the {@link CFG} where this operation
 		 *                       lies
 		 * @param sourceFile the source file name where this operation is
 		 *                       defined
@@ -82,7 +82,7 @@ public class StringSubstring extends NativeCFG {
 		 * @param middle     the middle operand of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringSubstring(ImplementedCFG cfg, String sourceFile, int line, int col, Expression left,
+		public IMPStringSubstring(CFG cfg, String sourceFile, int line, int col, Expression left,
 				Expression middle, Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, middle, right);
 		}
@@ -90,13 +90,13 @@ public class StringSubstring extends NativeCFG {
 		/**
 		 * Builds the substring.
 		 * 
-		 * @param cfg      the {@link ImplementedCFG} where this operation lies
+		 * @param cfg      the {@link CFG} where this operation lies
 		 * @param location the code location where this operation is defined
 		 * @param left     the left-hand side of this operation
 		 * @param middle   the middle operand of this operation
 		 * @param right    the right-hand side of this operation
 		 */
-		public IMPStringSubstring(ImplementedCFG cfg, CodeLocation location, Expression left, Expression middle,
+		public IMPStringSubstring(CFG cfg, CodeLocation location, Expression left, Expression middle,
 				Expression right) {
 			super(cfg, location, left, middle, right);
 		}

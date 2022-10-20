@@ -10,7 +10,7 @@ import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
@@ -25,7 +25,7 @@ public class CFGWithAnalysisResultsTest {
 	@Test
 	public void testIssue189() throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
+		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		Return ret = new Return(cfg, unknown, constant);
 		cfg.addNode(ret, true);

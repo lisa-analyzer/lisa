@@ -14,7 +14,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -59,7 +59,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private ContextSensitivityToken token;
 
-	private final Collection<ImplementedCFG> fixpointTriggers;
+	private final Collection<CFG> fixpointTriggers;
 
 	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
 
@@ -121,7 +121,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (ImplementedCFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints",
+			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints",
 					"entries"))
 				try {
 					CFGResults<A, H, V, T> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
@@ -139,12 +139,12 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// starting from the callers of the cfgs that needed a lub,
 			// find out the complete set of cfgs that might need to be
 			// processed again
-			VisitOnceWorkingSet<ImplementedCFG> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
-			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(ImplementedCFG.class::isInstance)
-					.map(ImplementedCFG.class::cast).forEach(ws::push));
+			VisitOnceWorkingSet<CFG> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
+			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(CFG.class::isInstance)
+					.map(CFG.class::cast).forEach(ws::push));
 			while (!ws.isEmpty())
-				callgraph.getCallers(ws.pop()).stream().filter(ImplementedCFG.class::isInstance)
-						.map(ImplementedCFG.class::cast)
+				callgraph.getCallers(ws.pop()).stream().filter(CFG.class::isInstance)
+						.map(CFG.class::cast)
 						.forEach(ws::push);
 
 			ws.getSeen().forEach(results::forget);
@@ -154,14 +154,14 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(ImplementedCFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
 		if (results.contains(cfg))
 			return results.getState(cfg).getAll();
 		else
 			return Collections.emptySet();
 	}
 
-	private Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> getEntryAndExit(ImplementedCFG cfg)
+	private Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> getEntryAndExit(CFG cfg)
 			throws SemanticException {
 		if (!results.contains(cfg))
 			return null;
@@ -183,7 +183,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		token = token.pushToken(scope);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
-		for (ImplementedCFG cfg : call.getTargets()) {
+		for (CFG cfg : call.getTargets()) {
 			Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> states = getEntryAndExit(cfg);
 
 			// prepare the state for the call: hide the visible variables
@@ -234,7 +234,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return result;
 	}
 
-	private CFGWithAnalysisResults<A, H, V, T> computeFixpoint(ImplementedCFG cfg, ContextSensitivityToken localToken,
+	private CFGWithAnalysisResults<A, H, V, T> computeFixpoint(CFG cfg, ContextSensitivityToken localToken,
 			AnalysisState<A, H, V, T> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
 		CFGWithAnalysisResults<A, H, V, T> fixpointResult = cfg.fixpoint(computedEntryState, this,

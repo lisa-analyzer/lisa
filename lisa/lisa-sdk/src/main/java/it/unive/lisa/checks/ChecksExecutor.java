@@ -6,7 +6,7 @@ import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,7 +39,7 @@ public final class ChecksExecutor {
 		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
 			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
 
-		for (ImplementedCFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
+		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 
 		// TODO: to check casting
@@ -59,10 +59,10 @@ public final class ChecksExecutor {
 		for (Global global : unit.getInstanceGlobals(false))
 			c.visitGlobal(tool, unit, global, true);
 
-		for (ImplementedCFG cfg : unit.getCFGs())
+		for (CFG cfg : unit.getCFGs())
 			cfg.accept(c, tool);
 
-		for (ImplementedCFG cfg : unit.getInstanceCFGs(false))
+		for (CFG cfg : unit.getInstanceCFGs(false))
 			cfg.accept(c, tool);
 	}
 }

@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -52,13 +52,13 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 	/**
 	 * Builds the substring.
 	 * 
-	 * @param cfg      the {@link ImplementedCFG} where this operation lies
+	 * @param cfg      the {@link CFG} where this operation lies
 	 * @param location the location where this literal is defined
 	 * @param left     the left-hand side of this operation
 	 * @param middle   the middle operand of this operation
 	 * @param right    the right-hand side of this operation
 	 */
-	public Substring(ImplementedCFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
+	public Substring(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
 		super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
 	}
 

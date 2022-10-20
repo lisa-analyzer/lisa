@@ -1,6 +1,6 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -25,7 +25,7 @@ public class Loop extends ControlFlowStructure {
 	 * @param firstFollower the first statement after the loop exits
 	 * @param body          the statements in the loop body
 	 */
-	public Loop(NodeList<ImplementedCFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
+	public Loop(NodeList<CFG, Statement, Edge> cfgMatrix, Statement condition, Statement firstFollower,
 			Collection<Statement> body) {
 		super(cfgMatrix, condition, firstFollower);
 		this.body = body;

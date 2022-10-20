@@ -1,8 +1,8 @@
 package it.unive.lisa.outputs.serializableGraph;
 
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.ImplementedCFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -20,7 +20,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Utility class to build {@link SerializableGraph}s from {@link CFG}s.
+ * Utility class to build {@link SerializableGraph}s from {@link ICFG}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -30,19 +30,19 @@ public class SerializableCFG {
 	}
 
 	/**
-	 * Builds a {@link SerializableGraph} starting from the given {@link CFG},
+	 * Builds a {@link SerializableGraph} starting from the given {@link ICFG},
 	 * with no extra descriptions for the statements.
 	 * 
 	 * @param source the source cfg
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(ImplementedCFG source) {
+	public static SerializableGraph fromCFG(CFG source) {
 		return fromCFG(source, null);
 	}
 
 	/**
-	 * Builds a {@link SerializableGraph} starting from the given {@link CFG},
+	 * Builds a {@link SerializableGraph} starting from the given {@link ICFG},
 	 * using the given function to generate extra descriptions for each
 	 * statement.
 	 * 
@@ -52,7 +52,7 @@ public class SerializableCFG {
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(ImplementedCFG source,
+	public static SerializableGraph fromCFG(CFG source,
 			Function<Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
@@ -99,15 +99,15 @@ public class SerializableCFG {
 	}
 
 	private static class InnerNodeExtractor
-			implements GraphVisitor<ImplementedCFG, Statement, Edge, Map<Statement, List<Statement>>> {
+			implements GraphVisitor<CFG, Statement, Edge, Map<Statement, List<Statement>>> {
 
 		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, ImplementedCFG graph) {
+		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph) {
 			return false;
 		}
 
 		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, ImplementedCFG graph, Statement node) {
+		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Statement node) {
 			List<Statement> inners = tool.computeIfAbsent(node, st -> new LinkedList<>());
 			if (node instanceof UnaryStatement)
 				// TODO should we have an nary statement? or an interface that
@@ -119,7 +119,7 @@ public class SerializableCFG {
 		}
 
 		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, ImplementedCFG graph, Edge edge) {
+		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Edge edge) {
 			return false;
 		}
 	}

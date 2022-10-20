@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.type.common.Int16;
 
 /**
@@ -16,11 +16,11 @@ public class Int16Literal extends Literal<Short> {
 	/**
 	 * Builds the literal.
 	 * 
-	 * @param cfg      the {@link ImplementedCFG} where this literal lies
+	 * @param cfg      the {@link CFG} where this literal lies
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int16Literal(ImplementedCFG cfg, CodeLocation location, short value) {
+	public Int16Literal(CFG cfg, CodeLocation location, short value) {
 		super(cfg, location, value, Int16.INSTANCE);
 	}
 }

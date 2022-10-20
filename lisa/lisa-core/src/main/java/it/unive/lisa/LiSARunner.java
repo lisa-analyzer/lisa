@@ -24,7 +24,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
@@ -95,7 +95,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 	Collection<Warning> run(Program program, FileManager fileManager) {
 		finalizeProgram(program);
 
-		Collection<ImplementedCFG> allCFGs = program.getAllCFGs();
+		Collection<CFG> allCFGs = program.getAllCFGs();
 
 		CheckTool tool = new CheckTool();
 		if (!conf.getSyntacticChecks().isEmpty())
@@ -120,9 +120,9 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager);
-			Map<ImplementedCFG,
+			Map<CFG,
 					Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
-			for (ImplementedCFG cfg : allCFGs)
+			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -142,7 +142,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		return tool.getWarnings();
 	}
 
-	private void analyze(Collection<ImplementedCFG> allCFGs, FileManager fileManager) {
+	private void analyze(Collection<CFG> allCFGs, FileManager fileManager) {
 		A state = this.state.top();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
@@ -161,7 +161,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 			int nfiles = fileManager.createdFiles().size();
 			boolean htmlViewer = false, subnodes = false;
 
-			for (ImplementedCFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
+			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
 					SerializableGraph graph = result.toSerializableGraph(
 							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());

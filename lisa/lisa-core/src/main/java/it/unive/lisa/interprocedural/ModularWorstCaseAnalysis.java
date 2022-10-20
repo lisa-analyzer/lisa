@@ -15,7 +15,7 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -68,7 +68,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
-	private final Map<ImplementedCFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
+	private final Map<CFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -81,7 +81,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException {
-		for (ImplementedCFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(),
+		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(),
 				"Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
@@ -102,7 +102,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(ImplementedCFG cfg) {
+	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
 		return Collections.singleton(results.get(cfg).orElse(null));
 	}
 

@@ -11,7 +11,7 @@ import it.unive.lisa.program.ProgramValidationException;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class SignatureCFG implements CFG {
+public class AbstractCFG implements ICFG {
 
 	/**
 	 * The descriptor of this signature control flow graph.
@@ -23,7 +23,7 @@ public class SignatureCFG implements CFG {
 	 * 
 	 * @param descriptor the descriptor of this signature cfg
 	 */
-	public SignatureCFG(CFGDescriptor descriptor) {
+	public AbstractCFG(CFGDescriptor descriptor) {
 		this.descriptor = descriptor;
 	}
 

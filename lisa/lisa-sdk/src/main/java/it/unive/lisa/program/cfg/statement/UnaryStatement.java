@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg.statement;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Objects;
@@ -24,7 +24,7 @@ public abstract class UnaryStatement extends Statement {
 	 *                       program
 	 * @param expression the argument of this statement
 	 */
-	protected UnaryStatement(ImplementedCFG cfg, CodeLocation location, Expression expression) {
+	protected UnaryStatement(CFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location);
 		Objects.requireNonNull(expression, "The argument of a unary statement cannot be null");
 		this.expression = expression;
@@ -72,7 +72,7 @@ public abstract class UnaryStatement extends Statement {
 	}
 
 	@Override
-	public final <V> boolean accept(GraphVisitor<ImplementedCFG, Statement, Edge, V> visitor, V tool) {
+	public final <V> boolean accept(GraphVisitor<CFG, Statement, Edge, V> visitor, V tool) {
 		if (!expression.accept(visitor, tool))
 			return false;
 		return visitor.visit(tool, getCFG(), this);

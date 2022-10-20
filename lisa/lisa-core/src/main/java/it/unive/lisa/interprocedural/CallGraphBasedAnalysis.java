@@ -12,7 +12,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
@@ -77,7 +77,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * @throws SemanticException if the analysis fails
 	 */
 	protected AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState,
-			ImplementedCFG cfg)
+			CFG cfg)
 			throws SemanticException {
 		AnalysisState<A, H, V, T> prepared = entryState;
 

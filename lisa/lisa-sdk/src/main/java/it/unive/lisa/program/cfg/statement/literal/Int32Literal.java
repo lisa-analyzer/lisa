@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.type.common.Int32;
 
 /**
@@ -16,11 +16,11 @@ public class Int32Literal extends Literal<Integer> {
 	/**
 	 * Builds the literal.
 	 * 
-	 * @param cfg      the {@link ImplementedCFG} where this literal lies
+	 * @param cfg      the {@link CFG} where this literal lies
 	 * @param location the location where this literal is defined
 	 * @param value    the constant value represented by this literal
 	 */
-	public Int32Literal(ImplementedCFG cfg, CodeLocation location, int value) {
+	public Int32Literal(CFG cfg, CodeLocation location, int value) {
 		super(cfg, location, value, Int32.INSTANCE);
 	}
 }

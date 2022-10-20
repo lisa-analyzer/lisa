@@ -9,7 +9,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
@@ -271,7 +271,7 @@ public class LiSAConfiguration {
 	 * Sets whether or not graph files, named
 	 * {@code analysis__<cfg name>.<format>}, should be created and dumped in
 	 * the working directory at the end of the analysis. These files will
-	 * contain a graph representing each input {@link CFG}s' structure, and
+	 * contain a graph representing each input {@link ICFG}s' structure, and
 	 * whose nodes will contain a representation of the results of the semantic
 	 * analysis on each {@link Statement}.<br>
 	 * <br>
@@ -425,7 +425,7 @@ public class LiSAConfiguration {
 
 	/**
 	 * Yields whether or not the results of analysis, if run, should be dumped
-	 * in the form of graphs representing results on single {@link CFG}s.
+	 * in the form of graphs representing results on single {@link ICFG}s.
 	 * 
 	 * @return whether or not the graphs should be dumped, and in what format
 	 */

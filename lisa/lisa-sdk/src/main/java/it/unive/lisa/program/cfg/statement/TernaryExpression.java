@@ -10,7 +10,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -38,7 +38,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName,
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName,
 			Expression left, Expression middle, Expression right) {
 		super(cfg, location, constructName, left, middle, right);
 	}
@@ -57,7 +57,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, Type staticType,
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, Type staticType,
 			Expression left, Expression middle, Expression right) {
 		super(cfg, location, constructName, staticType, left, middle, right);
 	}
@@ -76,7 +76,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Expression left, Expression middle, Expression right) {
 		super(cfg, location, constructName, order, left, middle, right);
 	}
@@ -95,7 +95,7 @@ public abstract class TernaryExpression extends NaryExpression {
 	 * @param middle        the second sub-expression of this expression
 	 * @param right         the third sub-expression of this expression
 	 */
-	protected TernaryExpression(ImplementedCFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
+	protected TernaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Type staticType, Expression left, Expression middle, Expression right) {
 		super(cfg, location, constructName, order, staticType, left, middle, right);
 	}

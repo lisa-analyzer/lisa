@@ -9,9 +9,9 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis,
+ * A call to one or more {@link ICFG}s and/or {@link NativeCFG}s under analysis,
  * implemented through a sequence of calls.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -56,7 +56,7 @@ public class MultiCall extends Call {
 	 * @param calls      the Calls underlying this one
 	 * @param parameters the parameters of this call
 	 */
-	public MultiCall(ImplementedCFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+	public MultiCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Collection<Call> calls, Expression... parameters) {
 		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
 				LeftToRightEvaluation.INSTANCE, calls, parameters);
@@ -82,7 +82,7 @@ public class MultiCall extends Call {
 	 * @param calls             the Calls underlying this one
 	 * @param parameters        the parameters of this call
 	 */
-	public MultiCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public MultiCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName, Collection<Call> calls, Expression... parameters) {
 		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				calls, parameters);
@@ -108,7 +108,7 @@ public class MultiCall extends Call {
 	 * @param calls             the Calls underlying this one
 	 * @param parameters        the parameters of this call
 	 */
-	public MultiCall(ImplementedCFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
+	public MultiCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName, EvaluationOrder order, Collection<Call> calls,
 			Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,

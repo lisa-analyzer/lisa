@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.RightToLeftEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -36,7 +36,7 @@ public class Assignment extends BinaryExpression {
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
-	public Assignment(ImplementedCFG cfg, CodeLocation location, Expression target, Expression expression) {
+	public Assignment(CFG cfg, CodeLocation location, Expression target, Expression expression) {
 		super(cfg, location, "=", RightToLeftEvaluation.INSTANCE, target, expression);
 	}
 
@@ -52,7 +52,7 @@ public class Assignment extends BinaryExpression {
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
-	public Assignment(ImplementedCFG cfg, CodeLocation location, EvaluationOrder order, Expression target,
+	public Assignment(CFG cfg, CodeLocation location, EvaluationOrder order, Expression target,
 			Expression expression) {
 		super(cfg, location, "=", order, target, expression);
 	}
@@ -69,7 +69,7 @@ public class Assignment extends BinaryExpression {
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
-	public Assignment(ImplementedCFG cfg, CodeLocation location, Type staticType, Expression target,
+	public Assignment(CFG cfg, CodeLocation location, Type staticType, Expression target,
 			Expression expression) {
 		super(cfg, location, "=", RightToLeftEvaluation.INSTANCE, staticType, target, expression);
 	}
@@ -86,7 +86,7 @@ public class Assignment extends BinaryExpression {
 	 * @param target     the target of the assignment
 	 * @param expression the expression to assign to {@code target}
 	 */
-	public Assignment(ImplementedCFG cfg, CodeLocation location, EvaluationOrder order, Type staticType,
+	public Assignment(CFG cfg, CodeLocation location, EvaluationOrder order, Type staticType,
 			Expression target,
 			Expression expression) {
 		super(cfg, location, "=", order, staticType, target, expression);

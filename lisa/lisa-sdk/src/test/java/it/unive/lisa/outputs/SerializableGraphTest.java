@@ -9,7 +9,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -46,7 +46,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleIf() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -103,7 +103,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyIf() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyIf"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -140,7 +140,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testIfWithEmptyBranch() {
-		ImplementedCFG cfg = new ImplementedCFG(
+		CFG cfg = new CFG(
 				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
@@ -198,7 +198,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testAsymmetricIf() {
-		ImplementedCFG cfg = new ImplementedCFG(
+		CFG cfg = new CFG(
 				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
@@ -266,7 +266,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleLoop() {
-		ImplementedCFG cfg = new ImplementedCFG(
+		CFG cfg = new CFG(
 				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
@@ -324,7 +324,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyLoop() {
-		ImplementedCFG cfg = new ImplementedCFG(
+		CFG cfg = new CFG(
 				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
@@ -372,7 +372,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testNestedConditionals() {
-		ImplementedCFG cfg = new ImplementedCFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "nested"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "nested"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);

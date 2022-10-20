@@ -9,7 +9,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -29,7 +29,7 @@ public class Throw extends UnaryStatement {
 	 *                       program
 	 * @param expression the expression to raise as error
 	 */
-	public Throw(ImplementedCFG cfg, CodeLocation location, Expression expression) {
+	public Throw(CFG cfg, CodeLocation location, Expression expression) {
 		super(cfg, location, expression);
 	}
 

@@ -50,7 +50,7 @@ import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.ImplementedCFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -120,7 +120,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
-	private final NodeList<ImplementedCFG, Statement, Edge> list;
+	private final NodeList<CFG, Statement, Edge> list;
 
 	private final Collection<Statement> entrypoints;
 
@@ -128,7 +128,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final Map<String, Pair<VariableRef, Annotations>> visibleIds;
 
-	private final ImplementedCFG cfg;
+	private final CFG cfg;
 
 	private final CFGDescriptor descriptor;
 
@@ -146,7 +146,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		entrypoints = new HashSet<>();
 		cfs = new LinkedList<>();
 		// side effects on entrypoints and matrix will affect the cfg
-		cfg = new ImplementedCFG(descriptor, entrypoints, list);
+		cfg = new CFG(descriptor, entrypoints, list);
 
 		visibleIds = new HashMap<>();
 		for (VariableTableEntry par : descriptor.getVariables())
@@ -159,10 +159,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 * 
 	 * @param ctx the block context
 	 * 
-	 * @return the {@link ImplementedCFG} built from the block
+	 * @return the {@link CFG} built from the block
 	 */
-	ImplementedCFG visitCodeMember(BlockContext ctx) {
-		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
+	CFG visitCodeMember(BlockContext ctx) {
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visited = visitBlock(ctx);
 		entrypoints.add(visited.getLeft());
 		list.mergeWith(visited.getMiddle());
 		cfs.forEach(cf -> cfg.addControlFlowStructure(cf));
@@ -195,16 +195,16 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitBlock(BlockContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, Pair<VariableRef,
 				Annotations>> backup = new HashMap<>(visibleIds);
 
-		NodeList<ImplementedCFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
+		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
 
-			Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,
+			Triple<Statement, NodeList<CFG, Statement, Edge>,
 					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getMiddle());
 			if (first == null)
@@ -237,7 +237,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitBlockOrStatement(
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlockOrStatement(
 			BlockOrStatementContext ctx) {
 		if (ctx.statement() != null)
 			return visitStatement(ctx.statement());
@@ -247,7 +247,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitStatement(
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(
 			StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
@@ -274,22 +274,22 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			throw new IllegalArgumentException("Statement '" + ctx.toString() + "' cannot be parsed");
 
-		NodeList<ImplementedCFG, Statement, Edge> adj = new NodeList<>(new SequentialEdge());
+		NodeList<CFG, Statement, Edge> adj = new NodeList<>(new SequentialEdge());
 		adj.addNode(st);
 		return Triple.of(st, adj, st);
 	}
 
-	private Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitIf(StatementContext ctx) {
-		NodeList<ImplementedCFG, Statement, Edge> ite = new NodeList<>(new SequentialEdge());
+	private Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitIf(StatementContext ctx) {
+		NodeList<CFG, Statement, Edge> ite = new NodeList<>(new SequentialEdge());
 
 		Statement condition = visitParExpr(ctx.parExpr());
 		ite.addNode(condition);
 
-		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> then = visitBlockOrStatement(ctx.then);
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> then = visitBlockOrStatement(ctx.then);
 		ite.mergeWith(then.getMiddle());
 		ite.addEdge(new TrueEdge(condition, then.getLeft()));
 
-		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> otherwise = null;
+		Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> otherwise = null;
 		if (ctx.otherwise != null) {
 			otherwise = visitBlockOrStatement(ctx.otherwise);
 			ite.mergeWith(otherwise.getMiddle());
@@ -333,7 +333,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitLoop(LoopContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitLoop(LoopContext ctx) {
 		if (ctx.whileLoop() != null)
 			return visitWhileLoop(ctx.whileLoop());
 		else
@@ -342,13 +342,13 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	@Override
 
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitWhileLoop(
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(
 			WhileLoopContext ctx) {
-		NodeList<ImplementedCFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
+		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);
 
-		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,
+		Triple<Statement, NodeList<CFG, Statement, Edge>,
 				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
@@ -364,8 +364,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>, Statement> visitForLoop(ForLoopContext ctx) {
-		NodeList<ImplementedCFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitForLoop(ForLoopContext ctx) {
+		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		LocalDeclarationContext initDecl = ctx.forDeclaration().initDecl;
 		ExpressionContext initExpr = ctx.forDeclaration().initExpr;
 		ExpressionContext cond = ctx.forDeclaration().condition;
@@ -393,7 +393,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		else
 			loop.addEdge(new SequentialEdge(first, condition));
 
-		Triple<Statement, NodeList<ImplementedCFG, Statement, Edge>,
+		Triple<Statement, NodeList<CFG, Statement, Edge>,
 				Statement> body = visitBlockOrStatement(ctx.blockOrStatement());
 		loop.mergeWith(body.getMiddle());
 		loop.addEdge(new TrueEdge(condition, body.getLeft()));
@@ -415,7 +415,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (post == null)
 			cfs.add(new Loop(list, condition, noop, body.getMiddle().getNodes()));
 		else {
-			NodeList<ImplementedCFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
+			NodeList<CFG, Statement, Edge> tmp = new NodeList<>(body.getMiddle());
 			tmp.addNode(last);
 			loop.addEdge(new SequentialEdge(body.getRight(), last));
 			cfs.add(new Loop(list, condition, noop, tmp.getNodes()));
