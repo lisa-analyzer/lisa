@@ -217,7 +217,6 @@ public class JsonReportComparer {
 
 		try (Reader l = new InputStreamReader(new FileInputStream(left), StandardCharsets.UTF_8);
 				Reader r = new InputStreamReader(new FileInputStream(right), StandardCharsets.UTF_8)) {
-
 			SerializableGraph leftGraph = SerializableGraph.readGraph(l);
 			SerializableGraph rightGraph = SerializableGraph.readGraph(r);
 			if (!leftGraph.equals(rightGraph)) {

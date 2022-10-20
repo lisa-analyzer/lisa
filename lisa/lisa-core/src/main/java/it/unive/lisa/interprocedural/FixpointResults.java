@@ -12,10 +12,9 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link FunctionalLattice} from {@link CFG}s to
- * {@link CFGResults}s. This class is meant to store all fixpoint results on all
- * token generated during the interprocedural analysis for each cfg under
- * analysis.
+ * A {@link FunctionalLattice} from {@link CFG}s to {@link CFGResults}s. This
+ * class is meant to store all fixpoint results on all token generated during
+ * the interprocedural analysis for each cfg under analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -55,8 +54,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * with the given {@code token} and {@code result} on the {@link CFGResults}
 	 * instance corresponding to {@code cfg}.
 	 * 
-	 * @param cfg    the {@link CFG} on which the result has been
-	 *                   computed
+	 * @param cfg    the {@link CFG} on which the result has been computed
 	 * @param token  the {@link ContextSensitivityToken} that identifying the
 	 *                   result
 	 * @param result the {@link CFGWithAnalysisResults} to store
@@ -65,8 +63,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg,
-			ContextSensitivityToken token,
+	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg, ContextSensitivityToken token,
 			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
 		CFGResults<A, H, V, T> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));

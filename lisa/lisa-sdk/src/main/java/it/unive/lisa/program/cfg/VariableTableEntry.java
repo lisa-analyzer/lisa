@@ -220,8 +220,7 @@ public class VariableTableEntry implements CodeElement {
 
 	/**
 	 * Creates a {@link VariableRef} for the variable depicted by this entry,
-	 * happening in the given {@link CFG} at the location of its
-	 * descriptor.
+	 * happening in the given {@link CFG} at the location of its descriptor.
 	 * 
 	 * @param cfg the cfg that the returned variable reference will be linked to
 	 * 

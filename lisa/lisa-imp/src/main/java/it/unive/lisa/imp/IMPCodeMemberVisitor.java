@@ -49,8 +49,8 @@ import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -198,12 +198,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitBlock(BlockContext ctx) {
 		Map<String, Pair<VariableRef,
 				Annotations>> backup = new HashMap<>(visibleIds);
-
 		NodeList<CFG, Statement, Edge> block = new NodeList<>(new SequentialEdge());
 
 		Statement first = null, last = null;
 		for (int i = 0; i < ctx.blockOrStatement().size(); i++) {
-
 			Triple<Statement, NodeList<CFG, Statement, Edge>,
 					Statement> st = visitBlockOrStatement(ctx.blockOrStatement(i));
 			block.mergeWith(st.getMiddle());
@@ -246,9 +244,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(
-			StatementContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitStatement(StatementContext ctx) {
 		Statement st;
 		if (ctx.localDeclaration() != null)
 			st = visitLocalDeclaration(ctx.localDeclaration());
@@ -332,7 +328,6 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-
 	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitLoop(LoopContext ctx) {
 		if (ctx.whileLoop() != null)
 			return visitWhileLoop(ctx.whileLoop());
@@ -341,9 +336,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-
-	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(
-			WhileLoopContext ctx) {
+	public Triple<Statement, NodeList<CFG, Statement, Edge>, Statement> visitWhileLoop(WhileLoopContext ctx) {
 		NodeList<CFG, Statement, Edge> loop = new NodeList<>(new SequentialEdge());
 		Statement condition = visitParExpr(ctx.parExpr());
 		loop.addNode(condition);

@@ -476,16 +476,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public Parameter[] visitFormals(FormalsContext ctx) {
-//		Type unitType = currentUnit instanceof InterfaceUnit
-//				? InterfaceType.lookup(this.currentUnit.getName(), (InterfaceUnit) this.currentUnit)
-//				: ClassType.lookup(this.currentUnit.getName(), (CompilationUnit) this.currentUnit);
 		Parameter[] formals = new Parameter[ctx.formal().size() + 1];
-//<<<<<<< HEAD
-//		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this", unitType);
-//=======
 		formals[0] = new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), "this",
 				new ReferenceType(ClassType.lookup(this.currentUnit.getName(), this.currentUnit)));
-//>>>>>>> refs/heads/master
 		int i = 1;
 		for (FormalContext f : ctx.formal())
 			formals[i++] = visitFormal(f);

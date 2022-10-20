@@ -10,8 +10,8 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.annotations.Annotation;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -82,8 +82,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType,
+	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType callType,
 			String qualifier, String targetName, Collection<CFG> targets, Expression... parameters) {
 		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
 				targets, parameters);
@@ -109,8 +108,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	 * @param targets           the CFGs that are targeted by this CFG call
 	 * @param parameters        the parameters of this call
 	 */
-	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType,
+	public CFGCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType callType,
 			String qualifier, String targetName, EvaluationOrder order, Collection<CFG> targets,
 			Expression... parameters) {
 		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,
@@ -126,8 +124,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	 * call, copying all its data.
 	 * 
 	 * @param source  the unresolved call to copy
-	 * @param targets the {@link CFG}s that the call has been
-	 *                    resolved against
+	 * @param targets the {@link CFG}s that the call has been resolved against
 	 */
 	public CFGCall(UnresolvedCall source, Collection<CFG> targets) {
 		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),

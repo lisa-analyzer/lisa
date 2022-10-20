@@ -49,7 +49,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * An implemented control flow graph, that has {@link Statement}s as nodes and
+ * A control flow graph with an implementation, that has {@link Statement}s as nodes and
  * {@link Edge}s as edges.<br>
  * <br>
  * Note that this class does not implement {@link #equals(Object)} nor
@@ -59,7 +59,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember, ICFG {
 
-	private static final Logger LOG = LogManager.getLogger(ICFG.class);
+	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
 	/**
 	 * The descriptor of this control flow graph.

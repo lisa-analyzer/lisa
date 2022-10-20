@@ -61,14 +61,14 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
-	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained
-	 * in this analysis. Each result is computed with
+	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
+	 * analysis. Each result is computed with
 	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, int)}
 	 * or one of its overloads. Results of individual cfgs are then available
 	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState         the entry state for the {@link CFG}s
-	 *                               that are the entrypoints of the computation
+	 * @param entryState         the entry state for the {@link CFG}s that are
+	 *                               the entrypoints of the computation
 	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
 	 *                               used in fixpoints.
 	 * @param wideningThreshold  the number of fixpoint iteration on a given

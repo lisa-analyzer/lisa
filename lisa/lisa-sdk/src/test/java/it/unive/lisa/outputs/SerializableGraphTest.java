@@ -8,8 +8,8 @@ import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -140,8 +140,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testIfWithEmptyBranch() {
-		CFG cfg = new CFG(
-				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -198,8 +197,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testAsymmetricIf() {
-		CFG cfg = new CFG(
-				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -266,8 +264,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleLoop() {
-		CFG cfg = new CFG(
-				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -324,8 +321,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyLoop() {
-		CFG cfg = new CFG(
-				new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
+		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);

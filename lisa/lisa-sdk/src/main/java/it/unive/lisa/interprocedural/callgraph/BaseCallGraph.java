@@ -7,10 +7,9 @@ import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.UnitWithSuperUnits;
-import it.unive.lisa.program.cfg.ICFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.VariableRef;
@@ -262,8 +261,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				&& nativeTargetsNoRec.isEmpty();
 	}
 
-	private boolean onlyNonRewritingNativeTargets(Collection<CFG> targets,
-			Collection<NativeCFG> nativeTargets,
+	private boolean onlyNonRewritingNativeTargets(Collection<CFG> targets, Collection<NativeCFG> nativeTargets,
 			Collection<CFG> targetsNoRec,
 			Collection<NativeCFG> nativeTargetsNoRec) {
 		return targets.isEmpty()
@@ -296,7 +294,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to resolve
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link ICFG}s targeted by the
+	 *                     method, will contain the {@link CFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted
@@ -306,8 +304,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types,
-			Collection<CFG> targets,
+	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : program.getAllCodeMembers())
@@ -320,7 +317,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to resolve
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link ICFG}s targeted by the
+	 *                     method, will contain the {@link CFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted
@@ -371,7 +368,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param call     the call to match
 	 * @param types    the runtime types of the parameters of the call
 	 * @param targets  the list of targets that, after the execution of this
-	 *                     method, will contain the {@link ICFG}s targeted by the
+	 *                     method, will contain the {@link CFG}s targeted by the
 	 *                     call
 	 * @param natives  the list of targets that, after the execution of this
 	 *                     method, will contain the {@link NativeCFG}s targeted

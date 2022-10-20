@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
@@ -56,8 +56,7 @@ public abstract class NaryExpression extends Expression {
 	 *                           expression
 	 * @param subExpressions the sub-expressions to be evaluated left-to-right
 	 */
-	protected NaryExpression(CFG cfg, CodeLocation location, String constructName,
-			Expression... subExpressions) {
+	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, Expression... subExpressions) {
 		this(cfg, location, constructName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, subExpressions);
 	}
 

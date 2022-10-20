@@ -3,11 +3,6 @@ package it.unive.lisa.program.cfg;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.junit.Test;
-
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -26,6 +21,9 @@ import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.program.cfg.statement.literal.StringLiteral;
 import it.unive.lisa.program.cfg.statement.literal.TrueLiteral;
 import it.unive.lisa.program.cfg.statement.string.Length;
+import java.util.Collection;
+import java.util.HashSet;
+import org.junit.Test;
 
 public class CFGSimplificationTest {
 

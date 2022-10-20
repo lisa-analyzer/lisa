@@ -8,8 +8,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -21,8 +21,7 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class Statement
-		implements CodeNode<CFG, Statement, Edge>, ProgramPoint, Comparable<Statement> {
+public abstract class Statement implements CodeNode<CFG, Statement, Edge>, ProgramPoint, Comparable<Statement> {
 
 	/**
 	 * The cfg containing this statement.

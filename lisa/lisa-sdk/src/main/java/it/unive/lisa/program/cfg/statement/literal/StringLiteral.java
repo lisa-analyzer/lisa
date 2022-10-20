@@ -1,7 +1,7 @@
 package it.unive.lisa.program.cfg.statement.literal;
 
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.type.common.StringType;
 
 /**

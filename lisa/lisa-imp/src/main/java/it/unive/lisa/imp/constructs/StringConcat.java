@@ -2,9 +2,9 @@ package it.unive.lisa.imp.constructs;
 
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.SourceCodeLocation;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -67,8 +67,7 @@ public class StringConcat extends NativeCFG {
 		/**
 		 * Builds the concat.
 		 * 
-		 * @param cfg        the {@link CFG} where this operation
-		 *                       lies
+		 * @param cfg        the {@link CFG} where this operation lies
 		 * @param sourceFile the source file name where this operation is
 		 *                       defined
 		 * @param line       the line number where this operation is defined
@@ -76,8 +75,7 @@ public class StringConcat extends NativeCFG {
 		 * @param left       the left-hand side of this operation
 		 * @param right      the right-hand side of this operation
 		 */
-		public IMPStringConcat(CFG cfg, String sourceFile, int line, int col, Expression left,
-				Expression right) {
+		public IMPStringConcat(CFG cfg, String sourceFile, int line, int col, Expression left, Expression right) {
 			this(cfg, new SourceCodeLocation(sourceFile, line, col), left, right);
 		}
 

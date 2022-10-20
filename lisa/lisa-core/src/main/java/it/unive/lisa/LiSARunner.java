@@ -120,8 +120,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager);
-			Map<CFG,
-					Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
+			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 

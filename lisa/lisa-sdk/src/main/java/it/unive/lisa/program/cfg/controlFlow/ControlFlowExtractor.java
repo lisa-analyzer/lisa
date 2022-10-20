@@ -22,9 +22,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * An extractor of {@link ControlFlowStructure}s from {@link CFG}s.
- * It uses {@link Dominators} to extract {@link Loop}s, and a graph visiting
- * heuristics to find {@link IfThenElse}s.<br>
+ * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
+ * {@link Dominators} to extract {@link Loop}s, and a graph visiting heuristics
+ * to find {@link IfThenElse}s.<br>
  * <br>
  * Extracting control flows should be a last-resort: if the cfg contains
  * arbitrary jumps (like {@code goto, break, continue, ...}) the aforementioned
@@ -141,6 +141,7 @@ public class ControlFlowExtractor {
 
 		private final Edge trueEdgeStartingEdge;
 		private final Edge falseEdgeStartingEdge;
+
 		private final NodeList<CFG, Statement, Edge> trueBranch;
 		private final NodeList<CFG, Statement, Edge> falseBranch;
 
@@ -329,8 +330,7 @@ public class ControlFlowExtractor {
 		return false;
 	}
 
-	private static class ConditionalsExtractor
-			implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
+	private static class ConditionalsExtractor implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
 
 		@Override
 		public boolean visit(Collection<Statement> tool, CFG graph) {

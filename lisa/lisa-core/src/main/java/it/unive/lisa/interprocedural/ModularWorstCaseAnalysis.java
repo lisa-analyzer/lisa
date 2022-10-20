@@ -81,8 +81,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(),
-				"Computing fixpoint over the whole program",
+		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				AnalysisState<A, H, V, T> prepared = entryState;

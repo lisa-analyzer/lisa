@@ -1,7 +1,6 @@
 package it.unive.lisa.type;
 
 import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.UnitWithSuperUnits;
 
 /**
@@ -12,7 +11,7 @@ import it.unive.lisa.program.UnitWithSuperUnits;
 public interface UnitType extends InMemoryType {
 
 	/**
-	 * Yields the {@link Unit} that induces this type.
+	 * Yields the {@link UnitWithSuperUnits} that induces this type.
 	 * 
 	 * @return the unit
 	 */

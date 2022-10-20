@@ -121,8 +121,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints",
-					"entries"))
+			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V, T> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
@@ -143,8 +142,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(CFG.class::isInstance)
 					.map(CFG.class::cast).forEach(ws::push));
 			while (!ws.isEmpty())
-				callgraph.getCallers(ws.pop()).stream().filter(CFG.class::isInstance)
-						.map(CFG.class::cast)
+				callgraph.getCallers(ws.pop()).stream().filter(CFG.class::isInstance).map(CFG.class::cast)
 						.forEach(ws::push);
 
 			ws.getSeen().forEach(results::forget);

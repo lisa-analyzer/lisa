@@ -1,7 +1,6 @@
 package it.unive.lisa.outputs.serializableGraph;
 
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.program.cfg.ICFG;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -20,7 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Utility class to build {@link SerializableGraph}s from {@link ICFG}s.
+ * Utility class to build {@link SerializableGraph}s from {@link CFG}s.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -30,7 +29,7 @@ public class SerializableCFG {
 	}
 
 	/**
-	 * Builds a {@link SerializableGraph} starting from the given {@link ICFG},
+	 * Builds a {@link SerializableGraph} starting from the given {@link CFG},
 	 * with no extra descriptions for the statements.
 	 * 
 	 * @param source the source cfg
@@ -42,7 +41,7 @@ public class SerializableCFG {
 	}
 
 	/**
-	 * Builds a {@link SerializableGraph} starting from the given {@link ICFG},
+	 * Builds a {@link SerializableGraph} starting from the given {@link CFG},
 	 * using the given function to generate extra descriptions for each
 	 * statement.
 	 * 
@@ -52,8 +51,7 @@ public class SerializableCFG {
 	 *
 	 * @return the serializable version of that cfg
 	 */
-	public static SerializableGraph fromCFG(CFG source,
-			Function<Statement, SerializableValue> descriptionGenerator) {
+	public static SerializableGraph fromCFG(CFG source, Function<Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
 		if (source instanceof CFGWithAnalysisResults<?, ?, ?, ?>)

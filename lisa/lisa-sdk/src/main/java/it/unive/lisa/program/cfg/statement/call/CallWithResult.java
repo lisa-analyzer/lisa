@@ -9,8 +9,8 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -44,7 +44,6 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-
 	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
 			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
 			Expression... parameters) {

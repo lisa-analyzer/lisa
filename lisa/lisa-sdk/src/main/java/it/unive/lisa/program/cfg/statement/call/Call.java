@@ -6,8 +6,8 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
@@ -96,8 +96,7 @@ public abstract class Call extends NaryExpression {
 	 * @param staticType        the static type of this call
 	 * @param parameters        the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType type,
+	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType type,
 			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");

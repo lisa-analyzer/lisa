@@ -1,8 +1,8 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
@@ -78,8 +78,8 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of {@link CFG}s defined in this unit.
-	 * Each cfg is uniquely identified by its signature
+	 * Yields the collection of {@link CFG}s defined in this unit. Each cfg is
+	 * uniquely identified by its signature
 	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
 	 * cfgs having the same signature in each unit.
 	 * 
@@ -127,8 +127,8 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the {@link CFG} defined in this unit having the given
-	 * signature ({@link CFGDescriptor#getSignature()}), if any.
+	 * Yields the {@link CFG} defined in this unit having the given signature
+	 * ({@link CFGDescriptor#getSignature()}), if any.
 	 * 
 	 * @param signature the signature of the cfg to find
 	 * 
@@ -170,8 +170,8 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of all {@link CFG}s defined in this unit
-	 * that have the given name.
+	 * Yields the collection of all {@link CFG}s defined in this unit that have
+	 * the given name.
 	 * 
 	 * @param name the name of the cfgs to include
 	 * 
@@ -221,8 +221,8 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of <b>all</b> the {@link CFG}s defined
-	 * in this unit.
+	 * Yields the collection of <b>all</b> the {@link CFG}s defined in this
+	 * unit.
 	 * 
 	 * @return the collection of the cfgs
 	 */
@@ -328,8 +328,7 @@ public abstract class Unit {
 	 * code members exist in this unit whose signatures matches one another,
 	 * according to {@link CFGDescriptor#matchesSignature(CFGDescriptor)}. This
 	 * avoids ambiguous call resolution. Moreover, this ensures that all
-	 * {@link CFG}s are valid, according to
-	 * {@link CFG#validate()}.
+	 * {@link CFG}s are valid, according to {@link CFG#validate()}.
 	 * 
 	 * @throws ProgramValidationException if the program has an invalid
 	 *                                        structure

@@ -42,7 +42,7 @@ public final class ChecksExecutor {
 		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
 			checks.forEach(c -> cfg.accept(c, tool));
 
-		// TODO: to check casting
+		// FIXME: to check casting
 		for (Unit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
 			checks.forEach(c -> visitUnit(tool, (CompilationUnit) unit, c));
 

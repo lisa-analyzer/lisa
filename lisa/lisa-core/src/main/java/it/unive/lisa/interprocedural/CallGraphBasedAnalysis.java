@@ -76,8 +76,7 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	 * 
 	 * @throws SemanticException if the analysis fails
 	 */
-	protected AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState,
-			CFG cfg)
+	protected AnalysisState<A, H, V, T> prepareEntryStateOfEntryPoint(AnalysisState<A, H, V, T> entryState, CFG cfg)
 			throws SemanticException {
 		AnalysisState<A, H, V, T> prepared = entryState;
 

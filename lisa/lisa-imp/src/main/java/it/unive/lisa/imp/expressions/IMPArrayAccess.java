@@ -40,8 +40,7 @@ public class IMPArrayAccess extends BinaryExpression {
 	 *                       will receive the access
 	 * @param location   the expression representing the accessed element
 	 */
-	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container,
-			Expression location) {
+	public IMPArrayAccess(CFG cfg, String sourceFile, int line, int col, Expression container, Expression location) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), "[]", container, location);
 	}
 
