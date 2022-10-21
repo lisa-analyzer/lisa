@@ -1,50 +1,35 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.annotations.Annotation;
-import it.unive.lisa.program.annotations.Annotations;
-import it.unive.lisa.program.cfg.ICFG;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.AbstractCFG;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 
+import it.unive.lisa.program.annotations.Annotation;
+import it.unive.lisa.program.annotations.Annotations;
+import it.unive.lisa.program.cfg.AbstractCodeMember;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
+import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.Parameter;
+
 /**
- * A compilation unit of the program to analyze. A compilation unit is a
- * {@link Unit} that also defines instance members, that can be inherited by
- * subunits.
+ * An unit of the program to analyze that is part of a hierarchical structure.
  * 
- * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
  */
-public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
+public abstract class CompilationUnit extends Unit implements CodeElement {
 
 	/**
-	 * The location in the program of this unit
+	 * The location in the program of this interface unit
 	 */
 	private final CodeLocation location;
-
-	/**
-	 * The collection of compilation units this unit directly inherits from.
-	 * This collection may contain both concrete and abstract compilation unit.
-	 */
-	private final Collection<CompilationUnit> superCompilationUnits;
-
-	/**
-	 * The collection of interface units this unit directly inherits from.
-	 */
-	private final Collection<InterfaceUnit> superInterfaceUnits;
 
 	/**
 	 * The instance globals defined in this unit, indexed by
@@ -53,22 +38,22 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	private final Map<String, Global> instanceGlobals;
 
 	/**
-	 * The instance cfgs defined in this unit, indexed by
-	 * {@link CFGDescriptor#getSignature()}
+	 * The instance code members defined in this unit, indexed by
+	 * {@link CodeMemberDescriptor#getSignature()}
 	 */
-	private final Map<String, CFG> instanceCfgs;
+	private final Map<String, CodeMember> instanceCodeMembers;
 
 	/**
-	 * The instance cfgs defined in this unit, indexed by
-	 * {@link CFGDescriptor#getSignature()}
+	 * The lazily computed collection of instances of this unit, that is, the
+	 * collection of compilation units that directly or indirectly inherit from
+	 * this unit.
 	 */
-	private final Map<String, AbstractCFG> signatureCfgs;
+	protected final Collection<Unit> instances;
 
 	/**
-	 * The instance constructs ({@link NativeCFG}s) defined in this unit,
-	 * indexed by {@link CFGDescriptor#getSignature()}
+	 * The annotations of this unit
 	 */
-	private final Map<String, NativeCFG> instanceConstructs;
+	private final Annotations annotations;
 
 	/**
 	 * Whether or not this compilation unit is sealed, meaning that it cannot be
@@ -77,57 +62,33 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	private final boolean sealed;
 
 	/**
-	 * Whether or not the hierarchy of this compilation unit has been fully
+	 * Whether or not the hierarchy of this interface unit has been fully
 	 * computed, to avoid re-computation
 	 */
-	private boolean hierarchyComputed;
-
-	private Annotations annotations;
+	protected boolean hierarchyComputed;
 
 	/**
-	 * Whether or not this compilation unit is abstract
-	 */
-	private final boolean abstractUnit;
-
-	/**
-	 * Builds a concrete compilation unit, defined at the given program point.
+	 * Builds an unit with super unit.
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
 	 * @param name     the name of the unit
-	 * @param sealed   whether or not this unit is sealed, meaning that it
-	 *                     cannot be used as super unit of other compilation
-	 *                     units
 	 */
-	public CompilationUnit(CodeLocation location, String name, boolean sealed) {
-		this(location, name, sealed, false);
-	}
-
-	/**
-	 * Builds a compilation unit, defined at the given program point.
-	 * 
-	 * @param location     the location where the unit is define within the
-	 *                         source file
-	 * @param name         the name of the unit
-	 * @param sealed       whether or not this unit is sealed, meaning that it
-	 *                         cannot be used as super unit of other compilation
-	 *                         units
-	 * @param abstractUnit whether or not this compilation unit is abstract
-	 */
-	public CompilationUnit(CodeLocation location, String name, boolean sealed, boolean abstractUnit) {
+	protected CompilationUnit(CodeLocation location, String name, boolean sealed) {
 		super(name);
-		Objects.requireNonNull(location, "The location of a unit cannot be null.");
 		this.location = location;
 		this.sealed = sealed;
-		superCompilationUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		superInterfaceUnits = Collections.newSetFromMap(new ConcurrentHashMap<>());
-		instanceGlobals = new ConcurrentHashMap<>();
-		instanceCfgs = new ConcurrentHashMap<>();
-		signatureCfgs = new ConcurrentHashMap<>();
-		instanceConstructs = new ConcurrentHashMap<>();
-		hierarchyComputed = false;
+		instanceCodeMembers = new TreeMap<>();
+		instanceGlobals = new TreeMap<>();
+		instances = new HashSet<>();
 		annotations = new Annotations();
-		this.abstractUnit = abstractUnit;
+
+		hierarchyComputed = false;
+	}
+
+	@Override
+	public CodeLocation getLocation() {
+		return location;
 	}
 
 	/**
@@ -136,22 +97,57 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return {@code true} if this unit is sealed
 	 */
-	public final boolean isSealed() {
+	public boolean isSealed() {
 		return sealed;
 	}
 
 	/**
-	 * Yields the collection of {@link CompilationUnit}s that this unit
-	 * <i>directly</i> inherits from. The returned collection does not include
-	 * units that are transitively inherited.
+	 * Adds a new {@link CompilationUnit} as direct inheritance ancestor (i.e.,
+	 * superclass, interface, or superinterface) of this unit.
 	 * 
-	 * @return the collection of direct super units
+	 * @param unit the unit to add
+	 * 
+	 * @return {@code true} if the collection of ancestors changed as a result
+	 *             of the call
+	 */
+	public abstract boolean addAncestor(CompilationUnit unit);
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This method also returns all the instance code members defined in this
+	 * unit.
 	 */
 	@Override
-	public final Collection<CompilationUnit> getSuperUnits() {
-		// TODO: it should return both super compilation units and super
-		// interfaces
-		return superCompilationUnits;
+	public Collection<CodeMember> getCodeMembersRecursively() {
+		Collection<CodeMember> all = super.getCodeMembersRecursively();
+		instanceCodeMembers.values().forEach(all::add);
+		return all;
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * This method also returns all the instance globals defined in this unit.
+	 */
+	@Override
+	public Collection<Global> getGlobalsRecursively() {
+		Collection<Global> all = super.getGlobalsRecursively();
+		instanceGlobals.values().forEach(all::add);
+		return all;
+	}
+
+	/**
+	 * Yields the collection of instance {@link CodeMember}s defined in this
+	 * unit.
+	 * 
+	 * @param traverseHierarchy if {@code true}, also returns instance code
+	 *                              members from superunits, transitively
+	 * 
+	 * @return the collection of instance code members
+	 */
+	public Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> true, traverseHierarchy);
 	}
 
 	/**
@@ -164,525 +160,75 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 	 * 
 	 * @return the collection of instance globals
 	 */
-	public final Collection<Global> getInstanceGlobals(boolean traverseHierarchy) {
+	public Collection<Global> getInstanceGlobals(boolean traverseHierarchy) {
 		return searchGlobals(g -> true, traverseHierarchy);
 	}
 
 	/**
-	 * Yields the collection of instance {@link CFG}s defined in this
-	 * unit. Each cfg is uniquely identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
-	 * instance cfgs having the same signature in each unit. Instance cfgs can
-	 * be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
+	 * Yields the collection of instance {@link CFG}s defined in this unit. Each
+	 * cfg is uniquely identified by its signature
+	 * ({@link CodeMemberDescriptor#getSignature()}), meaning that there are no
+	 * two instance cfgs having the same signature in each unit. Instance cfgs
+	 * can be overridden inside subunits, according to
+	 * {@link CodeMemberDescriptor#isOverridable()}.
 	 * 
 	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
 	 *                              superunits, transitively
 	 * 
 	 * @return the collection of instance cfgs
 	 */
-	public final Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof CFG, true, false, traverseHierarchy);
+	public Collection<CFG> getInstanceCFGs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof CFG, traverseHierarchy);
 	}
 
 	/**
-	 * Yields the collection of instance {@link AbstractCFG}s defined in this
-	 * unit. Each cfg is uniquely identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
-	 * signature cfgs having the same signature in each unit. Signature cfgs
+	 * Yields the collection of instance {@link AbstractCodeMember}s defined in
+	 * this unit. Each cfg is uniquely identified by its signature
+	 * ({@link CodeMemberDescriptor#getSignature()}), meaning that there are no
+	 * two signature cfgs having the same signature in each unit. Signature cfgs
 	 * must be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
+	 * {@link CodeMemberDescriptor#isOverridable()}.
 	 * 
 	 * @param traverseHierarchy if {@code true}, also returns signature cfgs
 	 *                              from superunits, transitively
 	 * 
 	 * @return the collection of signature cfgs
 	 */
-	public final Collection<AbstractCFG> getSignatureCFGs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof AbstractCFG, true, false, traverseHierarchy);
+	public Collection<AbstractCodeMember> getAbstractCodeMembers(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof AbstractCodeMember, traverseHierarchy);
 	}
 
 	/**
 	 * Yields the collection of instance constructs ({@link NativeCFG}s) defined
 	 * in this unit. Each construct is uniquely identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
-	 * instance constructs having the same signature in each unit. Instance
+	 * ({@link CodeMemberDescriptor#getSignature()}), meaning that there are no
+	 * two instance constructs having the same signature in each unit. Instance
 	 * constructs can be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
+	 * {@link CodeMemberDescriptor#isOverridable()}.
 	 * 
 	 * @param traverseHierarchy if {@code true}, also returns instance
 	 *                              constructs from superunits, transitively
 	 * 
 	 * @return the collection of instance constructs
 	 */
-	public final Collection<NativeCFG> getInstanceConstructs(boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> true, false, true, traverseHierarchy);
-	}
-
-	@Override
-	public final boolean addSuperUnit(UnitWithSuperUnits unit) {
-		if (unit instanceof CompilationUnit)
-			return superCompilationUnits.add((CompilationUnit) unit);
-		else
-			return superInterfaceUnits.add((InterfaceUnit) unit);
+	public Collection<NativeCFG> getInstanceConstructs(boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm instanceof NativeCFG, traverseHierarchy);
 	}
 
 	/**
-	 * Adds a new instance {@link Global}, identified by its name
-	 * ({@link Global#getName()}), to this unit.
-	 * 
-	 * @param global the global to add
-	 * 
-	 * @return {@code true} if there was no instance global previously
-	 *             associated with the same name, {@code false} otherwise. If
-	 *             this method returns {@code false}, the given global is
-	 *             discarded.
-	 */
-	public final boolean addInstanceGlobal(Global global) {
-		return instanceGlobals.putIfAbsent(global.getName(), global) == null;
-	}
-
-	/**
-	 * Adds a new instance {@link CFG}, identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), to this unit. Instance cfgs can
-	 * be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
-	 * 
-	 * @param cfg the cfg to add
-	 * 
-	 * @return {@code true} if there was no instance cfg previously associated
-	 *             with the same signature, {@code false} otherwise. If this
-	 *             method returns {@code false}, the given cfg is discarded.
-	 */
-	public final boolean addInstanceCFG(CFG cfg) {
-		CFG c = instanceCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
-		if (sealed)
-			if (c == null)
-				cfg.getDescriptor().setOverridable(false);
-			else
-				c.getDescriptor().setOverridable(false);
-		return c == null;
-	}
-
-	/**
-	 * Adds a new instance {@link NativeCFG}, identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), to this unit. Instance constructs
-	 * can be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
-	 * 
-	 * @param construct the construct to add
-	 * 
-	 * @return {@code true} if there was no instance construct previously
-	 *             associated with the same signature, {@code false} otherwise.
-	 *             If this method returns {@code false}, the given construct is
-	 *             discarded.
-	 */
-	public final boolean addInstanceConstruct(NativeCFG construct) {
-		NativeCFG c = instanceConstructs.putIfAbsent(construct.getDescriptor().getSignature(), construct);
-		if (sealed)
-			if (c == null)
-				construct.getDescriptor().setOverridable(false);
-			else
-				c.getDescriptor().setOverridable(false);
-		return c == null;
-	}
-
-	/**
-	 * Yields the instance {@link CFG} defined in this unit having
-	 * the given signature ({@link CFGDescriptor#getSignature()}), if any.
-	 * 
-	 * @param signature         the signature of the cfg to find
-	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
-	 *                              superunits, transitively
-	 * 
-	 * @return the instance cfg with the given signature, or {@code null}
-	 */
-	public final CFG getInstanceCFG(String signature, boolean traverseHierarchy) {
-		Collection<
-				CFG> res = searchCodeMembers(
-						cm -> cm instanceof CFG && cm.getDescriptor().getSignature().equals(signature), true,
-						false, traverseHierarchy);
-		if (res.isEmpty())
-			return null;
-		return res.stream().findFirst().get();
-	}
-
-	/**
-	 * Yields the instance {@link NativeCFG} defined in this unit having the
-	 * given signature ({@link CFGDescriptor#getSignature()}), if any.
-	 * 
-	 * @param signature         the signature of the construct to find
-	 * @param traverseHierarchy if {@code true}, also returns instance
-	 *                              constructs from superunits, transitively
-	 * 
-	 * @return the instance construct with the given signature, or {@code null}
-	 */
-	public final NativeCFG getInstanceConstruct(String signature, boolean traverseHierarchy) {
-		Collection<NativeCFG> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), false,
-				true, traverseHierarchy);
-		if (res.isEmpty())
-			return null;
-		return res.stream().findFirst().get();
-	}
-
-	/**
-	 * Yields the instance {@link Global} defined in this unit having the given
-	 * name ({@link Global#getName()}), if any.
-	 * 
-	 * @param name              the name of the global to find
-	 * @param traverseHierarchy if {@code true}, also returns instance globals
-	 *                              from superunits, transitively
-	 * 
-	 * @return the instance global with the given name, or {@code null}
-	 */
-	@Override
-	public final Global getInstanceGlobal(String name, boolean traverseHierarchy) {
-		Collection<Global> res = searchGlobals(cm -> cm.getName().equals(name), traverseHierarchy);
-		if (res.isEmpty())
-			return null;
-		return res.stream().findFirst().get();
-	}
-
-	/**
-	 * Yields the instance {@link CodeMember} defined in this unit having the
-	 * given signature ({@link CFGDescriptor#getSignature()}), if any. This
-	 * method searches the code member both among the instance cfgs and instance
-	 * constructs defined in this unit.
-	 * 
-	 * @param signature         the signature of the code member to find
-	 * @param traverseHierarchy if {@code true}, also returns instance code
-	 *                              members from superunits, transitively
-	 * 
-	 * @return the instance code member with the given signature, or
-	 *             {@code null}
-	 */
-	public final CodeMember getInstanceCodeMember(String signature, boolean traverseHierarchy) {
-		Collection<CodeMember> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature), true,
-				true, traverseHierarchy);
-		if (res.isEmpty())
-			return null;
-		return res.stream().findFirst().get();
-	}
-
-	/**
-	 * Yields the collection of all instance {@link CFG}s defined in
-	 * this unit that have the given name.
-	 * 
-	 * @param name              the name of the constructs to include
-	 * @param traverseHierarchy if {@code true}, also returns instance cfgs from
-	 *                              superunits, transitively
-	 * 
-	 * @return the collection of instance cfgs with the given name
-	 */
-	public final Collection<CFG> getInstanceCFGsByName(String name, boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm instanceof CFG && cm.getDescriptor().getName().equals(name), true,
-				false, traverseHierarchy);
-	}
-
-	/**
-	 * Yields the collection of all instance {@link NativeCFG}s defined in this
-	 * unit that have the given name.
-	 * 
-	 * @param name              the name of the constructs to include
-	 * @param traverseHierarchy if {@code true}, also returns instance
-	 *                              constructs from superunits, transitively
-	 * 
-	 * @return the collection of instance constructs with the given name
-	 */
-	public final Collection<NativeCFG> getInstanceConstructsByName(String name, boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), false, true, traverseHierarchy);
-	}
-
-	/**
-	 * Yields the collection of all instance {@link CodeMember}s defined in this
-	 * unit that have the given name. This method searches the code member both
-	 * among the instance cfgs and instance constructs defined in this unit.
-	 * 
-	 * @param name              the name of the code members to include
-	 * @param traverseHierarchy if {@code true}, also returns instance code
-	 *                              members from superunits, transitively
-	 * 
-	 * @return the collection of code members with the given name
-	 */
-	public final Collection<CodeMember> getInstanceCodeMembersByName(String name, boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), true, true, traverseHierarchy);
-	}
-
-	/**
-	 * Finds all the instance code members whose signature matches the one of
-	 * the given {@link CFGDescriptor}, according to
-	 * {@link CFGDescriptor#matchesSignature(CFGDescriptor)}.
-	 * 
-	 * @param signature         the descriptor providing the signature to match
-	 * @param traverseHierarchy if {@code true}, also returns instance code
-	 *                              members from superunits, transitively
-	 * 
-	 * @return the collection of instance code members that match the given
-	 *             signature
-	 */
-	public final Collection<CodeMember> getMatchingInstanceCodeMembers(CFGDescriptor signature,
-			boolean traverseHierarchy) {
-		return searchCodeMembers(cm -> cm.getDescriptor().matchesSignature(signature), true, true, traverseHierarchy);
-	}
-
-	/**
-	 * Searches among instance code members, returning a collection containing
-	 * all members that satisfy the given condition.
-	 * 
-	 * @param <T>               the concrete type of elements that this method
-	 *                              returns
-	 * @param filter            the filtering condition to use for selecting
-	 *                              which code members to return
-	 * @param cfgs              if {@code true}, the search will include
-	 *                              instance cfgs
-	 * @param constructs        if {@code true}, the search will include
-	 *                              instance constructs
-	 * @param traverseHierarchy if {@code true}, also returns instance code
-	 *                              members from superunits, transitively
-	 * 
-	 * @return the collection of matching code members
-	 */
-	@SuppressWarnings("unchecked")
-	private <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter, boolean cfgs,
-			boolean constructs, boolean traverseHierarchy) {
-		Collection<T> result = new HashSet<>();
-
-		if (cfgs) {
-			for (CFG cfg : instanceCfgs.values())
-				if (filter.test(cfg))
-					result.add((T) cfg);
-
-			for (AbstractCFG cfg : signatureCfgs.values())
-				if (filter.test(cfg))
-					result.add((T) cfg);
-		}
-
-		if (constructs)
-			for (NativeCFG construct : instanceConstructs.values())
-				if (filter.test(construct))
-					result.add((T) construct);
-
-		if (!traverseHierarchy)
-			return result;
-
-		for (CompilationUnit cu : superCompilationUnits)
-			for (CodeMember sup : cu.searchCodeMembers(filter, cfgs, constructs, true))
-				if (!result.stream().anyMatch(cfg -> sup.getDescriptor().overriddenBy().contains(cfg)))
-					// we skip the ones that are overridden by code members that
-					// are already in the set, since they are "hidden" from the
-					// point of view of this unit
-					result.add((T) sup);
-
-		return result;
-	}
-
-	/**
-	 * Searches among instance globals, returning a collection containing all
-	 * globals that satisfy the given condition.
-	 * 
-	 * @param filter            the filtering condition to use for selecting
-	 *                              which globals to return
-	 * @param traverseHierarchy if {@code true}, also returns instance globals
-	 *                              from superunits, transitively
-	 * 
-	 * @return the collection of matching globals
-	 */
-	private Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
-		Map<String, Global> result = new HashMap<>();
-		for (Global g : instanceGlobals.values())
-			if (filter.test(g))
-				result.put(g.getName(), g);
-
-		if (!traverseHierarchy)
-			return result.values();
-
-		for (CompilationUnit cu : superCompilationUnits)
-			for (Global sup : cu.searchGlobals(filter, true))
-				if (!result.containsKey(sup.getName()))
-					// we skip the ones that are hidden by globals that
-					// are already in the set, since they are "hidden" from the
-					// point of view of this unit
-					result.put(sup.getName(), sup);
-
-		return result.values();
-	}
-
-	/**
-	 * {@inheritDoc}<br>
+	 * Yields the collection of {@link ClassUnit}s that are instances of this
+	 * one, including itself. In other words, this method returns the collection
+	 * of compilation units that directly or indirectly, inherit from this
+	 * one.<br>
 	 * <br>
-	 * This method also returns all the instance cfgs defined in this unit.
+	 * Note that this method returns an empty collection, until
+	 * {@link #validateAndFinalize()} has been called.
+	 * 
+	 * @return the collection of units that are instances of this one, including
+	 *             this unit itself
 	 */
-	@Override
-	public Collection<CFG> getAllCFGs() {
-		Collection<CFG> all = super.getAllCFGs();
-		instanceCfgs.values().forEach(all::add);
-		return all;
-	}
-
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * This method also returns all the instance globals defined in this unit.
-	 */
-	@Override
-	public Collection<Global> getAllGlobals() {
-		Collection<Global> all = super.getAllGlobals();
-		instanceGlobals.values().forEach(all::add);
-		return all;
-	}
-
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * This method also returns all the instance constructs defined in this
-	 * unit.
-	 */
-	@Override
-	public Collection<NativeCFG> getAllConstructs() {
-		Collection<NativeCFG> all = super.getAllConstructs();
-		instanceConstructs.values().forEach(all::add);
-		return all;
-	}
-
-	/**
-	 * {@inheritDoc}<br>
-	 * <br>
-	 * This method returns the union of {@link #getInstanceCFGs(boolean)} and
-	 * {@link #getInstanceConstructs(boolean)}.
-	 */
-	@Override
-	public final Collection<CodeMember> getInstanceCodeMembers(boolean traverseHierarchy) {
-		Set<CodeMember> all = new HashSet<>(getInstanceCFGs(traverseHierarchy));
-		all.addAll(getSignatureCFGs(traverseHierarchy));
-		all.addAll(getInstanceConstructs(traverseHierarchy));
-		return all;
-	}
-
-	@Override
-	public final boolean isInstanceOf(UnitWithSuperUnits unit) {
-		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
-				: superCompilationUnits.stream().anyMatch(u -> u.isInstanceOf(unit)));
-	}
-
-	private final void addInstance(CompilationUnit unit) throws ProgramValidationException {
-		if (superCompilationUnits.contains(unit))
-			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
-					+ " is both a super unit and an instance of " + this);
-		instances.add(unit);
-
-		for (CompilationUnit sup : superCompilationUnits)
-			sup.addInstance(unit);
-
-		for (InterfaceUnit sup : superInterfaceUnits)
-			sup.addInstance(unit);
-	}
-
-	/**
-	 * {@inheritDoc} <br>
-	 * <br>
-	 * Validating a compilation unit causes the validation of all its super
-	 * units, and the population of the set of instances
-	 * ({@link #getInstances()}) of each element in its hierarchy. Moreover, the
-	 * validation ensures that no duplicate instance code members are defined in
-	 * the compilation unit, according to
-	 * {@link CFGDescriptor#matchesSignature(CFGDescriptor)}, to avoid ambiguous
-	 * call resolutions. Instance code members are also linked to other ones in
-	 * the hierarchy, populating the collections
-	 * {@link CFGDescriptor#overriddenBy()} and
-	 * {@link CFGDescriptor#overrides()}.
-	 */
-	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		if (hierarchyComputed)
-			return;
-
-		super.validateAndFinalize();
-
-		for (CompilationUnit sup : superCompilationUnits)
-			if (sup.sealed)
-				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
-			else
-				sup.validateAndFinalize();
-
-		for (InterfaceUnit i : superInterfaceUnits)
-			i.validateAndFinalize();
-
-		addInstance(this);
-
-		for (CodeMember cfg : getInstanceCodeMembers(false)) {
-			Collection<CodeMember> matching = getMatchingInstanceCodeMembers(cfg.getDescriptor(), false);
-			if (matching.size() != 1 || matching.iterator().next() != cfg)
-				throw new ProgramValidationException(
-						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
-		}
-
-		if (!signatureCfgs.isEmpty() && !abstractUnit)
-			throw new ProgramValidationException(this + " is not an abstract class and it cannot have signature cfgs.");
-
-		for (CompilationUnit s : superCompilationUnits)
-			for (CodeMember sup : s.getInstanceCodeMembers(true)) {
-				Collection<CodeMember> overriding = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
-				if (overriding.size() > 1)
-					throw new ProgramValidationException(
-							sup.getDescriptor().getSignature() + " is overriden multiple times in unit " + this + ": "
-									+ StringUtils.join(", ", overriding));
-				else if (!overriding.isEmpty()) {
-					if (!sup.getDescriptor().isOverridable()) {
-						throw new ProgramValidationException(
-								this + " overrides the non-overridable cfg " + sup.getDescriptor().getSignature());
-					} else {
-						CodeMember over = overriding.iterator().next();
-						over.getDescriptor().overrides().addAll(sup.getDescriptor().overrides());
-						over.getDescriptor().overrides().add(sup);
-						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
-					}
-				} else if (!s.canBeInstantiated() && canBeInstantiated())
-					throw new ProgramValidationException(
-							this + " does not overrides the cfg " + sup.getDescriptor().getSignature()
-									+ " of the non-instantiable unit " + s);
-			}
-
-		for (InterfaceUnit i : superInterfaceUnits)
-			for (ICFG sup : i.getInstanceCFGs(true)) {
-				Collection<CodeMember> implementing = getMatchingInstanceCodeMembers(sup.getDescriptor(), false);
-				if (implementing.size() > 1)
-					throw new ProgramValidationException(
-							sup.getDescriptor().getSignature() + " is implemented multiple times in unit " + this + ": "
-									+ StringUtils.join(", ", implementing));
-				else if (implementing.isEmpty()) {
-					if (sup instanceof AbstractCFG)
-						throw new ProgramValidationException(
-								this + " implements the interface " + i.getName() + " but does not implements the cfg "
-										+ sup.getDescriptor().getSignature());
-				} else {
-					CodeMember over = implementing.iterator().next();
-					over.getDescriptor().overrides().addAll(sup.getDescriptor().overrides());
-					over.getDescriptor().overrides().add(sup);
-					over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
-				}
-			}
-
-		for (CompilationUnit superUnit : superCompilationUnits)
-			for (Annotation ann : superUnit.getAnnotations())
-				if (!ann.isInherited())
-					addAnnotation(ann);
-
-		for (CodeMember instCfg : getInstanceCodeMembers(false))
-			for (CodeMember matching : instCfg.getDescriptor().overrides())
-				for (Annotation ann : matching.getDescriptor().getAnnotations()) {
-					if (!ann.isInherited())
-						instCfg.getDescriptor().addAnnotation(ann);
-
-					Parameter[] args = instCfg.getDescriptor().getFormals();
-					Parameter[] superArgs = matching.getDescriptor().getFormals();
-					for (int i = 0; i < args.length; i++)
-						for (Annotation parAnn : superArgs[i].getAnnotations()) {
-							if (!parAnn.isInherited())
-								args[i].addAnnotation(parAnn);
-						}
-				}
-
-		hierarchyComputed = true;
+	public Collection<Unit> getInstances() {
+		return instances;
 	}
 
 	/**
@@ -703,34 +249,289 @@ public class CompilationUnit extends UnitWithSuperUnits implements CodeElement {
 		annotations.addAnnotation(ann);
 	}
 
-	@Override
-	public CodeLocation getLocation() {
-		return location;
-	}
+	/**
+	 * Yields the collection of {@link CompilationUnit}s that are this unit
+	 * directly inherits from, regardless of their type.
+	 * 
+	 * @return the collection of units that are direct ancestors of this one
+	 */
+	public abstract Collection<CompilationUnit> getImmediateAncestors();
 
-	@Override
-	public boolean canBeInstantiated() {
-		return !abstractUnit;
+	/**
+	 * Yields {@code true} if and only if this unit is an instance of the given
+	 * one. This method works correctly even if {@link #validateAndFinalize()}
+	 * has not been called yet, and thus the if collection of instances of the
+	 * given unit is not yet available.
+	 * 
+	 * @param unit the other unit
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
+	public abstract boolean isInstanceOf(CompilationUnit unit);
+
+	/**
+	 * Searches among instance code members, returning a collection containing
+	 * all members that satisfy the given condition.
+	 * 
+	 * @param <T>               the concrete type of elements that this method
+	 *                              returns
+	 * @param filter            the filtering condition to use for selecting
+	 *                              which code members to return
+	 * @param traverseHierarchy if {@code true}, also returns instance code
+	 *                              members from superunits, transitively
+	 * 
+	 * @return the collection of matching code members
+	 */
+	@SuppressWarnings("unchecked")
+	protected <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter,
+			boolean traverseHierarchy) {
+		Collection<T> result = new HashSet<>();
+
+		for (CodeMember member : instanceCodeMembers.values())
+			if (filter.test(member))
+				result.add((T) member);
+
+		if (!traverseHierarchy)
+			return result;
+
+		for (CompilationUnit cu : getImmediateAncestors())
+			for (CodeMember sup : cu.searchCodeMembers(filter, true))
+				if (!result.stream().anyMatch(cm -> sup.getDescriptor().overriddenBy().contains(cm)))
+					// we skip the ones that are overridden by code members that
+					// are already in the set, since they are "hidden" from the
+					// point of view of this unit
+					result.add((T) sup);
+
+		return result;
 	}
 
 	/**
-	 * Adds a new instance {@link AbstractCFG}, identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), to this unit. Signature cfgs must
-	 * be overridden inside subunits, according to
-	 * {@link CFGDescriptor#isOverridable()}.
+	 * Searches among instance globals, returning a collection containing all
+	 * globals that satisfy the given condition.
 	 * 
-	 * @param cfg the cfg to add
+	 * @param filter            the filtering condition to use for selecting
+	 *                              which globals to return
+	 * @param traverseHierarchy if {@code true}, also returns instance globals
+	 *                              from superunits, transitively
 	 * 
-	 * @return {@code true} if there was no signature cfg previously associated
-	 *             with the same signature, {@code false} otherwise. If this
-	 *             method returns {@code false}, the given cfg is discarded.
+	 * @return the collection of matching globals
 	 */
-	public boolean addSignatureCFG(AbstractCFG cfg) {
-		AbstractCFG c = signatureCfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg);
-		if (c == null)
-			cfg.getDescriptor().setOverridable(true);
-		else
-			c.getDescriptor().setOverridable(true);
+	protected Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
+		Map<String, Global> result = new HashMap<>();
+		for (Global g : instanceGlobals.values())
+			if (filter.test(g))
+				result.put(g.getName(), g);
+
+		if (!traverseHierarchy)
+			return result.values();
+
+		for (CompilationUnit cu : getImmediateAncestors())
+			for (Global sup : cu.searchGlobals(filter, true))
+				if (!result.containsKey(sup.getName()))
+					// we skip the ones that are hidden by globals that
+					// are already in the set, since they are "hidden" from the
+					// point of view of this unit
+					result.put(sup.getName(), sup);
+
+		return result.values();
+	}
+
+	/**
+	 * Adds a new instance {@link Global}, identified by its name
+	 * ({@link Global#getName()}), to this unit.
+	 * 
+	 * @param global the global to add
+	 * 
+	 * @return {@code true} if there was no instance global previously
+	 *             associated with the same name, {@code false} otherwise. If
+	 *             this method returns {@code false}, the given global is
+	 *             discarded.
+	 */
+	public boolean addInstanceGlobal(Global global) {
+		return instanceGlobals.putIfAbsent(global.getName(), global) == null;
+	}
+
+	/**
+	 * Adds a new instance {@link CodeMember}, identified by its signature
+	 * ({@link CodeMemberDescriptor#getSignature()}), to this unit. Instance
+	 * code members can be overridden inside subunits, according to
+	 * {@link CodeMemberDescriptor#isOverridable()}.
+	 * 
+	 * @param cm the cfg to add
+	 * 
+	 * @return {@code true} if there was no instance member previously
+	 *             associated with the same signature, {@code false} otherwise.
+	 *             If this method returns {@code false}, the given code member
+	 *             is discarded.
+	 */
+	public boolean addInstanceCodeMember(CodeMember cm) {
+		CodeMember c = instanceCodeMembers.putIfAbsent(cm.getDescriptor().getSignature(), cm);
+		if (sealed)
+			if (c == null)
+				cm.getDescriptor().setOverridable(false);
+			else
+				c.getDescriptor().setOverridable(false);
 		return c == null;
+	}
+
+	/**
+	 * Yields the first instance {@link CodeMember} defined in this unit having
+	 * the given signature ({@link CodeMemberDescriptor#getSignature()}), if
+	 * any.
+	 * 
+	 * @param signature         the signature of the member to find
+	 * @param traverseHierarchy if {@code true}, also returns instance members
+	 *                              from superunits, transitively
+	 * 
+	 * @return the instance code member with the given signature, or
+	 *             {@code null}
+	 */
+	public CodeMember getInstanceCodeMember(String signature, boolean traverseHierarchy) {
+		Collection<CodeMember> res = searchCodeMembers(cm -> cm.getDescriptor().getSignature().equals(signature),
+				traverseHierarchy);
+		if (res.isEmpty())
+			return null;
+		return res.stream().findFirst().get();
+	}
+
+	/**
+	 * Yields the first instance {@link Global} defined in this unit having the
+	 * given name ({@link Global#getName()}), if any.
+	 * 
+	 * @param name              the name of the global to find
+	 * @param traverseHierarchy if {@code true}, also returns instance globals
+	 *                              from superunits, transitively
+	 * 
+	 * @return the instance global with the given name, or {@code null}
+	 */
+	public Global getInstanceGlobal(String name, boolean traverseHierarchy) {
+		Collection<Global> res = searchGlobals(cm -> cm.getName().equals(name), traverseHierarchy);
+		if (res.isEmpty())
+			return null;
+		return res.stream().findFirst().get();
+	}
+
+	/**
+	 * Yields the collection of all instance {@link CodeMember}s defined in this
+	 * unit that have the given name.
+	 * 
+	 * @param name              the name of the members to include
+	 * @param traverseHierarchy if {@code true}, also returns instance members
+	 *                              from superunits, transitively
+	 * 
+	 * @return the collection of instance members with the given name
+	 */
+	public Collection<CodeMember> getInstanceCodeMembersByName(String name, boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm.getDescriptor().getName().equals(name), traverseHierarchy);
+	}
+
+	/**
+	 * Finds all the instance code members whose signature matches the one of
+	 * the given {@link CodeMemberDescriptor}, according to
+	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}.
+	 * 
+	 * @param signature         the descriptor providing the signature to match
+	 * @param traverseHierarchy if {@code true}, also returns instance code
+	 *                              members from superunits, transitively
+	 * 
+	 * @return the collection of instance code members that match the given
+	 *             signature
+	 */
+	public Collection<CodeMember> getMatchingInstanceCodeMembers(CodeMemberDescriptor signature,
+			boolean traverseHierarchy) {
+		return searchCodeMembers(cm -> cm.getDescriptor().matchesSignature(signature), traverseHierarchy);
+	}
+
+	/**
+	 * {@inheritDoc} <br>
+	 * <br>
+	 * Validating a compilation unit causes the validation of all its super
+	 * units, and the population of the set of instances
+	 * ({@link #getInstances()}) of each element in its hierarchy. Moreover, the
+	 * validation ensures that no duplicate instance code members are defined in
+	 * the compilation unit, according to
+	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}, to
+	 * avoid ambiguous call resolutions. Instance code members are also linked
+	 * to other ones in the hierarchy, populating the collections
+	 * {@link CodeMemberDescriptor#overriddenBy()} and
+	 * {@link CodeMemberDescriptor#overrides()}.
+	 */
+	@Override
+	public void validateAndFinalize() throws ProgramValidationException {
+		if (hierarchyComputed)
+			return;
+
+		super.validateAndFinalize();
+
+		// recursive invocation
+		for (CompilationUnit sup : getImmediateAncestors())
+			if (sup.isSealed())
+				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
+			else
+				sup.validateAndFinalize();
+
+		// check for duplicate cms
+		for (CodeMember cm : getInstanceCodeMembers(false)) {
+			Collection<CodeMember> matching = getMatchingInstanceCodeMembers(cm.getDescriptor(), false);
+			if (matching.size() != 1 || matching.iterator().next() != cm)
+				throw new ProgramValidationException(
+						cm.getDescriptor().getSignature() + " is duplicated within unit " + this);
+		}
+
+		for (CompilationUnit ancestor : getImmediateAncestors()) {
+			// check overriders/implementers
+			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
+				Collection<CodeMember> localOverrides = getMatchingInstanceCodeMembers(inherited.getDescriptor(),
+						false);
+				if (localOverrides.isEmpty()) {
+					if (inherited instanceof AbstractCodeMember && !ancestor.canBeInstantiated() && canBeInstantiated())
+						// this is the first non-abstract child of ancestor, and
+						// it must provide an implementation for all abstract
+						// code members defined in the inheritance chain
+						throw new ProgramValidationException(this + " does not overrides the cfg "
+								+ inherited.getDescriptor().getSignature() + " of the non-instantiable unit "
+								+ ancestor);
+				} else if (localOverrides.size() == 1) {
+					if (!inherited.getDescriptor().isOverridable()) {
+						throw new ProgramValidationException(
+								this + " overrides the non-overridable cfg "
+										+ inherited.getDescriptor().getSignature());
+					} else {
+						CodeMember over = localOverrides.iterator().next();
+						over.getDescriptor().overrides().addAll(inherited.getDescriptor().overrides());
+						over.getDescriptor().overrides().add(inherited);
+						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
+					}
+				} else {
+					throw new ProgramValidationException(inherited.getDescriptor().getSignature()
+							+ " is overriden multiple times in unit " + this + ": "
+							+ StringUtils.join(", ", localOverrides));
+				}
+			}
+
+			// propagate annotations
+			for (Annotation ann : ancestor.getAnnotations())
+				if (!ann.isInherited())
+					addAnnotation(ann);
+		}
+
+		// propagate annotations in cfgs - this has to be done after the
+		// override chain has been computed
+		for (CodeMember instCfg : getInstanceCodeMembers(false))
+			for (CodeMember matching : instCfg.getDescriptor().overrides())
+				for (Annotation ann : matching.getDescriptor().getAnnotations()) {
+					if (!ann.isInherited())
+						instCfg.getDescriptor().addAnnotation(ann);
+
+					Parameter[] args = instCfg.getDescriptor().getFormals();
+					Parameter[] superArgs = matching.getDescriptor().getFormals();
+					for (int i = 0; i < args.length; i++)
+						for (Annotation parAnn : superArgs[i].getAnnotations()) {
+							if (!parAnn.isInherited())
+								args[i].addAnnotation(parAnn);
+						}
+				}
+
+		hierarchyComputed = true;
 	}
 }

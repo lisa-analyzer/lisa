@@ -107,7 +107,7 @@ public final class InterfaceType implements UnitType {
 				return current;
 
 			// null since we do not want to create new types here
-			current.unit.getSuperUnits().forEach(u -> ws.push(lookup(u.getName(), null)));
+			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName(), null)));
 		}
 
 		return Untyped.INSTANCE;

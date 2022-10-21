@@ -2,13 +2,15 @@ package it.unive.lisa.checks;
 
 import static it.unive.lisa.logging.IterationLogger.iterate;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import it.unive.lisa.program.cfg.CodeMember;
 
 /**
  * Utility class that handles the execution of {@link Check}s.
@@ -39,30 +41,34 @@ public final class ChecksExecutor {
 		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
 			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
 
-		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
-			checks.forEach(c -> cfg.accept(c, tool));
+		for (CodeMember cm : iterate(LOG, program.getCodeMembers(), "Analyzing program cfgs...", "CFGs"))
+			if (cm instanceof CFG)
+				checks.forEach(c -> ((CFG) cm).accept(c, tool));
 
 		// FIXME: to check casting
 		for (Unit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
-			checks.forEach(c -> visitUnit(tool, (CompilationUnit) unit, c));
+			checks.forEach(c -> visitUnit(tool, unit, c));
 
 		checks.forEach(c -> c.afterExecution(tool));
 	}
 
-	private static <C extends Check<T>, T> void visitUnit(T tool, CompilationUnit unit, C c) {
-		if (!c.visitCompilationUnit(tool, unit))
+	private static <C extends Check<T>, T> void visitUnit(T tool, Unit unit, C c) {
+		if (!c.visitUnit(tool, unit))
 			return;
 
 		for (Global global : unit.getGlobals())
 			c.visitGlobal(tool, unit, global, false);
 
-		for (Global global : unit.getInstanceGlobals(false))
-			c.visitGlobal(tool, unit, global, true);
+		if (unit instanceof CompilationUnit)
+			for (Global global : ((CompilationUnit) unit).getInstanceGlobals(false))
+				c.visitGlobal(tool, unit, global, true);
 
-		for (CFG cfg : unit.getCFGs())
-			cfg.accept(c, tool);
+		for (CodeMember cm : unit.getCodeMembers())
+			if (cm instanceof CFG)
+				((CFG) cm).accept(c, tool);
 
-		for (CFG cfg : unit.getInstanceCFGs(false))
-			cfg.accept(c, tool);
+		if (unit instanceof CompilationUnit)
+			for (CFG cfg : ((CompilationUnit) unit).getInstanceCFGs(false))
+				cfg.accept(c, tool);
 	}
 }

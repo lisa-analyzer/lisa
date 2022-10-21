@@ -1,7 +1,7 @@
 package it.unive.lisa.imp.types;
 
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.type.InMemoryType;
 import it.unive.lisa.type.PointerType;
 import it.unive.lisa.type.Type;
@@ -20,7 +20,7 @@ import java.util.Set;
  * A type representing an IMP class defined in an IMP program. ClassTypes are
  * instances of {@link PointerType} and {@link UnitType}, and are identified by
  * their name. To ensure uniqueness of ClassType objects,
- * {@link #lookup(String, UnitWithSuperUnits)} must be used to retrieve existing
+ * {@link #lookup(String, CompilationUnit)} must be used to retrieve existing
  * instances (or automatically create one if no matching instance exists).
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -56,15 +56,15 @@ public final class ClassType implements InMemoryType, UnitType {
 	 * @return the unique instance of {@link ClassType} representing the class
 	 *             with the given name
 	 */
-	public static ClassType lookup(String name, UnitWithSuperUnits unit) {
+	public static ClassType lookup(String name, CompilationUnit unit) {
 		return types.computeIfAbsent(name, x -> new ClassType(name, unit));
 	}
 
 	private final String name;
 
-	private final UnitWithSuperUnits unit;
+	private final CompilationUnit unit;
 
-	private ClassType(String name, UnitWithSuperUnits unit) {
+	private ClassType(String name, CompilationUnit unit) {
 		Objects.requireNonNull(name, "The name of a class type cannot be null");
 		Objects.requireNonNull(unit, "The unit of a class type cannot be null");
 		this.name = name;
@@ -72,7 +72,7 @@ public final class ClassType implements InMemoryType, UnitType {
 	}
 
 	@Override
-	public UnitWithSuperUnits getUnit() {
+	public CompilationUnit getUnit() {
 		return unit;
 	}
 
@@ -120,7 +120,7 @@ public final class ClassType implements InMemoryType, UnitType {
 				return current;
 
 			// null since we do not want to create new types here
-			current.unit.getSuperUnits().forEach(u -> ws.push(lookup(u.getName(), null)));
+			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName(), null)));
 		}
 
 		return Untyped.INSTANCE;

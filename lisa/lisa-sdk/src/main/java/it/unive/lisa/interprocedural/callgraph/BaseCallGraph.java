@@ -6,9 +6,9 @@ import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
 import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Program;
-import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -307,7 +307,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
-		for (CodeMember cm : program.getAllCodeMembers())
+		for (CodeMember cm : program.getCodeMembersRecursively())
 			checkMember(call, types, targets, natives, aliasing, cm, false);
 	}
 
@@ -335,7 +335,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 					"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
 		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
-			Collection<UnitWithSuperUnits> units;
+			Collection<CompilationUnit> units;
 			if (recType.isUnitType())
 				units = Collections.singleton(recType.asUnitType().getUnit());
 			else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isUnitType))
@@ -349,9 +349,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			else
 				continue;
 
-			Set<UnitWithSuperUnits> seen = new HashSet<>();
-			for (UnitWithSuperUnits unit : units)
-				for (UnitWithSuperUnits cu : call.getTraversalStrategy().traverse(call, unit))
+			Set<CompilationUnit> seen = new HashSet<>();
+			for (CompilationUnit unit : units)
+				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit))
 					if (seen.add(unit))
 						// we inspect only the ones of the current unit
 						for (CodeMember cm : cu.getInstanceCodeMembers(false))
@@ -386,7 +386,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			SymbolAliasing aliasing,
 			CodeMember cm,
 			boolean instance) {
-		CFGDescriptor descr = cm.getDescriptor();
+		CodeMemberDescriptor descr = cm.getDescriptor();
 		if (instance != descr.isInstance())
 			return;
 

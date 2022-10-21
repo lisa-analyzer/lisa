@@ -42,7 +42,7 @@ import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -82,7 +82,7 @@ import org.reflections.scanners.SubTypesScanner;
 
 public class SemanticsSanityTest {
 
-	private CompilationUnit unit;
+	private ClassUnit unit;
 	private CFG cfg;
 	private CallGraph cg;
 	private InterproceduralAnalysis<
@@ -107,9 +107,9 @@ public class SemanticsSanityTest {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("unknown", 0, 0);
 
 		Program p = new Program();
-		unit = new CompilationUnit(unknownLocation, "foo", false);
+		unit = new ClassUnit(unknownLocation, "foo", false);
 		p.addUnit(unit);
-		cfg = new CFG(new CFGDescriptor(unknownLocation, unit, false, "foo"));
+		cfg = new CFG(new CodeMemberDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();
 		cg.init(p);
 		interprocedural = new ModularWorstCaseAnalysis<>();

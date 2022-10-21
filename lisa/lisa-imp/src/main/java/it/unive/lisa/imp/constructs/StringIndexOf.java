@@ -1,9 +1,9 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
@@ -29,8 +29,8 @@ public class StringIndexOf extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringIndexOf(CodeLocation location, CompilationUnit stringUnit) {
-		super(new CFGDescriptor(location, stringUnit, true, "indexOf", StringType.INSTANCE,
+	public StringIndexOf(CodeLocation location, ClassUnit stringUnit) {
+		super(new CodeMemberDescriptor(location, stringUnit, true, "indexOf", StringType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
 				new Parameter(location, "search", StringType.INSTANCE)),
 				IMPStringIndexOf.class);

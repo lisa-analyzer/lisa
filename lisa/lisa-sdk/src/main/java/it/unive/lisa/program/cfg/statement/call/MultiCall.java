@@ -1,5 +1,10 @@
 package it.unive.lisa.program.cfg.statement.call;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -9,10 +14,9 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.cfg.ICFG;
-import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -21,14 +25,10 @@ import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Objects;
 
 /**
- * A call to one or more {@link ICFG}s and/or {@link NativeCFG}s under analysis,
- * implemented through a sequence of calls.
+ * A call to one or more {@link CodeMember}s under analysis, implemented through
+ * a sequence of calls.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

@@ -28,17 +28,19 @@ import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.imp.types.InterfaceType;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.AbstractClassUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
-import it.unive.lisa.program.UnitWithSuperUnits;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.AbstractCFG;
+import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
@@ -173,13 +175,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private final String file;
 
-	private final Map<String, Pair<UnitWithSuperUnits, String>> inheritanceMap;
+	private final Map<String, Pair<CompilationUnit, String>> inheritanceMap;
 
-	private final Map<String, Set<Pair<UnitWithSuperUnits, String>>> implementedInterfaces;
+	private final Map<String, Set<Pair<CompilationUnit, String>>> implementedInterfaces;
 
 	private final Program program;
 
-	private UnitWithSuperUnits currentUnit;
+	private CompilationUnit currentUnit;
 
 	private final boolean onlyMain;
 
@@ -219,15 +221,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 			// add constructs
 			SourceCodeLocation unknownLocation = new SourceCodeLocation("imp-runtime", 0, 0);
-			CompilationUnit str = new CompilationUnit(unknownLocation, "string", true);
-			str.addInstanceConstruct(new StringContains(unknownLocation, str));
-			str.addInstanceConstruct(new StringEndsWith(unknownLocation, str));
-			str.addInstanceConstruct(new StringEquals(unknownLocation, str));
-			str.addInstanceConstruct(new StringIndexOf(unknownLocation, str));
-			str.addInstanceConstruct(new StringLength(unknownLocation, str));
-			str.addInstanceConstruct(new StringReplace(unknownLocation, str));
-			str.addInstanceConstruct(new StringStartsWith(unknownLocation, str));
-			str.addInstanceConstruct(new StringSubstring(unknownLocation, str));
+			ClassUnit str = new ClassUnit(unknownLocation, "string", true);
+			str.addInstanceCodeMember(new StringContains(unknownLocation, str));
+			str.addInstanceCodeMember(new StringEndsWith(unknownLocation, str));
+			str.addInstanceCodeMember(new StringEquals(unknownLocation, str));
+			str.addInstanceCodeMember(new StringIndexOf(unknownLocation, str));
+			str.addInstanceCodeMember(new StringLength(unknownLocation, str));
+			str.addInstanceCodeMember(new StringReplace(unknownLocation, str));
+			str.addInstanceCodeMember(new StringStartsWith(unknownLocation, str));
+			str.addInstanceCodeMember(new StringSubstring(unknownLocation, str));
 
 			// register all possible types
 			p.registerType(BoolType.INSTANCE);
@@ -264,16 +266,20 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Program visitFile(FileContext ctx) {
 		for (UnitContext unit : ctx.unit()) {
 			// we add all the units first, so that type resolution an work
+			SourceCodeLocation loc = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
 			if (unit.classUnit() != null) {
-				CompilationUnit u = new CompilationUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-						unit.classUnit().name.getText(), false, unit.classUnit().ABSTRACT() != null);
+				ClassUnit u;
+				String name = unit.classUnit().name.getText();
+				if (unit.classUnit().ABSTRACT() == null)
+					u = new ClassUnit(loc, name, false);
+				else
+					u = new AbstractClassUnit(loc, name, false);
 				program.addUnit(u);
 				ClassType.lookup(u.getName(), u);
 
-				implementedInterfaces.put(unit.classUnit().name.getText(), new HashSet<>());
+				implementedInterfaces.put(name, new HashSet<>());
 			} else if (unit.interfaceUnit() != null) {
-				InterfaceUnit i = new InterfaceUnit(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-						unit.interfaceUnit().name.getText());
+				InterfaceUnit i = new InterfaceUnit(loc, unit.interfaceUnit().name.getText(), false);
 				program.addUnit(i);
 				InterfaceType.lookup(i.getName(), i);
 
@@ -287,17 +293,17 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			visitUnit(unit);
 
 		// adding super units
-		for (Pair<UnitWithSuperUnits, String> unit : inheritanceMap.values())
+		for (Pair<CompilationUnit, String> unit : inheritanceMap.values())
 			if (unit.getRight() != null)
-				unit.getLeft().addSuperUnit(inheritanceMap.get(unit.getRight()).getLeft());
+				unit.getLeft().addAncestor(inheritanceMap.get(unit.getRight()).getLeft());
 
 		// adding super interfaces
-		for (Set<Pair<UnitWithSuperUnits, String>> intfs : implementedInterfaces.values())
-			for (Pair<UnitWithSuperUnits, String> unit : intfs)
+		for (Set<Pair<CompilationUnit, String>> intfs : implementedInterfaces.values())
+			for (Pair<CompilationUnit, String> unit : intfs)
 				if (unit.getRight() != null) {
-					Set<Pair<UnitWithSuperUnits, String>> is = implementedInterfaces.get(unit.getRight());
-					for (Pair<UnitWithSuperUnits, String> i : is)
-						unit.getLeft().addSuperUnit(i.getLeft());
+					Set<Pair<CompilationUnit, String>> is = implementedInterfaces.get(unit.getRight());
+					for (Pair<CompilationUnit, String> i : is)
+						unit.getLeft().addAncestor(i.getLeft());
 				}
 
 		return program;
@@ -324,23 +330,16 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
 		for (SignatureDeclarationContext decl : ctx.interfaceMemberDeclarations().signatureDeclaration())
-			unit.addInstanceCFG(visitSignatureDeclaration(decl));
+			unit.addInstanceCodeMember(visitSignatureDeclaration(decl));
 
 		for (MethodDeclarationContext decl : ctx.interfaceMemberDeclarations().methodDeclaration())
-			unit.addInstanceCFG(visitMethodDeclaration(decl));
+			unit.addInstanceCodeMember(visitMethodDeclaration(decl));
 
-		for (CFG cfg : unit.getImplementedCFGs(false)) {
-			if (unit.getImplementedCFGs(false).stream()
-					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
-		}
-
-		for (AbstractCFG cfg : unit.getSignatureCFGs(false)) {
-			if (unit.getSignatureCFGs(false).stream()
-					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
+		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
+			if (unit.getInstanceCodeMembers(false).stream()
+					.anyMatch(c -> c != cm && c.getDescriptor().matchesSignature(cm.getDescriptor())
+							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException("Duplicate code member: " + cm);
 		}
 
 		for (FieldDeclarationContext decl : ctx.interfaceMemberDeclarations().fieldDeclaration())
@@ -355,8 +354,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
-	public CompilationUnit visitClassUnit(ClassUnitContext ctx) {
-		CompilationUnit unit = (CompilationUnit) program.getUnit(ctx.name.getText());
+	public ClassUnit visitClassUnit(ClassUnitContext ctx) {
+		ClassUnit unit = (ClassUnit) program.getUnit(ctx.name.getText());
 		currentUnit = unit;
 
 		if (ctx.superclass != null)
@@ -371,28 +370,21 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			implementedInterfaces.get(unit.getName()).add(Pair.of(unit, null));
 
 		for (MethodDeclarationContext decl : ctx.classMemberDeclarations().methodDeclaration())
-			unit.addInstanceCFG(visitMethodDeclaration(decl));
+			unit.addInstanceCodeMember(visitMethodDeclaration(decl));
 
 		for (ConstructorDeclarationContext decl : ctx.classMemberDeclarations().constructorDeclaration())
-			unit.addInstanceCFG(visitConstructorDeclaration(decl));
+			unit.addInstanceCodeMember(visitConstructorDeclaration(decl));
 
 		for (SignatureDeclarationContext decl : ctx.classMemberDeclarations().signatureDeclaration())
-			unit.addSignatureCFG(visitSignatureDeclaration(decl));
+			unit.addInstanceCodeMember(visitSignatureDeclaration(decl));
 
-		for (CFG cfg : unit.getInstanceCFGs(false)) {
-			if (unit.getInstanceCFGs(false).stream()
-					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate cfg: " + cfg);
-			if (isEntryPoint(cfg))
-				program.addEntryPoint(cfg);
-		}
-
-		for (AbstractCFG cfg : unit.getSignatureCFGs(false)) {
-			if (unit.getSignatureCFGs(false).stream()
-					.anyMatch(c -> c != cfg && c.getDescriptor().matchesSignature(cfg.getDescriptor())
-							&& cfg.getDescriptor().matchesSignature(c.getDescriptor())))
-				throw new IMPSyntaxException("Duplicate signature cfg: " + cfg);
+		for (CodeMember cm : unit.getInstanceCodeMembers(false)) {
+			if (unit.getInstanceCodeMembers(false).stream()
+					.anyMatch(c -> c != cm && c.getDescriptor().matchesSignature(cm.getDescriptor())
+							&& cm.getDescriptor().matchesSignature(c.getDescriptor())))
+				throw new IMPSyntaxException("Duplicate code member: " + cm);
+			if (isEntryPoint(cm))
+				program.addEntryPoint((CFG) cm);
 		}
 
 		for (FieldDeclarationContext decl : ctx.classMemberDeclarations().fieldDeclaration())
@@ -406,11 +398,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return unit;
 	}
 
-	private boolean isEntryPoint(CFG cfg) {
-		if (!onlyMain)
+	private boolean isEntryPoint(CodeMember cm) {
+		if (!(cm instanceof CFG))
+			return false;
+		else if (!onlyMain)
 			return true;
 		else
-			return cfg.getDescriptor().getName().equals("main");
+			return cm.getDescriptor().getName().equals("main");
 	}
 
 	@Override
@@ -421,7 +415,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public CFG visitConstructorDeclaration(ConstructorDeclarationContext ctx) {
-		CFGDescriptor descr = mkDescriptor(ctx);
+		CodeMemberDescriptor descr = mkDescriptor(ctx);
 		if (!currentUnit.getName().equals(descr.getName()))
 			throw new IMPSyntaxException("Constructor does not have the same name as its containing class");
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
@@ -429,18 +423,19 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	@Override
 	public CFG visitMethodDeclaration(MethodDeclarationContext ctx) {
-		CFGDescriptor descr = mkDescriptor(ctx);
+		CodeMemberDescriptor descr = mkDescriptor(ctx);
 		return new IMPCodeMemberVisitor(file, descr).visitCodeMember(ctx.block());
 	}
 
 	@Override
-	public AbstractCFG visitSignatureDeclaration(SignatureDeclarationContext ctx) {
-		CFGDescriptor descr = mkDescriptor(ctx);
-		return new AbstractCFG(descr);
+	public AbstractCodeMember visitSignatureDeclaration(SignatureDeclarationContext ctx) {
+		CodeMemberDescriptor descr = mkDescriptor(ctx);
+		return new AbstractCodeMember(descr);
 	}
 
-	private CFGDescriptor mkDescriptor(SignatureDeclarationContext ctx) {
-		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+	private CodeMemberDescriptor mkDescriptor(SignatureDeclarationContext ctx) {
+		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
 				true, ctx.name.getText(), Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
@@ -449,8 +444,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return descriptor;
 	}
 
-	private CFGDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
-		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+	private CodeMemberDescriptor mkDescriptor(ConstructorDeclarationContext ctx) {
+		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
 				true, ctx.name.getText(), Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),
@@ -459,8 +455,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		return descriptor;
 	}
 
-	private CFGDescriptor mkDescriptor(MethodDeclarationContext ctx) {
-		CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
+	private CodeMemberDescriptor mkDescriptor(MethodDeclarationContext ctx) {
+		CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
+				new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
 				currentUnit,
 				true, ctx.name.getText(), Untyped.INSTANCE,
 				new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()),

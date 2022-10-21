@@ -5,7 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -35,7 +35,7 @@ import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
-	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
 			false);
 
 	private static void checkMatrix(String label, Collection<Statement> nodes,
@@ -71,7 +71,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testSimpleIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -101,7 +101,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testEmptyIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
@@ -123,7 +123,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testIfWithEmptyBranch() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyBranch"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyBranch"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -153,7 +153,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "asymmetricIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "asymmetricIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -187,7 +187,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testBigAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "bigAsymmetricIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "bigAsymmetricIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -233,7 +233,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testSimpleLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -263,7 +263,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testEmptyLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -292,7 +292,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testLongLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "longLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "longLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		Assignment a1 = new Assignment(cfg, unknown,
@@ -338,7 +338,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testNestedConditionals() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "nested"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "nested"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
 		Int32Literal constant1 = new Int32Literal(cfg, unknown, 100);
 		NotEqual loop_condition = new NotEqual(cfg, unknown, constant, constant);
@@ -405,7 +405,7 @@ public class ConditionalsExtractionTest {
 	@Test
 	public void testIssue188() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "simpleLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleLoop"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		VariableRef inner = new VariableRef(cfg, unknown, "l");

@@ -7,10 +7,10 @@ import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
@@ -19,13 +19,13 @@ import org.junit.Test;
 
 public class CFGWithAnalysisResultsTest {
 
-	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
 			false);
 
 	@Test
 	public void testIssue189() throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		CFG cfg = new CFG(new CFGDescriptor(unknown, unit, false, "emptyIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
 		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
 		Return ret = new Return(cfg, unknown, constant);
 		cfg.addNode(ret, true);

@@ -1,19 +1,19 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.UnitWithSuperUnits;
 
 /**
- * Interface for types that are introduced by a {@link CompilationUnit}.
+ * Interface for types that are introduced by a {@link ClassUnit}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public interface UnitType extends InMemoryType {
 
 	/**
-	 * Yields the {@link UnitWithSuperUnits} that induces this type.
+	 * Yields the {@link CompilationUnit} that induces this type.
 	 * 
 	 * @return the unit
 	 */
-	UnitWithSuperUnits getUnit();
+	CompilationUnit getUnit();
 }

@@ -1,5 +1,10 @@
 package it.unive.lisa;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -9,15 +14,11 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.program.cfg.ICFG;
+import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -271,7 +272,7 @@ public class LiSAConfiguration {
 	 * Sets whether or not graph files, named
 	 * {@code analysis__<cfg name>.<format>}, should be created and dumped in
 	 * the working directory at the end of the analysis. These files will
-	 * contain a graph representing each input {@link ICFG}s' structure, and
+	 * contain a graph representing each input {@link CFG}s' structure, and
 	 * whose nodes will contain a representation of the results of the semantic
 	 * analysis on each {@link Statement}.<br>
 	 * <br>
@@ -425,7 +426,7 @@ public class LiSAConfiguration {
 
 	/**
 	 * Yields whether or not the results of analysis, if run, should be dumped
-	 * in the form of graphs representing results on single {@link ICFG}s.
+	 * in the form of graphs representing results on single {@link CFG}s.
 	 * 
 	 * @return whether or not the graphs should be dumped, and in what format
 	 */

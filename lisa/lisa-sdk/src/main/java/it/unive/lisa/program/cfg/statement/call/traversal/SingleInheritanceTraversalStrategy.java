@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.cfg.statement.Statement;
 
 /**
@@ -27,27 +27,27 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 	}
 
 	@Override
-	public Iterable<UnitWithSuperUnits> traverse(Statement st, UnitWithSuperUnits start) {
-		return new Iterable<UnitWithSuperUnits>() {
+	public Iterable<CompilationUnit> traverse(Statement st, CompilationUnit start) {
+		return new Iterable<CompilationUnit>() {
 
 			@Override
-			public Iterator<UnitWithSuperUnits> iterator() {
+			public Iterator<CompilationUnit> iterator() {
 				return new SingleInheritanceIterator(start);
 			}
 		};
 	}
 
-	private class SingleInheritanceIterator implements Iterator<UnitWithSuperUnits> {
+	private class SingleInheritanceIterator implements Iterator<CompilationUnit> {
 
-		private UnitWithSuperUnits current;
+		private CompilationUnit current;
 
-		private final Deque<UnitWithSuperUnits> remaining;
+		private final Deque<CompilationUnit> remaining;
 
-		private final Set<UnitWithSuperUnits> seen;
+		private final Set<CompilationUnit> seen;
 
-		private SingleInheritanceIterator(UnitWithSuperUnits start) {
+		private SingleInheritanceIterator(CompilationUnit start) {
 			current = start;
-			remaining = new LinkedList<>(start.getSuperUnits());
+			remaining = new LinkedList<>(start.getImmediateAncestors());
 			remaining.addFirst(start);
 			seen = new HashSet<>(remaining);
 		}
@@ -58,23 +58,23 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 		}
 
 		@Override
-		public UnitWithSuperUnits next() {
+		public CompilationUnit next() {
 			if (remaining.isEmpty())
 				throw new NoSuchElementException();
 
-			UnitWithSuperUnits cu = remaining.pop();
+			CompilationUnit cu = remaining.pop();
 
 			if (remaining.isEmpty())
-				if (current.getSuperUnits().isEmpty())
+				if (current.getImmediateAncestors().isEmpty())
 					current = null;
 				else {
 					// single inheritance!
-					current = current.getSuperUnits().iterator().next();
+					current = current.getImmediateAncestors().iterator().next();
 
 					// we avoid re-processing what we already seen
 					// note that current will have been visited during the
 					// previous iteration
-					current.getSuperUnits().forEach(su -> {
+					current.getImmediateAncestors().forEach(su -> {
 						if (seen.add(su))
 							remaining.add(su);
 					});

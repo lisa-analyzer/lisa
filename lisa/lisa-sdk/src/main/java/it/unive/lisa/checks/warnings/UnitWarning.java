@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,7 @@ public class UnitWarning extends WarningWithLocation {
 	 * @param message the message of this warning
 	 */
 	public UnitWarning(Unit unit, String message) {
-		super(unit instanceof CompilationUnit ? ((CompilationUnit) unit).getLocation() : SyntheticLocation.INSTANCE,
+		super(unit instanceof ClassUnit ? ((ClassUnit) unit).getLocation() : SyntheticLocation.INSTANCE,
 				message);
 		this.unit = unit;
 	}

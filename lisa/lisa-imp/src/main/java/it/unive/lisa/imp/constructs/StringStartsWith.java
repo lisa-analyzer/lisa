@@ -1,9 +1,9 @@
 package it.unive.lisa.imp.constructs;
 
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
@@ -30,8 +30,8 @@ public class StringStartsWith extends NativeCFG {
 	 * @param location   the location where this construct is defined
 	 * @param stringUnit the unit where this construct is defined
 	 */
-	public StringStartsWith(CodeLocation location, CompilationUnit stringUnit) {
-		super(new CFGDescriptor(location, stringUnit, true, "startsWith", BoolType.INSTANCE,
+	public StringStartsWith(CodeLocation location, ClassUnit stringUnit) {
+		super(new CodeMemberDescriptor(location, stringUnit, true, "startsWith", BoolType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
 				new Parameter(location, "other", StringType.INSTANCE)),
 				IMPStringStartsWith.class);

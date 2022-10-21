@@ -62,7 +62,7 @@ import it.unive.lisa.imp.types.ClassType;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
@@ -132,7 +132,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 
 	private final CFG cfg;
 
-	private final CFGDescriptor descriptor;
+	private final CodeMemberDescriptor descriptor;
 
 	/**
 	 * Builds the visitor of an IMP method or constructor.
@@ -141,7 +141,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	 *                       appears
 	 * @param descriptor the descriptor of the method or constructor
 	 */
-	IMPCodeMemberVisitor(String file, CFGDescriptor descriptor) {
+	IMPCodeMemberVisitor(String file, CodeMemberDescriptor descriptor) {
 		this.file = file;
 		this.descriptor = descriptor;
 		list = new NodeList<>(new SequentialEdge());

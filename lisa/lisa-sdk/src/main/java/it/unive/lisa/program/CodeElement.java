@@ -14,7 +14,7 @@ public interface CodeElement {
 	/**
 	 * Yields the location where this code element appears in the program.
 	 * 
-	 * @return the location where this code element apperars in the program
+	 * @return the location where this code element appears in the program
 	 */
 	CodeLocation getLocation();
 }

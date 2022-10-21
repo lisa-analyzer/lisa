@@ -57,14 +57,14 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember, ICFG {
+public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	private static final Logger LOG = LogManager.getLogger(CFG.class);
 
 	/**
 	 * The descriptor of this control flow graph.
 	 */
-	private final CFGDescriptor descriptor;
+	private final CodeMemberDescriptor descriptor;
 
 	/**
 	 * The control flow structures of this cfg
@@ -82,7 +82,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember, 
 	 * 
 	 * @param descriptor the descriptor of this cfg
 	 */
-	public CFG(CFGDescriptor descriptor) {
+	public CFG(CodeMemberDescriptor descriptor) {
 		super(new SequentialEdge());
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
@@ -98,7 +98,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember, 
 	 * @param list        the node list containing all the statements and the
 	 *                        edges that will be part of this cfg
 	 */
-	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints,
+	public CFG(CodeMemberDescriptor descriptor, Collection<Statement> entrypoints,
 			NodeList<CFG, Statement, Edge> list) {
 		super(entrypoints, list);
 		this.descriptor = descriptor;
@@ -123,7 +123,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember, 
 	 * 
 	 * @return the name
 	 */
-	public final CFGDescriptor getDescriptor() {
+	public final CodeMemberDescriptor getDescriptor() {
 		return descriptor;
 	}
 

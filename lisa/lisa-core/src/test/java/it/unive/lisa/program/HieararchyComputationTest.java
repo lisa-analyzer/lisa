@@ -4,12 +4,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import org.junit.Test;
+
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.program.cfg.ICFG;
+import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.AbstractCFG;
-import org.junit.Test;
+import it.unive.lisa.program.cfg.CodeMember;
 
 public class HieararchyComputationTest {
 
@@ -19,7 +20,7 @@ public class HieararchyComputationTest {
 		return unit;
 	}
 
-	private static CFG findCFG(CompilationUnit unit, String name) {
+	private static CFG findCFG(ClassUnit unit, String name) {
 		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
@@ -27,52 +28,54 @@ public class HieararchyComputationTest {
 		return cfg;
 	}
 
-	private static AbstractCFG findSignatureCFG(CompilationUnit unit, String name) {
-		AbstractCFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static AbstractCodeMember findSignatureCFG(ClassUnit unit, String name) {
+		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
+				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static ICFG findSignatureCFG(InterfaceUnit unit, String name) {
-		ICFG cfg = unit.getSignatureCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static AbstractCodeMember findSignatureCFG(InterfaceUnit unit, String name) {
+		AbstractCodeMember cfg = unit.getAbstractCodeMembers(false).stream()
+				.filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static ICFG findImplementedCFG(InterfaceUnit unit, String name) {
-		ICFG cfg = unit.getImplementedCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
+	private static CFG findImplementedCFG(InterfaceUnit unit, String name) {
+		CFG cfg = unit.getInstanceCFGs(false).stream().filter(c -> c.getDescriptor().getName().equals(name))
 				.findFirst()
 				.get();
 		assertNotNull("'" + unit.getName() + "' unit does not contain cfg '" + name + "'", cfg);
 		return cfg;
 	}
 
-	private static void isInstance(UnitWithSuperUnits sup, Unit unit) {
+	private static void isInstance(CompilationUnit sup, Unit unit) {
 		assertTrue("'" + unit.getName() + "' is not among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit) {
-			if (unit instanceof CompilationUnit)
+			if (unit instanceof ClassUnit)
 				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
-						((CompilationUnit) unit).isInstanceOf(sup));
+						((ClassUnit) unit).isInstanceOf(sup));
 			else
 				assertTrue("'" + sup.getName() + "' is not among '" + unit.getName() + "' superunits",
 						((InterfaceUnit) unit).isInstanceOf((InterfaceUnit) sup));
 		}
 	}
 
-	private static void notInstance(UnitWithSuperUnits sup, UnitWithSuperUnits unit) {
+	private static void notInstance(CompilationUnit sup, CompilationUnit unit) {
 		assertFalse("'" + unit.getName() + "' is among '" + sup.getName() + "' instances",
 				sup.getInstances().contains(unit));
 		if (sup != unit)
 			assertFalse("'" + sup.getName() + "' is among '" + unit.getName() + "' superunits",
-					unit.getSuperUnits().contains(sup));
+					unit.getImmediateAncestors().contains(sup));
 	}
 
-	private static void overrides(ICFG sup, ICFG cfg) {
+	private static void overrides(CodeMember sup, CodeMember cfg) {
 		assertTrue(
 				"'" + sup.getDescriptor().getFullName() + "' is not overridden by '"
 						+ cfg.getDescriptor().getFullName() + "'",
@@ -106,8 +109,8 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
-		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
+		ClassUnit second = (ClassUnit) findUnit(prog, "second");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -137,12 +140,12 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
-		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
-		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
-		CompilationUnit fourth = (CompilationUnit) findUnit(prog, "fourth");
-		CompilationUnit fifth = (CompilationUnit) findUnit(prog, "fifth");
-		CompilationUnit sixth = (CompilationUnit) findUnit(prog, "sixth");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
+		ClassUnit second = (ClassUnit) findUnit(prog, "second");
+		ClassUnit third = (ClassUnit) findUnit(prog, "third");
+		ClassUnit fourth = (ClassUnit) findUnit(prog, "fourth");
+		ClassUnit fifth = (ClassUnit) findUnit(prog, "fifth");
+		ClassUnit sixth = (ClassUnit) findUnit(prog, "sixth");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -200,9 +203,9 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
-		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
-		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
+		ClassUnit second = (ClassUnit) findUnit(prog, "second");
+		ClassUnit third = (ClassUnit) findUnit(prog, "third");
 
 		isInstance(first, first);
 		isInstance(second, second);
@@ -221,7 +224,7 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-interfaces.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
@@ -230,9 +233,9 @@ public class HieararchyComputationTest {
 		CFG bFirst = findCFG(first, "b");
 		CFG cFirst = findCFG(first, "c");
 
-		AbstractCFG aJ = (AbstractCFG) findSignatureCFG(j, "a");
-		AbstractCFG bI = (AbstractCFG) findSignatureCFG(i, "b");
-		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
+		AbstractCodeMember aJ = (AbstractCodeMember) findSignatureCFG(j, "a");
+		AbstractCodeMember bI = (AbstractCodeMember) findSignatureCFG(i, "b");
+		AbstractCodeMember cI = (AbstractCodeMember) findSignatureCFG(i, "c");
 
 		overrides(aJ, aFirst);
 		overrides(bI, bFirst);
@@ -244,7 +247,7 @@ public class HieararchyComputationTest {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/multi-interfaces.imp", false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 		InterfaceUnit k = (InterfaceUnit) findUnit(prog, "k");
@@ -254,9 +257,9 @@ public class HieararchyComputationTest {
 		CFG bFirst = findCFG(first, "b");
 		CFG cFirst = findCFG(first, "c");
 
-		AbstractCFG aI = (AbstractCFG) findSignatureCFG(i, "a");
-		AbstractCFG bJ = (AbstractCFG) findSignatureCFG(j, "b");
-		AbstractCFG cK = (AbstractCFG) findSignatureCFG(k, "c");
+		AbstractCodeMember aI = (AbstractCodeMember) findSignatureCFG(i, "a");
+		AbstractCodeMember bJ = (AbstractCodeMember) findSignatureCFG(j, "b");
+		AbstractCodeMember cK = (AbstractCodeMember) findSignatureCFG(k, "c");
 
 		overrides(aI, aFirst);
 		overrides(bJ, bFirst);
@@ -273,7 +276,7 @@ public class HieararchyComputationTest {
 				false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
@@ -281,8 +284,8 @@ public class HieararchyComputationTest {
 		CFG bFirst = findCFG(first, "b");
 		CFG cFirst = findCFG(first, "c");
 
-		AbstractCFG bI = (AbstractCFG) findSignatureCFG(i, "b");
-		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
+		AbstractCodeMember bI = (AbstractCodeMember) findSignatureCFG(i, "b");
+		AbstractCodeMember cI = (AbstractCodeMember) findSignatureCFG(i, "c");
 		findImplementedCFG(i, "d");
 
 		overrides(bI, bFirst);
@@ -308,14 +311,14 @@ public class HieararchyComputationTest {
 				false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
 		InterfaceUnit j = (InterfaceUnit) findUnit(prog, "j");
 
 		findImplementedCFG(j, "a");
 		CFG bJ = (CFG) findImplementedCFG(j, "b");
 
-		AbstractCFG cI = (AbstractCFG) findSignatureCFG(i, "c");
+		AbstractCodeMember cI = (AbstractCodeMember) findSignatureCFG(i, "c");
 		findImplementedCFG(i, "d");
 
 		CFG bFirst = findCFG(first, "b");
@@ -352,12 +355,12 @@ public class HieararchyComputationTest {
 				false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
-		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
+		ClassUnit second = (ClassUnit) findUnit(prog, "second");
 
 		assertFalse(first.canBeInstantiated());
 
-		AbstractCFG aFirst = findSignatureCFG(first, "a");
+		AbstractCodeMember aFirst = findSignatureCFG(first, "a");
 		CFG aSecond = findCFG(second, "a");
 
 		overrides(aFirst, aSecond);
@@ -372,14 +375,14 @@ public class HieararchyComputationTest {
 				false);
 		prog.validateAndFinalize();
 
-		CompilationUnit first = (CompilationUnit) findUnit(prog, "first");
-		CompilationUnit second = (CompilationUnit) findUnit(prog, "second");
-		CompilationUnit third = (CompilationUnit) findUnit(prog, "third");
+		ClassUnit first = (ClassUnit) findUnit(prog, "first");
+		ClassUnit second = (ClassUnit) findUnit(prog, "second");
+		ClassUnit third = (ClassUnit) findUnit(prog, "third");
 
 		assertFalse(first.canBeInstantiated());
 		assertFalse(second.canBeInstantiated());
 
-		AbstractCFG aFirst = findSignatureCFG(first, "a");
+		AbstractCodeMember aFirst = findSignatureCFG(first, "a");
 		CFG aThird = findCFG(third, "a");
 
 		overrides(aFirst, aThird);

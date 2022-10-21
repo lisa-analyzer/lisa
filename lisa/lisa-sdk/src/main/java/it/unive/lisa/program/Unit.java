@@ -1,14 +1,15 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.cfg.NativeCFG;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
+import it.unive.lisa.program.cfg.NativeCFG;
 
 /**
  * A unit of the program to analyze. A unit is a logical entity that groups a
@@ -35,15 +36,9 @@ public abstract class Unit {
 
 	/**
 	 * The cfgs defined in this unit, indexed by
-	 * {@link CFGDescriptor#getSignature()}
+	 * {@link CodeMemberDescriptor#getSignature()}
 	 */
-	private final Map<String, CFG> cfgs;
-
-	/**
-	 * The constructs ({@link NativeCFG}s) defined in this unit, indexed by
-	 * {@link CFGDescriptor#getSignature()}
-	 */
-	private final Map<String, NativeCFG> constructs;
+	private final Map<String, CodeMember> codeMembers;
 
 	/**
 	 * Builds a unit, defined at the given location.
@@ -52,9 +47,8 @@ public abstract class Unit {
 	 */
 	protected Unit(String name) {
 		this.name = name;
-		this.globals = new ConcurrentHashMap<>();
-		this.cfgs = new ConcurrentHashMap<>();
-		this.constructs = new ConcurrentHashMap<>();
+		this.globals = new TreeMap<>();
+		this.codeMembers = new TreeMap<>();
 	}
 
 	/**
@@ -78,40 +72,15 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the collection of {@link CFG}s defined in this unit. Each cfg is
-	 * uniquely identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
-	 * cfgs having the same signature in each unit.
-	 * 
-	 * @return the collection of cfgs
-	 */
-	public final Collection<CFG> getCFGs() {
-		return cfgs.values();
-	}
-
-	/**
-	 * Yields the collection of constructs ({@link NativeCFG}s) defined in this
-	 * unit. Each construct is uniquely identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), meaning that there are no two
-	 * constructs having the same signature in each unit.
-	 * 
-	 * @return the collection of constructs
-	 */
-	public final Collection<NativeCFG> getConstructs() {
-		return constructs.values();
-	}
-
-	/**
-	 * Yields the collection of {@link CodeMember}s defined in this unit. This
-	 * method returns the union of {@link #getCFGs()} and
-	 * {@link #getConstructs()}.
+	 * Yields the collection of {@link CodeMember}s defined in this unit. Each
+	 * code member is uniquely identified by its signature
+	 * ({@link CodeMemberDescriptor#getSignature()}), meaning that there are no
+	 * two cfgs having the same signature in each unit.
 	 * 
 	 * @return the collection of code members
 	 */
 	public final Collection<CodeMember> getCodeMembers() {
-		HashSet<CodeMember> all = new HashSet<>(getCFGs());
-		all.addAll(getConstructs());
-		return all;
+		return codeMembers.values();
 	}
 
 	/**
@@ -127,87 +96,28 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Yields the {@link CFG} defined in this unit having the given signature
-	 * ({@link CFGDescriptor#getSignature()}), if any.
-	 * 
-	 * @param signature the signature of the cfg to find
-	 * 
-	 * @return the cfg with the given signature, or {@code null}
-	 */
-	public final CFG getCFG(String signature) {
-		return cfgs.get(signature);
-	}
-
-	/**
-	 * Yields the {@link NativeCFG} defined in this unit having the given
-	 * signature ({@link CFGDescriptor#getSignature()}), if any.
-	 * 
-	 * @param signature the signature of the construct to find
-	 * 
-	 * @return the construct with the given signature, or {@code null}
-	 */
-	public final NativeCFG getConstruct(String signature) {
-		return constructs.get(signature);
-	}
-
-	/**
 	 * Yields the {@link CodeMember} defined in this unit having the given
-	 * signature ({@link CFGDescriptor#getSignature()}), if any. This method
-	 * first searches the code member within the cfgs defined in this unit,
-	 * through {@link #getCFG(String)}, and then within the constructs through
-	 * {@link #getConstruct(String)}, returning the first non-null result.
+	 * signature ({@link CodeMemberDescriptor#getSignature()}), if any.
 	 * 
 	 * @param signature the signature of the code member to find
 	 * 
 	 * @return the code member with the given signature, or {@code null}
 	 */
 	public final CodeMember getCodeMember(String signature) {
-		CodeMember res;
-		if ((res = getCFG(signature)) != null)
-			return res;
-
-		return getConstruct(signature);
-	}
-
-	/**
-	 * Yields the collection of all {@link CFG}s defined in this unit that have
-	 * the given name.
-	 * 
-	 * @param name the name of the cfgs to include
-	 * 
-	 * @return the collection of cfgs with the given name
-	 */
-	public final Collection<CFG> getCFGsByName(String name) {
-		return cfgs.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
-				.collect(Collectors.toList());
-	}
-
-	/**
-	 * Yields the collection of all {@link NativeCFG}s defined in this unit that
-	 * have the given name.
-	 * 
-	 * @param name the name of the constructs to include
-	 * 
-	 * @return the collection of constructs with the given name
-	 */
-	public final Collection<NativeCFG> getConstructsByName(String name) {
-		return constructs.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
-				.collect(Collectors.toList());
+		return codeMembers.get(signature);
 	}
 
 	/**
 	 * Yields the collection of all {@link CodeMember}s defined in this unit
-	 * that have the given name. This method returns the union of
-	 * {@link #getCFGsByName(String)} and {@link #getConstructsByName(String)}.
+	 * that have the given name.
 	 * 
 	 * @param name the name of the code members to include
 	 * 
 	 * @return the collection of code members with the given name
 	 */
 	public final Collection<CodeMember> getCodeMembersByName(String name) {
-		HashSet<CodeMember> all = new HashSet<>(getCFGsByName(name));
-		all.addAll(getConstructsByName(name));
-		return all;
+		return codeMembers.values().stream().filter(c -> c.getDescriptor().getName().equals(name))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -216,41 +126,20 @@ public abstract class Unit {
 	 * 
 	 * @return the collection of the globals
 	 */
-	public Collection<Global> getAllGlobals() {
+	public Collection<Global> getGlobalsRecursively() {
 		return new HashSet<>(getGlobals());
 	}
 
 	/**
-	 * Yields the collection of <b>all</b> the {@link CFG}s defined in this
-	 * unit.
-	 * 
-	 * @return the collection of the cfgs
-	 */
-	public Collection<CFG> getAllCFGs() {
-		return new HashSet<>(getCFGs());
-	}
-
-	/**
-	 * Yields the collection of <b>all</b> the {@link NativeCFG}s defined in
-	 * this unit.
-	 * 
-	 * @return the collection of the cfgs
-	 */
-	public Collection<NativeCFG> getAllConstructs() {
-		return new HashSet<>(getConstructs());
-	}
-
-	/**
 	 * Yields the collection of <b>all</b> the {@link CodeMember}s defined in
-	 * this unit. This method returns the union between {@link #getAllCFGs()}
-	 * and {@link #getAllConstructs()}.
+	 * this unit. This method returns the same result as
+	 * {@link #getCodeMembers()}, but subclasses are likely to re-implement it
+	 * to add additional ones (e.g., instance members).
 	 * 
 	 * @return the collection of the code members
 	 */
-	public final Collection<CodeMember> getAllCodeMembers() {
-		HashSet<CodeMember> all = new HashSet<>(getAllCFGs());
-		all.addAll(getAllConstructs());
-		return all;
+	public Collection<CodeMember> getCodeMembersRecursively() {
+		return new HashSet<>(getCodeMembers());
 	}
 
 	/**
@@ -268,31 +157,17 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Adds a new {@link CFG}, identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), to this unit.
+	 * Adds a new {@link CodeMember}, identified by its signature
+	 * ({@link CodeMemberDescriptor#getSignature()}), to this unit.
 	 * 
-	 * @param cfg the cfg to add
+	 * @param member the member to add
 	 * 
-	 * @return {@code true} if there was no cfg previously associated with the
-	 *             same signature, {@code false} otherwise. If this method
-	 *             returns {@code false}, the given cfg is discarded.
-	 */
-	public final boolean addCFG(CFG cfg) {
-		return cfgs.putIfAbsent(cfg.getDescriptor().getSignature(), cfg) == null;
-	}
-
-	/**
-	 * Adds a new {@link NativeCFG}, identified by its signature
-	 * ({@link CFGDescriptor#getSignature()}), to this unit.
-	 * 
-	 * @param construct the construct to add
-	 * 
-	 * @return {@code true} if there was no construct previously associated with
+	 * @return {@code true} if there was no member previously associated with
 	 *             the same signature, {@code false} otherwise. If this method
-	 *             returns {@code false}, the given construct is discarded.
+	 *             returns {@code false}, the given member is discarded.
 	 */
-	public final boolean addConstruct(NativeCFG construct) {
-		return constructs.putIfAbsent(construct.getDescriptor().getSignature(), construct) == null;
+	public final boolean addCodeMember(CodeMember member) {
+		return codeMembers.putIfAbsent(member.getDescriptor().getSignature(), member) == null;
 	}
 
 	@Override
@@ -302,23 +177,19 @@ public abstract class Unit {
 
 	/**
 	 * Finds all the code members whose signature matches the one of the given
-	 * {@link CFGDescriptor}, according to
-	 * {@link CFGDescriptor#matchesSignature(CFGDescriptor)}.
+	 * {@link CodeMemberDescriptor}, according to
+	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}.
 	 * 
 	 * @param signature the descriptor providing the signature to match
 	 * 
 	 * @return the collection of code members that match the given signature
 	 */
-	public final Collection<CodeMember> getMatchingCodeMember(CFGDescriptor signature) {
+	public final Collection<CodeMember> getMatchingCodeMember(CodeMemberDescriptor signature) {
 		Collection<CodeMember> result = new HashSet<>();
 
-		for (CFG cfg : cfgs.values())
-			if (cfg.getDescriptor().matchesSignature(signature))
-				result.add(cfg);
-
-		for (NativeCFG construct : constructs.values())
-			if (construct.getDescriptor().matchesSignature(signature))
-				result.add(construct);
+		for (CodeMember member : codeMembers.values())
+			if (member.getDescriptor().matchesSignature(signature))
+				result.add(member);
 
 		return result;
 	}
@@ -326,7 +197,8 @@ public abstract class Unit {
 	/**
 	 * Validates this unit, ensuring its consistency. This ensures that no two
 	 * code members exist in this unit whose signatures matches one another,
-	 * according to {@link CFGDescriptor#matchesSignature(CFGDescriptor)}. This
+	 * according to
+	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}. This
 	 * avoids ambiguous call resolution. Moreover, this ensures that all
 	 * {@link CFG}s are valid, according to {@link CFG#validate()}.
 	 * 
@@ -334,15 +206,14 @@ public abstract class Unit {
 	 *                                        structure
 	 */
 	public void validateAndFinalize() throws ProgramValidationException {
-		for (CodeMember cfg : getCodeMembers()) {
-			Collection<CodeMember> matching = getMatchingCodeMember(cfg.getDescriptor());
-			if (matching.size() != 1 || matching.iterator().next() != cfg)
+		for (CodeMember member : getCodeMembers()) {
+			Collection<CodeMember> matching = getMatchingCodeMember(member.getDescriptor());
+			if (matching.size() != 1 || matching.iterator().next() != member)
 				throw new ProgramValidationException(
-						cfg.getDescriptor().getSignature() + " is duplicated within unit " + this);
+						member.getDescriptor().getSignature() + " is duplicated within unit " + this);
+			
+			member.validate();
 		}
-
-		for (CFG cfg : getAllCFGs())
-			cfg.validate();
 	}
 
 	/**

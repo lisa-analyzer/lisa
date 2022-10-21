@@ -14,9 +14,9 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
-import it.unive.lisa.program.UnitWithSuperUnits;
+import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -32,7 +32,7 @@ import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
- * An access to an instance {@link Global} of a {@link CompilationUnit}.
+ * An access to an instance {@link Global} of a {@link ClassUnit}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -86,6 +86,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((target == null) ? 0 : target.hashCode());
+		result = prime * result + ((traversalStrategy == null) ? 0 : traversalStrategy.hashCode());
 		return result;
 	}
 
@@ -102,6 +103,11 @@ public class AccessInstanceGlobal extends UnaryExpression {
 			if (other.target != null)
 				return false;
 		} else if (!target.equals(other.target))
+			return false;
+		if (traversalStrategy == null) {
+			if (other.traversalStrategy != null)
+				return false;
+		} else if (!traversalStrategy.equals(other.traversalStrategy))
 			return false;
 		return true;
 	}
@@ -126,7 +132,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		AnalysisState<A, H, V, T> result = state.bottom();
 		for (Type recType : expr.getRuntimeTypes()) 
 			if (recType.isPointerType()) {
-				Collection<UnitWithSuperUnits> units;
+				Collection<CompilationUnit> units;
 				
 				ExternalSet<Type> rectypes = recType.asPointerType().getInnerTypes();
 				Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
@@ -145,15 +151,15 @@ public class AccessInstanceGlobal extends UnaryExpression {
 				else
 					continue;
 	
-				Set<UnitWithSuperUnits> seen = new HashSet<>();
-				for (UnitWithSuperUnits unit : units)
-					for (UnitWithSuperUnits cu : traversalStrategy.traverse(this, unit))
+				Set<CompilationUnit> seen = new HashSet<>();
+				for (CompilationUnit unit : units)
+					for (CompilationUnit cu : traversalStrategy.traverse(this, unit))
 						if (seen.add(unit)) {
 							Global global = cu.getInstanceGlobal(target, false);
 							if (global != null) {
 								Variable var = global.toSymbolicVariable(loc);
 								AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-								state.smallStepSemantics(access, this);								
+								result = result.lub(state.smallStepSemantics(access, this));								
 							}
 						}
 			}

@@ -1,5 +1,9 @@
 package it.unive.lisa.cron.nonInterference;
 
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
@@ -15,15 +19,12 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.util.Collection;
-import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 
@@ -92,18 +93,6 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 								TypeEnvironment<InferredTypes>>,
 						MonolithicHeap,
 						InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public boolean visitCompilationUnit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				CompilationUnit unit) {
-			return true;
 		}
 
 		@Override
@@ -186,5 +175,16 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			return true;
 		}
 
+		@Override
+		public boolean visitUnit(
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
+				Unit unit) {
+			return true;
+		}
 	}
 }

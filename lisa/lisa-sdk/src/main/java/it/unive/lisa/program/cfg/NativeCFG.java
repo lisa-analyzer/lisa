@@ -1,12 +1,13 @@
 package it.unive.lisa.program.cfg;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 /**
  * A native cfg, representing a cfg that is usually provided by the runtime of
@@ -29,7 +30,7 @@ public class NativeCFG implements CodeMember {
 	/**
 	 * The descriptor of this control flow graph
 	 */
-	private final CFGDescriptor descriptor;
+	private final CodeMemberDescriptor descriptor;
 
 	/**
 	 * The class of the {@link NaryExpression} that provides the semantics of
@@ -49,7 +50,7 @@ public class NativeCFG implements CodeMember {
 	 * @throws IllegalArgumentException if the class of the construct does not
 	 *                                      implement {@link PluggableStatement}
 	 */
-	public NativeCFG(CFGDescriptor descriptor, Class<? extends NaryExpression> construct) {
+	public NativeCFG(CodeMemberDescriptor descriptor, Class<? extends NaryExpression> construct) {
 		if (!PluggableStatement.class.isAssignableFrom(construct))
 			throw new IllegalArgumentException(construct + " must implement the " + PluggableStatement.class.getName()
 					+ " to be used within native cfgs");
@@ -58,7 +59,7 @@ public class NativeCFG implements CodeMember {
 	}
 
 	@Override
-	public CFGDescriptor getDescriptor() {
+	public CodeMemberDescriptor getDescriptor() {
 		return descriptor;
 	}
 
