@@ -684,7 +684,8 @@ public final class Automaton {
 	}
 
 	/**
-	 * Checks if the automaton {@code this} contains the automaton {@code other}.
+	 * Checks if the automaton {@code this} contains the automaton
+	 * {@code other}.
 	 * 
 	 * @param other the other automaton
 	 * 
