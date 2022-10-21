@@ -11,8 +11,8 @@ import it.unive.lisa.program.ProgramValidationException;
 public interface CodeMember {
 
 	/**
-	 * Yields the {@link CodeMemberDescriptor} containing the signature of this code
-	 * member.
+	 * Yields the {@link CodeMemberDescriptor} containing the signature of this
+	 * code member.
 	 * 
 	 * @return the descriptor of this code member
 	 */

@@ -1,14 +1,13 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.type.Type;
 
 /**
  * A program that LiSA can analyze. A program is a {@link Unit} that is defined
@@ -183,6 +182,12 @@ public class Program extends Unit {
 		return true;
 	}
 
+	/**
+	 * Yields all the {@link CFG}s defined in this program, obtained by
+	 * filtering the results of {@link #getCodeMembersRecursively()}.
+	 * 
+	 * @return the cfgs
+	 */
 	public Collection<CFG> getAllCFGs() {
 		return getCodeMembersRecursively().stream().filter(CFG.class::isInstance)
 				.map(CFG.class::cast).collect(Collectors.toSet());

@@ -28,8 +28,8 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -51,10 +51,12 @@ public class CheckToolWithAnalysisResultsTest {
 	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), "fake",
 			false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
-	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(new SourceCodeLocation("fake", 2, 0), unit, false,
+	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
+			new SourceCodeLocation("fake", 2, 0), unit, false,
 			"foo");
 	private static final CFG cfg = new CFG(descriptor);
-	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(new SourceCodeLocation("fake", 10, 0), unit,
+	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
+			new SourceCodeLocation("fake", 10, 0), unit,
 			false,
 			"faa");
 	private static final CFG cfg2 = new CFG(descriptor2);

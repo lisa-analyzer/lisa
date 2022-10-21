@@ -9,8 +9,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
  * the language, the order in which type hierarchies are traversed to find
  * targets of calls and global accesses changes (e.g. languages with multiple
  * inheritance have specific algorithms for traversing it). Each strategy comes
- * with a different {@link #traverse(Statement, CompilationUnit)}
- * implementation that yields an iterable containing (or generating on-the-fly)
+ * with a different {@link #traverse(Statement, CompilationUnit)} implementation
+ * that yields an iterable containing (or generating on-the-fly)
  * {@link CompilationUnit}s in the order they should be visited.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

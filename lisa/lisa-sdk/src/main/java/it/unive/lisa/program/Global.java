@@ -30,9 +30,9 @@ public class Global implements CodeElement {
 	private final CodeLocation location;
 
 	private final Annotations annotations;
-	
+
 	private final boolean isInstance;
-	
+
 	private final Unit container;
 
 	/**
@@ -40,8 +40,10 @@ public class Global implements CodeElement {
 	 * where this global happens is unknown (e.g. no source file/line/column is
 	 * available) as well as its type (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
-	 * @param location the location of this global variable
-	 * @param name     the name of this global
+	 * @param location   the location of this global variable
+	 * @param container  the {@link Unit} containing this global
+	 * @param name       the name of this global
+	 * @param isInstance whether or not this is an instance global
 	 */
 	public Global(CodeLocation location, Unit container, String name, boolean isInstance) {
 		this(location, container, name, isInstance, Untyped.INSTANCE);
@@ -53,7 +55,9 @@ public class Global implements CodeElement {
 	 * 
 	 * @param location   the location where this global is defined within the
 	 *                       program
+	 * @param container  the {@link Unit} containing this global
 	 * @param name       the name of this global
+	 * @param isInstance whether or not this is an instance global
 	 * @param staticType the type of this global. If unknown, use
 	 *                       {@link Untyped#INSTANCE}
 	 */
@@ -67,12 +71,15 @@ public class Global implements CodeElement {
 	 * 
 	 * @param location    the location where this global is defined within the
 	 *                        program
+	 * @param container   the {@link Unit} containing this global
 	 * @param name        the name of this global
+	 * @param isInstance  whether or not this is an instance global
 	 * @param staticType  the type of this global. If unknown, use
 	 *                        {@link Untyped#INSTANCE}
 	 * @param annotations the annotations of this global variable
 	 */
-	public Global(CodeLocation location, Unit container, String name, boolean isInstance, Type staticType, Annotations annotations) {
+	public Global(CodeLocation location, Unit container, String name, boolean isInstance, Type staticType,
+			Annotations annotations) {
 		Objects.requireNonNull(name, "The name of a global cannot be null");
 		Objects.requireNonNull(staticType, "The type of a global cannot be null");
 		Objects.requireNonNull(location, "The location of a global cannot be null");
@@ -102,11 +109,21 @@ public class Global implements CodeElement {
 	public Type getStaticType() {
 		return staticType;
 	}
-	
+
+	/**
+	 * Yields the unit containing this global.
+	 * 
+	 * @return the container
+	 */
 	public Unit getContainer() {
 		return container;
 	}
-	
+
+	/**
+	 * Yields {@code true} if and only if this is an instance global.
+	 * 
+	 * @return {@code true} only if that condition holds
+	 */
 	public boolean isInstance() {
 		return isInstance;
 	}
@@ -192,8 +209,10 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Creates a {@link Variable} that represent this global, that can be
-	 * used by {@link SemanticDomain}s to reference it.
+	 * Creates a {@link Variable} that represent this global, that can be used
+	 * by {@link SemanticDomain}s to reference it.
+	 * 
+	 * @param where the location where the variable will be generated
 	 * 
 	 * @return the variable representing this parameter
 	 */

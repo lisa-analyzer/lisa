@@ -1,14 +1,5 @@
 package it.unive.lisa.program;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
@@ -18,6 +9,13 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.Parameter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An unit of the program to analyze that is part of a hierarchical structure.
@@ -63,7 +61,7 @@ public abstract class CompilationUnit extends Unit implements CodeElement {
 
 	/**
 	 * Whether or not the hierarchy of this interface unit has been fully
-	 * computed, to avoid re-computation
+	 * computed, to avoid re-computation.
 	 */
 	protected boolean hierarchyComputed;
 
@@ -73,6 +71,7 @@ public abstract class CompilationUnit extends Unit implements CodeElement {
 	 * @param location the location where the unit is define within the source
 	 *                     file
 	 * @param name     the name of the unit
+	 * @param sealed   whether or not this unit can be inherited from
 	 */
 	protected CompilationUnit(CodeLocation location, String name, boolean sealed) {
 		super(name);

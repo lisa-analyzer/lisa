@@ -1,14 +1,12 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.AbstractCodeMember;
+import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
-
 import org.apache.commons.collections4.CollectionUtils;
-
-import it.unive.lisa.program.cfg.AbstractCodeMember;
-import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A {@link CompilationUnit} representing a concrete class that can be
@@ -51,10 +49,20 @@ public class ClassUnit extends CompilationUnit {
 		return CollectionUtils.union(superclasses, interfaces);
 	}
 
+	/**
+	 * Yields the list of {@link ClassUnit}s that this class inherits from.
+	 * 
+	 * @return the superclasses
+	 */
 	public List<ClassUnit> getSuperclasses() {
 		return superclasses;
 	}
 
+	/**
+	 * Yields the list of {@link InterfaceUnit}s implemented by this class.
+	 * 
+	 * @return the interfaces
+	 */
 	public List<InterfaceUnit> getInterfaces() {
 		return interfaces;
 	}
@@ -109,8 +117,8 @@ public class ClassUnit extends CompilationUnit {
 
 		addInstance(this);
 		if (canBeInstantiated() && !searchCodeMembers(cm -> cm instanceof AbstractCodeMember, false).isEmpty())
-				throw new ProgramValidationException(
-						this + " is not an abstract class and it cannot have abstract cfgs.");
+			throw new ProgramValidationException(
+					this + " is not an abstract class and it cannot have abstract cfgs.");
 
 		super.validateAndFinalize();
 	}

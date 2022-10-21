@@ -49,8 +49,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A control flow graph with an implementation, that has {@link Statement}s as nodes and
- * {@link Edge}s as edges.<br>
+ * A control flow graph with an implementation, that has {@link Statement}s as
+ * nodes and {@link Edge}s as edges.<br>
  * <br>
  * Note that this class does not implement {@link #equals(Object)} nor
  * {@link #hashCode()} since all cfgs are unique.

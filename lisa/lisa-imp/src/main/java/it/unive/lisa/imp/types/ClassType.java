@@ -1,7 +1,7 @@
 package it.unive.lisa.imp.types;
 
-import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.type.InMemoryType;
 import it.unive.lisa.type.PointerType;
 import it.unive.lisa.type.Type;

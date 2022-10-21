@@ -1,11 +1,5 @@
 package it.unive.lisa.program.cfg.statement.global;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -15,8 +9,8 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.ClassUnit;
-import it.unive.lisa.program.Global;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -30,6 +24,11 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * An access to an instance {@link Global} of a {@link ClassUnit}.
@@ -42,20 +41,24 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 * The global being accessed
 	 */
 	private final String target;
-	
+
 	private final HierarcyTraversalStrategy traversalStrategy;
 
 	/**
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
-	 * @param cfg      the cfg that this expression belongs to
-	 * @param location the location where the expression is defined within the
-	 *                     program
-	 * @param receiver the expression that determines the accessed instance
-	 * @param target   the accessed global
+	 * @param cfg               the cfg that this expression belongs to
+	 * @param location          the location where the expression is defined
+	 *                              within the program
+	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
+	 *                              access
+	 * @param receiver          the expression that determines the accessed
+	 *                              instance
+	 * @param target            the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, HierarcyTraversalStrategy traversalStrategy, Expression receiver, String target) {
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, HierarcyTraversalStrategy traversalStrategy,
+			Expression receiver, String target) {
 		super(cfg, location, "::", Untyped.INSTANCE, receiver);
 		this.target = target;
 		this.traversalStrategy = traversalStrategy;
@@ -128,17 +131,17 @@ public class AccessInstanceGlobal extends UnaryExpression {
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
 		CodeLocation loc = getLocation();
-		
+
 		AnalysisState<A, H, V, T> result = state.bottom();
-		for (Type recType : expr.getRuntimeTypes()) 
+		for (Type recType : expr.getRuntimeTypes())
 			if (recType.isPointerType()) {
 				Collection<CompilationUnit> units;
-				
+
 				ExternalSet<Type> rectypes = recType.asPointerType().getInnerTypes();
 				Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
 				HeapDereference container = new HeapDereference(rectype, expr, loc);
 				container.setRuntimeTypes(rectypes);
-				
+
 				if (recType.isUnitType())
 					units = Collections.singleton(recType.asUnitType().getUnit());
 				else if (recType.isPointerType() && rectypes.anyMatch(Type::isUnitType))
@@ -150,7 +153,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 							.collect(Collectors.toSet());
 				else
 					continue;
-	
+
 				Set<CompilationUnit> seen = new HashSet<>();
 				for (CompilationUnit unit : units)
 					for (CompilationUnit cu : traversalStrategy.traverse(this, unit))
@@ -159,7 +162,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 							if (global != null) {
 								Variable var = global.toSymbolicVariable(loc);
 								AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-								result = result.lub(state.smallStepSemantics(access, this));								
+								result = result.lub(state.smallStepSemantics(access, this));
 							}
 						}
 			}

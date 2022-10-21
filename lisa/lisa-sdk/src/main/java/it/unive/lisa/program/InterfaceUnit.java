@@ -1,11 +1,10 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a
@@ -24,7 +23,10 @@ public class InterfaceUnit extends CompilationUnit {
 	/**
 	 * Builds an interface unit, defined at the given location.
 	 * 
-	 * @param name the name of the unit
+	 * @param location the location where the unit is define within the source
+	 *                     file
+	 * @param name     the name of the unit
+	 * @param sealed   whether or not this unit can be inherited from
 	 */
 	public InterfaceUnit(CodeLocation location, String name, boolean sealed) {
 		super(location, name, sealed);
@@ -36,6 +38,14 @@ public class InterfaceUnit extends CompilationUnit {
 		return false;
 	}
 
+	/**
+	 * Adds the given {@link InterfaceUnit} to the list of direct ancestors of
+	 * this interface.
+	 * 
+	 * @param unit the unit to add
+	 * 
+	 * @return {@code true} only if the list has changed
+	 */
 	public boolean addSuperinterface(InterfaceUnit unit) {
 		return superinterfaces.add(unit);
 	}

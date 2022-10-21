@@ -26,13 +26,15 @@ public class WarningsTest {
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
 	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);
 
-	private static final CodeMemberDescriptor descriptor1 = new CodeMemberDescriptor(new SourceCodeLocation("fake", 2, 0), unit1,
+	private static final CodeMemberDescriptor descriptor1 = new CodeMemberDescriptor(
+			new SourceCodeLocation("fake", 2, 0), unit1,
 			false, "foo1");
 	private static final CFG cfg1 = new CFG(descriptor1);
 	private static final Statement st1 = new NoOp(cfg1, new SourceCodeLocation("fake", 3, 0));
 	private static final Expression e1 = new Int32Literal(cfg1, new SourceCodeLocation("fake", 4, 0), 5);
 
-	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(new SourceCodeLocation("fake", 2, 1), unit2,
+	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
+			new SourceCodeLocation("fake", 2, 1), unit2,
 			false, "foo2");
 	private static final CFG cfg2 = new CFG(descriptor2);
 	private static final Statement st2 = new NoOp(cfg2, new SourceCodeLocation("fake", 3, 1));
