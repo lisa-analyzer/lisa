@@ -20,7 +20,7 @@ import java.util.Set;
  * A class that represent the Finite State Automaton domain for strings.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class FSA extends BaseNonRelationalValueDomain<FSA> {
 	/**

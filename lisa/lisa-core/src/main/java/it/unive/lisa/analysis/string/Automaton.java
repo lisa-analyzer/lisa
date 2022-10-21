@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa).
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
- * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public final class Automaton {
 
@@ -738,7 +738,6 @@ public final class Automaton {
 	 * @return a newly created automaton representing the widening automaton.
 	 */
 	public Automaton widening(int n) {
-
 		Set<State> newStates = new HashSet<>();
 		// stores all the powerstates
 		Set<Set<State>> powerStates = new HashSet<>();
