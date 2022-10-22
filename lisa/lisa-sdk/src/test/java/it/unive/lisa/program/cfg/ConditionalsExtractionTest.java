@@ -22,11 +22,12 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.call.assignment.OrderPreservingAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.resolution.JavaLikeMatchingStrategy;
-import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.program.language.parameterassignment.OrderPreservingAssigningStrategy;
+import it.unive.lisa.program.language.resolution.JavaLikeMatchingStrategy;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
