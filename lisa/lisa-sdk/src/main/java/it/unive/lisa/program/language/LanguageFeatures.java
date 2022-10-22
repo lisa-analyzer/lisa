@@ -1,0 +1,40 @@
+package it.unive.lisa.program.language;
+
+import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
+
+/**
+ * Logical grouping of all language-specific features, such as strategies for
+ * matching call parameters or traversing type hierarchies.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public abstract class LanguageFeatures {
+
+	/**
+	 * Yields the {@link ParameterMatchingStrategy} encoding how actual
+	 * parameters of a call are matched against the formal ones of its targets.
+	 * 
+	 * @return the matching strategy
+	 */
+	public abstract ParameterMatchingStrategy getMatchingStrategy();
+
+	/**
+	 * Yields the {@link HierarcyTraversalStrategy} that expresses how a class
+	 * hierarchy is traversed, starting from a leaf and visiting all of its
+	 * ancestors recursively, when searching for program members in it.
+	 * 
+	 * @return the traversal strategy
+	 */
+	public abstract HierarcyTraversalStrategy getTraversalStrategy();
+
+	/**
+	 * Yields the {@link ParameterAssigningStrategy} defining how actual
+	 * parameters of a call are matched against the formal ones of its targets.
+	 * 
+	 * @return the assigning strategy
+	 */
+	public abstract ParameterAssigningStrategy getAssigningStrategy();
+
+}

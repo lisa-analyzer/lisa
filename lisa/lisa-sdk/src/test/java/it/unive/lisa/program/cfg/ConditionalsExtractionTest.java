@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowExtractor;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -24,10 +25,6 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
-import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
-import it.unive.lisa.program.language.parameterassignment.OrderPreservingAssigningStrategy;
-import it.unive.lisa.program.language.resolution.JavaLikeMatchingStrategy;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -36,8 +33,8 @@ import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
-			false);
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), new Program(null),
+			"Testing", false);
 
 	private static void checkMatrix(String label, Collection<Statement> nodes,
 			Collection<Statement> expected) {
@@ -411,9 +408,6 @@ public class ConditionalsExtractionTest {
 		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
 		VariableRef inner = new VariableRef(cfg, unknown, "l");
 		UnresolvedCall a1 = new UnresolvedCall(cfg, unknown,
-				OrderPreservingAssigningStrategy.INSTANCE,
-				JavaLikeMatchingStrategy.INSTANCE,
-				SingleInheritanceTraversalStrategy.INSTANCE,
 				CallType.STATIC,
 				null,
 				"foo",

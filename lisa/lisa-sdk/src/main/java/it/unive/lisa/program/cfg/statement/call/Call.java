@@ -11,7 +11,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Objects;
@@ -60,11 +59,6 @@ public abstract class Call extends NaryExpression {
 	private UnresolvedCall source = null;
 
 	/**
-	 * The {@link ParameterAssigningStrategy} of the parameters of this call
-	 */
-	private final ParameterAssigningStrategy assigningStrategy;
-
-	/**
 	 * An optional qualifier for the call.
 	 */
 	private final String qualifier;
@@ -82,39 +76,25 @@ public abstract class Call extends NaryExpression {
 	/**
 	 * Builds a call happening at the given source location.
 	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where the expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param type              the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the name of the target of this call
-	 * @param order             the evaluation order of the sub-expressions
-	 * @param staticType        the static type of this call
-	 * @param parameters        the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where the expression is defined within the
+	 *                       program
+	 * @param type       the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this call
+	 * @param parameters the parameters of this call
 	 */
-	protected Call(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy, CallType type,
+	protected Call(CFG cfg, CodeLocation location, CallType type,
 			String qualifier, String targetName, EvaluationOrder order, Type staticType, Expression... parameters) {
 		super(cfg, location, completeName(qualifier, targetName), order, staticType, parameters);
 		Objects.requireNonNull(targetName, "The name of the target of a call cannot be null");
-		Objects.requireNonNull(assigningStrategy, "The assigning strategy of a call cannot be null");
 		this.targetName = targetName;
 		this.qualifier = qualifier;
 		this.callType = type;
-		this.assigningStrategy = assigningStrategy;
-	}
-
-	/**
-	 * Yields the {@link ParameterAssigningStrategy} of the parameters of this
-	 * call.
-	 * 
-	 * @return the assigning strategy
-	 */
-	public ParameterAssigningStrategy getAssigningStrategy() {
-		return assigningStrategy;
 	}
 
 	private static String completeName(String qualifier, String name) {
@@ -220,7 +200,6 @@ public abstract class Call extends NaryExpression {
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((assigningStrategy == null) ? 0 : assigningStrategy.hashCode());
 		result = prime * result + ((qualifier == null) ? 0 : qualifier.hashCode());
 		result = prime * result + ((targetName == null) ? 0 : targetName.hashCode());
 		result = prime * result + ((callType == null) ? 0 : callType.hashCode());
@@ -236,11 +215,6 @@ public abstract class Call extends NaryExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		Call other = (Call) obj;
-		if (assigningStrategy == null) {
-			if (other.assigningStrategy != null)
-				return false;
-		} else if (!assigningStrategy.equals(other.assigningStrategy))
-			return false;
 		if (qualifier == null) {
 			if (other.qualifier != null)
 				return false;

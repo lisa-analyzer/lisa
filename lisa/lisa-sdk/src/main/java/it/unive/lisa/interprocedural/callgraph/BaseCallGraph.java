@@ -19,8 +19,11 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.MultiCall;
 import it.unive.lisa.program.cfg.statement.call.NativeCall;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
+import it.unive.lisa.program.cfg.statement.call.ResolvedCall;
 import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -75,7 +78,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		if (!adjacencyMatrix.containsNode(source))
 			addNode(source, program.getEntryPoints().contains(call.getCFG()));
 
-		for (CFG cfg : call.getTargets()) {
+		for (CFG cfg : call.getTargetedCFGs()) {
 			callsites.computeIfAbsent(cfg, cm -> new HashSet<>()).add(call);
 
 			CallGraphNode t = new CallGraphNode(this, cfg);
@@ -119,9 +122,6 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			UnresolvedCall tempCall = new UnresolvedCall(
 					call.getCFG(),
 					call.getLocation(),
-					call.getAssigningStrategy(),
-					call.getMatchingStrategy(),
-					call.getTraversalStrategy(),
 					CallType.INSTANCE,
 					call.getQualifier(),
 					call.getTargetName(),
@@ -142,9 +142,6 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			tempCall = new UnresolvedCall(
 					call.getCFG(),
 					call.getLocation(),
-					call.getAssigningStrategy(),
-					call.getMatchingStrategy(),
-					call.getTraversalStrategy(),
 					CallType.STATIC,
 					((VariableRef) params[0]).getName(),
 					call.getTargetName(),
@@ -204,6 +201,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
 
+		LOG.trace(
+				call + " [" + call.getLocation() + "] has been resolved to: " + ((ResolvedCall) resolved).getTargets());
 		return resolved;
 	}
 
@@ -350,8 +349,10 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
+			HierarcyTraversalStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram().getFeatures()
+					.getTraversalStrategy();
 			for (CompilationUnit unit : units)
-				for (CompilationUnit cu : call.getTraversalStrategy().traverse(call, unit))
+				for (CompilationUnit cu : strategy.traverse(call, unit))
 					if (seen.add(unit))
 						// we inspect only the ones of the current unit
 						for (CodeMember cm : cu.getInstanceCodeMembers(false))
@@ -427,7 +428,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		if (!add)
 			add = matchCodeMemberName(call, qualifier, name);
 
-		if (add && call.getMatchingStrategy().matches(call, descr.getFormals(), call.getParameters(), types))
+		ParameterMatchingStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram()
+				.getFeatures().getMatchingStrategy();
+		if (add && strategy.matches(call, descr.getFormals(), call.getParameters(), types))
 			add(targets, natives, cm);
 	}
 

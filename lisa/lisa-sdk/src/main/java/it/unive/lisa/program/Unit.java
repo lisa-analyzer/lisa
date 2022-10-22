@@ -223,4 +223,11 @@ public abstract class Unit {
 	 *             otherwise
 	 */
 	public abstract boolean canBeInstantiated();
+
+	/**
+	 * Yields the {@link Program} where this unit is defined.
+	 * 
+	 * @return the program
+	 */
+	public abstract Program getProgram();
 }

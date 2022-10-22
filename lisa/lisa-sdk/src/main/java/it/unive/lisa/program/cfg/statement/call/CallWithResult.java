@@ -14,7 +14,6 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Skip;
@@ -25,29 +24,26 @@ import it.unive.lisa.type.Type;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class CallWithResult extends Call implements MetaVariableCreator {
+public abstract class CallWithResult extends Call implements MetaVariableCreator, ResolvedCall {
 
 	/**
 	 * Builds the call, happening at the given location in the program.
 	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param callType          the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the name of the target of this call
-	 * @param order             the evaluation order of the sub-expressions
-	 * @param staticType        the static type of this call
-	 * @param parameters        the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the name of the target of this call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param staticType the static type of this call
+	 * @param parameters the parameters of this call
 	 */
-	public CallWithResult(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, EvaluationOrder order, Type staticType,
-			Expression... parameters) {
-		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order, staticType, parameters);
+	public CallWithResult(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+			EvaluationOrder order, Type staticType, Expression... parameters) {
+		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
 	/**

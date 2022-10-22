@@ -102,7 +102,7 @@ public class CFGFixpointTest {
 	@Test
 	public void testMetaVariablesOfRootExpressions()
 			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
-		Program program = new Program();
+		Program program = new Program(null);
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);

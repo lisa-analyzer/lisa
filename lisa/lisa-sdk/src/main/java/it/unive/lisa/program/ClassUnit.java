@@ -32,13 +32,14 @@ public class ClassUnit extends CompilationUnit {
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
+	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 * @param sealed   whether or not this unit is sealed, meaning that it
 	 *                     cannot be used as super unit of other compilation
 	 *                     units
 	 */
-	public ClassUnit(CodeLocation location, String name, boolean sealed) {
-		super(location, name, sealed);
+	public ClassUnit(CodeLocation location, Program program, String name, boolean sealed) {
+		super(location, program, name, sealed);
 		Objects.requireNonNull(location, "The location of a unit cannot be null.");
 		superclasses = new LinkedList<>();
 		interfaces = new LinkedList<>();

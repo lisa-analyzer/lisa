@@ -11,16 +11,18 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.MetaVariableCreator;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
-import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * A call to a CFG that is not under analysis.
@@ -44,10 +46,8 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Expression... parameters) {
-		// if a call is open we don't really care if it's instance or not and we
-		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
-				LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE, parameters);
+		super(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, Untyped.INSTANCE,
+				parameters);
 	}
 
 	/**
@@ -66,11 +66,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Expression... parameters) {
-		// if a call is open we don't really care if it's instance or not and we
-		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName, order,
-				Untyped.INSTANCE,
-				parameters);
+		super(cfg, location, callType, qualifier, targetName, order, Untyped.INSTANCE, parameters);
 	}
 
 	/**
@@ -114,11 +110,7 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 	 */
 	public OpenCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			EvaluationOrder order, Type staticType, Expression... parameters) {
-		// if a call is open we don't really care if it's instance or not and we
-		// will never perform parameter assignment
-		super(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName, order,
-				staticType,
-				parameters);
+		super(cfg, location, callType, qualifier, targetName, order, staticType, parameters);
 	}
 
 	/**
@@ -156,5 +148,10 @@ public class OpenCall extends CallWithResult implements MetaVariableCreator {
 					ExpressionSet<SymbolicExpression>[] parameters)
 					throws SemanticException {
 		return interprocedural.getAbstractResultOf(this, entryState, parameters, expressions);
+	}
+
+	@Override
+	public Collection<CodeMember> getTargets() {
+		return Collections.emptySet();
 	}
 }

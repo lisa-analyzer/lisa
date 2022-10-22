@@ -106,8 +106,8 @@ public class SemanticsSanityTest {
 	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("unknown", 0, 0);
 
-		Program p = new Program();
-		unit = new ClassUnit(unknownLocation, "foo", false);
+		Program p = new Program(null);
+		unit = new ClassUnit(unknownLocation, p, "foo", false);
 		p.addUnit(unit);
 		cfg = new CFG(new CodeMemberDescriptor(unknownLocation, unit, false, "foo"));
 		cg = new RTACallGraph();

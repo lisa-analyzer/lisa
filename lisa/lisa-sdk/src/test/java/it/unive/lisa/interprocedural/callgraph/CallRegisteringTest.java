@@ -18,8 +18,12 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.language.LanguageFeatures;
+import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
+import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
@@ -43,13 +47,27 @@ public class CallRegisteringTest {
 
 		};
 
-		Program p = new Program();
+		Program p = new Program(new LanguageFeatures() {
+
+			@Override
+			public HierarcyTraversalStrategy getTraversalStrategy() {
+				return SingleInheritanceTraversalStrategy.INSTANCE;
+			}
+
+			@Override
+			public ParameterMatchingStrategy getMatchingStrategy() {
+				return StaticTypesMatchingStrategy.INSTANCE;
+			}
+
+			@Override
+			public ParameterAssigningStrategy getAssigningStrategy() {
+				return PythonLikeAssigningStrategy.INSTANCE;
+			}
+		});
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
-		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
-				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
-				SingleInheritanceTraversalStrategy.INSTANCE,
-				CallType.STATIC, p.getName(), "cfg2");
+		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
+				p.getName(), "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);

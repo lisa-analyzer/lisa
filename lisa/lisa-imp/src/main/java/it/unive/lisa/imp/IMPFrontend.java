@@ -42,12 +42,6 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
-import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
-import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
-import it.unive.lisa.program.language.resolution.JavaLikeMatchingStrategy;
-import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
@@ -84,21 +78,6 @@ import org.apache.logging.log4j.Logger;
 public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 	private static final Logger log = LogManager.getLogger(IMPFrontend.class);
-
-	/**
-	 * The parameter matching strategy for IMP calling expressions.
-	 */
-	public static final ParameterMatchingStrategy MATCHING_STRATEGY = JavaLikeMatchingStrategy.INSTANCE;
-
-	/**
-	 * The hierarchy traversal strategy for IMP calling expressions.
-	 */
-	public static final HierarcyTraversalStrategy TRAVERSAL_STRATEGY = SingleInheritanceTraversalStrategy.INSTANCE;
-
-	/**
-	 * The parameter assigning strategy for IMP calling expressions.
-	 */
-	public static final ParameterAssigningStrategy ASSIGN_STRATEGY = PythonLikeAssigningStrategy.INSTANCE;
 
 	/**
 	 * Parses a file using the {@link IMPLexer} and the {@link IMPParser}
@@ -189,7 +168,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
 		implementedInterfaces = new HashMap<>();
-		program = new Program();
+		program = new Program(new IMPFeatures());
 		this.onlyMain = onlyMain;
 	}
 
@@ -221,7 +200,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 			// add constructs
 			SourceCodeLocation unknownLocation = new SourceCodeLocation("imp-runtime", 0, 0);
-			ClassUnit str = new ClassUnit(unknownLocation, "string", true);
+			ClassUnit str = new ClassUnit(unknownLocation, program, "string", true);
 			str.addInstanceCodeMember(new StringContains(unknownLocation, str));
 			str.addInstanceCodeMember(new StringEndsWith(unknownLocation, str));
 			str.addInstanceCodeMember(new StringEquals(unknownLocation, str));
@@ -271,15 +250,15 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				ClassUnit u;
 				String name = unit.classUnit().name.getText();
 				if (unit.classUnit().ABSTRACT() == null)
-					u = new ClassUnit(loc, name, false);
+					u = new ClassUnit(loc, program, name, false);
 				else
-					u = new AbstractClassUnit(loc, name, false);
+					u = new AbstractClassUnit(loc, program, name, false);
 				program.addUnit(u);
 				ClassType.lookup(u.getName(), u);
 
 				implementedInterfaces.put(name, new HashSet<>());
 			} else if (unit.interfaceUnit() != null) {
-				InterfaceUnit i = new InterfaceUnit(loc, unit.interfaceUnit().name.getText(), false);
+				InterfaceUnit i = new InterfaceUnit(loc, program, unit.interfaceUnit().name.getText(), false);
 				program.addUnit(i);
 				InterfaceType.lookup(i.getName(), i);
 

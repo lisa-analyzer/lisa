@@ -11,6 +11,7 @@ import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
@@ -26,7 +27,7 @@ import org.junit.Test;
 
 public class CheckToolTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), "fake",
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null), "fake",
 			false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(

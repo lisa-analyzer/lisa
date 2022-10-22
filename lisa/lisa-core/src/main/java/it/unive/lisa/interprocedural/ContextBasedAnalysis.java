@@ -18,6 +18,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
@@ -181,7 +182,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		token = token.pushToken(scope);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
-		for (CFG cfg : call.getTargets()) {
+		for (CFG cfg : call.getTargetedCFGs()) {
 			Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> states = getEntryAndExit(cfg);
 
 			// prepare the state for the call: hide the visible variables
@@ -194,8 +195,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			for (int i = 0; i < parameters.length; i++)
 				actuals[i] = parameters[i].pushScope(scope);
 
+			ParameterAssigningStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram().getFeatures()
+					.getAssigningStrategy();
 			Pair<AnalysisState<A, H, V, T>,
-					ExpressionSet<SymbolicExpression>[]> prepared = call.getAssigningStrategy().prepare(call, callState,
+					ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(call, callState,
 							this, expressions, formals, actuals);
 
 			AnalysisState<A, H, V, T> exitState;

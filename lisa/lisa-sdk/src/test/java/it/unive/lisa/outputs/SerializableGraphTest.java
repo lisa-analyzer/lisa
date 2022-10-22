@@ -7,6 +7,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
@@ -29,7 +30,7 @@ import org.junit.Test;
 
 public class SerializableGraphTest {
 
-	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE, "Testing",
+	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE, new Program(null), "Testing",
 			false);
 
 	private static void addNode(SortedSet<SerializableNode> nodes, Statement st, Statement... inner) {

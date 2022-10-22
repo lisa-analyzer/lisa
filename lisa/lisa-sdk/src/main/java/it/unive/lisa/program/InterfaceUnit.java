@@ -25,11 +25,12 @@ public class InterfaceUnit extends CompilationUnit {
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
+	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 * @param sealed   whether or not this unit can be inherited from
 	 */
-	public InterfaceUnit(CodeLocation location, String name, boolean sealed) {
-		super(location, name, sealed);
+	public InterfaceUnit(CodeLocation location, Program program, String name, boolean sealed) {
+		super(location, program, name, sealed);
 		superinterfaces = new LinkedList<>();
 	}
 

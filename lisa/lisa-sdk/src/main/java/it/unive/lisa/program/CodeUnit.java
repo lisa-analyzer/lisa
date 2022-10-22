@@ -8,28 +8,18 @@ import it.unive.lisa.program.cfg.CodeLocation;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CodeUnit extends Unit implements CodeElement {
-
-	/**
-	 * The location in the program of this unit
-	 */
-	private final CodeLocation location;
+public class CodeUnit extends ProgramUnit {
 
 	/**
 	 * Builds a unit, defined at the given location.
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
+	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 */
-	public CodeUnit(CodeLocation location, String name) {
-		super(name);
-		this.location = location;
-	}
-
-	@Override
-	public CodeLocation getLocation() {
-		return location;
+	public CodeUnit(CodeLocation location, Program program, String name) {
+		super(location, program, name);
 	}
 
 	@Override

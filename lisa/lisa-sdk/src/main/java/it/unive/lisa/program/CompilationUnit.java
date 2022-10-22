@@ -22,12 +22,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:vincenzo.arceri@unipr.it">VincenzoArceri</a>
  */
-public abstract class CompilationUnit extends Unit implements CodeElement {
-
-	/**
-	 * The location in the program of this interface unit
-	 */
-	private final CodeLocation location;
+public abstract class CompilationUnit extends ProgramUnit {
 
 	/**
 	 * The instance globals defined in this unit, indexed by
@@ -70,12 +65,12 @@ public abstract class CompilationUnit extends Unit implements CodeElement {
 	 * 
 	 * @param location the location where the unit is define within the source
 	 *                     file
+	 * @param program  the program where this unit is defined
 	 * @param name     the name of the unit
 	 * @param sealed   whether or not this unit can be inherited from
 	 */
-	protected CompilationUnit(CodeLocation location, String name, boolean sealed) {
-		super(name);
-		this.location = location;
+	protected CompilationUnit(CodeLocation location, Program program, String name, boolean sealed) {
+		super(location, program, name);
 		this.sealed = sealed;
 		instanceCodeMembers = new TreeMap<>();
 		instanceGlobals = new TreeMap<>();
@@ -83,11 +78,6 @@ public abstract class CompilationUnit extends Unit implements CodeElement {
 		annotations = new Annotations();
 
 		hierarchyComputed = false;
-	}
-
-	@Override
-	public CodeLocation getLocation() {
-		return location;
 	}
 
 	/**

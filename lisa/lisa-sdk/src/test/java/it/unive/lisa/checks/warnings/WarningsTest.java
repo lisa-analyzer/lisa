@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
@@ -18,10 +19,10 @@ import org.junit.Test;
 
 public class WarningsTest {
 
-	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0), "fake1",
-			false);
-	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1), "fake2",
-			false);
+	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null),
+			"fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1), new Program(null),
+			"fake2", false);
 
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
 	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);

@@ -8,6 +8,7 @@ import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
@@ -19,8 +20,8 @@ import org.junit.Test;
 
 public class CFGWithAnalysisResultsTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), "Testing",
-			false);
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), new Program(null),
+			"Testing", false);
 
 	@Test
 	public void testIssue189() throws SemanticException {

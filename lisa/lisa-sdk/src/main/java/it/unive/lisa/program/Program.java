@@ -2,6 +2,7 @@ package it.unive.lisa.program;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.language.LanguageFeatures;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -35,6 +36,11 @@ public class Program extends Unit {
 	private final Collection<CFG> entrypoints;
 
 	/**
+	 * The language-specific features, algorithms and semantics of this program
+	 */
+	private final LanguageFeatures features;
+
+	/**
 	 * The collection of types registered in this program. This collection will
 	 * be erased during {@link #validateAndFinalize()}.
 	 */
@@ -42,12 +48,26 @@ public class Program extends Unit {
 
 	/**
 	 * Builds an empty program.
+	 * 
+	 * @param features the language-specific features, algorithms and semantics
+	 *                     of this program
 	 */
-	public Program() {
+	public Program(LanguageFeatures features) {
 		super(PROGRAM_NAME);
+		this.features = features;
 		units = new TreeMap<>();
 		types = new LinkedList<>();
 		entrypoints = new LinkedList<>();
+	}
+
+	/**
+	 * Yields the language-specific features, algorithms and semantics of this
+	 * program.
+	 * 
+	 * @return the features
+	 */
+	public LanguageFeatures getFeatures() {
+		return features;
 	}
 
 	/**
@@ -179,7 +199,12 @@ public class Program extends Unit {
 
 	@Override
 	public boolean canBeInstantiated() {
-		return true;
+		return false;
+	}
+
+	@Override
+	public Program getProgram() {
+		return this;
 	}
 
 	/**

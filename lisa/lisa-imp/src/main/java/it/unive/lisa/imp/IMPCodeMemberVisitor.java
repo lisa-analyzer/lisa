@@ -91,7 +91,6 @@ import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
 import it.unive.lisa.program.cfg.statement.numeric.Negation;
 import it.unive.lisa.program.cfg.statement.numeric.Remainder;
 import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
-import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
@@ -447,8 +446,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	@Override
 	public AccessInstanceGlobal visitFieldAccess(FieldAccessContext ctx) {
 		Expression receiver = visitReceiver(ctx.receiver());
-		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				SingleInheritanceTraversalStrategy.INSTANCE, receiver, ctx.name.getText());
+		return new AccessInstanceGlobal(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), receiver,
+				ctx.name.getText());
 	}
 
 	@Override
@@ -680,9 +679,8 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		Expression receiver = visitReceiver(ctx.receiver());
 		String name = ctx.name.getText();
 		Expression[] args = ArrayUtils.insert(0, visitArguments(ctx.arguments()), receiver);
-		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)),
-				IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY,
-				CallType.INSTANCE, null, name, args);
+		return new UnresolvedCall(cfg, new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), CallType.INSTANCE, null,
+				name, args);
 	}
 
 	@Override

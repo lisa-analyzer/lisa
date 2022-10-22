@@ -34,6 +34,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
@@ -60,9 +61,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
-import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
-import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -108,10 +106,10 @@ import org.reflections.scanners.SubTypesScanner;
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
-	private static final ClassUnit unit1 = new ClassUnit(loc, "fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(loc, "fake2", false);
-	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, "fake1", false);
-	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, "fake2", false);
+	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(null), "fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(null), "fake2", false);
+	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, new Program(null), "fake1", false);
+	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, new Program(null), "fake2", false);
 	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
 	private static final CodeMemberDescriptor descr2 = new CodeMemberDescriptor(loc, unit2, false, "fake2");
 	private static final CFG cfg1 = new CFG(descr1);
@@ -127,12 +125,8 @@ public class EqualityContractVerificationTest {
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
-	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
-			"foo");
-	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "bar",
-			"bar");
+	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
+	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
 	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
 	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
 	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);

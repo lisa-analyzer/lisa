@@ -48,7 +48,7 @@ import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), "fake",
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null), "fake",
 			false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(

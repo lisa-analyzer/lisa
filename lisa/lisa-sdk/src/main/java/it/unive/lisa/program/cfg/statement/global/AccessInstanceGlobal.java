@@ -42,26 +42,19 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 */
 	private final String target;
 
-	private final HierarcyTraversalStrategy traversalStrategy;
-
 	/**
 	 * Builds the global access, happening at the given location in the program.
 	 * The type of this expression is the one of the accessed global.
 	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where the expression is defined
-	 *                              within the program
-	 * @param traversalStrategy the {@link HierarcyTraversalStrategy} of this
-	 *                              access
-	 * @param receiver          the expression that determines the accessed
-	 *                              instance
-	 * @param target            the accessed global
+	 * @param cfg      the cfg that this expression belongs to
+	 * @param location the location where the expression is defined within the
+	 *                     program
+	 * @param receiver the expression that determines the accessed instance
+	 * @param target   the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, HierarcyTraversalStrategy traversalStrategy,
-			Expression receiver, String target) {
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, String target) {
 		super(cfg, location, "::", Untyped.INSTANCE, receiver);
 		this.target = target;
-		this.traversalStrategy = traversalStrategy;
 		receiver.setParentStatement(this);
 	}
 
@@ -89,7 +82,6 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		final int prime = 31;
 		int result = super.hashCode();
 		result = prime * result + ((target == null) ? 0 : target.hashCode());
-		result = prime * result + ((traversalStrategy == null) ? 0 : traversalStrategy.hashCode());
 		return result;
 	}
 
@@ -106,11 +98,6 @@ public class AccessInstanceGlobal extends UnaryExpression {
 			if (other.target != null)
 				return false;
 		} else if (!target.equals(other.target))
-			return false;
-		if (traversalStrategy == null) {
-			if (other.traversalStrategy != null)
-				return false;
-		} else if (!traversalStrategy.equals(other.traversalStrategy))
 			return false;
 		return true;
 	}
@@ -155,8 +142,10 @@ public class AccessInstanceGlobal extends UnaryExpression {
 					continue;
 
 				Set<CompilationUnit> seen = new HashSet<>();
+				HierarcyTraversalStrategy strategy = getCFG().getDescriptor().getUnit().getProgram().getFeatures()
+						.getTraversalStrategy();
 				for (CompilationUnit unit : units)
-					for (CompilationUnit cu : traversalStrategy.traverse(this, unit))
+					for (CompilationUnit cu : strategy.traverse(this, unit))
 						if (seen.add(unit)) {
 							Global global = cu.getInstanceGlobal(target, false);
 							if (global != null) {
