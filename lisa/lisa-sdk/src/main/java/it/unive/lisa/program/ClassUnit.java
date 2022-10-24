@@ -1,6 +1,5 @@
 package it.unive.lisa.program;
 
-import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -94,14 +93,15 @@ public class ClassUnit extends CompilationUnit {
 
 	@Override
 	public boolean isInstanceOf(CompilationUnit unit) {
-		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
-				: getImmediateAncestors().stream().anyMatch(u -> u.isInstanceOf(unit)));
+		return this == unit || unit.instances.contains(this)
+				|| getImmediateAncestors().stream().anyMatch(u -> u.isInstanceOf(unit));
 	}
 
-	private final void addInstance(ClassUnit unit) throws ProgramValidationException {
-		if (superclasses.contains(unit))
+	@Override
+	public void addInstance(Unit unit) throws ProgramValidationException {
+		if (superclasses.contains(unit) || interfaces.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
-					+ " is both a super unit and an instance of " + this);
+					+ " is both an ancestor and an instance of " + this);
 		instances.add(unit);
 
 		for (ClassUnit sup : superclasses)
@@ -109,19 +109,6 @@ public class ClassUnit extends CompilationUnit {
 
 		for (InterfaceUnit sup : interfaces)
 			sup.addInstance(unit);
-	}
-
-	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		if (hierarchyComputed)
-			return;
-
-		addInstance(this);
-		if (canBeInstantiated() && !searchCodeMembers(cm -> cm instanceof AbstractCodeMember, false).isEmpty())
-			throw new ProgramValidationException(
-					this + " is not an abstract class and it cannot have abstract cfgs.");
-
-		super.validateAndFinalize();
 	}
 
 	@Override

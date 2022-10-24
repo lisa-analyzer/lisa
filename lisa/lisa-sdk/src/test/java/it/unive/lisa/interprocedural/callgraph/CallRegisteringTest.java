@@ -25,6 +25,8 @@ import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStra
 import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
+import it.unive.lisa.program.language.validation.BaseValidationLogic;
+import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
@@ -63,6 +65,11 @@ public class CallRegisteringTest {
 			public ParameterAssigningStrategy getAssigningStrategy() {
 				return PythonLikeAssigningStrategy.INSTANCE;
 			}
+
+			@Override
+			public ProgramValidationLogic getProgramValidationLogic() {
+				return new BaseValidationLogic();
+			}
 		});
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
@@ -78,7 +85,7 @@ public class CallRegisteringTest {
 
 		p.addCodeMember(cfg2);
 		p.addCodeMember(cfg1);
-		p.validateAndFinalize();
+		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
 		cg.init(p);
 		@SuppressWarnings("unchecked")

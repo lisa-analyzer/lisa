@@ -7,6 +7,8 @@ import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStra
 import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.language.resolution.JavaLikeMatchingStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.language.validation.BaseValidationLogic;
+import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 
 /**
  * IMP's {@link LanguageFeatures} implementation.
@@ -28,5 +30,10 @@ public class IMPFeatures extends LanguageFeatures {
 	@Override
 	public ParameterAssigningStrategy getAssigningStrategy() {
 		return PythonLikeAssigningStrategy.INSTANCE;
+	}
+
+	@Override
+	public ProgramValidationLogic getProgramValidationLogic() {
+		return new BaseValidationLogic();
 	}
 }

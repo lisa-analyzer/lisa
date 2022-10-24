@@ -3,6 +3,7 @@ package it.unive.lisa.program.language;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 
 /**
  * Logical grouping of all language-specific features, such as strategies for
@@ -37,4 +38,12 @@ public abstract class LanguageFeatures {
 	 */
 	public abstract ParameterAssigningStrategy getAssigningStrategy();
 
+	/**
+	 * Yields the {@link ProgramValidationLogic} that validates the structure of
+	 * a program, identifying erroneous situations (e.g., code members with the
+	 * same signature) that can crash the analysis.
+	 * 
+	 * @return the validation logic
+	 */
+	public abstract ProgramValidationLogic getProgramValidationLogic();
 }

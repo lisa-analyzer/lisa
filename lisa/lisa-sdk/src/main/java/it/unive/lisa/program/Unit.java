@@ -194,28 +194,6 @@ public abstract class Unit {
 	}
 
 	/**
-	 * Validates this unit, ensuring its consistency. This ensures that no two
-	 * code members exist in this unit whose signatures matches one another,
-	 * according to
-	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}. This
-	 * avoids ambiguous call resolution. Moreover, this ensures that all
-	 * {@link CFG}s are valid, according to {@link CFG#validate()}.
-	 * 
-	 * @throws ProgramValidationException if the program has an invalid
-	 *                                        structure
-	 */
-	public void validateAndFinalize() throws ProgramValidationException {
-		for (CodeMember member : getCodeMembers()) {
-			Collection<CodeMember> matching = getMatchingCodeMember(member.getDescriptor());
-			if (matching.size() != 1 || matching.iterator().next() != member)
-				throw new ProgramValidationException(
-						member.getDescriptor().getSignature() + " is duplicated within unit " + this);
-
-			member.validate();
-		}
-	}
-
-	/**
 	 * Yields {@code true} if this unit can be instantiated, {@code false}
 	 * otherwise (e.g., interfaces, abstract classes).
 	 * 

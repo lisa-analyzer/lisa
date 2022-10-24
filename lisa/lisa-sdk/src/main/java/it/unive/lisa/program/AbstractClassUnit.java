@@ -30,15 +30,4 @@ public class AbstractClassUnit extends ClassUnit {
 	public boolean canBeInstantiated() {
 		return false;
 	}
-
-	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		if (hierarchyComputed)
-			return;
-
-		if (isSealed())
-			throw new ProgramValidationException(this + " is an abstract class and cannot be sealed.");
-
-		super.validateAndFinalize();
-	}
 }

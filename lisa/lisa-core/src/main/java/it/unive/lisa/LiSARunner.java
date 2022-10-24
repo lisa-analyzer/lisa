@@ -228,7 +228,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 			try {
-				program.validateAndFinalize();
+				program.getFeatures().getProgramValidationLogic().validateAndFinalize(program);
 			} catch (ProgramValidationException e) {
 				throw new AnalysisExecutionException("Unable to finalize target program", e);
 			}

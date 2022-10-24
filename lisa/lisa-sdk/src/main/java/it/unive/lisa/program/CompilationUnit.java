@@ -8,14 +8,13 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
-import it.unive.lisa.program.cfg.Parameter;
+import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Predicate;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * An unit of the program to analyze that is part of a hierarchical structure.
@@ -55,12 +54,6 @@ public abstract class CompilationUnit extends ProgramUnit {
 	private final boolean sealed;
 
 	/**
-	 * Whether or not the hierarchy of this interface unit has been fully
-	 * computed, to avoid re-computation.
-	 */
-	protected boolean hierarchyComputed;
-
-	/**
 	 * Builds an unit with super unit.
 	 * 
 	 * @param location the location where the unit is define within the source
@@ -76,8 +69,6 @@ public abstract class CompilationUnit extends ProgramUnit {
 		instanceGlobals = new TreeMap<>();
 		instances = new HashSet<>();
 		annotations = new Annotations();
-
-		hierarchyComputed = false;
 	}
 
 	/**
@@ -100,6 +91,16 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 *             of the call
 	 */
 	public abstract boolean addAncestor(CompilationUnit unit);
+
+	/**
+	 * Adds the given unit as an instance of this one, thus marking the former
+	 * as a type that inherits from the latter.
+	 * 
+	 * @param unit the unit to be added
+	 * 
+	 * @throws ProgramValidationException if the given unit cannot be added
+	 */
+	public abstract void addInstance(Unit unit) throws ProgramValidationException;
 
 	/**
 	 * {@inheritDoc}<br>
@@ -210,8 +211,9 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * of compilation units that directly or indirectly, inherit from this
 	 * one.<br>
 	 * <br>
-	 * Note that this method returns an empty collection, until
-	 * {@link #validateAndFinalize()} has been called.
+	 * Note that this method returns an empty collection, until the
+	 * {@link Program} has been validated by a
+	 * {@link ProgramValidationLogic#validateAndFinalize(Program)} call.
 	 * 
 	 * @return the collection of units that are instances of this one, including
 	 *             this unit itself
@@ -248,9 +250,10 @@ public abstract class CompilationUnit extends ProgramUnit {
 
 	/**
 	 * Yields {@code true} if and only if this unit is an instance of the given
-	 * one. This method works correctly even if {@link #validateAndFinalize()}
-	 * has not been called yet, and thus the if collection of instances of the
-	 * given unit is not yet available.
+	 * one. This method works correctly even if
+	 * {@link ProgramValidationLogic#validateAndFinalize(Program)} has not been
+	 * invoked yet, and thus the if collection of instances of the given unit is
+	 * not yet available.
 	 * 
 	 * @param unit the other unit
 	 * 
@@ -272,7 +275,7 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * @return the collection of matching code members
 	 */
 	@SuppressWarnings("unchecked")
-	protected <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter,
+	public <T extends CodeMember> Collection<T> searchCodeMembers(Predicate<CodeMember> filter,
 			boolean traverseHierarchy) {
 		Collection<T> result = new HashSet<>();
 
@@ -305,7 +308,7 @@ public abstract class CompilationUnit extends ProgramUnit {
 	 * 
 	 * @return the collection of matching globals
 	 */
-	protected Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
+	public Collection<Global> searchGlobals(Predicate<Global> filter, boolean traverseHierarchy) {
 		Map<String, Global> result = new HashMap<>();
 		for (Global g : instanceGlobals.values())
 			if (filter.test(g))
@@ -429,98 +432,5 @@ public abstract class CompilationUnit extends ProgramUnit {
 	public Collection<CodeMember> getMatchingInstanceCodeMembers(CodeMemberDescriptor signature,
 			boolean traverseHierarchy) {
 		return searchCodeMembers(cm -> cm.getDescriptor().matchesSignature(signature), traverseHierarchy);
-	}
-
-	/**
-	 * {@inheritDoc} <br>
-	 * <br>
-	 * Validating a compilation unit causes the validation of all its super
-	 * units, and the population of the set of instances
-	 * ({@link #getInstances()}) of each element in its hierarchy. Moreover, the
-	 * validation ensures that no duplicate instance code members are defined in
-	 * the compilation unit, according to
-	 * {@link CodeMemberDescriptor#matchesSignature(CodeMemberDescriptor)}, to
-	 * avoid ambiguous call resolutions. Instance code members are also linked
-	 * to other ones in the hierarchy, populating the collections
-	 * {@link CodeMemberDescriptor#overriddenBy()} and
-	 * {@link CodeMemberDescriptor#overrides()}.
-	 */
-	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		if (hierarchyComputed)
-			return;
-
-		super.validateAndFinalize();
-
-		// recursive invocation
-		for (CompilationUnit sup : getImmediateAncestors())
-			if (sup.isSealed())
-				throw new ProgramValidationException(this + " cannot inherit from the sealed unit " + sup);
-			else
-				sup.validateAndFinalize();
-
-		// check for duplicate cms
-		for (CodeMember cm : getInstanceCodeMembers(false)) {
-			Collection<CodeMember> matching = getMatchingInstanceCodeMembers(cm.getDescriptor(), false);
-			if (matching.size() != 1 || matching.iterator().next() != cm)
-				throw new ProgramValidationException(
-						cm.getDescriptor().getSignature() + " is duplicated within unit " + this);
-		}
-
-		for (CompilationUnit ancestor : getImmediateAncestors()) {
-			// check overriders/implementers
-			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
-				Collection<CodeMember> localOverrides = getMatchingInstanceCodeMembers(inherited.getDescriptor(),
-						false);
-				if (localOverrides.isEmpty()) {
-					if (inherited instanceof AbstractCodeMember && !ancestor.canBeInstantiated() && canBeInstantiated())
-						// this is the first non-abstract child of ancestor, and
-						// it must provide an implementation for all abstract
-						// code members defined in the inheritance chain
-						throw new ProgramValidationException(this + " does not overrides the cfg "
-								+ inherited.getDescriptor().getSignature() + " of the non-instantiable unit "
-								+ ancestor);
-				} else if (localOverrides.size() == 1) {
-					if (!inherited.getDescriptor().isOverridable()) {
-						throw new ProgramValidationException(
-								this + " overrides the non-overridable cfg "
-										+ inherited.getDescriptor().getSignature());
-					} else {
-						CodeMember over = localOverrides.iterator().next();
-						over.getDescriptor().overrides().addAll(inherited.getDescriptor().overrides());
-						over.getDescriptor().overrides().add(inherited);
-						over.getDescriptor().overrides().forEach(c -> c.getDescriptor().overriddenBy().add(over));
-					}
-				} else {
-					throw new ProgramValidationException(inherited.getDescriptor().getSignature()
-							+ " is overriden multiple times in unit " + this + ": "
-							+ StringUtils.join(", ", localOverrides));
-				}
-			}
-
-			// propagate annotations
-			for (Annotation ann : ancestor.getAnnotations())
-				if (!ann.isInherited())
-					addAnnotation(ann);
-		}
-
-		// propagate annotations in cfgs - this has to be done after the
-		// override chain has been computed
-		for (CodeMember instCfg : getInstanceCodeMembers(false))
-			for (CodeMember matching : instCfg.getDescriptor().overrides())
-				for (Annotation ann : matching.getDescriptor().getAnnotations()) {
-					if (!ann.isInherited())
-						instCfg.getDescriptor().addAnnotation(ann);
-
-					Parameter[] args = instCfg.getDescriptor().getFormals();
-					Parameter[] superArgs = matching.getDescriptor().getFormals();
-					for (int i = 0; i < args.length; i++)
-						for (Annotation parAnn : superArgs[i].getAnnotations()) {
-							if (!parAnn.isInherited())
-								args[i].addAnnotation(parAnn);
-						}
-				}
-
-		hierarchyComputed = true;
 	}
 }

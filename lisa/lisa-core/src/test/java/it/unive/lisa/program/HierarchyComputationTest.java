@@ -11,7 +11,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import org.junit.Test;
 
-public class HieararchyComputationTest {
+public class HierarchyComputationTest {
 
 	private static Unit findUnit(Program prog, String name) {
 		Unit unit = prog.getUnits().stream().filter(u -> u.getName().equals(name)).findFirst().get();
@@ -99,14 +99,14 @@ public class HieararchyComputationTest {
 	@Test
 	public void testSingle() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/single.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 		// we just check that no exception is thrown
 	}
 
 	@Test
 	public void testSimpleInheritance() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-inheritance.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		ClassUnit second = (ClassUnit) findUnit(prog, "second");
@@ -125,19 +125,19 @@ public class HieararchyComputationTest {
 	@Test(expected = ProgramValidationException.class)
 	public void testFinalCfg() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/final-cfg.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test(expected = ProgramValidationException.class)
 	public void testTree() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
 	public void testTreeSanitized() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/tree-sanitized.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		ClassUnit second = (ClassUnit) findUnit(prog, "second");
@@ -200,7 +200,7 @@ public class HieararchyComputationTest {
 	@Test
 	public void testSkipOne() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/skip-one.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		ClassUnit second = (ClassUnit) findUnit(prog, "second");
@@ -221,7 +221,7 @@ public class HieararchyComputationTest {
 	@Test
 	public void testSimpleInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-interfaces.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
@@ -244,7 +244,7 @@ public class HieararchyComputationTest {
 	@Test
 	public void testMultiInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/multi-interfaces.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
@@ -273,7 +273,7 @@ public class HieararchyComputationTest {
 	public void testDefaultMethodsInterface() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/default-methods-interface.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
@@ -301,14 +301,14 @@ public class HieararchyComputationTest {
 	@Test(expected = ProgramValidationException.class)
 	public void testInterfaces() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/interfaces.imp", false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
 	public void testOverridingDefaultMethods() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/overriding-default-method.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		InterfaceUnit i = (InterfaceUnit) findUnit(prog, "i");
@@ -338,21 +338,21 @@ public class HieararchyComputationTest {
 	public void testAbstractClass() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/signatures-in-concrete-class.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test(expected = ProgramValidationException.class)
 	public void testExtendingButNotImpl() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/extending-but-not-impl.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 	}
 
 	@Test
 	public void testSimpleAbstractClass() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/simple-abstract-class.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		ClassUnit second = (ClassUnit) findUnit(prog, "second");
@@ -372,7 +372,7 @@ public class HieararchyComputationTest {
 	public void testAbstractClassExt() throws ParsingException, ProgramValidationException {
 		Program prog = IMPFrontend.processFile("imp-testcases/program-finalization/abstract-class-ext.imp",
 				false);
-		prog.validateAndFinalize();
+		prog.getFeatures().getProgramValidationLogic().validateAndFinalize(prog);
 
 		ClassUnit first = (ClassUnit) findUnit(prog, "first");
 		ClassUnit second = (ClassUnit) findUnit(prog, "second");

@@ -52,30 +52,12 @@ public class InterfaceUnit extends CompilationUnit {
 	}
 
 	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		if (hierarchyComputed)
-			return;
-
-		addInstance(this);
-		if (!getInstanceGlobals(false).isEmpty())
-			throw new ProgramValidationException(this + " is an interface and cannot have instange globals.");
-		super.validateAndFinalize();
-	}
-
-	@Override
 	public Collection<CompilationUnit> getImmediateAncestors() {
 		return superinterfaces.stream().map(CompilationUnit.class::cast).collect(Collectors.toList());
 	}
 
-	/**
-	 * Adds an instance unit to this interface unit.
-	 * 
-	 * @param unit the unit to be added
-	 * 
-	 * @throws ProgramValidationException if this interface unit already
-	 *                                        contains the unit to be added
-	 */
-	void addInstance(Unit unit) throws ProgramValidationException {
+	@Override
+	public void addInstance(Unit unit) throws ProgramValidationException {
 		if (superinterfaces.contains(unit))
 			throw new ProgramValidationException("Found loop in compilation units hierarchy: " + unit
 					+ " is both a super unit and an instance of " + this);
@@ -87,8 +69,8 @@ public class InterfaceUnit extends CompilationUnit {
 
 	@Override
 	public boolean isInstanceOf(CompilationUnit unit) {
-		return this == unit || (hierarchyComputed ? unit.instances.contains(this)
-				: superinterfaces.stream().anyMatch(u -> u.isInstanceOf(unit)));
+		return this == unit || unit.instances.contains(this)
+				|| superinterfaces.stream().anyMatch(u -> u.isInstanceOf(unit));
 	}
 
 	@Override

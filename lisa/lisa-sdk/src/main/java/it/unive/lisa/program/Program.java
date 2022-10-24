@@ -101,8 +101,13 @@ public class Program extends Unit {
 	 * @return {@code true} if there was no unit previously associated with the
 	 *             same name, {@code false} otherwise. If this method returns
 	 *             {@code false}, the given unit is discarded.
+	 * 
+	 * @throws IllegalArgumentException if the given unit is an instance of this
+	 *                                      class
 	 */
 	public final boolean addUnit(Unit unit) {
+		if (unit instanceof Program)
+			throw new IllegalArgumentException("Cannot add a program to another one");
 		return units.putIfAbsent(unit.getName(), unit) == null;
 	}
 
@@ -176,25 +181,6 @@ public class Program extends Unit {
 		Collection<Global> all = super.getGlobalsRecursively();
 		units.values().stream().flatMap(u -> u.getGlobalsRecursively().stream()).forEach(all::add);
 		return all;
-	}
-
-	/**
-	 * {@inheritDoc} <br>
-	 * <br>
-	 * Validating a program simply causes the validation of all the
-	 * {@link ClassUnit}s defined inside it. Validation also clears (by setting
-	 * it to {@code null}) the set of registered types, in order to shrink the
-	 * memory fingerprint of the program.
-	 */
-	@Override
-	public void validateAndFinalize() throws ProgramValidationException {
-		// shrink memory fingerprint
-		types = null;
-
-		super.validateAndFinalize();
-
-		for (Unit unit : getUnits())
-			unit.validateAndFinalize();
 	}
 
 	@Override
