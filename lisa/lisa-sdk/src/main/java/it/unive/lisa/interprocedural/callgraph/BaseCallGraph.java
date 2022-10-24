@@ -353,7 +353,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 					.getTraversalStrategy();
 			for (CompilationUnit unit : units)
 				for (CompilationUnit cu : strategy.traverse(call, unit))
-					if (seen.add(unit))
+					if (seen.add(cu))
 						// we inspect only the ones of the current unit
 						for (CodeMember cm : cu.getInstanceCodeMembers(false))
 							checkMember(call, types, targets, natives, aliasing, cm, true);
