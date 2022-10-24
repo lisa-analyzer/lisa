@@ -5,8 +5,8 @@ import it.unive.lisa.analysis.symbols.NameSymbol;
 import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
 import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
@@ -56,15 +56,15 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 	private static final Logger LOG = LogManager.getLogger(BaseCallGraph.class);
 
-	private Program program;
+	private Application app;
 
 	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
 
 	private final Map<UnresolvedCall, Call> resolvedCache = new IdentityHashMap<>();
 
 	@Override
-	public void init(Program program) throws CallGraphConstructionException {
-		this.program = program;
+	public void init(Application app) throws CallGraphConstructionException {
+		this.app = app;
 	}
 
 	@Override
@@ -76,14 +76,14 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
-			addNode(source, program.getEntryPoints().contains(call.getCFG()));
+			addNode(source, app.getEntryPoints().contains(call.getCFG()));
 
 		for (CFG cfg : call.getTargetedCFGs()) {
 			callsites.computeIfAbsent(cfg, cm -> new HashSet<>()).add(call);
 
 			CallGraphNode t = new CallGraphNode(this, cfg);
 			if (!adjacencyMatrix.containsNode(t))
-				addNode(t, program.getEntryPoints().contains(call.getCFG()));
+				addNode(t, app.getEntryPoints().contains(call.getCFG()));
 			addEdge(new CallGraphEdge(source, t));
 		}
 	}
@@ -183,12 +183,12 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
-			addNode(source, program.getEntryPoints().contains(call.getCFG()));
+			addNode(source, app.getEntryPoints().contains(call.getCFG()));
 
 		for (CFG target : targets) {
 			CallGraphNode t = new CallGraphNode(this, target);
 			if (!adjacencyMatrix.containsNode(t))
-				addNode(t, program.getEntryPoints().contains(call.getCFG()));
+				addNode(t, app.getEntryPoints().contains(call.getCFG()));
 			addEdge(new CallGraphEdge(source, t));
 			callsites.computeIfAbsent(target, cm -> new HashSet<>()).add(call);
 		}
@@ -306,7 +306,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
-		for (CodeMember cm : program.getCodeMembersRecursively())
+		for (CodeMember cm : app.getAllCodeCodeMembers())
 			checkMember(call, types, targets, natives, aliasing, cm, false);
 	}
 

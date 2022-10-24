@@ -5,6 +5,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -87,7 +88,8 @@ public class CallRegisteringTest {
 		p.addCodeMember(cfg1);
 		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
-		cg.init(p);
+		Application app = new Application(p);
+		cg.init(app);
 		@SuppressWarnings("unchecked")
 		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
 		cg.registerCall(resolved);

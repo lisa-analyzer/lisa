@@ -11,7 +11,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -42,9 +42,9 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	protected CallGraph callgraph;
 
 	/**
-	 * The program.
+	 * The application.
 	 */
-	protected Program program;
+	protected Application app;
 
 	/**
 	 * The policy to evaluate results of open calls.
@@ -52,10 +52,10 @@ public abstract class CallGraphBasedAnalysis<A extends AbstractState<A, H, V, T>
 	protected OpenCallPolicy policy;
 
 	@Override
-	public void init(Program program, CallGraph callgraph, OpenCallPolicy policy)
+	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
 		this.callgraph = callgraph;
-		this.program = program;
+		this.app = app;
 		this.policy = policy;
 	}
 

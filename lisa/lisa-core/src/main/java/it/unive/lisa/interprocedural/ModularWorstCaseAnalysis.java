@@ -14,7 +14,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
-import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -53,9 +53,9 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	private static final Logger LOG = LogManager.getLogger(ModularWorstCaseAnalysis.class);
 
 	/**
-	 * The program.
+	 * The application.
 	 */
-	private Program program;
+	private Application app;
 
 	/**
 	 * The policy used for computing the result of cfg calls.
@@ -81,7 +81,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			int wideningThreshold) throws FixpointException {
-		for (CFG cfg : IterationLogger.iterate(LOG, program.getAllCFGs(), "Computing fixpoint over the whole program",
+		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
 				AnalysisState<A, H, V, T> prepared = entryState;
@@ -128,9 +128,9 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public void init(Program program, CallGraph callgraph, OpenCallPolicy policy)
+	public void init(Application app, CallGraph callgraph, OpenCallPolicy policy)
 			throws InterproceduralAnalysisException {
-		this.program = program;
+		this.app = app;
 		this.policy = policy;
 	}
 

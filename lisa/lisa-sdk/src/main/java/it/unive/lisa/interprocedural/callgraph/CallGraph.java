@@ -1,7 +1,7 @@
 package it.unive.lisa.interprocedural.callgraph;
 
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
-import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -21,12 +21,12 @@ public interface CallGraph {
 	/**
 	 * Initializes the call graph of the given program.
 	 *
-	 * @param program the program to analyze
+	 * @param app the application to analyze
 	 *
 	 * @throws CallGraphConstructionException if an exception happens while
 	 *                                            building the call graph
 	 */
-	void init(Program program) throws CallGraphConstructionException;
+	void init(Application app) throws CallGraphConstructionException;
 
 	/**
 	 * Yields a {@link Call} implementation that corresponds to the resolution

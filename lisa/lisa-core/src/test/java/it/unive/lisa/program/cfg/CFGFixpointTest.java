@@ -20,6 +20,7 @@ import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
@@ -42,8 +43,9 @@ public class CFGFixpointTest {
 				ValueEnvironment<Sign>,
 				TypeEnvironment<InferredTypes>> analysis = new ModularWorstCaseAnalysis<>();
 		RTACallGraph callgraph = new RTACallGraph();
-		callgraph.init(p);
-		analysis.init(p, callgraph, WorstCasePolicy.INSTANCE);
+		Application app = new Application(p);
+		callgraph.init(app);
+		analysis.init(app, callgraph, WorstCasePolicy.INSTANCE);
 		return analysis;
 	}
 

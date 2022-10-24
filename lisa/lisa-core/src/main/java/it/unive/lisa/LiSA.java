@@ -7,6 +7,7 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
@@ -62,12 +63,13 @@ public class LiSA {
 	/**
 	 * Runs LiSA, executing all the checks that have been added.
 	 * 
-	 * @param program the program to analyze
+	 * @param programs the programs, each written in a single programming
+	 *                     language, to analyze
 	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void run(Program program) throws AnalysisException {
+	public void run(Program... programs) throws AnalysisException {
 		printConfig();
 
 		CallGraph callGraph;
@@ -91,9 +93,10 @@ public class LiSA {
 		}
 
 		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getAbstractState());
+		Application app = new Application(programs);
 
 		try {
-			warnings.addAll(TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(program, fileManager)));
+			warnings.addAll(TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app, fileManager)));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
@@ -126,7 +129,7 @@ public class LiSA {
 	/**
 	 * Yields an unmodifiable view of the warnings that have been generated
 	 * during the analysis. Invoking this method before invoking
-	 * {@link #run(Program)} will return an empty collection.
+	 * {@link #run(Program...)} will return an empty collection.
 	 * 
 	 * @return a view of the generated warnings
 	 */

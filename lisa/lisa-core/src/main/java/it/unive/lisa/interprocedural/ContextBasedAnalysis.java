@@ -94,7 +94,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		this.fixpointWorkingSet = fixpointWorkingSet;
 		this.wideningThreshold = wideningThreshold;
 
-		if (program.getEntryPoints().isEmpty())
+		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
 
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
@@ -122,7 +122,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
+			for (CFG cfg : IterationLogger.iterate(LOG, app.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V, T> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);

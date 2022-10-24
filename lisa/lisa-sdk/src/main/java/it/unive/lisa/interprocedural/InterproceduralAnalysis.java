@@ -13,7 +13,7 @@ import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
-import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
@@ -49,7 +49,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * Initializes the interprocedural analysis of the given program.
 	 *
 	 * @param callgraph the callgraph used to resolve method calls
-	 * @param program   the program
+	 * @param app       the application to analyze
 	 * @param policy    the {@link OpenCallPolicy} to be used for computing the
 	 *                      result of {@link OpenCall}s
 	 *
@@ -57,7 +57,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 *                                              performing the
 	 *                                              interprocedural analysis
 	 */
-	void init(Program program, CallGraph callgraph, OpenCallPolicy policy) throws InterproceduralAnalysisException;
+	void init(Application app, CallGraph callgraph, OpenCallPolicy policy) throws InterproceduralAnalysisException;
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a

@@ -22,6 +22,7 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -68,7 +69,7 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public void init(Program program) throws CallGraphConstructionException {
+		public void init(Application program) throws CallGraphConstructionException {
 		}
 
 		@Override
