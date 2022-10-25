@@ -6,10 +6,11 @@ import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
@@ -29,7 +30,7 @@ import org.junit.Test;
 
 public class SerializableGraphTest {
 
-	private static final CompilationUnit unit = new CompilationUnit(SyntheticLocation.INSTANCE, "Testing",
+	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE, new Program(null), "Testing",
 			false);
 
 	private static void addNode(SortedSet<SerializableNode> nodes, Statement st, Statement... inner) {
@@ -46,7 +47,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleIf() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -103,7 +104,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyIf() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -140,7 +141,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testIfWithEmptyBranch() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -197,7 +198,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testAsymmetricIf() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -264,7 +265,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testSimpleLoop() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -321,7 +322,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testEmptyLoop() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
@@ -368,7 +369,7 @@ public class SerializableGraphTest {
 
 	@Test
 	public void testNestedConditionals() {
-		CFG cfg = new CFG(new CFGDescriptor(SyntheticLocation.INSTANCE, unit, false, "nested"));
+		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "nested"));
 
 		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
 		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);

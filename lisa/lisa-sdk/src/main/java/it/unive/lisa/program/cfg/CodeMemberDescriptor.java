@@ -15,12 +15,12 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * A descriptor of a CFG, containing the debug informations (source file, line,
- * column) as well as metadata.
+ * A descriptor of a {@link CodeMember}, containing the debug informations
+ * (source file, line, column) as well as metadata.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class CFGDescriptor implements CodeElement {
+public class CodeMemberDescriptor implements CodeElement {
 
 	/**
 	 * The unit the cfg belongs to
@@ -82,7 +82,7 @@ public class CFGDescriptor implements CodeElement {
 	 * @param formals  the formal parametersof the CFG associated with this
 	 *                     descriptor
 	 */
-	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
+	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Parameter... formals) {
 		this(location, unit, instance, name, Untyped.INSTANCE, formals);
 	}
@@ -102,7 +102,7 @@ public class CFGDescriptor implements CodeElement {
 	 * @param formals    the formal parameters of the CFG associated with this
 	 *                       descriptor
 	 */
-	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
+	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Type returnType, Parameter... formals) {
 		this(location, unit, instance, name, returnType, new Annotations(), formals);
 	}
@@ -124,7 +124,7 @@ public class CFGDescriptor implements CodeElement {
 	 * @param formals     the formal parameters of the CFG associated with this
 	 *                        descriptor
 	 */
-	public CFGDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
+	public CodeMemberDescriptor(CodeLocation location, Unit unit, boolean instance, String name,
 			Type returnType, Annotations annotations, Parameter... formals) {
 		Objects.requireNonNull(unit, "The unit of a CFG cannot be null");
 		Objects.requireNonNull(name, "The name of a CFG cannot be null");
@@ -344,7 +344,7 @@ public class CFGDescriptor implements CodeElement {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		CFGDescriptor other = (CFGDescriptor) obj;
+		CodeMemberDescriptor other = (CodeMemberDescriptor) obj;
 		if (annotations == null) {
 			if (other.annotations != null)
 				return false;
@@ -417,7 +417,7 @@ public class CFGDescriptor implements CodeElement {
 	 * @return {@code true} if the two signatures are compatible, {@code false}
 	 *             otherwise
 	 */
-	public boolean matchesSignature(CFGDescriptor reference) {
+	public boolean matchesSignature(CodeMemberDescriptor reference) {
 		if (!name.equals(reference.name))
 			return false;
 
@@ -426,7 +426,7 @@ public class CFGDescriptor implements CodeElement {
 
 		for (int i = 0; i < formals.length; i++)
 			if (!formals[i].getStaticType().canBeAssignedTo(reference.formals[i].getStaticType()))
-				// TODO not sure if this is generic enough
+				// not sure if this is generic enough
 				return false;
 
 		return true;

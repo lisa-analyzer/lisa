@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.statement.call.assignment;
+package it.unive.lisa.program.language.parameterassignment;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;

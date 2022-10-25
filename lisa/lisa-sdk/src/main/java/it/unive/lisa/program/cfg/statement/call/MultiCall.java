@@ -11,10 +11,8 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.NativeCFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
-import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -24,14 +22,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
- * A call to one or more {@link CFG}s and/or {@link NativeCFG}s under analysis,
- * implemented through a sequence of calls.
+ * A call to one or more {@link CodeMember}s under analysis, implemented through
+ * a sequence of calls.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class MultiCall extends Call {
+public class MultiCall extends Call implements ResolvedCall {
 
 	/**
 	 * The underlying calls
@@ -39,7 +38,7 @@ public class MultiCall extends Call {
 	private final Collection<Call> calls;
 
 	/**
-	 * Builds the multi call, happening at the given location in the program.
+	 * Builds the multi-call, happening at the given location in the program.
 	 * The {@link EvaluationOrder} of the parameter is
 	 * {@link LeftToRightEvaluation}. The static type of this call is the common
 	 * supertype of the return types of all targets.
@@ -57,34 +56,7 @@ public class MultiCall extends Call {
 	 */
 	public MultiCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Collection<Call> calls, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
-				LeftToRightEvaluation.INSTANCE, calls, parameters);
-	}
-
-	/**
-	 * Builds the multi call, happening at the given location in the program.
-	 * The {@link EvaluationOrder} of the parameter is
-	 * {@link LeftToRightEvaluation}. The static type of this call is the common
-	 * supertype of the return types of all targets.
-	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param callType          the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the qualified name of the static target of this
-	 *                              call
-	 * @param calls             the Calls underlying this one
-	 * @param parameters        the parameters of this call
-	 */
-	public MultiCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, Collection<Call> calls, Expression... parameters) {
-		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
-				calls, parameters);
+		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, calls, parameters);
 	}
 
 	/**
@@ -92,29 +64,27 @@ public class MultiCall extends Call {
 	 * The static type of this call is the common supertype of the return types
 	 * of all targets.
 	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param callType          the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the qualified name of the static target of this
-	 *                              call
-	 * @param order             the evaluation order of the sub-expressions
-	 * @param calls             the Calls underlying this one
-	 * @param parameters        the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the qualified name of the static target of this call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param calls      the Calls underlying this one
+	 * @param parameters the parameters of this call
 	 */
-	public MultiCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, EvaluationOrder order, Collection<Call> calls,
-			Expression... parameters) {
-		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,
-				getCommonReturnType(calls), parameters);
+	public MultiCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+			EvaluationOrder order, Collection<Call> calls, Expression... parameters) {
+		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(calls), parameters);
 		Objects.requireNonNull(calls, "The calls underlying a multi call cannot be null");
-		for (Call target : calls)
+		for (Call target : calls) {
 			Objects.requireNonNull(target, "A call underlying a multi call cannot be null");
+			if (!(target instanceof ResolvedCall))
+				throw new IllegalArgumentException(target + " has not been resolved yet");
+		}
 		this.calls = calls;
 	}
 
@@ -147,9 +117,8 @@ public class MultiCall extends Call {
 	 * @param calls  the calls underlying this one
 	 */
 	public MultiCall(UnresolvedCall source, Call... calls) {
-		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
-				source.getCallType(), source.getQualifier(),
-				source.getTargetName(), List.of(calls), source.getParameters());
+		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
+				List.of(calls), source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -218,5 +187,11 @@ public class MultiCall extends Call {
 		}
 
 		return result;
+	}
+
+	@Override
+	public Collection<CodeMember> getTargets() {
+		return calls.stream().map(ResolvedCall.class::cast).flatMap(c -> c.getTargets().stream())
+				.collect(Collectors.toSet());
 	}
 }

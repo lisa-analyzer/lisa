@@ -258,12 +258,16 @@ blockOrStatement
    | statement
    ;
 /*
- * CLASS MEMBERS
+ * CLASS AND INTERFACE MEMBERS
  */
    
    
-memberDeclarations
-   : (methodDeclaration | fieldDeclaration | constructorDeclaration)*
+classMemberDeclarations
+   : (methodDeclaration | fieldDeclaration | constructorDeclaration | signatureDeclaration)*
+   ;
+
+interfaceMemberDeclarations
+   : (methodDeclaration | fieldDeclaration | signatureDeclaration)*
    ;
 
 fieldDeclaration
@@ -277,13 +281,30 @@ constructorDeclaration
 methodDeclaration
    : annotations? FINAL? name = IDENTIFIER pars = formals code = block
    ;
+
+signatureDeclaration
+   : annotations? FINAL? name = IDENTIFIER formals SEMI
+   ;
 /*
  * CLASS
  */
    
    
 unit
-   : annotations? CLASS name = unitName (EXTENDS superclass = unitName)? LBRACE declarations = memberDeclarations RBRACE
+   : classUnit
+   | interfaceUnit
+   ;
+
+classUnit
+   : annotations? ABSTRACT? CLASS name = unitName (EXTENDS superclass = unitName)? (IMPLEMENTS superinterfaces = unitNames)? LBRACE declarations = classMemberDeclarations RBRACE
+   ;
+
+interfaceUnit
+   : annotations? INTERFACE name = unitName (EXTENDS superinterfaces = unitNames)? LBRACE declarations = interfaceMemberDeclarations RBRACE
+   ;
+
+unitNames
+   : unitName (COMMA unitName)*
    ;
 
 file

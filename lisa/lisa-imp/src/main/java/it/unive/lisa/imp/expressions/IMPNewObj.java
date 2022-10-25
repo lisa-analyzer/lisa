@@ -9,7 +9,6 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.caches.Caches;
-import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -83,9 +82,8 @@ public class IMPNewObj extends NaryExpression {
 			tmp = tmp.lub(callstate.assign(v, ref, paramThis));
 		expressions.put(paramThis, tmp);
 
-		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(),
-				IMPFrontend.ASSIGN_STRATEGY, IMPFrontend.MATCHING_STRATEGY, IMPFrontend.TRAVERSAL_STRATEGY,
-				CallType.INSTANCE, type.toString(), type.toString(), fullExpressions);
+		UnresolvedCall call = new UnresolvedCall(getCFG(), getLocation(), CallType.INSTANCE, type.toString(),
+				type.toString(), fullExpressions);
 		AnalysisState<A, H, V, T> sem = call.expressionSemantics(interprocedural, tmp, fullParams, expressions);
 
 		if (!call.getMetaVariables().isEmpty())

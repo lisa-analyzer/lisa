@@ -34,8 +34,10 @@ import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.InterfaceUnit;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.Unit;
@@ -44,10 +46,11 @@ import it.unive.lisa.program.annotations.AnnotationMember;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
 import it.unive.lisa.program.annotations.values.AnnotationValue;
+import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
@@ -61,9 +64,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
-import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -109,24 +109,27 @@ import org.reflections.scanners.SubTypesScanner;
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
-	private static final CompilationUnit unit1 = new CompilationUnit(loc, "fake1", false);
-	private static final CompilationUnit unit2 = new CompilationUnit(loc, "fake2", false);
-	private static final CFGDescriptor descr1 = new CFGDescriptor(loc, unit1, false, "fake1");
-	private static final CFGDescriptor descr2 = new CFGDescriptor(loc, unit2, false, "fake2");
+	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(null), "fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(null), "fake2", false);
+	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, new Program(null), "fake1", false);
+	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, new Program(null), "fake2", false);
+	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
+	private static final CodeMemberDescriptor descr2 = new CodeMemberDescriptor(loc, unit2, false, "fake2");
 	private static final CFG cfg1 = new CFG(descr1);
 	private static final CFG cfg2 = new CFG(descr2);
+	private static final CodeMemberDescriptor signDescr1 = new CodeMemberDescriptor(loc, interface1, true, "fake1");
+	private static final CodeMemberDescriptor signDescr2 = new CodeMemberDescriptor(loc, interface1, true, "fake2");
+	private static final AbstractCodeMember signCfg1 = new AbstractCodeMember(signDescr1);
+	private static final AbstractCodeMember signCfg2 = new AbstractCodeMember(signDescr2);
 	private static final NodeList<CFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
 	private static final NodeList<CFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
+
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
 	private static final SingleGraph g2 = new SingleGraph("b");
-	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "foo",
-			"foo");
-	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, PythonLikeAssigningStrategy.INSTANCE,
-			StaticTypesMatchingStrategy.INSTANCE, SingleInheritanceTraversalStrategy.INSTANCE, CallType.STATIC, "bar",
-			"bar");
+	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
+	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
 	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
 	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
 	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);
@@ -196,8 +199,12 @@ public class EqualityContractVerificationTest {
 		SingleTypeEqualsVerifierApi<T> verifier = EqualsVerifier.forClass(clazz)
 				.suppress(suppressions)
 				.withPrefabValues(CFG.class, cfg1, cfg2)
-				.withPrefabValues(CFGDescriptor.class, descr1, descr2)
-				.withPrefabValues(CompilationUnit.class, unit1, unit2)
+				.withPrefabValues(AbstractCodeMember.class, signCfg1, signCfg2)
+				.withPrefabValues(CodeMemberDescriptor.class, descr1, descr2)
+				.withPrefabValues(ClassUnit.class, unit1, unit2)
+				.withPrefabValues(Unit.class, unit1, unit2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
+				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(NodeList.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
@@ -413,7 +420,7 @@ public class EqualityContractVerificationTest {
 		// the default value does not impact the definition of the formal
 		verify(Parameter.class, verifier -> verifier.withIgnoredFields("defaultValue"));
 		// 'overridable' is mutable
-		verify(CFGDescriptor.class, Warning.NONFINAL_FIELDS);
+		verify(CodeMemberDescriptor.class, Warning.NONFINAL_FIELDS);
 		// scope bounds are mutable
 		verify(VariableTableEntry.class, Warning.NONFINAL_FIELDS);
 		Reflections scanner = mkReflections();

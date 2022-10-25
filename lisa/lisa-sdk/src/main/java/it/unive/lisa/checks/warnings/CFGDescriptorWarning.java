@@ -1,6 +1,6 @@
 package it.unive.lisa.checks.warnings;
 
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -14,7 +14,7 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	/**
 	 * The descriptor where this warning was reported on
 	 */
-	private final CFGDescriptor descriptor;
+	private final CodeMemberDescriptor descriptor;
 
 	/**
 	 * Builds the warning.
@@ -22,7 +22,7 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	 * @param descriptor the descriptor where this warning was reported on
 	 * @param message    the message of this warning
 	 */
-	public CFGDescriptorWarning(CFGDescriptor descriptor, String message) {
+	public CFGDescriptorWarning(CodeMemberDescriptor descriptor, String message) {
 		super(descriptor.getLocation(), message);
 		this.descriptor = descriptor;
 	}
@@ -32,7 +32,7 @@ public class CFGDescriptorWarning extends WarningWithLocation {
 	 * 
 	 * @return the column, or {@code -1}
 	 */
-	public CFGDescriptor getDescriptor() {
+	public CodeMemberDescriptor getDescriptor() {
 		return descriptor;
 	}
 

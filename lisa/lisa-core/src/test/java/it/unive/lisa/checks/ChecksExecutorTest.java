@@ -5,7 +5,6 @@ import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.imp.ParsingException;
-import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
@@ -45,12 +44,12 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 		}
 
 		@Override
-		public boolean visitCompilationUnit(CheckTool tool, CompilationUnit unit) {
-			return true;
+		public void visitGlobal(CheckTool tool, Unit unit, Global global, boolean instance) {
 		}
 
 		@Override
-		public void visitGlobal(CheckTool tool, Unit unit, Global global, boolean instance) {
+		public boolean visitUnit(CheckTool tool, Unit unit) {
+			return true;
 		}
 	}
 

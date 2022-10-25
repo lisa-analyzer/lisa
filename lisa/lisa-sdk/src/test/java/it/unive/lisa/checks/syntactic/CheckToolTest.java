@@ -9,12 +9,13 @@ import it.unive.lisa.checks.warnings.GlobalWarning;
 import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
-import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -26,10 +27,11 @@ import org.junit.Test;
 
 public class CheckToolTest {
 
-	private static final CompilationUnit unit = new CompilationUnit(new SourceCodeLocation("fake", 1, 0), "fake",
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null), "fake",
 			false);
-	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), "fake");
-	private static final CFGDescriptor descriptor = new CFGDescriptor(new SourceCodeLocation("fake", 2, 0), unit, false,
+	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
+	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
+			new SourceCodeLocation("fake", 2, 0), unit, false,
 			"foo");
 	private static final CFG cfg = new CFG(descriptor);
 
@@ -46,9 +48,9 @@ public class CheckToolTest {
 		} else if (target instanceof CFG) {
 			tool.warnOn((CFG) target, message);
 			return new CFGWarning((CFG) target, message);
-		} else if (target instanceof CFGDescriptor) {
-			tool.warnOn((CFGDescriptor) target, message);
-			return new CFGDescriptorWarning((CFGDescriptor) target, message);
+		} else if (target instanceof CodeMemberDescriptor) {
+			tool.warnOn((CodeMemberDescriptor) target, message);
+			return new CFGDescriptorWarning((CodeMemberDescriptor) target, message);
 		} else if (target instanceof Expression) {
 			tool.warnOn((Expression) target, message);
 			return new ExpressionWarning((Expression) target, message);

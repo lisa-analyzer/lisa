@@ -1,0 +1,12 @@
+abstract class first {
+	a(i);
+}
+
+class second extends first {
+	~second(x) {
+		this.field2 = x;
+	}
+	a(i) {
+		return i + 1;
+	}
+}

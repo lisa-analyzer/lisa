@@ -1,7 +1,7 @@
-package it.unive.lisa.program.cfg.statement.call.traversal;
+package it.unive.lisa.program.language.hierarchytraversal;
 
 import it.unive.lisa.program.CompilationUnit;
-import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,7 +26,7 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 	}
 
 	@Override
-	public Iterable<CompilationUnit> traverse(Call call, CompilationUnit start) {
+	public Iterable<CompilationUnit> traverse(Statement st, CompilationUnit start) {
 		return new Iterable<CompilationUnit>() {
 
 			@Override
@@ -46,7 +46,7 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 
 		private SingleInheritanceIterator(CompilationUnit start) {
 			current = start;
-			remaining = new LinkedList<>(start.getSuperUnits());
+			remaining = new LinkedList<>(start.getImmediateAncestors());
 			remaining.addFirst(start);
 			seen = new HashSet<>(remaining);
 		}
@@ -64,16 +64,16 @@ public class SingleInheritanceTraversalStrategy implements HierarcyTraversalStra
 			CompilationUnit cu = remaining.pop();
 
 			if (remaining.isEmpty())
-				if (current.getSuperUnits().isEmpty())
+				if (current.getImmediateAncestors().isEmpty())
 					current = null;
 				else {
 					// single inheritance!
-					current = current.getSuperUnits().iterator().next();
+					current = current.getImmediateAncestors().iterator().next();
 
 					// we avoid re-processing what we already seen
 					// note that current will have been visited during the
 					// previous iteration
-					current.getSuperUnits().forEach(su -> {
+					current.getImmediateAncestors().forEach(su -> {
 						if (seen.add(su))
 							remaining.add(su);
 					});

@@ -50,6 +50,14 @@ CLASS
    : 'class'
    ;
 
+INTERFACE
+   : 'interface'
+   ;
+
+IMPLEMENTS
+   : 'implements'
+   ;
+
 EXTENDS
    : 'extends'
    ;
@@ -85,6 +93,10 @@ NEW
 
 ASSERT
    : 'assert'
+   ;
+
+ABSTRACT
+   : 'abstract'
    ;
    // =========================== STRING FUNCTIONS =========================== 
    

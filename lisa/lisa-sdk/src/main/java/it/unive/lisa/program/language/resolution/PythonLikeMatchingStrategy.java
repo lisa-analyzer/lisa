@@ -1,4 +1,4 @@
-package it.unive.lisa.program.cfg.statement.call.resolution;
+package it.unive.lisa.program.language.resolution;
 
 import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.Parameter;
