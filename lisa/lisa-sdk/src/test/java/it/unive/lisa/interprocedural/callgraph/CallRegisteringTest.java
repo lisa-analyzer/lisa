@@ -5,12 +5,13 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
 import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Ret;
@@ -18,9 +19,15 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.resolution.StaticTypesMatchingStrategy;
-import it.unive.lisa.program.cfg.statement.call.traversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.program.language.LanguageFeatures;
+import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
+import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
+import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
+import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
+import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
+import it.unive.lisa.program.language.validation.BaseValidationLogic;
+import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
@@ -43,26 +50,46 @@ public class CallRegisteringTest {
 
 		};
 
-		Program p = new Program();
+		Program p = new Program(new LanguageFeatures() {
 
-		CFG cfg1 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
-		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0),
-				PythonLikeAssigningStrategy.INSTANCE, StaticTypesMatchingStrategy.INSTANCE,
-				SingleInheritanceTraversalStrategy.INSTANCE,
-				CallType.STATIC, p.getName(), "cfg2");
+			@Override
+			public HierarcyTraversalStrategy getTraversalStrategy() {
+				return SingleInheritanceTraversalStrategy.INSTANCE;
+			}
+
+			@Override
+			public ParameterMatchingStrategy getMatchingStrategy() {
+				return StaticTypesMatchingStrategy.INSTANCE;
+			}
+
+			@Override
+			public ParameterAssigningStrategy getAssigningStrategy() {
+				return PythonLikeAssigningStrategy.INSTANCE;
+			}
+
+			@Override
+			public ProgramValidationLogic getProgramValidationLogic() {
+				return new BaseValidationLogic();
+			}
+		});
+
+		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
+		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
+				p.getName(), "cfg2");
 		cfg1.addNode(call, true);
 		Ret ret = new Ret(cfg1, new SourceCodeLocation("fake1", 2, 0));
 		cfg1.addNode(ret, false);
 		cfg1.addEdge(new SequentialEdge(call, ret));
 
-		CFG cfg2 = new CFG(new CFGDescriptor(new SourceCodeLocation("fake2", 0, 0), p, false, "cfg2"));
+		CFG cfg2 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake2", 0, 0), p, false, "cfg2"));
 		cfg2.addNode(new Ret(cfg2, new SourceCodeLocation("fake2", 1, 0)), true);
 
-		p.addCFG(cfg2);
-		p.addCFG(cfg1);
-		p.validateAndFinalize();
+		p.addCodeMember(cfg2);
+		p.addCodeMember(cfg1);
+		p.getFeatures().getProgramValidationLogic().validateAndFinalize(p);
 
-		cg.init(p);
+		Application app = new Application(p);
+		cg.init(app);
 		@SuppressWarnings("unchecked")
 		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
 		cg.registerCall(resolved);

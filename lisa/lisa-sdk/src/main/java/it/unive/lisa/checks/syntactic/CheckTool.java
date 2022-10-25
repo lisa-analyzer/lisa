@@ -10,7 +10,7 @@ import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CFGDescriptor;
+import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import java.util.Collection;
@@ -101,7 +101,7 @@ public class CheckTool {
 	 * @param descriptor the descriptor cfg to warn on
 	 * @param message    the message of the warning
 	 */
-	public void warnOn(CFGDescriptor descriptor, String message) {
+	public void warnOn(CodeMemberDescriptor descriptor, String message) {
 		warnings.add(new CFGDescriptorWarning(descriptor, message));
 	}
 

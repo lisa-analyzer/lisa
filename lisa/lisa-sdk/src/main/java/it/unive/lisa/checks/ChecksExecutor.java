@@ -2,10 +2,13 @@ package it.unive.lisa.checks;
 
 import static it.unive.lisa.logging.IterationLogger.iterate;
 
+import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,42 +28,51 @@ public final class ChecksExecutor {
 	/**
 	 * Executes all the given checks on the given inputs cfgs.
 	 * 
-	 * @param <C>     the type of the checks to execute
-	 * @param <T>     the type of the auxiliary tool used by the check
-	 * @param tool    the auxiliary tool to be used during the checks execution
-	 * @param program the program to analyze
-	 * @param checks  the checks to execute
+	 * @param <C>    the type of the checks to execute
+	 * @param <T>    the type of the auxiliary tool used by the check
+	 * @param tool   the auxiliary tool to be used during the checks execution
+	 * @param app    the application to analyze
+	 * @param checks the checks to execute
 	 */
-	public static <C extends Check<T>, T> void executeAll(T tool, Program program,
+	public static <C extends Check<T>, T> void executeAll(T tool, Application app,
 			Iterable<C> checks) {
 		checks.forEach(c -> c.beforeExecution(tool));
 
-		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
-			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
-
-		for (CFG cfg : iterate(LOG, program.getCFGs(), "Analyzing program cfgs...", "CFGs"))
-			checks.forEach(c -> cfg.accept(c, tool));
-
-		for (CompilationUnit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
-			checks.forEach(c -> visitUnit(tool, unit, c));
+		for (Program p : app.getPrograms())
+			visitProgram(tool, p, checks);
 
 		checks.forEach(c -> c.afterExecution(tool));
 	}
 
-	private static <C extends Check<T>, T> void visitUnit(T tool, CompilationUnit unit, C c) {
-		if (!c.visitCompilationUnit(tool, unit))
+	private static <T, C extends Check<T>> void visitProgram(T tool, Program program, Iterable<C> checks) {
+		for (Global global : iterate(LOG, program.getGlobals(), "Analyzing program globals...", "Globals"))
+			checks.forEach(c -> c.visitGlobal(tool, program, global, false));
+
+		for (CodeMember cm : iterate(LOG, program.getCodeMembers(), "Analyzing program cfgs...", "CFGs"))
+			if (cm instanceof CFG)
+				checks.forEach(c -> ((CFG) cm).accept(c, tool));
+
+		for (Unit unit : iterate(LOG, program.getUnits(), "Analyzing compilation units...", "Units"))
+			checks.forEach(c -> visitUnit(tool, unit, c));
+	}
+
+	private static <C extends Check<T>, T> void visitUnit(T tool, Unit unit, C c) {
+		if (!c.visitUnit(tool, unit))
 			return;
 
 		for (Global global : unit.getGlobals())
 			c.visitGlobal(tool, unit, global, false);
 
-		for (Global global : unit.getInstanceGlobals(false))
-			c.visitGlobal(tool, unit, global, true);
+		if (unit instanceof CompilationUnit)
+			for (Global global : ((CompilationUnit) unit).getInstanceGlobals(false))
+				c.visitGlobal(tool, unit, global, true);
 
-		for (CFG cfg : unit.getCFGs())
-			cfg.accept(c, tool);
+		for (CodeMember cm : unit.getCodeMembers())
+			if (cm instanceof CFG)
+				((CFG) cm).accept(c, tool);
 
-		for (CFG cfg : unit.getInstanceCFGs(false))
-			cfg.accept(c, tool);
+		if (unit instanceof CompilationUnit)
+			for (CFG cfg : ((CompilationUnit) unit).getInstanceCFGs(false))
+				cfg.accept(c, tool);
 	}
 }

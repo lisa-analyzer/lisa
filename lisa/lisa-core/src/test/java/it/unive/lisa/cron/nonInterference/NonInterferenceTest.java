@@ -15,7 +15,6 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
@@ -92,18 +91,6 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 								TypeEnvironment<InferredTypes>>,
 						MonolithicHeap,
 						InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public boolean visitCompilationUnit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				CompilationUnit unit) {
-			return true;
 		}
 
 		@Override
@@ -186,5 +173,16 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			return true;
 		}
 
+		@Override
+		public boolean visitUnit(
+				CheckToolWithAnalysisResults<
+						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
+								TypeEnvironment<InferredTypes>>,
+						MonolithicHeap,
+						InferenceSystem<NonInterference>,
+						TypeEnvironment<InferredTypes>> tool,
+				Unit unit) {
+			return true;
+		}
 	}
 }

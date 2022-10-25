@@ -12,19 +12,20 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
-import it.unive.lisa.program.cfg.statement.call.assignment.ParameterAssigningStrategy;
-import it.unive.lisa.program.cfg.statement.call.assignment.PythonLikeAssigningStrategy;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -32,7 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NativeCall extends Call implements CanRemoveReceiver {
+public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall {
 
 	/**
 	 * The native targets of this call
@@ -58,36 +59,7 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 */
 	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
 			Collection<NativeCFG> targets, Expression... parameters) {
-		this(cfg, location, PythonLikeAssigningStrategy.INSTANCE, callType, qualifier, targetName,
-				LeftToRightEvaluation.INSTANCE, targets, parameters);
-	}
-
-	/**
-	 * Builds the native call, happening at the given location in the program.
-	 * The {@link EvaluationOrder} of the parameter is
-	 * {@link LeftToRightEvaluation}. The static type of this call is the common
-	 * supertype of the return types of all targets.
-	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param callType          the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the qualified name of the static target of this
-	 *                              call
-	 * @param targets           the NativeCFGs that are targeted by this CFG
-	 *                              call
-	 * @param parameters        the parameters of this call
-	 */
-	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName,
-			Collection<NativeCFG> targets, Expression... parameters) {
-		this(cfg, location, assigningStrategy, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE,
-				targets, parameters);
+		this(cfg, location, callType, qualifier, targetName, LeftToRightEvaluation.INSTANCE, targets, parameters);
 	}
 
 	/**
@@ -95,27 +67,21 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 * The static type of this call is the common supertype of the return types
 	 * of all targets.
 	 * 
-	 * @param cfg               the cfg that this expression belongs to
-	 * @param location          the location where this expression is defined
-	 *                              within the program
-	 * @param assigningStrategy the {@link ParameterAssigningStrategy} of the
-	 *                              parameters of this call
-	 * @param callType          the call type of this call
-	 * @param qualifier         the optional qualifier of the call (can be null
-	 *                              or empty - see {@link #getFullTargetName()}
-	 *                              for more info)
-	 * @param targetName        the qualified name of the static target of this
-	 *                              call
-	 * @param order             the evaluation order of the sub-expressions
-	 * @param targets           the NativeCFGs that are targeted by this CFG
-	 *                              call
-	 * @param parameters        the parameters of this call
+	 * @param cfg        the cfg that this expression belongs to
+	 * @param location   the location where this expression is defined within
+	 *                       the program
+	 * @param callType   the call type of this call
+	 * @param qualifier  the optional qualifier of the call (can be null or
+	 *                       empty - see {@link #getFullTargetName()} for more
+	 *                       info)
+	 * @param targetName the qualified name of the static target of this call
+	 * @param order      the evaluation order of the sub-expressions
+	 * @param targets    the NativeCFGs that are targeted by this CFG call
+	 * @param parameters the parameters of this call
 	 */
-	public NativeCall(CFG cfg, CodeLocation location, ParameterAssigningStrategy assigningStrategy,
-			CallType callType, String qualifier, String targetName, EvaluationOrder order,
-			Collection<NativeCFG> targets, Expression... parameters) {
-		super(cfg, location, assigningStrategy, callType, qualifier, targetName, order,
-				getCommonReturnType(targets), parameters);
+	public NativeCall(CFG cfg, CodeLocation location, CallType callType, String qualifier, String targetName,
+			EvaluationOrder order, Collection<NativeCFG> targets, Expression... parameters) {
+		super(cfg, location, callType, qualifier, targetName, order, getCommonReturnType(targets), parameters);
 		Objects.requireNonNull(targets, "The targets of a native call cannot be null");
 		Objects.requireNonNull(targets, "The native targets of a native call cannot be null");
 		for (NativeCFG target : targets)
@@ -132,9 +98,8 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	 *                    against
 	 */
 	public NativeCall(UnresolvedCall source, Collection<NativeCFG> targets) {
-		this(source.getCFG(), source.getLocation(), source.getAssigningStrategy(),
-				source.getCallType(), source.getQualifier(),
-				source.getTargetName(), targets, source.getParameters());
+		this(source.getCFG(), source.getLocation(), source.getCallType(), source.getQualifier(), source.getTargetName(),
+				targets, source.getParameters());
 		for (Expression param : source.getParameters())
 			// make sure they stay linked to the original call
 			param.setParentStatement(source);
@@ -162,12 +127,17 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	}
 
 	/**
-	 * Yields the NativeCFGs that are targeted by this native call.
+	 * Yields the {@link NativeCFG}s that are targeted by this native call.
 	 * 
-	 * @return the target NativeCFGs
+	 * @return the target {@link NativeCFG}s
 	 */
-	public Collection<NativeCFG> getTargets() {
+	public Collection<NativeCFG> getTargetedConstructs() {
 		return targets;
+	}
+
+	@Override
+	public Collection<CodeMember> getTargets() {
+		return targets.stream().map(CodeMember.class::cast).collect(Collectors.toSet());
 	}
 
 	@Override
@@ -213,11 +183,12 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 		AnalysisState<A, H, V, T> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
+		ParameterAssigningStrategy strategy = getCFG().getDescriptor().getUnit().getProgram()
+				.getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
-				Pair<AnalysisState<A, H, V, T>,
-						ExpressionSet<SymbolicExpression>[]> prepared = getAssigningStrategy().prepare(this, state,
-								interprocedural, expressions, nat.getDescriptor().getFormals(), params);
+				Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,
+						state, interprocedural, expressions, nat.getDescriptor().getFormals(), params);
 
 				NaryExpression rewritten = nat.rewrite(this, parameters);
 				result = result
@@ -233,7 +204,7 @@ public class NativeCall extends Call implements CanRemoveReceiver {
 	@Override
 	public TruncatedParamsCall removeFirstParameter() {
 		return new TruncatedParamsCall(
-				new NativeCall(getCFG(), getLocation(), getAssigningStrategy(), getCallType(), getQualifier(),
-						getFullTargetName(), getOrder(), targets, CanRemoveReceiver.truncate(getParameters())));
+				new NativeCall(getCFG(), getLocation(), getCallType(), getQualifier(), getFullTargetName(), getOrder(),
+						targets, CanRemoveReceiver.truncate(getParameters())));
 	}
 }

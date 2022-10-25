@@ -49,8 +49,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
- * as edges.<br>
+ * A control flow graph with an implementation, that has {@link Statement}s as
+ * nodes and {@link Edge}s as edges.<br>
  * <br>
  * Note that this class does not implement {@link #equals(Object)} nor
  * {@link #hashCode()} since all cfgs are unique.
@@ -64,7 +64,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	/**
 	 * The descriptor of this control flow graph.
 	 */
-	private final CFGDescriptor descriptor;
+	private final CodeMemberDescriptor descriptor;
 
 	/**
 	 * The control flow structures of this cfg
@@ -82,7 +82,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param descriptor the descriptor of this cfg
 	 */
-	public CFG(CFGDescriptor descriptor) {
+	public CFG(CodeMemberDescriptor descriptor) {
 		super(new SequentialEdge());
 		this.descriptor = descriptor;
 		this.cfStructs = new LinkedList<>();
@@ -98,7 +98,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param list        the node list containing all the statements and the
 	 *                        edges that will be part of this cfg
 	 */
-	public CFG(CFGDescriptor descriptor, Collection<Statement> entrypoints,
+	public CFG(CodeMemberDescriptor descriptor, Collection<Statement> entrypoints,
 			NodeList<CFG, Statement, Edge> list) {
 		super(entrypoints, list);
 		this.descriptor = descriptor;
@@ -123,7 +123,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the name
 	 */
-	public final CFGDescriptor getDescriptor() {
+	public final CodeMemberDescriptor getDescriptor() {
 		return descriptor;
 	}
 
@@ -646,8 +646,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	/**
-	 * Validates this cfg, ensuring that the code contained in it is well
-	 * formed. This method checks that:
+	 * {@inheritDoc} This method checks that:
 	 * <ul>
 	 * <li>the underlying adjacency matrix is valid, through
 	 * {@link AdjacencyMatrix#validate(Collection)}</li>
@@ -659,10 +658,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * execution (according to {@link Statement#stopsExecution()})</li>
 	 * <li>all entrypoints are effectively part of this cfg</li>
 	 * </ul>
-	 * 
-	 * @throws ProgramValidationException if one of the aforementioned checks
-	 *                                        fail
 	 */
+	@Override
 	public void validate() throws ProgramValidationException {
 		try {
 			list.validate(entrypoints);

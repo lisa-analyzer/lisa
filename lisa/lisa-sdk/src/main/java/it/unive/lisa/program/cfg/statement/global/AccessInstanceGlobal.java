@@ -7,23 +7,31 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryExpression;
+import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.UnitType;
+import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * An access to an instance {@link Global} of a {@link CompilationUnit}.
+ * An access to an instance {@link Global} of a {@link ClassUnit}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -32,7 +40,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	/**
 	 * The global being accessed
 	 */
-	private final Global target;
+	private final String target;
 
 	/**
 	 * Builds the global access, happening at the given location in the program.
@@ -44,8 +52,8 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 * @param receiver the expression that determines the accessed instance
 	 * @param target   the accessed global
 	 */
-	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, Global target) {
-		super(cfg, location, "::", target.getStaticType(), receiver);
+	public AccessInstanceGlobal(CFG cfg, CodeLocation location, Expression receiver, String target) {
+		super(cfg, location, "::", Untyped.INSTANCE, receiver);
 		this.target = target;
 		receiver.setParentStatement(this);
 	}
@@ -65,7 +73,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 	 * 
 	 * @return the global
 	 */
-	public Global getTarget() {
+	public String getTarget() {
 		return target;
 	}
 
@@ -96,7 +104,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 
 	@Override
 	public String toString() {
-		return getSubExpression() + "::" + target.getName();
+		return getSubExpression() + "::" + target;
 	}
 
 	@Override
@@ -109,24 +117,45 @@ public class AccessInstanceGlobal extends UnaryExpression {
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		Variable var = new Variable(
-				target.getStaticType(),
-				target.getName(),
-				target.getAnnotations(),
-				target.getLocation());
+		CodeLocation loc = getLocation();
 
-		ExternalSet<Type> rectypes = Caches.types().mkEmptySet();
-		for (Type t : expr.getRuntimeTypes())
-			if (t.isPointerType())
-				rectypes.addAll(t.asPointerType().getInnerTypes());
+		AnalysisState<A, H, V, T> result = state.bottom();
+		for (Type recType : expr.getRuntimeTypes())
+			if (recType.isPointerType()) {
+				Collection<CompilationUnit> units;
 
-		if (rectypes.isEmpty())
-			return state.bottom();
+				ExternalSet<Type> rectypes = recType.asPointerType().getInnerTypes();
+				Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
+				HeapDereference container = new HeapDereference(rectype, expr, loc);
+				container.setRuntimeTypes(rectypes);
 
-		Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
-		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
-		container.setRuntimeTypes(rectypes);
-		AccessChild access = new AccessChild(var.getStaticType(), container, var, getLocation());
-		return state.smallStepSemantics(access, this);
+				if (recType.isUnitType())
+					units = Collections.singleton(recType.asUnitType().getUnit());
+				else if (recType.isPointerType() && rectypes.anyMatch(Type::isUnitType))
+					units = rectypes
+							.stream()
+							.filter(Type::isUnitType)
+							.map(Type::asUnitType)
+							.map(UnitType::getUnit)
+							.collect(Collectors.toSet());
+				else
+					continue;
+
+				Set<CompilationUnit> seen = new HashSet<>();
+				HierarcyTraversalStrategy strategy = getCFG().getDescriptor().getUnit().getProgram().getFeatures()
+						.getTraversalStrategy();
+				for (CompilationUnit unit : units)
+					for (CompilationUnit cu : strategy.traverse(this, unit))
+						if (seen.add(unit)) {
+							Global global = cu.getInstanceGlobal(target, false);
+							if (global != null) {
+								Variable var = global.toSymbolicVariable(loc);
+								AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
+								result = result.lub(state.smallStepSemantics(access, this));
+							}
+						}
+			}
+
+		return result;
 	}
 }

@@ -9,8 +9,10 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import java.util.Collection;
 
 /**
  * A call that wraps another one that has been created through
@@ -20,7 +22,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class TruncatedParamsCall extends Call {
+public class TruncatedParamsCall extends Call implements ResolvedCall {
 
 	private final Call call;
 
@@ -30,9 +32,10 @@ public class TruncatedParamsCall extends Call {
 	 * @param call the call to be wrapped
 	 */
 	public TruncatedParamsCall(Call call) {
-		super(call.getCFG(), call.getLocation(), call.getAssigningStrategy(), call.getCallType(), call.getQualifier(),
-				call.getTargetName(), call.getOrder(), call.getStaticType(),
-				call.getParameters());
+		super(call.getCFG(), call.getLocation(), call.getCallType(), call.getQualifier(), call.getTargetName(),
+				call.getOrder(), call.getStaticType(), call.getParameters());
+		if (!(call instanceof ResolvedCall))
+			throw new IllegalArgumentException("The given call has not been resolved yet");
 		this.call = call;
 	}
 
@@ -98,5 +101,10 @@ public class TruncatedParamsCall extends Call {
 
 		getMetaVariables().addAll(call.getMetaVariables());
 		return post;
+	}
+
+	@Override
+	public Collection<CodeMember> getTargets() {
+		return ((ResolvedCall) call).getTargets();
 	}
 }

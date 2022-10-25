@@ -1,0 +1,31 @@
+
+interface j {
+	a(x);
+}
+
+interface i extends j {
+	b(x);
+	c(x);	
+}
+
+class first implements i {
+	field;
+	~first(x) {
+		this.field = x;
+	}
+	foo(i, j) {
+		return i + j;
+	}
+	
+	a(x) {
+		return x + 1;
+	}
+	
+	b(x) {
+		return x - 1;
+	}
+	
+	c(x) {
+		return x * 1;
+	}
+}

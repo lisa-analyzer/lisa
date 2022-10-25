@@ -18,6 +18,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
+import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
@@ -93,7 +94,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		this.fixpointWorkingSet = fixpointWorkingSet;
 		this.wideningThreshold = wideningThreshold;
 
-		if (program.getEntryPoints().isEmpty())
+		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
 
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
@@ -121,7 +122,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
-			for (CFG cfg : IterationLogger.iterate(LOG, program.getEntryPoints(), "Processing entrypoints", "entries"))
+			for (CFG cfg : IterationLogger.iterate(LOG, app.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
 					CFGResults<A, H, V, T> value = new CFGResults<>(new CFGWithAnalysisResults<>(cfg, entryState));
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
@@ -181,7 +182,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		token = token.pushToken(scope);
 		AnalysisState<A, H, V, T> result = entryState.bottom();
 
-		for (CFG cfg : call.getTargets()) {
+		for (CFG cfg : call.getTargetedCFGs()) {
 			Pair<AnalysisState<A, H, V, T>, AnalysisState<A, H, V, T>> states = getEntryAndExit(cfg);
 
 			// prepare the state for the call: hide the visible variables
@@ -194,8 +195,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			for (int i = 0; i < parameters.length; i++)
 				actuals[i] = parameters[i].pushScope(scope);
 
+			ParameterAssigningStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram().getFeatures()
+					.getAssigningStrategy();
 			Pair<AnalysisState<A, H, V, T>,
-					ExpressionSet<SymbolicExpression>[]> prepared = call.getAssigningStrategy().prepare(call, callState,
+					ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(call, callState,
 							this, expressions, formals, actuals);
 
 			AnalysisState<A, H, V, T> exitState;

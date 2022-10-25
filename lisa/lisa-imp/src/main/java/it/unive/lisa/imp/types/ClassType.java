@@ -1,6 +1,7 @@
 package it.unive.lisa.imp.types;
 
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.type.InMemoryType;
 import it.unive.lisa.type.PointerType;
 import it.unive.lisa.type.Type;
@@ -77,7 +78,11 @@ public final class ClassType implements InMemoryType, UnitType {
 
 	@Override
 	public final boolean canBeAssignedTo(Type other) {
-		return other instanceof ClassType && subclass((ClassType) other);
+		if (other instanceof ClassType)
+			return subclass((ClassType) other);
+
+		// TODO: fix
+		return other instanceof InterfaceType;
 	}
 
 	private boolean subclass(ClassType other) {
@@ -115,7 +120,7 @@ public final class ClassType implements InMemoryType, UnitType {
 				return current;
 
 			// null since we do not want to create new types here
-			current.unit.getSuperUnits().forEach(u -> ws.push(lookup(u.getName(), null)));
+			current.unit.getImmediateAncestors().forEach(u -> ws.push(lookup(u.getName(), null)));
 		}
 
 		return Untyped.INSTANCE;
@@ -160,7 +165,7 @@ public final class ClassType implements InMemoryType, UnitType {
 	@Override
 	public Collection<Type> allInstances() {
 		Collection<Type> instances = new HashSet<>();
-		for (CompilationUnit in : unit.getInstances())
+		for (Unit in : unit.getInstances())
 			instances.add(lookup(in.getName(), null));
 		return instances;
 	}
