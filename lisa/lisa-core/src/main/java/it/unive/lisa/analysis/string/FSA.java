@@ -90,18 +90,23 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 
 	@Override
 	public boolean isBottom() {
-		return this.a.acceptsEmptyLanguage();
+		return !isTop() && this.a.acceptsEmptyLanguage();
 	}
 
 	@Override
 	public FSA bottom() {
 		Set<State> states = new HashSet<>();
 		states.add(new State(true, false));
-		return new FSA(new Automaton(states, null));
+		return new FSA(new Automaton(states, new HashSet<Transition>()));
 	}
 
 	@Override
 	public DomainRepresentation representation() {
+		if (isBottom())
+			return new StringRepresentation("no string");
+		else if (isTop())
+			return new StringRepresentation("any string");
+
 		return new StringRepresentation(this.a.toRegex());
 	}
 
