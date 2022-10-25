@@ -706,9 +706,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
 			else
 				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
-		else if (ctx.LITERAL_STRING() != null)
-			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
-		else if (ctx.LITERAL_FLOAT() != null)
+		else if (ctx.LITERAL_STRING() != null) {
+			String str = ctx.LITERAL_STRING().getText().substring(1, ctx.LITERAL_STRING().getText().length() -1);
+			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), str);
+		} else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
 				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
