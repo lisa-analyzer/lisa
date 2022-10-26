@@ -845,7 +845,7 @@ public final class Automaton {
 		// this algorithm works only with deterministic automata
 		Automaton a = this.determinize();
 		// automaton that accepts only the empty string
-		if(a.states.size() == 1 && a.transitions.size() == 0)
+		if (a.states.size() == 1 && a.transitions.size() == 0)
 			return "";
 		// automaton with one state -> cyclic automaton
 		if (a.states.size() == 1) {
@@ -861,8 +861,9 @@ public final class Automaton {
 			string.append("*");
 			return string.toString();
 		}
-		// automaton with only one transition returns the symbol of that transition
-		if(a.transitions.size() == 1)
+		// automaton with only one transition returns the symbol of that
+		// transition
+		if (a.transitions.size() == 1)
 			return a.transitions.stream().findFirst().get().getSymbol();
 		// states and transitions of the automaton used to compute the regex
 		Set<State> regStates = new HashSet<>(a.states);

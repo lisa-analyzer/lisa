@@ -1,4 +1,4 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_fsa.branching(fsa__this,_untyped_x).json", "untyped_fsa.constants(fsa__this).json" ]
+  "files" : [ "untyped_fsa.branching(fsa__this,_untyped_x).json", "untyped_fsa.constants(fsa__this).json", "untyped_fsa.loops(fsa__this,_untyped_x).json" ]
 }

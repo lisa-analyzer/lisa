@@ -12,4 +12,11 @@ class fsa {
     	else
     		a = "world";
     }	
+    
+    loops(x) {
+    	def str = "a";
+    	while (x < 100) {
+    		str = str + "a";
+   		 }
+    }    
 }
