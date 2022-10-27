@@ -112,12 +112,13 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * Error message format for {@link AbstractCodeMember} that is not instance.
 	 */
 	public static final String ABSTRACT_NON_INSTANCE = "%s is not an instance member and cannot be abstract";
-	
+
 	/**
-	 * Error message format for a {@link CodeMember} not matching its own signature.
+	 * Error message format for a {@link CodeMember} not matching its own
+	 * signature.
 	 */
 	public static final String MEMBER_MISMATCH = "%s does not match its own signature";
-	
+
 	/**
 	 * The set of {@link CompilationUnit}s, represented by their names, that
 	 * have been already processed by

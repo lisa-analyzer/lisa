@@ -226,7 +226,6 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				types.add(t);
 				types.add(new ReferenceType(t));
 			}
-			types = null;
 
 			TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 				try {
@@ -236,5 +235,6 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				}
 			});
 		}
+		types = null;
 	}
 }
