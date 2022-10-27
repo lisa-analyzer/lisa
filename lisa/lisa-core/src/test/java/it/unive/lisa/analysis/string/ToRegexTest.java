@@ -177,4 +177,20 @@ public class ToRegexTest {
 		Automaton a = new Automaton(states, delta);
 		assertEquals(a.toRegex(), "");
 	}
+	@Test
+	public void test10() {
+		Set<State> states = new HashSet<>();
+		State[] st = new State[2];
+		st[0] = new State(true, false);
+		st[1] = new State(false, true);
+		Collections.addAll(states, st);
+
+		Set<Transition> delta = new HashSet<>();
+		delta.add(new Transition(st[0], st[1], "a"));
+		delta.add(new Transition(st[1], st[1], "a"));
+		delta.add(new Transition(st[1], st[1], "b"));
+
+		Automaton a = new Automaton(states, delta);
+		assertThat(a.toRegex(), anyOf(is("a(b|a)*"), is("a(a|b)*")));
+	}
 }

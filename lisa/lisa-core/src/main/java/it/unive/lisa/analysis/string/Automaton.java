@@ -947,9 +947,10 @@ public final class Automaton {
 
 			Set<State> newLevel = reg.transitions.stream().filter(t -> t.getSource().equals(regInitialState))
 					.map(Transition::getDestination).collect(Collectors.toSet());
-			reg.states.removeAll(newLevel);
 
 			for (State s : newLevel) {
+				if(!s.equals(regFinalState))
+					reg.states.remove(s);
 				Set<State> nextLevel = reg.transitions.stream()
 						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
 						.map(Transition::getDestination).collect(Collectors.toSet());
