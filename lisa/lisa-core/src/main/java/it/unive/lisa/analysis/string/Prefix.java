@@ -30,7 +30,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         StringBuilder result = new StringBuilder();
 
         int i = 0;
-        while(prefix.charAt(i) == otherPrefixString.charAt(i)){
+        while(i <= prefix.length() - 1 && prefix.charAt(i) == otherPrefixString.charAt(i)){
             result.append(prefix.charAt(i++));
         }
 
@@ -45,6 +45,21 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
     protected Prefix wideningAux(Prefix other) throws SemanticException {
         return lubAux(other);
     }
+
+  /*  @Override
+    protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
+        String thisPrefixString = this.getPrefix();
+        String otherPrefixString = other.getPrefix();
+        int i = 0;
+
+        if(otherPrefixString.length() <= thisPrefixString.length()){
+            while(otherPrefixString.charAt(i) == thisPrefixString.charAt(i)){
+                ++i;
+            }
+        }
+
+        return i == otherPrefixString.length() - 1;
+    } */
 
     @Override
     protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
@@ -123,7 +138,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         return TOP;
     }
 
-    private String getPrefix(){
+    protected String getPrefix(){
         return this.prefix;
     }
 }
