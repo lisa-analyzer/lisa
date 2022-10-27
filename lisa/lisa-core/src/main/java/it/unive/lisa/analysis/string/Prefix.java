@@ -6,17 +6,15 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
-import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 import java.util.Objects;
 
 public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
 
-    private final String prefix;
-
     private final static Prefix TOP = new Prefix();
     private final static Prefix BOTTOM = new Prefix(null);
+    private final String prefix;
 
     public Prefix(){
         this("");
@@ -38,6 +36,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
 
         if(result.length() != 0)
             return new Prefix(result.toString());
+
         else
             return TOP;
     }
@@ -49,7 +48,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
 
     @Override
     protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
-        return false;
+        return !(this.lubAux(other).equals(TOP));
     }
 
     @Override
@@ -76,6 +75,16 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
     }
 
     @Override
+    public boolean isTop() {
+        return this == TOP;
+    }
+
+    @Override
+    public boolean isBottom() {
+        return this == BOTTOM;
+    }
+
+    @Override
     public DomainRepresentation representation() {
         return null;
     }
@@ -95,36 +104,20 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
 
     @Override
     protected Prefix evalUnaryExpression(UnaryOperator operator, Prefix arg, ProgramPoint pp){
-        if(operator == StringLength.INSTANCE){
-            return this;
-        }
-        else
-            return TOP;
+        return TOP;
     }
 
     @Override
-    protected Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) throws SemanticException {
+    protected Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp){
         if(operator == StringConcat.INSTANCE){
             return left;
         }
-        else if(operator == StringContains.INSTANCE){
-            return left.lubAux(right);
-        }
-
-        else if(operator == StringEndsWith.INSTANCE){
-            return left.lubAux(right);
-        }
-
-        else if(operator == StringEquals.INSTANCE){
-            return left.lubAux(right);
-        }
-
-        else if(operator == StringIndexOf.INSTANCE){
-            return left.lubAux(right);
-        }
-
-        else if(operator == StringStartsWith.INSTANCE){
-            return left.lubAux(right);
+        else if(operator == StringContains.INSTANCE ||
+                operator == StringEndsWith.INSTANCE ||
+                operator == StringEquals.INSTANCE ||
+                operator == StringIndexOf.INSTANCE ||
+                operator == StringStartsWith.INSTANCE) {
+            return TOP;
         }
 
         return TOP;
