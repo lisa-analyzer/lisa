@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.symbols.QualifierSymbol;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
@@ -364,7 +365,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * Checks if the given code member {@code cm} is a candidate target for the
 	 * given call, and proceeds to add it to the set of targets if it is.
 	 * Aliasing information is used here to match code members that have been
-	 * aliased and that can be targeted by calls that refer to other names.
+	 * aliased and that can be targeted by calls that refer to other names. Note
+	 * that {@link AbstractCodeMember}s are always discarded.
 	 * 
 	 * @param call     the call to match
 	 * @param types    the runtime types of the parameters of the call
@@ -388,7 +390,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			CodeMember cm,
 			boolean instance) {
 		CodeMemberDescriptor descr = cm.getDescriptor();
-		if (instance != descr.isInstance())
+		if (instance != descr.isInstance() || cm instanceof AbstractCodeMember)
 			return;
 
 		String qualifier = descr.getUnit().getName();
