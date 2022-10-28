@@ -10,13 +10,13 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
 import java.util.Objects;
 
-public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
+public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
     private final static Prefix TOP = new Prefix();
     private final static Prefix BOTTOM = new Prefix(null);
     private final String prefix;
 
-    public Prefix(){
+    public Prefix() {
         this("");
     }
 
@@ -30,13 +30,13 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         StringBuilder result = new StringBuilder();
 
         int i = 0;
-        while(i <= prefix.length() - 1 &&
-                i <= otherPrefixString.length() -1 &&
-                prefix.charAt(i) == otherPrefixString.charAt(i)){
+        while (i <= prefix.length() - 1 &&
+                i <= otherPrefixString.length() - 1 &&
+                prefix.charAt(i) == otherPrefixString.charAt(i)) {
             result.append(prefix.charAt(i++));
         }
 
-        if(result.length() != 0)
+        if (result.length() != 0)
             return new Prefix(result.toString());
 
         else
@@ -48,26 +48,9 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         return lubAux(other);
     }
 
-  /*  @Override
-    protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
-        String thisPrefixString = this.getPrefix();
-        String otherPrefixString = other.getPrefix();
-        int i = 0;
-
-        if(otherPrefixString.length() <= thisPrefixString.length()){
-            while(i <= otherPrefixString.length() &&
-             otherPrefixString.charAt(i) == thisPrefixString.charAt(i)){
-                ++i;
-            }
-        }
-
-        return i != 0;
-        return i == otherPrefixString.length() - 1;
-    } */
-
     @Override
     protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
-        if(other.getPrefix().length() <= this.getPrefix().length()) {
+        if (other.getPrefix().length() <= this.getPrefix().length()) {
             Prefix lub = this.lubAux(other);
             String lubString = lub.getPrefix();
 
@@ -116,29 +99,28 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
     }
 
     @Override
-    protected Prefix evalNullConstant(ProgramPoint pp){
+    protected Prefix evalNullConstant(ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Prefix evalNonNullConstant(Constant constant, ProgramPoint pp){
-        if(constant.getValue() instanceof String)
-            return new Prefix( (String) constant.getValue() );
+    protected Prefix evalNonNullConstant(Constant constant, ProgramPoint pp) {
+        if (constant.getValue() instanceof String)
+            return new Prefix((String) constant.getValue());
 
         return TOP;
     }
 
     @Override
-    protected Prefix evalUnaryExpression(UnaryOperator operator, Prefix arg, ProgramPoint pp){
+    protected Prefix evalUnaryExpression(UnaryOperator operator, Prefix arg, ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp){
-        if(operator == StringConcat.INSTANCE){
+    protected Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) {
+        if (operator == StringConcat.INSTANCE) {
             return left;
-        }
-        else if(operator == StringContains.INSTANCE ||
+        } else if (operator == StringContains.INSTANCE ||
                 operator == StringEndsWith.INSTANCE ||
                 operator == StringEquals.INSTANCE ||
                 operator == StringIndexOf.INSTANCE ||
@@ -149,7 +131,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         return TOP;
     }
 
-    protected String getPrefix(){
+    protected String getPrefix() {
         return this.prefix;
     }
 }
