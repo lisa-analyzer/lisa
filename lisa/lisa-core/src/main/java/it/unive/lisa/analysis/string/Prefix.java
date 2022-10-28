@@ -11,6 +11,7 @@ import it.unive.lisa.symbolic.value.operator.binary.*;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+
 import java.util.Objects;
 
 public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
@@ -140,11 +141,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp){
-        if (operator == StringSubstring.INSTANCE)
+    protected Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
+        if (operator == StringSubstring.INSTANCE) {
             return TOP; //placeholder
+        }
 
-    return TOP;
+        return TOP;
     }
 
     protected String getPrefix() {
