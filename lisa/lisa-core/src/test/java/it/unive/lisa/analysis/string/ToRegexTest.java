@@ -43,7 +43,7 @@ public class ToRegexTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		assertThat(a.toRegex(), anyOf(is("c*a(d|bc*a)*"), is("c*a(bc*a|d)*")));
+		assertEquals(a.toRegex(), "(c*a)(d|bc*a)*");
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class ToRegexTest {
 
 		// ab | cc
 		Automaton a = new Automaton(states, delta);
-		assertThat(a.toRegex(), anyOf(is("a|c"), is("c|a")));
+		assertEquals(a.toRegex(), "(a|c)");
 	}
 
 	@Test
@@ -103,7 +103,7 @@ public class ToRegexTest {
 		// ab | cc
 		Automaton a = new Automaton(states, delta);
 
-		assertThat(a.toRegex(), anyOf(is("ab|cc"), is("cc|ab")));
+		assertEquals(a.toRegex(), "ab|cc");
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class ToRegexTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		assertThat(a.toRegex(), anyOf(is("ac*|bc*"), is("bc*|ac*")));
+		assertEquals(a.toRegex(), "(a|b)c*");
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class ToRegexTest {
 		delta.add(new Transition(st[2], st[3], "c"));
 
 		Automaton a = new Automaton(states, delta);
-		assertThat(a.toRegex(), anyOf(is("a(b|c)"), is("a(c|b)")));
+		assertEquals(a.toRegex(), "a(b|c)");
 	}
 
 	@Test
@@ -191,6 +191,6 @@ public class ToRegexTest {
 		delta.add(new Transition(st[1], st[1], "b"));
 
 		Automaton a = new Automaton(states, delta);
-		assertThat(a.toRegex(), anyOf(is("a(b|a)*"), is("a(a|b)*")));
+		assertEquals(a.toRegex(), "a(a|b)*");
 	}
 }

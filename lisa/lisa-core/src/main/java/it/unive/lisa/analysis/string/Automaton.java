@@ -96,6 +96,22 @@ public final class Automaton {
 	}
 
 	/**
+	 * Return an ordered set containing this automaton states.
+	 * @return a set containing the states ordered by ids
+	 */
+	private Set<State> getOrderedStates() {
+		return new TreeSet<>(this.states);
+	}
+
+	/**
+	 * Return an ordered set containing this automaton transitions.
+	 * @return a set containing the transitions ordered by ids
+	 */
+	private Set<Transition> getOrderedTransitions() {
+		return new TreeSet<>(this.transitions);
+	}
+
+	/**
 	 * Computes all the automaton transitions to validate a given string
 	 * {@code str}.
 	 *
@@ -866,7 +882,7 @@ public final class Automaton {
 		if (a.transitions.size() == 1)
 			return a.transitions.stream().findFirst().get().getSymbol();
 		// states and transitions of the automaton used to compute the regex
-		Set<State> regStates = new HashSet<>(a.states);
+		Set<State> regStates = new HashSet<>();
 		Set<Transition> regTransitions = new HashSet<>();
 		// stores mapping between old and new states
 		Map<State, State> oldToNew = new HashMap<>();
@@ -886,12 +902,13 @@ public final class Automaton {
 		if (!initialStateIngoing.isEmpty()) {
 			State newInitial = new State(true, false);
 			State q = new State(false, initialState.isFinal());
-			regStates.remove(initialState);
+			a.states.remove(initialState);
 			regStates.add(q);
 			regStates.add(newInitial);
 			oldToNew.put(initialState, q);
 			regTransitions.add(new Transition(newInitial, q, ""));
 		}
+		regStates.addAll(a.getOrderedStates());
 
 		if (finalStates.size() > 1) {
 			State newFinal = new State(false, true);
@@ -938,29 +955,29 @@ public final class Automaton {
 		Automaton reg = new Automaton(regStates, regTransitions);
 
 		// reg initial state
-		State regInitialState = reg.states.stream().filter(State::isInitial).findFirst().get();
+		State regInitialState = reg.getOrderedStates().stream().filter(State::isInitial).findFirst().get();
 
 		// reg final state
-		State regFinalState = reg.states.stream().filter(State::isFinal).findFirst().get();
+		State regFinalState = reg.getOrderedStates().stream().filter(State::isFinal).findFirst().get();
 
 		do {
 
-			Set<State> newLevel = reg.transitions.stream().filter(t -> t.getSource().equals(regInitialState))
+			Set<State> newLevel = reg.getOrderedTransitions().stream().filter(t -> t.getSource().equals(regInitialState))
 					.map(Transition::getDestination).collect(Collectors.toSet());
 
 			for (State s : newLevel) {
 				if(!s.equals(regFinalState))
 					reg.states.remove(s);
-				Set<State> nextLevel = reg.transitions.stream()
+				Set<State> nextLevel = reg.getOrderedTransitions().stream()
 						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
 						.map(Transition::getDestination).collect(Collectors.toSet());
-				Set<Transition> outgoingTransitions = reg.transitions.stream()
+				Set<Transition> outgoingTransitions = reg.getOrderedTransitions().stream()
 						.filter(t -> t.getSource().equals(s) && !t.getDestination().equals(s))
 						.collect(Collectors.toSet());
-				Set<Transition> ingoingTransitions = reg.transitions.stream()
+				Set<Transition> ingoingTransitions = reg.getOrderedTransitions().stream()
 						.filter(t -> !t.getSource().equals(s) && t.getDestination().equals(s))
 						.collect(Collectors.toSet());
-				Set<Transition> selfTransitions = reg.transitions.stream()
+				Set<Transition> selfTransitions = reg.getOrderedTransitions().stream()
 						.filter(t -> t.getDestination().equals(t.getSource()) && t.getDestination().equals(s))
 						.collect(Collectors.toSet());
 
@@ -1019,6 +1036,10 @@ public final class Automaton {
 							if (!t.getSymbol().equals(""))
 								ingoingString.append(t.getSymbol()).append("|");
 						ingoingString.delete(ingoingString.length() - 1, ingoingString.length());
+						if (ingoingString.length() > 1) {
+							ingoingString.insert(0, "(");
+							ingoingString.append(")");
+						}
 					}
 					reg.transitions.removeAll(ingoingTransitions);
 					for (Transition t : ingoingTransitions)
