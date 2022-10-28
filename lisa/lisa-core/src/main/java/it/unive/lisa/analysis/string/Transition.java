@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * A class that describes an Automaton transition.
@@ -8,12 +9,16 @@ import java.util.Objects;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public final class Transition {
+public final class Transition implements Comparable<Transition>{
 
 	private final State source, destination;
 
 	// "" means epsilon transition
 	private final String symbol;
+
+	private static final AtomicInteger idGenerator = new AtomicInteger();
+
+	private final int id;
 
 	/**
 	 * Creates a new transition for a generic automaton.
@@ -28,6 +33,7 @@ public final class Transition {
 		this.source = source;
 		this.destination = destination;
 		this.symbol = symbol;
+		this.id = idGenerator.getAndIncrement();
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public final class Transition {
 
 	@Override
 	public String toString() {
-		return "[" + source + " -> " + destination + " : " + symbol + "]";
+		return "[" + source + " -> " + destination + " : " + symbol + ", id=" + id + "]";
 	}
 
 	/**
@@ -78,5 +84,18 @@ public final class Transition {
 	 */
 	public State getDestination() {
 		return this.destination;
+	}
+
+	/**
+	 * Returns the transition id.
+	 * @return an integer representing the transition's id.
+	 */
+	public int getId() {
+		return this.id;
+	}
+
+	@Override
+	public int compareTo(Transition transition) {
+		return Integer.compare(this.id, transition.id);
 	}
 }
