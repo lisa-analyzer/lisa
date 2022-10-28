@@ -30,7 +30,9 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         StringBuilder result = new StringBuilder();
 
         int i = 0;
-        while(i <= prefix.length() - 1 && prefix.charAt(i) == otherPrefixString.charAt(i)){
+        while(i <= prefix.length() - 1 &&
+                i <= otherPrefixString.length() -1 &&
+                prefix.charAt(i) == otherPrefixString.charAt(i)){
             result.append(prefix.charAt(i++));
         }
 
@@ -53,17 +55,26 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix>{
         int i = 0;
 
         if(otherPrefixString.length() <= thisPrefixString.length()){
-            while(otherPrefixString.charAt(i) == thisPrefixString.charAt(i)){
+            while(i <= otherPrefixString.length() &&
+             otherPrefixString.charAt(i) == thisPrefixString.charAt(i)){
                 ++i;
             }
         }
 
+        return i != 0;
         return i == otherPrefixString.length() - 1;
     } */
 
     @Override
     protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
-        return !(this.lubAux(other).equals(TOP));
+        if(other.getPrefix().length() <= this.getPrefix().length()) {
+            Prefix lub = this.lubAux(other);
+            String lubString = lub.getPrefix();
+
+            return lubString.length() == other.getPrefix().length();
+        }
+
+        return false;
     }
 
     @Override

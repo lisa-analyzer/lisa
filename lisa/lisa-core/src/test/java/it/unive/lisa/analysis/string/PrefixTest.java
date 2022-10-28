@@ -2,7 +2,8 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.Assert.*;
 
 public class PrefixTest {
 
@@ -27,5 +28,33 @@ public class PrefixTest {
         Prefix result = new Prefix("Hello World!").lubAux(new Prefix("Hello, World!"));
 
         assertEquals(result.getPrefix() ,"Hello");
+    }
+
+    @Test
+    public void testPrefixLubAux2() throws SemanticException {
+        Prefix result = new Prefix("abc*").lubAux(new Prefix("def*"));
+
+        assertTrue(result.isTop());
+    }
+
+    @Test
+    public void testLessOrEqualsAux() throws SemanticException {
+        Prefix result = new Prefix("abc*");
+
+        assertFalse(result.lessOrEqualAux(new Prefix("abcde*")));
+    }
+
+    @Test
+    public void testLessOrEqualsAux1() throws SemanticException {
+        Prefix result = new Prefix("abcde*");
+
+        assertFalse(result.lessOrEqualAux(new Prefix("abd*")));
+    }
+
+    @Test
+    public void testLessOrEqualsAux2() throws SemanticException {
+        Prefix result = new Prefix("abde");
+
+        assertTrue(result.lessOrEqualAux(new Prefix("abd")));
     }
 }
