@@ -18,12 +18,12 @@ public class BitLogicTest {
 	@Test
 	public void testBitmask() {
 		for (int i = 0; i < 63; i++) {
-			long bitmask = BitExternalSet.bitmask(i);
+			long bitmask = 1L << (i % 64);
 			long pow = (long) Math.pow(2, i);
 			assertEquals("Wrong bitmask for " + i + ": expected " + pow + ", got " + bitmask, pow, bitmask);
 		}
 		long _63 = -9223372036854775808L; // this is 2^63 in two's complement
-		long bitmask = BitExternalSet.bitmask(63);
+		long bitmask = 1L << (63 % 64);
 		assertEquals("Wrong bitmask for 63: expected " + _63 + ", got " + bitmask, _63, bitmask);
 	}
 
@@ -32,7 +32,7 @@ public class BitLogicTest {
 		Random random = new Random();
 		for (int i = 0; i < LIMIT; i++) {
 			int test = Math.abs(random.nextInt());
-			int index = BitExternalSet.bitvector_index(test);
+			int index = test >> 6;
 			int div = test / 64;
 			assertEquals("Wrong bitvector index for " + test + ": expected " + div + ", got " + index, div, index);
 		}
@@ -50,20 +50,20 @@ public class BitLogicTest {
 
 			assertEquals("Testing " + test + ": the bitvector is not set to 0 before the computation", 0L, smash(bits));
 			assertFalse("Testing " + test + ": the corresponding bit is set at the beginning",
-					BitExternalSet.isset(bits, test));
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
-			BitExternalSet.set(bits, test);
+			bits[test >> 6] |= 1L << (test % 64);
 			assertNotEquals("Testing " + test + ": set() did not modify the bitvector (still equal to 0)", 0L,
 					smash(bits));
 			assertArrayEquals("Testing " + test + ": set() did not modfiy the bits appropriately",
 					new int[] { test }, actives(bits));
 			assertTrue("Testing " + test + ": isset() does not detect the modification made by set()",
-					BitExternalSet.isset(bits, test));
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 
-			BitExternalSet.unset(bits, test);
+			bits[test >> 6] &= ~(1L << (test % 64));
 			assertEquals("Testing " + test + ": unset() did not bring the bitvector to 0", 0L, smash(bits));
 			assertFalse("Testing " + test + ": isset() does not detect the modification made by unset()",
-					BitExternalSet.isset(bits, test));
+					(bits[test >> 6] & 1L << (test % 64)) != 0L);
 		}
 	}
 

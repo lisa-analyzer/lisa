@@ -1,7 +1,9 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Numeric type interface. Any concrete numerical type or numerical
@@ -75,80 +77,79 @@ public interface NumericType extends Type {
 	}
 
 	/**
-	 * Checks if two implementations of {@link NumericType} represent the same
-	 * type, and can thus be used interchangeably. For two instances represent
-	 * the same type, every {@code isX} method defined by this interface has to
-	 * return the same value.
+	 * Checks if the two implementations of {@link NumericType} of {@code this}
+	 * and {@code other} represent the same type, and can thus be used
+	 * interchangeably. For two instances represent the same type, every
+	 * {@code isX} method defined by this interface has to return the same
+	 * value.
 	 * 
-	 * @param t1 the first type
-	 * @param t2 the second type
+	 * @param other the other type
 	 * 
 	 * @return whether or not the two instances represent the same type
 	 */
-	public static boolean sameNumericTypes(NumericType t1, NumericType t2) {
-		if (t1.is8Bits() != t2.is8Bits())
+	default boolean sameNumericTypes(NumericType other) {
+		if (is8Bits() != other.is8Bits())
 			return false;
-		if (t1.is16Bits() != t2.is16Bits())
+		if (is16Bits() != other.is16Bits())
 			return false;
-		if (t1.is32Bits() != t2.is32Bits())
+		if (is32Bits() != other.is32Bits())
 			return false;
-		if (t1.is64Bits() != t2.is64Bits())
+		if (is64Bits() != other.is64Bits())
 			return false;
-		if (t1.isIntegral() != t2.isIntegral())
+		if (isIntegral() != other.isIntegral())
 			return false;
-		if (t1.isUnsigned() != t2.isUnsigned())
+		if (isUnsigned() != other.isUnsigned())
 			return false;
 		return true;
 	}
 
 	/**
-	 * Determines which of the two {@link NumericType}s is supertype for the
-	 * other. At first, the size of the two types is considered, and the larger
-	 * size takes precedence. Then, precedence is given to non-integral types,
-	 * and at last, to signed types.
+	 * Determines which of the two {@link NumericType}s between {@code this} and
+	 * {@code other} is supertype for the other. At first, the size of the two
+	 * types is considered, and the larger size takes precedence. Then,
+	 * precedence is given to non-integral types, and at last, to signed types.
 	 * 
-	 * @param t1 the first type
-	 * @param t2 the second type
+	 * @param other the other type
 	 * 
 	 * @return the supertype between the two
 	 */
-	public static NumericType supertype(NumericType t1, NumericType t2) {
-		if (t1.is8Bits() && (t2.is16Bits() || t2.is32Bits() || t2.is64Bits()))
-			return t2;
-		if (t2.is8Bits() && (t1.is16Bits() || t1.is32Bits() || t1.is64Bits()))
-			return t1;
+	default NumericType supertype(NumericType other) {
+		if (is8Bits() && (other.is16Bits() || other.is32Bits() || other.is64Bits()))
+			return other;
+		if (other.is8Bits() && (is16Bits() || is32Bits() || is64Bits()))
+			return this;
 
-		if (t1.is16Bits() && (t2.is32Bits() || t2.is64Bits()))
-			return t2;
-		if (t2.is16Bits() && (t1.is32Bits() || t1.is64Bits()))
-			return t1;
+		if (is16Bits() && (other.is32Bits() || other.is64Bits()))
+			return other;
+		if (other.is16Bits() && (is32Bits() || is64Bits()))
+			return this;
 
-		if (t1.is32Bits() && t2.is64Bits())
-			return t2;
-		if (t2.is32Bits() && t1.is64Bits())
-			return t1;
+		if (is32Bits() && other.is64Bits())
+			return other;
+		if (other.is32Bits() && is64Bits())
+			return this;
 
 		// both 64 bits
 
-		if (t1.isIntegral() && !t2.isIntegral())
-			return t2;
-		if (!t1.isIntegral() && t2.isIntegral())
-			return t1;
+		if (isIntegral() && !other.isIntegral())
+			return other;
+		if (!isIntegral() && other.isIntegral())
+			return this;
 
-		if (t1.isUnsigned() && t2.isSigned())
-			return t2;
-		if (t1.isSigned() && t2.isUnsigned())
-			return t1;
+		if (isUnsigned() && other.isSigned())
+			return other;
+		if (isSigned() && other.isUnsigned())
+			return this;
 
-		return t1; // they are both 64-bit signed non-integral types
+		return this; // they are both 64-bit signed non-integral types
 	}
 
 	/**
-	 * Computes the {@link ExternalSet} of {@link Type}s representing the common
-	 * ones among the given sets. The result is computed as follows:
+	 * Computes the set of {@link Type}s representing the common ones among the
+	 * given sets. The result is computed as follows:
 	 * <ul>
 	 * <li>if both arguments have no numeric types among their possible types,
-	 * then a singleton set containing {@link Untyped#INSTANCE} is returned</li>
+	 * then an empty set is returned</li>
 	 * <li>for each pair {@code <t1, t2>} where {@code t1} is a type of
 	 * {@code left} and {@code t2} is a type of {@code right}:
 	 * <ul>
@@ -175,15 +176,20 @@ public interface NumericType extends Type {
 	 * 
 	 * @return the set of possible runtime types
 	 */
-	public static ExternalSet<Type> commonNumericalType(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isNumericType) && right.noneMatch(Type::isNumericType))
+	public static Set<Type> commonNumericalType(Set<Type> left, Set<Type> right) {
+		Set<Type> lfiltered = left.stream().filter(type -> type.isNumericType() || type.isUntyped())
+				.collect(Collectors.toSet());
+		Set<Type> rfiltered = right.stream().filter(type -> type.isNumericType() || type.isUntyped())
+				.collect(Collectors.toSet());
+		if ((lfiltered.isEmpty() || lfiltered.stream().allMatch(Type::isUntyped))
+				&& (rfiltered.isEmpty() || rfiltered.stream().allMatch(Type::isUntyped)))
 			// if none have numeric types in them,
 			// we cannot really compute the
-			return Caches.types().mkEmptySet();
+			return Collections.emptySet();
 
-		ExternalSet<Type> result = Caches.types().mkEmptySet();
-		for (Type t1 : left.filter(type -> type.isNumericType() || type.isUntyped()))
-			for (Type t2 : right.filter(type -> type.isNumericType() || type.isUntyped()))
+		Set<Type> result = new HashSet<>();
+		for (Type t1 : lfiltered)
+			for (Type t2 : rfiltered)
 				if (t1.isUntyped() && t2.isUntyped())
 					result.add(t1);
 				else if (t1.isUntyped())

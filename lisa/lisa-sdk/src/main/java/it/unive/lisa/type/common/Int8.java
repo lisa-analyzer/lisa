@@ -2,9 +2,10 @@ package it.unive.lisa.type.common;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * A signed 8-bit integral {@link NumericType}. The only singleton instance of
@@ -19,10 +20,10 @@ import java.util.Collections;
  * The common supertype between an Int8 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
- * {@link NumericType#supertype(NumericType, NumericType)}. <br>
+ * {@link NumericType#supertype(NumericType)}. <br>
  * <br>
  * Equality with other types is determined through
- * {@link NumericType#sameNumericTypes(NumericType, NumericType)}.
+ * {@link NumericType#sameNumericTypes(NumericType)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -76,7 +77,7 @@ public class Int8 implements NumericType {
 		if (!other.isNumericType())
 			return Untyped.INSTANCE;
 
-		return NumericType.supertype(this, other.asNumericType());
+		return supertype(other.asNumericType());
 	}
 
 	@Override
@@ -89,7 +90,7 @@ public class Int8 implements NumericType {
 		if (!(other instanceof NumericType))
 			return false;
 
-		return NumericType.sameNumericTypes(this, (NumericType) other);
+		return sameNumericTypes((NumericType) other);
 	}
 
 	@Override
@@ -98,7 +99,7 @@ public class Int8 implements NumericType {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

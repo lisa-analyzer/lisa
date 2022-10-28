@@ -256,7 +256,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							true,
 							expression.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);
@@ -273,7 +273,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					true,
 					expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
-				id.setRuntimeTypes(expression.getRuntimeTypes());
+				id.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(id);
 		}
 
@@ -290,7 +290,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							(AllocationSite) loc,
 							loc.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				} else
 					result.add(loc);
@@ -334,7 +334,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						site,
 						site.getCodeLocation());
 				if (v.hasRuntimeTypes())
-					e.setRuntimeTypes(v.getRuntimeTypes());
+					e.setRuntimeTypes(v.getRuntimeTypes(null));
 				result.add(e);
 			}
 

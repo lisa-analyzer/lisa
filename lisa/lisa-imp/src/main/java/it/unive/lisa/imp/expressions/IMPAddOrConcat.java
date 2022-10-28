@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingAdd;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -64,9 +65,10 @@ public class IMPAddOrConcat extends it.unive.lisa.program.cfg.statement.BinaryEx
 					throws SemanticException {
 		AnalysisState<A, H, V, T> result = state.bottom();
 		BinaryOperator op;
+		TypeSystem types = getProgram().getTypes();
 
-		for (Type tleft : left.getRuntimeTypes())
-			for (Type tright : right.getRuntimeTypes()) {
+		for (Type tleft : left.getRuntimeTypes(types))
+			for (Type tright : right.getRuntimeTypes(types)) {
 				if (tleft.isStringType())
 					if (tright.isStringType() || tright.isUntyped())
 						op = StringConcat.INSTANCE;

@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -167,9 +167,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return left.isTop() ? left : POS;
 			else
 				return top();
-		else if (operator instanceof it.unive.lisa.symbolic.value.operator.Module)
+		else if (operator instanceof it.unive.lisa.symbolic.value.operator.ModuleOperator)
 			return top();
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			if (left.isZero() || right.isZero())
 				return ZERO;
 			else if (left.equals(right))

@@ -19,9 +19,9 @@ import org.junit.Test;
 
 public class WarningsTest {
 
-	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null),
+	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null, null),
 			"fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1), new Program(null),
+	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1), new Program(null, null),
 			"fake2", false);
 
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);

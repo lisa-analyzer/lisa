@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given two expressions, a {@link BinaryExpression} using this operator checks
@@ -40,7 +41,7 @@ public class ComparisonEq implements ComparisonOperator, BinaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		return Caches.types().mkSingletonSet(BoolType.INSTANCE);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+		return Collections.singleton(BoolType.INSTANCE);
 	}
 }

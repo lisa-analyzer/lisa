@@ -1,7 +1,7 @@
 package it.unive.lisa.type;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * The void type. It implements the singleton design pattern, that is the
@@ -46,7 +46,7 @@ public class VoidType implements Type {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

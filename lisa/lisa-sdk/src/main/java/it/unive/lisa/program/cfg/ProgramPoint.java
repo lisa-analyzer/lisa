@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg;
 
 import it.unive.lisa.program.CodeElement;
+import it.unive.lisa.program.Program;
 
 /**
  * A program point, representing an instruction that is happening in one of the
@@ -16,4 +17,15 @@ public interface ProgramPoint extends CodeElement {
 	 * @return the containing cfg
 	 */
 	CFG getCFG();
+
+	/**
+	 * Yields the {@link Program} where this program point is defined. By
+	 * default, this is obtained through the {@link CFG} returned by
+	 * {@link #getCFG()}.
+	 * 
+	 * @return the containing program
+	 */
+	default Program getProgram() {
+		return getCFG().getDescriptor().getUnit().getProgram();
+	}
 }

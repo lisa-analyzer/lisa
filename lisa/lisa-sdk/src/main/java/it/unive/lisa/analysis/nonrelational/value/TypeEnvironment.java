@@ -11,8 +11,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -135,15 +135,15 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public ExternalSet<Type> getInferredRuntimeTypes() {
+	public Set<Type> getInferredRuntimeTypes() {
 		return stack.getRuntimeTypes();
 	}
 
 	@Override
 	public Type getInferredDynamicType() {
-		ExternalSet<Type> types = stack.getRuntimeTypes();
+		Set<Type> types = stack.getRuntimeTypes();
 		if (stack.isTop() || stack.isBottom() || types.isEmpty())
 			return Untyped.INSTANCE;
-		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
+		return Type.commonSupertype(types, Untyped.INSTANCE);
 	}
 }

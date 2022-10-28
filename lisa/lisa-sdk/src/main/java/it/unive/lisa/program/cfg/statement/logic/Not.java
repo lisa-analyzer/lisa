@@ -16,6 +16,7 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
 
 /**
@@ -48,7 +49,8 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (expr.getRuntimeTypes().noneMatch(Type::isBooleanType))
+		TypeSystem types = getProgram().getTypes();
+		if (expr.getRuntimeTypes(types).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

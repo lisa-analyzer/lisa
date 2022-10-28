@@ -10,6 +10,8 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.imp.types.IMPTypeSystem;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -141,6 +143,11 @@ public class BaseInferredValueTest {
 			@Override
 			public CFG getCFG() {
 				return null;
+			}
+
+			@Override
+			public Program getProgram() {
+				return new Program(null, new IMPTypeSystem());
 			}
 
 		}

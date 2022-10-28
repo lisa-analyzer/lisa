@@ -211,7 +211,9 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
-		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		if (expression.hasRuntimeTypes())
+			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
 	}
 
 	/**
@@ -261,7 +263,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected T evalTypeConv(BinaryExpression conv, T left, T right, ProgramPoint pp) throws SemanticException {
-		return conv.getRuntimeTypes().isEmpty() ? bottom() : left;
+		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
 	}
 
 	/**
@@ -279,7 +281,7 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected T evalTypeCast(BinaryExpression cast, T left, T right, ProgramPoint pp) throws SemanticException {
-		return cast.getRuntimeTypes().isEmpty() ? bottom() : left;
+		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
 	}
 
 	/**

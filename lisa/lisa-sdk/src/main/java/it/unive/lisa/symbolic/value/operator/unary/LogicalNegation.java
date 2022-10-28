@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.LogicalOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given an expression that evaluates to a Boolean value, a
@@ -40,9 +41,9 @@ public class LogicalNegation implements LogicalOperator, UnaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> argument) {
-		if (argument.noneMatch(Type::isBooleanType))
-			return Caches.types().mkEmptySet();
-		return Caches.types().mkSingletonSet(BoolType.INSTANCE);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+		if (argument.stream().noneMatch(Type::isBooleanType))
+			return Collections.emptySet();
+		return Collections.singleton(BoolType.INSTANCE);
 	}
 }

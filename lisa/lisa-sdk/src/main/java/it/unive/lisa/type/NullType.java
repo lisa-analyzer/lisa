@@ -1,7 +1,7 @@
 package it.unive.lisa.type;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * The Null type, that is the type of {#link NullLiteral}. It implements the
@@ -49,7 +49,7 @@ public class NullType implements InMemoryType {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

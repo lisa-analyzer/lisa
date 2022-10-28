@@ -128,7 +128,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
 						expression.getCodeLocation());
 				if (expr.hasRuntimeTypes())
-					e.setRuntimeTypes(expr.getRuntimeTypes());
+					e.setRuntimeTypes(expr.getRuntimeTypes(null));
 				result.add(e);
 			}
 			return new ExpressionSet<>(result);
@@ -145,7 +145,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 							expression.getOperator(),
 							expression.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
 			return new ExpressionSet<>(result);
@@ -164,7 +164,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 								expression.getOperator(),
 								expression.getCodeLocation());
 						if (expression.hasRuntimeTypes())
-							e.setRuntimeTypes(expression.getRuntimeTypes());
+							e.setRuntimeTypes(expression.getRuntimeTypes(null));
 						result.add(e);
 					}
 			return new ExpressionSet<>(result);

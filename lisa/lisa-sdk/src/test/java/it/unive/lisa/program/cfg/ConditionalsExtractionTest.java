@@ -33,7 +33,8 @@ import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), new Program(null),
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
+			new Program(null, null),
 			"Testing", false);
 
 	private static void checkMatrix(String label, Collection<Statement> nodes,

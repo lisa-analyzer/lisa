@@ -361,7 +361,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
-		return conv.getRuntimeTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 
@@ -384,7 +384,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
-		return cast.getRuntimeTypes().isEmpty() ? new InferredPair<>(bot, bot, bot)
+		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
 				: new InferredPair<>((T) this, left, state);
 	}
 
@@ -608,7 +608,9 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 
 	@Override
 	public boolean canProcess(SymbolicExpression expression) {
-		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		if (expression.hasRuntimeTypes())
+			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
 	}
 
 	@Override

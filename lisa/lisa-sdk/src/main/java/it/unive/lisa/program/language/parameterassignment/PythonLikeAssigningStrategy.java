@@ -16,7 +16,7 @@ import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.language.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -76,11 +76,11 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 					throws SemanticException {
 
 		ExpressionSet<SymbolicExpression>[] slots = new ExpressionSet[formals.length];
-		ExternalSet<Type>[] slotsTypes = new ExternalSet[formals.length];
+		Set<Type>[] slotsTypes = new Set[formals.length];
 		Expression[] actuals = call.getParameters();
 
 		ExpressionSet<SymbolicExpression>[] defaults = new ExpressionSet[formals.length];
-		ExternalSet<Type>[] defaultTypes = new ExternalSet[formals.length];
+		Set<Type>[] defaultTypes = new Set[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
 			if (def != null) {

@@ -9,7 +9,8 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.caches.Caches;
+import it.unive.lisa.imp.types.IMPTypeSystem;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -31,10 +32,11 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collections;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.Test;
 
@@ -83,8 +85,8 @@ public class BaseNonRelationalTypeDomainTest {
 		}
 
 		@Override
-		public ExternalSet<Type> getRuntimeTypes() {
-			return Caches.types().mkEmptySet();
+		public Set<Type> getRuntimeTypes() {
+			return Collections.emptySet();
 		}
 	}
 
@@ -138,6 +140,10 @@ public class BaseNonRelationalTypeDomainTest {
 				return null;
 			}
 
+			@Override
+			public Program getProgram() {
+				return new Program(null, new IMPTypeSystem());
+			}
 		}
 
 		if (param == Type.class)

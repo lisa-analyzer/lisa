@@ -20,7 +20,8 @@ import org.junit.Test;
 
 public class CFGWithAnalysisResultsTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), new Program(null),
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
+			new Program(null, null),
 			"Testing", false);
 
 	@Test

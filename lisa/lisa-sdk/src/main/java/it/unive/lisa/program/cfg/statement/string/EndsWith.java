@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.StringType;
 
@@ -72,9 +73,10 @@ public class EndsWith extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

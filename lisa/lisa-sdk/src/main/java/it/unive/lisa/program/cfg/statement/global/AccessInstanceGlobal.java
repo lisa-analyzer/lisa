@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
@@ -23,9 +22,9 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -123,30 +122,31 @@ public class AccessInstanceGlobal extends UnaryExpression {
 
 		AnalysisState<A, H, V, T> result = state.bottom();
 		boolean atLeastOne = false;
-		for (Type recType : expr.getRuntimeTypes())
+		TypeSystem types = getProgram().getTypes();
+		for (Type recType : expr.getRuntimeTypes(types))
 			if (recType.isPointerType()) {
 				Collection<CompilationUnit> units;
 
-				ExternalSet<Type> rectypes = recType.asPointerType().getInnerTypes();
-				Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
+				Set<Type> rectypes = recType.asPointerType().getInnerTypes();
+				Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 				HeapDereference container = new HeapDereference(rectype, expr, loc);
 				container.setRuntimeTypes(rectypes);
 
 				if (recType.isUnitType())
 					units = Collections.singleton(recType.asUnitType().getUnit());
-				else if (recType.isPointerType() && rectypes.anyMatch(Type::isUnitType))
+				else {
 					units = rectypes
 							.stream()
 							.filter(Type::isUnitType)
 							.map(Type::asUnitType)
 							.map(UnitType::getUnit)
 							.collect(Collectors.toSet());
-				else
-					continue;
+					if (units.isEmpty())
+						continue;
+				}
 
 				Set<CompilationUnit> seen = new HashSet<>();
-				HierarcyTraversalStrategy strategy = getCFG().getDescriptor().getUnit().getProgram().getFeatures()
-						.getTraversalStrategy();
+				HierarcyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
 				for (CompilationUnit unit : units)
 					for (CompilationUnit cu : strategy.traverse(this, unit))
 						if (seen.add(unit)) {
@@ -164,15 +164,15 @@ public class AccessInstanceGlobal extends UnaryExpression {
 			return result;
 
 		// worst case: we are accessing a global that we know nothing about
-		ExternalSet<Type> rectypes = Caches.types().mkEmptySet();
-		for (Type t : expr.getRuntimeTypes())
+		Set<Type> rectypes = new HashSet<>();
+		for (Type t : expr.getRuntimeTypes(types))
 			if (t.isPointerType())
 				rectypes.addAll(t.asPointerType().getInnerTypes());
 
 		if (rectypes.isEmpty())
 			return state.bottom();
 
-		Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
+		Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
 		Variable var = new Variable(Untyped.INSTANCE, target, new Annotations(), getLocation());
 		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
 		container.setRuntimeTypes(rectypes);

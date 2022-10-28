@@ -39,18 +39,18 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null), "fake",
-			false);
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null, null),
+			"fake", false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 			new SourceCodeLocation("fake", 2, 0), unit, false,
@@ -88,7 +88,7 @@ public class CheckToolWithAnalysisResultsTest {
 		}
 
 		@Override
-		public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+		public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 				throws CallResolutionException {
 			return null;
 		}

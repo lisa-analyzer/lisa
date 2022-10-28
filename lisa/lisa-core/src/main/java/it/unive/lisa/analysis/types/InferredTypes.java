@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.types;
 
+import static org.apache.commons.collections4.CollectionUtils.intersection;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -9,7 +11,6 @@ import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -27,9 +28,13 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -39,52 +44,67 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
-	private static final InferredTypes TOP = new InferredTypes(Caches.types().mkUniversalSet());
+	private static final InferredTypes BOTTOM = new InferredTypes(null, Collections.emptySet());
 
-	private static final InferredTypes BOTTOM = new InferredTypes(Caches.types().mkEmptySet());
+	private final Set<Type> elements;
 
-	private final ExternalSet<Type> elements;
+	private final boolean isTop;
 
 	/**
 	 * Builds the inferred types. The object built through this constructor
 	 * represents an empty set of types.
 	 */
 	public InferredTypes() {
-		this(Caches.types().mkUniversalSet());
+		this(null, (Set<Type>) null);
 	}
 
 	/**
 	 * Builds the inferred types, representing only the given {@link Type}.
 	 * 
-	 * @param type the type to be included in the set of inferred types
+	 * @param typeSystem the type system knowing about the types of the program
+	 *                       where this element is created
+	 * @param type       the type to be included in the set of inferred types
 	 */
-	InferredTypes(Type type) {
-		this(Caches.types().mkSingletonSet(type));
+	InferredTypes(TypeSystem typeSystem, Type type) {
+		this(typeSystem, Collections.singleton(type));
 	}
 
 	/**
 	 * Builds the inferred types, representing only the given set of
 	 * {@link Type}s.
 	 * 
-	 * @param types the types to be included in the set of inferred types
+	 * @param typeSystem the type system knowing about the types of the program
+	 *                       where this element is created
+	 * @param types      the types to be included in the set of inferred types
 	 */
-	InferredTypes(ExternalSet<Type> types) {
-		this.elements = types;
+	InferredTypes(TypeSystem typeSystem, Set<Type> types) {
+		this(typeSystem != null && types.equals(typeSystem.getTypes()), types);
 	}
 
+	private InferredTypes(boolean isTop, Set<Type> types) {
+		this.elements = types;
+		this.isTop = isTop;
+	}
+
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Caution: invoking this method on the top instance obtained through
+	 * {@code new InferredTypes().top()} will return a {@code null} value.
+	 */
 	@Override
-	public ExternalSet<Type> getRuntimeTypes() {
+	public Set<Type> getRuntimeTypes() {
 		return elements;
 	}
 
 	@Override
 	public InferredTypes top() {
-		return TOP;
+		return new InferredTypes(true, null);
 	}
 
 	@Override
 	public boolean isTop() {
-		return super.isTop() || elements.equals(TOP.elements);
+		return super.isTop() || isTop;
 	}
 
 	@Override
@@ -94,7 +114,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	public boolean isBottom() {
-		return super.isBottom() || elements.equals(BOTTOM.elements);
+		return super.isBottom() || BOTTOM.elements.equals(elements);
 	}
 
 	@Override
@@ -114,77 +134,95 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 		InferredTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
-		return new InferredTypes(id.getRuntimeTypes());
+		TypeSystem types = pp.getProgram().getTypes();
+		return new InferredTypes(types, id.getRuntimeTypes(types));
 	}
 
 	@Override
 	protected InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
-		return new InferredTypes(pushAny.getRuntimeTypes());
+		TypeSystem types = pp.getProgram().getTypes();
+		if (pushAny.getStaticType().isUntyped())
+			return new InferredTypes(true, types.getTypes());
+		return new InferredTypes(types, pushAny.getRuntimeTypes(types));
 	}
 
 	@Override
 	protected InferredTypes evalNullConstant(ProgramPoint pp) {
-		return new InferredTypes(NullType.INSTANCE);
+		return new InferredTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
 	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new InferredTypes(constant.getStaticType());
+		return new InferredTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
 	@Override
 	protected InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
 			ProgramPoint pp) {
-		ExternalSet<Type> inferred = operator.typeInference(arg.elements);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> elems = arg.isTop() ? types.getTypes() : arg.elements;
+		Set<Type> inferred = operator.typeInference(types, elems);
 		if (inferred.isEmpty())
 			return BOTTOM;
-		return new InferredTypes(inferred);
+		return new InferredTypes(types, inferred);
 	}
 
 	@Override
 	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left,
 			InferredTypes right, ProgramPoint pp) {
-		ExternalSet<Type> inferred = operator.typeInference(left.elements, right.elements);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
+		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
+		Set<Type> inferred = operator.typeInference(types, lelems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
-		return new InferredTypes(inferred);
+		return new InferredTypes(types, inferred);
 	}
 
 	@Override
 	protected InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left,
 			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
-		ExternalSet<Type> inferred = operator.typeInference(left.elements, middle.elements, right.elements);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
+		Set<Type> melems = middle.isTop() ? types.getTypes() : middle.elements;
+		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
+		Set<Type> inferred = operator.typeInference(types, lelems, melems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
-		return new InferredTypes(inferred);
+		return new InferredTypes(types, inferred);
 	}
 
 	@Override
 	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
 			InferredTypes right, ProgramPoint pp) {
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
+		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
 		if (operator == ComparisonEq.INSTANCE || operator == ComparisonNe.INSTANCE) {
-			if (!left.elements.allMatch(Type::isTypeTokenType) || !right.elements.allMatch(Type::isTypeTokenType))
+			Set<Type> lfiltered = lelems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
+			Set<Type> rfiltered = relems.stream().filter(Type::isTypeTokenType).collect(Collectors.toSet());
+
+			if (lelems.size() != lfiltered.size() || relems.size() != rfiltered.size())
 				// if there is at least one element that is not a type
 				// token, than we cannot reason about it
 				return Satisfiability.UNKNOWN;
 
-			ExternalSet<Type> lfiltered = left.elements.filter(Type::isTypeTokenType);
-			ExternalSet<Type> rfiltered = right.elements.filter(Type::isTypeTokenType);
 			if (operator == ComparisonEq.INSTANCE) {
-				if (left.elements.size() == 1 && left.elements.equals(right.elements))
+				if (lelems.size() == 1 && lelems.equals(relems))
 					// only one element, and it is the same
 					return Satisfiability.SATISFIED;
-				else if (!left.elements.intersects(right.elements) && !typeTokensIntersect(lfiltered, rfiltered))
+				else if (intersection(lelems, relems).isEmpty()
+						&& !typeTokensIntersect(lfiltered, rfiltered))
 					// no common elements, they cannot be equal
 					return Satisfiability.NOT_SATISFIED;
 				else
 					// we don't know really
 					return Satisfiability.UNKNOWN;
 			} else {
-				if (!left.elements.intersects(right.elements) && !typeTokensIntersect(lfiltered, rfiltered))
+				if (intersection(lelems, relems).isEmpty() && !typeTokensIntersect(lfiltered, rfiltered))
 					// no common elements, they cannot be equal
 					return Satisfiability.SATISFIED;
-				else if (left.elements.size() == 1 && left.elements.equals(right.elements))
+				else if (lelems.size() == 1 && lelems.equals(relems))
 					// only one element, and it is the same
 					return Satisfiability.NOT_SATISFIED;
 				else
@@ -196,8 +234,8 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 				// no common types, the check will always fail
 				return Satisfiability.NOT_SATISFIED;
 			AtomicBoolean mightFail = new AtomicBoolean();
-			ExternalSet<Type> set = Type.cast(left.elements, right.elements, mightFail);
-			if (left.elements.equals(set) && !mightFail.get())
+			Set<Type> set = types.cast(lelems, relems, mightFail);
+			if (lelems.equals(set) && !mightFail.get())
 				// if all the types stayed in 'set' then the there is no
 				// execution that reach the expression with a type that cannot
 				// be casted, and thus this is a tautology
@@ -229,10 +267,11 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	 *                                  {@link TypeTokenType} (this is due to
 	 *                                  the conversion)
 	 */
-	static boolean typeTokensIntersect(ExternalSet<Type> lfiltered, ExternalSet<Type> rfiltered) {
+	static boolean typeTokensIntersect(Set<Type> lfiltered, Set<Type> rfiltered) {
 		for (Type l : lfiltered)
 			for (Type r : rfiltered)
-				if (l.asTypeTokenType().getTypes().intersects(r.asTypeTokenType().getTypes()))
+				if (!intersection(l.asTypeTokenType().getTypes(), r.asTypeTokenType().getTypes())
+						.isEmpty())
 					return true;
 
 		return false;
@@ -240,7 +279,9 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	protected InferredTypes lubAux(InferredTypes other) throws SemanticException {
-		return new InferredTypes(elements.union(other.elements));
+		Set<Type> lub = new HashSet<>(elements);
+		lub.addAll(other.elements);
+		return new InferredTypes(null, lub);
 	}
 
 	@Override
@@ -250,7 +291,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	protected boolean lessOrEqualAux(InferredTypes other) throws SemanticException {
-		return other.elements.contains(elements);
+		return other.elements.containsAll(elements);
 	}
 
 	@Override
@@ -258,6 +299,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((elements == null) ? 0 : elements.hashCode());
+		result = prime * result + (isTop ? 1231 : 1237);
 		return result;
 	}
 
@@ -275,25 +317,33 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 				return false;
 		} else if (!elements.equals(other.elements))
 			return false;
+		if (isTop != other.isTop)
+			return false;
 		return true;
 	}
 
 	@Override
 	protected InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
 			ProgramPoint pp) {
-		ExternalSet<Type> inferred = cast.getOperator().typeInference(left.elements, right.elements);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
+		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
+		Set<Type> inferred = cast.getOperator().typeInference(types, lelems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
-		return new InferredTypes(inferred);
+		return new InferredTypes(types, inferred);
 	}
 
 	@Override
 	protected InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
 			ProgramPoint pp) {
-		ExternalSet<Type> inferred = conv.getOperator().typeInference(left.elements, right.elements);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
+		Set<Type> relems = right.isTop() ? types.getTypes() : right.elements;
+		Set<Type> inferred = conv.getOperator().typeInference(types, lelems, relems);
 		if (inferred.isEmpty())
 			return BOTTOM;
-		return new InferredTypes(inferred);
+		return new InferredTypes(types, inferred);
 	}
 
 	@Override

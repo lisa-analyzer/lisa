@@ -1,10 +1,8 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.symbolic.value.operator.ModuleOperator;
 import it.unive.lisa.type.NumericType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * Given two expressions that both evaluate to numeric values, a
@@ -18,7 +16,7 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingMod implements it.unive.lisa.symbolic.value.operator.Module, BinaryOperator {
+public class NumericNonOverflowingMod extends NumericOperation implements ModuleOperator {
 
 	/**
 	 * The singleton instance of this class.
@@ -31,15 +29,5 @@ public class NumericNonOverflowingMod implements it.unive.lisa.symbolic.value.op
 	@Override
 	public String toString() {
 		return "%";
-	}
-
-	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isNumericType) || right.noneMatch(Type::isNumericType))
-			return Caches.types().mkEmptySet();
-		ExternalSet<Type> set = NumericType.commonNumericalType(left, right);
-		if (set.isEmpty())
-			return Caches.types().mkEmptySet();
-		return set;
 	}
 }

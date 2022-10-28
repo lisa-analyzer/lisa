@@ -31,7 +31,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimpleSimplification() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknown, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
@@ -64,7 +64,7 @@ public class CFGSimplificationTest {
 	public void testDoubleSimplification() throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));
@@ -98,7 +98,7 @@ public class CFGSimplificationTest {
 	public void testConditionalSimplification() throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));
@@ -162,7 +162,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationWithDuplicateStatements() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknown, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
@@ -194,7 +194,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationAtTheStart() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknown, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		NoOp start = new NoOp(first, unknown);
 		Assignment assign = new Assignment(first, unknown,
@@ -226,7 +226,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationAtTheEnd() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknown, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "x"),
@@ -261,7 +261,7 @@ public class CFGSimplificationTest {
 	@Test
 	public void testSimplificationAtTheEndWithBranch() throws ProgramValidationException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
-		ClassUnit unit = new ClassUnit(unknown, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknown, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknown, unit, false, "foo"));
 		Assignment assign1 = new Assignment(first, unknown,
 				new VariableRef(first, unknown, "b"),
@@ -321,7 +321,7 @@ public class CFGSimplificationTest {
 	public void testIssue210() throws ProgramValidationException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("fake", 0, 0);
 		SourceCodeLocation unknownLocation2 = new SourceCodeLocation("fake", 0, 1);
-		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null), "foo", false);
+		ClassUnit unit = new ClassUnit(unknownLocation, new Program(null, null), "foo", false);
 		CFG first = new CFG(new CodeMemberDescriptor(unknownLocation, unit, true, "foo"));
 		Assignment assign = new Assignment(first, unknownLocation, new VariableRef(first, unknownLocation, "x"),
 				new Int32Literal(first, unknownLocation, 5));

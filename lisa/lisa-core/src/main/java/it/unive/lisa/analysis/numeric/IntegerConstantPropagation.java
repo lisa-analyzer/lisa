@@ -14,8 +14,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Module;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.ModuleOperator;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -135,9 +135,9 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 				return top();
 			else
 				return new IntegerConstantPropagation(left.value / right.value);
-		else if (operator instanceof Module)
+		else if (operator instanceof ModuleOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value % right.value);
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value * right.value);
 		else if (operator instanceof SubtractionOperator)
 			return left.isTop() || right.isTop() ? top() : new IntegerConstantPropagation(left.value - right.value);

@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -73,11 +74,12 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (middle.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(

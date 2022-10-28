@@ -1,11 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given two expressions, with the second one evaluating to a type token, a
@@ -40,12 +41,12 @@ public class TypeConv implements TypeOperator, BinaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (right.noneMatch(Type::isTypeTokenType))
-			return Caches.types().mkEmptySet();
-		ExternalSet<Type> set = Type.convert(left, right);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+		if (right.stream().noneMatch(Type::isTypeTokenType))
+			return Collections.emptySet();
+		Set<Type> set = types.convert(left, right);
 		if (set.isEmpty())
-			return Caches.types().mkEmptySet();
+			return Collections.emptySet();
 		return set;
 	}
 }

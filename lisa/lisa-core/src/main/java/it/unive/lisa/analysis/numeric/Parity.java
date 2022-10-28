@@ -13,8 +13,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Module;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.ModuleOperator;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -119,7 +119,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 				return EVEN;
 			else
 				return ODD;
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			if (left.isEven() || right.isEven())
 				return EVEN;
 			else
@@ -129,7 +129,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 				return right.isOdd() ? ODD : EVEN;
 			else
 				return right.isOdd() ? EVEN : TOP;
-		else if (operator instanceof Module)
+		else if (operator instanceof ModuleOperator)
 			return TOP;
 
 		return TOP;

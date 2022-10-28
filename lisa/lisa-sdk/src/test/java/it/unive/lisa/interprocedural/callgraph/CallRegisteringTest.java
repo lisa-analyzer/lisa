@@ -29,8 +29,8 @@ import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.program.language.validation.BaseValidationLogic;
 import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
+import java.util.Set;
 import org.junit.Test;
 
 public class CallRegisteringTest {
@@ -43,9 +43,9 @@ public class CallRegisteringTest {
 		CallGraph cg = new BaseCallGraph() {
 
 			@Override
-			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 					throws CallResolutionException {
-				return receiver.getStaticType().allInstances();
+				return receiver.getStaticType().allInstances(receiver.getProgram().getTypes());
 			}
 
 		};
@@ -71,7 +71,7 @@ public class CallRegisteringTest {
 			public ProgramValidationLogic getProgramValidationLogic() {
 				return new BaseValidationLogic();
 			}
-		});
+		}, null);
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
@@ -91,7 +91,7 @@ public class CallRegisteringTest {
 		Application app = new Application(p);
 		cg.init(app);
 		@SuppressWarnings("unchecked")
-		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
+		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[0], new SymbolAliasing());
 		cg.registerCall(resolved);
 
 		Collection<CodeMember> callees = cg.getCallees(cfg1);

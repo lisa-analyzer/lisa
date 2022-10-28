@@ -27,6 +27,7 @@ import it.unive.lisa.imp.constructs.StringStartsWith;
 import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.types.ArrayType;
 import it.unive.lisa.imp.types.ClassType;
+import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.AbstractClassUnit;
 import it.unive.lisa.program.ClassUnit;
@@ -168,7 +169,7 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		this.file = file;
 		inheritanceMap = new HashMap<>();
 		implementedInterfaces = new HashMap<>();
-		program = new Program(new IMPFeatures());
+		program = new Program(new IMPFeatures(), new IMPTypeSystem());
 		this.onlyMain = onlyMain;
 	}
 
@@ -211,13 +212,13 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 			str.addInstanceCodeMember(new StringSubstring(unknownLocation, str));
 
 			// register all possible types
-			p.registerType(BoolType.INSTANCE);
-			p.registerType(Float32.INSTANCE);
-			p.registerType(Int32.INSTANCE);
-			p.registerType(StringType.INSTANCE);
-			ClassType.all().forEach(p::registerType);
-			ArrayType.all().forEach(p::registerType);
-			InterfaceType.all().forEach(p::registerType);
+			p.getTypes().registerType(BoolType.INSTANCE);
+			p.getTypes().registerType(Float32.INSTANCE);
+			p.getTypes().registerType(Int32.INSTANCE);
+			p.getTypes().registerType(StringType.INSTANCE);
+			ClassType.all().forEach(t -> p.getTypes().registerType(t));
+			ArrayType.all().forEach(t -> p.getTypes().registerType(t));
+			InterfaceType.all().forEach(t -> p.getTypes().registerType(t));
 
 			return p;
 		} catch (FileNotFoundException e) {

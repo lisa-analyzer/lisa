@@ -81,7 +81,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 						site.isWeak(),
 						site.getCodeLocation());
 				if (expression.hasRuntimeTypes())
-					e.setRuntimeTypes(expression.getRuntimeTypes());
+					e.setRuntimeTypes(expression.getRuntimeTypes(null));
 				result.add(e);
 			}
 		}
@@ -98,7 +98,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				weak = false;
 			AllocationSite e = new AllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
-				e.setRuntimeTypes(expression.getRuntimeTypes());
+				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(e);
 		}
 

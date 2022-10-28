@@ -1,8 +1,7 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -16,12 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public final class ReferenceType implements PointerType {
 
-	private ExternalSet<Type> innerTypes;
-
-	// TODO the purpose of this field is to avoid using the cache
-	// when defining the descriptors of cfgs, we have to find another
-	// workaround to this problem
-	private Type innerType;
+	private Set<Type> innerTypes;
 
 	/**
 	 * Builds the type for a reference to a location containing values of types
@@ -29,7 +23,7 @@ public final class ReferenceType implements PointerType {
 	 * 
 	 * @param innerTypes the possible types of the referenced location
 	 */
-	public ReferenceType(ExternalSet<Type> innerTypes) {
+	public ReferenceType(Set<Type> innerTypes) {
 		this.innerTypes = innerTypes;
 	}
 
@@ -40,7 +34,7 @@ public final class ReferenceType implements PointerType {
 	 * @param t the type of the referenced location
 	 */
 	public ReferenceType(Type t) {
-		innerType = t;
+		this.innerTypes = Collections.singleton(t);
 	}
 
 	@Override
@@ -54,26 +48,20 @@ public final class ReferenceType implements PointerType {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
-		return Caches.types().mkSingletonSet(this);
+	public Set<Type> allInstances(TypeSystem types) {
+		return Collections.singleton(this);
 	}
 
 	@Override
-	public ExternalSet<Type> getInnerTypes() {
-		return innerTypes != null ? innerTypes : Caches.types().mkSingletonSet(innerType);
+	public Set<Type> getInnerTypes() {
+		return innerTypes;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		if (innerTypes != null)
-			if (innerTypes.size() == 1)
-				result = prime * result + innerTypes.first().hashCode();
-			else
-				result = prime * result + ((innerTypes == null) ? 0 : innerTypes.hashCode());
-		else
-			result = prime * result + ((innerType == null) ? 0 : innerType.hashCode());
+		result = prime * result + ((innerTypes == null) ? 0 : innerTypes.hashCode());
 		return result;
 	}
 
@@ -81,56 +69,26 @@ public final class ReferenceType implements PointerType {
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof ReferenceType))
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		ReferenceType other = (ReferenceType) obj;
-
-		if (innerTypes != null) {
-			if (innerTypes.size() == 1) {
-				if (other.innerTypes != null)
-					if (other.innerTypes.size() != 1)
-						// [x] != [y, z]
-						return false;
-					else
-						// [x] ?= [y]
-						return innerTypes.first().equals(other.innerTypes.first());
-				else
-					// [x] ?= y
-					return innerTypes.first().equals(other.innerType);
-			} else {
-				if (other.innerTypes != null)
-					if (other.innerTypes.size() != 1)
-						// [x, w] ?= [y, z]
-						return innerTypes.equals(other.innerTypes);
-					else
-						// [x, w] != [y]
-						return false;
-				else
-					// [x, w] != y
-					return false;
-			}
-		} else if (innerType != null) {
+		if (innerTypes == null) {
 			if (other.innerTypes != null)
-				if (other.innerTypes.size() != 1)
-					// x != [y, z]
-					return false;
-				else
-					// x ?= [y]
-					return innerType.equals(other.innerTypes.first());
-			else
-				// x ?= y
-				return innerType.equals(other.innerType);
-		} else
+				return false;
+		} else if (!innerTypes.equals(other.innerTypes))
 			return false;
+		return true;
 	}
 
 	@Override
 	public String toString() {
 		if (innerTypes != null)
 			if (innerTypes.size() == 1)
-				return innerTypes.first() + "*";
+				return innerTypes.iterator().next() + "*";
 			else
 				return "[" + StringUtils.join(innerTypes, ", ") + "]*";
-		return innerType + "*";
+		return "?*";
 	}
 }

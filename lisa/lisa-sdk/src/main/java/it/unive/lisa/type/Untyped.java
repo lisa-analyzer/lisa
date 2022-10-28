@@ -1,7 +1,6 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * The untyped type, corresponding to an unknown/untyped type. This type is used
@@ -48,7 +47,7 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
-		return Caches.types().mkUniversalSet();
+	public Set<Type> allInstances(TypeSystem types) {
+		return types.getTypes();
 	}
 }
