@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
@@ -95,7 +97,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
     @Override
     public DomainRepresentation representation() {
-        return null;
+        if (isBottom())
+            return Lattice.bottomRepresentation();
+        if (isTop())
+            return Lattice.topRepresentation();
+
+        return new StringRepresentation(prefix + '*');
     }
 
     @Override
