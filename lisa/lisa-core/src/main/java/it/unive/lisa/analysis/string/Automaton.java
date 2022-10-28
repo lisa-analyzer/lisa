@@ -843,7 +843,7 @@ public final class Automaton {
 	 */
 	public String toRegex() {
 		// this algorithm works only with deterministic automata
-		Automaton a = this.determinize();
+		Automaton a = this.minimize();
 		// automaton that accepts only the empty string
 		if (a.states.size() == 1 && a.transitions.size() == 0)
 			return "";
