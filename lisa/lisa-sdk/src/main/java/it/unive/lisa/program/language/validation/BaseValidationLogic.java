@@ -109,6 +109,17 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	public static final String MULTIPLE_OVERRIDES = "%s is overriden multiple times in unit %s: %s";
 
 	/**
+	 * Error message format for {@link AbstractCodeMember} that is not instance.
+	 */
+	public static final String ABSTRACT_NON_INSTANCE = "%s is not an instance member and cannot be abstract";
+
+	/**
+	 * Error message format for a {@link CodeMember} not matching its own
+	 * signature.
+	 */
+	public static final String MEMBER_MISMATCH = "%s does not match its own signature";
+
+	/**
 	 * The set of {@link CompilationUnit}s, represented by their names, that
 	 * have been already processed by
 	 * {@link #validateAndFinalize(CompilationUnit)}. This is used to avoid
@@ -340,11 +351,16 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * @throws ProgramValidationException if the member has an invalid structure
 	 */
 	public void validate(CodeMember member, boolean instance) throws ProgramValidationException {
+		if (!instance && member instanceof AbstractCodeMember)
+			throw new ProgramValidationException(format(ABSTRACT_NON_INSTANCE, member));
 		Unit container = member.getDescriptor().getUnit();
 		Collection<CodeMember> matching = instance
 				? ((CompilationUnit) container).getMatchingInstanceCodeMembers(member.getDescriptor(), false)
 				: container.getMatchingCodeMember(member.getDescriptor());
-		if (matching.size() != 1 || matching.iterator().next() != member)
+		if (matching.isEmpty())
+			throw new ProgramValidationException(
+					format(MEMBER_MISMATCH, member.getDescriptor().getSignature()));
+		else if (matching.size() != 1 || matching.iterator().next() != member)
 			throw new ProgramValidationException(
 					format(DUPLICATE_MEMBER, member.getDescriptor().getSignature(), container));
 

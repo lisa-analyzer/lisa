@@ -7,10 +7,12 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
 import it.unive.lisa.program.Global;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -120,6 +122,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		CodeLocation loc = getLocation();
 
 		AnalysisState<A, H, V, T> result = state.bottom();
+		boolean atLeastOne = false;
 		for (Type recType : expr.getRuntimeTypes())
 			if (recType.isPointerType()) {
 				Collection<CompilationUnit> units;
@@ -152,10 +155,28 @@ public class AccessInstanceGlobal extends UnaryExpression {
 								Variable var = global.toSymbolicVariable(loc);
 								AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
 								result = result.lub(state.smallStepSemantics(access, this));
+								atLeastOne = true;
 							}
 						}
 			}
 
-		return result;
+		if (atLeastOne)
+			return result;
+
+		// worst case: we are accessing a global that we know nothing about
+		ExternalSet<Type> rectypes = Caches.types().mkEmptySet();
+		for (Type t : expr.getRuntimeTypes())
+			if (t.isPointerType())
+				rectypes.addAll(t.asPointerType().getInnerTypes());
+
+		if (rectypes.isEmpty())
+			return state.bottom();
+
+		Type rectype = rectypes.reduce(rectypes.first(), (r, t) -> r.commonSupertype(t));
+		Variable var = new Variable(Untyped.INSTANCE, target, new Annotations(), getLocation());
+		HeapDereference container = new HeapDereference(rectype, expr, getLocation());
+		container.setRuntimeTypes(rectypes);
+		AccessChild access = new AccessChild(Untyped.INSTANCE, container, var, getLocation());
+		return state.smallStepSemantics(access, this);
 	}
 }

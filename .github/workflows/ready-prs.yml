@@ -7,7 +7,7 @@ on:
 
 jobs:
   move-prs:
-    if: github.event.label.name == 'resolution:wip'
+    if: github.event.label.name == '🏗 resolution:wip'
     runs-on: ubuntu-latest
     steps:
     - name: Move to the PR-READY column

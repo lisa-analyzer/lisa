@@ -7,7 +7,7 @@ on:
 
 jobs:
   move-resolved-issues:
-    if: github.event.label.name == 'resolution:resolved'
+    if: github.event.label.name == '🎊 resolution:resolved'
     runs-on: ubuntu-latest
     steps:
     - name: Move to the DONE column
