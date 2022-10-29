@@ -23,7 +23,12 @@ public class NumericNonOverflowingSub extends NumericOperation implements Subtra
 	 */
 	public static final NumericNonOverflowingSub INSTANCE = new NumericNonOverflowingSub();
 
-	private NumericNonOverflowingSub() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingSub() {
 	}
 
 	@Override

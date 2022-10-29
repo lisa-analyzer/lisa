@@ -25,7 +25,12 @@ public class Numeric32BitMul extends NumericOperation
 	 */
 	public static final Numeric32BitMul INSTANCE = new Numeric32BitMul();
 
-	private Numeric32BitMul() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric32BitMul() {
 	}
 
 	@Override

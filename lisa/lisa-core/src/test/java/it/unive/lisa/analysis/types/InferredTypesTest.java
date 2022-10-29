@@ -49,8 +49,8 @@ import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Float32Type;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +78,7 @@ public class InferredTypesTest {
 
 		@Override
 		public NumericType getIntegerType() {
-			return Int32.INSTANCE;
+			return Int32Type.INSTANCE;
 		}
 
 		@Override
@@ -92,8 +92,8 @@ public class InferredTypesTest {
 	private static final InferredTypes string = new InferredTypes(types, StringType.INSTANCE);
 	private static final InferredTypes bool_or_string = new InferredTypes(types,
 			Set.of(BoolType.INSTANCE, StringType.INSTANCE));
-	private static final InferredTypes integer = new InferredTypes(types, Int32.INSTANCE);
-	private static final InferredTypes floating = new InferredTypes(types, Float32.INSTANCE);
+	private static final InferredTypes integer = new InferredTypes(types, Int32Type.INSTANCE);
+	private static final InferredTypes floating = new InferredTypes(types, Float32Type.INSTANCE);
 	private static final InferredTypes numeric;
 	private static final InferredTypes all;
 
@@ -101,8 +101,8 @@ public class InferredTypesTest {
 
 	static {
 		Set<Type> nums = new HashSet<>();
-		nums.add(Int32.INSTANCE);
-		nums.add(Float32.INSTANCE);
+		nums.add(Int32Type.INSTANCE);
+		nums.add(Float32Type.INSTANCE);
 		numeric = new InferredTypes(types, nums);
 		Set<Type> full = new HashSet<>(nums);
 		full.add(StringType.INSTANCE);
@@ -478,7 +478,7 @@ public class InferredTypesTest {
 
 	@Test
 	public void testSatisfies() {
-		InferredTypes left = new InferredTypes(types, new TypeTokenType(Collections.singleton(Int32.INSTANCE)));
+		InferredTypes left = new InferredTypes(types, new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, left, Satisfiability.SATISFIED);
 		satisfies(ComparisonNe.INSTANCE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, integer, left, Satisfiability.SATISFIED);
@@ -496,7 +496,7 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(types, new TypeTokenType(Set.of(Int32.INSTANCE, StringType.INSTANCE)));
+		right = new InferredTypes(types, new TypeTokenType(Set.of(Int32Type.INSTANCE, StringType.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
@@ -505,7 +505,7 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(types, Set.of(new TypeTokenType(Collections.singleton(Int32.INSTANCE)),
+		right = new InferredTypes(types, Set.of(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
 				new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);

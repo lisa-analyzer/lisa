@@ -2,11 +2,11 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.Int16;
+import it.unive.lisa.type.common.Int16Type;
 
 /**
  * A 16-bit signed {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link Int16} static type. Internally, the
+ * Instances of this literal have a {@link Int16Type} static type. Internally, the
  * constant is stored in a {@code short}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
@@ -21,6 +21,6 @@ public class Int16Literal extends Literal<Short> {
 	 * @param value    the constant value represented by this literal
 	 */
 	public Int16Literal(CFG cfg, CodeLocation location, short value) {
-		super(cfg, location, value, Int16.INSTANCE);
+		super(cfg, location, value, Int16Type.INSTANCE);
 	}
 }

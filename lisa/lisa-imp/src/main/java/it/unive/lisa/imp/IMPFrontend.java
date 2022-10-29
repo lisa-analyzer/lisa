@@ -46,8 +46,8 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Float32Type;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
@@ -213,8 +213,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 
 			// register all possible types
 			p.getTypes().registerType(BoolType.INSTANCE);
-			p.getTypes().registerType(Float32.INSTANCE);
-			p.getTypes().registerType(Int32.INSTANCE);
+			p.getTypes().registerType(Float32Type.INSTANCE);
+			p.getTypes().registerType(Int32Type.INSTANCE);
 			p.getTypes().registerType(StringType.INSTANCE);
 			ClassType.all().forEach(t -> p.getTypes().registerType(t));
 			ArrayType.all().forEach(t -> p.getTypes().registerType(t));

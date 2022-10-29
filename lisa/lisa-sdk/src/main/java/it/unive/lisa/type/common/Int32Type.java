@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * An unsigned 8-bit integral {@link NumericType}. The only singleton instance
- * of this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * A signed 32-bit integral {@link NumericType}. The only singleton instance of
+ * this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is8Bits()} yield {@code true}. An instance of Int8 is assumed to be
+ * {@link #is32Bits()} yield {@code true}. An instance of Int32 is assumed to be
  * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
- * The common supertype between an Int8 instance {@code t1} and another type
+ * The common supertype between an Int32 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,19 +27,24 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt8 implements NumericType {
+public class Int32Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final UInt8 INSTANCE = new UInt8();
+	public static final Int32Type INSTANCE = new Int32Type();
 
-	private UInt8() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Int32Type() {
 	}
 
 	@Override
 	public boolean is8Bits() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -49,7 +54,7 @@ public class UInt8 implements NumericType {
 
 	@Override
 	public boolean is32Bits() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -59,7 +64,7 @@ public class UInt8 implements NumericType {
 
 	@Override
 	public boolean isUnsigned() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class UInt8 implements NumericType {
 
 	@Override
 	public String toString() {
-		return "int8";
+		return "int32";
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class UInt8 implements NumericType {
 
 	@Override
 	public final int hashCode() {
-		return UInt8.class.getName().hashCode();
+		return Int32Type.class.getName().hashCode();
 	}
 
 	@Override

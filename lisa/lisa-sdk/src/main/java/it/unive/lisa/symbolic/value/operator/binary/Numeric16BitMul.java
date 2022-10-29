@@ -25,7 +25,12 @@ public class Numeric16BitMul extends NumericOperation
 	 */
 	public static final Numeric16BitMul INSTANCE = new Numeric16BitMul();
 
-	private Numeric16BitMul() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric16BitMul() {
 	}
 
 	@Override

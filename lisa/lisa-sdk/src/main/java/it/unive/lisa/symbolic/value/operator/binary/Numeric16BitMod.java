@@ -24,7 +24,12 @@ public class Numeric16BitMod extends NumericOperation implements ModuleOperator,
 	 */
 	public static final Numeric16BitMod INSTANCE = new Numeric16BitMod();
 
-	private Numeric16BitMod() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric16BitMod() {
 	}
 
 	@Override

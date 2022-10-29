@@ -1,12 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.operator.LogicalOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * A common implementation for classes implementing {@link BinaryOperator} and
@@ -23,6 +23,6 @@ public abstract class LogicalOperation implements LogicalOperator, BinaryOperato
 	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
 		if (left.stream().noneMatch(Type::isBooleanType) || right.stream().noneMatch(Type::isBooleanType))
 			return Collections.emptySet();
-		return Collections.singleton(BoolType.INSTANCE);
+		return Collections.singleton(types.getBooleanType());
 	}
 }

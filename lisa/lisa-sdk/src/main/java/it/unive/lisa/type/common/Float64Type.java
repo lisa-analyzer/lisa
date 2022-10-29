@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * An unsigned 64-bit integral {@link NumericType}. The only singleton instance
- * of this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * A signed 64-bit floating point {@link NumericType}. The only singleton
+ * instance of this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is64Bits()} yield {@code true}. An instance of Int64 is assumed to be
- * assignable to any {@link NumericType}, with possible loss of information.
+ * {@link NumericType} interface, and for which {@link #isIntegral()} yields
+ * {@code false} and {@link #is64Bits()} yields {@code true}. An instance of
+ * Float64 is assumed to be assignable to any {@link NumericType}, with possible
+ * loss of information. <br>
  * <br>
- * <br>
- * The common supertype between an Int64 instance {@code t1} and another type
+ * The common supertype between an Float64 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,14 +27,19 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt64 implements NumericType {
+public class Float64Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final UInt64 INSTANCE = new UInt64();
+	public static final Float64Type INSTANCE = new Float64Type();
 
-	private UInt64() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Float64Type() {
 	}
 
 	@Override
@@ -59,12 +64,12 @@ public class UInt64 implements NumericType {
 
 	@Override
 	public boolean isUnsigned() {
-		return true;
+		return false;
 	}
 
 	@Override
 	public boolean isIntegral() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class UInt64 implements NumericType {
 
 	@Override
 	public String toString() {
-		return "int64";
+		return "float64";
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class UInt64 implements NumericType {
 
 	@Override
 	public final int hashCode() {
-		return UInt64.class.getName().hashCode();
+		return Float64Type.class.getName().hashCode();
 	}
 
 	@Override

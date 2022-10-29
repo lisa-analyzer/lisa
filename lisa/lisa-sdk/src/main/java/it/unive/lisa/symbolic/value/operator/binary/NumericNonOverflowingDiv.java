@@ -22,7 +22,12 @@ public class NumericNonOverflowingDiv extends NumericOperation implements Divisi
 	 */
 	public static final NumericNonOverflowingDiv INSTANCE = new NumericNonOverflowingDiv();
 
-	private NumericNonOverflowingDiv() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingDiv() {
 	}
 
 	@Override

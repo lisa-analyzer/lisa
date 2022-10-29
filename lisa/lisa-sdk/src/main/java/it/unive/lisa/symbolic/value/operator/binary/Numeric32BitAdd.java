@@ -24,7 +24,12 @@ public class Numeric32BitAdd extends NumericOperation implements AdditionOperato
 	 */
 	public static final Numeric32BitAdd INSTANCE = new Numeric32BitAdd();
 
-	private Numeric32BitAdd() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric32BitAdd() {
 	}
 
 	@Override

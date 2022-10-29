@@ -22,7 +22,12 @@ public class LogicalAnd extends LogicalOperation {
 	 */
 	public static final LogicalAnd INSTANCE = new LogicalAnd();
 
-	private LogicalAnd() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected LogicalAnd() {
 	}
 
 	@Override

@@ -23,7 +23,12 @@ public class NumericNonOverflowingMod extends NumericOperation implements Module
 	 */
 	public static final NumericNonOverflowingMod INSTANCE = new NumericNonOverflowingMod();
 
-	private NumericNonOverflowingMod() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingMod() {
 	}
 
 	@Override

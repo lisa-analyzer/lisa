@@ -25,7 +25,12 @@ public class Numeric8BitSub extends NumericOperation
 	 */
 	public static final Numeric8BitSub INSTANCE = new Numeric8BitSub();
 
-	private Numeric8BitSub() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric8BitSub() {
 	}
 
 	@Override

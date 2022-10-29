@@ -24,7 +24,12 @@ public class BitwiseShiftLeft extends NumericOperation implements BitwiseOperato
 	 */
 	public static final BitwiseShiftLeft INSTANCE = new BitwiseShiftLeft();
 
-	private BitwiseShiftLeft() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected BitwiseShiftLeft() {
 	}
 
 	@Override

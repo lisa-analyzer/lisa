@@ -22,7 +22,12 @@ public class LogicalOr extends LogicalOperation {
 	 */
 	public static final LogicalOr INSTANCE = new LogicalOr();
 
-	private LogicalOr() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected LogicalOr() {
 	}
 
 	@Override

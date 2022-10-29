@@ -25,7 +25,12 @@ public class Numeric64BitMul extends NumericOperation
 	 */
 	public static final Numeric64BitMul INSTANCE = new Numeric64BitMul();
 
-	private Numeric64BitMul() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric64BitMul() {
 	}
 
 	@Override

@@ -32,7 +32,12 @@ public class TypeConv implements TypeOperator, BinaryOperator {
 	 */
 	public static final TypeConv INSTANCE = new TypeConv();
 
-	private TypeConv() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected TypeConv() {
 	}
 
 	@Override

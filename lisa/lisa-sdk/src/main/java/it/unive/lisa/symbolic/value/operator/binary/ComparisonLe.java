@@ -23,7 +23,12 @@ public class ComparisonLe extends NumericComparison {
 	 */
 	public static final ComparisonLe INSTANCE = new ComparisonLe();
 
-	private ComparisonLe() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected ComparisonLe() {
 	}
 
 	@Override

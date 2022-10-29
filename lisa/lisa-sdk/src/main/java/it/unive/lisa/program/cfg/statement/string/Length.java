@@ -20,12 +20,12 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string length operation. The type of the operand
- * must be {@link StringType}. The type of this expression is the {@link Int32}.
+ * must be {@link StringType}. The type of this expression is the {@link Int32Type}.
  * <br>
  * <br>
  * Since in most languages string operations are provided through calls to
@@ -58,7 +58,7 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	 * @param parameter the operand of this operation
 	 */
 	public Length(CFG cfg, CodeLocation location, Expression parameter) {
-		super(cfg, location, "len", Int32.INSTANCE, parameter);
+		super(cfg, location, "len", Int32Type.INSTANCE, parameter);
 	}
 
 	@Override
@@ -77,7 +77,7 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 
 		return state.smallStepSemantics(
 				new UnaryExpression(
-						Int32.INSTANCE,
+						Int32Type.INSTANCE,
 						expr,
 						StringLength.INSTANCE,
 						getLocation()),

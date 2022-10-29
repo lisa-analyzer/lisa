@@ -23,7 +23,12 @@ public class ComparisonGt extends NumericComparison {
 	 */
 	public static final ComparisonGt INSTANCE = new ComparisonGt();
 
-	private ComparisonGt() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected ComparisonGt() {
 	}
 
 	@Override

@@ -1,14 +1,14 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.Int32;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Given an expression that evaluates to a string value, a
@@ -27,7 +27,12 @@ public class StringLength implements StringOperator, UnaryOperator {
 	 */
 	public static final StringLength INSTANCE = new StringLength();
 
-	private StringLength() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringLength() {
 	}
 
 	@Override
@@ -39,6 +44,6 @@ public class StringLength implements StringOperator, UnaryOperator {
 	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
 		if (argument.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
-		return Collections.singleton(Int32.INSTANCE);
+		return Collections.singleton(types.getIntegerType());
 	}
 }

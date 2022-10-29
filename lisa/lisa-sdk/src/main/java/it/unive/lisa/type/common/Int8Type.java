@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A signed 64-bit integral {@link NumericType}. The only singleton instance of
+ * A signed 8-bit integral {@link NumericType}. The only singleton instance of
  * this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is64Bits()} yield {@code true}. An instance of Int64 is assumed to be
+ * {@link #is8Bits()} yield {@code true}. An instance of Int8 is assumed to be
  * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
- * The common supertype between an Int64 instance {@code t1} and another type
+ * The common supertype between an Int8 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,19 +27,24 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int64 implements NumericType {
+public class Int8Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final Int64 INSTANCE = new Int64();
+	public static final Int8Type INSTANCE = new Int8Type();
 
-	private Int64() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Int8Type() {
 	}
 
 	@Override
 	public boolean is8Bits() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -54,7 +59,7 @@ public class Int64 implements NumericType {
 
 	@Override
 	public boolean is64Bits() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class Int64 implements NumericType {
 
 	@Override
 	public String toString() {
-		return "int64";
+		return "int8";
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class Int64 implements NumericType {
 
 	@Override
 	public final int hashCode() {
-		return Int64.class.getName().hashCode();
+		return Int8Type.class.getName().hashCode();
 	}
 
 	@Override

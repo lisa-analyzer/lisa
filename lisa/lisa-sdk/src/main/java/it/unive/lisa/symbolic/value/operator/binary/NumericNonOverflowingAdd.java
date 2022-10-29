@@ -22,7 +22,12 @@ public class NumericNonOverflowingAdd extends NumericOperation implements Additi
 	 */
 	public static final NumericNonOverflowingAdd INSTANCE = new NumericNonOverflowingAdd();
 
-	private NumericNonOverflowingAdd() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingAdd() {
 	}
 
 	@Override

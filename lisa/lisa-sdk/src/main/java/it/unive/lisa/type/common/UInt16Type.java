@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A signed 16-bit integral {@link NumericType}. The only singleton instance of
- * this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * An unsigned 16-bit integral {@link NumericType}. The only singleton instance
+ * of this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
@@ -27,14 +27,19 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int16 implements NumericType {
+public class UInt16Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final Int16 INSTANCE = new Int16();
+	public static final UInt16Type INSTANCE = new UInt16Type();
 
-	private Int16() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected UInt16Type() {
 	}
 
 	@Override
@@ -59,7 +64,7 @@ public class Int16 implements NumericType {
 
 	@Override
 	public boolean isUnsigned() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class Int16 implements NumericType {
 
 	@Override
 	public final int hashCode() {
-		return Int16.class.getName().hashCode();
+		return UInt16Type.class.getName().hashCode();
 	}
 
 	@Override

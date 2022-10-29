@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A signed 32-bit floating point {@link NumericType}. The only singleton
- * instance of this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * A signed 16-bit integral {@link NumericType}. The only singleton instance of
+ * this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link NumericType} interface, and for which {@link #isIntegral()} yields
- * {@code false} and {@link #is32Bits()} yields {@code true}. An instance of
- * Float32 is assumed to be assignable to any {@link NumericType}, with possible
- * loss of information. <br>
+ * {@link NumericType} interface, and for which {@link #isIntegral()} and
+ * {@link #is16Bits()} yield {@code true}. An instance of Int16 is assumed to be
+ * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
- * The common supertype between an Float32 instance {@code t1} and another type
+ * <br>
+ * The common supertype between an Int16 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,14 +27,19 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Float32 implements NumericType {
+public class Int16Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final Float32 INSTANCE = new Float32();
+	public static final Int16Type INSTANCE = new Int16Type();
 
-	private Float32() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Int16Type() {
 	}
 
 	@Override
@@ -44,12 +49,12 @@ public class Float32 implements NumericType {
 
 	@Override
 	public boolean is16Bits() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean is32Bits() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -64,7 +69,7 @@ public class Float32 implements NumericType {
 
 	@Override
 	public boolean isIntegral() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -82,7 +87,7 @@ public class Float32 implements NumericType {
 
 	@Override
 	public String toString() {
-		return "float32";
+		return "int16";
 	}
 
 	@Override
@@ -95,7 +100,7 @@ public class Float32 implements NumericType {
 
 	@Override
 	public final int hashCode() {
-		return Float32.class.getName().hashCode();
+		return Int16Type.class.getName().hashCode();
 	}
 
 	@Override

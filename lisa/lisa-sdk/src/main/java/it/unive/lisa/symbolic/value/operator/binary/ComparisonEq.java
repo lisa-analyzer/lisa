@@ -1,13 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Given two expressions, a {@link BinaryExpression} using this operator checks
@@ -27,7 +27,12 @@ public class ComparisonEq implements ComparisonOperator, BinaryOperator {
 	 */
 	public static final ComparisonEq INSTANCE = new ComparisonEq();
 
-	private ComparisonEq() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected ComparisonEq() {
 	}
 
 	@Override
@@ -42,6 +47,6 @@ public class ComparisonEq implements ComparisonOperator, BinaryOperator {
 
 	@Override
 	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
-		return Collections.singleton(BoolType.INSTANCE);
+		return Collections.singleton(types.getBooleanType());
 	}
 }

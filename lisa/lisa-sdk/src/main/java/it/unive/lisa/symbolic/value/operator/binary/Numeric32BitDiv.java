@@ -24,7 +24,12 @@ public class Numeric32BitDiv extends NumericOperation implements DivisionOperato
 	 */
 	public static final Numeric32BitDiv INSTANCE = new Numeric32BitDiv();
 
-	private Numeric32BitDiv() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric32BitDiv() {
 	}
 
 	@Override

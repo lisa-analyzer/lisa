@@ -4,7 +4,7 @@ import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -26,7 +26,7 @@ public class IMPTypeSystem extends TypeSystem {
 
 	@Override
 	public NumericType getIntegerType() {
-		return Int32.INSTANCE;
+		return Int32Type.INSTANCE;
 	}
 
 }

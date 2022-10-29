@@ -26,7 +26,12 @@ public class BitwiseNegation implements BitwiseOperator, UnaryOperator {
 	 */
 	public static final BitwiseNegation INSTANCE = new BitwiseNegation();
 
-	private BitwiseNegation() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected BitwiseNegation() {
 	}
 
 	@Override

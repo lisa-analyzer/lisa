@@ -18,7 +18,12 @@ public class Untyped implements Type {
 	 */
 	public static final Untyped INSTANCE = new Untyped();
 
-	private Untyped() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Untyped() {
 	}
 
 	@Override

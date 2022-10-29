@@ -25,7 +25,12 @@ public class Numeric32BitSub extends NumericOperation
 	 */
 	public static final Numeric32BitSub INSTANCE = new Numeric32BitSub();
 
-	private Numeric32BitSub() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric32BitSub() {
 	}
 
 	@Override

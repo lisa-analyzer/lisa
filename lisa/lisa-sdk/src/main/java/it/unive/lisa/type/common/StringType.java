@@ -23,7 +23,12 @@ public class StringType implements it.unive.lisa.type.StringType {
 	 */
 	public static final StringType INSTANCE = new StringType();
 
-	private StringType() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringType() {
 	}
 
 	@Override

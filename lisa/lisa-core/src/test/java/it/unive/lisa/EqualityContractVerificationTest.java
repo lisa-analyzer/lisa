@@ -69,7 +69,7 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.collections.externalSet.BitExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
@@ -129,7 +129,7 @@ public class EqualityContractVerificationTest {
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
 	private static final Set<Type> s1 = Collections.singleton(Untyped.INSTANCE);
-	private static final Set<Type> s2 = Collections.singleton(Int32.INSTANCE);
+	private static final Set<Type> s2 = Collections.singleton(Int32Type.INSTANCE);
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 

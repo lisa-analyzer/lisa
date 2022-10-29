@@ -23,7 +23,12 @@ public class NumericNonOverflowingMul extends NumericOperation implements Multip
 	 */
 	public static final NumericNonOverflowingMul INSTANCE = new NumericNonOverflowingMul();
 
-	private NumericNonOverflowingMul() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingMul() {
 	}
 
 	@Override

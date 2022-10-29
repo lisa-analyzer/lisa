@@ -15,7 +15,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -134,10 +134,10 @@ public class SubstitutionTest {
 		}
 	};
 
-	private final Variable x = new Variable(Int32.INSTANCE, "x", SyntheticLocation.INSTANCE);
-	private final Variable y = new Variable(Int32.INSTANCE, "y", SyntheticLocation.INSTANCE);
-	private final Variable z = new Variable(Int32.INSTANCE, "z", SyntheticLocation.INSTANCE);
-	private final Variable w = new Variable(Int32.INSTANCE, "w", SyntheticLocation.INSTANCE);
+	private final Variable x = new Variable(Int32Type.INSTANCE, "x", SyntheticLocation.INSTANCE);
+	private final Variable y = new Variable(Int32Type.INSTANCE, "y", SyntheticLocation.INSTANCE);
+	private final Variable z = new Variable(Int32Type.INSTANCE, "z", SyntheticLocation.INSTANCE);
+	private final Variable w = new Variable(Int32Type.INSTANCE, "w", SyntheticLocation.INSTANCE);
 	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
 
 	private void check(List<HeapReplacement> sub,

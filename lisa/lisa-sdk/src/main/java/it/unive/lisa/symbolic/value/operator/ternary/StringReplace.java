@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.ternary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.StringType;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Given three expressions that all evaluate to string values, a
@@ -38,7 +39,12 @@ public class StringReplace implements StringOperator, TernaryOperator {
 	 */
 	public static final StringReplace INSTANCE = new StringReplace();
 
-	private StringReplace() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringReplace() {
 	}
 
 	@Override
@@ -52,6 +58,6 @@ public class StringReplace implements StringOperator, TernaryOperator {
 				|| middle.stream().noneMatch(Type::isStringType)
 				|| right.stream().noneMatch(Type::isStringType))
 			return Collections.emptySet();
-		return Collections.singleton(StringType.INSTANCE);
+		return Collections.singleton(types.getStringType());
 	}
 }

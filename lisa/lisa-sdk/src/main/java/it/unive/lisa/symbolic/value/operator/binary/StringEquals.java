@@ -4,7 +4,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * Given two expressions that both evaluate to string values, a
@@ -25,7 +25,12 @@ public class StringEquals extends StringOperation {
 	 */
 	public static final StringEquals INSTANCE = new StringEquals();
 
-	private StringEquals() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringEquals() {
 	}
 
 	@Override
@@ -34,7 +39,7 @@ public class StringEquals extends StringOperation {
 	}
 
 	@Override
-	protected Type resultType() {
-		return BoolType.INSTANCE;
+	protected Type resultType(TypeSystem types) {
+		return types.getBooleanType();
 	}
 }

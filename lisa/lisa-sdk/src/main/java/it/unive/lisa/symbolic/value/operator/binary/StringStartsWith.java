@@ -4,7 +4,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * Given two expressions that both evaluate to string values, a
@@ -24,7 +24,12 @@ public class StringStartsWith extends StringOperation {
 	 */
 	public static final StringStartsWith INSTANCE = new StringStartsWith();
 
-	private StringStartsWith() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringStartsWith() {
 	}
 
 	@Override
@@ -33,7 +38,7 @@ public class StringStartsWith extends StringOperation {
 	}
 
 	@Override
-	protected Type resultType() {
-		return BoolType.INSTANCE;
+	protected Type resultType(TypeSystem types) {
+		return types.getBooleanType();
 	}
 }

@@ -4,7 +4,7 @@ import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * Given two expressions that both evaluate to string values, a
@@ -26,7 +26,12 @@ public class StringIndexOf extends StringOperation {
 	 */
 	public static final StringIndexOf INSTANCE = new StringIndexOf();
 
-	private StringIndexOf() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringIndexOf() {
 	}
 
 	@Override
@@ -35,7 +40,7 @@ public class StringIndexOf extends StringOperation {
 	}
 
 	@Override
-	protected Type resultType() {
-		return Int32.INSTANCE;
+	protected Type resultType(TypeSystem types) {
+		return types.getIntegerType();
 	}
 }

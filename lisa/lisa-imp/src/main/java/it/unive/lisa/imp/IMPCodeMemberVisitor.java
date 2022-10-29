@@ -94,8 +94,8 @@ import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Float32Type;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.Collections;
@@ -632,9 +632,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.BOOLEAN() != null)
 			return BoolType.INSTANCE;
 		else if (ctx.INT() != null)
-			return Int32.INSTANCE;
+			return Int32Type.INSTANCE;
 		else
-			return Float32.INSTANCE;
+			return Float32Type.INSTANCE;
 	}
 
 	@Override
