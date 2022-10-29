@@ -1,6 +1,8 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.symbolic.value.Operator;
+import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -57,5 +59,10 @@ public class PrefixTest {
         Prefix result = new Prefix("abde");
 
         assertTrue(result.lessOrEqualAux(new Prefix("abd")));
+    }
+
+    @Test
+    public void testEvalTernaryExpression(){
+        Operator operator = StringSubstring.INSTANCE;
     }
 }

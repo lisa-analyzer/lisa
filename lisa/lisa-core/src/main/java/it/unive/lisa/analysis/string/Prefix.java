@@ -11,6 +11,8 @@ import it.unive.lisa.symbolic.value.operator.binary.*;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 import java.util.Objects;
 
@@ -143,9 +145,19 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     @Override
     protected Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
         if (operator == StringSubstring.INSTANCE) {
-            return TOP; //placeholder
-        }
+            StringSubstring stringSubstring = (StringSubstring) operator;
 
+            ExternalSet<Type> externalSet =
+                    operator.typeInference((ExternalSet<Type>) left,
+                            (ExternalSet<Type>) middle,
+                            (ExternalSet<Type>) right);
+
+            for(Type type: externalSet.collect()){
+                System.out.println(type.asStringType());
+            }
+
+             return TOP; //placeholder
+        }
         return TOP;
     }
 
