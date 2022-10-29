@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.UInt16Type;
 
 /**
  * A 16-bit unsigned {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link UInt16Type} static type. Internally, the
- * constant is stored in a (signed) {@code short}.
+ * Instances of this literal have a {@link UInt16Type} static type. Internally,
+ * the constant is stored in a (signed) {@code short}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.Float64Type;
 
 /**
  * A 64-bit signed {@link Literal} representing a constant non-integral value.
- * Instances of this literal have a {@link Float64Type} static type. Internally, the
- * constant is stored in a {@code double}.
+ * Instances of this literal have a {@link Float64Type} static type. Internally,
+ * the constant is stored in a {@code double}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

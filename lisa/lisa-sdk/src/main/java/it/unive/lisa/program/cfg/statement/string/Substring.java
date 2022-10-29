@@ -18,15 +18,16 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.Int32Type;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string substring operation. The type of the first
  * operand must be {@link StringType}, while the other two operands' types must
- * be {@link Int32Type}. The type of this expression is the {@link StringType}. <br>
+ * be {@link NumericType}. The type of this expression is the
+ * {@link StringType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -60,7 +61,8 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 	 * @param right    the right-hand side of this operation
 	 */
 	public Substring(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
-		super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
+		super(cfg, location, "substring", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
+				middle, right);
 	}
 
 	@Override
@@ -85,7 +87,7 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 
 		return state.smallStepSemantics(
 				new TernaryExpression(
-						StringType.INSTANCE,
+						getStaticType(),
 						left,
 						middle,
 						right,

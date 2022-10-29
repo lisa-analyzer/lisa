@@ -7,8 +7,8 @@ import it.unive.lisa.type.common.Int32Type;
 
 /**
  * A 32-bit signed {@link Literal} representing a constant non-integral value.
- * Instances of this literal have a {@link Float32Type} static type. Internally, the
- * constant is stored in a {@code float}.
+ * Instances of this literal have a {@link Float32Type} static type. Internally,
+ * the constant is stored in a {@code float}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

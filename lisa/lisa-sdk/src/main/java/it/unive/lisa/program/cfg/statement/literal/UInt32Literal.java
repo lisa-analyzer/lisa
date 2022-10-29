@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.UInt32Type;
 
 /**
  * A 32-bit unsigned {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link UInt32Type} static type. Internally, the
- * constant is stored in a (signed) {@code int}.
+ * Instances of this literal have a {@link UInt32Type} static type. Internally,
+ * the constant is stored in a (signed) {@code int}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

@@ -14,11 +14,11 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.BooleanType;
 
 /**
  * An expression modeling the equality test ({@code ==}). The type of this
- * expression is the {@link BoolType}.
+ * expression is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -33,7 +33,7 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 	 * @param right    the right-hand side of this operation
 	 */
 	public Equal(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "==", BoolType.INSTANCE, left, right);
+		super(cfg, location, "==", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class Equal extends it.unive.lisa.program.cfg.statement.BinaryExpression 
 					throws SemanticException {
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						ComparisonEq.INSTANCE,

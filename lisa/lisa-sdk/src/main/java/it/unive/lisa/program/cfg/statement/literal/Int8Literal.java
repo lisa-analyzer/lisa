@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.Int8Type;
 
 /**
  * An 8-bit signed {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link Int8Type} static type. Internally, the
- * constant is stored in a {@code byte}.
+ * Instances of this literal have a {@link Int8Type} static type. Internally,
+ * the constant is stored in a {@code byte}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

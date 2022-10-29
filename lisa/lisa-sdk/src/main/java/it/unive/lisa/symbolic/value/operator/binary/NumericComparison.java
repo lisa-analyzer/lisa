@@ -4,7 +4,6 @@ import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
 import java.util.Collections;
 import java.util.Set;
 
@@ -27,6 +26,6 @@ public abstract class NumericComparison implements ComparisonOperator, BinaryOpe
 		Set<Type> set = NumericType.commonNumericalType(left, right);
 		if (set.isEmpty())
 			return Collections.emptySet();
-		return Collections.singleton(BoolType.INSTANCE);
+		return Collections.singleton(types.getBooleanType());
 	}
 }

@@ -76,8 +76,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			IntInterval exp = aval1.interval.plus(aval2.interval);
 			assertEquals("eval(" + val1 + " + " + val2 + ") did not return " + exp, exp,
 					singleton.evalBinaryExpression(NumericNonOverflowingAdd.INSTANCE, aval1, aval2,
@@ -90,8 +92,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			IntInterval exp = aval1.interval.diff(aval2.interval);
 			assertEquals("eval(" + val1 + " - " + val2 + ") did not return " + exp, exp,
 					singleton.evalBinaryExpression(NumericNonOverflowingSub.INSTANCE, aval1, aval2,
@@ -104,8 +108,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			IntInterval exp = aval1.interval.mul(aval2.interval);
 			assertEquals("eval(" + val1 + " * " + val2 + ") did not return " + exp, exp,
 					singleton.evalBinaryExpression(NumericNonOverflowingMul.INSTANCE, aval1, aval2,
@@ -118,8 +124,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			IntInterval exp = aval1.interval.div(aval2.interval, false, false);
 			assertEquals("eval(" + val1 + " / " + val2 + ") did not return " + exp, exp,
 					singleton.evalBinaryExpression(NumericNonOverflowingDiv.INSTANCE, aval1, aval2,
@@ -132,8 +140,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Interval lub = aval1.lub(aval2);
 			Interval widen = aval1.widening(aval2);
 			Interval glb = aval1.glb(aval2);
@@ -167,8 +177,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 == val2);
 			assertEquals("satisfies(" + val1 + " == " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonEq.INSTANCE, aval1, aval2, pp));
@@ -180,8 +192,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 != val2);
 			assertEquals("satisfies(" + val1 + " != " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonNe.INSTANCE, aval1, aval2, pp));
@@ -193,8 +207,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 > val2);
 			assertEquals("satisfies(" + val1 + " > " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonGt.INSTANCE, aval1, aval2, pp));
@@ -206,8 +222,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 >= val2);
 			assertEquals("satisfies(" + val1 + " >= " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonGe.INSTANCE, aval1, aval2, pp));
@@ -219,8 +237,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 < val2);
 			assertEquals("satisfies(" + val1 + " < " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonLt.INSTANCE, aval1, aval2, pp));
@@ -232,8 +252,10 @@ public class IntervalTest {
 		for (int i = 0; i < TEST_LIMIT; i++) {
 			int val1 = rand.nextInt();
 			int val2 = rand.nextInt();
-			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()), pp);
-			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()), pp);
+			Interval aval1 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val1, pp.getLocation()),
+					pp);
+			Interval aval2 = singleton.evalNonNullConstant(new Constant(Int32Type.INSTANCE, val2, pp.getLocation()),
+					pp);
 			Satisfiability exp = Satisfiability.fromBoolean(val1 <= val2);
 			assertEquals("satisfies(" + val1 + " <= " + val2 + ") did not return " + exp, exp,
 					singleton.satisfiesBinaryExpression(ComparisonLe.INSTANCE, aval1, aval2, pp));

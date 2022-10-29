@@ -14,15 +14,15 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
 
 /**
  * An expression modeling the less than operation ({@code <}). Both operands'
  * types must be instances of {@link NumericType}. The type of this expression
- * is the {@link BoolType}.
+ * is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -37,7 +37,7 @@ public class LessThan extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param right    the right-hand side of this operation
 	 */
 	public LessThan(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "<", BoolType.INSTANCE, left, right);
+		super(cfg, location, "<", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class LessThan extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						ComparisonLt.INSTANCE,

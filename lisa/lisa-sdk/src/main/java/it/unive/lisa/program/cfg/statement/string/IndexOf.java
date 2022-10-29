@@ -18,15 +18,15 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.Int32Type;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string indexOf operation. The type of both
  * operands must be {@link StringType}. The type of this expression is the
- * {@link Int32Type}. <br>
+ * {@link NumericType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -59,7 +59,8 @@ public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpressio
 	 * @param right    the right-hand side of this operation
 	 */
 	public IndexOf(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "indexOf", Int32Type.INSTANCE, left, right);
+		super(cfg, location, "indexOf", cfg.getDescriptor().getUnit().getProgram().getTypes().getIntegerType(), left,
+				right);
 	}
 
 	@Override
@@ -81,7 +82,7 @@ public class IndexOf extends it.unive.lisa.program.cfg.statement.BinaryExpressio
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						Int32Type.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						StringIndexOf.INSTANCE,

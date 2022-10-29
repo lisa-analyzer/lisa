@@ -18,9 +18,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string contains operation. The type of both
@@ -58,7 +58,8 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 	 * @param right    the right-hand side of this operation
 	 */
 	public Concat(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "concat", StringType.INSTANCE, left, right);
+		super(cfg, location, "concat", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
+				right);
 	}
 
 	@Override
@@ -80,7 +81,7 @@ public class Concat extends it.unive.lisa.program.cfg.statement.BinaryExpression
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						StringType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						StringConcat.INSTANCE,

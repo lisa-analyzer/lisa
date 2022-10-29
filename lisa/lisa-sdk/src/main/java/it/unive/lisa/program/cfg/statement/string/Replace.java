@@ -18,9 +18,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string replace operation. The type of all three
@@ -59,7 +59,8 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	 * @param right    the right-hand side of this operation
 	 */
 	public Replace(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
-		super(cfg, location, "replace", StringType.INSTANCE, left, middle, right);
+		super(cfg, location, "replace", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
+				middle, right);
 	}
 
 	@Override
@@ -84,7 +85,7 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 
 		return state.smallStepSemantics(
 				new TernaryExpression(
-						StringType.INSTANCE,
+						getStaticType(),
 						left,
 						middle,
 						right,

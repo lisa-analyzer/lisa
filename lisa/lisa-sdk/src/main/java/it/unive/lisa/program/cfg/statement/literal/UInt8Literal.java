@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.UInt8Type;
 
 /**
  * An 8-bit unsigned {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link UInt8Type} static type. Internally, the
- * constant is stored in a (signed) {@code byte}.
+ * Instances of this literal have a {@link UInt8Type} static type. Internally,
+ * the constant is stored in a (signed) {@code byte}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

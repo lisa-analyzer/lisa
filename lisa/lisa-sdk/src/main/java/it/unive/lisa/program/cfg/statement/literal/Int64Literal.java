@@ -6,8 +6,8 @@ import it.unive.lisa.type.common.Int64Type;
 
 /**
  * A 64-bit signed {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link Int64Type} static type. Internally, the
- * constant is stored in a {@code long}.
+ * Instances of this literal have a {@link Int64Type} static type. Internally,
+ * the constant is stored in a {@code long}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

@@ -1,9 +1,9 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
 import it.unive.lisa.symbolic.value.BinaryExpression;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * Given two expressions that both evaluate to string values, a

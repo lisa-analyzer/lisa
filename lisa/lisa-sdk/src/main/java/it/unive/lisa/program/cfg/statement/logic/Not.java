@@ -17,12 +17,11 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
 
 /**
  * An expression modeling the logical negation ({@code !} or {@code not}). The
  * operand's type must be instance of {@link BooleanType}. The type of this
- * expression is the {@link BoolType}.
+ * expression is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -36,7 +35,7 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 	 * @param expression the operand of this operation
 	 */
 	public Not(CFG cfg, CodeLocation location, Expression expression) {
-		super(cfg, location, "!", BoolType.INSTANCE, expression);
+		super(cfg, location, "!", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), expression);
 	}
 
 	@Override
@@ -55,7 +54,7 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 
 		return state.smallStepSemantics(
 				new UnaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						expr,
 						LogicalNegation.INSTANCE,
 						getLocation()),

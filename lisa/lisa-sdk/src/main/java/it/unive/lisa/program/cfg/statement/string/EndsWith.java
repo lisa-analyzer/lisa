@@ -18,15 +18,15 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * An expression modeling the string endsWith operation. The type of both
  * operands must be {@link StringType}. The type of this expression is the
- * {@link BoolType}. <br>
+ * {@link BooleanType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -59,7 +59,8 @@ public class EndsWith extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param right    the right-hand side of this operation
 	 */
 	public EndsWith(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "endsWith", BoolType.INSTANCE, left, right);
+		super(cfg, location, "endsWith", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
+				right);
 	}
 
 	@Override
@@ -81,7 +82,7 @@ public class EndsWith extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						StringEndsWith.INSTANCE,
