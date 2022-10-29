@@ -44,7 +44,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * An heap environment tracking which allocation sites are associated to
 	 * each identifier.
 	 */
-	protected final HeapEnvironment<AllocationSites> heapEnv;
+	public final HeapEnvironment<AllocationSites> heapEnv;
 
 	/**
 	 * Builds a new instance of field-insensitive point-based heap.
@@ -59,7 +59,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
-	protected PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
 		this.heapEnv = heapEnv;
 	}
 
@@ -70,7 +70,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @return a point-based heap build from the original one
 	 */
-	protected PointBasedHeap from(PointBasedHeap original) {
+	public PointBasedHeap from(PointBasedHeap original) {
 		return original;
 	}
 
@@ -167,17 +167,17 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
+	public PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		return from(new PointBasedHeap(heapEnv.lub(other.heapEnv)));
 	}
 
 	@Override
-	protected PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
+	public PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}
 
@@ -207,7 +207,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		return this;
 	}
 
@@ -233,7 +233,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	protected class Rewriter extends BaseHeapDomain.Rewriter {
+	public class Rewriter extends BaseHeapDomain.Rewriter {
 
 		/*
 		 * note that all the cases where we are adding a plain expression to the

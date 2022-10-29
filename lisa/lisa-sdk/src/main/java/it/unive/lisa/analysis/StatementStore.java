@@ -87,7 +87,7 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	protected StatementStore<A, H, V, T> mk(AnalysisState<A, H, V, T> lattice,
+	public StatementStore<A, H, V, T> mk(AnalysisState<A, H, V, T> lattice,
 			Map<Statement, AnalysisState<A, H, V, T>> function) {
 		return new StatementStore<>(lattice, function);
 	}

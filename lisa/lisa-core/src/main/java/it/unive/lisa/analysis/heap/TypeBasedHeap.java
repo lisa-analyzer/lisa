@@ -110,12 +110,12 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	protected TypeBasedHeap mk(TypeBasedHeap reference) {
+	public TypeBasedHeap mk(TypeBasedHeap reference) {
 		return this;
 	}
 
 	@Override
-	protected TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public TypeBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			AccessChild access = (AccessChild) expression;
 			TypeBasedHeap containerState = smallStepSemantics(access.getContainer(), pp);
@@ -141,17 +141,17 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	protected TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap lubAux(TypeBasedHeap other) throws SemanticException {
 		return new TypeBasedHeap(SetUtils.union(names, other.names));
 	}
 
 	@Override
-	protected TypeBasedHeap wideningAux(TypeBasedHeap other) throws SemanticException {
+	public TypeBasedHeap wideningAux(TypeBasedHeap other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
 		return other.names.containsAll(names);
 	}
 

@@ -62,23 +62,23 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	protected ValueEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+	public ValueEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
 		return new ValueEnvironment<>(lattice, function, stack);
 	}
 
 	@Override
-	protected ValueEnvironment<T> copy() {
+	public ValueEnvironment<T> copy() {
 		return new ValueEnvironment<>(lattice, mkNewFunction(function), stack);
 	}
 
 	@Override
-	protected Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
 	}
 
 	@Override
-	protected ValueEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
+	public ValueEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
 			T value, T eval, ProgramPoint pp) {
 		return new ValueEnvironment<>(lattice, function, value);
 	}
@@ -90,12 +90,12 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	protected ValueEnvironment<T> assumeSatisfied(T eval) {
+	public ValueEnvironment<T> assumeSatisfied(T eval) {
 		return this;
 	}
 
 	@Override
-	protected ValueEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, ValueEnvironment<T> other)
+	public ValueEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, ValueEnvironment<T> other)
 			throws SemanticException {
 		return new ValueEnvironment<>(lattice, function, stack.glb(other.stack));
 	}

@@ -238,7 +238,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalIdentifier(Identifier id, InferenceSystem<T> environment, ProgramPoint pp)
+	public InferredPair<T> evalIdentifier(Identifier id, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>((T) this, environment.getState(id), environment.getExecutionState());
 	}
@@ -255,7 +255,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -271,7 +271,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalNullConstant(T state, ProgramPoint pp) throws SemanticException {
+	public InferredPair<T> evalNullConstant(T state, ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -288,7 +288,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalNonNullConstant(Constant constant, T state, ProgramPoint pp)
+	public InferredPair<T> evalNonNullConstant(Constant constant, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -310,7 +310,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
+	public InferredPair<T> evalUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -336,7 +336,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalBinaryExpression(BinaryOperator operator, T left, T right, T state, ProgramPoint pp)
+	public InferredPair<T> evalBinaryExpression(BinaryOperator operator, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -358,7 +358,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
+	public InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
 		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
@@ -381,7 +381,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	protected InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
+	public InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
 		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
@@ -410,7 +410,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected InferredPair<T> evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
+	public InferredPair<T> evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -433,7 +433,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -452,7 +452,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesPushAny(PushAny pushAny, T state) throws SemanticException {
+	public Satisfiability satisfiesPushAny(PushAny pushAny, T state) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -473,7 +473,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) throws SemanticException {
+	public Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -495,7 +495,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp)
+	public Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -523,7 +523,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
+	public Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -556,7 +556,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right, T state,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -590,7 +590,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
+	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -653,7 +653,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected T glbAux(T other) throws SemanticException {
+	public T glbAux(T other) throws SemanticException {
 		return bottom();
 	}
 }

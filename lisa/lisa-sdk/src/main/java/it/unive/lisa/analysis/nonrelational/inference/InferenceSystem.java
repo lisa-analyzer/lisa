@@ -58,7 +58,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
+	public InferenceSystem<T> mk(T lattice, Map<Identifier, T> function) {
 		return new InferenceSystem<>(lattice, function, inferred);
 	}
 
@@ -85,18 +85,18 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected InferenceSystem<T> copy() {
+	public InferenceSystem<T> copy() {
 		return new InferenceSystem<>(lattice, mkNewFunction(function), inferred);
 	}
 
 	@Override
-	protected Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		InferredPair<T> eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval.getInferred(), eval);
 	}
 
 	@Override
-	protected InferenceSystem<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
+	public InferenceSystem<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
 			T value, InferredPair<T> eval, ProgramPoint pp) {
 		return new InferenceSystem<>(lattice, function, new InferredPair<>(lattice, value, eval.getState()));
 	}
@@ -122,7 +122,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected InferenceSystem<T> lubAux(InferenceSystem<T> other) throws SemanticException {
+	public InferenceSystem<T> lubAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
@@ -130,7 +130,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
+	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
@@ -138,7 +138,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(InferenceSystem<T> other) throws SemanticException {
+	public boolean lessOrEqualAux(InferenceSystem<T> other) throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 
@@ -146,13 +146,13 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	protected InferenceSystem<T> assumeSatisfied(InferredPair<T> eval) {
+	public InferenceSystem<T> assumeSatisfied(InferredPair<T> eval) {
 		return new InferenceSystem<>(lattice, function,
 				new InferredPair<>(lattice, eval.getInferred(), eval.getState()));
 	}
 
 	@Override
-	protected InferenceSystem<T> glbAux(T lattice, Map<Identifier, T> function, InferenceSystem<T> other) {
+	public InferenceSystem<T> glbAux(T lattice, Map<Identifier, T> function, InferenceSystem<T> other) {
 		return new InferenceSystem<>(lattice, function,
 				// we take the updated execution state
 				new InferredPair<>(lattice, getInferredValue(), other.getExecutionState()));

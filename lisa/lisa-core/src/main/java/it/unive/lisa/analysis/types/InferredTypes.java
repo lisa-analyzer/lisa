@@ -129,7 +129,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
+	public InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
 		InferredTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
@@ -139,7 +139,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+	public InferredTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		if (pushAny.getStaticType().isUntyped())
 			return new InferredTypes(true, types.getTypes());
@@ -147,17 +147,17 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalNullConstant(ProgramPoint pp) {
+	public InferredTypes evalNullConstant(ProgramPoint pp) {
 		return new InferredTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
-	protected InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public InferredTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		return new InferredTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
 	@Override
-	protected InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
+	public InferredTypes evalUnaryExpression(UnaryOperator operator, InferredTypes arg,
 			ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> elems = arg.isTop() ? types.getTypes() : arg.elements;
@@ -168,7 +168,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left,
+	public InferredTypes evalBinaryExpression(BinaryOperator operator, InferredTypes left,
 			InferredTypes right, ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
@@ -180,7 +180,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left,
+	public InferredTypes evalTernaryExpression(TernaryOperator operator, InferredTypes left,
 			InferredTypes middle, InferredTypes right, ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
@@ -193,7 +193,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, InferredTypes left,
 			InferredTypes right, ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
@@ -278,19 +278,19 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes lubAux(InferredTypes other) throws SemanticException {
+	public InferredTypes lubAux(InferredTypes other) throws SemanticException {
 		Set<Type> lub = new HashSet<>(elements);
 		lub.addAll(other.elements);
 		return new InferredTypes(null, lub);
 	}
 
 	@Override
-	protected InferredTypes wideningAux(InferredTypes other) throws SemanticException {
+	public InferredTypes wideningAux(InferredTypes other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(InferredTypes other) throws SemanticException {
+	public boolean lessOrEqualAux(InferredTypes other) throws SemanticException {
 		return other.elements.containsAll(elements);
 	}
 
@@ -323,7 +323,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
+	public InferredTypes evalTypeCast(BinaryExpression cast, InferredTypes left, InferredTypes right,
 			ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;
@@ -335,7 +335,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	protected InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
+	public InferredTypes evalTypeConv(BinaryExpression conv, InferredTypes left, InferredTypes right,
 			ProgramPoint pp) {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.isTop() ? types.getTypes() : left.elements;

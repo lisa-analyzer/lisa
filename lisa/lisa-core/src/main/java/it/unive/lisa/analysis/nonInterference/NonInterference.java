@@ -125,7 +125,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected NonInterference lubAux(NonInterference other) throws SemanticException {
+	public NonInterference lubAux(NonInterference other) throws SemanticException {
 		// HL
 		// | \
 		// HH LL
@@ -139,12 +139,12 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected NonInterference wideningAux(NonInterference other) throws SemanticException {
+	public NonInterference wideningAux(NonInterference other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(NonInterference other) throws SemanticException {
+	public boolean lessOrEqualAux(NonInterference other) throws SemanticException {
 		// HL
 		// | \
 		// HH LL
@@ -226,38 +226,38 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
+	public InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
 			ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalUnaryExpression(UnaryOperator operator, NonInterference arg,
+	public InferredPair<NonInterference> evalUnaryExpression(UnaryOperator operator, NonInterference arg,
 			NonInterference state, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, arg, state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalBinaryExpression(BinaryOperator operator, NonInterference left,
+	public InferredPair<NonInterference> evalBinaryExpression(BinaryOperator operator, NonInterference left,
 			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, left.lub(right), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalTernaryExpression(TernaryOperator operator, NonInterference left,
+	public InferredPair<NonInterference> evalTernaryExpression(TernaryOperator operator, NonInterference left,
 			NonInterference middle, NonInterference right, NonInterference state, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>(this, left.lub(middle).lub(right), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalIdentifier(Identifier id,
+	public InferredPair<NonInterference> evalIdentifier(Identifier id,
 			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
 	}

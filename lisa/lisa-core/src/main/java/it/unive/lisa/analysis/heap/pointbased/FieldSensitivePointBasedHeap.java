@@ -42,7 +42,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	protected FieldSensitivePointBasedHeap from(PointBasedHeap original) {
+	public FieldSensitivePointBasedHeap from(PointBasedHeap original) {
 		return new FieldSensitivePointBasedHeap(original.heapEnv);
 	}
 
@@ -71,7 +71,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			return new ExpressionSet<>(result);
 		}
 
-		protected void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
+		public void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
 				Set<ValueExpression> result, AllocationSite site) {
 			for (SymbolicExpression target : child) {
 				AllocationSite e = new AllocationSite(

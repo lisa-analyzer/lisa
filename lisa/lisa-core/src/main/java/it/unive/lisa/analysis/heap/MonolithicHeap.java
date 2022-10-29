@@ -59,12 +59,12 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	protected MonolithicHeap mk(MonolithicHeap reference) {
+	public MonolithicHeap mk(MonolithicHeap reference) {
 		return TOP;
 	}
 
 	@Override
-	protected MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
+	public MonolithicHeap semanticsOf(HeapExpression expression, ProgramPoint pp) {
 		return this;
 	}
 
@@ -90,17 +90,17 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	protected MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap lubAux(MonolithicHeap other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected MonolithicHeap wideningAux(MonolithicHeap other) throws SemanticException {
+	public MonolithicHeap wideningAux(MonolithicHeap other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
 		return true;
 	}
 

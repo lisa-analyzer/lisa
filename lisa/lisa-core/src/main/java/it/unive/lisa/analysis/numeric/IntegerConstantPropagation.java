@@ -96,19 +96,19 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalNullConstant(ProgramPoint pp) {
+	public IntegerConstantPropagation evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public IntegerConstantPropagation evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer)
 			return new IntegerConstantPropagation((Integer) constant.getValue());
 		return top();
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
+	public IntegerConstantPropagation evalUnaryExpression(UnaryOperator operator, IntegerConstantPropagation arg,
 			ProgramPoint pp) {
 
 		if (arg.isTop())
@@ -121,7 +121,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
+	public IntegerConstantPropagation evalBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
 
 		if (operator instanceof AdditionOperator)
@@ -146,24 +146,24 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected IntegerConstantPropagation evalTernaryExpression(TernaryOperator operator,
+	public IntegerConstantPropagation evalTernaryExpression(TernaryOperator operator,
 			IntegerConstantPropagation left,
 			IntegerConstantPropagation middle, IntegerConstantPropagation right, ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected IntegerConstantPropagation lubAux(IntegerConstantPropagation other) throws SemanticException {
+	public IntegerConstantPropagation lubAux(IntegerConstantPropagation other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected IntegerConstantPropagation wideningAux(IntegerConstantPropagation other) throws SemanticException {
+	public IntegerConstantPropagation wideningAux(IntegerConstantPropagation other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(IntegerConstantPropagation other) throws SemanticException {
+	public boolean lessOrEqualAux(IntegerConstantPropagation other) throws SemanticException {
 		return false;
 	}
 
@@ -199,7 +199,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, IntegerConstantPropagation left,
 			IntegerConstantPropagation right, ProgramPoint pp) {
 
 		if (left.isTop() || right.isTop())
@@ -224,7 +224,7 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	protected ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
+	public ValueEnvironment<IntegerConstantPropagation> assumeBinaryExpression(
 			ValueEnvironment<IntegerConstantPropagation> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE)

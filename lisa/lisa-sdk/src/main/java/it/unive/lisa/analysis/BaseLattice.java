@@ -42,7 +42,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract L lubAux(L other) throws SemanticException;
+	public abstract L lubAux(L other) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -74,7 +74,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract L wideningAux(L other) throws SemanticException;
+	public abstract L wideningAux(L other) throws SemanticException;
 
 	@Override
 	public boolean lessOrEqual(L other) throws SemanticException {
@@ -108,7 +108,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract boolean lessOrEqualAux(L other) throws SemanticException;
+	public abstract boolean lessOrEqualAux(L other) throws SemanticException;
 
 	@Override
 	public abstract boolean equals(Object obj);

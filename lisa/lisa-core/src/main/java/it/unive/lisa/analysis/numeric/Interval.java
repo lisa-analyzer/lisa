@@ -117,7 +117,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return new Interval(new MathNumber(i), new MathNumber(i));
@@ -127,7 +127,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
+	public Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
@@ -144,7 +144,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
+	public Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
 		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
@@ -172,14 +172,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval lubAux(Interval other) throws SemanticException {
+	public Interval lubAux(Interval other) throws SemanticException {
 		MathNumber newLow = interval.getLow().min(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().max(other.interval.getHigh());
 		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
-	protected Interval glbAux(Interval other) {
+	public Interval glbAux(Interval other) {
 		MathNumber newLow = interval.getLow().max(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().min(other.interval.getHigh());
 
@@ -189,7 +189,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval wideningAux(Interval other) throws SemanticException {
+	public Interval wideningAux(Interval other) throws SemanticException {
 		MathNumber newLow, newHigh;
 		if (other.interval.getHigh().compareTo(interval.getHigh()) > 0)
 			newHigh = MathNumber.PLUS_INFINITY;
@@ -205,12 +205,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(Interval other) throws SemanticException {
+	public boolean lessOrEqualAux(Interval other) throws SemanticException {
 		return other.interval.includes(interval);
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
 			ProgramPoint pp) {
 
 		if (left.isTop() || right.isTop())
@@ -299,7 +299,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected ValueEnvironment<Interval> assumeBinaryExpression(
+	public ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 

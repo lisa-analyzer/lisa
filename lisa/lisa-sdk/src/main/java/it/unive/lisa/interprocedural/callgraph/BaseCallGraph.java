@@ -303,7 +303,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
+	public void resolveNonInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : app.getAllCodeCodeMembers())
@@ -326,7 +326,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
+	public void resolveInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
@@ -381,7 +381,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param instance whether or not the only instance or non-instance members
 	 *                     should be matched
 	 */
-	protected void checkMember(
+	public void checkMember(
 			UnresolvedCall call,
 			Set<Type>[] types,
 			Collection<CFG> targets,
@@ -454,7 +454,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @return {@code true} if the qualifier and name are compatible with the
 	 *             ones of the call's target
 	 */
-	protected boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
+	public boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
 		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))
@@ -475,7 +475,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
+	public abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 			throws CallResolutionException;
 
 	@Override

@@ -101,7 +101,7 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	protected StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
+	public StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
 			ProgramPoint pp) throws SemanticException {
 		StaticTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
@@ -110,17 +110,17 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	protected StaticTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+	public StaticTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
 		return new StaticTypes(pp.getProgram().getTypes(), pushAny.getStaticType());
 	}
 
 	@Override
-	protected StaticTypes evalNullConstant(ProgramPoint pp) {
+	public StaticTypes evalNullConstant(ProgramPoint pp) {
 		return new StaticTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
-	protected StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		return new StaticTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
@@ -151,7 +151,7 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, StaticTypes left,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, StaticTypes left,
 			StaticTypes right, ProgramPoint pp) throws SemanticException {
 		TypeSystem types = pp.getProgram().getTypes();
 		Set<Type> lelems = left.type.allInstances(types);
@@ -161,17 +161,17 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	protected StaticTypes lubAux(StaticTypes other) throws SemanticException {
+	public StaticTypes lubAux(StaticTypes other) throws SemanticException {
 		return new StaticTypes(types, type.commonSupertype(other.type));
 	}
 
 	@Override
-	protected StaticTypes wideningAux(StaticTypes other) throws SemanticException {
+	public StaticTypes wideningAux(StaticTypes other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
+	public boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
 		return type.canBeAssignedTo(other.type);
 	}
 

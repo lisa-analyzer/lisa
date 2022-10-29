@@ -60,17 +60,17 @@ public class BaseNonRelationalTypeDomainTest {
 		}
 
 		@Override
-		protected Sample lubAux(Sample other) throws SemanticException {
+		public Sample lubAux(Sample other) throws SemanticException {
 			return this;
 		}
 
 		@Override
-		protected Sample wideningAux(Sample other) throws SemanticException {
+		public Sample wideningAux(Sample other) throws SemanticException {
 			return this;
 		}
 
 		@Override
-		protected boolean lessOrEqualAux(Sample other) throws SemanticException {
+		public boolean lessOrEqualAux(Sample other) throws SemanticException {
 			return true;
 		}
 

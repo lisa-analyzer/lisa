@@ -64,17 +64,17 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	protected T lubAux(T other) throws SemanticException {
+	public T lubAux(T other) throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	protected T wideningAux(T other) throws SemanticException {
+	public T wideningAux(T other) throws SemanticException {
 		return (T) this;
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(T other) throws SemanticException {
+	public boolean lessOrEqualAux(T other) throws SemanticException {
 		return true;
 	}
 

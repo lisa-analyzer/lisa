@@ -43,7 +43,7 @@ public class CallRegisteringTest {
 		CallGraph cg = new BaseCallGraph() {
 
 			@Override
-			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
+			public Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 					throws CallResolutionException {
 				return receiver.getStaticType().allInstances(receiver.getProgram().getTypes());
 			}

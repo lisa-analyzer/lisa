@@ -39,7 +39,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	/**
 	 * The underlying domain.
 	 */
-	protected final E domain;
+	public final E domain;
 
 	/**
 	 * Builds the domain.
@@ -51,7 +51,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	 * @param isTop    whether or not this domain is the top of the lattice
 	 * @param isBottom whether or not this domain is the bottom of the lattice
 	 */
-	protected DataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
+	public DataflowDomain(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		this.elements = elements;
 		this.domain = domain;
 		this.isTop = isTop;
@@ -71,7 +71,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	 * 
 	 * @return the concrete instance of domain
 	 */
-	protected abstract D mk(E domain, Set<E> elements, boolean isTop, boolean isBottom);
+	public abstract D mk(E domain, Set<E> elements, boolean isTop, boolean isBottom);
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -267,7 +267,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@Override
-	protected D wideningAux(D other) throws SemanticException {
+	public D wideningAux(D other) throws SemanticException {
 		return lubAux(other);
 	}
 

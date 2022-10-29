@@ -80,12 +80,12 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalNullConstant(ProgramPoint pp) {
+	public Parity evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i % 2 == 0 ? EVEN : ODD;
@@ -103,14 +103,14 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
+	public Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
 		if (operator == NumericNegation.INSTANCE)
 			return arg;
 		return top();
 	}
 
 	@Override
-	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
+	public Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return top();
 
@@ -136,17 +136,17 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity lubAux(Parity other) throws SemanticException {
+	public Parity lubAux(Parity other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected Parity wideningAux(Parity other) throws SemanticException {
+	public Parity wideningAux(Parity other) throws SemanticException {
 		return lubAux(other);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(Parity other) throws SemanticException {
+	public boolean lessOrEqualAux(Parity other) throws SemanticException {
 		return false;
 	}
 
@@ -173,7 +173,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected ValueEnvironment<Parity> assumeBinaryExpression(
+	public ValueEnvironment<Parity> assumeBinaryExpression(
 			ValueEnvironment<Parity> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE) {

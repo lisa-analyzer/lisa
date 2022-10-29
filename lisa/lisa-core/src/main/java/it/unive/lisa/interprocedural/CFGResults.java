@@ -153,7 +153,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	protected CFGResults<A, H, V, T> mk(CFGWithAnalysisResults<A, H, V, T> lattice,
+	public CFGResults<A, H, V, T> mk(CFGWithAnalysisResults<A, H, V, T> lattice,
 			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
 		return new CFGResults<>(lattice, function);
 	}
