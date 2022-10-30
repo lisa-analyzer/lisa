@@ -868,7 +868,7 @@ public final class Automaton {
 			StringBuilder string = new StringBuilder();
 			if (a.transitions.size() > 1)
 				string.append("(");
-			for (Transition t : a.transitions)
+			for (Transition t : a.getOrderedTransitions())
 				string.append(t.getSymbol()).append(" | ");
 			if (!a.transitions.isEmpty())
 				string.delete(string.length() - 3, string.length());
@@ -913,7 +913,7 @@ public final class Automaton {
 		if (finalStates.size() > 1) {
 			State newFinal = new State(false, true);
 			regStates.add(newFinal);
-			for (State s : finalStates) {
+			for (State s : new TreeSet<>(finalStates)) {
 				State q = new State(s.isInitial(), false);
 				regStates.remove(s);
 				regStates.add(q);
@@ -933,7 +933,7 @@ public final class Automaton {
 			}
 		}
 
-		for (Transition t : a.transitions) {
+		for (Transition t : a.getOrderedTransitions()) {
 			State source = t.getSource();
 			State dest = t.getDestination();
 			if (!initialStateIngoing.isEmpty()) {
@@ -965,7 +965,7 @@ public final class Automaton {
 			Set<State> newLevel = reg.getOrderedTransitions().stream().filter(t -> t.getSource().equals(regInitialState))
 					.map(Transition::getDestination).collect(Collectors.toSet());
 
-			for (State s : newLevel) {
+			for (State s : new TreeSet<>(newLevel)) {
 				if(!s.equals(regFinalState))
 					reg.states.remove(s);
 				Set<State> nextLevel = reg.getOrderedTransitions().stream()
@@ -989,7 +989,7 @@ public final class Automaton {
 				if (!selfTransitions.isEmpty()) {
 					if (selfTransitions.size() > 1)
 						selfString.append("(");
-					for (Transition t : selfTransitions)
+					for (Transition t : new TreeSet<>(selfTransitions))
 						selfString.append(t.getSymbol()).append("|");
 					selfString.delete(selfString.length() - 1, selfString.length());
 					if (selfTransitions.size() > 1)
@@ -1004,7 +1004,7 @@ public final class Automaton {
 							&& outgoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
 						if (outgoingTransitions.size() > 1)
 							outgoingString.append("(");
-						for (Transition t : outgoingTransitions)
+						for (Transition t : new TreeSet<>(outgoingTransitions))
 							if (!t.getSymbol().equals(""))
 								outgoingString.append(t.getSymbol()).append("|");
 						outgoingString.delete(outgoingString.length() - 1, outgoingString.length());
@@ -1013,7 +1013,7 @@ public final class Automaton {
 					}
 					reg.transitions.removeAll(outgoingTransitions);
 					StringBuilder ingString = new StringBuilder();
-					for (Transition t : ingoingTransitions)
+					for (Transition t : new TreeSet<>(ingoingTransitions))
 						if (!t.getSymbol().equals("") && t.getSource().equals(regInitialState))
 							ingString.append(t.getSymbol()).append("|");
 					if (!ingString.toString().equals(""))
@@ -1022,7 +1022,7 @@ public final class Automaton {
 						ingString.insert(0, "(");
 						ingString.append(")");
 					}
-					for (State q : nextLevel)
+					for (State q : new TreeSet<>(nextLevel))
 						if (reg.states.size() != 2)
 							reg.transitions.add(new Transition(regInitialState, q,
 									selfString.toString() + ingString + outgoingString));
@@ -1032,7 +1032,7 @@ public final class Automaton {
 				if (!ingoingTransitions.isEmpty()) {
 					if (!(ingoingTransitions.size() == 1
 							&& ingoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
-						for (Transition t : ingoingTransitions)
+						for (Transition t : new TreeSet<>(ingoingTransitions))
 							if (!t.getSymbol().equals(""))
 								ingoingString.append(t.getSymbol()).append("|");
 						ingoingString.delete(ingoingString.length() - 1, ingoingString.length());
@@ -1042,7 +1042,7 @@ public final class Automaton {
 						}
 					}
 					reg.transitions.removeAll(ingoingTransitions);
-					for (Transition t : ingoingTransitions)
+					for (Transition t : new TreeSet<>(ingoingTransitions))
 						if (reg.states.size() > 2 && !t.getSource().equals(regInitialState))
 							reg.transitions.add(new Transition(t.getSource(), t.getSource(),
 									ingoingString.toString() + selfString + outgoingString));
@@ -1055,7 +1055,7 @@ public final class Automaton {
 			if (reg.states.size() == 2) {
 				if (reg.transitions.size() > 1) {
 					StringBuilder finalValue = new StringBuilder();
-					for (Transition t : reg.transitions)
+					for (Transition t : reg.getOrderedTransitions())
 						finalValue.append(t.getSymbol()).append("|");
 					finalValue.delete(finalValue.length() - 1, finalValue.length());
 					reg.transitions.clear();
