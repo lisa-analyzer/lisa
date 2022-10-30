@@ -78,7 +78,7 @@ public class Constant extends ValueExpression {
 
 	@Override
 	public String toString() {
-		return value.toString();
+		return value instanceof String ? "\"" + value + "\"" : value.toString();
 	}
 
 	@Override

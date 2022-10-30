@@ -43,9 +43,20 @@ import it.unive.lisa.util.numeric.MathNumber;
  */
 public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
-	private static final Interval ZERO = new Interval(IntInterval.ZERO);
-	private static final Interval TOP = new Interval(IntInterval.INFINITY);
-	private static final Interval BOTTOM = new Interval(null);
+	/**
+	 * The abstract zero ({@code [0, 0]}) element.
+	 */
+	public static final Interval ZERO = new Interval(IntInterval.ZERO);
+
+	/**
+	 * The abstract top ({@code [-Inf, +Inf]}) element.
+	 */
+	public static final Interval TOP = new Interval(IntInterval.INFINITY);
+
+	/**
+	 * The abstract bottom element.
+	 */
+	public static final Interval BOTTOM = new Interval(null);
 
 	/**
 	 * The interval represented by this domain element.

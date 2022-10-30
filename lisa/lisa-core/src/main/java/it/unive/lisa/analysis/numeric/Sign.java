@@ -40,11 +40,30 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private static final Sign POS = new Sign((byte) 4);
-	private static final Sign NEG = new Sign((byte) 3);
-	private static final Sign ZERO = new Sign((byte) 2);
-	private static final Sign TOP = new Sign((byte) 0);
-	private static final Sign BOTTOM = new Sign((byte) 1);
+	/**
+	 * The abstract positive element.
+	 */
+	public static final Sign POS = new Sign((byte) 4);
+
+	/**
+	 * The abstract negative element.
+	 */
+	public static final Sign NEG = new Sign((byte) 3);
+
+	/**
+	 * The abstract zero element.
+	 */
+	public static final Sign ZERO = new Sign((byte) 2);
+
+	/**
+	 * The abstract top element.
+	 */
+	public static final Sign TOP = new Sign((byte) 0);
+
+	/**
+	 * The abstract bottom element.
+	 */
+	public static final Sign BOTTOM = new Sign((byte) 1);
 
 	private final byte sign;
 

@@ -13,6 +13,7 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.imp.types.IMPTypeSystem;
@@ -105,7 +106,7 @@ public class CFGFixpointTest {
 	@Test
 	public void testMetaVariablesOfRootExpressions()
 			throws FixpointException, InterproceduralAnalysisException, CallGraphConstructionException {
-		Program program = new Program(null, new IMPTypeSystem());
+		Program program = new Program(new IMPFeatures(), new IMPTypeSystem());
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, program, false, "cfg"));
 		OpenCall call = new OpenCall(cfg, SyntheticLocation.INSTANCE, CallType.STATIC, "test", "test");
 		cfg.addNode(call, true);

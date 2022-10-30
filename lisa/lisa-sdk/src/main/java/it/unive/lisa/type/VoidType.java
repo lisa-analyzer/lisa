@@ -31,12 +31,12 @@ public class VoidType implements Type {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		return other instanceof VoidType;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return VoidType.class.hashCode();
 	}
 

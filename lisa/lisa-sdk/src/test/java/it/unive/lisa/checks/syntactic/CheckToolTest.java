@@ -2,6 +2,8 @@ package it.unive.lisa.checks.syntactic;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestLanguageFeatures;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -27,8 +29,8 @@ import org.junit.Test;
 
 public class CheckToolTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null, null),
-			"fake", false);
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake", false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 			new SourceCodeLocation("fake", 2, 0), unit, false,

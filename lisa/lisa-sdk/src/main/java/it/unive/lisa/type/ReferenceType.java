@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public final class ReferenceType implements PointerType {
+public class ReferenceType implements PointerType {
 
 	private Set<Type> innerTypes;
 

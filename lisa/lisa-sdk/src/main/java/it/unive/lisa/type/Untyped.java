@@ -32,12 +32,12 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		return other instanceof Untyped;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return Untyped.class.hashCode();
 	}
 

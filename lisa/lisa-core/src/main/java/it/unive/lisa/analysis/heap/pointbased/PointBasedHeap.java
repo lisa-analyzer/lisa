@@ -318,7 +318,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
 			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
 				return new ExpressionSet<>(resolveIdentifier(expression));

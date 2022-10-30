@@ -3,7 +3,9 @@ package it.unive.lisa.analysis;
 import static org.junit.Assert.assertEquals;
 
 import it.unive.lisa.TestHeapDomain;
+import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeDomain;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
@@ -21,8 +23,7 @@ import org.junit.Test;
 public class CFGWithAnalysisResultsTest {
 
 	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
-			new Program(null, null),
-			"Testing", false);
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
 
 	@Test
 	public void testIssue189() throws SemanticException {

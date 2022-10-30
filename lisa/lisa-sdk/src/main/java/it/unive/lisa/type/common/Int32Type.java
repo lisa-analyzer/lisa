@@ -91,7 +91,7 @@ public class Int32Type implements NumericType {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if (!(other instanceof NumericType))
 			return false;
 
@@ -99,7 +99,7 @@ public class Int32Type implements NumericType {
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return Int32Type.class.getName().hashCode();
 	}
 

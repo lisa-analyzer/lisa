@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.TestHeapDomain;
+import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeDomain;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -49,8 +51,8 @@ import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null, null),
-			"fake", false);
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("fake", 1, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake", false);
 	private static final Global global = new Global(new SourceCodeLocation("fake", 15, 0), unit, "fake", false);
 	private static final CodeMemberDescriptor descriptor = new CodeMemberDescriptor(
 			new SourceCodeLocation("fake", 2, 0), unit, false,

@@ -47,12 +47,12 @@ public class BoolType implements BooleanType {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		return other instanceof BooleanType;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return BooleanType.class.getName().hashCode();
 	}
 

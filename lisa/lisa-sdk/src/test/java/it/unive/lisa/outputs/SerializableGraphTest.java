@@ -2,6 +2,8 @@ package it.unive.lisa.outputs;
 
 import static org.junit.Assert.assertEquals;
 
+import it.unive.lisa.TestLanguageFeatures;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
@@ -30,8 +32,8 @@ import org.junit.Test;
 
 public class SerializableGraphTest {
 
-	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE, new Program(null, null), "Testing",
-			false);
+	private static final ClassUnit unit = new ClassUnit(SyntheticLocation.INSTANCE,
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
 
 	private static void addNode(SortedSet<SerializableNode> nodes, Statement st, Statement... inner) {
 		List<Integer> list = new ArrayList<>(inner.length);

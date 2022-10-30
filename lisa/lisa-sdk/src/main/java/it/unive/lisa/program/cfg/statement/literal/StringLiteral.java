@@ -22,4 +22,9 @@ public class StringLiteral extends Literal<String> {
 	public StringLiteral(CFG cfg, CodeLocation location, String value) {
 		super(cfg, location, value, cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType());
 	}
+
+	@Override
+	public String toString() {
+		return "\"" + super.toString() + "\"";
+	}
 }

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestLanguageFeatures;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Program;
@@ -19,10 +21,10 @@ import org.junit.Test;
 
 public class WarningsTest {
 
-	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0), new Program(null, null),
-			"fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1), new Program(null, null),
-			"fake2", false);
+	private static final ClassUnit unit1 = new ClassUnit(new SourceCodeLocation("fake", 1, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(new SourceCodeLocation("fake", 1, 1),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "fake2", false);
 
 	private static final Global global1 = new Global(new SourceCodeLocation("fake", 15, 0), unit1, "fake1", false);
 	private static final Global global2 = new Global(new SourceCodeLocation("fake", 15, 1), unit2, "fake2", false);

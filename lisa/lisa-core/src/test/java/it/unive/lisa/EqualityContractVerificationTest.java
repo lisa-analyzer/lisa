@@ -18,7 +18,9 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.ContextSensitivityToken;
@@ -107,10 +109,14 @@ import org.reflections.scanners.SubTypesScanner;
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
-	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(null, null), "fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(null, null), "fake2", false);
-	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, new Program(null, null), "fake1", false);
-	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, new Program(null, null), "fake2", false);
+	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2", false);
+	private static final InterfaceUnit interface1 = new InterfaceUnit(loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake1", false);
+	private static final InterfaceUnit interface2 = new InterfaceUnit(loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake2", false);
 	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
 	private static final CodeMemberDescriptor descr2 = new CodeMemberDescriptor(loc, unit2, false, "fake2");
 	private static final CFG cfg1 = new CFG(descr1);
@@ -269,7 +275,7 @@ public class EqualityContractVerificationTest {
 				verify(type, Warning.NONFINAL_FIELDS, Warning.ALL_FIELDS_SHOULD_BE_USED);
 			else
 				// type token is the only one with an eclipse-like equals
-				verify(type, type == TypeTokenType.class);
+				verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
 	}
 
 	@Test

@@ -33,6 +33,7 @@ import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
@@ -108,7 +109,7 @@ public class SemanticsSanityTest {
 	public void setup() throws CallGraphConstructionException, InterproceduralAnalysisException {
 		SourceCodeLocation unknownLocation = new SourceCodeLocation("unknown", 0, 0);
 
-		Program p = new Program(null, new IMPTypeSystem());
+		Program p = new Program(new IMPFeatures(), new IMPTypeSystem());
 		Application app = new Application(p);
 		unit = new ClassUnit(unknownLocation, p, "foo", false);
 		p.addUnit(unit);

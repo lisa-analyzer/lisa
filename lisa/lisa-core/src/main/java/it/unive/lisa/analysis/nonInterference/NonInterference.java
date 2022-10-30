@@ -30,13 +30,25 @@ import java.util.Map;
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	private static final Annotation LOW_CONF_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
+	/**
+	 * The annotation used to mark low confidentiality variables.
+	 */
+	public static final Annotation LOW_CONF_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
 
-	private static final AnnotationMatcher LOW_CONF_MATCHER = new BasicAnnotationMatcher(LOW_CONF_ANNOTATION);
+	/**
+	 * {@link AnnotationMatcher} for {@link #LOW_CONF_ANNOTATION}.
+	 */
+	public static final AnnotationMatcher LOW_CONF_MATCHER = new BasicAnnotationMatcher(LOW_CONF_ANNOTATION);
 
-	private static final Annotation HIGH_INT_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
+	/**
+	 * The annotation used to mark high integrity variables.
+	 */
+	public static final Annotation HIGH_INT_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
 
-	private static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
+	/**
+	 * {@link AnnotationMatcher} for {@link #HIGH_INT_ANNOTATION}.
+	 */
+	public static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
 
 	private static final byte NI_BOTTOM = 0;
 

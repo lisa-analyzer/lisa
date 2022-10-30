@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
@@ -134,7 +135,7 @@ public class InferredTypesTest {
 
 		@Override
 		public Program getProgram() {
-			return new Program(null, new IMPTypeSystem());
+			return new Program(new IMPFeatures(), new IMPTypeSystem());
 		}
 	};
 
