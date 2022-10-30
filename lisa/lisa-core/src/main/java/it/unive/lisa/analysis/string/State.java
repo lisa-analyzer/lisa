@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public final class State implements Comparable<State>{
+public final class State implements Comparable<State> {
 
 	/**
 	 * Whether this state is final.
@@ -26,6 +26,7 @@ public final class State implements Comparable<State>{
 	private final int id;
 
 	private static final AtomicInteger idGenerator = new AtomicInteger();
+
 	/**
 	 * State constructor, it creates a new state with the given information.
 	 *
@@ -80,6 +81,7 @@ public final class State implements Comparable<State>{
 
 	/**
 	 * Returns the states, id.
+	 * 
 	 * @return integer value representing the state's id.
 	 */
 	public int getId() {

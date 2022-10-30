@@ -1,13 +1,11 @@
 package it.unive.lisa.analysis.string;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.AnyOf.anyOf;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.junit.Test;
 
 public class ToRegexTest {

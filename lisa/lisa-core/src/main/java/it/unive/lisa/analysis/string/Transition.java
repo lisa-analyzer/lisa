@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public final class Transition implements Comparable<Transition>{
+public final class Transition implements Comparable<Transition> {
 
 	private final State source, destination;
 
@@ -88,6 +88,7 @@ public final class Transition implements Comparable<Transition>{
 
 	/**
 	 * Returns the transition id.
+	 * 
 	 * @return an integer representing the transition's id.
 	 */
 	public int getId() {

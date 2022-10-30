@@ -97,6 +97,7 @@ public final class Automaton {
 
 	/**
 	 * Return an ordered set containing this automaton states.
+	 * 
 	 * @return a set containing the states ordered by ids
 	 */
 	private Set<State> getOrderedStates() {
@@ -105,6 +106,7 @@ public final class Automaton {
 
 	/**
 	 * Return an ordered set containing this automaton transitions.
+	 * 
 	 * @return a set containing the transitions ordered by ids
 	 */
 	private Set<Transition> getOrderedTransitions() {
@@ -962,11 +964,12 @@ public final class Automaton {
 
 		do {
 
-			Set<State> newLevel = reg.getOrderedTransitions().stream().filter(t -> t.getSource().equals(regInitialState))
+			Set<State> newLevel = reg.getOrderedTransitions().stream()
+					.filter(t -> t.getSource().equals(regInitialState))
 					.map(Transition::getDestination).collect(Collectors.toSet());
 
 			for (State s : new TreeSet<>(newLevel)) {
-				if(!s.equals(regFinalState))
+				if (!s.equals(regFinalState))
 					reg.states.remove(s);
 				Set<State> nextLevel = reg.getOrderedTransitions().stream()
 						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
