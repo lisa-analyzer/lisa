@@ -470,7 +470,7 @@ public class PointBasedHeapTest {
 
 		// *(y) rewritten in x -> pp1 -> empty set
 		deref = new HeapDereference(untyped, y, loc1);
-		expectedRewritten = new ExpressionSet<>();
+		expectedRewritten = new ExpressionSet<>(new AllocationSite(untyped, "unknown@y", fakeLocation));
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 	}
 }

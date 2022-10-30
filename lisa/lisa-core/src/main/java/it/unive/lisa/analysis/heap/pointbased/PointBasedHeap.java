@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -30,6 +24,11 @@ import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -353,7 +352,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 			return result;
 		}
-		
+
 		@Override
 		public ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
 				throws SemanticException {

@@ -81,7 +81,7 @@ public class AllocationSite extends HeapLocation {
 			CodeLocation location) {
 		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.locationName = locationName;
-		this.field = field.toString();
+		this.field = field != null ? field.toString() : null;
 	}
 
 	/**
