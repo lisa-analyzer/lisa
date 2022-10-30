@@ -16,6 +16,8 @@ public class AllocationSite extends HeapLocation {
 
 	private final String locationName;
 
+	private final String field;
+
 	/**
 	 * Builds a strong allocation site from its source code location (without
 	 * field).
@@ -79,6 +81,7 @@ public class AllocationSite extends HeapLocation {
 			CodeLocation location) {
 		super(staticType, "pp@" + locationName + (field == null ? "" : "[" + field + "]"), isWeak, location);
 		this.locationName = locationName;
+		this.field = field.toString();
 	}
 
 	/**
@@ -90,5 +93,16 @@ public class AllocationSite extends HeapLocation {
 	 */
 	public String getLocationName() {
 		return locationName;
+	}
+
+	/**
+	 * Yields the string that identifies the subfield of the location
+	 * ({@link #getLocationName()}) that this allocation site has been
+	 * allocated.
+	 * 
+	 * @return the subfield name (can be {@code null})
+	 */
+	public String getField() {
+		return field;
 	}
 }

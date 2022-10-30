@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -7,6 +13,7 @@ import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -17,13 +24,12 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -311,6 +317,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					Identifier id = (Identifier) ref;
 					if (heapEnv.getKeys().contains(id))
 						result.addAll(resolveIdentifier(id));
+					else if (id instanceof Variable) {
+						// this is a variable from the program that we know
+						// nothing about
+						CodeLocation loc = expression.getCodeLocation();
+						AllocationSite site = new AllocationSite(id.getStaticType(), "unknown@" + id.getName(), loc);
+						result.add(site);
+					}
 				} else
 					result.add(ref);
 
@@ -339,6 +352,21 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 			}
 
 			return result;
+		}
+		
+		@Override
+		public ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
+				throws SemanticException {
+			if (expression.getStaticType().isPointerType()) {
+				Set<Type> inner = expression.getStaticType().asPointerType().getInnerTypes();
+
+				Type tmp = Type.commonSupertype(inner, Untyped.INSTANCE);
+
+				CodeLocation loc = expression.getCodeLocation();
+				AllocationSite site = new AllocationSite(tmp, "unknown@" + loc.getCodeLocation(), loc);
+				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
+			}
+			return new ExpressionSet<>(expression);
 		}
 	}
 }
