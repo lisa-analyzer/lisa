@@ -707,7 +707,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			else
 				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
 		else if (ctx.LITERAL_STRING() != null)
-			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), ctx.LITERAL_STRING().getText());
+			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), clean(ctx));
 		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
 				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
@@ -724,5 +724,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+	}
+
+	private String clean(LiteralContext ctx) {
+		String text = ctx.LITERAL_STRING().getText();
+		if (text.startsWith("\"") && text.endsWith("\""))
+			return text.substring(1, text.length() - 1);
+		return text;
 	}
 }
