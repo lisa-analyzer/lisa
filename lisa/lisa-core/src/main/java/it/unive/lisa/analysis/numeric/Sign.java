@@ -75,7 +75,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		this((byte) 0);
 	}
 
-	private Sign(byte sign) {
+	/**
+	 * Builds the sign instance for the given sign value.
+	 * 
+	 * @param sign the sign (0 = top, 1 = bottom, 2 = zero, 3 = negative, 4 =
+	 *                 positive)
+	 */
+	public Sign(byte sign) {
 		this.sign = sign;
 	}
 
@@ -122,19 +128,40 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		return top();
 	}
 
-	private boolean isPositive() {
+	/**
+	 * Yields whether or not this is the positive sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isPositive() {
 		return this == POS;
 	}
 
-	private boolean isZero() {
+	/**
+	 * Yields whether or not this is the zero sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isZero() {
 		return this == ZERO;
 	}
 
-	private boolean isNegative() {
+	/**
+	 * Yields whether or not this is the negative sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isNegative() {
 		return this == NEG;
 	}
 
-	private Sign opposite() {
+	/**
+	 * Yields the sign opposite to this one. Top and bottom elements do not
+	 * change.
+	 * 
+	 * @return the opposite sign
+	 */
+	public Sign opposite() {
 		if (isTop() || isBottom())
 			return this;
 		return isPositive() ? NEG : isNegative() ? POS : ZERO;
@@ -260,7 +287,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability eq(Sign other) {
+	/**
+	 * Tests if this instance is equal to the given one, returning a
+	 * {@link Satisfiability} element.
+	 * 
+	 * @param other the instance
+	 * 
+	 * @return the satisfiability of {@code this = other}
+	 */
+	public Satisfiability eq(Sign other) {
 		if (!this.equals(other))
 			return Satisfiability.NOT_SATISFIED;
 		else if (isZero())
@@ -269,7 +304,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability gt(Sign other) {
+	/**
+	 * Tests if this instance is greater than the given one, returning a
+	 * {@link Satisfiability} element.
+	 * 
+	 * @param other the instance
+	 * 
+	 * @return the satisfiability of {@code this > other}
+	 */
+	public Satisfiability gt(Sign other) {
 		if (this.equals(other))
 			return this.isZero() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN;
 		else if (this.isZero())

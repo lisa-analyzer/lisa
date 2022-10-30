@@ -52,7 +52,20 @@ public class InferenceSystem<T extends InferredValue<T>>
 		this(other.lattice, other.function, new InferredPair<>(other.lattice, other.inferred.getInferred(), state));
 	}
 
-	private InferenceSystem(T domain, Map<Identifier, T> function, InferredPair<T> inferred) {
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param domain   a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * @param inferred the inferred pair for the last computed expression, that
+	 *                     is left on the top of the stack
+	 */
+	public InferenceSystem(T domain, Map<Identifier, T> function, InferredPair<T> inferred) {
 		super(domain, function);
 		this.inferred = inferred;
 	}

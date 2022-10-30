@@ -62,7 +62,12 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 		this.isBottom = isBottom;
 	}
 
-	private IntegerConstantPropagation(Integer value) {
+	/**
+	 * Builds the abstract value for the given constant.
+	 * 
+	 * @param value the constant
+	 */
+	public IntegerConstantPropagation(Integer value) {
 		this(value, false, false);
 	}
 

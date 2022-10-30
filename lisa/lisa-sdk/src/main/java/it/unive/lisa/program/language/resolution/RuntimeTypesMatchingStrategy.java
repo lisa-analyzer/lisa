@@ -27,7 +27,7 @@ public class RuntimeTypesMatchingStrategy extends FixedOrderMatchingStrategy {
 	}
 
 	@Override
-	protected boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types) {
+	public boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types) {
 		return types.stream().anyMatch(rt -> rt.canBeAssignedTo(formal.getStaticType()));
 	}
 }

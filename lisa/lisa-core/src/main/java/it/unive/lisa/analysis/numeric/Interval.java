@@ -150,7 +150,16 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			return top();
 	}
 
-	private boolean is(int n) {
+	/**
+	 * Tests whether this interval instance corresponds (i.e., concretizes)
+	 * exactly to the given integer. The tests is performed through
+	 * {@link IntInterval#is(int)}.
+	 * 
+	 * @param n the integer value
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean is(int n) {
 		return !isBottom() && interval.is(n);
 	}
 

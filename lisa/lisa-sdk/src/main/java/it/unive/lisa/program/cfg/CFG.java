@@ -111,7 +111,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param other the original cfg
 	 */
-	protected CFG(CFG other) {
+	public CFG(CFG other) {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
@@ -511,7 +511,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	@Override
-	protected void preSimplify(Statement node) {
+	public void preSimplify(Statement node) {
 		shiftVariableScopes(node);
 		shiftControlFlowStructuresEnd(node);
 	}

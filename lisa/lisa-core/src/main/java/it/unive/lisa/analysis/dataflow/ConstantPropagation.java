@@ -43,7 +43,13 @@ public class ConstantPropagation
 		this(null, null);
 	}
 
-	private ConstantPropagation(Identifier id, Integer v) {
+	/**
+	 * Builds the new constant propagation object.
+	 * 
+	 * @param id the constant variable
+	 * @param v  the constant value
+	 */
+	public ConstantPropagation(Identifier id, Integer v) {
 		this.id = id;
 		this.constant = v;
 	}

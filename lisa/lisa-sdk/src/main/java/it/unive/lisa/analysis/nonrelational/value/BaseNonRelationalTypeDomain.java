@@ -41,8 +41,14 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDomain<T>> extends BaseLattice<T>
 		implements NonRelationalTypeDomain<T> {
 
+	/**
+	 * A {@link ExpressionVisitor} for {@link BaseNonRelationalTypeDomain}
+	 * instances.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	@SuppressWarnings("unchecked")
-	private class EvaluationVisitor implements ExpressionVisitor<T> {
+	public class EvaluationVisitor implements ExpressionVisitor<T> {
 
 		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational type domain";
 

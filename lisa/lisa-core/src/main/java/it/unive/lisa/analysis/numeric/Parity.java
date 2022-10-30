@@ -64,7 +64,12 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		this((byte) 0);
 	}
 
-	private Parity(byte parity) {
+	/**
+	 * Builds the parity instance for the given parity value.
+	 * 
+	 * @param parity the sign (0 = top, 1 = bottom, 2 = odd, 3 = even)
+	 */
+	public Parity(byte parity) {
 		this.parity = parity;
 	}
 
@@ -109,11 +114,21 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		return top();
 	}
 
-	private boolean isEven() {
+	/**
+	 * Yields whether or not this is the even parity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isEven() {
 		return this == EVEN;
 	}
 
-	private boolean isOdd() {
+	/**
+	 * Yields whether or not this is the odd parity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isOdd() {
 		return this == ODD;
 	}
 

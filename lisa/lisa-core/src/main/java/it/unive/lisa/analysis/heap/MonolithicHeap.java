@@ -136,7 +136,13 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return isTop() == other.isTop() && isBottom() == other.isBottom();
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	/**
+	 * A {@link it.unive.lisa.analysis.heap.BaseHeapDomain.Rewriter} for the
+	 * {@link MonolithicHeap} domain.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,

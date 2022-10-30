@@ -432,14 +432,10 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 		ParameterMatchingStrategy strategy = call.getProgram().getFeatures().getMatchingStrategy();
 		if (add && strategy.matches(call, descr.getFormals(), call.getParameters(), types))
-			add(targets, natives, cm);
-	}
-
-	private void add(Collection<CFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
-		if (cm instanceof CFG)
-			targets.add((CFG) cm);
-		else
-			natives.add((NativeCFG) cm);
+			if (cm instanceof CFG)
+				targets.add((CFG) cm);
+			else
+				natives.add((NativeCFG) cm);
 	}
 
 	/**

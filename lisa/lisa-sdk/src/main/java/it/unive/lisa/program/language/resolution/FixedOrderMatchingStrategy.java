@@ -39,5 +39,5 @@ public abstract class FixedOrderMatchingStrategy implements ParameterMatchingStr
 	 * 
 	 * @return {@code true} if and only if that condition holds
 	 */
-	protected abstract boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types);
+	public abstract boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types);
 }

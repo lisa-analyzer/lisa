@@ -37,8 +37,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		super();
 	}
 
-	private FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> allocationSites) {
-		super(allocationSites);
+	/**
+	 * Builds a new instance of field-sensitive point-based heap from its heap
+	 * environment.
+	 * 
+	 * @param heapEnv the heap environment that this instance tracks
+	 */
+	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+		super(heapEnv);
 	}
 
 	@Override
@@ -52,7 +58,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		return expression.accept(new Rewriter());
 	}
 
-	private class Rewriter extends PointBasedHeap.Rewriter {
+	/**
+	 * A {@link it.unive.lisa.analysis.heap.BaseHeapDomain.Rewriter} for the
+	 * {@link FieldSensitivePointBasedHeap} domain.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public class Rewriter extends PointBasedHeap.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
@@ -71,7 +83,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			return new ExpressionSet<>(result);
 		}
 
-		public void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
+		private void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
 				Set<ValueExpression> result, AllocationSite site) {
 			for (SymbolicExpression target : child) {
 				AllocationSite e = new AllocationSite(

@@ -47,7 +47,20 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 		this.stack = domain.bottom();
 	}
 
-	private TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param domain   a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * @param stack    the abstract value for the last computed expression, that
+	 *                     is left on the top of the stack
+	 */
+	public TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}

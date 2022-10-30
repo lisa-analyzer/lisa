@@ -43,12 +43,6 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 		super(lattice);
 	}
 
-	/**
-	 * Builds a new result.
-	 * 
-	 * @param lattice a singleton instance used for retrieving top and bottom
-	 *                    values
-	 */
 	private CFGResults(CFGWithAnalysisResults<A, H, V, T> lattice,
 			Map<ContextSensitivityToken, CFGWithAnalysisResults<A, H, V, T>> function) {
 		super(lattice, function);

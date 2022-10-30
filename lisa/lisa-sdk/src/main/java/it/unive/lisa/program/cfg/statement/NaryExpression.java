@@ -160,7 +160,7 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	@Override
-	protected Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(Statement other) {
 		int len = subExpressions.length;
 		if (other == this)
 			return len == 0 ? null : subExpressions[order.last(len)];

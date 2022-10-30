@@ -34,11 +34,6 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 		super(state);
 	}
 
-	/**
-	 * Builds the store.
-	 * 
-	 * @param state an instance of the underlying lattice
-	 */
 	private StatementStore(AnalysisState<A, H, V, T> state, Map<Statement, AnalysisState<A, H, V, T>> function) {
 		super(state, function);
 	}

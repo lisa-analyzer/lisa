@@ -65,7 +65,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	 *                       where this element is created
 	 * @param type       the type to be included in the set of inferred types
 	 */
-	InferredTypes(TypeSystem typeSystem, Type type) {
+	public InferredTypes(TypeSystem typeSystem, Type type) {
 		this(typeSystem, Collections.singleton(type));
 	}
 
@@ -77,11 +77,19 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	 *                       where this element is created
 	 * @param types      the types to be included in the set of inferred types
 	 */
-	InferredTypes(TypeSystem typeSystem, Set<Type> types) {
+	public InferredTypes(TypeSystem typeSystem, Set<Type> types) {
 		this(typeSystem != null && types.equals(typeSystem.getTypes()), types);
 	}
 
-	private InferredTypes(boolean isTop, Set<Type> types) {
+	/**
+	 * Builds the inferred types, representing only the given set of
+	 * {@link Type}s.
+	 * 
+	 * @param isTop whether or not the set of types represents all possible
+	 *                  types
+	 * @param types the types to be included in the set of inferred types
+	 */
+	public InferredTypes(boolean isTop, Set<Type> types) {
 		this.elements = types;
 		this.isTop = isTop;
 	}

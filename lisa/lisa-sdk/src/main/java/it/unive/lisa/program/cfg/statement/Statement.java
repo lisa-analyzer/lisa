@@ -192,7 +192,7 @@ public abstract class Statement implements CodeNode<CFG, Statement, Edge>, Progr
 	 * 
 	 * @return the previous statement, or {@code null}
 	 */
-	protected Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(Statement other) {
 		return null;
 	}
 }

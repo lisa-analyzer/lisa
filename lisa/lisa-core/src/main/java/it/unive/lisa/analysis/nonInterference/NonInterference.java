@@ -50,11 +50,20 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	 */
 	public static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
 
-	private static final byte NI_BOTTOM = 0;
+	/**
+	 * The value to use for bottom non interference levels.
+	 */
+	public static final byte NI_BOTTOM = 0;
 
-	private static final byte NI_LOW = 1;
+	/**
+	 * The value to use for low non interference levels.
+	 */
+	public static final byte NI_LOW = 1;
 
-	private static final byte NI_HIGH = 2;
+	/**
+	 * The value to use for high non interference levels.
+	 */
+	public static final byte NI_HIGH = 2;
 
 	private final byte confidentiality;
 
@@ -70,7 +79,15 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		this(NI_HIGH, NI_LOW);
 	}
 
-	private NonInterference(byte confidentiality, byte integrity) {
+	/**
+	 * Builds the abstract value for the given confidentiality and integrity
+	 * values. Each of those can be either 0 for bottom ({@link #NI_BOTTOM}), 1
+	 * for low ({@link #NI_LOW}), or 2 for high ({@link #NI_HIGH}).
+	 * 
+	 * @param confidentiality the confidentiality value
+	 * @param integrity       the integrity value
+	 */
+	public NonInterference(byte confidentiality, byte integrity) {
 		this.confidentiality = confidentiality;
 		this.integrity = integrity;
 		this.guards = new IdentityHashMap<>();

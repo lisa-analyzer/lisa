@@ -15,7 +15,6 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
-import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
@@ -45,15 +44,28 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	private final Set<String> names;
 
 	/**
-	 * Builds a new instance of TypeBasedHeap, with an unique rewritten
-	 * expression {@link Skip}.
+	 * Builds a new empty instance of {@link TypeBasedHeap}.
 	 */
 	public TypeBasedHeap() {
 		this(new HashSet<>());
 	}
 
-	private TypeBasedHeap(Set<String> names) {
+	/**
+	 * Builds a new instance of {@link TypeBasedHeap} knowing the given types.
+	 * 
+	 * @param names the name of the known types
+	 */
+	public TypeBasedHeap(Set<String> names) {
 		this.names = names;
+	}
+
+	/**
+	 * Yields the name of the types known to this domain instance.
+	 * 
+	 * @return the names
+	 */
+	public Set<String> getKnownTypes() {
+		return names;
 	}
 
 	@Override
@@ -180,7 +192,13 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		return true;
 	}
 
-	private static class Rewriter extends BaseHeapDomain.Rewriter {
+	/**
+	 * A {@link it.unive.lisa.analysis.heap.BaseHeapDomain.Rewriter} for the
+	 * {@link TypeBasedHeap} domain.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class Rewriter extends BaseHeapDomain.Rewriter {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,

@@ -52,7 +52,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	 * @param left  the left-hand side of the Cartesian product
 	 * @param right the right-hand side of the Cartesian product
 	 */
-	protected CartesianProduct(T1 left, T2 right) {
+	public CartesianProduct(T1 left, T2 right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -127,7 +127,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	 * 
 	 * @return the new instance of product
 	 */
-	protected abstract C mk(T1 left, T2 right);
+	public abstract C mk(T1 left, T2 right);
 
 	@Override
 	public DomainRepresentation representation() {

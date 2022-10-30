@@ -58,7 +58,20 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		this(domain, function, Collections.emptyList());
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function, List<HeapReplacement> substitution) {
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param domain       a singleton instance to be used during semantic
+	 *                         operations to retrieve top and bottom values
+	 * @param function     the function representing the mapping contained in
+	 *                         the new environment; can be {@code null}
+	 * @param substitution the list of substitutions that has been generated
+	 *                         together with the fresh instance being built
+	 */
+	public HeapEnvironment(T domain, Map<Identifier, T> function, List<HeapReplacement> substitution) {
 		super(domain, function);
 		this.substitution = substitution;
 	}

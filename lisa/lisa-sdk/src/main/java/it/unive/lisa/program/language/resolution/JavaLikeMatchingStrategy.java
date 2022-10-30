@@ -27,7 +27,7 @@ public class JavaLikeMatchingStrategy extends FixedOrderMatchingStrategy {
 	}
 
 	@Override
-	protected boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types) {
+	public boolean matches(Call call, int pos, Parameter formal, Expression actual, Set<Type> types) {
 		if (call.getCallType() == CallType.INSTANCE && pos == 0)
 			return RuntimeTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);
 		return StaticTypesMatchingStrategy.INSTANCE.matches(call, pos, formal, actual, types);

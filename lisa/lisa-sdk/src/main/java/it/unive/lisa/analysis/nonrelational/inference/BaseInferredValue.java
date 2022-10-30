@@ -41,8 +41,13 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends BaseLattice<T>
 		implements InferredValue<T> {
 
+	/**
+	 * A {@link ExpressionVisitor} for {@link BaseInferredValue} instances.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
 	@SuppressWarnings("unchecked")
-	private class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
+	public class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
 
 		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with an inferred value domain";
 
