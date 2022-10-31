@@ -177,11 +177,6 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}

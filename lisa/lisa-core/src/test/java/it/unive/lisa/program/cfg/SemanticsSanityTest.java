@@ -262,11 +262,6 @@ public class SemanticsSanityTest {
 		}
 
 		@Override
-		public NRHeap widening(NRHeap other) throws SemanticException {
-			return top();
-		}
-
-		@Override
 		public boolean lessOrEqual(NRHeap other) throws SemanticException {
 			return false;
 		}

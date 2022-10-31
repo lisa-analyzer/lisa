@@ -166,11 +166,6 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	}
 
 	@Override
-	public StaticTypes wideningAux(StaticTypes other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
 		return type.canBeAssignedTo(other.type);
 	}

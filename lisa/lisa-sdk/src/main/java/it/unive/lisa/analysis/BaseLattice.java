@@ -67,6 +67,9 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * <li>{@code this} and {@code other} are not the same object (according
 	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
 	 * </ul>
+	 * The default implementation of this method delegates to
+	 * {@link #lubAux(BaseLattice)}, and is thus safe for finite lattices and
+	 * ACC ones.
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -74,7 +77,9 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract L wideningAux(L other) throws SemanticException;
+	public L wideningAux(L other) throws SemanticException {
+		return lubAux(other);
+	}
 
 	@Override
 	public boolean lessOrEqual(L other) throws SemanticException {

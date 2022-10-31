@@ -171,11 +171,6 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	public Parity wideningAux(Parity other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(Parity other) throws SemanticException {
 		return false;
 	}

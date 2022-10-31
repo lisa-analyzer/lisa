@@ -293,11 +293,6 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	}
 
 	@Override
-	public InferredTypes wideningAux(InferredTypes other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(InferredTypes other) throws SemanticException {
 		return other.elements.containsAll(elements);
 	}

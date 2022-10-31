@@ -100,11 +100,6 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public Collector widening(Collector other) throws SemanticException {
-			return null; // not used
-		}
-
-		@Override
 		public boolean lessOrEqual(Collector other) throws SemanticException {
 			return false; // not used
 		}

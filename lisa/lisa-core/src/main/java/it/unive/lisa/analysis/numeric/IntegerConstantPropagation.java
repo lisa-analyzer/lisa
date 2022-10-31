@@ -163,11 +163,6 @@ public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<Int
 	}
 
 	@Override
-	public IntegerConstantPropagation wideningAux(IntegerConstantPropagation other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(IntegerConstantPropagation other) throws SemanticException {
 		return false;
 	}

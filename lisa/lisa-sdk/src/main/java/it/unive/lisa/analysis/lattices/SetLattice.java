@@ -97,11 +97,6 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 	}
 
 	@Override
-	public S wideningAux(S other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(S other) throws SemanticException {
 		return other.elements.containsAll(elements);
 	}

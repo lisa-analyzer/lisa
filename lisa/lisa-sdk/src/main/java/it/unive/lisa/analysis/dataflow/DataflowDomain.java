@@ -267,11 +267,6 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 	}
 
 	@Override
-	public D wideningAux(D other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public final String toString() {
 		return representation().toString();
 	}

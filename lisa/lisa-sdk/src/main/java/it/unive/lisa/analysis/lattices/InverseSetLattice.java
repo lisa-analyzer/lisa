@@ -96,11 +96,6 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	}
 
 	@Override
-	public S wideningAux(S other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public Iterator<E> iterator() {
 		return elements.iterator();
 	}

@@ -66,11 +66,6 @@ public class BaseNonRelationalTypeDomainTest {
 		}
 
 		@Override
-		public Sample wideningAux(Sample other) throws SemanticException {
-			return this;
-		}
-
-		@Override
 		public boolean lessOrEqualAux(Sample other) throws SemanticException {
 			return true;
 		}

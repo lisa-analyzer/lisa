@@ -1,10 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.function.Predicate;
 
 /**
  * A domain able to determine how abstract information evolves thanks to the
@@ -194,11 +195,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return lub(other);
-			}
-
-			@Override
 			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
 				return other == this || other == UNKNOWN;
 			}
@@ -235,11 +231,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 				if (other == UNKNOWN || other == SATISFIED)
 					return UNKNOWN;
 				return this;
-			}
-
-			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return lub(other);
 			}
 
 			@Override
@@ -287,11 +278,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return this;
-			}
-
-			@Override
 			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
 				return other == UNKNOWN;
 			}
@@ -324,11 +310,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 
 			@Override
 			public Satisfiability lub(Satisfiability other) throws SemanticException {
-				return other;
-			}
-
-			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
 				return other;
 			}
 

@@ -168,11 +168,6 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	public NonInterference wideningAux(NonInterference other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(NonInterference other) throws SemanticException {
 		// HL
 		// | \

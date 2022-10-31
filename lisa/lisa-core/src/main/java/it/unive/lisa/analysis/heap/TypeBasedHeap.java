@@ -158,11 +158,6 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public TypeBasedHeap wideningAux(TypeBasedHeap other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
 		return other.names.containsAll(names);
 	}

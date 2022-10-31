@@ -69,11 +69,6 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public T wideningAux(T other) throws SemanticException {
-		return (T) this;
-	}
-
-	@Override
 	public boolean lessOrEqualAux(T other) throws SemanticException {
 		return true;
 	}

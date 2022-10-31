@@ -232,11 +232,6 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	public Sign wideningAux(Sign other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(Sign other) throws SemanticException {
 		return false;
 	}
