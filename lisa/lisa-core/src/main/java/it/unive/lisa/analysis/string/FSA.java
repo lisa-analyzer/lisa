@@ -54,17 +54,17 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
-	protected FSA lubAux(FSA other) throws SemanticException {
+	public FSA lubAux(FSA other) throws SemanticException {
 		return new FSA(this.a.union(other.a).minimize());
 	}
 
 	@Override
-	protected FSA wideningAux(FSA other) throws SemanticException {
+	public FSA wideningAux(FSA other) throws SemanticException {
 		return new FSA(this.a.union(other.a).widening(WIDENING_TH));
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(FSA other) throws SemanticException {
+	public boolean lessOrEqualAux(FSA other) throws SemanticException {
 		return this.a.isContained(other.a);
 	}
 
@@ -111,7 +111,7 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
-	protected FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	public FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
 		if (constant.getValue() instanceof String) {
 			return new FSA(new Automaton((String) constant.getValue()));
 		}
@@ -119,13 +119,13 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
-	protected FSA evalUnaryExpression(UnaryOperator operator, FSA arg, ProgramPoint pp) throws SemanticException {
+	public FSA evalUnaryExpression(UnaryOperator operator, FSA arg, ProgramPoint pp) throws SemanticException {
 		// TODO
 		return super.evalUnaryExpression(operator, arg, pp);
 	}
 
 	@Override
-	protected FSA evalBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp)
+	public FSA evalBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE)
 			return new FSA(left.a.concat(right.a));
@@ -133,14 +133,14 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
-	protected FSA evalTernaryExpression(TernaryOperator operator, FSA left, FSA middle, FSA right, ProgramPoint pp)
+	public FSA evalTernaryExpression(TernaryOperator operator, FSA left, FSA middle, FSA right, ProgramPoint pp)
 			throws SemanticException {
 		// TODO
 		return super.evalTernaryExpression(operator, left, middle, right, pp);
 	}
 
 	@Override
-	protected SemanticDomain.Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
+	public SemanticDomain.Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
 			ProgramPoint pp) throws SemanticException {
 		if (operator == StringContains.INSTANCE) {
 			try {
