@@ -31,11 +31,3 @@ Head to the [project's website](https://lisa-analyzer.github.io/releases/) for t
 ### Snapshots
 
 The snapshot of the last commit of the `master` branch is always available on [GitHub Packages](https://github.com/orgs/lisa-analyzer/packages?repo_name=lisa) (you can find the updated milestone [here](https://github.com/lisa-analyzer/lisa/releases/tag/latest)).
-
-### Next steps
-
-* Extend and finalize the program model
-* Add more heap and value analyses
-* Add more call graph abstractions
-
-The 1.0 release will be delivered as we reach a stable version of all the main ingredients for the analysis (call graphs and abstractions) as well as a flexible enough control flow graph representation that enables the modeling of most languages.
