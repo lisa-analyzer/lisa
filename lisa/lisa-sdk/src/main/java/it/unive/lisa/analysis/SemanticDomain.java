@@ -399,6 +399,26 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		public Satisfiability bottom() {
 			return BOTTOM;
 		}
+
+		/**
+		 * Yields whether or not this element can represent a {@code true}
+		 * result.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean mightBeTrue() {
+			return this == SATISFIED || this == UNKNOWN;
+		}
+
+		/**
+		 * Yields whether or not this element can represent a {@code false}
+		 * result.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean mightBeFalse() {
+			return this == NOT_SATISFIED || this == UNKNOWN;
+		}
 	}
 
 	/**
