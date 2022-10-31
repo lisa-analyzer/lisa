@@ -9,6 +9,9 @@ import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.imp.IMPFeatures;
+import it.unive.lisa.imp.types.IMPTypeSystem;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
@@ -29,7 +32,7 @@ import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -56,17 +59,12 @@ public class BaseNonRelationalValueDomainTest {
 		}
 
 		@Override
-		protected Sample lubAux(Sample other) throws SemanticException {
+		public Sample lubAux(Sample other) throws SemanticException {
 			return this;
 		}
 
 		@Override
-		protected Sample wideningAux(Sample other) throws SemanticException {
-			return this;
-		}
-
-		@Override
-		protected boolean lessOrEqualAux(Sample other) throws SemanticException {
+		public boolean lessOrEqualAux(Sample other) throws SemanticException {
 			return true;
 		}
 
@@ -131,15 +129,19 @@ public class BaseNonRelationalValueDomainTest {
 				return null;
 			}
 
+			@Override
+			public Program getProgram() {
+				return new Program(new IMPFeatures(), new IMPTypeSystem());
+			}
 		}
 
 		if (param == Type.class)
-			return (R) Int32.INSTANCE;
+			return (R) Int32Type.INSTANCE;
 
 		if (param == PushAny.class)
 			return (R) new PushAny(Untyped.INSTANCE, SyntheticLocation.INSTANCE);
 		if (param == Constant.class || param == ValueExpression.class)
-			return (R) new Constant(Int32.INSTANCE, 5, SyntheticLocation.INSTANCE);
+			return (R) new Constant(Int32Type.INSTANCE, 5, SyntheticLocation.INSTANCE);
 		if (param == Identifier.class)
 			return (R) new Variable(provideParam(mtd, Type.class), "foo", SyntheticLocation.INSTANCE);
 

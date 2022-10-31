@@ -7,7 +7,6 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -18,7 +17,9 @@ import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An expression modeling the array element access operation
@@ -45,7 +46,7 @@ public class IMPArrayAccess extends BinaryExpression {
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
@@ -55,15 +56,16 @@ public class IMPArrayAccess extends BinaryExpression {
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		ExternalSet<Type> arraytypes = Caches.types().mkEmptySet();
-		for (Type t : left.getRuntimeTypes())
-			if (t.isPointerType() && t.asPointerType().getInnerTypes().anyMatch(Type::isArrayType))
-				arraytypes.addAll(t.asPointerType().getInnerTypes().filter(Type::isArrayType));
+		Set<Type> arraytypes = new HashSet<>();
+		TypeSystem types = getProgram().getTypes();
+		for (Type t : left.getRuntimeTypes(types))
+			if (t.isPointerType())
+				t.asPointerType().getInnerTypes().stream().filter(Type::isArrayType).forEach(arraytypes::add);
 
 		if (arraytypes.isEmpty())
 			return state.bottom();
 
-		ArrayType arraytype = arraytypes.reduce(arraytypes.first(), (r, t) -> r.commonSupertype(t)).asArrayType();
+		ArrayType arraytype = Type.commonSupertype(arraytypes, getStaticType()).asArrayType();
 		HeapDereference container = new HeapDereference(arraytype, left, getLocation());
 		container.setRuntimeTypes(arraytypes);
 

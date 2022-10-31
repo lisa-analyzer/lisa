@@ -94,7 +94,7 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * Error message format for missing override of an
 	 * {@link AbstractCodeMember}.
 	 */
-	public static final String MISSING_OVERRIDE = "%s does not overrides %s from the non-instantiable unit %s";
+	public static final String MISSING_OVERRIDE = "%s does not override %s from the non-instantiable unit %s";
 
 	/**
 	 * Error message format for the overriding of a non-overridable
@@ -280,6 +280,8 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		for (CodeMember cm : unit.getInstanceCodeMembers(false))
 			validate(cm, true);
 
+		unit.addInstance(unit);
+
 		for (CompilationUnit ancestor : unit.getImmediateAncestors()) {
 			// check overriders/implementers
 			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
@@ -332,7 +334,6 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 								args[i].addAnnotation(parAnn);
 				}
 
-		unit.addInstance(unit);
 		processedUnits.add(unit.getName());
 	}
 

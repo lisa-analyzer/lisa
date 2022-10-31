@@ -32,7 +32,7 @@ public class OutOfScopeIdentifier extends Identifier {
 		this.id = id;
 		this.scope = scope;
 		if (id.hasRuntimeTypes())
-			setRuntimeTypes(id.getRuntimeTypes());
+			setRuntimeTypes(id.getRuntimeTypes(null));
 	}
 
 	@Override

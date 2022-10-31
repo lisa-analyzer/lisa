@@ -18,8 +18,9 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string replace operation. The type of all three
@@ -58,11 +59,12 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 	 * @param right    the right-hand side of this operation
 	 */
 	public Replace(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
-		super(cfg, location, "replace", StringType.INSTANCE, left, middle, right);
+		super(cfg, location, "replace", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
+				middle, right);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> ternarySemantics(
@@ -73,16 +75,17 @@ public class Replace extends it.unive.lisa.program.cfg.statement.TernaryExpressi
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (middle.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new TernaryExpression(
-						StringType.INSTANCE,
+						getStaticType(),
 						left,
 						middle,
 						right,

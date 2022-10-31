@@ -111,7 +111,7 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	protected FixpointResults<A, H, V, T> mk(CFGResults<A, H, V, T> lattice,
+	public FixpointResults<A, H, V, T> mk(CFGResults<A, H, V, T> lattice,
 			Map<CFG, CFGResults<A, H, V, T>> function) {
 		return new FixpointResults<>(lattice, function);
 	}

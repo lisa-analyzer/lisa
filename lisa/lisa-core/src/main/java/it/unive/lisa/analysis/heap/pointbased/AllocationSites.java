@@ -61,7 +61,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	protected AllocationSites mk(Set<AllocationSite> set) {
+	public AllocationSites mk(Set<AllocationSite> set) {
 		return new AllocationSites(set, false);
 	}
 
@@ -93,7 +93,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 	}
 
 	@Override
-	protected AllocationSites lubAux(AllocationSites other) throws SemanticException {
+	public AllocationSites lubAux(AllocationSites other) throws SemanticException {
 		Map<String, AllocationSite> lub = new HashMap<>();
 
 		// all weak identifiers are part of the lub

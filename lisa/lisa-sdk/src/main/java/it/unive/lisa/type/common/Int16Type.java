@@ -2,13 +2,14 @@ package it.unive.lisa.type.common;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
- * An unsigned 16-bit integral {@link NumericType}. The only singleton instance
- * of this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * A signed 16-bit integral {@link NumericType}. The only singleton instance of
+ * this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
@@ -19,21 +20,26 @@ import java.util.Collections;
  * The common supertype between an Int16 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
- * {@link NumericType#supertype(NumericType, NumericType)}. <br>
+ * {@link NumericType#supertype(NumericType)}. <br>
  * <br>
  * Equality with other types is determined through
- * {@link NumericType#sameNumericTypes(NumericType, NumericType)}.
+ * {@link NumericType#sameNumericTypes(NumericType)}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt16 implements NumericType {
+public class Int16Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final UInt16 INSTANCE = new UInt16();
+	public static final Int16Type INSTANCE = new Int16Type();
 
-	private UInt16() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Int16Type() {
 	}
 
 	@Override
@@ -58,7 +64,7 @@ public class UInt16 implements NumericType {
 
 	@Override
 	public boolean isUnsigned() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -76,7 +82,7 @@ public class UInt16 implements NumericType {
 		if (!other.isNumericType())
 			return Untyped.INSTANCE;
 
-		return NumericType.supertype(this, other.asNumericType());
+		return supertype(other.asNumericType());
 	}
 
 	@Override
@@ -85,20 +91,20 @@ public class UInt16 implements NumericType {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		if (!(other instanceof NumericType))
 			return false;
 
-		return NumericType.sameNumericTypes(this, (NumericType) other);
+		return sameNumericTypes((NumericType) other);
 	}
 
 	@Override
-	public final int hashCode() {
-		return UInt16.class.getName().hashCode();
+	public int hashCode() {
+		return Int16Type.class.getName().hashCode();
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

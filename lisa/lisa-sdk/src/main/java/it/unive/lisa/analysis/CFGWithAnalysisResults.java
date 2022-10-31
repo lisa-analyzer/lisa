@@ -88,7 +88,15 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		entryStates.forEach(this.entryStates::put);
 	}
 
-	private CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V, T> entryStates,
+	/**
+	 * Builds the control flow graph, storing the given mapping between nodes
+	 * and fixpoint computation results.
+	 * 
+	 * @param cfg         the original control flow graph
+	 * @param entryStates the entry state for each entry point of the cfg
+	 * @param results     the results of the fixpoint computation
+	 */
+	public CFGWithAnalysisResults(CFG cfg, StatementStore<A, H, V, T> entryStates,
 			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;
@@ -174,7 +182,6 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		for (Statement st : statements)
 			result = result.lub(entry ? getAnalysisStateBefore(st) : getAnalysisStateAfter(st));
 		return result;
-
 	}
 
 	/**

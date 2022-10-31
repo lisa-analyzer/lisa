@@ -1,12 +1,11 @@
 package it.unive.lisa.program.language.resolution;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.Parameter;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
 
 /**
  * A Python-like matching strategy. Specifically, actual parameters are
@@ -60,17 +59,17 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public boolean matches(Call call, Parameter[] formals, Expression[] actuals, ExternalSet<Type>[] types) {
+	public boolean matches(Call call, Parameter[] formals, Expression[] actuals, Set<Type>[] types) {
 		Expression[] slots = new Expression[formals.length];
-		ExternalSet<Type>[] slotTypes = new ExternalSet[formals.length];
+		Set<Type>[] slotTypes = new Set[formals.length];
 
 		Expression[] defaults = new Expression[formals.length];
-		ExternalSet<Type>[] defaultTypes = new ExternalSet[formals.length];
+		Set<Type>[] defaultTypes = new Set[formals.length];
 		for (int pos = 0; pos < slots.length; pos++) {
 			Expression def = formals[pos].getDefaultValue();
 			if (def != null) {
 				defaults[pos] = def;
-				defaultTypes[pos] = Caches.types().mkSet(def.getStaticType().allInstances());
+				defaultTypes[pos] = def.getStaticType().allInstances(call.getProgram().getTypes());
 			}
 		}
 
@@ -129,11 +128,11 @@ public class PythonLikeMatchingStrategy implements ParameterMatchingStrategy {
 			Parameter[] formals,
 			Expression[] actuals,
 			T[] given,
-			ExternalSet<Type>[] givenTypes,
+			Set<Type>[] givenTypes,
 			T[] defaults,
-			ExternalSet<Type>[] defaultTypes,
+			Set<Type>[] defaultTypes,
 			T[] slots,
-			ExternalSet<Type>[] slotTypes,
+			Set<Type>[] slotTypes,
 			F failure) {
 		if (formals.length < actuals.length)
 			// too many arguments!

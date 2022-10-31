@@ -39,7 +39,7 @@ public interface HeapSemanticOperation {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	final class HeapReplacement {
+	class HeapReplacement {
 
 		/**
 		 * The set of identifiers that are the sources of the replacement

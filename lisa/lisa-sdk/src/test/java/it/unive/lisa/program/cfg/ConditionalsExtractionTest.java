@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import it.unive.lisa.TestLanguageFeatures;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -33,7 +35,8 @@ import org.junit.Test;
 
 public class ConditionalsExtractionTest {
 
-	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0), new Program(null),
+	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
+			new Program(new TestLanguageFeatures(), new TestTypeSystem()),
 			"Testing", false);
 
 	private static void checkMatrix(String label, Collection<Statement> nodes,

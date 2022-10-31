@@ -14,14 +14,15 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the less or equal operation ({@code <=}). Both
  * operands' types must be instances of {@link NumericType}. The type of this
- * expression is the {@link BoolType}.
+ * expression is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -36,11 +37,11 @@ public class LessOrEqual extends it.unive.lisa.program.cfg.statement.BinaryExpre
 	 * @param right    the right-hand side of this operation
 	 */
 	public LessOrEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "<=", BoolType.INSTANCE, left, right);
+		super(cfg, location, "<=", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
@@ -50,14 +51,15 @@ public class LessOrEqual extends it.unive.lisa.program.cfg.statement.BinaryExpre
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isNumericType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isNumericType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						ComparisonLe.INSTANCE,

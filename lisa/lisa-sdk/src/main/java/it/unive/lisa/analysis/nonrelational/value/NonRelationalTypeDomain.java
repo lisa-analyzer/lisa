@@ -4,7 +4,7 @@ import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
 
 /**
  * A non-relational type domain, that is able to compute the types of a
@@ -20,10 +20,9 @@ public interface NonRelationalTypeDomain<T extends NonRelationalTypeDomain<T>>
 		extends NonRelationalDomain<T, ValueExpression, TypeEnvironment<T>> {
 
 	/**
-	 * Yields the {@link ExternalSet} containing the types held by this
-	 * instance.
+	 * Yields the set containing the types held by this instance.
 	 * 
 	 * @return the set of types inside this instance
 	 */
-	ExternalSet<Type> getRuntimeTypes();
+	Set<Type> getRuntimeTypes();
 }

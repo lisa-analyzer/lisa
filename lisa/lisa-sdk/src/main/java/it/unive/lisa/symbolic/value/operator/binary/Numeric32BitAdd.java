@@ -1,13 +1,9 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.OverflowingOperator;
 import it.unive.lisa.type.NumericType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.function.Predicate;
 
 /**
  * Given two expressions that both evaluate to numeric values, a
@@ -21,29 +17,23 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Numeric32BitAdd implements AdditionOperator, OverflowingOperator, BinaryOperator {
+public class Numeric32BitAdd extends NumericOperation implements AdditionOperator, OverflowingOperator {
 
 	/**
 	 * The singleton instance of this class.
 	 */
 	public static final Numeric32BitAdd INSTANCE = new Numeric32BitAdd();
 
-	private Numeric32BitAdd() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Numeric32BitAdd() {
 	}
 
 	@Override
 	public String toString() {
 		return "+";
-	}
-
-	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		Predicate<Type> test = type -> type.isNumericType() && type.asNumericType().is32Bits();
-		if (left.noneMatch(test) || right.noneMatch(test))
-			return Caches.types().mkEmptySet();
-		ExternalSet<Type> set = NumericType.commonNumericalType(left, right).filter(test);
-		if (set.isEmpty())
-			return Caches.types().mkEmptySet();
-		return set;
 	}
 }

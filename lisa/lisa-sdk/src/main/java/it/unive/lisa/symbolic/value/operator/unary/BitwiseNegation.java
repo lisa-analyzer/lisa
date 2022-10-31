@@ -1,11 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.BitwiseOperator;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Given an expression that evaluates to a numeric value, a
@@ -24,7 +26,12 @@ public class BitwiseNegation implements BitwiseOperator, UnaryOperator {
 	 */
 	public static final BitwiseNegation INSTANCE = new BitwiseNegation();
 
-	private BitwiseNegation() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected BitwiseNegation() {
 	}
 
 	@Override
@@ -33,9 +40,9 @@ public class BitwiseNegation implements BitwiseOperator, UnaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> argument) {
-		if (argument.noneMatch(Type::isNumericType))
-			return Caches.types().mkEmptySet();
-		return argument.filter(Type::isNumericType);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> argument) {
+		if (argument.stream().noneMatch(Type::isNumericType))
+			return Collections.emptySet();
+		return argument.stream().filter(Type::isNumericType).collect(Collectors.toSet());
 	}
 }
