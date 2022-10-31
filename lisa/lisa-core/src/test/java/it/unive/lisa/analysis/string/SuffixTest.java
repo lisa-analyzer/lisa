@@ -2,8 +2,8 @@ package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.*;
 
 public class SuffixTest {
 
@@ -26,5 +26,19 @@ public class SuffixTest {
         Suffix result = new Suffix("Hello").lubAux(new Suffix("World"));
 
         assertTrue(result.isTop());
+    }
+
+    @Test
+    public void testSuffixLessOrEqual() throws SemanticException {
+        Suffix suffix = new Suffix("fghabc");
+
+        assertTrue(suffix.lessOrEqualAux(new Suffix("abc")));
+    }
+
+    @Test
+    public void testSuffixLessOrEqual1() throws SemanticException {
+        Suffix suffix = new Suffix("fghabc");
+
+        assertFalse(suffix.lessOrEqualAux(new Suffix("abd")));
     }
 }

@@ -36,8 +36,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
         int i = suffix.length() - 1;
         int j = otherSuffix.length() - 1;
 
-        while (i >= 0 &&
-                j >= 0 &&
+        while (i >= 0 && j >= 0 &&
                 suffix.charAt(i) == otherSuffix.charAt(j)) {
             result.append(suffix.charAt(i--));
             j--;
@@ -56,7 +55,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected boolean lessOrEqualAux(Suffix other) throws SemanticException { //TODO
+    protected boolean lessOrEqualAux(Suffix other) throws SemanticException {
         if (other.getSuffix().length() <= this.getSuffix().length()) {
             Suffix lub = this.lubAux(other);
             String lubString = lub.getSuffix();
@@ -107,7 +106,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
         if (isTop())
             return Lattice.topRepresentation();
 
-        return new StringRepresentation(suffix + '*');
+        return new StringRepresentation(suffix);
     }
 
     @Override
@@ -129,9 +128,9 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix evalBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) { //TODO
+    protected Suffix evalBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) {
         if (operator == StringConcat.INSTANCE) {
-            return left;
+            return right;
         } else if (operator == StringContains.INSTANCE ||
                 operator == StringEndsWith.INSTANCE ||
                 operator == StringEquals.INSTANCE ||
