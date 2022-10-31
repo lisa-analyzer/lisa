@@ -14,11 +14,11 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.BooleanType;
 
 /**
  * An expression modeling the inequality test ({@code !=}). The type of this
- * expression is the {@link BoolType}.
+ * expression is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -33,11 +33,11 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 	 * @param right    the right-hand side of this operation
 	 */
 	public NotEqual(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "!=", BoolType.INSTANCE, left, right);
+		super(cfg, location, "!=", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left, right);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
@@ -49,7 +49,7 @@ public class NotEqual extends it.unive.lisa.program.cfg.statement.BinaryExpressi
 					throws SemanticException {
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						ComparisonNe.INSTANCE,

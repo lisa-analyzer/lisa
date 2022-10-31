@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -43,9 +43,20 @@ import it.unive.lisa.util.numeric.MathNumber;
  */
 public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
-	private static final Interval ZERO = new Interval(IntInterval.ZERO);
-	private static final Interval TOP = new Interval(IntInterval.INFINITY);
-	private static final Interval BOTTOM = new Interval(null);
+	/**
+	 * The abstract zero ({@code [0, 0]}) element.
+	 */
+	public static final Interval ZERO = new Interval(IntInterval.ZERO);
+
+	/**
+	 * The abstract top ({@code [-Inf, +Inf]}) element.
+	 */
+	public static final Interval TOP = new Interval(IntInterval.INFINITY);
+
+	/**
+	 * The abstract bottom element.
+	 */
+	public static final Interval BOTTOM = new Interval(null);
 
 	/**
 	 * The interval represented by this domain element.
@@ -117,7 +128,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return new Interval(new MathNumber(i), new MathNumber(i));
@@ -127,7 +138,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
+	public Interval evalUnaryExpression(UnaryOperator operator, Interval arg, ProgramPoint pp) {
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isTop())
 				return top();
@@ -139,12 +150,21 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			return top();
 	}
 
-	private boolean is(int n) {
+	/**
+	 * Tests whether this interval instance corresponds (i.e., concretizes)
+	 * exactly to the given integer. The tests is performed through
+	 * {@link IntInterval#is(int)}.
+	 * 
+	 * @param n the integer value
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean is(int n) {
 		return !isBottom() && interval.is(n);
 	}
 
 	@Override
-	protected Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
+	public Interval evalBinaryExpression(BinaryOperator operator, Interval left, Interval right, ProgramPoint pp) {
 		if (!(operator instanceof DivisionOperator) && (left.isTop() || right.isTop()))
 			// with div, we can return zero or bottom even if one of the
 			// operands is top
@@ -154,7 +174,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			return new Interval(left.interval.plus(right.interval));
 		else if (operator instanceof SubtractionOperator)
 			return new Interval(left.interval.diff(right.interval));
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			if (left.is(0) || right.is(0))
 				return ZERO;
 			else
@@ -172,14 +192,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval lubAux(Interval other) throws SemanticException {
+	public Interval lubAux(Interval other) throws SemanticException {
 		MathNumber newLow = interval.getLow().min(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().max(other.interval.getHigh());
 		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
 
 	@Override
-	protected Interval glbAux(Interval other) {
+	public Interval glbAux(Interval other) {
 		MathNumber newLow = interval.getLow().max(other.interval.getLow());
 		MathNumber newHigh = interval.getHigh().min(other.interval.getHigh());
 
@@ -189,7 +209,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected Interval wideningAux(Interval other) throws SemanticException {
+	public Interval wideningAux(Interval other) throws SemanticException {
 		MathNumber newLow, newHigh;
 		if (other.interval.getHigh().compareTo(interval.getHigh()) > 0)
 			newHigh = MathNumber.PLUS_INFINITY;
@@ -205,12 +225,12 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(Interval other) throws SemanticException {
+	public boolean lessOrEqualAux(Interval other) throws SemanticException {
 		return other.interval.includes(interval);
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
 			ProgramPoint pp) {
 
 		if (left.isTop() || right.isTop())
@@ -299,7 +319,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
-	protected ValueEnvironment<Interval> assumeBinaryExpression(
+	public ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 

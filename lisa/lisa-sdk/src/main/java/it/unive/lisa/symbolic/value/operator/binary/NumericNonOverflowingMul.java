@@ -1,11 +1,8 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.type.NumericType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * Given two expressions that both evaluate to numeric values, a
@@ -19,28 +16,23 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class NumericNonOverflowingMul implements Multiplication, BinaryOperator {
+public class NumericNonOverflowingMul extends NumericOperation implements MultiplicationOperator {
 
 	/**
 	 * The singleton instance of this class.
 	 */
 	public static final NumericNonOverflowingMul INSTANCE = new NumericNonOverflowingMul();
 
-	private NumericNonOverflowingMul() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NumericNonOverflowingMul() {
 	}
 
 	@Override
 	public String toString() {
 		return "*";
-	}
-
-	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isNumericType) || right.noneMatch(Type::isNumericType))
-			return Caches.types().mkEmptySet();
-		ExternalSet<Type> set = NumericType.commonNumericalType(left, right);
-		if (set.isEmpty())
-			return Caches.types().mkEmptySet();
-		return set;
 	}
 }

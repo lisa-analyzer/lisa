@@ -79,7 +79,7 @@ public abstract class UnaryStatement extends Statement {
 	}
 
 	@Override
-	protected Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(Statement other) {
 		return other == this ? expression : null;
 	}
 }

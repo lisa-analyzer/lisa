@@ -14,7 +14,7 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -40,11 +40,30 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  */
 public class Sign extends BaseNonRelationalValueDomain<Sign> {
 
-	private static final Sign POS = new Sign((byte) 4);
-	private static final Sign NEG = new Sign((byte) 3);
-	private static final Sign ZERO = new Sign((byte) 2);
-	private static final Sign TOP = new Sign((byte) 0);
-	private static final Sign BOTTOM = new Sign((byte) 1);
+	/**
+	 * The abstract positive element.
+	 */
+	public static final Sign POS = new Sign((byte) 4);
+
+	/**
+	 * The abstract negative element.
+	 */
+	public static final Sign NEG = new Sign((byte) 3);
+
+	/**
+	 * The abstract zero element.
+	 */
+	public static final Sign ZERO = new Sign((byte) 2);
+
+	/**
+	 * The abstract top element.
+	 */
+	public static final Sign TOP = new Sign((byte) 0);
+
+	/**
+	 * The abstract bottom element.
+	 */
+	public static final Sign BOTTOM = new Sign((byte) 1);
 
 	private final byte sign;
 
@@ -56,7 +75,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		this((byte) 0);
 	}
 
-	private Sign(byte sign) {
+	/**
+	 * Builds the sign instance for the given sign value.
+	 * 
+	 * @param sign the sign (0 = top, 1 = bottom, 2 = zero, 3 = negative, 4 =
+	 *                 positive)
+	 */
+	public Sign(byte sign) {
 		this.sign = sign;
 	}
 
@@ -89,12 +114,12 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalNullConstant(ProgramPoint pp) {
+	public Sign evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Sign evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Sign evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i == 0 ? ZERO : i > 0 ? POS : NEG;
@@ -103,26 +128,47 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 		return top();
 	}
 
-	private boolean isPositive() {
+	/**
+	 * Yields whether or not this is the positive sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isPositive() {
 		return this == POS;
 	}
 
-	private boolean isZero() {
+	/**
+	 * Yields whether or not this is the zero sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isZero() {
 		return this == ZERO;
 	}
 
-	private boolean isNegative() {
+	/**
+	 * Yields whether or not this is the negative sign.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isNegative() {
 		return this == NEG;
 	}
 
-	private Sign opposite() {
+	/**
+	 * Yields the sign opposite to this one. Top and bottom elements do not
+	 * change.
+	 * 
+	 * @return the opposite sign
+	 */
+	public Sign opposite() {
 		if (isTop() || isBottom())
 			return this;
 		return isPositive() ? NEG : isNegative() ? POS : ZERO;
 	}
 
 	@Override
-	protected Sign evalUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
+	public Sign evalUnaryExpression(UnaryOperator operator, Sign arg, ProgramPoint pp) {
 		if (operator == NumericNegation.INSTANCE)
 			if (arg.isPositive())
 				return NEG;
@@ -136,7 +182,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
+	public Sign evalBinaryExpression(BinaryOperator operator, Sign left, Sign right, ProgramPoint pp) {
 		if (operator instanceof AdditionOperator)
 			if (left.isZero())
 				return right;
@@ -167,9 +213,9 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 				return left.isTop() ? left : POS;
 			else
 				return top();
-		else if (operator instanceof it.unive.lisa.symbolic.value.operator.Module)
+		else if (operator instanceof it.unive.lisa.symbolic.value.operator.ModuleOperator)
 			return top();
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			if (left.isZero() || right.isZero())
 				return ZERO;
 			else if (left.equals(right))
@@ -181,17 +227,12 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Sign lubAux(Sign other) throws SemanticException {
+	public Sign lubAux(Sign other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected Sign wideningAux(Sign other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
-	protected boolean lessOrEqualAux(Sign other) throws SemanticException {
+	public boolean lessOrEqualAux(Sign other) throws SemanticException {
 		return false;
 	}
 
@@ -218,7 +259,7 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Sign left, Sign right,
 			ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
@@ -241,7 +282,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability eq(Sign other) {
+	/**
+	 * Tests if this instance is equal to the given one, returning a
+	 * {@link Satisfiability} element.
+	 * 
+	 * @param other the instance
+	 * 
+	 * @return the satisfiability of {@code this = other}
+	 */
+	public Satisfiability eq(Sign other) {
 		if (!this.equals(other))
 			return Satisfiability.NOT_SATISFIED;
 		else if (isZero())
@@ -250,7 +299,15 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 			return Satisfiability.UNKNOWN;
 	}
 
-	private Satisfiability gt(Sign other) {
+	/**
+	 * Tests if this instance is greater than the given one, returning a
+	 * {@link Satisfiability} element.
+	 * 
+	 * @param other the instance
+	 * 
+	 * @return the satisfiability of {@code this > other}
+	 */
+	public Satisfiability gt(Sign other) {
 		if (this.equals(other))
 			return this.isZero() ? Satisfiability.NOT_SATISFIED : Satisfiability.UNKNOWN;
 		else if (this.isZero())
@@ -262,13 +319,13 @@ public class Sign extends BaseNonRelationalValueDomain<Sign> {
 	}
 
 	@Override
-	protected Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
+	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Sign left, Sign middle, Sign right,
 			ProgramPoint pp) {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	protected ValueEnvironment<Sign> assumeBinaryExpression(
+	public ValueEnvironment<Sign> assumeBinaryExpression(
 			ValueEnvironment<Sign> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE)

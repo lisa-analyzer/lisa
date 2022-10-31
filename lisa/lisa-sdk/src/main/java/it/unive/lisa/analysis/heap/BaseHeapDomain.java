@@ -82,7 +82,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * 
 	 * @return a new instance of this domain
 	 */
-	protected abstract H mk(H reference);
+	public abstract H mk(H reference);
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -108,7 +108,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
+	public abstract H semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * An {@link ExpressionVisitor} that rewrites {@link SymbolicExpression}s to
@@ -117,7 +117,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	protected abstract static class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
+	public abstract static class Rewriter implements ExpressionVisitor<ExpressionSet<ValueExpression>> {
 
 		@Override
 		public ExpressionSet<ValueExpression> visit(UnaryExpression expression,
@@ -128,7 +128,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 				UnaryExpression e = new UnaryExpression(expression.getStaticType(), expr, expression.getOperator(),
 						expression.getCodeLocation());
 				if (expr.hasRuntimeTypes())
-					e.setRuntimeTypes(expr.getRuntimeTypes());
+					e.setRuntimeTypes(expr.getRuntimeTypes(null));
 				result.add(e);
 			}
 			return new ExpressionSet<>(result);
@@ -145,7 +145,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 							expression.getOperator(),
 							expression.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				}
 			return new ExpressionSet<>(result);
@@ -164,7 +164,7 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 								expression.getOperator(),
 								expression.getCodeLocation());
 						if (expression.hasRuntimeTypes())
-							e.setRuntimeTypes(expression.getRuntimeTypes());
+							e.setRuntimeTypes(expression.getRuntimeTypes(null));
 						result.add(e);
 					}
 			return new ExpressionSet<>(result);

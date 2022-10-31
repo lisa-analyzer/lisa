@@ -3,7 +3,8 @@ package it.unive.lisa.symbolic.value.operator.ternary;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Operator;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.Set;
 
 /**
  * A ternary {@link Operator} that can be applied to three
@@ -18,6 +19,8 @@ public interface TernaryOperator extends Operator {
 	 * this expression) assuming that the arguments of this expression have the
 	 * given types.
 	 * 
+	 * @param types  the type system knowing about the types of the current
+	 *                   program
 	 * @param left   the set of types of the left-most argument of this
 	 *                   expression
 	 * @param middle the set of types of the middle argument of this expression
@@ -26,5 +29,5 @@ public interface TernaryOperator extends Operator {
 	 * 
 	 * @return the runtime types of this expression
 	 */
-	ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> middle, ExternalSet<Type> right);
+	Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right);
 }

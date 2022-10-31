@@ -16,12 +16,12 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.LogicalNegation;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the logical negation ({@code !} or {@code not}). The
  * operand's type must be instance of {@link BooleanType}. The type of this
- * expression is the {@link BoolType}.
+ * expression is the {@link BooleanType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -35,11 +35,11 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 	 * @param expression the operand of this operation
 	 */
 	public Not(CFG cfg, CodeLocation location, Expression expression) {
-		super(cfg, location, "!", BoolType.INSTANCE, expression);
+		super(cfg, location, "!", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), expression);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
@@ -48,12 +48,13 @@ public class Not extends it.unive.lisa.program.cfg.statement.UnaryExpression {
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (expr.getRuntimeTypes().noneMatch(Type::isBooleanType))
+		TypeSystem types = getProgram().getTypes();
+		if (expr.getRuntimeTypes(types).stream().noneMatch(Type::isBooleanType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new UnaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						expr,
 						LogicalNegation.INSTANCE,
 						getLocation()),

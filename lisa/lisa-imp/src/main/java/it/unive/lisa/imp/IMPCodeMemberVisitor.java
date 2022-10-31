@@ -94,8 +94,8 @@ import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Float32Type;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 import java.util.Collection;
 import java.util.Collections;
@@ -632,9 +632,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		if (ctx.BOOLEAN() != null)
 			return BoolType.INSTANCE;
 		else if (ctx.INT() != null)
-			return Int32.INSTANCE;
+			return Int32Type.INSTANCE;
 		else
-			return Float32.INSTANCE;
+			return Float32Type.INSTANCE;
 	}
 
 	@Override
@@ -706,10 +706,9 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return new TrueLiteral(cfg, new SourceCodeLocation(file, line, col));
 			else
 				return new FalseLiteral(cfg, new SourceCodeLocation(file, line, col));
-		else if (ctx.LITERAL_STRING() != null) {
-			String str = ctx.LITERAL_STRING().getText().substring(1, ctx.LITERAL_STRING().getText().length() - 1);
-			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), str);
-		} else if (ctx.LITERAL_FLOAT() != null)
+		else if (ctx.LITERAL_STRING() != null)
+			return new StringLiteral(cfg, new SourceCodeLocation(file, line, col), clean(ctx));
+		else if (ctx.LITERAL_FLOAT() != null)
 			if (ctx.SUB() != null)
 				return new Float32Literal(cfg, new SourceCodeLocation(file, line, col),
 						-Float.parseFloat(ctx.LITERAL_FLOAT().getText()));
@@ -725,5 +724,12 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 						Integer.parseInt(ctx.LITERAL_DECIMAL().getText()));
 
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
+	}
+
+	private String clean(LiteralContext ctx) {
+		String text = ctx.LITERAL_STRING().getText();
+		if (text.startsWith("\"") && text.endsWith("\""))
+			return text.substring(1, text.length() - 1);
+		return text;
 	}
 }

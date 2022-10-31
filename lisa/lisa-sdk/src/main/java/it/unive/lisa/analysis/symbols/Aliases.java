@@ -55,7 +55,7 @@ public class Aliases extends SetLattice<Aliases, Symbol> {
 	}
 
 	@Override
-	protected Aliases mk(Set<Symbol> set) {
+	public Aliases mk(Set<Symbol> set) {
 		return new Aliases(set);
 	}
 

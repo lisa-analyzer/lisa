@@ -1,13 +1,10 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * Given two expressions that both evaluate to string values, a
@@ -20,14 +17,19 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StringStartsWith implements StringOperator, BinaryOperator {
+public class StringStartsWith extends StringOperation {
 
 	/**
 	 * The singleton instance of this class.
 	 */
 	public static final StringStartsWith INSTANCE = new StringStartsWith();
 
-	private StringStartsWith() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringStartsWith() {
 	}
 
 	@Override
@@ -36,9 +38,7 @@ public class StringStartsWith implements StringOperator, BinaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isStringType) || right.noneMatch(Type::isStringType))
-			return Caches.types().mkEmptySet();
-		return Caches.types().mkSingletonSet(BoolType.INSTANCE);
+	protected Type resultType(TypeSystem types) {
+		return types.getBooleanType();
 	}
 }

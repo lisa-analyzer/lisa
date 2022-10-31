@@ -12,8 +12,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Objects;
+import java.util.Set;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -247,9 +247,9 @@ public abstract class Call extends NaryExpression {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> ExternalSet<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions) {
+			T extends TypeDomain<T>> Set<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions) {
 		Expression[] actuals = getParameters();
-		ExternalSet<Type>[] types = new ExternalSet[actuals.length];
+		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++)
 			types[i] = expressions.getState(actuals[i]).getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
 		return types;

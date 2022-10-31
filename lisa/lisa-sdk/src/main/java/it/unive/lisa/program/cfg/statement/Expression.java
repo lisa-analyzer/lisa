@@ -177,7 +177,7 @@ public abstract class Expression extends Statement {
 	}
 
 	@Override
-	protected Statement getStatementEvaluatedBefore(Statement other) {
+	public Statement getStatementEvaluatedBefore(Statement other) {
 		if (this instanceof Call) {
 			Call original = (Call) this;
 			while (original.getSource() != null)

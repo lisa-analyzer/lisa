@@ -2,7 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.type.StringType;
 
 /**
  * A {@link Literal} representing a constant string value. Instances of this
@@ -20,6 +20,11 @@ public class StringLiteral extends Literal<String> {
 	 * @param value    the constant value represented by this literal
 	 */
 	public StringLiteral(CFG cfg, CodeLocation location, String value) {
-		super(cfg, location, value, StringType.INSTANCE);
+		super(cfg, location, value, cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType());
+	}
+
+	@Override
+	public String toString() {
+		return "\"" + super.toString() + "\"";
 	}
 }

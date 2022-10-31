@@ -72,7 +72,7 @@ public abstract class CallWithResult extends Call implements MetaVariableCreator
 	 *
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
-	protected abstract <A extends AbstractState<A, H, V, T>,
+	public abstract <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> compute(

@@ -2,12 +2,12 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 
 /**
  * A 32-bit signed {@link Literal} representing a constant integral value.
- * Instances of this literal have a {@link Int32} static type. Internally, the
- * constant is stored in a {@code int}.
+ * Instances of this literal have a {@link Int32Type} static type. Internally,
+ * the constant is stored in a {@code int}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -21,6 +21,6 @@ public class Int32Literal extends Literal<Integer> {
 	 * @param value    the constant value represented by this literal
 	 */
 	public Int32Literal(CFG cfg, CodeLocation location, int value) {
-		super(cfg, location, value, Int32.INSTANCE);
+		super(cfg, location, value, Int32Type.INSTANCE);
 	}
 }

@@ -33,18 +33,18 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	}
 
 	@Override
-	protected PossibleForwardDataflowDomain<E> mk(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
+	public PossibleForwardDataflowDomain<E> mk(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		return new PossibleForwardDataflowDomain<>(domain, elements, isTop, isBottom);
 	}
 
 	@Override
-	protected PossibleForwardDataflowDomain<E> lubAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
+	public PossibleForwardDataflowDomain<E> lubAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
 		Set<E> union = SetUtils.union(this.getDataflowElements(), other.getDataflowElements());
 		return new PossibleForwardDataflowDomain<>(domain, union, false, false);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
+	public boolean lessOrEqualAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
 		return other.getDataflowElements().containsAll(this.getDataflowElements());
 	}
 }
