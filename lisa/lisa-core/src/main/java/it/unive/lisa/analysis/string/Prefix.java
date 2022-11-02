@@ -8,11 +8,8 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
-import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 import java.util.Objects;
 
@@ -91,12 +88,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
     @Override
     public boolean isTop() {
-        return this == TOP;
+        return this.equals(TOP);
     }
 
     @Override
     public boolean isBottom() {
-        return this == BOTTOM;
+        return this.equals(BOTTOM);
     }
 
     @Override
@@ -144,20 +141,6 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
     @Override
     protected Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
-        if (operator == StringSubstring.INSTANCE) {
-            StringSubstring stringSubstring = (StringSubstring) operator;
-
-            ExternalSet<Type> externalSet =
-                    operator.typeInference((ExternalSet<Type>) left,
-                            (ExternalSet<Type>) middle,
-                            (ExternalSet<Type>) right);
-
-            for(Type type: externalSet.collect()){
-                System.out.println(type.asStringType());
-            }
-
-             return TOP; //placeholder
-        }
         return TOP;
     }
 
