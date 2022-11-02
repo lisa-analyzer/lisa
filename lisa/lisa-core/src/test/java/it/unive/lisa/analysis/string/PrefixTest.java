@@ -1,8 +1,6 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.symbolic.value.Operator;
-import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -10,31 +8,31 @@ import static org.junit.Assert.*;
 public class PrefixTest {
 
     @Test
-    public void testPrefixConstructor() {
+    public void testConstructor() {
         new Prefix();
     }
 
     @Test
-    public void testPrefixConstructor1() {
+    public void testConstructor1() {
         new Prefix("Hello World!");
     }
 
     @Test
-    public void testPrefixLubAux() throws SemanticException {
+    public void testLubAux() throws SemanticException {
         Prefix result = new Prefix("abc").lubAux(new Prefix("abcdef"));
 
         assertEquals(result.getPrefix(), "abc");
     }
 
     @Test
-    public void testPrefixLubAux1() throws SemanticException {
+    public void testLubAux1() throws SemanticException {
         Prefix result = new Prefix("Hello World!").lubAux(new Prefix("Hello, World!"));
 
         assertEquals(result.getPrefix(), "Hello");
     }
 
     @Test
-    public void testPrefixLubAux2() throws SemanticException {
+    public void testLubAux2() throws SemanticException {
         Prefix result = new Prefix("abc").lubAux(new Prefix("def"));
 
         assertTrue(result.isTop());
@@ -62,7 +60,12 @@ public class PrefixTest {
     }
 
     @Test
-    public void testEvalTernaryExpression(){
-        Operator operator = StringSubstring.INSTANCE;
+    public void testIsTop(){
+        assertTrue(new Prefix("").isTop());
+    }
+
+    @Test
+    public void testIsBottom(){
+        assertTrue(new Prefix(null).isBottom());
     }
 }
