@@ -90,12 +90,12 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
     @Override
     public boolean isTop() {
-        return this == TOP;
+        return this.equals(TOP);
     }
 
     @Override
     public boolean isBottom() {
-        return this == BOTTOM;
+        return this.equals(BOTTOM);
     }
 
     @Override
