@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
-import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 
@@ -144,10 +143,6 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
     @Override
     protected Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right, ProgramPoint pp) { //TODO
-        if (operator == StringSubstring.INSTANCE) {
-            return TOP; //placeholder
-        }
-
         return TOP;
     }
 

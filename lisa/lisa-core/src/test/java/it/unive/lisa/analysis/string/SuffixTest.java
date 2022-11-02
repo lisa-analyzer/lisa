@@ -8,6 +8,16 @@ import static org.junit.Assert.*;
 public class SuffixTest {
 
     @Test
+    public void testSuffixConstructor(){
+        new Suffix();
+    }
+
+    @Test
+    public void testSuffixConstructor1(){
+        new Suffix("Hello World!");
+    }
+
+    @Test
     public void testSuffixLubAux() throws SemanticException {
         Suffix result = new Suffix("Hello World!").lubAux(new Suffix("World!"));
 
