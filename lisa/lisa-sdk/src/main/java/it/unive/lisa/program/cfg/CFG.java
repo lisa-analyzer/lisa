@@ -471,12 +471,17 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> join(Statement node,
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> joinAsc(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
 			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
 
+			/*
+			newApprox = oldApprox.widening(newApprox);
+			newIntermediate = oldIntermediate.widening(newIntermediate);
+			*/
+			
 			if (widenAfter == 0) {
 				newApprox = newApprox.lub(oldApprox);
 				newIntermediate = newIntermediate.lub(oldIntermediate);
@@ -494,10 +499,24 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 				lubs.put(node, --lub);
 			}
+			
 
 			return Pair.of(newApprox, newIntermediate);
 		}
 
+		@Override
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> joinDesc(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
+			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
+
+			newApprox = newApprox.narrowing(oldApprox);
+			newIntermediate = newIntermediate.lub(oldIntermediate);
+
+			return Pair.of(newApprox, newIntermediate);
+		}
+		
 		@Override
 		public boolean equality(Statement node, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {

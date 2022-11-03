@@ -30,6 +30,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	private final Graph<G, N, E> graph;
 
 	private final Map<N, T> result;
+	
+	private boolean ascendingPhase;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
@@ -39,6 +41,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Fixpoint(Graph<G, N, E> graph) {
 		this.graph = graph;
 		result = new HashMap<>(graph.getNodesCount());
+		this.ascendingPhase = true;
 	}
 
 	/**
@@ -122,8 +125,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T join(N node, T approx, T old) throws Exception;
+		T joinAsc(N node, T approx, T old) throws Exception;
 
+		T joinDesc(N node, T approx, T old) throws Exception;
 		/**
 		 * Given a node and two states, yields whether or not the most recent
 		 * one has to be considered <i>equal</i> to the older one in terms of
@@ -193,7 +197,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			T oldApprox = result.get(current);
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.join(current, newApprox, oldApprox);
+					if(this.ascendingPhase)
+						newApprox = implementation.joinAsc(current, newApprox, oldApprox);
+					else
+						newApprox = implementation.joinDesc(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
@@ -208,8 +215,12 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				throw new FixpointException(format(ERROR, "updating result", current, graph), e);
 			}
 		}
-
-		return result;
+		if(!ascendingPhase)
+			return result;		
+		
+		this.ascendingPhase = false;
+		
+		return this.fixpoint(startingPoints, ws, implementation);
 	}
 
 	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation)

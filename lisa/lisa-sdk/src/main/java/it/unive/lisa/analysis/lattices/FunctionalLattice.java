@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.lattices;
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -140,6 +141,11 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	@Override
 	public F wideningAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+	}
+	
+	@Override
+	public F narrowingAux(F other) throws SemanticException {
+		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**

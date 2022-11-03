@@ -212,6 +212,14 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				valueState.widening(other.valueState),
 				typeState.widening(other.typeState));
 	}
+	
+	@Override
+	public SimpleAbstractState<H, V, T> narrowingAux(SimpleAbstractState<H, V, T> other) throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.narrowing(other.heapState),
+				valueState.narrowing(other.valueState),
+				typeState.narrowing(other.typeState));
+	}
 
 	@Override
 	public boolean lessOrEqualAux(SimpleAbstractState<H, V, T> other) throws SemanticException {
@@ -325,4 +333,6 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		return valueState.getDomainInstance(domain);
 	}
+
+
 }

@@ -235,7 +235,15 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 				computedExpressions.lub(other.computedExpressions),
 				aliasing.widening(other.aliasing));
 	}
-
+	
+	@Override
+	public AnalysisState<A, H, V, T> narrowingAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+		return new AnalysisState<>(
+				state.narrowing(other.state),
+				computedExpressions.lub(other.computedExpressions),
+				aliasing.narrowing(other.aliasing));
+		}
+		
 	@Override
 	public boolean lessOrEqualAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return state.lessOrEqual(other.state)
@@ -334,4 +342,6 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 		return state.getDomainInstance(domain);
 	}
+
+
 }

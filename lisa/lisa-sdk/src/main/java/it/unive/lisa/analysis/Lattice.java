@@ -57,6 +57,22 @@ public interface Lattice<L extends Lattice<L>> {
 	L lub(L other) throws SemanticException;
 
 	/**
+	 * Performs the narrowing operation between this lattice element and the
+	 * given one. This operation is not commutative. The default implementation
+	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for
+	 * finite lattices and DCC ones.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the narrowing between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L narrowing(L other) throws SemanticException {
+		return lub(other);
+	}
+	
+	/**
 	 * Performs the widening operation between this lattice element and the
 	 * given one. This operation is not commutative. The default implementation
 	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for

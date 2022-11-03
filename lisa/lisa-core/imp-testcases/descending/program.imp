@@ -1,0 +1,11 @@
+class tutorial {
+
+	sat() { 
+		def x = 0;
+		while (x < 100)
+			if (x < 50)
+				x = x + 2;
+			else
+				x = x + 10;
+	}	
+}

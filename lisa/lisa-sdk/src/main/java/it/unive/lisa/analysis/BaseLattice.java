@@ -55,6 +55,18 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 		return wideningAux(other);
 	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public L narrowing(L other) throws SemanticException {
+		if (other == null || this.isBottom() || this == other || this.equals(other))
+			return (L) this;
+
+		if (this.isTop())
+			return other;
+
+		return narrowingAux(other);
+	}
 
 	/**
 	 * Performs the widening operation between this lattice element and the
@@ -78,6 +90,10 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public L wideningAux(L other) throws SemanticException {
+		return lubAux(other);
+	}
+	
+	public L narrowingAux(L other) throws SemanticException {
 		return lubAux(other);
 	}
 
