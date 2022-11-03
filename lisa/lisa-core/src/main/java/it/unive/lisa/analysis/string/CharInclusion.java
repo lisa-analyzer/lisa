@@ -14,12 +14,15 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
     private final Collection<Character> maybeContained;
 
-    public CharInclusion(){
-        this(new HashSet<>(), new HashSet<>()); //How to create a TOP element?
+    private static final CharInclusion TOP = new CharInclusion();
+    private static final CharInclusion BOTTOM = new CharInclusion(null, null);
+
+    public CharInclusion() {
+        this(new HashSet<>(), getAlphabet());
     }
 
     public CharInclusion(Collection<Character> certainlyContained,
-                         Collection<Character> maybeContained){
+                         Collection<Character> maybeContained) {
         this.certainlyContained = certainlyContained;
         this.maybeContained = maybeContained;
     }
@@ -42,19 +45,20 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
         int otherCertainlyContainedSize = other.certainlyContained.size();
         int otherMaybeContainedSize = other.maybeContained.size();
 
-        if(CertainlyContainedSize > otherCertainlyContainedSize ||
+        if (CertainlyContainedSize > otherCertainlyContainedSize ||
                 MaybeContainedSize > otherMaybeContainedSize)
             return false;
 
-        for(Character certainlyContainedCharacter: this.certainlyContained){
-            for (Character otherCertainlyContainedCharacter: other.certainlyContained){
-                if(certainlyContainedCharacter != otherCertainlyContainedCharacter)
+        for (Character certainlyContainedCharacter : this.certainlyContained) { //I suppose that the order are the same, which is incorrect (maybe a sorting should be done)
+            for (Character otherCertainlyContainedCharacter : other.certainlyContained) {
+                if (certainlyContainedCharacter != otherCertainlyContainedCharacter)
                     return false;
             }
         }
-        for(Character maybeContainedCharacter: this.maybeContained){
-            for (Character otherMaybeContainedCharacter: other.maybeContained){
-                if(maybeContainedCharacter != otherMaybeContainedCharacter)
+
+        for (Character maybeContainedCharacter : this.maybeContained) {
+            for (Character otherMaybeContainedCharacter : other.maybeContained) {
+                if (maybeContainedCharacter != otherMaybeContainedCharacter)
                     return false;
             }
         }
@@ -87,5 +91,15 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     @Override
     public DomainRepresentation representation() { //TODO
         return null;
+    }
+
+    private static HashSet<Character> getAlphabet() {
+        HashSet<Character> alphabet = new HashSet<>();
+
+        for (char character = 'a'; character <= 'z'; character++) {
+            alphabet.add(character);
+        }
+
+        return alphabet;
     }
 }
