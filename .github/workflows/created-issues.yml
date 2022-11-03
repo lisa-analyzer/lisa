@@ -12,9 +12,11 @@ jobs:
 
     steps:
     - name: Move to the TODO column
-      uses: alex-page/github-project-automation-plus@v0.7.1
+      uses: leonsteinhaeuser/project-beta-automations@v2.0.1
       with:
-        project: LiSA
-        column: TODO
-        repo-token: ${{ secrets.LISA_PAT }}
+        gh_token: ${{ secrets.LISA_PAT }}
+        organization: lisa-analyzer
+        project_id: 3
+        resource_node_id: ${{ github.event.issue.node_id }}
+        status_value: Todo
     
