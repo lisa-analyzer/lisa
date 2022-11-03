@@ -44,31 +44,30 @@ jobs:
     - name: 'Retrieve commit list'
       id: gitinfo
       run: |
-        currenttag=$(git describe --tags --abbrev=0)
-        while [[ "$currenttag" != "v"* ]]; do
-            # go back until the first version tag
-            currenttag=$(git describe --tags --abbrev=0 $currenttag^)
-        done
-        # now currenttag contains the last proper tag, excluding 'latest' or similar
-        git log $(if [[ -z $currenttag ]]; then echo HEAD; else echo $currenttag..HEAD; fi) --pretty=format:"%C(auto)%h - %s" >> changelog.txt
+        # get last tag excluding 'latest' and considering only version tags
+        echo "most recent tags:"
+        git tag --sort=-creatordate | head -n5
+        currenttag=$(git tag --sort=-creatordate | grep -v latest | grep "^v[0-9].*" | head -n1)
+        echo "current tag: $currenttag"
+        git log $currenttag..HEAD --pretty=format:"%C(auto)%h - %s" > changelog.txt
         function join_by {
           local d=${1-} f=${2-}
           if shift 2; then
-            printf %s "$f" "${@/#/$d}"
+          printf %s "$f" "${@/#/$d}"
           fi
         }
         # tokenize whenever we transition from numbers to whatever else
         # 5.2b4 -> (5 . 2 b 4)
-        currenttag=${currenttag#?} # remove the v
-        nexttag=( $(grep -oE '[0-9]+|[^0-9]+' <<< $currenttag) ) 
+        currentver=${currenttag#?} # remove the v
+        echo "current version: $currentver"
+        nexttag=( $(grep -oE '[0-9]+|[^0-9]+' <<< $currentver) ) 
         let nexttag[-1]=${nexttag[-1]}+1
         nextver=$(join_by "" "${nexttag[@]}")
         changelog=$(cat changelog.txt)
-        echo "currentver: $currenttag"
-        echo "nextver: $nextver"
-        echo "changelog: $changelog"
+        echo "next version: $nextver"
+        echo "changelog: $changelog.txt"
         echo "::set-output name=nextver::$nextver"
-        echo "::set-output name=currentver::$currenttag"
+        echo "::set-output name=currentver::$currentver"
         echo "CHANGELOG<<EOF" >> $GITHUB_ENV
         echo "$changelog" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV
