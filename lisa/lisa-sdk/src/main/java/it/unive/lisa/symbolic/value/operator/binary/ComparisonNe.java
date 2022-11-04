@@ -1,12 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given two expressions, a {@link BinaryExpression} using this operator checks
@@ -26,7 +26,12 @@ public class ComparisonNe implements ComparisonOperator, BinaryOperator {
 	 */
 	public static final ComparisonNe INSTANCE = new ComparisonNe();
 
-	private ComparisonNe() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected ComparisonNe() {
 	}
 
 	@Override
@@ -40,7 +45,7 @@ public class ComparisonNe implements ComparisonOperator, BinaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		return Caches.types().mkSingletonSet(BoolType.INSTANCE);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> right) {
+		return Collections.singleton(types.getBooleanType());
 	}
 }

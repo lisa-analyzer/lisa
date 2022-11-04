@@ -58,13 +58,26 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		this(domain, function, Collections.emptyList());
 	}
 
-	private HeapEnvironment(T domain, Map<Identifier, T> function, List<HeapReplacement> substitution) {
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param domain       a singleton instance to be used during semantic
+	 *                         operations to retrieve top and bottom values
+	 * @param function     the function representing the mapping contained in
+	 *                         the new environment; can be {@code null}
+	 * @param substitution the list of substitutions that has been generated
+	 *                         together with the fresh instance being built
+	 */
+	public HeapEnvironment(T domain, Map<Identifier, T> function, List<HeapReplacement> substitution) {
 		super(domain, function);
 		this.substitution = substitution;
 	}
 
 	@Override
-	protected HeapEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+	public HeapEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
 		return new HeapEnvironment<>(lattice, function);
 	}
 
@@ -80,12 +93,12 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	protected HeapEnvironment<T> copy() {
+	public HeapEnvironment<T> copy() {
 		return new HeapEnvironment<>(lattice, mkNewFunction(function), new ArrayList<>(substitution));
 	}
 
 	@Override
-	protected Pair<T, T> eval(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public Pair<T, T> eval(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
 	}
@@ -97,12 +110,12 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	protected HeapEnvironment<T> assumeSatisfied(T eval) {
+	public HeapEnvironment<T> assumeSatisfied(T eval) {
 		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
 	}
 
 	@Override
-	protected HeapEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, HeapEnvironment<T> other) {
+	public HeapEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, HeapEnvironment<T> other) {
 		return new HeapEnvironment<>(lattice, function, other.substitution);
 	}
 
@@ -127,7 +140,7 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	protected HeapEnvironment<T> lubAux(HeapEnvironment<T> other) throws SemanticException {
+	public HeapEnvironment<T> lubAux(HeapEnvironment<T> other) throws SemanticException {
 		HeapEnvironment<T> lub = super.lubAux(other);
 		if (lub.isTop() || lub.isBottom())
 			return lub;
@@ -136,7 +149,7 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	protected HeapEnvironment<T> wideningAux(HeapEnvironment<T> other) throws SemanticException {
+	public HeapEnvironment<T> wideningAux(HeapEnvironment<T> other) throws SemanticException {
 		HeapEnvironment<T> widen = super.wideningAux(other);
 		if (widen.isTop() || widen.isBottom())
 			return widen;
@@ -145,7 +158,7 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
+	public boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
 		// TODO how do we check the substitutions?

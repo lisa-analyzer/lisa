@@ -183,8 +183,7 @@ public class NativeCall extends Call implements CanRemoveReceiver, ResolvedCall 
 		AnalysisState<A, H, V, T> result = state.bottom();
 
 		Expression[] parameters = getSubExpressions();
-		ParameterAssigningStrategy strategy = getCFG().getDescriptor().getUnit().getProgram()
-				.getFeatures().getAssigningStrategy();
+		ParameterAssigningStrategy strategy = getProgram().getFeatures().getAssigningStrategy();
 		for (NativeCFG nat : targets)
 			try {
 				Pair<AnalysisState<A, H, V, T>, ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(this,

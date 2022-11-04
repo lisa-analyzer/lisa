@@ -58,7 +58,9 @@ public interface Lattice<L extends Lattice<L>> {
 
 	/**
 	 * Performs the widening operation between this lattice element and the
-	 * given one. This operation is not commutative.
+	 * given one. This operation is not commutative. The default implementation
+	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for
+	 * finite lattices and ACC ones.
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -66,7 +68,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L widening(L other) throws SemanticException;
+	default L widening(L other) throws SemanticException {
+		return lub(other);
+	}
 
 	/**
 	 * Yields {@code true} if and only if this lattice element is in relation

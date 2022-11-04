@@ -28,7 +28,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	/**
 	 * The function implemented by this lattice.
 	 */
-	protected Map<K, V> function;
+	public Map<K, V> function;
 
 	/**
 	 * The underlying lattice.
@@ -40,7 +40,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @param lattice the underlying lattice
 	 */
-	protected FunctionalLattice(V lattice) {
+	public FunctionalLattice(V lattice) {
 		this.lattice = lattice;
 		this.function = mkNewFunction(null);
 	}
@@ -51,7 +51,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param lattice  the underlying lattice
 	 * @param function the function to clone
 	 */
-	protected FunctionalLattice(V lattice, Map<K, V> function) {
+	public FunctionalLattice(V lattice, Map<K, V> function) {
 		this.lattice = lattice;
 		this.function = function;
 	}
@@ -66,7 +66,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return a new function, either empty or containing the same data of the
 	 *             given one
 	 */
-	protected Map<K, V> mkNewFunction(Map<K, V> other) {
+	public Map<K, V> mkNewFunction(Map<K, V> other) {
 		if (other == null)
 			return new HashMap<>();
 		return new HashMap<>(other);
@@ -130,15 +130,15 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @return a new instance of this class
 	 */
-	protected abstract F mk(V lattice, Map<K, V> function);
+	public abstract F mk(V lattice, Map<K, V> function);
 
 	@Override
-	protected F lubAux(F other) throws SemanticException {
+	public F lubAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
 	}
 
 	@Override
-	protected F wideningAux(F other) throws SemanticException {
+	public F wideningAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
 	}
 
@@ -150,7 +150,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param <V> {@link Lattice} type of the values
 	 */
 	@FunctionalInterface
-	protected interface FunctionalLift<V extends Lattice<V>> {
+	public interface FunctionalLift<V extends Lattice<V>> {
 
 		/**
 		 * Yields the lift of {@code first} and {@code second} lattice element.
@@ -174,7 +174,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param <K> the key type
 	 */
 	@FunctionalInterface
-	protected interface KeyFunctionalLift<K> {
+	public interface KeyFunctionalLift<K> {
 
 		/**
 		 * Yields the lift of {@code first} and {@code second} key sets.
@@ -202,7 +202,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @throws SemanticException if something goes wrong while lifting the
 	 *                               lattice elements
 	 */
-	protected F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
+	public F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
 			throws SemanticException {
 		F result = mk(lattice.lub(other.lattice), mkNewFunction(null));
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
@@ -225,7 +225,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * 
 	 * @throws SemanticException if something goes wrong while lifting the keys
 	 */
-	protected Set<K> lubKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+	public Set<K> lubKeys(Set<K> k1, Set<K> k2) throws SemanticException {
 		Set<K> keys = new HashSet<>(k1);
 		keys.addAll(k2);
 		return keys;
@@ -242,14 +242,14 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @throws SemanticException if something goes wrong while lifting the key
 	 *                               sets
 	 */
-	protected Set<K> glbKeys(Set<K> k1, Set<K> k2) throws SemanticException {
+	public Set<K> glbKeys(Set<K> k1, Set<K> k2) throws SemanticException {
 		Set<K> keys = new HashSet<>(k1);
 		keys.retainAll(k2);
 		return keys;
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(F other) throws SemanticException {
+	public boolean lessOrEqualAux(F other) throws SemanticException {
 		for (K key : function.keySet())
 			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
 				return false;

@@ -18,14 +18,15 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string length operation. The type of the operand
- * must be {@link StringType}. The type of this expression is the {@link Int32}.
- * <br>
+ * must be {@link StringType}. The type of this expression is the
+ * {@link NumericType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -57,11 +58,11 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 	 * @param parameter the operand of this operation
 	 */
 	public Length(CFG cfg, CodeLocation location, Expression parameter) {
-		super(cfg, location, "len", Int32.INSTANCE, parameter);
+		super(cfg, location, "len", cfg.getDescriptor().getUnit().getProgram().getTypes().getIntegerType(), parameter);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
@@ -70,12 +71,13 @@ public class Length extends it.unive.lisa.program.cfg.statement.UnaryExpression 
 					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (expr.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (expr.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new UnaryExpression(
-						Int32.INSTANCE,
+						getStaticType(),
 						expr,
 						StringLength.INSTANCE,
 						getLocation()),

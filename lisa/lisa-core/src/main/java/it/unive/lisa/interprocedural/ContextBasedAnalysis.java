@@ -195,8 +195,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			for (int i = 0; i < parameters.length; i++)
 				actuals[i] = parameters[i].pushScope(scope);
 
-			ParameterAssigningStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram().getFeatures()
-					.getAssigningStrategy();
+			ParameterAssigningStrategy strategy = call.getProgram().getFeatures().getAssigningStrategy();
 			Pair<AnalysisState<A, H, V, T>,
 					ExpressionSet<SymbolicExpression>[]> prepared = strategy.prepare(call, callState,
 							this, expressions, formals, actuals);

@@ -1,9 +1,7 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Set;
 
 /**
  * Type interface. Any instance of a concrete type, instance of Type, should be
@@ -246,6 +244,27 @@ public interface Type {
 	}
 
 	/**
+	 * Yields {@code true} if and only if this type is an instance of
+	 * {@link ReferenceType}.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	default boolean isReferenceType() {
+		return this instanceof ReferenceType;
+	}
+
+	/**
+	 * Returns this type casted as a {@link ReferenceType}, only if
+	 * {@link #isReferenceType()} yields {@code true}. Otherwise, this method
+	 * returns {@code null}.
+	 * 
+	 * @return this type casted as {@link ReferenceType}, or {@code null}
+	 */
+	default ReferenceType asReferenceType() {
+		return isReferenceType() ? (ReferenceType) this : null;
+	}
+
+	/**
 	 * Determines if the type represented by this {@link Type} object is either
 	 * the same as, or is a subtype of, the type represented by {@code other}.
 	 * It returns {@code true} if so, and returns {@code false} otherwise.
@@ -271,86 +290,32 @@ public interface Type {
 	/**
 	 * Yields all possible instances of this type, including itself.
 	 * 
+	 * @param types the type system that can be used to look for subtypes of
+	 *                  this type
+	 * 
 	 * @return the possible instances
 	 */
-	Collection<Type> allInstances();
+	Set<Type> allInstances(TypeSystem types);
 
 	/**
-	 * Simulates a cast operation, where an expression with possible runtime
-	 * types {@code types} is being cast to one of the possible type tokens in
-	 * {@code tokens}. All types in {@code tokens} that are not
-	 * {@link TypeTokenType}s, according to {@link Type#isTypeTokenType()}, will
-	 * be ignored. The returned set contains a subset of the types in
-	 * {@code types}, keeping only the ones that can be assigned to one of the
-	 * types represented by one of the tokens in {@code tokens}.<br>
-	 * <br>
-	 * Invoking this method is equivalent to invoking
-	 * {@link #cast(ExternalSet, ExternalSet, AtomicBoolean)} passing
-	 * {@code null} as third parameter.
+	 * Yields the most specific common supertype of the given collection of
+	 * types by successive invocations of {@link #commonSupertype(Type)} between
+	 * its elements.
 	 * 
-	 * @param types  the types of the expression being casted
-	 * @param tokens the tokens representing the operand of the cast
+	 * @param types    the types
+	 * @param fallback the type to return if the collection is empty
 	 * 
-	 * @return the set of possible types after the cast
+	 * @return the most specific common supertype, or {@code fallback}
 	 */
-	public static ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens) {
-		return cast(types, tokens, null);
-	}
-
-	/**
-	 * Simulates a cast operation, where an expression with possible runtime
-	 * types {@code types} is being cast to one of the possible type tokens in
-	 * {@code tokens}. All types in {@code tokens} that are not
-	 * {@link TypeTokenType}s, according to {@link Type#isTypeTokenType()}, will
-	 * be ignored. The returned set contains a subset of the types in
-	 * {@code types}, keeping only the ones that can be assigned to one of the
-	 * types represented by one of the tokens in {@code tokens}.
-	 * 
-	 * @param types     the types of the expression being casted
-	 * @param tokens    the tokens representing the operand of the cast
-	 * @param mightFail a reference to the boolean to set if this cast might
-	 *                      fail (e.g., casting an [int, string] to an int will
-	 *                      yield a set containing int and will set the boolean
-	 *                      to true)
-	 * 
-	 * @return the set of possible types after the cast
-	 */
-	public static ExternalSet<Type> cast(ExternalSet<Type> types, ExternalSet<Type> tokens, AtomicBoolean mightFail) {
-		if (mightFail != null)
-			mightFail.set(false);
-
-		ExternalSet<Type> result = Caches.types().mkEmptySet();
-		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
-			for (Type t : types)
-				if (t.canBeAssignedTo(token))
-					result.add(t);
-				else if (mightFail != null)
-					mightFail.set(true);
-
-		return result;
-	}
-
-	/**
-	 * Simulates a conversion operation, where an expression with possible
-	 * runtime types {@code types} is being converted to one of the possible
-	 * type tokens in {@code tokens}. All types in {@code tokens} that are not
-	 * {@link TypeTokenType}s, according to {@link Type#isTypeTokenType()}, will
-	 * be ignored. The returned set contains a subset of the types in
-	 * {@code tokens}, keeping only the ones such that there exists at least one
-	 * type in {@code types} that can be assigned to it.
-	 * 
-	 * @param types  the types of the expression being converted
-	 * @param tokens the tokens representing the operand of the type conversion
-	 * 
-	 * @return the set of possible types after the type conversion
-	 */
-	public static ExternalSet<Type> convert(ExternalSet<Type> types, ExternalSet<Type> tokens) {
-		ExternalSet<Type> result = Caches.types().mkEmptySet();
-		for (Type token : tokens.filter(Type::isTypeTokenType).multiTransform(t -> t.asTypeTokenType().getTypes()))
-			for (Type t : types)
-				if (t.canBeAssignedTo(token))
-					result.add(token);
-
+	public static Type commonSupertype(Collection<Type> types, Type fallback) {
+		if (types == null || types.isEmpty())
+			return fallback;
+		Type result = null;
+		for (Type t : types)
+			if (result == null)
+				result = t;
+			else
+				result = result.commonSupertype(t);
 		return result;
 	}
 }

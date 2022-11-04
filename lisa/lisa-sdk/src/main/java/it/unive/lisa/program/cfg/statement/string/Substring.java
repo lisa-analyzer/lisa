@@ -18,14 +18,16 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.ternary.StringSubstring;
+import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.Int32;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string substring operation. The type of the first
  * operand must be {@link StringType}, while the other two operands' types must
- * be {@link Int32}. The type of this expression is the {@link StringType}. <br>
+ * be {@link NumericType}. The type of this expression is the
+ * {@link StringType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -59,11 +61,12 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 	 * @param right    the right-hand side of this operation
 	 */
 	public Substring(CFG cfg, CodeLocation location, Expression left, Expression middle, Expression right) {
-		super(cfg, location, "substring", StringType.INSTANCE, left, middle, right);
+		super(cfg, location, "substring", cfg.getDescriptor().getUnit().getProgram().getTypes().getStringType(), left,
+				middle, right);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> ternarySemantics(
@@ -74,16 +77,17 @@ public class Substring extends it.unive.lisa.program.cfg.statement.TernaryExpres
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (middle.getRuntimeTypes().noneMatch(Type::isNumericType))
+		if (middle.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isNumericType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isNumericType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new TernaryExpression(
-						StringType.INSTANCE,
+						getStaticType(),
 						left,
 						middle,
 						right,

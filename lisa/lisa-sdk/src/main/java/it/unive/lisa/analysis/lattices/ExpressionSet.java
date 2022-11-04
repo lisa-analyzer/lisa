@@ -69,7 +69,7 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 	}
 
 	@Override
-	protected ExpressionSet<T> mk(Set<T> set) {
+	public ExpressionSet<T> mk(Set<T> set) {
 		return new ExpressionSet<>(set);
 	}
 
@@ -98,7 +98,7 @@ public class ExpressionSet<T extends SymbolicExpression> extends SetLattice<Expr
 
 	@Override
 	@SuppressWarnings("unchecked")
-	protected ExpressionSet<T> lubAux(ExpressionSet<T> other) throws SemanticException {
+	public ExpressionSet<T> lubAux(ExpressionSet<T> other) throws SemanticException {
 		Set<T> lub = new HashSet<>();
 
 		// all non-identifiers expressions are part of the lub
