@@ -179,6 +179,8 @@ public abstract class TypeSystem {
 	 * is, if a pointer to memory locations containing them can be created. If
 	 * this method returns {@code true}, LiSA will automatically register a
 	 * {@link ReferenceType} into this type system that contains the given type.
+	 *
+	 * @param type the type to check
 	 * 
 	 * @return {@code true} if and only if the given type can be referenced
 	 */

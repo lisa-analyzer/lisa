@@ -9,7 +9,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -90,11 +89,6 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public List<HeapReplacement> getSubstitution() {
 		return substitution;
-	}
-
-	@Override
-	public HeapEnvironment<T> copy() {
-		return new HeapEnvironment<>(lattice, mkNewFunction(function), new ArrayList<>(substitution));
 	}
 
 	@Override

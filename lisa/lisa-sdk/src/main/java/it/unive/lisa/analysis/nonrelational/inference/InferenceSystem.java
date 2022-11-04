@@ -98,11 +98,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> copy() {
-		return new InferenceSystem<>(lattice, mkNewFunction(function), inferred);
-	}
-
-	@Override
 	public Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		InferredPair<T> eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval.getInferred(), eval);

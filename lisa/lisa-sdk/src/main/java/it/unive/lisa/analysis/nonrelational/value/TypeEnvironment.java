@@ -71,11 +71,6 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public TypeEnvironment<T> copy() {
-		return new TypeEnvironment<>(lattice, mkNewFunction(function), stack);
-	}
-
-	@Override
 	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);

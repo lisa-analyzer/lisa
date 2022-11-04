@@ -80,11 +80,6 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	public ValueEnvironment<T> copy() {
-		return new ValueEnvironment<>(lattice, mkNewFunction(function), stack);
-	}
-
-	@Override
 	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
