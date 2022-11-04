@@ -1,7 +1,7 @@
 package it.unive.lisa.analysis.value;
 
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
 
 /**
  * An domain that is able to determine the runtime types of an expression given
@@ -19,7 +19,7 @@ public interface TypeDomain<T extends TypeDomain<T>> extends ValueDomain<T> {
 	 * 
 	 * @return the runtime types
 	 */
-	ExternalSet<Type> getInferredRuntimeTypes();
+	Set<Type> getInferredRuntimeTypes();
 
 	/**
 	 * Yields the dynamic type that this analysis inferred for the last computed

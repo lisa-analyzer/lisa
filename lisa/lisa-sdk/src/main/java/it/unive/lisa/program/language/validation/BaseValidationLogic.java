@@ -94,7 +94,7 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * Error message format for missing override of an
 	 * {@link AbstractCodeMember}.
 	 */
-	public static final String MISSING_OVERRIDE = "%s does not overrides %s from the non-instantiable unit %s";
+	public static final String MISSING_OVERRIDE = "%s does not override %s from the non-instantiable unit %s";
 
 	/**
 	 * Error message format for the overriding of a non-overridable
@@ -107,6 +107,17 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * {@link CodeMember} inside the same {@link CompilationUnit}.
 	 */
 	public static final String MULTIPLE_OVERRIDES = "%s is overriden multiple times in unit %s: %s";
+
+	/**
+	 * Error message format for {@link AbstractCodeMember} that is not instance.
+	 */
+	public static final String ABSTRACT_NON_INSTANCE = "%s is not an instance member and cannot be abstract";
+
+	/**
+	 * Error message format for a {@link CodeMember} not matching its own
+	 * signature.
+	 */
+	public static final String MEMBER_MISMATCH = "%s does not match its own signature";
 
 	/**
 	 * The set of {@link CompilationUnit}s, represented by their names, that
@@ -269,6 +280,8 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		for (CodeMember cm : unit.getInstanceCodeMembers(false))
 			validate(cm, true);
 
+		unit.addInstance(unit);
+
 		for (CompilationUnit ancestor : unit.getImmediateAncestors()) {
 			// check overriders/implementers
 			for (CodeMember inherited : ancestor.getInstanceCodeMembers(true)) {
@@ -321,7 +334,6 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 								args[i].addAnnotation(parAnn);
 				}
 
-		unit.addInstance(unit);
 		processedUnits.add(unit.getName());
 	}
 
@@ -340,11 +352,16 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	 * @throws ProgramValidationException if the member has an invalid structure
 	 */
 	public void validate(CodeMember member, boolean instance) throws ProgramValidationException {
+		if (!instance && member instanceof AbstractCodeMember)
+			throw new ProgramValidationException(format(ABSTRACT_NON_INSTANCE, member));
 		Unit container = member.getDescriptor().getUnit();
 		Collection<CodeMember> matching = instance
 				? ((CompilationUnit) container).getMatchingInstanceCodeMembers(member.getDescriptor(), false)
 				: container.getMatchingCodeMember(member.getDescriptor());
-		if (matching.size() != 1 || matching.iterator().next() != member)
+		if (matching.isEmpty())
+			throw new ProgramValidationException(
+					format(MEMBER_MISMATCH, member.getDescriptor().getSignature()));
+		else if (matching.size() != 1 || matching.iterator().next() != member)
 			throw new ProgramValidationException(
 					format(DUPLICATE_MEMBER, member.getDescriptor().getSignature(), container));
 

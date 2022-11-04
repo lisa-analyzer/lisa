@@ -20,7 +20,7 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  *
- * @param <C>  the concrete type of the cartesian product
+ * @param <C>  the concrete type of the Cartesian product
  * @param <T1> the concrete instance of the left-hand side abstract domain of
  *                 the Cartesian product
  * @param <T2> the concrete instance of the right-hand side abstract domain of
@@ -52,7 +52,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	 * @param left  the left-hand side of the Cartesian product
 	 * @param right the right-hand side of the Cartesian product
 	 */
-	protected CartesianProduct(T1 left, T2 right) {
+	public CartesianProduct(T1 left, T2 right) {
 		this.left = left;
 		this.right = right;
 	}
@@ -120,14 +120,14 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	/**
-	 * Builds a new instance of cartesian product.
+	 * Builds a new instance of Cartesian product.
 	 * 
 	 * @param left  the first domain
 	 * @param right the second domain
 	 * 
 	 * @return the new instance of product
 	 */
-	protected abstract C mk(T1 left, T2 right);
+	public abstract C mk(T1 left, T2 right);
 
 	@Override
 	public DomainRepresentation representation() {

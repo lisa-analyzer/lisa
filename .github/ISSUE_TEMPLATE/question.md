@@ -2,7 +2,7 @@
 name: Question
 about: A question for the developers
 title: "[QUESTION] "
-labels: type:question
+labels: "❔ type:question"
 assignees: lucaneg
 
 ---

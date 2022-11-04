@@ -48,7 +48,7 @@ public class SymbolAliasing extends FunctionalLattice<SymbolAliasing, Symbol, Al
 	}
 
 	@Override
-	protected SymbolAliasing mk(Aliases lattice, Map<Symbol, Aliases> function) {
+	public SymbolAliasing mk(Aliases lattice, Map<Symbol, Aliases> function) {
 		return new SymbolAliasing(lattice, function);
 	}
 }

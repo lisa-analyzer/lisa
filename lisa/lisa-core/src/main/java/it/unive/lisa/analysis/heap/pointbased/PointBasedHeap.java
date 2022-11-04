@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.heap.BaseHeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
@@ -17,8 +18,12 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
+import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.Untyped;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -44,7 +49,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * An heap environment tracking which allocation sites are associated to
 	 * each identifier.
 	 */
-	protected final HeapEnvironment<AllocationSites> heapEnv;
+	public final HeapEnvironment<AllocationSites> heapEnv;
 
 	/**
 	 * Builds a new instance of field-insensitive point-based heap.
@@ -59,7 +64,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
-	protected PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
 		this.heapEnv = heapEnv;
 	}
 
@@ -70,7 +75,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @return a point-based heap build from the original one
 	 */
-	protected PointBasedHeap from(PointBasedHeap original) {
+	public PointBasedHeap from(PointBasedHeap original) {
 		return original;
 	}
 
@@ -167,17 +172,12 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	protected PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
+	public PointBasedHeap lubAux(PointBasedHeap other) throws SemanticException {
 		return from(new PointBasedHeap(heapEnv.lub(other.heapEnv)));
 	}
 
 	@Override
-	protected PointBasedHeap wideningAux(PointBasedHeap other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
-	protected boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
+	public boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}
 
@@ -207,7 +207,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	protected PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
+	public PointBasedHeap semanticsOf(HeapExpression expression, ProgramPoint pp) throws SemanticException {
 		return this;
 	}
 
@@ -233,7 +233,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	protected class Rewriter extends BaseHeapDomain.Rewriter {
+	public class Rewriter extends BaseHeapDomain.Rewriter {
 
 		/*
 		 * note that all the cases where we are adding a plain expression to the
@@ -256,7 +256,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							true,
 							expression.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);
@@ -273,7 +273,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					true,
 					expression.getCodeLocation());
 			if (expression.hasRuntimeTypes())
-				id.setRuntimeTypes(expression.getRuntimeTypes());
+				id.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(id);
 		}
 
@@ -290,7 +290,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 							(AllocationSite) loc,
 							loc.getCodeLocation());
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes());
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
 				} else
 					result.add(loc);
@@ -311,6 +311,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					Identifier id = (Identifier) ref;
 					if (heapEnv.getKeys().contains(id))
 						result.addAll(resolveIdentifier(id));
+					else if (id instanceof Variable) {
+						// this is a variable from the program that we know
+						// nothing about
+						CodeLocation loc = expression.getCodeLocation();
+						AllocationSite site = new AllocationSite(id.getStaticType(), "unknown@" + id.getName(), loc);
+						result.add(site);
+					}
 				} else
 					result.add(ref);
 
@@ -318,7 +325,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public final ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
 			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
 				return new ExpressionSet<>(resolveIdentifier(expression));
@@ -334,11 +341,26 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						site,
 						site.getCodeLocation());
 				if (v.hasRuntimeTypes())
-					e.setRuntimeTypes(v.getRuntimeTypes());
+					e.setRuntimeTypes(v.getRuntimeTypes(null));
 				result.add(e);
 			}
 
 			return result;
+		}
+
+		@Override
+		public ExpressionSet<ValueExpression> visit(PushAny expression, Object... params)
+				throws SemanticException {
+			if (expression.getStaticType().isPointerType()) {
+				Set<Type> inner = expression.getStaticType().asPointerType().getInnerTypes();
+
+				Type tmp = Type.commonSupertype(inner, Untyped.INSTANCE);
+
+				CodeLocation loc = expression.getCodeLocation();
+				AllocationSite site = new AllocationSite(tmp, "unknown@" + loc.getCodeLocation(), loc);
+				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
+			}
+			return new ExpressionSet<>(expression);
 		}
 	}
 }

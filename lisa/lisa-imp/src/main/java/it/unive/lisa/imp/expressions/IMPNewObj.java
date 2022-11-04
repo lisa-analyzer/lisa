@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
@@ -23,7 +22,9 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.UnitType;
+import java.util.Collections;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -67,8 +68,8 @@ public class IMPNewObj extends NaryExpression {
 		ReferenceType reftype = new ReferenceType(type);
 		HeapAllocation created = new HeapAllocation(type, getLocation());
 		HeapReference ref = new HeapReference(reftype, created, getLocation());
-		created.setRuntimeTypes(Caches.types().mkSingletonSet(type));
-		ref.setRuntimeTypes(Caches.types().mkSingletonSet(reftype));
+		created.setRuntimeTypes(Collections.singleton(type));
+		ref.setRuntimeTypes(Collections.singleton(reftype));
 
 		// we need to add the receiver to the parameters
 		VariableRef paramThis = new VariableRef(getCFG(), getLocation(), "$lisareceiver", type);
@@ -98,9 +99,10 @@ public class IMPNewObj extends NaryExpression {
 		sem = sem.smallStepSemantics(created, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();
+		TypeSystem types = getProgram().getTypes();
 		for (SymbolicExpression loc : sem.getComputedExpressions())
 			result = result.lub(sem.smallStepSemantics(
-					new HeapReference(new ReferenceType(loc.getRuntimeTypes()), loc, getLocation()), call));
+					new HeapReference(new ReferenceType(loc.getRuntimeTypes(types)), loc, getLocation()), call));
 
 		return result;
 	}

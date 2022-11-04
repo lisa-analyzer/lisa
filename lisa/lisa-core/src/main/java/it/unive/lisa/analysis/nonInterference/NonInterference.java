@@ -30,19 +30,40 @@ import java.util.Map;
  */
 public class NonInterference extends BaseInferredValue<NonInterference> {
 
-	private static final Annotation LOW_CONF_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
+	/**
+	 * The annotation used to mark low confidentiality variables.
+	 */
+	public static final Annotation LOW_CONF_ANNOTATION = new Annotation("lisa.ni.LowConfidentiality");
 
-	private static final AnnotationMatcher LOW_CONF_MATCHER = new BasicAnnotationMatcher(LOW_CONF_ANNOTATION);
+	/**
+	 * {@link AnnotationMatcher} for {@link #LOW_CONF_ANNOTATION}.
+	 */
+	public static final AnnotationMatcher LOW_CONF_MATCHER = new BasicAnnotationMatcher(LOW_CONF_ANNOTATION);
 
-	private static final Annotation HIGH_INT_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
+	/**
+	 * The annotation used to mark high integrity variables.
+	 */
+	public static final Annotation HIGH_INT_ANNOTATION = new Annotation("lisa.ni.HighIntegrity");
 
-	private static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
+	/**
+	 * {@link AnnotationMatcher} for {@link #HIGH_INT_ANNOTATION}.
+	 */
+	public static final AnnotationMatcher HIGH_INT_MATCHER = new BasicAnnotationMatcher(HIGH_INT_ANNOTATION);
 
-	private static final byte NI_BOTTOM = 0;
+	/**
+	 * The value to use for bottom non interference levels.
+	 */
+	public static final byte NI_BOTTOM = 0;
 
-	private static final byte NI_LOW = 1;
+	/**
+	 * The value to use for low non interference levels.
+	 */
+	public static final byte NI_LOW = 1;
 
-	private static final byte NI_HIGH = 2;
+	/**
+	 * The value to use for high non interference levels.
+	 */
+	public static final byte NI_HIGH = 2;
 
 	private final byte confidentiality;
 
@@ -58,7 +79,15 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 		this(NI_HIGH, NI_LOW);
 	}
 
-	private NonInterference(byte confidentiality, byte integrity) {
+	/**
+	 * Builds the abstract value for the given confidentiality and integrity
+	 * values. Each of those can be either 0 for bottom ({@link #NI_BOTTOM}), 1
+	 * for low ({@link #NI_LOW}), or 2 for high ({@link #NI_HIGH}).
+	 * 
+	 * @param confidentiality the confidentiality value
+	 * @param integrity       the integrity value
+	 */
+	public NonInterference(byte confidentiality, byte integrity) {
 		this.confidentiality = confidentiality;
 		this.integrity = integrity;
 		this.guards = new IdentityHashMap<>();
@@ -125,7 +154,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected NonInterference lubAux(NonInterference other) throws SemanticException {
+	public NonInterference lubAux(NonInterference other) throws SemanticException {
 		// HL
 		// | \
 		// HH LL
@@ -139,12 +168,7 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected NonInterference wideningAux(NonInterference other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
-	protected boolean lessOrEqualAux(NonInterference other) throws SemanticException {
+	public boolean lessOrEqualAux(NonInterference other) throws SemanticException {
 		// HL
 		// | \
 		// HH LL
@@ -226,38 +250,38 @@ public class NonInterference extends BaseInferredValue<NonInterference> {
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
+	public InferredPair<NonInterference> evalNullConstant(NonInterference state, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
+	public InferredPair<NonInterference> evalNonNullConstant(Constant constant, NonInterference state,
 			ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, mkLowHigh(), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalUnaryExpression(UnaryOperator operator, NonInterference arg,
+	public InferredPair<NonInterference> evalUnaryExpression(UnaryOperator operator, NonInterference arg,
 			NonInterference state, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, arg, state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalBinaryExpression(BinaryOperator operator, NonInterference left,
+	public InferredPair<NonInterference> evalBinaryExpression(BinaryOperator operator, NonInterference left,
 			NonInterference right, NonInterference state, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, left.lub(right), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalTernaryExpression(TernaryOperator operator, NonInterference left,
+	public InferredPair<NonInterference> evalTernaryExpression(TernaryOperator operator, NonInterference left,
 			NonInterference middle, NonInterference right, NonInterference state, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>(this, left.lub(middle).lub(right), state(state, pp));
 	}
 
 	@Override
-	protected InferredPair<NonInterference> evalIdentifier(Identifier id,
+	public InferredPair<NonInterference> evalIdentifier(Identifier id,
 			InferenceSystem<NonInterference> environment, ProgramPoint pp) throws SemanticException {
 		return new InferredPair<>(this, variable(id, null), state(environment.getExecutionState(), pp));
 	}

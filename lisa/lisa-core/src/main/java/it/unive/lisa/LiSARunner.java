@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.checks.ChecksExecutor;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -29,7 +28,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
@@ -218,15 +217,11 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 	}
 
 	private static void finalizeApp(Application app) {
-		// fill up the types cache by side effect on an external set
-		Caches.types().clear();
-		ExternalSet<Type> types = Caches.types().mkEmptySet();
 		for (Program p : app.getPrograms()) {
-			for (Type t : p.getRegisteredTypes()) {
-				types.add(t);
-				types.add(new ReferenceType(t));
-			}
-			types = null;
+			TypeSystem types = p.getTypes();
+			for (Type t : types.getTypes())
+				// TODO do we want all types to be considered here?
+				types.registerType(new ReferenceType(t));
 
 			TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 				try {

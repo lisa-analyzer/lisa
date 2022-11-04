@@ -51,7 +51,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * @param domain a singleton instance to be used during semantic operations
 	 *                   to retrieve top and bottom values
 	 */
-	protected Environment(T domain) {
+	public Environment(T domain) {
 		super(domain);
 	}
 
@@ -66,7 +66,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * @param function the function representing the mapping contained in the
 	 *                     new environment; can be {@code null}
 	 */
-	protected Environment(T domain, Map<Identifier, T> function) {
+	public Environment(T domain, Map<Identifier, T> function) {
 		super(domain, function);
 	}
 
@@ -76,7 +76,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @return a copy of the given environment
 	 */
-	protected abstract M copy();
+	public abstract M copy();
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -122,7 +122,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the evaluation
 	 */
-	protected abstract Pair<T, V> eval(E expression, ProgramPoint pp) throws SemanticException;
+	public abstract Pair<T, V> eval(E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
 	 * Auxiliary function of
@@ -147,7 +147,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract M assignAux(Identifier id, E expression, Map<Identifier, T> function, T value, V eval,
+	public abstract M assignAux(Identifier id, E expression, Map<Identifier, T> function, T value, V eval,
 			ProgramPoint pp) throws SemanticException;
 
 	@Override
@@ -174,7 +174,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract M assumeSatisfied(V eval) throws SemanticException;
+	public abstract M assumeSatisfied(V eval) throws SemanticException;
 
 	/**
 	 * Performs the greatest lower bound between this environment and
@@ -215,7 +215,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	protected abstract M glbAux(T lattice, Map<Identifier, T> function, M other) throws SemanticException;
+	public abstract M glbAux(T lattice, Map<Identifier, T> function, M other) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -318,7 +318,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	}
 
 	@Override
-	protected Set<Identifier> lubKeys(Set<Identifier> k1, Set<Identifier> k2) throws SemanticException {
+	public Set<Identifier> lubKeys(Set<Identifier> k1, Set<Identifier> k2) throws SemanticException {
 		Set<Identifier> keys = new HashSet<>();
 		CollectionsDiffBuilder<Identifier> builder = new CollectionsDiffBuilder<>(Identifier.class, k1,
 				k2);

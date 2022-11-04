@@ -83,7 +83,7 @@ public class ControlFlowExtractor {
 		return extracted;
 	}
 
-	private final class LoopReconstructor {
+	private class LoopReconstructor {
 		private final Statement conditional;
 		private final Statement tail;
 
@@ -136,7 +136,7 @@ public class ControlFlowExtractor {
 		}
 	}
 
-	private final class IfReconstructor {
+	private class IfReconstructor {
 		private final Statement conditional;
 
 		private final Edge trueEdgeStartingEdge;

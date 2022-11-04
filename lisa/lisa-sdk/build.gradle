@@ -19,4 +19,5 @@ dependencies {
 	
 	// testing
     testImplementation 'junit:junit:4.12'
+	testImplementation 'org.reflections:reflections:0.9.12'
 }

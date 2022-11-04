@@ -13,8 +13,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.Module;
-import it.unive.lisa.symbolic.value.operator.Multiplication;
+import it.unive.lisa.symbolic.value.operator.ModuleOperator;
+import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -34,10 +34,25 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  */
 public class Parity extends BaseNonRelationalValueDomain<Parity> {
 
-	private static final Parity EVEN = new Parity((byte) 3);
-	private static final Parity ODD = new Parity((byte) 2);
-	private static final Parity TOP = new Parity((byte) 0);
-	private static final Parity BOTTOM = new Parity((byte) 1);
+	/**
+	 * The abstract even element.
+	 */
+	public static final Parity EVEN = new Parity((byte) 3);
+
+	/**
+	 * The abstract odd element.
+	 */
+	public static final Parity ODD = new Parity((byte) 2);
+
+	/**
+	 * The abstract top element.
+	 */
+	public static final Parity TOP = new Parity((byte) 0);
+
+	/**
+	 * The abstract bottom element.
+	 */
+	public static final Parity BOTTOM = new Parity((byte) 1);
 
 	private final byte parity;
 
@@ -49,7 +64,12 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		this((byte) 0);
 	}
 
-	private Parity(byte parity) {
+	/**
+	 * Builds the parity instance for the given parity value.
+	 * 
+	 * @param parity the sign (0 = top, 1 = bottom, 2 = odd, 3 = even)
+	 */
+	public Parity(byte parity) {
 		this.parity = parity;
 	}
 
@@ -80,12 +100,12 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected Parity evalNullConstant(ProgramPoint pp) {
+	public Parity evalNullConstant(ProgramPoint pp) {
 		return top();
 	}
 
 	@Override
-	protected Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
+	public Parity evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();
 			return i % 2 == 0 ? EVEN : ODD;
@@ -94,23 +114,33 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 		return top();
 	}
 
-	private boolean isEven() {
+	/**
+	 * Yields whether or not this is the even parity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isEven() {
 		return this == EVEN;
 	}
 
-	private boolean isOdd() {
+	/**
+	 * Yields whether or not this is the odd parity.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean isOdd() {
 		return this == ODD;
 	}
 
 	@Override
-	protected Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
+	public Parity evalUnaryExpression(UnaryOperator operator, Parity arg, ProgramPoint pp) {
 		if (operator == NumericNegation.INSTANCE)
 			return arg;
 		return top();
 	}
 
 	@Override
-	protected Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
+	public Parity evalBinaryExpression(BinaryOperator operator, Parity left, Parity right, ProgramPoint pp) {
 		if (left.isTop() || right.isTop())
 			return top();
 
@@ -119,7 +149,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 				return EVEN;
 			else
 				return ODD;
-		else if (operator instanceof Multiplication)
+		else if (operator instanceof MultiplicationOperator)
 			if (left.isEven() || right.isEven())
 				return EVEN;
 			else
@@ -129,24 +159,19 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 				return right.isOdd() ? ODD : EVEN;
 			else
 				return right.isOdd() ? EVEN : TOP;
-		else if (operator instanceof Module)
+		else if (operator instanceof ModuleOperator)
 			return TOP;
 
 		return TOP;
 	}
 
 	@Override
-	protected Parity lubAux(Parity other) throws SemanticException {
+	public Parity lubAux(Parity other) throws SemanticException {
 		return TOP;
 	}
 
 	@Override
-	protected Parity wideningAux(Parity other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
-	protected boolean lessOrEqualAux(Parity other) throws SemanticException {
+	public boolean lessOrEqualAux(Parity other) throws SemanticException {
 		return false;
 	}
 
@@ -173,7 +198,7 @@ public class Parity extends BaseNonRelationalValueDomain<Parity> {
 	}
 
 	@Override
-	protected ValueEnvironment<Parity> assumeBinaryExpression(
+	public ValueEnvironment<Parity> assumeBinaryExpression(
 			ValueEnvironment<Parity> environment, BinaryOperator operator, ValueExpression left,
 			ValueExpression right, ProgramPoint pp) throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE) {

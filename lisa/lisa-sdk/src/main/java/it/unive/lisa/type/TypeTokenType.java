@@ -1,7 +1,5 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,14 +11,14 @@ import java.util.TreeSet;
  */
 public class TypeTokenType implements Type {
 
-	private final ExternalSet<Type> types;
+	private final Set<Type> types;
 
 	/**
 	 * Builds the type token representing the given types.
 	 * 
 	 * @param types the types
 	 */
-	public TypeTokenType(ExternalSet<Type> types) {
+	public TypeTokenType(Set<Type> types) {
 		this.types = types;
 	}
 
@@ -29,7 +27,7 @@ public class TypeTokenType implements Type {
 	 * 
 	 * @return the types
 	 */
-	public ExternalSet<Type> getTypes() {
+	public Set<Type> getTypes() {
 		return types;
 	}
 
@@ -42,7 +40,7 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + ((types == null) ? 0 : types.hashCode());
@@ -50,7 +48,7 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public final boolean equals(Object obj) {
+	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)
@@ -77,7 +75,7 @@ public class TypeTokenType implements Type {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }

@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.TestLanguageFeatures;
+import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
@@ -19,18 +21,9 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
-import it.unive.lisa.program.language.hierarchytraversal.SingleInheritanceTraversalStrategy;
-import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
-import it.unive.lisa.program.language.parameterassignment.PythonLikeAssigningStrategy;
-import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
-import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
-import it.unive.lisa.program.language.validation.BaseValidationLogic;
-import it.unive.lisa.program.language.validation.ProgramValidationLogic;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Collection;
+import java.util.Set;
 import org.junit.Test;
 
 public class CallRegisteringTest {
@@ -43,35 +36,14 @@ public class CallRegisteringTest {
 		CallGraph cg = new BaseCallGraph() {
 
 			@Override
-			protected Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+			public Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 					throws CallResolutionException {
-				return receiver.getStaticType().allInstances();
+				return receiver.getStaticType().allInstances(receiver.getProgram().getTypes());
 			}
 
 		};
 
-		Program p = new Program(new LanguageFeatures() {
-
-			@Override
-			public HierarcyTraversalStrategy getTraversalStrategy() {
-				return SingleInheritanceTraversalStrategy.INSTANCE;
-			}
-
-			@Override
-			public ParameterMatchingStrategy getMatchingStrategy() {
-				return StaticTypesMatchingStrategy.INSTANCE;
-			}
-
-			@Override
-			public ParameterAssigningStrategy getAssigningStrategy() {
-				return PythonLikeAssigningStrategy.INSTANCE;
-			}
-
-			@Override
-			public ProgramValidationLogic getProgramValidationLogic() {
-				return new BaseValidationLogic();
-			}
-		});
+		Program p = new Program(new TestLanguageFeatures(), new TestTypeSystem());
 
 		CFG cfg1 = new CFG(new CodeMemberDescriptor(new SourceCodeLocation("fake1", 0, 0), p, false, "cfg1"));
 		UnresolvedCall call = new UnresolvedCall(cfg1, new SourceCodeLocation("fake1", 1, 0), CallType.STATIC,
@@ -91,7 +63,7 @@ public class CallRegisteringTest {
 		Application app = new Application(p);
 		cg.init(app);
 		@SuppressWarnings("unchecked")
-		CFGCall resolved = (CFGCall) cg.resolve(call, new ExternalSet[0], new SymbolAliasing());
+		CFGCall resolved = (CFGCall) cg.resolve(call, new Set[0], new SymbolAliasing());
 		cg.registerCall(resolved);
 
 		Collection<CodeMember> callees = cg.getCallees(cfg1);

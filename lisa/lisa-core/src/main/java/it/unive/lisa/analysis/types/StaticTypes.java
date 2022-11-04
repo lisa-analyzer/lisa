@@ -7,9 +7,7 @@ import it.unive.lisa.analysis.nonrelational.inference.InferredValue;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -24,9 +22,10 @@ import it.unive.lisa.symbolic.value.operator.binary.TypeCast;
 import it.unive.lisa.symbolic.value.operator.binary.TypeConv;
 import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
@@ -36,39 +35,53 @@ import java.util.HashSet;
  */
 public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 
-	private static final StaticTypes TOP = new StaticTypes(Untyped.INSTANCE);
-
-	private static final StaticTypes BOTTOM = new StaticTypes(null);
+	private static final StaticTypes BOTTOM = new StaticTypes(null, null);
 
 	private final Type type;
+
+	private final TypeSystem types;
 
 	/**
 	 * Builds the inferred types. The object built through this constructor
 	 * represents an empty set of types.
 	 */
 	public StaticTypes() {
-		this(Untyped.INSTANCE);
+		this(null, Untyped.INSTANCE);
 	}
 
 	/**
 	 * Builds the inferred types, representing only the given {@link Type}.
 	 * 
-	 * @param type the type to be included in the set of inferred types
+	 * @param types the type system knowing about the types of the program where
+	 *                  this element is created
+	 * @param type  the type to be included in the set of inferred types
 	 */
-	StaticTypes(Type type) {
+	StaticTypes(TypeSystem types, Type type) {
 		this.type = type;
+		this.types = types;
 	}
 
+	/**
+	 * {@inheritDoc}<br>
+	 * <br>
+	 * Caution: invoking this method on the top instance obtained through
+	 * {@code new StaticTypes().top()} will return a {@code null} value.
+	 */
 	@Override
-	public ExternalSet<Type> getRuntimeTypes() {
+	public Set<Type> getRuntimeTypes() {
 		if (this.isBottom())
-			Caches.types().mkEmptySet();
-		return Caches.types().mkSet(type.allInstances());
+			Collections.emptySet();
+		return type.allInstances(types);
 	}
 
 	@Override
 	public StaticTypes top() {
-		return TOP;
+		return new StaticTypes(types, Untyped.INSTANCE);
+	}
+
+	@Override
+	public boolean isTop() {
+		return type == Untyped.INSTANCE;
 	}
 
 	@Override
@@ -84,37 +97,38 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
-		return new SetRepresentation(new HashSet<>(type.allInstances()), StringRepresentation::new);
+		return new StringRepresentation(type.toString());
 	}
 
 	@Override
-	protected StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
+	public StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
 			ProgramPoint pp) throws SemanticException {
 		StaticTypes eval = super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
-		return new StaticTypes(id.getStaticType());
+		return new StaticTypes(pp.getProgram().getTypes(), id.getStaticType());
 	}
 
 	@Override
-	protected StaticTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
-		return new StaticTypes(pushAny.getStaticType());
+	public StaticTypes evalPushAny(PushAny pushAny, ProgramPoint pp) {
+		return new StaticTypes(pp.getProgram().getTypes(), pushAny.getStaticType());
 	}
 
 	@Override
-	protected StaticTypes evalNullConstant(ProgramPoint pp) {
-		return new StaticTypes(NullType.INSTANCE);
+	public StaticTypes evalNullConstant(ProgramPoint pp) {
+		return new StaticTypes(pp.getProgram().getTypes(), NullType.INSTANCE);
 	}
 
 	@Override
-	protected StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		return new StaticTypes(constant.getStaticType());
+	public StaticTypes evalNonNullConstant(Constant constant, ProgramPoint pp) {
+		return new StaticTypes(pp.getProgram().getTypes(), constant.getStaticType());
 	}
 
 	@Override
 	public StaticTypes eval(ValueExpression expression, TypeEnvironment<StaticTypes> environment, ProgramPoint pp)
 			throws SemanticException {
 		if (expression instanceof BinaryExpression) {
+			TypeSystem types = pp.getProgram().getTypes();
 			BinaryExpression binary = (BinaryExpression) expression;
 			if (binary.getOperator() instanceof TypeCast || binary.getOperator() instanceof TypeConv) {
 				StaticTypes left = null, right = null;
@@ -124,39 +138,35 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 				} catch (ClassCastException e) {
 					throw new SemanticException(expression + " is not a value expression");
 				}
-				ExternalSet<Type> lelems = Caches.types().mkSet(left.type.allInstances());
-				ExternalSet<Type> relems = Caches.types().mkSet(right.type.allInstances());
-				ExternalSet<Type> inferred = binary.getOperator().typeInference(lelems, relems);
+				Set<Type> lelems = left.type.allInstances(types);
+				Set<Type> relems = right.type.allInstances(types);
+				Set<Type> inferred = binary.getOperator().typeInference(types, lelems, relems);
 				if (inferred.isEmpty())
 					return BOTTOM;
-				return new StaticTypes(inferred.reduce(inferred.first(), (result, t) -> result.commonSupertype(t)));
+				return new StaticTypes(pp.getProgram().getTypes(), Type.commonSupertype(inferred, Untyped.INSTANCE));
 			}
 		}
 
-		return new StaticTypes(expression.getStaticType());
+		return new StaticTypes(pp.getProgram().getTypes(), expression.getStaticType());
 	}
 
 	@Override
-	protected Satisfiability satisfiesBinaryExpression(BinaryOperator operator, StaticTypes left,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, StaticTypes left,
 			StaticTypes right, ProgramPoint pp) throws SemanticException {
-		ExternalSet<Type> lelems = Caches.types().mkSet(left.type.allInstances());
-		ExternalSet<Type> relems = Caches.types().mkSet(right.type.allInstances());
-		return new InferredTypes().satisfiesBinaryExpression(operator, new InferredTypes(lelems),
-				new InferredTypes(relems), pp);
+		TypeSystem types = pp.getProgram().getTypes();
+		Set<Type> lelems = left.type.allInstances(types);
+		Set<Type> relems = right.type.allInstances(types);
+		return new InferredTypes().satisfiesBinaryExpression(operator, new InferredTypes(types, lelems),
+				new InferredTypes(types, relems), pp);
 	}
 
 	@Override
-	protected StaticTypes lubAux(StaticTypes other) throws SemanticException {
-		return new StaticTypes(type.commonSupertype(other.type));
+	public StaticTypes lubAux(StaticTypes other) throws SemanticException {
+		return new StaticTypes(types, type.commonSupertype(other.type));
 	}
 
 	@Override
-	protected StaticTypes wideningAux(StaticTypes other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
-	protected boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
+	public boolean lessOrEqualAux(StaticTypes other) throws SemanticException {
 		return type.canBeAssignedTo(other.type);
 	}
 

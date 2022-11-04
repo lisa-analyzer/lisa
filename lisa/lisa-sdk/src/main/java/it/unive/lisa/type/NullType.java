@@ -1,7 +1,7 @@
 package it.unive.lisa.type;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 /**
  * The Null type, that is the type of {#link NullLiteral}. It implements the
@@ -20,7 +20,12 @@ public class NullType implements InMemoryType {
 	 */
 	public static final NullType INSTANCE = new NullType();
 
-	private NullType() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected NullType() {
 	}
 
 	@Override
@@ -29,12 +34,12 @@ public class NullType implements InMemoryType {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		return other instanceof NullType;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return NullType.class.hashCode();
 	}
 
@@ -49,7 +54,7 @@ public class NullType implements InMemoryType {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
+	public Set<Type> allInstances(TypeSystem types) {
 		return Collections.singleton(this);
 	}
 }
