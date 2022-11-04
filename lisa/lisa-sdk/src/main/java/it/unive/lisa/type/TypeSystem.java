@@ -29,9 +29,6 @@ public abstract class TypeSystem {
 	 */
 	protected TypeSystem() {
 		this.types = new TreeMap<String, Type>();
-		registerType(getBooleanType());
-		registerType(getStringType());
-		registerType(getIntegerType());
 	}
 
 	/**

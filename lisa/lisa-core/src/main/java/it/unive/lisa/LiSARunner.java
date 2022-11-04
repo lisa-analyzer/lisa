@@ -219,6 +219,10 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 	private static void finalizeApp(Application app) {
 		for (Program p : app.getPrograms()) {
 			TypeSystem types = p.getTypes();
+			// make sure the basic types are registered
+			types.registerType(types.getBooleanType());
+			types.registerType(types.getStringType());
+			types.registerType(types.getIntegerType());
 			for (Type t : types.getTypes())
 				// TODO do we want all types to be considered here?
 				types.registerType(new ReferenceType(t));
