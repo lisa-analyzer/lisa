@@ -28,7 +28,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix lubAux(Prefix other) throws SemanticException {
+    public Prefix lubAux(Prefix other) throws SemanticException {
         String otherPrefixString = other.getPrefix();
         StringBuilder result = new StringBuilder();
 
@@ -47,12 +47,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix wideningAux(Prefix other) throws SemanticException {
+    public Prefix wideningAux(Prefix other) throws SemanticException {
         return lubAux(other);
     }
 
     @Override
-    protected boolean lessOrEqualAux(Prefix other) throws SemanticException {
+    public boolean lessOrEqualAux(Prefix other) throws SemanticException {
         if (other.getPrefix().length() <= this.getPrefix().length()) {
             Prefix lub = this.lubAux(other);
             String lubString = lub.getPrefix();
@@ -107,12 +107,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix evalNullConstant(ProgramPoint pp) {
+    public Prefix evalNullConstant(ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Prefix evalNonNullConstant(Constant constant, ProgramPoint pp) {
+    public Prefix evalNonNullConstant(Constant constant, ProgramPoint pp) {
         if (constant.getValue() instanceof String)
             return new Prefix((String) constant.getValue());
 
@@ -120,12 +120,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix evalUnaryExpression(UnaryOperator operator, Prefix arg, ProgramPoint pp) {
+    public Prefix evalUnaryExpression(UnaryOperator operator, Prefix arg, ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) {
+    public Prefix evalBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) {
         if (operator == StringConcat.INSTANCE) {
             return left;
         } else if (operator == StringContains.INSTANCE ||
@@ -140,7 +140,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     }
 
     @Override
-    protected Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
+    public Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
         return TOP;
     }
 
