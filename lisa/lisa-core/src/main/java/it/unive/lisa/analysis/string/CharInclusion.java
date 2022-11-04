@@ -30,8 +30,17 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     }
 
     @Override
-    public CharInclusion lubAux(CharInclusion other) throws SemanticException { //TODO
-        return null;
+    public CharInclusion lubAux(CharInclusion other) throws SemanticException {
+        HashSet<Character> lubAuxCertainly = new HashSet<>();
+
+        HashSet<Character> lubAuxMaybe = new HashSet<>(this.getMaybeContained());
+        lubAuxMaybe.addAll(other.getMaybeContained());
+
+        for(Character certainlyContainedChar: this.getCertainlyContained())
+            if(other.getCertainlyContained().contains(certainlyContainedChar))
+                lubAuxCertainly.add(certainlyContainedChar);
+
+        return new CharInclusion(lubAuxCertainly,lubAuxMaybe);
     }
 
     @Override
@@ -96,26 +105,26 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
         if (isTop())
             return Lattice.topRepresentation();
 
-        return new StringRepresentation(formatCharInclusionRepresentation());
+        return new StringRepresentation(formatRepresentation());
     }
 
     public Collection<Character> getCertainlyContained() {
-        return certainlyContained;
+        return this.certainlyContained;
     }
 
     public Collection<Character> getMaybeContained() {
-        return maybeContained;
+        return this.maybeContained;
     }
 
-    private String formatCharInclusionRepresentation(){
+    private String formatRepresentation(){
         StringBuilder stringBuilder = new StringBuilder("CertainlyContained: {");
         int counter = 0;
 
-        for(Character certainlyContainedCharacter: this.getCertainlyContained()){
+        for(Character certainlyContainedChar: this.getCertainlyContained()){
             String formattedCharacter;
 
             formattedCharacter = counter != this.getCertainlyContained().size() - 1 ?
-                    certainlyContainedCharacter + ", " : certainlyContainedCharacter + "}";
+                    certainlyContainedChar + ", " : certainlyContainedChar + "}";
             counter++;
 
             stringBuilder.append(formattedCharacter);
@@ -124,11 +133,11 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
         counter = 0;
         stringBuilder.append(", MaybeContained: {");
 
-        for(Character maybeContainedCharacter: this.getMaybeContained()){
+        for(Character maybeContainedChar: this.getMaybeContained()){
             String formattedCharacter;
 
-            formattedCharacter = counter != this.getCertainlyContained().size() - 1 ?
-                    maybeContainedCharacter + ", " : maybeContainedCharacter + "}";
+            formattedCharacter = counter != this.getMaybeContained().size() - 1 ?
+                    maybeContainedChar + ", " : maybeContainedChar + "}";
             counter++;
 
             stringBuilder.append(formattedCharacter);
