@@ -1,6 +1,6 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import java.util.Set;
 
 /**
  * Pointer type interface. This can be used to represent whatever type that
@@ -16,5 +16,5 @@ public interface PointerType extends Type {
 	 * 
 	 * @return the inner types
 	 */
-	ExternalSet<Type> getInnerTypes();
+	Set<Type> getInnerTypes();
 }

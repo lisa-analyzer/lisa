@@ -6,7 +6,9 @@ import static org.junit.Assert.assertTrue;
 
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.caches.Caches;
+import it.unive.lisa.imp.IMPFeatures;
+import it.unive.lisa.imp.types.IMPTypeSystem;
+import it.unive.lisa.program.Program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -41,21 +43,24 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.TypeOf;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Float32Type;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
-import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Test;
 
@@ -65,28 +70,45 @@ public class InferredTypesTest {
 	private static final String WRONG_RESULT = "Wrong result for %s(%s)";
 	private static final String RESULT_NOT_BOTTOM = "Result is not bottom for %s(%s)";
 
-	private static final ExternalSetCache<Type> TYPES = Caches.types();
+	private static final TypeSystem types = new TypeSystem() {
 
-	private static final InferredTypes untyped = new InferredTypes(Untyped.INSTANCE);
-	private static final InferredTypes bool = new InferredTypes(BoolType.INSTANCE);
-	private static final InferredTypes string = new InferredTypes(StringType.INSTANCE);
-	private static final InferredTypes bool_or_string = new InferredTypes(
-			TYPES.mkSet(List.of(BoolType.INSTANCE, StringType.INSTANCE)));
-	private static final InferredTypes integer = new InferredTypes(Int32.INSTANCE);
-	private static final InferredTypes floating = new InferredTypes(Float32.INSTANCE);
+		@Override
+		public it.unive.lisa.type.StringType getStringType() {
+			return StringType.INSTANCE;
+		}
+
+		@Override
+		public NumericType getIntegerType() {
+			return Int32Type.INSTANCE;
+		}
+
+		@Override
+		public BooleanType getBooleanType() {
+			return BoolType.INSTANCE;
+		}
+	};
+
+	private static final InferredTypes untyped = new InferredTypes(types, Untyped.INSTANCE);
+	private static final InferredTypes bool = new InferredTypes(types, BoolType.INSTANCE);
+	private static final InferredTypes string = new InferredTypes(types, StringType.INSTANCE);
+	private static final InferredTypes bool_or_string = new InferredTypes(types,
+			Set.of(BoolType.INSTANCE, StringType.INSTANCE));
+	private static final InferredTypes integer = new InferredTypes(types, Int32Type.INSTANCE);
+	private static final InferredTypes floating = new InferredTypes(types, Float32Type.INSTANCE);
 	private static final InferredTypes numeric;
 	private static final InferredTypes all;
 
 	private static final Map<String, InferredTypes> combos = new HashMap<>();
 
 	static {
-		ExternalSet<Type> nums = TYPES.mkSingletonSet(Int32.INSTANCE);
-		nums.add(Float32.INSTANCE);
-		numeric = new InferredTypes(nums);
-		ExternalSet<Type> full = nums.copy();
+		Set<Type> nums = new HashSet<>();
+		nums.add(Int32Type.INSTANCE);
+		nums.add(Float32Type.INSTANCE);
+		numeric = new InferredTypes(types, nums);
+		Set<Type> full = new HashSet<>(nums);
 		full.add(StringType.INSTANCE);
 		full.add(BoolType.INSTANCE);
-		all = new InferredTypes(full);
+		all = new InferredTypes(types, full);
 
 		combos.put("bool", bool);
 		combos.put("string", string);
@@ -110,100 +132,106 @@ public class InferredTypesTest {
 		public CodeLocation getLocation() {
 			return null;
 		}
+
+		@Override
+		public Program getProgram() {
+			return new Program(new IMPFeatures(), new IMPTypeSystem());
+		}
 	};
 
 	@Test
 	public void testCastWithNoTokens() {
 		// cast(str, x) = emptyset if x does not contain type tokens
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> cast = Type.cast(str, str, null);
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> cast = types.cast(str, str, null);
 		assertTrue("Casting where the second arg does not have tokens succeded", cast.isEmpty());
 	}
 
 	@Test
 	public void testCastIncompatible() {
 		// cast(str, int) = emptyset
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> in = TYPES.mkSingletonSet(new TypeTokenType(integer.getRuntimeTypes()));
-		ExternalSet<Type> cast = Type.cast(str, in, null);
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> in = Collections.singleton(new TypeTokenType(integer.getRuntimeTypes()));
+		Set<Type> cast = types.cast(str, in, null);
 		assertTrue("Casting a string into an integer succeded", cast.isEmpty());
 	}
 
 	@Test
 	public void testCastSame() {
 		// cast(str, str) = str
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
-		ExternalSet<Type> cast = Type.cast(str, tok, null);
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> tok = Collections.singleton(new TypeTokenType(str));
+		Set<Type> cast = types.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
 	@Test
 	public void testCastMultiTokens() {
 		// cast(str, ((str), (int))) = str
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> tok = new HashSet<>();
+		tok.add(new TypeTokenType(str));
 		tok.add(new TypeTokenType(integer.getRuntimeTypes()));
-		ExternalSet<Type> cast = Type.cast(str, tok, null);
+		Set<Type> cast = types.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
 	@Test
 	public void testCastTokenWithMultiTypes() {
 		// cast(str, (str, int)) = str
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> tt = str.copy();
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> tt = new HashSet<>(str);
 		tt.addAll(integer.getRuntimeTypes());
-		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(tt));
-		ExternalSet<Type> cast = Type.cast(str, tok, null);
+		Set<Type> tok = Collections.singleton(new TypeTokenType(tt));
+		Set<Type> cast = types.cast(str, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
 	@Test
 	public void testCastMultiTypes() {
 		// cast((str, int), str) = str
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> tt = str.copy();
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> tt = new HashSet<>(str);
 		tt.addAll(integer.getRuntimeTypes());
-		ExternalSet<Type> tok = TYPES.mkSingletonSet(new TypeTokenType(str));
-		ExternalSet<Type> cast = Type.cast(tt, tok, null);
+		Set<Type> tok = Collections.singleton(new TypeTokenType(str));
+		Set<Type> cast = types.cast(tt, tok, null);
 		assertEquals("Casting a string into a string failed", str, cast);
 	}
 
 	@Test
 	public void testCommonNumericalTypeIncompatible() {
-		ExternalSet<Type> str = string.getRuntimeTypes();
-		ExternalSet<Type> in = integer.getRuntimeTypes();
-		ExternalSet<Type> common = NumericType.commonNumericalType(str, in);
+		Set<Type> str = string.getRuntimeTypes();
+		Set<Type> in = integer.getRuntimeTypes();
+		Set<Type> common = NumericType.commonNumericalType(str, in);
 		assertTrue("Common numerical type between a string and an integer exists", common.isEmpty());
 	}
 
 	@Test
 	public void testCommonNumericalTypeSame() {
-		ExternalSet<Type> in = integer.getRuntimeTypes();
-		ExternalSet<Type> common = NumericType.commonNumericalType(in, in);
+		Set<Type> in = integer.getRuntimeTypes();
+		Set<Type> common = NumericType.commonNumericalType(in, in);
 		assertEquals("Common numerical type between an integer and an integer does not exist", in, common);
 	}
 
 	@Test
 	public void testCommonNumericalType() {
-		ExternalSet<Type> in = integer.getRuntimeTypes();
-		ExternalSet<Type> fl = floating.getRuntimeTypes();
-		ExternalSet<Type> common = NumericType.commonNumericalType(in, fl);
+		Set<Type> in = integer.getRuntimeTypes();
+		Set<Type> fl = floating.getRuntimeTypes();
+		Set<Type> common = NumericType.commonNumericalType(in, fl);
 		assertEquals("Common numerical type between an integer and a float is not a float", fl, common);
 	}
 
 	@Test
 	public void testCommonNumericalTypeWithUntyped() {
-		ExternalSet<Type> un = untyped.getRuntimeTypes();
-		ExternalSet<Type> fl = floating.getRuntimeTypes();
-		ExternalSet<Type> union = un.union(fl);
-		ExternalSet<Type> common = NumericType.commonNumericalType(un, fl);
+		Set<Type> un = untyped.getRuntimeTypes();
+		Set<Type> fl = floating.getRuntimeTypes();
+		Set<Type> union = SetUtils.union(un, fl);
+		Set<Type> common = NumericType.commonNumericalType(un, fl);
 		assertEquals("Common numerical type between an untyped and a float is not a float", fl, common);
 		common = NumericType.commonNumericalType(fl, un);
 		assertEquals("Common numerical type between a float and un untyped is not a float", fl, common);
 		common = NumericType.commonNumericalType(un, un);
-		assertEquals("Common numerical type between two untyped is not empty", TYPES.mkEmptySet(), common);
+		assertEquals("Common numerical type between two untyped is not empty", Collections.emptySet(), common);
 		common = NumericType.commonNumericalType(fl, union);
 		assertEquals("Common numerical type between a float and an (untyped,float) is not float", fl, common);
 		common = NumericType.commonNumericalType(union, fl);
@@ -249,13 +277,13 @@ public class InferredTypesTest {
 
 		unaryMapping(NumericNegation.INSTANCE,
 				Map.of(integer, integer, floating, floating, numeric, numeric, all, numeric));
-		unaryMapping(TypeOf.INSTANCE, Map.of(bool, new InferredTypes(new TypeTokenType(bool.getRuntimeTypes())),
-				string, new InferredTypes(new TypeTokenType(string.getRuntimeTypes())),
-				integer, new InferredTypes(new TypeTokenType(integer.getRuntimeTypes())),
-				floating, new InferredTypes(new TypeTokenType(floating.getRuntimeTypes())),
-				numeric, new InferredTypes(new TypeTokenType(numeric.getRuntimeTypes())),
-				all, new InferredTypes(new TypeTokenType(all.getRuntimeTypes())),
-				bool_or_string, new InferredTypes(new TypeTokenType(bool_or_string.getRuntimeTypes()))));
+		unaryMapping(TypeOf.INSTANCE, Map.of(bool, new InferredTypes(types, new TypeTokenType(bool.getRuntimeTypes())),
+				string, new InferredTypes(types, new TypeTokenType(string.getRuntimeTypes())),
+				integer, new InferredTypes(types, new TypeTokenType(integer.getRuntimeTypes())),
+				floating, new InferredTypes(types, new TypeTokenType(floating.getRuntimeTypes())),
+				numeric, new InferredTypes(types, new TypeTokenType(numeric.getRuntimeTypes())),
+				all, new InferredTypes(types, new TypeTokenType(all.getRuntimeTypes())),
+				bool_or_string, new InferredTypes(types, new TypeTokenType(bool_or_string.getRuntimeTypes()))));
 	}
 
 	private void binaryLE(BinaryOperator op, InferredTypes expected, InferredTypes left, InferredTypes right)
@@ -384,10 +412,10 @@ public class InferredTypesTest {
 		binaryLE(StringConcat.INSTANCE, string, string, string);
 
 		java.util.function.BinaryOperator<InferredTypes> commonNumbers = (l, r) -> {
-			ExternalSet<Type> set = NumericType.commonNumericalType(l.getRuntimeTypes(), r.getRuntimeTypes());
+			Set<Type> set = NumericType.commonNumericalType(l.getRuntimeTypes(), r.getRuntimeTypes());
 			if (set.isEmpty())
 				return domain.bottom();
-			return new InferredTypes(set);
+			return new InferredTypes(types, set);
 		};
 		binaryTransform(NumericNonOverflowingAdd.INSTANCE, commonNumbers, excluded);
 		binaryTransform(NumericNonOverflowingDiv.INSTANCE, commonNumbers, excluded);
@@ -396,21 +424,21 @@ public class InferredTypesTest {
 		binaryTransform(NumericNonOverflowingMod.INSTANCE, commonNumbers, excluded);
 
 		binaryTransformSecond(TypeCast.INSTANCE, (l, r) -> {
-			ExternalSet<Type> set = Type.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);
+			Set<Type> set = types.cast(l.getRuntimeTypes(), r.getRuntimeTypes(), null);
 			if (set.isEmpty())
 				return domain.bottom();
-			return new InferredTypes(set);
-		}, it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
+			return new InferredTypes(types, set);
+		}, it -> new InferredTypes(types, new TypeTokenType(it.getRuntimeTypes())));
 
 		binaryTransformSecond(TypeConv.INSTANCE, (l, r) -> {
-			ExternalSet<Type> set = Type.convert(l.getRuntimeTypes(), r.getRuntimeTypes());
+			Set<Type> set = types.convert(l.getRuntimeTypes(), r.getRuntimeTypes());
 			if (set.isEmpty())
 				return domain.bottom();
-			return new InferredTypes(set);
-		}, it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
+			return new InferredTypes(types, set);
+		}, it -> new InferredTypes(types, new TypeTokenType(it.getRuntimeTypes())));
 
 		binaryTransformSecond(TypeCheck.INSTANCE, (l, r) -> bool,
-				it -> new InferredTypes(new TypeTokenType(it.getRuntimeTypes())));
+				it -> new InferredTypes(types, new TypeTokenType(it.getRuntimeTypes())));
 	}
 
 	private void ternaryLE(TernaryOperator op, InferredTypes expected, InferredTypes left, InferredTypes middle,
@@ -451,7 +479,7 @@ public class InferredTypesTest {
 
 	@Test
 	public void testSatisfies() {
-		InferredTypes left = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)));
+		InferredTypes left = new InferredTypes(types, new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, left, Satisfiability.SATISFIED);
 		satisfies(ComparisonNe.INSTANCE, left, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, integer, left, Satisfiability.SATISFIED);
@@ -460,7 +488,7 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, bool, left, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, left, Satisfiability.NOT_SATISFIED);
 
-		InferredTypes right = new InferredTypes(new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)));
+		InferredTypes right = new InferredTypes(types, new TypeTokenType(Collections.singleton(StringType.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.NOT_SATISFIED);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.SATISFIED);
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.NOT_SATISFIED);
@@ -469,7 +497,7 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(new TypeTokenType(TYPES.mkSet(List.of(Int32.INSTANCE, StringType.INSTANCE))));
+		right = new InferredTypes(types, new TypeTokenType(Set.of(Int32Type.INSTANCE, StringType.INSTANCE)));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);
@@ -478,8 +506,8 @@ public class InferredTypesTest {
 		satisfies(TypeCheck.INSTANCE, bool, right, Satisfiability.NOT_SATISFIED);
 		satisfies(TypeCheck.INSTANCE, bool_or_string, right, Satisfiability.UNKNOWN);
 
-		right = new InferredTypes(TYPES.mkSet(List.of(new TypeTokenType(TYPES.mkSingletonSet(Int32.INSTANCE)),
-				new TypeTokenType(TYPES.mkSingletonSet(StringType.INSTANCE)))));
+		right = new InferredTypes(types, Set.of(new TypeTokenType(Collections.singleton(Int32Type.INSTANCE)),
+				new TypeTokenType(Collections.singleton(StringType.INSTANCE))));
 		satisfies(ComparisonEq.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(ComparisonNe.INSTANCE, left, right, Satisfiability.UNKNOWN);
 		satisfies(TypeCheck.INSTANCE, integer, right, Satisfiability.UNKNOWN);

@@ -1,7 +1,6 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.caches.Caches;
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * The untyped type, corresponding to an unknown/untyped type. This type is used
@@ -19,7 +18,12 @@ public class Untyped implements Type {
 	 */
 	public static final Untyped INSTANCE = new Untyped();
 
-	private Untyped() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected Untyped() {
 	}
 
 	@Override
@@ -28,12 +32,12 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public final boolean equals(Object other) {
+	public boolean equals(Object other) {
 		return other instanceof Untyped;
 	}
 
 	@Override
-	public final int hashCode() {
+	public int hashCode() {
 		return Untyped.class.hashCode();
 	}
 
@@ -48,7 +52,7 @@ public class Untyped implements Type {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
-		return Caches.types().mkUniversalSet();
+	public Set<Type> allInstances(TypeSystem types) {
+		return types.getTypes();
 	}
 }

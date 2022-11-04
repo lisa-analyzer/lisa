@@ -194,11 +194,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return lub(other);
-			}
-
-			@Override
 			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
 				return other == this || other == UNKNOWN;
 			}
@@ -235,11 +230,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 				if (other == UNKNOWN || other == SATISFIED)
 					return UNKNOWN;
 				return this;
-			}
-
-			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return lub(other);
 			}
 
 			@Override
@@ -287,11 +277,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 			}
 
 			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
-				return this;
-			}
-
-			@Override
 			public boolean lessOrEqual(Satisfiability other) throws SemanticException {
 				return other == UNKNOWN;
 			}
@@ -324,11 +309,6 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 
 			@Override
 			public Satisfiability lub(Satisfiability other) throws SemanticException {
-				return other;
-			}
-
-			@Override
-			public Satisfiability widening(Satisfiability other) throws SemanticException {
 				return other;
 			}
 
@@ -398,6 +378,26 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 		@Override
 		public Satisfiability bottom() {
 			return BOTTOM;
+		}
+
+		/**
+		 * Yields whether or not this element can represent a {@code true}
+		 * result.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean mightBeTrue() {
+			return this == SATISFIED || this == UNKNOWN;
+		}
+
+		/**
+		 * Yields whether or not this element can represent a {@code false}
+		 * result.
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		public boolean mightBeFalse() {
+			return this == NOT_SATISFIED || this == UNKNOWN;
 		}
 	}
 

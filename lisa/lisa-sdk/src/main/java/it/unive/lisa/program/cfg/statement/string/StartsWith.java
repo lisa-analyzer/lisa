@@ -18,14 +18,15 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the string startsWith operation. The type of both
  * operands must be {@link StringType}. The type of this expression is the
- * {@link BoolType}. <br>
+ * {@link BooleanType}. <br>
  * <br>
  * Since in most languages string operations are provided through calls to
  * library functions, this class contains a field {@link #originating} whose
@@ -58,11 +59,12 @@ public class StartsWith extends it.unive.lisa.program.cfg.statement.BinaryExpres
 	 * @param right    the right-hand side of this operation
 	 */
 	public StartsWith(CFG cfg, CodeLocation location, Expression left, Expression right) {
-		super(cfg, location, "startsWith", BoolType.INSTANCE, left, right);
+		super(cfg, location, "startsWith", cfg.getDescriptor().getUnit().getProgram().getTypes().getBooleanType(), left,
+				right);
 	}
 
 	@Override
-	protected <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
@@ -72,14 +74,15 @@ public class StartsWith extends it.unive.lisa.program.cfg.statement.BinaryExpres
 					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		if (left.getRuntimeTypes().noneMatch(Type::isStringType))
+		TypeSystem types = getProgram().getTypes();
+		if (left.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
-		if (right.getRuntimeTypes().noneMatch(Type::isStringType))
+		if (right.getRuntimeTypes(types).stream().noneMatch(Type::isStringType))
 			return state.bottom();
 
 		return state.smallStepSemantics(
 				new BinaryExpression(
-						BoolType.INSTANCE,
+						getStaticType(),
 						left,
 						right,
 						StringStartsWith.INSTANCE,

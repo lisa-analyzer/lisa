@@ -3,16 +3,17 @@ tag-template: 'draft'
 categories:
   - title: '🚀 Features'
     labels:
-      - 'type:feature'
+      - '🎆 type:feature'
   - title: '🐛 Bug Fixes'
     labels:
-      - 'type:bug'
+      - '🐛 type:bug'
   - title: '🧰 Maintenance and others'
     labels: 
-      - 'type:test'
-      - 'scope:infrastructure'
-      - 'type:refactoring'
-      - 'scope:docs'
+      - '🧫 type:test'
+      - '🏨 scope:infrastructure'
+      - '🛠 type:refactoring'
+      - '📑 scope:docs'
+      - '🧱 scope:build'
 change-template: '- $TITLE @$AUTHOR (#$NUMBER)'
 change-title-escapes: '\<*_&'
 template: |

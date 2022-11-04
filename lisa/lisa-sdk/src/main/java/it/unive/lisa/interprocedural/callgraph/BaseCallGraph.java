@@ -27,7 +27,6 @@ import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrate
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;
 import java.util.Collection;
 import java.util.Collections;
@@ -91,7 +90,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Call resolve(UnresolvedCall call, ExternalSet<Type>[] types, SymbolAliasing aliasing)
+	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		Call cached = resolvedCache.get(call);
 		if (cached != null)
@@ -137,7 +136,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			}
 
 			Expression[] truncatedParams = new Expression[params.length - 1];
-			ExternalSet<Type>[] truncatedTypes = new ExternalSet[types.length - 1];
+			Set<Type>[] truncatedTypes = new Set[types.length - 1];
 			System.arraycopy(params, 1, truncatedParams, 0, params.length - 1);
 			System.arraycopy(types, 1, truncatedTypes, 0, types.length - 1);
 			tempCall = new UnresolvedCall(
@@ -304,7 +303,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveNonInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
+	public void resolveNonInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		for (CodeMember cm : app.getAllCodeCodeMembers())
@@ -327,7 +326,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @throws CallResolutionException if something goes wrong while resolving
 	 *                                     the call
 	 */
-	protected void resolveInstance(UnresolvedCall call, ExternalSet<Type>[] types, Collection<CFG> targets,
+	public void resolveInstance(UnresolvedCall call, Set<Type>[] types, Collection<CFG> targets,
 			Collection<NativeCFG> natives, SymbolAliasing aliasing)
 			throws CallResolutionException {
 		if (call.getParameters().length == 0)
@@ -338,7 +337,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 			Collection<CompilationUnit> units;
 			if (recType.isUnitType())
 				units = Collections.singleton(recType.asUnitType().getUnit());
-			else if (recType.isPointerType() && recType.asPointerType().getInnerTypes().anyMatch(Type::isUnitType))
+			else if (recType.isPointerType()) {
 				units = recType.asPointerType()
 						.getInnerTypes()
 						.stream()
@@ -346,12 +345,13 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 						.map(Type::asUnitType)
 						.map(UnitType::getUnit)
 						.collect(Collectors.toSet());
-			else
+				if (units.isEmpty())
+					continue;
+			} else
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
-			HierarcyTraversalStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram().getFeatures()
-					.getTraversalStrategy();
+			HierarcyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
 			for (CompilationUnit unit : units)
 				for (CompilationUnit cu : strategy.traverse(call, unit))
 					if (seen.add(cu))
@@ -381,9 +381,9 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @param instance whether or not the only instance or non-instance members
 	 *                     should be matched
 	 */
-	protected void checkMember(
+	public void checkMember(
 			UnresolvedCall call,
-			ExternalSet<Type>[] types,
+			Set<Type>[] types,
 			Collection<CFG> targets,
 			Collection<NativeCFG> natives,
 			SymbolAliasing aliasing,
@@ -430,17 +430,12 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 		if (!add)
 			add = matchCodeMemberName(call, qualifier, name);
 
-		ParameterMatchingStrategy strategy = call.getCFG().getDescriptor().getUnit().getProgram()
-				.getFeatures().getMatchingStrategy();
+		ParameterMatchingStrategy strategy = call.getProgram().getFeatures().getMatchingStrategy();
 		if (add && strategy.matches(call, descr.getFormals(), call.getParameters(), types))
-			add(targets, natives, cm);
-	}
-
-	private void add(Collection<CFG> targets, Collection<NativeCFG> natives, CodeMember cm) {
-		if (cm instanceof CFG)
-			targets.add((CFG) cm);
-		else
-			natives.add((NativeCFG) cm);
+			if (cm instanceof CFG)
+				targets.add((CFG) cm);
+			else
+				natives.add((NativeCFG) cm);
 	}
 
 	/**
@@ -455,7 +450,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * @return {@code true} if the qualifier and name are compatible with the
 	 *             ones of the call's target
 	 */
-	protected boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
+	public boolean matchCodeMemberName(UnresolvedCall call, String qualifier, String name) {
 		if (!name.equals(call.getTargetName()))
 			return false;
 		if (StringUtils.isBlank(call.getQualifier()))
@@ -476,7 +471,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	 * 
 	 * @throws CallResolutionException if the types cannot be computed
 	 */
-	protected abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, ExternalSet<Type> types)
+	public abstract Collection<Type> getPossibleTypesOfReceiver(Expression receiver, Set<Type> types)
 			throws CallResolutionException;
 
 	@Override

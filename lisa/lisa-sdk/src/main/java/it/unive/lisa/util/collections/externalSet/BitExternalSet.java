@@ -71,8 +71,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	BitExternalSet(ExternalSetCache<T> cache, T element) {
 		this.cache = cache;
 		int pos = cache.indexOfOrAdd(element);
-		bits = new long[1 + bitvector_index(pos)];
-		set(bits, pos);
+		bits = new long[1 + (pos >> 6)];
+		bits[pos >> 6] |= 1L << (pos % 64);
 	}
 
 	/**
@@ -109,18 +109,18 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 	public boolean add(T e) {
 		long[] localbits = bits;
 		int pos = cache.indexOfOrAdd(e);
-		int bitvector = bitvector_index(pos);
+		int bitvector = pos >> 6;
 
 		if (bitvector >= localbits.length) {
 			// the array is not long enough for the position
 			// of the element that we are adding
 			expand(1 + bitvector);
-			set(bits, pos);
+			bits[pos >> 6] |= 1L << (pos % 64);
 			return true;
-		} else if (isset(localbits, pos))
+		} else if ((localbits[pos >> 6] & 1L << (pos % 64)) != 0L)
 			return false;
 
-		set(localbits, pos);
+		localbits[pos >> 6] |= 1L << (pos % 64);
 		return true;
 	}
 
@@ -163,10 +163,10 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 			return false;
 
 		long[] localbits = this.bits;
-		if (bitvector_index(pos) >= localbits.length)
+		if (pos >> 6 >= localbits.length)
 			return false;
 
-		unset(localbits, pos);
+		localbits[pos >> 6] &= ~(1L << (pos % 64));
 		removeTrailingZeros();
 		return true;
 	}
@@ -180,10 +180,11 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 		for (int pos = localbits.length - 1; pos >= 0; pos--) {
 			bitvector = localbits[pos];
 			if (bitvector != 0L)
-				for (int i = 0; i < 64; i++)
-					// we iterate over all possible bits of the bitvector
-					if (isset(localbits, 64 * pos + i))
+				for (int i = 0; i < 64; i++) {
+					int n = 64 * pos + i;
+					if ((localbits[n >> 6] & 1L << (n % 64)) != 0L)
 						count++;
+				}
 		}
 
 		return count;
@@ -457,7 +458,7 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 			int l = this.totalBits;
 
 			while (start < l) {
-				int pos = bitvector_index(start);
+				int pos = start >> 6;
 				long bitvector = localbits[pos];
 
 				while (bitvector == 0L) {
@@ -467,7 +468,7 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 					bitvector = localbits[++pos];
 				}
 
-				long bit = bitmask(start);
+				long bit = 1L << (start % 64);
 				do {
 					if ((bitvector & bit) != 0L)
 						return start;
@@ -519,8 +520,8 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 			// if it's not inside the cache, it's not in the set
 			return false;
 
-		int bitvector = bitvector_index(pos);
-		return bitvector < bits.length && isset(bits, pos);
+		int bitvector = pos >> 6;
+		return bitvector < bits.length && (bits[pos >> 6] & 1L << (pos % 64)) != 0L;
 	}
 
 	@Override
@@ -575,73 +576,5 @@ public final class BitExternalSet<T> implements ExternalSet<T> {
 		for (T o : toRemove)
 			remove(o);
 		return !toRemove.isEmpty();
-	}
-
-	/**
-	 * Yields a mask of {@code 0}s with one 1, represented as a long value, to
-	 * represent the given number inside a long bitvector. To determine the
-	 * correct long bitvector to apply this mask to, use
-	 * {@link #bitvector_index(int)}
-	 * 
-	 * @param n the number
-	 * 
-	 * @return the bitwise mask
-	 */
-	static long bitmask(int n) {
-		// assuming that n will be stored in the right long (obtained with
-		// toNLongs(n)), we have to determine which bit of the long has to be
-		// turned to 1. To do that, we take the 1L (that is just the right-most
-		// bit set to 1) and we shift it to the left. The amount of positions
-		// that we need to shift it is equal to n%64 that yields the correct bit
-		// to represent a number between 0 and 63 inside the long
-		return 1L << (n % 64);
-	}
-
-	/**
-	 * Yields the 0-based index of the bitvector where the bit representing the
-	 * given number lies.
-	 * 
-	 * @param n the number
-	 * 
-	 * @return the index
-	 */
-	static int bitvector_index(int n) {
-		// a long is 64 (2^6) bits, and can thus represent 64 elements.
-		// shifting n to the right by 6 determines the number of
-		// 64-bits chunks needed to represent that number.
-		return n >> 6;
-	}
-
-	/**
-	 * Sets the bit used to represent the given integer inside the bitvector.
-	 * 
-	 * @param bits the bitvector
-	 * @param n    the integer value whose bit is to be set
-	 */
-	static void set(long[] bits, int n) {
-		bits[bitvector_index(n)] |= bitmask(n);
-	}
-
-	/**
-	 * Unsets the bit used to represent the given integer inside the bitvector.
-	 * 
-	 * @param bits the bitvector
-	 * @param n    the integer value whose bit is to be unset
-	 */
-	static void unset(long[] bits, int n) {
-		bits[bitvector_index(n)] &= ~bitmask(n);
-	}
-
-	/**
-	 * Checks if the bit used to represent the given integer inside the
-	 * bitvector is set.
-	 * 
-	 * @param bits the bitvector
-	 * @param n    the integer value to check
-	 * 
-	 * @return {@code true} iff the corresponding bit is set
-	 */
-	static boolean isset(long[] bits, int n) {
-		return (bits[bitvector_index(n)] & bitmask(n)) != 0L;
 	}
 }

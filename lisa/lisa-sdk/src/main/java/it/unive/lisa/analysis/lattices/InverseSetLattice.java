@@ -30,13 +30,13 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	/**
 	 * The set of elements contained in the lattice.
 	 */
-	protected Set<E> elements;
+	public Set<E> elements;
 
 	/**
 	 * Whether or not this is the top or bottom element of the lattice, valid
 	 * only if the set of elements is empty.
 	 */
-	protected final boolean isTop;
+	public final boolean isTop;
 
 	/**
 	 * Builds the lattice.
@@ -45,7 +45,7 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	 * @param isTop    whether or not this is the top or bottom element of the
 	 *                     lattice, valid only if the set of elements is empty
 	 */
-	protected InverseSetLattice(Set<E> elements, boolean isTop) {
+	public InverseSetLattice(Set<E> elements, boolean isTop) {
 		this.elements = elements;
 		this.isTop = isTop;
 	}
@@ -62,10 +62,10 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	 * @return a new concrete instance of {@link InverseSetLattice} containing
 	 *             the elements of the given set
 	 */
-	protected abstract S mk(Set<E> set);
+	public abstract S mk(Set<E> set);
 
 	@Override
-	protected S lubAux(S other) throws SemanticException {
+	public S lubAux(S other) throws SemanticException {
 		Set<E> lub = new HashSet<>(elements);
 		lub.retainAll(other.elements);
 		return mk(lub);
@@ -96,17 +96,12 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 	}
 
 	@Override
-	protected S wideningAux(S other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public Iterator<E> iterator() {
 		return elements.iterator();
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(S other) throws SemanticException {
+	public boolean lessOrEqualAux(S other) throws SemanticException {
 		return elements.containsAll(other.elements);
 	}
 

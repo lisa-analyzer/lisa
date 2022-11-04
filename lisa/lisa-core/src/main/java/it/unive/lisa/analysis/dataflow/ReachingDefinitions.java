@@ -32,7 +32,13 @@ public class ReachingDefinitions
 		this(null, null);
 	}
 
-	private ReachingDefinitions(Identifier variable, ProgramPoint pp) {
+	/**
+	 * Builds a new reaching definition object.
+	 * 
+	 * @param variable the variable being defined
+	 * @param pp       the location where the definition happens
+	 */
+	public ReachingDefinitions(Identifier variable, ProgramPoint pp) {
 		this.programPoint = pp;
 		this.variable = variable;
 	}

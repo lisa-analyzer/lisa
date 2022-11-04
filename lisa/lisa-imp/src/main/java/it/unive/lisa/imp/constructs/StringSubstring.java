@@ -12,7 +12,7 @@ import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Substring;
 import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -35,15 +35,15 @@ public class StringSubstring extends NativeCFG {
 	public StringSubstring(CodeLocation location, ClassUnit stringUnit) {
 		super(new CodeMemberDescriptor(location, stringUnit, true, "substring", BoolType.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE),
-				new Parameter(location, "start", Int32.INSTANCE),
-				new Parameter(location, "end", Int32.INSTANCE)),
+				new Parameter(location, "start", Int32Type.INSTANCE),
+				new Parameter(location, "end", Int32Type.INSTANCE)),
 				IMPStringSubstring.class);
 	}
 
 	/**
 	 * An expression modeling the string substring operation. The type of the
 	 * first operand must be {@link StringType}, while the other two operands'
-	 * types must be {@link Int32}. The type of this expression is the
+	 * types must be {@link Int32Type}. The type of this expression is the
 	 * {@link StringType}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>

@@ -82,7 +82,7 @@ public class BinaryExpression extends ValueExpression {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.pushScope(token), right.pushScope(token),
 				operator, getCodeLocation());
 		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes());
+			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 
@@ -91,7 +91,7 @@ public class BinaryExpression extends ValueExpression {
 		BinaryExpression expr = new BinaryExpression(getStaticType(), left.popScope(token), right.popScope(token),
 				operator, getCodeLocation());
 		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes());
+			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 

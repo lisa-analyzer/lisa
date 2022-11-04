@@ -17,7 +17,10 @@ import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.symbols.Symbol;
+import it.unive.lisa.analysis.types.StaticTypes;
+import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
+import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
 import it.unive.lisa.interprocedural.ContextSensitivityToken;
@@ -68,10 +71,9 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.collections.IterableArray;
 import it.unive.lisa.util.collections.externalSet.BitExternalSet;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.collections.externalSet.UniversalExternalSet;
 import it.unive.lisa.util.collections.workset.ConcurrentFIFOWorkingSet;
@@ -86,6 +88,7 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -106,10 +109,14 @@ import org.reflections.scanners.SubTypesScanner;
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
-	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(null), "fake1", false);
-	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(null), "fake2", false);
-	private static final InterfaceUnit interface1 = new InterfaceUnit(loc, new Program(null), "fake1", false);
-	private static final InterfaceUnit interface2 = new InterfaceUnit(loc, new Program(null), "fake2", false);
+	private static final ClassUnit unit1 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake1", false);
+	private static final ClassUnit unit2 = new ClassUnit(loc, new Program(new IMPFeatures(), new IMPTypeSystem()),
+			"fake2", false);
+	private static final InterfaceUnit interface1 = new InterfaceUnit(loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake1", false);
+	private static final InterfaceUnit interface2 = new InterfaceUnit(loc,
+			new Program(new IMPFeatures(), new IMPTypeSystem()), "fake2", false);
 	private static final CodeMemberDescriptor descr1 = new CodeMemberDescriptor(loc, unit1, false, "fake1");
 	private static final CodeMemberDescriptor descr2 = new CodeMemberDescriptor(loc, unit2, false, "fake2");
 	private static final CFG cfg1 = new CFG(descr1);
@@ -127,9 +134,8 @@ public class EqualityContractVerificationTest {
 	private static final SingleGraph g2 = new SingleGraph("b");
 	private static final UnresolvedCall uc1 = new UnresolvedCall(cfg1, loc, CallType.STATIC, "foo", "foo");
 	private static final UnresolvedCall uc2 = new UnresolvedCall(cfg2, loc, CallType.STATIC, "bar", "bar");
-	private static final ExternalSetCache<Type> scache = new ExternalSetCache<>();
-	private static final ExternalSet<Type> s1 = scache.mkSingletonSet(Untyped.INSTANCE);
-	private static final ExternalSet<Type> s2 = scache.mkSingletonSet(Int32.INSTANCE);
+	private static final Set<Type> s1 = Collections.singleton(Untyped.INSTANCE);
+	private static final Set<Type> s2 = Collections.singleton(Int32Type.INSTANCE);
 
 	private static final Collection<Class<?>> tested = new HashSet<>();
 
@@ -207,7 +213,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
-				.withPrefabValues(ExternalSet.class, s1, s2)
+				.withPrefabValues(Set.class, s1, s2)
 				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
 
 		if (getClass)
@@ -269,7 +275,7 @@ public class EqualityContractVerificationTest {
 				verify(type, Warning.NONFINAL_FIELDS, Warning.ALL_FIELDS_SHOULD_BE_USED);
 			else
 				// type token is the only one with an eclipse-like equals
-				verify(type, type == TypeTokenType.class);
+				verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
 	}
 
 	@Test
@@ -361,6 +367,8 @@ public class EqualityContractVerificationTest {
 					|| InverseSetLattice.class.isAssignableFrom(subject))
 				// fields function and elements can be null
 				verify(subject, Warning.NONFINAL_FIELDS);
+			else if (subject == StaticTypes.class)
+				verify(subject, verifier -> verifier.withIgnoredFields("types"));
 			else if (subject != CFGWithAnalysisResults.class)
 				// we test the cfg separately
 				verify(subject);

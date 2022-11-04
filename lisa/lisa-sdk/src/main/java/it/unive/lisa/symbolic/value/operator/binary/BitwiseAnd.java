@@ -1,11 +1,8 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.BitwiseOperator;
 import it.unive.lisa.type.NumericType;
-import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 
 /**
  * Given two expressions that both evaluate to numeric values, a
@@ -19,28 +16,23 @@ import it.unive.lisa.util.collections.externalSet.ExternalSet;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BitwiseAnd implements BitwiseOperator, BinaryOperator {
+public class BitwiseAnd extends NumericOperation implements BitwiseOperator {
 
 	/**
 	 * The singleton instance of this class.
 	 */
 	public static final BitwiseAnd INSTANCE = new BitwiseAnd();
 
-	private BitwiseAnd() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected BitwiseAnd() {
 	}
 
 	@Override
 	public String toString() {
 		return "&";
-	}
-
-	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isNumericType) || right.noneMatch(Type::isNumericType))
-			return Caches.types().mkEmptySet();
-		ExternalSet<Type> set = NumericType.commonNumericalType(left, right);
-		if (set.isEmpty())
-			return Caches.types().mkEmptySet();
-		return set;
 	}
 }

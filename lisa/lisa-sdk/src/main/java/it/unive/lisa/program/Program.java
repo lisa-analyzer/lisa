@@ -3,7 +3,7 @@ package it.unive.lisa.program;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -41,22 +41,23 @@ public class Program extends Unit {
 	private final LanguageFeatures features;
 
 	/**
-	 * The collection of types registered in this program. This collection will
-	 * be erased during {@link #validateAndFinalize()}.
+	 * The type system knowing about the types that appear in the program
 	 */
-	private Collection<Type> types;
+	private final TypeSystem types;
 
 	/**
 	 * Builds an empty program.
 	 * 
 	 * @param features the language-specific features, algorithms and semantics
 	 *                     of this program
+	 * @param types    the type system knowing about the types that appear in
+	 *                     the program
 	 */
-	public Program(LanguageFeatures features) {
+	public Program(LanguageFeatures features, TypeSystem types) {
 		super(PROGRAM_NAME);
 		this.features = features;
+		this.types = types;
 		units = new TreeMap<>();
-		types = new LinkedList<>();
 		entrypoints = new LinkedList<>();
 	}
 
@@ -71,24 +72,12 @@ public class Program extends Unit {
 	}
 
 	/**
-	 * Registers a new {@link Type} that appears in the program.
-	 * 
-	 * @param type the type to add
-	 * 
-	 * @return {@code true} if the collection of types changed as a result of
-	 *             the call
-	 */
-	public final boolean registerType(Type type) {
-		return types.add(type);
-	}
-
-	/**
-	 * Yields the collection of {@link Type}s that have been registered in this
+	 * Yields the type system knowing about the types that appear in the
 	 * program.
 	 * 
-	 * @return the collection of types
+	 * @return the type system
 	 */
-	public final Collection<Type> getRegisteredTypes() {
+	public TypeSystem getTypes() {
 		return types;
 	}
 

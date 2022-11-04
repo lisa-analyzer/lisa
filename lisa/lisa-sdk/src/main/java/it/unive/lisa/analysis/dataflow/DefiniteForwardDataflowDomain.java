@@ -34,18 +34,18 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	}
 
 	@Override
-	protected DefiniteForwardDataflowDomain<E> mk(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
+	public DefiniteForwardDataflowDomain<E> mk(E domain, Set<E> elements, boolean isTop, boolean isBottom) {
 		return new DefiniteForwardDataflowDomain<>(domain, elements, isTop, isBottom);
 	}
 
 	@Override
-	protected DefiniteForwardDataflowDomain<E> lubAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
+	public DefiniteForwardDataflowDomain<E> lubAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
 		Set<E> intersection = SetUtils.intersection(this.getDataflowElements(), other.getDataflowElements());
 		return new DefiniteForwardDataflowDomain<>(domain, intersection, false, false);
 	}
 
 	@Override
-	protected boolean lessOrEqualAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
+	public boolean lessOrEqualAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
 		return this.getDataflowElements().containsAll(other.getDataflowElements());
 	}
 }

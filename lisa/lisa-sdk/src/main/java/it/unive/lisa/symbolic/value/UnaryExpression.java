@@ -78,7 +78,7 @@ public class UnaryExpression extends ValueExpression {
 					right.removeNegations(),
 					oppositeOp, getCodeLocation());
 			if (hasRuntimeTypes())
-				expr.setRuntimeTypes(getRuntimeTypes());
+				expr.setRuntimeTypes(getRuntimeTypes(null));
 			return expr;
 		}
 
@@ -97,7 +97,7 @@ public class UnaryExpression extends ValueExpression {
 		UnaryExpression expr = new UnaryExpression(getStaticType(), expression.popScope(token), operator,
 				getCodeLocation());
 		if (hasRuntimeTypes())
-			expr.setRuntimeTypes(getRuntimeTypes());
+			expr.setRuntimeTypes(getRuntimeTypes(null));
 		return expr;
 	}
 

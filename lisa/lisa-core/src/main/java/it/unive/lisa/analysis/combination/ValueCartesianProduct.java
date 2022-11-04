@@ -31,7 +31,7 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	}
 
 	@Override
-	protected ValueCartesianProduct<T1, T2> mk(T1 left, T2 right) {
+	public ValueCartesianProduct<T1, T2> mk(T1 left, T2 right) {
 		return new ValueCartesianProduct<>(left, right);
 	}
 
