@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -38,30 +40,19 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     }
 
     @Override
-    protected boolean lessOrEqualAux(CharInclusion other) throws SemanticException { //WIP
-        int CertainlyContainedSize = this.certainlyContained.size();
-        int MaybeContainedSize = this.maybeContained.size();
-
-        int otherCertainlyContainedSize = other.certainlyContained.size();
-        int otherMaybeContainedSize = other.maybeContained.size();
-
-        if (CertainlyContainedSize > otherCertainlyContainedSize ||
-                MaybeContainedSize > otherMaybeContainedSize)
+    protected boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
+        if (this.getCertainlyContained().size() > other.getCertainlyContained().size() ||
+                this.getMaybeContained().size() > other.getMaybeContained().size())
             return false;
 
-        for (Character certainlyContainedCharacter : this.certainlyContained) { //I suppose that the order are the same, which is incorrect (maybe a sorting should be done)
-            for (Character otherCertainlyContainedCharacter : other.certainlyContained) {
-                if (certainlyContainedCharacter != otherCertainlyContainedCharacter)
-                    return false;
-            }
-        }
+        for (Character certainlyContainedCharacter : this.getCertainlyContained())
+            if (!other.getCertainlyContained().contains(certainlyContainedCharacter))
+                return false;
 
-        for (Character maybeContainedCharacter : this.maybeContained) {
-            for (Character otherMaybeContainedCharacter : other.maybeContained) {
-                if (maybeContainedCharacter != otherMaybeContainedCharacter)
-                    return false;
-            }
-        }
+        for (Character maybeContainedCharacter : this.getMaybeContained())
+            if (!other.getMaybeContained().contains(maybeContainedCharacter))
+                return false;
+
         return true;
     }
 
@@ -79,18 +70,71 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     }
 
     @Override
-    public CharInclusion top() { //TODO
-        return null;
+    public CharInclusion top() {
+        return TOP;
     }
 
     @Override
-    public CharInclusion bottom() { //TODO
-        return null;
+    public CharInclusion bottom() {
+        return BOTTOM;
     }
 
     @Override
-    public DomainRepresentation representation() { //TODO
-        return null;
+    public boolean isTop() {
+        return this.equals(TOP);
+    }
+
+    @Override
+    public boolean isBottom() {
+        return this.equals(BOTTOM);
+    }
+
+    @Override
+    public DomainRepresentation representation() {
+        if (isBottom())
+            return Lattice.bottomRepresentation();
+        if (isTop())
+            return Lattice.topRepresentation();
+
+        return new StringRepresentation(formatCharInclusionRepresentation());
+    }
+
+    public Collection<Character> getCertainlyContained() {
+        return certainlyContained;
+    }
+
+    public Collection<Character> getMaybeContained() {
+        return maybeContained;
+    }
+
+    private String formatCharInclusionRepresentation(){
+        StringBuilder stringBuilder = new StringBuilder("CertainlyContained: {");
+        int counter = 0;
+
+        for(Character certainlyContainedCharacter: this.getCertainlyContained()){
+            String formattedCharacter;
+
+            formattedCharacter = counter != this.getCertainlyContained().size() - 1 ?
+                    certainlyContainedCharacter + ", " : certainlyContainedCharacter + "}";
+            counter++;
+
+            stringBuilder.append(formattedCharacter);
+        }
+
+        counter = 0;
+        stringBuilder.append(", MaybeContained: {");
+
+        for(Character maybeContainedCharacter: this.getMaybeContained()){
+            String formattedCharacter;
+
+            formattedCharacter = counter != this.getCertainlyContained().size() - 1 ?
+                    maybeContainedCharacter + ", " : maybeContainedCharacter + "}";
+            counter++;
+
+            stringBuilder.append(formattedCharacter);
+        }
+
+        return stringBuilder.toString();
     }
 
     private static HashSet<Character> getAlphabet() {
