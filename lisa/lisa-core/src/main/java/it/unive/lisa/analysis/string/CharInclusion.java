@@ -30,17 +30,17 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     }
 
     @Override
-    protected CharInclusion lubAux(CharInclusion other) throws SemanticException { //TODO
+    public CharInclusion lubAux(CharInclusion other) throws SemanticException { //TODO
         return null;
     }
 
     @Override
-    protected CharInclusion wideningAux(CharInclusion other) throws SemanticException {
+    public CharInclusion wideningAux(CharInclusion other) throws SemanticException {
         return lubAux(other);
     }
 
     @Override
-    protected boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
+    public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
         if (this.getCertainlyContained().size() > other.getCertainlyContained().size() ||
                 this.getMaybeContained().size() > other.getMaybeContained().size())
             return false;

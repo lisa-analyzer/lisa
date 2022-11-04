@@ -23,6 +23,6 @@ public class CharInclusionTest {
         maybeContained.add('f');
 
         assertEquals(new CharInclusion(certainlyContained, maybeContained).representation().toString(),
-                "CertainlyContained: {a, b, c} MaybeContained: {d, e, f}");
+                "CertainlyContained: {a, b, c}, MaybeContained: {d, e, f}");
     }
 }
