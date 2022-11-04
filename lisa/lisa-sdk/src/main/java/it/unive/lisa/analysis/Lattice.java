@@ -57,6 +57,18 @@ public interface Lattice<L extends Lattice<L>> {
 	L lub(L other) throws SemanticException;
 
 	/**
+	 * Performs the greatest lower upper bound operation between this lattice element and
+	 * the given one. This operation is commutative.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the reatest lower bound
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	L glb(L other) throws SemanticException;
+	
+	/**
 	 * Performs the narrowing operation between this lattice element and the
 	 * given one. This operation is not commutative. The default implementation
 	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for
