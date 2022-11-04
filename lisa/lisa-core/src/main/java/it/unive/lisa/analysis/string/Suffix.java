@@ -28,7 +28,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix lubAux(Suffix other) throws SemanticException {
+    public Suffix lubAux(Suffix other) throws SemanticException {
         String otherSuffix = other.getSuffix();
         StringBuilder result = new StringBuilder();
 
@@ -49,12 +49,12 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix wideningAux(Suffix other) throws SemanticException {
+    public Suffix wideningAux(Suffix other) throws SemanticException {
         return lubAux(other);
     }
 
     @Override
-    protected boolean lessOrEqualAux(Suffix other) throws SemanticException {
+    public boolean lessOrEqualAux(Suffix other) throws SemanticException {
         if (other.getSuffix().length() <= this.getSuffix().length()) {
             Suffix lub = this.lubAux(other);
             String lubString = lub.getSuffix();
@@ -109,12 +109,12 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix evalNullConstant(ProgramPoint pp) {
+    public Suffix evalNullConstant(ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Suffix evalNonNullConstant(Constant constant, ProgramPoint pp) {
+    public Suffix evalNonNullConstant(Constant constant, ProgramPoint pp) {
         if (constant.getValue() instanceof String)
             return new Suffix((String) constant.getValue());
 
@@ -122,12 +122,12 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix evalUnaryExpression(UnaryOperator operator, Suffix arg, ProgramPoint pp) {
+    public Suffix evalUnaryExpression(UnaryOperator operator, Suffix arg, ProgramPoint pp) {
         return TOP;
     }
 
     @Override
-    protected Suffix evalBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) {
+    public Suffix evalBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) {
         if (operator == StringConcat.INSTANCE) {
             return right;
         } else if (operator == StringContains.INSTANCE ||
@@ -142,7 +142,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     }
 
     @Override
-    protected Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right, ProgramPoint pp) { //TODO
+    public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right, ProgramPoint pp) {
         return TOP;
     }
 
