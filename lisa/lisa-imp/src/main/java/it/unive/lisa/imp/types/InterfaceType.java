@@ -3,6 +3,7 @@ package it.unive.lisa.imp.types;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
@@ -150,13 +151,13 @@ public final class InterfaceType implements UnitType {
 	}
 
 	@Override
-	public Collection<Type> allInstances() {
-		Collection<Type> instances = new HashSet<>();
+	public Set<Type> allInstances(TypeSystem types) {
+		Set<Type> instances = new HashSet<>();
 		for (Unit un : unit.getInstances())
 			if (un instanceof InterfaceUnit)
 				instances.add(lookup(un.getName(), null));
 			else
-				instances.add(InterfaceType.lookup(un.getName(), null));
+				instances.add(ClassType.lookup(un.getName(), null));
 		return instances;
 	}
 }

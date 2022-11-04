@@ -3,7 +3,7 @@ package it.unive.lisa.program;
 import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
- * A unit that is parto of a LiSA {@link Program}.
+ * A unit that is part of a LiSA {@link Program}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */

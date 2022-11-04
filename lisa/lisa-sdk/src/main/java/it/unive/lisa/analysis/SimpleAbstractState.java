@@ -11,8 +11,8 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /**
@@ -94,17 +94,20 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			value = value.applySubstitution(heap.getSubstitution(), pp);
 		}
 
+		T typeRes = type.bottom();
+		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
-			type = type.assign(id, expr, pp);
+			T tmp = type.assign(id, expr, pp);
 
-			ExternalSet<Type> rt = type.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			id.setRuntimeTypes(rt);
 			expr.setRuntimeTypes(rt);
 
-			value = value.assign(id, expr, pp);
+			typeRes = typeRes.lub(tmp);
+			valueRes = valueRes.lub(value.assign(id, expr, pp));
 		}
 
-		return new SimpleAbstractState<>(heap, value, type);
+		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
 	@Override
@@ -120,16 +123,19 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			value = value.applySubstitution(heap.getSubstitution(), pp);
 		}
 
+		T typeRes = type.bottom();
+		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
-			type = type.smallStepSemantics(expr, pp);
+			T tmp = type.smallStepSemantics(expr, pp);
 
-			ExternalSet<Type> rt = type.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			value = value.smallStepSemantics(expr, pp);
+			typeRes = typeRes.lub(tmp);
+			valueRes = valueRes.lub(value.smallStepSemantics(expr, pp));
 		}
 
-		return new SimpleAbstractState<>(heap, value, type);
+		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
 	@Override
@@ -145,16 +151,18 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			value = value.applySubstitution(heap.getSubstitution(), pp);
 		}
 
+		T typeRes = type.bottom();
+		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
 			T tmp = type.smallStepSemantics(expr, pp);
-			ExternalSet<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			type = type.assume(expr, pp);
-			value = value.assume(expr, pp);
+			typeRes = typeRes.lub(type.assume(expr, pp));
+			valueRes = valueRes.lub(value.assume(expr, pp));
 		}
 
-		return new SimpleAbstractState<>(heap, value, type);
+		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
 	@Override
@@ -164,7 +172,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		Satisfiability valueResult = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten) {
 			T tmp = typeState.smallStepSemantics(expr, pp);
-			ExternalSet<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
 			typeResult = typeResult.lub(typeState.satisfies(expr, pp));

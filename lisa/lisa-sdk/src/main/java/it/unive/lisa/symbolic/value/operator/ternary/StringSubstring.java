@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.ternary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.StringOperator;
 import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.StringType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given three expressions, with the first one evaluating to a string value and
@@ -38,7 +39,12 @@ public class StringSubstring implements StringOperator, TernaryOperator {
 	 */
 	public static final StringSubstring INSTANCE = new StringSubstring();
 
-	private StringSubstring() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringSubstring() {
 	}
 
 	@Override
@@ -47,13 +53,13 @@ public class StringSubstring implements StringOperator, TernaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> middle, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isStringType)
-				|| middle.noneMatch(Type::isNumericType)
-				|| middle.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral())
-				|| right.noneMatch(Type::isNumericType)
-				|| right.filter(Type::isNumericType).noneMatch(t -> t.asNumericType().isIntegral()))
-			return Caches.types().mkEmptySet();
-		return Caches.types().mkSingletonSet(StringType.INSTANCE);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right) {
+		if (left.stream().noneMatch(Type::isStringType))
+			return Collections.emptySet();
+		if (middle.stream().filter(Type::isNumericType).map(Type::asNumericType).noneMatch(NumericType::isIntegral))
+			return Collections.emptySet();
+		if (right.stream().filter(Type::isNumericType).map(Type::asNumericType).noneMatch(NumericType::isIntegral))
+			return Collections.emptySet();
+		return Collections.singleton(types.getStringType());
 	}
 }

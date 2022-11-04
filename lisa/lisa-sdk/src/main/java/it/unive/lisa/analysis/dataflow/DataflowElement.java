@@ -146,6 +146,8 @@ public interface DataflowElement<D extends DataflowDomain<D, E>, E extends Dataf
 
 	@Override
 	default boolean canProcess(SymbolicExpression expression) {
-		return expression.getRuntimeTypes().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		if (expression.hasRuntimeTypes())
+			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
+		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
 	}
 }

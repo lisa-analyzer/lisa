@@ -11,8 +11,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
 import java.util.Map;
+import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -47,29 +47,42 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 		this.stack = domain.bottom();
 	}
 
-	private TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
+	/**
+	 * Builds an environment containing the given mapping. If function is
+	 * {@code null}, the new environment is the top environment if
+	 * {@code lattice.isTop()} holds, and it is the bottom environment if
+	 * {@code lattice.isBottom()} holds.
+	 * 
+	 * @param domain   a singleton instance to be used during semantic
+	 *                     operations to retrieve top and bottom values
+	 * @param function the function representing the mapping contained in the
+	 *                     new environment; can be {@code null}
+	 * @param stack    the abstract value for the last computed expression, that
+	 *                     is left on the top of the stack
+	 */
+	public TypeEnvironment(T domain, Map<Identifier, T> function, T stack) {
 		super(domain, function);
 		this.stack = stack;
 	}
 
 	@Override
-	protected TypeEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
+	public TypeEnvironment<T> mk(T lattice, Map<Identifier, T> function) {
 		return new TypeEnvironment<>(lattice, function, stack);
 	}
 
 	@Override
-	protected TypeEnvironment<T> copy() {
+	public TypeEnvironment<T> copy() {
 		return new TypeEnvironment<>(lattice, mkNewFunction(function), stack);
 	}
 
 	@Override
-	protected Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
 	}
 
 	@Override
-	protected TypeEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
+	public TypeEnvironment<T> assignAux(Identifier id, ValueExpression expression, Map<Identifier, T> function,
 			T value, T eval, ProgramPoint pp) {
 		return new TypeEnvironment<>(lattice, function, value);
 	}
@@ -81,12 +94,12 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	protected TypeEnvironment<T> assumeSatisfied(T eval) {
+	public TypeEnvironment<T> assumeSatisfied(T eval) {
 		return this;
 	}
 
 	@Override
-	protected TypeEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, TypeEnvironment<T> other)
+	public TypeEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, TypeEnvironment<T> other)
 			throws SemanticException {
 		return new TypeEnvironment<>(lattice, function, stack.glb(other.stack));
 	}
@@ -135,15 +148,15 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public ExternalSet<Type> getInferredRuntimeTypes() {
+	public Set<Type> getInferredRuntimeTypes() {
 		return stack.getRuntimeTypes();
 	}
 
 	@Override
 	public Type getInferredDynamicType() {
-		ExternalSet<Type> types = stack.getRuntimeTypes();
+		Set<Type> types = stack.getRuntimeTypes();
 		if (stack.isTop() || stack.isBottom() || types.isEmpty())
 			return Untyped.INSTANCE;
-		return types.reduce(types.first(), (result, t) -> result.commonSupertype(t));
+		return Type.commonSupertype(types, Untyped.INSTANCE);
 	}
 }

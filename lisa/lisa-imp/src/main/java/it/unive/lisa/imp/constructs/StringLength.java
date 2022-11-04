@@ -11,7 +11,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Length;
-import it.unive.lisa.type.common.Int32;
+import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.type.common.StringType;
 
 /**
@@ -29,7 +29,7 @@ public class StringLength extends NativeCFG {
 	 * @param stringUnit the unit where this construct is defined
 	 */
 	public StringLength(CodeLocation location, ClassUnit stringUnit) {
-		super(new CodeMemberDescriptor(location, stringUnit, true, "len", Int32.INSTANCE,
+		super(new CodeMemberDescriptor(location, stringUnit, true, "len", Int32Type.INSTANCE,
 				new Parameter(location, "this", StringType.INSTANCE)),
 				IMPStringLength.class);
 	}
@@ -37,7 +37,7 @@ public class StringLength extends NativeCFG {
 	/**
 	 * An expression modeling the string length operation. The type of the
 	 * operand must be {@link StringType}. The type of this expression is the
-	 * {@link Int32}.
+	 * {@link Int32Type}.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */

@@ -224,7 +224,7 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 *                                           being simplified with an
 	 *                                           outgoing non-simplifiable edge
 	 */
-	protected Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
+	public Set<N> simplify(Class<? extends N> target, Collection<E> removedEdges,
 			Map<Pair<E, E>, E> replacedEdges) {
 		Set<N> targets = getNodes().stream().filter(k -> target.isAssignableFrom(k.getClass()))
 				.collect(Collectors.toSet());
@@ -238,7 +238,7 @@ public abstract class CodeGraph<G extends CodeGraph<G, N, E>, N extends CodeNode
 	 * 
 	 * @param node the node about to be simplified
 	 */
-	protected void preSimplify(N node) {
+	public void preSimplify(N node) {
 		// nothing to do, but subclasses might redefine
 	}
 }

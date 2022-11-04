@@ -111,7 +111,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @param other the original cfg
 	 */
-	protected CFG(CFG other) {
+	public CFG(CFG other) {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
@@ -136,7 +136,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the normal exitpoints of this cfg.
 	 */
-	public final Collection<Statement> getNormalExitpoints() {
+	public Collection<Statement> getNormalExitpoints() {
 		return list.getNodes().stream().filter(st -> st.stopsExecution() && !st.throwsError())
 				.collect(Collectors.toList());
 	}
@@ -150,7 +150,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the exitpoints of this cfg.
 	 */
-	public final Collection<Statement> getAllExitpoints() {
+	public Collection<Statement> getAllExitpoints() {
 		return list.getNodes().stream().filter(st -> st.stopsExecution() || st.throwsError())
 				.collect(Collectors.toList());
 	}
@@ -164,7 +164,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @throws IllegalArgumentException if a control flow structure for the same
 	 *                                      condition already exists
 	 */
-	public final void addControlFlowStructure(ControlFlowStructure cf) {
+	public void addControlFlowStructure(ControlFlowStructure cf) {
 		if (cfStructs.stream().anyMatch(c -> c.getCondition().equals(cf.getCondition())))
 			throw new IllegalArgumentException(
 					"Cannot have more than one conditional structure happening on the same condition: "
@@ -260,7 +260,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
@@ -321,7 +321,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
@@ -383,7 +383,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-	public final <A extends AbstractState<A, H, V, T>,
+	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
@@ -412,7 +412,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return new CFGWithAnalysisResults<>(this, singleton, startingPoints, finalResults);
 	}
 
-	private final class CFGFixpoint<A extends AbstractState<A, H, V, T>,
+	private class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>>
@@ -511,7 +511,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	@Override
-	protected void preSimplify(Statement node) {
+	public void preSimplify(Statement node) {
 		shiftVariableScopes(node);
 		shiftControlFlowStructuresEnd(node);
 	}

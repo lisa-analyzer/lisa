@@ -1,11 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.ternary;
 
-import it.unive.lisa.caches.Caches;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.operator.StringOperator;
+import it.unive.lisa.type.StringType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.common.StringType;
-import it.unive.lisa.util.collections.externalSet.ExternalSet;
+import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given three expressions that all evaluate to string values, a
@@ -37,7 +38,12 @@ public class StringReplace implements StringOperator, TernaryOperator {
 	 */
 	public static final StringReplace INSTANCE = new StringReplace();
 
-	private StringReplace() {
+	/**
+	 * Builds the type. This constructor is visible to allow subclassing:
+	 * instances of this class should be unique, and the singleton can be
+	 * retrieved through field {@link #INSTANCE}.
+	 */
+	protected StringReplace() {
 	}
 
 	@Override
@@ -46,10 +52,11 @@ public class StringReplace implements StringOperator, TernaryOperator {
 	}
 
 	@Override
-	public ExternalSet<Type> typeInference(ExternalSet<Type> left, ExternalSet<Type> middle, ExternalSet<Type> right) {
-		if (left.noneMatch(Type::isStringType) || middle.noneMatch(Type::isStringType)
-				|| right.noneMatch(Type::isStringType))
-			return Caches.types().mkEmptySet();
-		return Caches.types().mkSingletonSet(StringType.INSTANCE);
+	public Set<Type> typeInference(TypeSystem types, Set<Type> left, Set<Type> middle, Set<Type> right) {
+		if (left.stream().noneMatch(Type::isStringType)
+				|| middle.stream().noneMatch(Type::isStringType)
+				|| right.stream().noneMatch(Type::isStringType))
+			return Collections.emptySet();
+		return Collections.singleton(types.getStringType());
 	}
 }

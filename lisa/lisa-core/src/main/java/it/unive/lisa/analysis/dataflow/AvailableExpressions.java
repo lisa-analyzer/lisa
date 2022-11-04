@@ -35,7 +35,12 @@ public class AvailableExpressions
 		this(null);
 	}
 
-	private AvailableExpressions(ValueExpression expression) {
+	/**
+	 * Builds the available expressions object.
+	 * 
+	 * @param expression the expression of this element
+	 */
+	public AvailableExpressions(ValueExpression expression) {
 		this.expression = expression;
 	}
 
