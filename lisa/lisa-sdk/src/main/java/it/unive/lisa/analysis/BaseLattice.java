@@ -24,6 +24,19 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 		return lubAux(other);
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public L glb(L other) throws SemanticException {
+		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other))
+			return (L) this;
+
+		if (other.isBottom() || this.isTop())
+			return other;
+
+		return glbAux(other);
+	}
+
+	
 	/**
 	 * Performs the least upper bound operation between this lattice element and
 	 * the given one, assuming that base cases have already been handled. In
@@ -44,6 +57,27 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 */
 	public abstract L lubAux(L other) throws SemanticException;
 
+	/**
+	 * Performs the greatest lower bound operation between this lattice element and
+	 * the given one, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * </ul>
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the greatest lower bound between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	public abstract L glbAux(L other) throws SemanticException;
+
+	
 	@Override
 	@SuppressWarnings("unchecked")
 	public L widening(L other) throws SemanticException {
@@ -62,7 +96,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 		if (other == null || this.isBottom() || this == other || this.equals(other))
 			return (L) this;
 
-		if (this.isTop())
+		if (this.isTop() || other.isBottom())
 			return other;
 
 		return narrowingAux(other);
@@ -93,8 +127,29 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 		return lubAux(other);
 	}
 	
+	/**
+	 * Performs the narrowing operation between this lattice element and the
+	 * given one, assuming that base cases have already been handled. In
+	 * particular, it is guaranteed that:
+	 * <ul>
+	 * <li>{@code other} is not {@code null}</li>
+	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
+	 * <li>{@code this} and {@code other} are not the same object (according
+	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
+	 * </ul>
+	 * The default implementation of this method delegates to
+	 * {@link #glbAux(BaseLattice)}, and is thus safe for finite lattices and
+	 * DCC ones.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the narrowing between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
 	public L narrowingAux(L other) throws SemanticException {
-		return lubAux(other);
+		return glbAux(other);
 	}
 
 	@Override

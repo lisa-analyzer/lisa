@@ -62,7 +62,7 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @param other the other lattice element
 	 * 
-	 * @return the reatest lower bound
+	 * @return the greatest lower bound
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
