@@ -224,8 +224,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 			types.registerType(types.getStringType());
 			types.registerType(types.getIntegerType());
 			for (Type t : types.getTypes())
-				// TODO do we want all types to be considered here?
-				types.registerType(new ReferenceType(t));
+				if (types.canBeReferenced(t))
+					types.registerType(new ReferenceType(t));
 
 			TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 				try {

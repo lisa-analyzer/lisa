@@ -173,4 +173,14 @@ public abstract class TypeSystem {
 	 * @return the integer type
 	 */
 	public abstract NumericType getIntegerType();
+
+	/**
+	 * Yields whether or not values of the given type can be referenced, that
+	 * is, if a pointer to memory locations containing them can be created. If
+	 * this method returns {@code true}, LiSA will automatically register a
+	 * {@link ReferenceType} into this type system that contains the given type.
+	 * 
+	 * @return {@code true} if and only if the given type can be referenced
+	 */
+	public abstract boolean canBeReferenced(Type type);
 }
