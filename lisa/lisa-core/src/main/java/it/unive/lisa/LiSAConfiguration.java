@@ -151,6 +151,11 @@ public class LiSAConfiguration {
 	private OpenCallPolicy openCallPolicy;
 
 	/**
+	 * Whether or not the fixpoint algorithm should compute the descending phase
+	 */
+	private boolean doDescendingPhase;
+	
+	/**
 	 * Builds a new configuration object, with default settings. By default:
 	 * <ul>
 	 * <li>no syntactic check is executed</li>
@@ -164,6 +169,7 @@ public class LiSAConfiguration {
 	 * <li>the default warning threshold ({@value #DEFAULT_WIDENING_THRESHOLD})
 	 * will be used</li>
 	 * <li>the open call policy used is {@link WorstCasePolicy}</li>
+	 * <li>the descending phase will not be computed</li>
 	 * </ul>
 	 */
 	public LiSAConfiguration() {
@@ -174,6 +180,7 @@ public class LiSAConfiguration {
 		this.fixpointWorkingSet = FIFOWorkingSet.class;
 		this.openCallPolicy = WorstCasePolicy.INSTANCE;
 		this.analysisGraphs = GraphType.NONE;
+		this.doDescendingPhase = false;
 	}
 
 	/**
@@ -358,6 +365,18 @@ public class LiSAConfiguration {
 	 */
 	public LiSAConfiguration setWideningThreshold(int wideningThreshold) {
 		this.wideningThreshold = wideningThreshold;
+		return this;
+	}
+	
+	/**
+	 * Sets whether or not the fixpoint algorithm should compute del descending phase
+	 * 
+	 * @param doDescendingPhase 
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setDoDescendingPhase(boolean doDescendingPhase) {
+		this.doDescendingPhase = doDescendingPhase;
 		return this;
 	}
 
