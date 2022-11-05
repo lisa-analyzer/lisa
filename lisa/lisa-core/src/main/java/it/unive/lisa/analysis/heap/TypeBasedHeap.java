@@ -158,6 +158,12 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
+	public TypeBasedHeap glbAux(TypeBasedHeap other) throws SemanticException {
+		return new TypeBasedHeap(SetUtils.intersection(names, other.names));
+	}
+
+	
+	@Override
 	public boolean lessOrEqualAux(TypeBasedHeap other) throws SemanticException {
 		return other.names.containsAll(names);
 	}

@@ -158,6 +158,16 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
+	public HeapEnvironment<T> narrowingAux(HeapEnvironment<T> other) throws SemanticException {
+		HeapEnvironment<T> narrow = super.narrowingAux(other);
+		if (narrow.isTop() || narrow.isBottom())
+			return narrow;
+		// TODO how do we narrow the substitutions?
+		return new HeapEnvironment<>(narrow.lattice, narrow.function, other.substitution);
+	}
+
+	
+	@Override
 	public boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {
 		if (!super.lessOrEqualAux(other))
 			return false;
