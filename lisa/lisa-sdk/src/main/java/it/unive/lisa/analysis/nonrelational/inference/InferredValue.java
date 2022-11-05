@@ -122,10 +122,20 @@ public interface InferredValue<T extends InferredValue<T>>
 		}
 
 		@Override
+		public InferredPair<T> glbAux(InferredPair<T> other) throws SemanticException {
+			return new InferredPair<>(domain, inferred.glb(other.inferred), state.glb(other.state));
+		}
+		
+		@Override
 		public InferredPair<T> wideningAux(InferredPair<T> other) throws SemanticException {
 			return new InferredPair<>(domain, inferred.widening(other.inferred), state.widening(other.state));
 		}
 
+		@Override
+		public InferredPair<T> narrowingAux(InferredPair<T> other) throws SemanticException {
+			return new InferredPair<>(domain, inferred.narrowing(other.inferred), state.narrowing(other.state));
+		}
+		
 		@Override
 		public boolean lessOrEqualAux(InferredPair<T> other) throws SemanticException {
 			return inferred.lessOrEqual(other.inferred) && state.lessOrEqual(other.state);
