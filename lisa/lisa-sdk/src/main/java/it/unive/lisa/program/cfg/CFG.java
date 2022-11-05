@@ -471,7 +471,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> joinAsc(Statement node,
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> join(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
@@ -505,7 +505,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		}
 
 		@Override
-		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> joinDesc(Statement node,
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> meet(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();

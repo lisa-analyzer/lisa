@@ -125,9 +125,26 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T joinAsc(N node, T approx, T old) throws Exception;
-
-		T joinDesc(N node, T approx, T old) throws Exception;
+		T join(N node, T approx, T old) throws Exception;
+		
+		/**
+		 * Given a node and two states, meets the states (i.e. greatest lower bound
+		 * <i>or</i> narrowing) together.<br>
+		 * <br>
+		 * This callback is invoked after the exit state of a node has been
+		 * computed through {@link #semantics(Object, Object)}, to meet it with
+		 * results from older fixpoint iterations.
+		 * 
+		 * @param node   the node where the computation takes place
+		 * @param approx the most recent state
+		 * @param old    the older state
+		 * 
+		 * @return the met state
+		 * 
+		 * @throws Exception if something goes wrong during the computation
+		 */
+		T meet(N node, T approx, T old) throws Exception;
+		
 		/**
 		 * Given a node and two states, yields whether or not the most recent
 		 * one has to be considered <i>equal</i> to the older one in terms of
@@ -198,9 +215,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			if (oldApprox != null)
 				try {
 					if(this.ascendingPhase)
-						newApprox = implementation.joinAsc(current, newApprox, oldApprox);
+						newApprox = implementation.join(current, newApprox, oldApprox);
 					else
-						newApprox = implementation.joinDesc(current, newApprox, oldApprox);
+						newApprox = implementation.meet(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
