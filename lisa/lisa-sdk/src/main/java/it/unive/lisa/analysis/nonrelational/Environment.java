@@ -187,6 +187,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 * 
 	 * @throws SemanticException if something goes wrong during the computation
 	 */
+	@Override
 	@SuppressWarnings("unchecked")
 	public M glb(M other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)

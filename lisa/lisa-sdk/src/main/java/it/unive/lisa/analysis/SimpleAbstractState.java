@@ -206,6 +206,15 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
+	public SimpleAbstractState<H, V, T> glbAux(SimpleAbstractState<H, V, T> other) throws SemanticException {
+		return new SimpleAbstractState<>(
+				heapState.glb(other.heapState),
+				valueState.glb(other.valueState),
+				typeState.glb(other.typeState));
+	}
+
+	
+	@Override
 	public SimpleAbstractState<H, V, T> wideningAux(SimpleAbstractState<H, V, T> other) throws SemanticException {
 		return new SimpleAbstractState<>(
 				heapState.widening(other.heapState),
