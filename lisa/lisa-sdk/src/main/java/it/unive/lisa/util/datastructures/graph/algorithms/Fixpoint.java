@@ -143,7 +143,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T meet(N node, T approx, T old) throws Exception;
+		default T meet(N node, T approx, T old) throws Exception {
+			return approx;
+		}
 		
 		/**
 		 * Given a node and two states, yields whether or not the most recent
@@ -167,6 +169,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * @throws Exception if something goes wrong during the computation
 		 */
 		boolean equality(N node, T approx, T old) throws Exception;
+		
+		boolean doDescendingPhase();
 	}
 
 	/**
@@ -232,7 +236,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				throw new FixpointException(format(ERROR, "updating result", current, graph), e);
 			}
 		}
-		if(!ascendingPhase)
+		if(!ascendingPhase || !implementation.doDescendingPhase())
 			return result;		
 		
 		this.ascendingPhase = false;

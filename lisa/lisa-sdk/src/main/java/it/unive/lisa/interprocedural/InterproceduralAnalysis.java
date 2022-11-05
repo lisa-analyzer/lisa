@@ -81,7 +81,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 */
 	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold) throws FixpointException;
+			int wideningThreshold, boolean doDescendingPhase) throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the

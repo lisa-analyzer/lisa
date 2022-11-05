@@ -451,6 +451,10 @@ public class LiSAConfiguration {
 	public GraphType getAnalysisGraphs() {
 		return analysisGraphs;
 	}
+	
+	public boolean getDoDescendingPhase() {
+		return this.doDescendingPhase;
+	}
 
 	/**
 	 * Yields whether or not a json report file should be dumped at the end of
@@ -619,4 +623,6 @@ public class LiSAConfiguration {
 					.append(check.getClass().getSimpleName());
 		return res.toString();
 	}
+
+
 }

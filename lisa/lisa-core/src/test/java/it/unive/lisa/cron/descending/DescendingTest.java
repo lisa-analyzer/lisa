@@ -21,7 +21,8 @@ public class DescendingTest extends AnalysisTestExecutor {
 		LiSAConfiguration conf = new LiSAConfiguration()
 				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
-						new TypeEnvironment<>(new InferredTypes())));
+						new TypeEnvironment<>(new InferredTypes())))
+				.setDoDescendingPhase(true);
 		perform("descending", "program.imp", conf);
 	}
 }
