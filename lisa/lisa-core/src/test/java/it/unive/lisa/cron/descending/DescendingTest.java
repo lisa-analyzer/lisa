@@ -22,7 +22,8 @@ public class DescendingTest extends AnalysisTestExecutor {
 				.setSerializeResults(true)
 				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 						new TypeEnvironment<>(new InferredTypes())))
-				.setDoDescendingPhase(true);
+				.setDoDescendingPhase(true)
+				.setDumpAnalysis(GraphType.DOT);
 		perform("descending", "program.imp", conf);
 	}
 }

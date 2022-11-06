@@ -425,6 +425,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		private final InterproceduralAnalysis<A, H, V, T> interprocedural;
 		private final int widenAfter;
 		private final Map<Statement, Integer> lubs;
+		private final Map<Statement, Integer> glbs;
 		private final boolean doDescendingPhase;
 
 		private CFGFixpoint(int widenAfter, InterproceduralAnalysis<A, H, V, T> interprocedural, 
@@ -432,6 +433,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			this.widenAfter = widenAfter;
 			this.interprocedural = interprocedural;
 			this.lubs = new HashMap<>(CFG.this.getNodesCount());
+			this.glbs = new HashMap<>(CFG.this.getNodesCount());
 			this.doDescendingPhase = doDescendingPhase;
 		}
 
@@ -514,12 +516,31 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> meet(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+			
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
 			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
-
-			newApprox = newApprox.narrowing(oldApprox);
-			newIntermediate = newIntermediate.lub(oldIntermediate);
-
+			
+			newApprox = oldApprox.narrowing(newApprox);
+			newIntermediate = oldIntermediate.narrowing(newIntermediate);
+			/*
+			if (widenAfter == 0) {
+				newApprox = newApprox.glb(oldApprox);
+				newIntermediate = newIntermediate.glb(oldIntermediate);
+			} else {
+				// we multiply by the number of predecessors since
+				// if we have more than one
+				// the threshold will be reached faster
+				int glb = glbs.computeIfAbsent(node, st -> widenAfter * predecessorsOf(st).size());
+				if (glb > 0) {
+					newApprox = newApprox.glb(oldApprox);
+					newIntermediate = newIntermediate.glb(oldIntermediate);
+				} else {
+					newApprox = oldApprox.narrowing(newApprox);
+					newIntermediate = oldIntermediate.narrowing(newIntermediate);
+				}
+				glbs.put(node, --glb);
+			}
+			*/		
 			return Pair.of(newApprox, newIntermediate);
 		}
 		

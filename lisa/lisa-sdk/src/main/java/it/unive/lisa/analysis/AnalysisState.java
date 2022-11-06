@@ -248,7 +248,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	public AnalysisState<A, H, V, T> narrowingAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.narrowing(other.state),
-				computedExpressions.lub(other.computedExpressions),
+				computedExpressions.glb(other.computedExpressions),
 				aliasing.narrowing(other.aliasing));
 		}
 		

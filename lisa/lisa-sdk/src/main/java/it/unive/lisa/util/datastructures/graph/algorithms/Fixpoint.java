@@ -193,9 +193,12 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
-		result.clear();
-		startingPoints.keySet().forEach(ws::push);
-
+		
+		if(this.ascendingPhase) {
+			result.clear();
+			startingPoints.keySet().forEach(ws::push);
+		}
+		
 		T newApprox;
 		while (!ws.isEmpty()) {
 			N current = ws.pop();
@@ -214,7 +217,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			} catch (Exception e) {
 				throw new FixpointException(format(ERROR, "computing semantics", current, graph), e);
 			}
-
+			
 			T oldApprox = result.get(current);
 			if (oldApprox != null)
 				try {
@@ -225,9 +228,11 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
-
+			
 			try {
-				if (oldApprox == null || !implementation.equality(current, newApprox, oldApprox)) {
+				if (oldApprox == null || 
+				   (ascendingPhase &&	!implementation.equality(current, newApprox, oldApprox)) ||
+				   (!ascendingPhase && !implementation.equality(current, oldApprox, newApprox))) {
 					result.put(current, newApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);
@@ -236,10 +241,13 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				throw new FixpointException(format(ERROR, "updating result", current, graph), e);
 			}
 		}
+		
 		if(!ascendingPhase || !implementation.doDescendingPhase())
 			return result;		
-		
+	
 		this.ascendingPhase = false;
+		
+		graph.getNodes().forEach(ws::push);
 		
 		return this.fixpoint(startingPoints, ws, implementation);
 	}
