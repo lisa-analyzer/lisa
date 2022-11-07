@@ -110,12 +110,12 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	public TypeEnvironment<T> bottom() {
 		return isBottom() ? this : new TypeEnvironment<>(lattice.bottom(), null, lattice.bottom());
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return super.isTop() && stack.isTop();
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return super.isBottom() && stack.isBottom();

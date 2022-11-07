@@ -133,12 +133,12 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		return isBottom() ? this
 				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList());
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return super.isTop() && substitution.isEmpty();
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return super.isBottom() && substitution.isEmpty();

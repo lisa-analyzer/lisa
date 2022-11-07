@@ -25,10 +25,12 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
@@ -99,7 +101,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		Collection<CFG> allCFGs = app.getAllCFGs();
 
 		AtomicBoolean htmlViewer = new AtomicBoolean(false), subnodes = new AtomicBoolean(false);
-		if (conf.isSerializeInputs())
+		if (conf.serializeInputs)
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input cfgs", "cfgs")) {
 				SerializableGraph graph = cfg.toSerializableGraph();
 				String filename = cfg.getDescriptor().getFullSignatureWithParNames() + "_cfg";
@@ -107,7 +109,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				try {
 					fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 
-					dump(fileManager, filename, conf.getAnalysisGraphs(), graph, htmlViewer, subnodes);
+					dump(fileManager, filename, conf.analysisGraphs, graph, htmlViewer, subnodes);
 				} catch (IOException e) {
 					LOG.error("Exception while dumping the analysis results on {}",
 							cfg.getDescriptor().getFullSignature());
@@ -116,8 +118,8 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 			}
 
 		CheckTool tool = new CheckTool();
-		if (!conf.getSyntacticChecks().isEmpty())
-			ChecksExecutor.executeAll(tool, app, conf.getSyntacticChecks());
+		if (!conf.syntacticChecks.isEmpty())
+			ChecksExecutor.executeAll(tool, app, conf.syntacticChecks);
 		else
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
@@ -129,7 +131,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		}
 
 		try {
-			interproc.init(app, callGraph, conf.getOpenCallPolicy());
+			interproc.init(app, callGraph, conf.openCallPolicy);
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisExecutionException(
@@ -143,7 +145,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Collection<SemanticCheck<A, H, V, T>> semanticChecks = (Collection) conf.getSemanticChecks();
+			Collection<SemanticCheck<A, H, V, T>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty()) {
 				CheckToolWithAnalysisResults<A, H, V, T> tool2 = new CheckToolWithAnalysisResults<>(
 						tool,
@@ -159,6 +161,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		return tool.getWarnings();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void analyze(Collection<CFG> allCFGs, FileManager fileManager, AtomicBoolean htmlViewer,
 			AtomicBoolean subnodes) {
 		A state = this.state.top();
@@ -167,15 +170,16 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					try {
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
-								conf.getFixpointWorkingSet(), conf.getWideningThreshold());
+								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
+								conf.wideningThreshold);
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
 					}
 				});
 
-		GraphType type = conf.getAnalysisGraphs();
-		if (conf.isSerializeResults() || type != GraphType.NONE) {
+		GraphType type = conf.analysisGraphs;
+		if (conf.serializeResults || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
@@ -187,7 +191,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						filename += "_" + result.getId().hashCode();
 
 					try {
-						if (conf.isSerializeResults())
+						if (conf.serializeResults)
 							fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 
 						dump(fileManager, filename, type, graph, htmlViewer, subnodes);

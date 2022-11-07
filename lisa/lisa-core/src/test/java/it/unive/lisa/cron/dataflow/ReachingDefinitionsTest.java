@@ -15,13 +15,12 @@ public class ReachingDefinitionsTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testReachingDefinitions() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(
-						getDefaultFor(AbstractState.class,
-								getDefaultFor(HeapDomain.class),
-								new ReachingDefinitions(),
-								getDefaultFor(TypeDomain.class)));
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new ReachingDefinitions(),
+				getDefaultFor(TypeDomain.class));
 		perform("reaching-definitions", "reaching-definitions.imp", conf);
 	}
 }

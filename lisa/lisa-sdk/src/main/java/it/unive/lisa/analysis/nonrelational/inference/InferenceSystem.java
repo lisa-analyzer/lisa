@@ -125,12 +125,12 @@ public class InferenceSystem<T extends InferredValue<T>>
 	public InferenceSystem<T> bottom() {
 		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return super.isTop() && inferred.isTop();
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return super.isBottom() && inferred.isBottom();

@@ -119,12 +119,12 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	public ValueEnvironment<T> bottom() {
 		return isBottom() ? this : new ValueEnvironment<>(lattice.bottom(), null, lattice.bottom());
 	}
-	
+
 	@Override
 	public boolean isTop() {
 		return super.isTop() && stack.isTop();
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return super.isBottom() && stack.isBottom();
