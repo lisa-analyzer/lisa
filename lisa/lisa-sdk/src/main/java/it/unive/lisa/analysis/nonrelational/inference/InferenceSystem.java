@@ -111,22 +111,29 @@ public class InferenceSystem<T extends InferredValue<T>>
 
 	@Override
 	public InferenceSystem<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		// we update the inferred value
+		if (isBottom())
+			return this;
 		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
 	@Override
 	public InferenceSystem<T> top() {
-		// we do not redefine isTop() since we can ignore 'inferred':
-		// we can infer a non-top value even with a top environment
 		return new InferenceSystem<>(lattice.top(), null, inferred.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
-		// we do not redefine isBottom() since we can ignore 'inferred':
-		// we can infer a non-bottom value even with a top environment
 		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
+	}
+	
+	@Override
+	public boolean isTop() {
+		return super.isTop() && inferred.isTop();
+	}
+	
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && inferred.isBottom();
 	}
 
 	@Override

@@ -143,6 +143,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return (M) this;
+		
 		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
@@ -210,6 +213,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 

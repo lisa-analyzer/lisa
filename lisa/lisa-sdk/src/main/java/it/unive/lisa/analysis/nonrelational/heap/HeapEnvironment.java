@@ -116,7 +116,8 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		// environment does not change without an assignment
+		if (isBottom())
+			return this;
 		T eval = lattice.eval(expression, this, pp);
 		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
 	}
@@ -131,6 +132,16 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	public HeapEnvironment<T> bottom() {
 		return isBottom() ? this
 				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList());
+	}
+	
+	@Override
+	public boolean isTop() {
+		return super.isTop() && substitution.isEmpty();
+	}
+	
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && substitution.isEmpty();
 	}
 
 	@Override
