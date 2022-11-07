@@ -20,7 +20,7 @@ import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the modulo operation ({@code %}, returning the
- * remainder of the division between the two operands and taking the sign of the
+ * Euclidean module between the two operands and taking the sign of the
  * divisor). Both operands' types must be instances of {@link NumericType}. The
  * type of this expression is the common numerical type of its operands,
  * according to the type inference.

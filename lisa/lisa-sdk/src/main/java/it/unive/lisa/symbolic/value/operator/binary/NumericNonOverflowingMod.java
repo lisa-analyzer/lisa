@@ -7,9 +7,8 @@ import it.unive.lisa.type.NumericType;
 /**
  * Given two expressions that both evaluate to numeric values, a
  * {@link BinaryExpression} using this operator computes the arithmetic modulo
- * (the remainder of the division between the two operands and taking the sign
- * of the divisor) of those values. This operation does never
- * overflows/underflows.<br>
+ * (Euclidean modulo between the two operands and taking the sign of the
+ * divisor) of those values. This operation does never overflows/underflows.<br>
  * <br>
  * First argument expression type: {@link NumericType}<br>
  * Second argument expression type: {@link NumericType}<br>
