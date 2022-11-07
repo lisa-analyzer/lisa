@@ -2,15 +2,16 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 
 import static java.lang.String.format;
 
-import it.unive.lisa.util.collections.workset.WorkingSet;
-import it.unive.lisa.util.datastructures.graph.Edge;
-import it.unive.lisa.util.datastructures.graph.Graph;
-import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import it.unive.lisa.util.collections.workset.WorkingSet;
+import it.unive.lisa.util.datastructures.graph.Edge;
+import it.unive.lisa.util.datastructures.graph.Graph;
+import it.unive.lisa.util.datastructures.graph.Node;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
@@ -202,7 +203,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		T newApprox;
 		while (!ws.isEmpty()) {
 			N current = ws.pop();
-
+			
 			if (current == null)
 				throw new FixpointException("null node encountered during fixpoint in '" + graph + "'");
 			if (!graph.containsNode(current))
@@ -231,8 +232,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			
 			try {
 				if (oldApprox == null || 
-				   (ascendingPhase &&	!implementation.equality(current, newApprox, oldApprox)) ||
-				   (!ascendingPhase && !implementation.equality(current, oldApprox, newApprox))) {
+				   (ascendingPhase  &&	!implementation.equality(current, newApprox, oldApprox)) ||
+				   (!ascendingPhase &&  !implementation.equality(current, oldApprox, newApprox))) {
 					result.put(current, newApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);

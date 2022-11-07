@@ -1,5 +1,9 @@
 package it.unive.lisa.analysis;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -11,9 +15,6 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * An abstract state of the analysis, composed by a heap state modeling the

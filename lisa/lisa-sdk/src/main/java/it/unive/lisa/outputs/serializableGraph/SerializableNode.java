@@ -1,10 +1,12 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import it.unive.lisa.util.collections.CollectionUtilities;
 import java.util.Collections;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import it.unive.lisa.util.collections.CollectionUtilities;
 
 /**
  * A node of a {@link SerializableGraph}, represented by a numeric id.

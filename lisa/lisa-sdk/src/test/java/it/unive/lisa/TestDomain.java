@@ -1,5 +1,7 @@
 package it.unive.lisa;
 
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -7,7 +9,6 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
 public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression> extends BaseLattice<T>

@@ -1,7 +1,8 @@
 package it.unive.lisa.analysis.value;
 
-import it.unive.lisa.type.Type;
 import java.util.Set;
+
+import it.unive.lisa.type.Type;
 
 /**
  * An domain that is able to determine the runtime types of an expression given

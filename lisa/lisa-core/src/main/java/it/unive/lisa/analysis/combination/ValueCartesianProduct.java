@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.combination;
 
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -38,5 +39,11 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	@Override
 	public boolean isBottom() {
 		return left.isBottom() && right.isBottom();
+	}
+
+	@Override
+	public ValueCartesianProduct<T1, T2> glb(ValueCartesianProduct<T1, T2> other) throws SemanticException {
+		// TODO Auto-generated method stub
+		return this.bottom();
 	}
 }

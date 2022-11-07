@@ -1,12 +1,13 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.HashSet;
 
 /**
  * A {@link ControlFlowStructure} representing a if-then-else.

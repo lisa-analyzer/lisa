@@ -1,9 +1,10 @@
 package it.unive.lisa.analysis.symbols;
 
-import it.unive.lisa.analysis.lattices.SetLattice;
-import it.unive.lisa.util.collections.CastIterable;
 import java.util.Collections;
 import java.util.Set;
+
+import it.unive.lisa.analysis.lattices.SetLattice;
+import it.unive.lisa.util.collections.CastIterable;
 
 /**
  * A {@link SetLattice} of {@link Symbol}s to be used as aliases.

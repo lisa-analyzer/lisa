@@ -1,12 +1,13 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * Given two expressions, a {@link BinaryExpression} using this operator checks

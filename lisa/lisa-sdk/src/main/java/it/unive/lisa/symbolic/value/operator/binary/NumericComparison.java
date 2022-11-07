@@ -1,11 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import java.util.Collections;
-import java.util.Set;
 
 /**
  * A common implementation for classes implementing {@link BinaryOperator} and

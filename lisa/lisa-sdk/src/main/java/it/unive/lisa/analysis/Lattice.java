@@ -66,7 +66,9 @@ public interface Lattice<L extends Lattice<L>> {
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	L glb(L other) throws SemanticException;
+	default L glb(L other) throws SemanticException {
+		return bottom();
+	}
 	
 	/**
 	 * Performs the narrowing operation between this lattice element and the

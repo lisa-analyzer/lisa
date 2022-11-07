@@ -1,7 +1,8 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import it.unive.lisa.program.cfg.CodeMember;
 import java.util.Collection;
+
+import it.unive.lisa.program.cfg.CodeMember;
 
 /**
  * Marker for {@link Call}s that have already been resolved, and that thus know

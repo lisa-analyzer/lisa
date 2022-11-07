@@ -1,10 +1,12 @@
 package it.unive.lisa.analysis.dataflow;
 
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.commons.collections4.SetUtils;
+
+import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.lattices.InverseSetLattice;
 
 /**
  * A {@link DataflowDomain} for <b>forward</b> and <b>definite</b> dataflow
@@ -47,5 +49,11 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	@Override
 	public boolean lessOrEqualAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
 		return this.getDataflowElements().containsAll(other.getDataflowElements());
+	}
+
+	@Override
+	public DefiniteForwardDataflowDomain<E> glbAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
+		// TODO Auto-generated method stub
+		return this.bottom();
 	}
 }

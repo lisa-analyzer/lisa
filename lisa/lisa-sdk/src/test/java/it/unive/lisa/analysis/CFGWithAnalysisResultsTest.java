@@ -2,6 +2,10 @@ package it.unive.lisa.analysis;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Map;
+
+import org.junit.Test;
+
 import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeDomain;
@@ -17,8 +21,6 @@ import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
-import java.util.Map;
-import org.junit.Test;
 
 public class CFGWithAnalysisResultsTest {
 

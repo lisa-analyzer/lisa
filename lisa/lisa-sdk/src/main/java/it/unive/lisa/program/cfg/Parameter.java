@@ -1,5 +1,7 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.annotations.Annotation;
@@ -8,7 +10,6 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import java.util.Objects;
 
 /**
  * A CFG parameter identified by its name and its type, containing the

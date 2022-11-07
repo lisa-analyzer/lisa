@@ -1,7 +1,8 @@
 package it.unive.lisa.analysis.symbols;
 
-import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import java.util.Map;
+
+import it.unive.lisa.analysis.lattices.FunctionalLattice;
 
 /**
  * A {@link FunctionalLattice} mapping {@link Symbol}s to {@link Aliases}, that

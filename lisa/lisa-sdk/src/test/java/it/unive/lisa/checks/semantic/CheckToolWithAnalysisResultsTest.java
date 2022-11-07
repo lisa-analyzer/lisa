@@ -3,6 +3,15 @@ package it.unive.lisa.checks.semantic;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.junit.Test;
+
 import it.unive.lisa.TestHeapDomain;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeDomain;
@@ -41,13 +50,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.type.Type;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import org.apache.commons.collections4.CollectionUtils;
-import org.junit.Test;
 
 public class CheckToolWithAnalysisResultsTest {
 

@@ -1,12 +1,13 @@
 package it.unive.lisa.type;
 
-import it.unive.lisa.program.Program;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+
+import it.unive.lisa.program.Program;
 
 /**
  * A type system, knowing about the types that can appear in a {@link Program}.

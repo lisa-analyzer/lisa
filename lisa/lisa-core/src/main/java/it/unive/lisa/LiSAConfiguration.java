@@ -1,5 +1,10 @@
 package it.unive.lisa;
 
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.concurrent.ConcurrentHashMap;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -14,10 +19,6 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -369,7 +370,7 @@ public class LiSAConfiguration {
 	}
 	
 	/**
-	 * Sets whether or not the fixpoint algorithm should compute del descending phase
+	 * Sets whether or not the fixpoint algorithm should compute del descending phase.
 	 * 
 	 * @param doDescendingPhase 
 	 * 
@@ -452,6 +453,11 @@ public class LiSAConfiguration {
 		return analysisGraphs;
 	}
 	
+	/**
+	 * Yields whether the descending phase is enabled.
+	 * 
+	 * @return whether the descending phase is enabled
+	 */
 	public boolean getDoDescendingPhase() {
 		return this.doDescendingPhase;
 	}

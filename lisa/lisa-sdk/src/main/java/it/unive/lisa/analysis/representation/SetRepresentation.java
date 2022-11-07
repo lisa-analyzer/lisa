@@ -1,14 +1,16 @@
 package it.unive.lisa.analysis.representation;
 
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.function.Function;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A {@link DomainRepresentation} in the form of a set of values.

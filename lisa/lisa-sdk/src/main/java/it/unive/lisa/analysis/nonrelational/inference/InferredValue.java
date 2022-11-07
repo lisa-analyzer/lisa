@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
+import java.util.Map;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
@@ -8,7 +10,6 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by

@@ -75,7 +75,9 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public abstract L glbAux(L other) throws SemanticException;
+	public L glbAux(L other) throws SemanticException {
+		return bottom();
+	} 
 
 	
 	@Override

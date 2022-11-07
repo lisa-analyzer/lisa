@@ -1,5 +1,21 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -33,20 +49,6 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImple
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -261,18 +263,31 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               working set
 	 */
 	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					int widenAfter,
-					boolean doDescendingPhase)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>,
+	T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			AnalysisState<A, H, V, T> entryState,
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			WorkingSet<Statement> ws,
+			int widenAfter,
+			boolean doDescendingPhase)
 					throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, widenAfter, doDescendingPhase);
+	}
+
+	public <A extends AbstractState<A, H, V, T>,
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>,
+	T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			AnalysisState<A, H, V, T> entryState,
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			WorkingSet<Statement> ws,
+			int widenAfter)
+					throws FixpointException {
+	
+		return fixpoint(entryState, interprocedural, ws, widenAfter, false);
 	}
 
 	/**
@@ -323,14 +338,14 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               working set
 	 */
 	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					int widenAfter,
-					boolean doDescendingPhase) throws FixpointException {
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>,
+	T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			Collection<Statement> entrypoints, AnalysisState<A, H, V, T> entryState,
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			WorkingSet<Statement> ws,
+			int widenAfter,
+			boolean doDescendingPhase) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, widenAfter, doDescendingPhase);
@@ -386,24 +401,24 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               working set
 	 */
 	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					AnalysisState<A, H, V, T> singleton,
-					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					int widenAfter,
-					boolean doDescendingPhase)
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>,
+	T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			AnalysisState<A, H, V, T> singleton,
+			Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
+			InterproceduralAnalysis<A, H, V, T> interprocedural,
+			WorkingSet<Statement> ws,
+			int widenAfter,
+			boolean doDescendingPhase)
 					throws FixpointException {
 
 		Fixpoint<CFG, Statement, Edge,
-				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fix = new Fixpoint<>(this);
+		Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fix = new Fixpoint<>(this);
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> starting = new HashMap<>();
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
 		Map<Statement,
-				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
-						new CFGFixpoint<>(widenAfter, interprocedural, doDescendingPhase));
+		Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
+				new CFGFixpoint<>(widenAfter, interprocedural, doDescendingPhase));
 
 		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
 		for (Entry<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> e : fixpoint.entrySet()) {
@@ -416,11 +431,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	}
 
 	private class CFGFixpoint<A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>>
-			implements FixpointImplementation<Statement, Edge,
-					Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> {
+	H extends HeapDomain<H>,
+	V extends ValueDomain<V>,
+	T extends TypeDomain<T>>
+	implements FixpointImplementation<Statement, Edge,
+	Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> {
 
 		private final InterproceduralAnalysis<A, H, V, T> interprocedural;
 		private final int widenAfter;
@@ -488,8 +503,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			/*
 			newApprox = oldApprox.widening(newApprox);
 			newIntermediate = oldIntermediate.widening(newIntermediate);
-			*/
-			
+			 */
+
 			if (widenAfter == 0) {
 				newApprox = newApprox.lub(oldApprox);
 				newIntermediate = newIntermediate.lub(oldIntermediate);
@@ -507,7 +522,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 				lubs.put(node, --lub);
 			}
-			
+
 
 			return Pair.of(newApprox, newIntermediate);
 		}
@@ -516,10 +531,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> meet(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
-			
+
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
 			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
-			
+
 			newApprox = oldApprox.narrowing(newApprox);
 			newIntermediate = oldIntermediate.narrowing(newIntermediate);
 			/*
@@ -540,10 +555,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				}
 				glbs.put(node, --glb);
 			}
-			*/		
+			 */		
 			return Pair.of(newApprox, newIntermediate);
 		}
-		
+
 		@Override
 		public boolean equality(Statement node, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
@@ -603,8 +618,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	private void shiftVariableScopes(Statement node) {
 		Collection<
-				VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
-						.collect(Collectors.toList());
+		VariableTableEntry> starting = descriptor.getVariables().stream().filter(v -> v.getScopeStart() == node)
+		.collect(Collectors.toList());
 		Collection<VariableTableEntry> ending = descriptor.getVariables().stream().filter(v -> v.getScopeEnd() == node)
 				.collect(Collectors.toList());
 		if (ending.isEmpty() && starting.isEmpty())

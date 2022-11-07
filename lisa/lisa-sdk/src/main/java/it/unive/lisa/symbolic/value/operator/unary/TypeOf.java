@@ -1,13 +1,14 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.TypeOperator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.TypeTokenType;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Given any expression, a {@link UnaryExpression} using this operator computes
