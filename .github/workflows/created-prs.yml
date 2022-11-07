@@ -12,12 +12,14 @@ jobs:
 
     steps:
     - name: Move to the PR-WIP column
-      uses: alex-page/github-project-automation-plus@v0.7.1
+      uses: leonsteinhaeuser/project-beta-automations@v2.0.1
       with:
-        project: LiSA
-        column: PR-WIP
-        repo-token: ${{ secrets.LISA_PAT }}
-    - name: add label
+        gh_token: ${{ secrets.LISA_PAT }}
+        organization: lisa-analyzer
+        project_id: 3
+        resource_node_id: ${{ github.event.pull_request.node_id }}
+        status_value: 'PR WIP'
+    - name: Add WIP label
       uses: andymckay/labeler@22d5392de2b725cea4b284df5824125054049d84
       with:
         add-labels: '🏗 resolution:wip'
