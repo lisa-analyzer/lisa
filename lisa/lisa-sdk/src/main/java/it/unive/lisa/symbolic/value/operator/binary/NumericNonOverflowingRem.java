@@ -1,43 +1,39 @@
 package it.unive.lisa.symbolic.value.operator.binary;
 
 import it.unive.lisa.symbolic.value.BinaryExpression;
-import it.unive.lisa.symbolic.value.operator.ComparisonOperator;
-import it.unive.lisa.type.BooleanType;
+import it.unive.lisa.symbolic.value.operator.RemainderOperator;
 import it.unive.lisa.type.NumericType;
 
 /**
  * Given two expressions that both evaluate to numeric values, a
- * {@link BinaryExpression} using this operator checks if the value of the first
- * argument is greater or equal than the value of the right-hand side.<br>
+ * {@link BinaryExpression} using this operator computes the arithmetic
+ * remainder (the remainder of the division between the two operands and taking
+ * the sign of the dividend) of those values. This operation does never
+ * overflows/underflows.<br>
  * <br>
  * First argument expression type: {@link NumericType}<br>
  * Second argument expression type: {@link NumericType}<br>
- * Computed expression type: {@link BooleanType}
+ * Computed expression type: {@link NumericType}
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class ComparisonGe extends NumericComparison {
+public class NumericNonOverflowingRem extends NumericOperation implements RemainderOperator {
 
 	/**
 	 * The singleton instance of this class.
 	 */
-	public static final ComparisonGe INSTANCE = new ComparisonGe();
+	public static final NumericNonOverflowingRem INSTANCE = new NumericNonOverflowingRem();
 
 	/**
 	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
-	protected ComparisonGe() {
+	protected NumericNonOverflowingRem() {
 	}
 
 	@Override
 	public String toString() {
-		return ">=";
-	}
-
-	@Override
-	public ComparisonOperator opposite() {
-		return ComparisonLt.INSTANCE;
+		return "%";
 	}
 }

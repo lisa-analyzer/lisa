@@ -26,7 +26,7 @@ public class Numeric64BitSub extends NumericOperation
 	public static final Numeric64BitSub INSTANCE = new Numeric64BitSub();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

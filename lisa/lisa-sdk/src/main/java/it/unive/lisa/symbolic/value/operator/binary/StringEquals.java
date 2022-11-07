@@ -26,7 +26,7 @@ public class StringEquals extends StringOperation {
 	public static final StringEquals INSTANCE = new StringEquals();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
