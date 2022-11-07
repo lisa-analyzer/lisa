@@ -221,15 +221,22 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			
 			T oldApprox = result.get(current);
 			if (oldApprox != null)
-				try {
-					if(this.ascendingPhase)
+				if(this.ascendingPhase) {
+					try {
 						newApprox = implementation.join(current, newApprox, oldApprox);
-					else
-						newApprox = implementation.meet(current, newApprox, oldApprox);
-				} catch (Exception e) {
-					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
+					}
+					catch(Exception e) {
+						throw new FixpointException(format(ERROR, "joining states", current, graph), e);
+					}
 				}
-			
+				else {
+					try {
+						newApprox = implementation.meet(current, newApprox, oldApprox);
+					}
+					catch(Exception e) {
+						throw new FixpointException(format(ERROR, "meeting states", current, graph), e);
+					}
+				}
 			try {
 				if (oldApprox == null || 
 				   (ascendingPhase  &&	!implementation.equality(current, newApprox, oldApprox)) ||
