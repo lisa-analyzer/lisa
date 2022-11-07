@@ -115,6 +115,12 @@ public class LiSAConfiguration {
 	private GraphType analysisGraphs;
 
 	/**
+	 * Whether or not the inputs {@link CFG}s to the analysis should be dumped
+	 * in json format
+	 */
+	private boolean serializeInputs;
+
+	/**
 	 * Whether or not the result of the analysis should be dumped in json
 	 * format, if it is executed
 	 */
@@ -308,6 +314,19 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Sets whether or not the the inputs {@link CFG}s to the analysis should be
+	 * dumped in json format.
+	 * 
+	 * @param serializeInputs whether or not the graphs should be produced
+	 * 
+	 * @return the current (modified) configuration
+	 */
+	public LiSAConfiguration setSerializeInputs(boolean serializeInputs) {
+		this.serializeInputs = serializeInputs;
+		return this;
+	}
+
+	/**
 	 * Sets whether or not the results of the analyses should be dumped in the
 	 * form of json graphs.
 	 * 
@@ -444,6 +463,16 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * Yields whether or not the the inputs {@link CFG}s to the analysis should
+	 * be dumped in json format.
+	 * 
+	 * @return {@code true} if the graphs should be produced
+	 */
+	public boolean isSerializeInputs() {
+		return serializeInputs;
+	}
+
+	/**
 	 * Yields whether or not the results of the analyses should be dumped in the
 	 * form of json graphs.
 	 * 
@@ -504,6 +533,7 @@ public class LiSAConfiguration {
 		result = prime * result + (jsonOutput ? 1231 : 1237);
 		result = prime * result + ((openCallPolicy == null) ? 0 : openCallPolicy.hashCode());
 		result = prime * result + ((semanticChecks == null) ? 0 : semanticChecks.hashCode());
+		result = prime * result + (serializeInputs ? 1231 : 1237);
 		result = prime * result + (serializeResults ? 1231 : 1237);
 		result = prime * result + ((syntacticChecks == null) ? 0 : syntacticChecks.hashCode());
 		result = prime * result + wideningThreshold;
@@ -554,6 +584,8 @@ public class LiSAConfiguration {
 				return false;
 		} else if (!semanticChecks.equals(other.semanticChecks))
 			return false;
+		if (serializeInputs != other.serializeInputs)
+			return false;
 		if (serializeResults != other.serializeResults)
 			return false;
 		if (syntacticChecks == null) {
@@ -577,6 +609,8 @@ public class LiSAConfiguration {
 		res.append("LiSA configuration:")
 				.append("\n  workdir: ")
 				.append(String.valueOf(workdir))
+				.append("\n  serialize inputs: ")
+				.append(serializeInputs)
 				.append("\n  serialize results: ")
 				.append(serializeResults)
 				.append("\n  analysis results format: ")

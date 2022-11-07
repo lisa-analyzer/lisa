@@ -50,6 +50,13 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void testInputSerialization() throws AnalysisSetupException {
+		LiSAConfiguration conf = config();
+		conf.setSerializeInputs(true);
+		perform("visualization", "inputs", "program.imp", conf);
+	}
+
+	@Test
 	public void testDOT() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
 		conf.setDumpAnalysis(GraphType.DOT);
