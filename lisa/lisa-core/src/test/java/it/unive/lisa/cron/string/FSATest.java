@@ -16,10 +16,10 @@ public class FSATest extends AnalysisTestExecutor {
 
 	@Test
 	public void testFSA() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new FSA(),
-						new TypeEnvironment<>(new InferredTypes())));
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new FSA(),
+				new TypeEnvironment<>(new InferredTypes()));
 		perform("fsa", "program.imp", conf);
 	}
 }
