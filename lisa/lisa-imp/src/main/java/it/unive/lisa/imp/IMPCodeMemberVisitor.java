@@ -43,6 +43,8 @@ import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAddOrConcat;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
+import it.unive.lisa.imp.expressions.IMPBumpArray;
+import it.unive.lisa.imp.expressions.IMPBumpObj;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
 import it.unive.lisa.imp.types.ClassType;
@@ -538,6 +540,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
 			else
 				return visitNewReferenceType(ctx.newReferenceType());
+		else if (ctx.BUMP() != null)
+			if (ctx.newBasicArrayExpr() != null)
+				return visitBumpBasicArrayExpr(ctx.newBasicArrayExpr());
+			else
+				return visitBumpReferenceType(ctx.newReferenceType());
 		else if (ctx.arrayAccess() != null)
 			return visitArrayAccess(ctx.arrayAccess());
 		else if (ctx.fieldAccess() != null)
@@ -613,6 +620,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
+	private Expression visitBumpBasicArrayExpr(NewBasicArrayExprContext ctx) {
+		return new IMPBumpArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
+				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+	}
+
 	@Override
 	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
@@ -635,6 +647,17 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return Int32Type.INSTANCE;
 		else
 			return Float32Type.INSTANCE;
+	}
+
+	private Expression visitBumpReferenceType(NewReferenceTypeContext ctx) {
+		// null since we do not want to create a new one, class types should
+		// have been created during the preprocessing
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		if (ctx.arrayCreatorRest() != null)
+			return new IMPBumpArray(cfg, file, getLine(ctx), getCol(ctx), base,
+					visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		else
+			return new IMPBumpObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
 	}
 
 	@Override

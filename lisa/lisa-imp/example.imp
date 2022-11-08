@@ -118,18 +118,24 @@ class example {
 		new float[5]; new boolean[5]; new example[5];
 		
 		// 7) an object creation
-		def obj = new example(); // as method calls, constructor calls can also recieve parameters
+		def obj = new example(); // as method calls, constructor calls can also receive parameters
 
-		// 8) an access to an array element 
+		// 8) an array creation statically allocated
+		def staticArray = bump int[5]; 
+		
+		// 9) an object creation statically allocated
+		def staticObj = bump example(); // as method calls
+
+		// 10) an access to an array element 
 		// only arrays stored in variables or parameters are supported
 		intArray[2];
 		
-		// 9) a field access
+		// 11) a field access
 		// the receiver must always be explicit (this, super or a variable/parameter)
 		this.field;
 		obj.field;
 		
-		// 10) a method call
+		// 12) a method call
 		// the receiver must always be explicit (this, super or a variable/parameter)
 		obj.foo();
 		obj.foo3(5, 3);
