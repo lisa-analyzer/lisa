@@ -304,9 +304,9 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator == ComparisonGe.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
-		else if (operator == ComparisonGt.INSTANCE)
 			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp);
+		else if (operator == ComparisonGt.INSTANCE)
+			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
 		else if (operator == ComparisonLe.INSTANCE) {
 			Interval glb = null;
 			try {
