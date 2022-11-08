@@ -23,13 +23,10 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.UnitType;
 import it.unive.lisa.type.Untyped;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * An access to an instance {@link Global} of a {@link ClassUnit}.
@@ -125,39 +122,26 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		TypeSystem types = getProgram().getTypes();
 		for (Type recType : expr.getRuntimeTypes(types))
 			if (recType.isPointerType()) {
-				Collection<CompilationUnit> units;
+				Type inner = recType.asPointerType().getInnerType();
+				if (!inner.isUnitType())
+					continue;
 
-				Set<Type> rectypes = recType.asPointerType().getInnerTypes();
-				Type rectype = Type.commonSupertype(rectypes, Untyped.INSTANCE);
-				HeapDereference container = new HeapDereference(rectype, expr, loc);
-				container.setRuntimeTypes(rectypes);
-
-				if (recType.isUnitType())
-					units = Collections.singleton(recType.asUnitType().getUnit());
-				else {
-					units = rectypes
-							.stream()
-							.filter(Type::isUnitType)
-							.map(Type::asUnitType)
-							.map(UnitType::getUnit)
-							.collect(Collectors.toSet());
-					if (units.isEmpty())
-						continue;
-				}
+				HeapDereference container = new HeapDereference(inner, expr, loc);
+				container.setRuntimeTypes(Collections.singleton(inner));
+				CompilationUnit unit = inner.asUnitType().getUnit();
 
 				Set<CompilationUnit> seen = new HashSet<>();
 				HierarcyTraversalStrategy strategy = getProgram().getFeatures().getTraversalStrategy();
-				for (CompilationUnit unit : units)
-					for (CompilationUnit cu : strategy.traverse(this, unit))
-						if (seen.add(unit)) {
-							Global global = cu.getInstanceGlobal(target, false);
-							if (global != null) {
-								Variable var = global.toSymbolicVariable(loc);
-								AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
-								result = result.lub(state.smallStepSemantics(access, this));
-								atLeastOne = true;
-							}
+				for (CompilationUnit cu : strategy.traverse(this, unit))
+					if (seen.add(unit)) {
+						Global global = cu.getInstanceGlobal(target, false);
+						if (global != null) {
+							Variable var = global.toSymbolicVariable(loc);
+							AccessChild access = new AccessChild(var.getStaticType(), container, var, loc);
+							result = result.lub(state.smallStepSemantics(access, this));
+							atLeastOne = true;
 						}
+					}
 			}
 
 		if (atLeastOne)
@@ -167,7 +151,7 @@ public class AccessInstanceGlobal extends UnaryExpression {
 		Set<Type> rectypes = new HashSet<>();
 		for (Type t : expr.getRuntimeTypes(types))
 			if (t.isPointerType())
-				rectypes.addAll(t.asPointerType().getInnerTypes());
+				rectypes.add(t.asPointerType().getInnerType());
 
 		if (rectypes.isEmpty())
 			return state.bottom();

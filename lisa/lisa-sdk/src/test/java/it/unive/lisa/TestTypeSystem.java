@@ -2,6 +2,7 @@ package it.unive.lisa;
 
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
+import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Int32Type;
@@ -22,6 +23,11 @@ public class TestTypeSystem extends TypeSystem {
 	@Override
 	public NumericType getIntegerType() {
 		return Int32Type.INSTANCE;
+	}
+
+	@Override
+	public boolean canBeReferenced(Type type) {
+		return false;
 	}
 
 }

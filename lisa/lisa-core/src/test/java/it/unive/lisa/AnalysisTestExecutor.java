@@ -183,7 +183,7 @@ public abstract class AnalysisTestExecutor {
 
 		setupWorkdir(configuration, actualPath);
 
-		configuration.setJsonOutput(true);
+		configuration.jsonOutput = true;
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
@@ -287,7 +287,7 @@ public abstract class AnalysisTestExecutor {
 			e.printStackTrace(System.err);
 			fail("Cannot delete working directory '" + workdir + "': " + e.getMessage());
 		}
-		configuration.setWorkdir(workdir.toString());
+		configuration.workdir = workdir.toString();
 	}
 
 	private class Accumulator implements DiffReporter {

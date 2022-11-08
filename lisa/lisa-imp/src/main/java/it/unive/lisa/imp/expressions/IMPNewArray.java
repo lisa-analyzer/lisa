@@ -19,7 +19,6 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * An expression modeling the array allocation operation
@@ -60,10 +59,9 @@ public class IMPNewArray extends NaryExpression {
 		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();
-		TypeSystem types = getProgram().getTypes();
 		for (SymbolicExpression loc : sem.getComputedExpressions()) {
-			HeapReference ref = new HeapReference(new ReferenceType(loc.getRuntimeTypes(types)), loc,
-					getLocation());
+			ReferenceType staticType = new ReferenceType(loc.getStaticType());
+			HeapReference ref = new HeapReference(staticType, loc, getLocation());
 			AnalysisState<A, H, V, T> refSem = sem.smallStepSemantics(ref, this);
 			result = result.lub(refSem);
 		}
