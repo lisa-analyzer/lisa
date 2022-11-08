@@ -71,11 +71,6 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public TypeEnvironment<T> copy() {
-		return new TypeEnvironment<>(lattice, mkNewFunction(function), stack);
-	}
-
-	@Override
 	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
@@ -90,6 +85,8 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	@Override
 	public TypeEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		if (isBottom())
+			return this;
 		return new TypeEnvironment<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
@@ -112,6 +109,16 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	@Override
 	public TypeEnvironment<T> bottom() {
 		return isBottom() ? this : new TypeEnvironment<>(lattice.bottom(), null, lattice.bottom());
+	}
+
+	@Override
+	public boolean isTop() {
+		return super.isTop() && stack.isTop();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && stack.isBottom();
 	}
 
 	@Override

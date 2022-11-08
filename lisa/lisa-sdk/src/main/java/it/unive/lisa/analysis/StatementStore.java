@@ -49,6 +49,8 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	 * @return the previous state mapped to {@code expression}, or {@code null}
 	 */
 	public AnalysisState<A, H, V, T> put(Statement st, AnalysisState<A, H, V, T> state) {
+		if (function == null)
+			function = mkNewFunction(null, false);
 		return function.put(st, state);
 	}
 
@@ -58,7 +60,11 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	 * @param st the statement whose state needs to be forgotten
 	 */
 	public void forget(Statement st) {
+		if (function == null)
+			return;
 		function.remove(st);
+		if (function.isEmpty())
+			function = null;
 	}
 
 	@Override
@@ -67,18 +73,8 @@ public class StatementStore<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public boolean isTop() {
-		return lattice.isTop() && (function == null || function.isEmpty());
-	}
-
-	@Override
 	public StatementStore<A, H, V, T> bottom() {
 		return new StatementStore<>(lattice.bottom());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return lattice.isBottom() && (function == null || function.isEmpty());
 	}
 
 	@Override

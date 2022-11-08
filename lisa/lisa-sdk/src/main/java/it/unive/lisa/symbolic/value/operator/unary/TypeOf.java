@@ -27,7 +27,7 @@ public class TypeOf implements TypeOperator, UnaryOperator {
 	public static final TypeOf INSTANCE = new TypeOf();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
