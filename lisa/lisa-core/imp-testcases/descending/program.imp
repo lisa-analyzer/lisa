@@ -7,5 +7,13 @@ class tutorial {
 				x = x + 2;
 			else
 				x = x + 10;
+		return x;
 	}	
+
+	intv_dec() {
+		def i = 1000;
+		while (i > 0) 
+			i = i - 1;
+		return i;
+	}
 }

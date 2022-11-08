@@ -240,7 +240,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
 			ProgramPoint pp) {
-
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
@@ -258,9 +257,9 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return Satisfiability.SATISFIED;
 			return Satisfiability.UNKNOWN;
 		} else if (operator == ComparisonGe.INSTANCE)
-			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
-		else if (operator == ComparisonGt.INSTANCE)
 			return satisfiesBinaryExpression(ComparisonLe.INSTANCE, right, left, pp);
+		else if (operator == ComparisonGt.INSTANCE)
+			return satisfiesBinaryExpression(ComparisonLt.INSTANCE, right, left, pp);
 		else if (operator == ComparisonLe.INSTANCE) {
 			Interval glb = null;
 			try {
@@ -371,7 +370,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return environment.putState(id, inf_high);
 			else
 				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
-		else if (operator == ComparisonLt.INSTANCE)
+		else if (operator == ComparisonLt.INSTANCE) 
 			if (rightIsExpr)
 				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
 			else
