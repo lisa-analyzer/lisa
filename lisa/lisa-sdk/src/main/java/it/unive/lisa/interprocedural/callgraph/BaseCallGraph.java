@@ -1,18 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.symbols.Aliases;
 import it.unive.lisa.analysis.symbols.NameSymbol;
 import it.unive.lisa.analysis.symbols.QualifiedNameSymbol;
@@ -39,8 +26,18 @@ import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrategy;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.UnitType;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An instance of {@link CallGraph} that provides the basic mechanism to resolve
@@ -336,30 +333,21 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 					"An instance call should have at least one parameter to be used as the receiver of the call");
 		Expression receiver = call.getParameters()[0];
 		for (Type recType : getPossibleTypesOfReceiver(receiver, types[0])) {
-			Collection<CompilationUnit> units;
+			CompilationUnit unit;
 			if (recType.isUnitType())
-				units = Collections.singleton(recType.asUnitType().getUnit());
-			else if (recType.isPointerType()) {
-				units = recType.asPointerType()
-						.getInnerTypes()
-						.stream()
-						.filter(Type::isUnitType)
-						.map(Type::asUnitType)
-						.map(UnitType::getUnit)
-						.collect(Collectors.toSet());
-				if (units.isEmpty())
-					continue;
-			} else
+				unit = recType.asUnitType().getUnit();
+			else if (recType.isPointerType() && recType.asPointerType().getInnerType().isUnitType())
+				unit = recType.asPointerType().getInnerType().asUnitType().getUnit();
+			else
 				continue;
 
 			Set<CompilationUnit> seen = new HashSet<>();
 			HierarcyTraversalStrategy strategy = call.getProgram().getFeatures().getTraversalStrategy();
-			for (CompilationUnit unit : units)
-				for (CompilationUnit cu : strategy.traverse(call, unit))
-					if (seen.add(cu))
-						// we inspect only the ones of the current unit
-						for (CodeMember cm : cu.getInstanceCodeMembers(false))
-							checkMember(call, types, targets, natives, aliasing, cm, true);
+			for (CompilationUnit cu : strategy.traverse(call, unit))
+				if (seen.add(cu))
+					// we inspect only the ones of the current unit
+					for (CodeMember cm : cu.getInstanceCodeMembers(false))
+						checkMember(call, types, targets, natives, aliasing, cm, true);
 		}
 	}
 

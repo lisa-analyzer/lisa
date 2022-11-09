@@ -350,6 +350,25 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	/**
+	 * Yields the absolute value of this number. If it is not a number
+	 * (according to {@link #isNaN()}), then {@link #NaN} is returned.
+	 * 
+	 * @return the absolute value of {@code this}
+	 */
+	public MathNumber abs() {
+		if (isNaN())
+			return NaN;
+
+		if (isPlusInfinity())
+			return this;
+
+		if (isMinusInfinity())
+			return PLUS_INFINITY;
+
+		return cached(new MathNumber(number.abs()));
+	}
+
+	/**
 	 * Rounds down this number to the next integer value towards plus infinity
 	 * (see {@link RoundingMode#CEILING}). If this number is infinite or is not
 	 * a number (according to {@link #isInfinite()} and {@link #isNaN()},

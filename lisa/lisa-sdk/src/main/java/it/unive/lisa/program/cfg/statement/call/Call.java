@@ -1,10 +1,5 @@
 package it.unive.lisa.program.cfg.statement.call;
 
-import java.util.Objects;
-import java.util.Set;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -17,6 +12,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
 import it.unive.lisa.type.Type;
+import java.util.Objects;
+import java.util.Set;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A call to another cfg.

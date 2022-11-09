@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.heap;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -25,6 +19,11 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A monolithic heap implementation that abstracts all heap locations to a
@@ -100,7 +99,6 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		return TOP;
 	}
 
-	
 	@Override
 	public boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
 		return true;

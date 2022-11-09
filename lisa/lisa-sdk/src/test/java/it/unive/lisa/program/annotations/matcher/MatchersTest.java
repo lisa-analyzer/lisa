@@ -3,14 +3,12 @@ package it.unive.lisa.program.annotations.matcher;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.List;
-
-import org.junit.Test;
-
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.AnnotationMember;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.annotations.values.IntAnnotationValue;
+import java.util.List;
+import org.junit.Test;
 
 public class MatchersTest {
 

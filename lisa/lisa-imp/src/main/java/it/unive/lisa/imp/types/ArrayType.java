@@ -1,16 +1,14 @@
 package it.unive.lisa.imp.types;
 
+import it.unive.lisa.type.Type;
+import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.type.Untyped;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.Untyped;
 
 /**
  * A type representing an IMP array defined in an IMP program. ArrayTypes are

@@ -6,19 +6,17 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.collections4.SetUtils;
-import org.junit.Test;
-
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.TestGraph;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestEdge;
 import it.unive.lisa.util.datastructures.graph.TestGraph.TestNode;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.collections4.SetUtils;
+import org.junit.Test;
 
 public class FixpointTest {
 
@@ -45,7 +43,7 @@ public class FixpointTest {
 		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			return SetUtils.union(approx, old);
 		}
-		
+
 		@Override
 		public Set<TestNode> meet(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			return SetUtils.intersection(approx, old);
@@ -232,7 +230,7 @@ public class FixpointTest {
 				throw new Exception();
 			return true;
 		}
-		
+
 		@Override
 		public Set<TestNode> meet(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			if (type == 5)
@@ -308,7 +306,7 @@ public class FixpointTest {
 		}
 
 		if (!fail)
-			
+
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
 
@@ -337,7 +335,7 @@ public class FixpointTest {
 			fail = true;
 			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("updating result"));
 		}
-		
+
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
@@ -352,7 +350,7 @@ public class FixpointTest {
 			fail = true;
 			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("meeting states"));
 		}
-		
+
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);

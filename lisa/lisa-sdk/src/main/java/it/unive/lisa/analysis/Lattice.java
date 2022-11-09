@@ -57,8 +57,8 @@ public interface Lattice<L extends Lattice<L>> {
 	L lub(L other) throws SemanticException;
 
 	/**
-	 * Performs the greatest lower upper bound operation between this lattice element and
-	 * the given one. This operation is commutative.
+	 * Performs the greatest lower upper bound operation between this lattice
+	 * element and the given one. This operation is commutative.
 	 * 
 	 * @param other the other lattice element
 	 * 
@@ -69,7 +69,7 @@ public interface Lattice<L extends Lattice<L>> {
 	default L glb(L other) throws SemanticException {
 		return bottom();
 	}
-	
+
 	/**
 	 * Performs the narrowing operation between this lattice element and the
 	 * given one. This operation is not commutative. The default implementation
@@ -85,7 +85,7 @@ public interface Lattice<L extends Lattice<L>> {
 	default L narrowing(L other) throws SemanticException {
 		return glb(other);
 	}
-	
+
 	/**
 	 * Performs the widening operation between this lattice element and the
 	 * given one. This operation is not commutative. The default implementation

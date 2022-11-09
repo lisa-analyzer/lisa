@@ -1,11 +1,10 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
-import java.util.Set;
-
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Operator;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import java.util.Set;
 
 /**
  * A unary {@link Operator} that can be applied to a single

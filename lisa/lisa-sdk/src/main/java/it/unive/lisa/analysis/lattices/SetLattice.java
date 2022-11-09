@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis.lattices;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 /**
  * A generic set lattice containing a set of elements. Lattice operations
@@ -79,7 +78,7 @@ public abstract class SetLattice<S extends SetLattice<S, E>, E> extends BaseLatt
 		glb.retainAll(other.elements);
 		return mk(glb);
 	}
-	
+
 	@Override
 	public boolean lessOrEqualAux(S other) throws SemanticException {
 		return other.elements.containsAll(elements);

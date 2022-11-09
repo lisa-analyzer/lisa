@@ -3,8 +3,6 @@ package it.unive.lisa.type;
 import java.util.Collections;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * A type for references to memory regions. This type is the one of variables
  * holding references to entities that leave in the heap. For instance, where
@@ -16,17 +14,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ReferenceType implements PointerType {
 
-	private Set<Type> innerTypes;
-
-	/**
-	 * Builds the type for a reference to a location containing values of types
-	 * {@code innerTypes}.
-	 * 
-	 * @param innerTypes the possible types of the referenced location
-	 */
-	public ReferenceType(Set<Type> innerTypes) {
-		this.innerTypes = innerTypes;
-	}
+	private Type innerType;
 
 	/**
 	 * Builds the type for a reference to a location containing values of types
@@ -35,7 +23,7 @@ public class ReferenceType implements PointerType {
 	 * @param t the type of the referenced location
 	 */
 	public ReferenceType(Type t) {
-		this.innerTypes = Collections.singleton(t);
+		this.innerType = t;
 	}
 
 	@Override
@@ -54,15 +42,15 @@ public class ReferenceType implements PointerType {
 	}
 
 	@Override
-	public Set<Type> getInnerTypes() {
-		return innerTypes;
+	public Type getInnerType() {
+		return innerType;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((innerTypes == null) ? 0 : innerTypes.hashCode());
+		result = prime * result + ((innerType == null) ? 0 : innerType.hashCode());
 		return result;
 	}
 
@@ -75,21 +63,16 @@ public class ReferenceType implements PointerType {
 		if (getClass() != obj.getClass())
 			return false;
 		ReferenceType other = (ReferenceType) obj;
-		if (innerTypes == null) {
-			if (other.innerTypes != null)
+		if (innerType == null) {
+			if (other.innerType != null)
 				return false;
-		} else if (!innerTypes.equals(other.innerTypes))
+		} else if (!innerType.equals(other.innerType))
 			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		if (innerTypes != null)
-			if (innerTypes.size() == 1)
-				return innerTypes.iterator().next() + "*";
-			else
-				return "[" + StringUtils.join(innerTypes, ", ") + "]*";
-		return "?*";
+		return innerType + "*";
 	}
 }

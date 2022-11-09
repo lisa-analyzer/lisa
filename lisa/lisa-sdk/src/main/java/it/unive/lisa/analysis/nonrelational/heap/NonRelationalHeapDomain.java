@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.heap;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -13,6 +10,8 @@ import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A non-relational heap domain, that is able to compute the value of a

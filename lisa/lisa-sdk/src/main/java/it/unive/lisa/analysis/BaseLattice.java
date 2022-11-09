@@ -36,7 +36,6 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 		return glbAux(other);
 	}
 
-	
 	/**
 	 * Performs the least upper bound operation between this lattice element and
 	 * the given one, assuming that base cases have already been handled. In
@@ -58,8 +57,8 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	public abstract L lubAux(L other) throws SemanticException;
 
 	/**
-	 * Performs the greatest lower bound operation between this lattice element and
-	 * the given one, assuming that base cases have already been handled. In
+	 * Performs the greatest lower bound operation between this lattice element
+	 * and the given one, assuming that base cases have already been handled. In
 	 * particular, it is guaranteed that:
 	 * <ul>
 	 * <li>{@code other} is not {@code null}</li>
@@ -77,9 +76,8 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 */
 	public L glbAux(L other) throws SemanticException {
 		return bottom();
-	} 
+	}
 
-	
 	@Override
 	@SuppressWarnings("unchecked")
 	public L widening(L other) throws SemanticException {
@@ -91,7 +89,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 		return wideningAux(other);
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public L narrowing(L other) throws SemanticException {
@@ -128,7 +126,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	public L wideningAux(L other) throws SemanticException {
 		return lubAux(other);
 	}
-	
+
 	/**
 	 * Performs the narrowing operation between this lattice element and the
 	 * given one, assuming that base cases have already been handled. In

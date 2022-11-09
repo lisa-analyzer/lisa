@@ -1,5 +1,14 @@
 package it.unive.lisa.outputs.compare;
 
+import it.unive.lisa.outputs.json.JsonReport;
+import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,18 +19,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-
+import java.util.SortedMap;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -282,8 +286,9 @@ public class JsonReportComparer {
 							if (fid == sid) {
 								reporter.fileDiff(leftpath, rightpath,
 										"Different desciption for node "
-												+ currentF.getNodeId() + ": "
-												+ llabels.get(currentF.getNodeId()));
+												+ currentF.getNodeId() + " ("
+												+ llabels.get(currentF.getNodeId()) + "):\n"
+												+ diff(currentF.getDescription(), currentS.getDescription()));
 								currentF = null;
 								currentS = null;
 							} else if (fid < sid) {
@@ -342,5 +347,163 @@ public class JsonReportComparer {
 		public void fileDiff(String first, String second, String message) {
 			LOG.warn("['" + first + "', '" + second + "'] " + message);
 		}
+	}
+
+	private static final String diff(SerializableValue first, SerializableValue second) {
+		StringBuilder builder = new StringBuilder();
+		diff(0, builder, first, second);
+		return builder.toString().replaceAll("(?m)^[ \t]*\r?\n", "").trim();
+	}
+
+	private static final boolean diff(int depth, StringBuilder builder,
+			SerializableValue first, SerializableValue second) {
+		if (first.getClass() != second.getClass()) {
+			fillWithDiff(depth, builder, first, second);
+			return true;
+		}
+
+		if (first instanceof SerializableString)
+			return diff(depth, builder, (SerializableString) first, (SerializableString) second);
+
+		if (first instanceof SerializableArray)
+			return diff(depth, builder, (SerializableArray) first, (SerializableArray) second);
+
+		return diff(depth, builder, (SerializableObject) first, (SerializableObject) second);
+	}
+
+	private static final boolean diff(int depth, StringBuilder builder, SerializableString first,
+			SerializableString second) {
+		if (!first.getValue().equals(second.getValue())) {
+			fillWithDiff(depth, builder, first, second);
+			return true;
+		}
+		return false;
+	}
+
+	private static final boolean diff(int depth, StringBuilder builder, SerializableArray first,
+			SerializableArray second) {
+		List<SerializableValue> felements = first.getElements();
+		List<SerializableValue> selements = second.getElements();
+		int fsize = felements.size();
+		int ssize = selements.size();
+		int min = Math.min(fsize, ssize);
+		boolean atLeastOne = false;
+		StringBuilder inner;
+		for (int i = 0; i < min; i++)
+			if (diff(depth + 1, inner = new StringBuilder(), felements.get(i), selements.get(i))) {
+				builder.append("\t".repeat(depth))
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append(inner.toString())
+						.append("\n");
+				atLeastOne = true;
+			}
+
+		if (fsize > min) {
+			builder.append("\t".repeat(depth))
+					.append(">EXPECTED HAS ")
+					.append(fsize - min)
+					.append(" MORE ELEMENT(S):\n");
+			for (int i = min; i < fsize; i++) {
+				builder.append("\t".repeat(depth + 1))
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append(felements.get(i))
+						.append("\n");
+			}
+			atLeastOne = true;
+		}
+
+		if (ssize > min) {
+			builder.append("\t".repeat(depth))
+					.append(">ACTUAL HAS ")
+					.append(ssize - min)
+					.append(" MORE ELEMENT(S):\n");
+			for (int i = min; i < ssize; i++) {
+				builder.append("\t".repeat(depth + 1))
+						.append(">ELEMENT #")
+						.append(i)
+						.append(":\n")
+						.append(selements.get(i))
+						.append("\n");
+			}
+			atLeastOne = true;
+		}
+
+		return atLeastOne;
+	}
+
+	private static final boolean diff(int depth, StringBuilder builder, SerializableObject first,
+			SerializableObject second) {
+		SortedMap<String, SerializableValue> felements = first.getFields();
+		SortedMap<String, SerializableValue> selements = second.getFields();
+
+		CollectionsDiffBuilder<
+				String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(), selements.keySet());
+		diff.compute(String::compareTo);
+
+		int fsize = felements.size();
+		int ssize = selements.size();
+		int min = Math.min(fsize, ssize);
+		boolean atLeastOne = false;
+		StringBuilder inner;
+		for (Pair<String, String> field : diff.getCommons())
+			if (diff(depth + 1, inner = new StringBuilder(), felements.get(field.getLeft()),
+					selements.get(field.getLeft()))) {
+				builder.append("\t".repeat(depth))
+						.append(">FIELD ")
+						.append(field.getLeft())
+						.append(":\n")
+						.append(inner.toString())
+						.append("\n");
+				atLeastOne = true;
+			}
+
+		if (fsize > min) {
+			builder.append("\t".repeat(depth))
+					.append(">EXPECTED HAS ")
+					.append(fsize - min)
+					.append(" MORE FIELD(S):\n");
+			for (String field : diff.getOnlyFirst()) {
+				builder.append("\t".repeat(depth + 1))
+						.append(">FIELD ")
+						.append(field)
+						.append(":\n")
+						.append(felements.get(field))
+						.append("\n");
+			}
+			atLeastOne = true;
+		}
+
+		if (ssize > min) {
+			builder.append("\t".repeat(depth))
+					.append(">ACTUAL HAS ")
+					.append(ssize - min)
+					.append(" MORE FIELD(S):\n");
+			for (String field : diff.getOnlySecond()) {
+				builder.append("\t".repeat(depth + 1))
+						.append(">FIELD ")
+						.append(field)
+						.append(":\n")
+						.append(selements.get(field))
+						.append("\n");
+			}
+			atLeastOne = true;
+		}
+
+		return atLeastOne;
+	}
+
+	private static final void fillWithDiff(int depth, StringBuilder builder,
+			SerializableValue first, SerializableValue second) {
+		builder.append("\t".repeat(depth))
+				.append(first)
+				.append("\n")
+				.append("\t".repeat(depth))
+				.append("<--->\n")
+				.append("\t".repeat(depth))
+				.append(second);
 	}
 }

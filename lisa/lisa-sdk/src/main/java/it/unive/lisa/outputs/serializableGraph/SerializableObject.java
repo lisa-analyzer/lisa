@@ -1,12 +1,11 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 /**
  * A complex serializable object, represented through a set of named

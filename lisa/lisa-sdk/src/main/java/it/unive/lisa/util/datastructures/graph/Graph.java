@@ -1,11 +1,10 @@
 package it.unive.lisa.util.datastructures.graph;
 
-import java.util.Collection;
-import java.util.function.Function;
-
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import java.util.Collection;
+import java.util.function.Function;
 
 /**
  * Interface of a generic graph structure.

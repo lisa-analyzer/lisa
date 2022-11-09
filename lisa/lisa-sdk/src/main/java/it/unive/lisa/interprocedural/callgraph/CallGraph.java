@@ -1,8 +1,5 @@
 package it.unive.lisa.interprocedural.callgraph;
 
-import java.util.Collection;
-import java.util.Set;
-
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -10,6 +7,8 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * A callgraph of the program to analyze, that knows how to resolve dynamic

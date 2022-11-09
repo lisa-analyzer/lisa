@@ -2,14 +2,6 @@ package it.unive.lisa;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -18,6 +10,12 @@ import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -54,12 +52,9 @@ public class LiSA {
 	 * @param conf the configuration of the analysis to run
 	 */
 	public LiSA(LiSAConfiguration conf) {
-		// since the warnings collection will be filled AFTER the execution of
-		// every concurrent bit has completed its execution, it is fine to use a
-		// non thread-safe one
 		this.warnings = new ArrayList<>();
 		this.conf = conf;
-		this.fileManager = new FileManager(conf.getWorkdir());
+		this.fileManager = new FileManager(conf.workdir);
 	}
 
 	/**
@@ -76,8 +71,8 @@ public class LiSA {
 
 		CallGraph callGraph;
 		try {
-			callGraph = conf.getCallGraph() == null ? getDefaultFor(CallGraph.class) : conf.getCallGraph();
-			if (conf.getCallGraph() == null)
+			callGraph = conf.callGraph == null ? getDefaultFor(CallGraph.class) : conf.callGraph;
+			if (conf.callGraph == null)
 				LOG.warn("No call graph set for this analysis, defaulting to {}", callGraph.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default call graph", e);
@@ -85,16 +80,16 @@ public class LiSA {
 
 		InterproceduralAnalysis interproc;
 		try {
-			interproc = conf.getInterproceduralAnalysis() == null ? getDefaultFor(InterproceduralAnalysis.class)
-					: conf.getInterproceduralAnalysis();
-			if (conf.getInterproceduralAnalysis() == null)
+			interproc = conf.interproceduralAnalysis == null ? getDefaultFor(InterproceduralAnalysis.class)
+					: conf.interproceduralAnalysis;
+			if (conf.interproceduralAnalysis == null)
 				LOG.warn("No interprocedural analysis set for this analysis, defaulting to {}",
 						interproc.getClass().getSimpleName());
 		} catch (AnalysisSetupException e) {
 			throw new AnalysisExecutionException("Unable to create default interprocedural analysis", e);
 		}
 
-		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.getAbstractState());
+		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.abstractState);
 		Application app = new Application(programs);
 
 		try {
@@ -105,7 +100,7 @@ public class LiSA {
 
 		printStats();
 
-		if (conf.isJsonOutput()) {
+		if (conf.jsonOutput) {
 			LOG.info("Dumping reported warnings to 'report.json'");
 			JsonReport report = new JsonReport(warnings, fileManager.createdFiles());
 			try {

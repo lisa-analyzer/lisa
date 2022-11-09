@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.Environment;
 import it.unive.lisa.analysis.nonrelational.inference.InferredValue.InferredPair;
@@ -14,6 +10,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An inference system that model standard derivation systems (e.g., types
@@ -100,11 +98,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> copy() {
-		return new InferenceSystem<>(lattice, mkNewFunction(function), inferred);
-	}
-
-	@Override
 	public Pair<T, InferredPair<T>> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		InferredPair<T> eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval.getInferred(), eval);
@@ -118,22 +111,29 @@ public class InferenceSystem<T extends InferredValue<T>>
 
 	@Override
 	public InferenceSystem<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		// we update the inferred value
+		if (isBottom())
+			return this;
 		return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
 	@Override
 	public InferenceSystem<T> top() {
-		// we do not redefine isTop() since we can ignore 'inferred':
-		// we can infer a non-top value even with a top environment
 		return new InferenceSystem<>(lattice.top(), null, inferred.top());
 	}
 
 	@Override
 	public InferenceSystem<T> bottom() {
-		// we do not redefine isBottom() since we can ignore 'inferred':
-		// we can infer a non-bottom value even with a top environment
 		return new InferenceSystem<>(lattice.bottom(), null, inferred.bottom());
+	}
+
+	@Override
+	public boolean isTop() {
+		return super.isTop() && inferred.isTop();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && inferred.isBottom();
 	}
 
 	@Override

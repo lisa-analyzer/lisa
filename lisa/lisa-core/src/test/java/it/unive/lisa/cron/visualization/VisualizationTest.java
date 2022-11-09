@@ -3,12 +3,6 @@ package it.unive.lisa.cron.visualization;
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.junit.AfterClass;
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
@@ -20,17 +14,21 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
+import java.util.Collection;
+import java.util.HashSet;
+import org.junit.AfterClass;
+import org.junit.Test;
 
 public class VisualizationTest extends AnalysisTestExecutor {
 
 	private static LiSAConfiguration config() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						getDefaultFor(ValueDomain.class),
-						getDefaultFor(TypeDomain.class)))
-				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
-				.setCallGraph(new RTACallGraph());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				getDefaultFor(ValueDomain.class),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
 		return conf;
 	}
 
@@ -52,37 +50,44 @@ public class VisualizationTest extends AnalysisTestExecutor {
 	}
 
 	@Test
+	public void testInputSerialization() throws AnalysisSetupException {
+		LiSAConfiguration conf = config();
+		conf.serializeInputs = true;
+		perform("visualization", "inputs", "program.imp", conf);
+	}
+
+	@Test
 	public void testDOT() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
-		conf.setDumpAnalysis(GraphType.DOT);
+		conf.analysisGraphs = GraphType.DOT;
 		perform("visualization", "dot", "program.imp", conf);
 	}
 
 	@Test
 	public void testGRAPHML() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
-		conf.setDumpAnalysis(GraphType.GRAPHML);
+		conf.analysisGraphs = GraphType.GRAPHML;
 		perform("visualization", "graphml", "program.imp", conf);
 	}
 
 	@Test
 	public void testGRAPHML_WITH_SUBNODES() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
-		conf.setDumpAnalysis(GraphType.GRAPHML_WITH_SUBNODES);
+		conf.analysisGraphs = GraphType.GRAPHML_WITH_SUBNODES;
 		perform("visualization", "graphml-sub", "program.imp", conf);
 	}
 
 	@Test
 	public void testHTML() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
-		conf.setDumpAnalysis(GraphType.HTML);
+		conf.analysisGraphs = GraphType.HTML;
 		perform("visualization", "html", "program.imp", conf);
 	}
 
 	@Test
 	public void testHTML_WITH_SUBNODES() throws AnalysisSetupException {
 		LiSAConfiguration conf = config();
-		conf.setDumpAnalysis(GraphType.HTML_WITH_SUBNODES);
+		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
 		perform("visualization", "html-sub", "program.imp", conf);
 	}
 }

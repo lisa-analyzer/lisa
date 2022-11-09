@@ -1,11 +1,10 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CodeLocation;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CodeLocation;
 
 /**
  * A interface unit of the program to analyze. A interface unit is a

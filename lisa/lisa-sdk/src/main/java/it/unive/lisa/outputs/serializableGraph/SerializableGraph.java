@@ -1,5 +1,10 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import it.unive.lisa.outputs.DotGraph;
+import it.unive.lisa.outputs.GraphmlGraph;
+import it.unive.lisa.outputs.HtmlGraph;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -14,15 +19,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.Pair;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import it.unive.lisa.outputs.DotGraph;
-import it.unive.lisa.outputs.GraphmlGraph;
-import it.unive.lisa.outputs.HtmlGraph;
 
 /**
  * A graph that can be serialized. This graph contains {@link SerializableNode}s

@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.inference;
 
-import java.util.Map;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
@@ -10,6 +8,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Map;
 
 /**
  * A {@link NonRelationalElement} that can be inferred by
@@ -126,7 +125,7 @@ public interface InferredValue<T extends InferredValue<T>>
 		public InferredPair<T> glbAux(InferredPair<T> other) throws SemanticException {
 			return new InferredPair<>(domain, inferred.glb(other.inferred), state.glb(other.state));
 		}
-		
+
 		@Override
 		public InferredPair<T> wideningAux(InferredPair<T> other) throws SemanticException {
 			return new InferredPair<>(domain, inferred.widening(other.inferred), state.widening(other.state));
@@ -136,7 +135,7 @@ public interface InferredValue<T extends InferredValue<T>>
 		public InferredPair<T> narrowingAux(InferredPair<T> other) throws SemanticException {
 			return new InferredPair<>(domain, inferred.narrowing(other.inferred), state.narrowing(other.state));
 		}
-		
+
 		@Override
 		public boolean lessOrEqualAux(InferredPair<T> other) throws SemanticException {
 			return inferred.lessOrEqual(other.inferred) && state.lessOrEqual(other.state);

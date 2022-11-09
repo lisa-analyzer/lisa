@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis.dataflow;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -17,6 +13,9 @@ import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.symbolic.value.TernaryExpression;
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 
 /**
  * An implementation of the available expressions dataflow analysis, that

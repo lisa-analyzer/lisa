@@ -1,10 +1,9 @@
 package it.unive.lisa.program;
 
-import java.util.Collection;
-import java.util.HashSet;
-
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
+import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * An complete application, collecting several {@link Program}s that need to be

@@ -14,7 +14,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
+import it.unive.lisa.symbolic.value.operator.ModuloOperator;
 import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
+import it.unive.lisa.symbolic.value.operator.RemainderOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonEq;
@@ -188,6 +190,58 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return top();
 			else
 				return new Interval(left.interval.div(right.interval, false, false));
+		else if (operator instanceof ModuloOperator)
+			if (right.is(0))
+				return bottom();
+			else if (left.is(0))
+				return ZERO;
+			else if (left.isTop() || right.isTop())
+				return top();
+			else {
+				// the result takes the sign of the divisor - l%r is:
+				// - [r.low+1,0] if r.high < 0 (fully negative)
+				// - [0,r.high-1] if r.low > 0 (fully positive)
+				// - [r.low+1,r.high-1] otherwise
+				if (right.interval.getHigh().compareTo(MathNumber.ZERO) < 0)
+					return new Interval(right.interval.getLow().add(MathNumber.ONE), MathNumber.ZERO);
+				else if (right.interval.getLow().compareTo(MathNumber.ZERO) > 0)
+					return new Interval(MathNumber.ZERO, right.interval.getHigh().subtract(MathNumber.ONE));
+				else
+					return new Interval(right.interval.getLow().add(MathNumber.ONE),
+							right.interval.getHigh().subtract(MathNumber.ONE));
+			}
+		else if (operator instanceof RemainderOperator)
+			if (right.is(0))
+				return bottom();
+			else if (left.is(0))
+				return ZERO;
+			else if (left.isTop() || right.isTop())
+				return top();
+			else {
+				// the result takes the sign of the dividend - l%r is:
+				// - [-M+1,0] if l.high < 0 (fully negative)
+				// - [0,M-1] if l.low > 0 (fully positive)
+				// - [-M+1,M-1] otherwise
+				// where M is
+				// - -r.low if r.high < 0 (fully negative)
+				// - r.high if r.low > 0 (fully positive)
+				// - max(abs(r.low),abs(r.right)) otherwise
+				MathNumber M;
+				if (right.interval.getHigh().compareTo(MathNumber.ZERO) < 0)
+					M = right.interval.getLow().multiply(MathNumber.MINUS_ONE);
+				else if (right.interval.getLow().compareTo(MathNumber.ZERO) > 0)
+					M = right.interval.getHigh();
+				else
+					M = right.interval.getLow().abs().max(right.interval.getHigh().abs());
+
+				if (left.interval.getHigh().compareTo(MathNumber.ZERO) < 0)
+					return new Interval(M.multiply(MathNumber.MINUS_ONE).add(MathNumber.ONE), MathNumber.ZERO);
+				else if (left.interval.getLow().compareTo(MathNumber.ZERO) > 0)
+					return new Interval(MathNumber.ZERO, M.subtract(MathNumber.ONE));
+				else
+					return new Interval(M.multiply(MathNumber.MINUS_ONE).add(MathNumber.ONE),
+							M.subtract(MathNumber.ONE));
+			}
 		return top();
 	}
 
@@ -223,7 +277,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 
 		return newLow.isMinusInfinity() && newHigh.isPlusInfinity() ? top() : new Interval(newLow, newHigh);
 	}
-	
+
 	@Override
 	public Interval narrowingAux(Interval other) throws SemanticException {
 		MathNumber newLow, newHigh;
@@ -370,7 +424,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 				return environment.putState(id, inf_high);
 			else
 				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
-		else if (operator == ComparisonLt.INSTANCE) 
+		else if (operator == ComparisonLt.INSTANCE)
 			if (rightIsExpr)
 				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
 			else

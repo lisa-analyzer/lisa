@@ -1,10 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.SemanticException;
@@ -12,6 +7,10 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
@@ -80,6 +79,13 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(ContextSensitivityToken token,
 			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
+		if (function == null) {
+			// no previous result
+			function = mkNewFunction(null, false);
+			function.put(token, result);
+			return Pair.of(false, result);
+		}
+
 		CFGWithAnalysisResults<A, H, V, T> previousResult = function.get(token);
 		if (previousResult == null) {
 			// no previous result
@@ -125,7 +131,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * @return the results
 	 */
 	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAll() {
-		return function.values();
+		return function == null ? Collections.emptySet() : function.values();
 	}
 
 	@Override
@@ -134,18 +140,8 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public boolean isTop() {
-		return lattice.isTop() && (function == null || function.isEmpty());
-	}
-
-	@Override
 	public CFGResults<A, H, V, T> bottom() {
 		return new CFGResults<>(lattice.bottom());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return lattice.isBottom() && (function == null || function.isEmpty());
 	}
 
 	@Override

@@ -1,5 +1,11 @@
 package it.unive.lisa.outputs;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableArray;
+import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
+import it.unive.lisa.outputs.serializableGraph.SerializableNode;
+import it.unive.lisa.outputs.serializableGraph.SerializableObject;
+import it.unive.lisa.outputs.serializableGraph.SerializableString;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -9,19 +15,11 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
-
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.stream.file.FileSinkGraphML;
-
-import it.unive.lisa.outputs.serializableGraph.SerializableArray;
-import it.unive.lisa.outputs.serializableGraph.SerializableEdge;
-import it.unive.lisa.outputs.serializableGraph.SerializableNode;
-import it.unive.lisa.outputs.serializableGraph.SerializableObject;
-import it.unive.lisa.outputs.serializableGraph.SerializableString;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 
 /**
  * A graph that can be dumped into compound GraphML format.

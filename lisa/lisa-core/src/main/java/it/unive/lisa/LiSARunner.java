@@ -1,13 +1,5 @@
 package it.unive.lisa;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -33,12 +25,21 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.ProgramValidationException;
 import it.unive.lisa.program.SyntheticLocation;
 import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.file.FileManager;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * An auxiliary analysis runner for executing LiSA analysis.
@@ -99,9 +100,26 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 
+		AtomicBoolean htmlViewer = new AtomicBoolean(false), subnodes = new AtomicBoolean(false);
+		if (conf.serializeInputs)
+			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input cfgs", "cfgs")) {
+				SerializableGraph graph = cfg.toSerializableGraph();
+				String filename = cfg.getDescriptor().getFullSignatureWithParNames() + "_cfg";
+
+				try {
+					fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
+
+					dump(fileManager, filename, conf.analysisGraphs, graph, htmlViewer, subnodes);
+				} catch (IOException e) {
+					LOG.error("Exception while dumping the analysis results on {}",
+							cfg.getDescriptor().getFullSignature());
+					LOG.error(e);
+				}
+			}
+
 		CheckTool tool = new CheckTool();
-		if (!conf.getSyntacticChecks().isEmpty())
-			ChecksExecutor.executeAll(tool, app, conf.getSyntacticChecks());
+		if (!conf.syntacticChecks.isEmpty())
+			ChecksExecutor.executeAll(tool, app, conf.syntacticChecks);
 		else
 			LOG.warn("Skipping syntactic checks execution since none have been provided");
 
@@ -113,7 +131,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		}
 
 		try {
-			interproc.init(app, callGraph, conf.getOpenCallPolicy());
+			interproc.init(app, callGraph, conf.openCallPolicy);
 		} catch (InterproceduralAnalysisException e) {
 			LOG.fatal("Exception while building the interprocedural analysis for the input program", e);
 			throw new AnalysisExecutionException(
@@ -121,13 +139,13 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		}
 
 		if (state != null) {
-			analyze(allCFGs, fileManager);
+			analyze(allCFGs, fileManager, htmlViewer, subnodes);
 			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
 			@SuppressWarnings({ "rawtypes", "unchecked" })
-			Collection<SemanticCheck<A, H, V, T>> semanticChecks = (Collection) conf.getSemanticChecks();
+			Collection<SemanticCheck<A, H, V, T>> semanticChecks = (Collection) conf.semanticChecks;
 			if (!semanticChecks.isEmpty()) {
 				CheckToolWithAnalysisResults<A, H, V, T> tool2 = new CheckToolWithAnalysisResults<>(
 						tool,
@@ -143,24 +161,26 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		return tool.getWarnings();
 	}
 
-	private void analyze(Collection<CFG> allCFGs, FileManager fileManager) {
+	@SuppressWarnings("unchecked")
+	private void analyze(Collection<CFG> allCFGs, FileManager fileManager, AtomicBoolean htmlViewer,
+			AtomicBoolean subnodes) {
 		A state = this.state.top();
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
 				() -> {
 					try {
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
-								conf.getFixpointWorkingSet(), conf.getWideningThreshold(), conf.getDoDescendingPhase());
+								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
+								conf.wideningThreshold, conf.doDescendingPhase);
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
 					}
 				});
 
-		GraphType type = conf.getAnalysisGraphs();
-		if (conf.isSerializeResults() || type != GraphType.NONE) {
+		GraphType type = conf.analysisGraphs;
+		if (conf.serializeResults || type != GraphType.NONE) {
 			int nfiles = fileManager.createdFiles().size();
-			boolean htmlViewer = false, subnodes = false;
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
 				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
@@ -171,34 +191,10 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						filename += "_" + result.getId().hashCode();
 
 					try {
-						if (conf.isSerializeResults())
+						if (conf.serializeResults)
 							fileManager.mkJsonFile(filename, writer -> graph.dump(writer));
 
-						switch (type) {
-						case DOT:
-							fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
-							break;
-						case GRAPHML:
-							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(false).dump(writer));
-							break;
-						case GRAPHML_WITH_SUBNODES:
-							fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
-							subnodes = true;
-							break;
-						case HTML:
-							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
-							htmlViewer = true;
-							break;
-						case HTML_WITH_SUBNODES:
-							fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
-							htmlViewer = true;
-							subnodes = true;
-							break;
-						case NONE:
-							break;
-						default:
-							throw new AnalysisExecutionException("Unknown graph type: " + type);
-						}
+						dump(fileManager, filename, type, graph, htmlViewer, subnodes);
 					} catch (IOException e) {
 						LOG.error("Exception while dumping the analysis results on {}",
 								cfg.getDescriptor().getFullSignature());
@@ -206,11 +202,11 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					}
 				}
 
-			if (htmlViewer && fileManager.createdFiles().size() != nfiles)
+			if (htmlViewer.get() && fileManager.createdFiles().size() != nfiles)
 				try {
 					// we dumped at least one file: need to copy the
 					// javascript files
-					fileManager.generateHtmlViewerSupportFiles(subnodes);
+					fileManager.generateHtmlViewerSupportFiles(subnodes.get());
 				} catch (IOException e) {
 					LOG.error("Exception while generating supporting files for the html viwer");
 					LOG.error(e);
@@ -218,12 +214,45 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 		}
 	}
 
+	private static void dump(FileManager fileManager, String filename, GraphType type, SerializableGraph graph,
+			AtomicBoolean htmlViewer, AtomicBoolean subnodes) throws IOException {
+		switch (type) {
+		case DOT:
+			fileManager.mkDotFile(filename, writer -> graph.toDot().dump(writer));
+			break;
+		case GRAPHML:
+			fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(false).dump(writer));
+			break;
+		case GRAPHML_WITH_SUBNODES:
+			fileManager.mkGraphmlFile(filename, writer -> graph.toGraphml(true).dump(writer));
+			subnodes.set(true);
+			break;
+		case HTML:
+			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(false, "results").dump(writer));
+			htmlViewer.set(true);
+			break;
+		case HTML_WITH_SUBNODES:
+			fileManager.mkHtmlFile(filename, writer -> graph.toHtml(true, "results").dump(writer));
+			htmlViewer.set(true);
+			subnodes.set(true);
+			break;
+		case NONE:
+			break;
+		default:
+			throw new AnalysisExecutionException("Unknown graph type: " + type);
+		}
+	}
+
 	private static void finalizeApp(Application app) {
 		for (Program p : app.getPrograms()) {
 			TypeSystem types = p.getTypes();
+			// make sure the basic types are registered
+			types.registerType(types.getBooleanType());
+			types.registerType(types.getStringType());
+			types.registerType(types.getIntegerType());
 			for (Type t : types.getTypes())
-				// TODO do we want all types to be considered here?
-				types.registerType(new ReferenceType(t));
+				if (types.canBeReferenced(t))
+					types.registerType(new ReferenceType(t));
 
 			TimerLogger.execAction(LOG, "Finalizing input program", () -> {
 				try {

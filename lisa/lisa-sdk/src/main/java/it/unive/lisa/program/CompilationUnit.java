@@ -1,12 +1,5 @@
 package it.unive.lisa.program;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
@@ -16,6 +9,12 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.NativeCFG;
 import it.unive.lisa.program.language.validation.ProgramValidationLogic;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
 
 /**
  * An unit of the program to analyze that is part of a hierarchical structure.

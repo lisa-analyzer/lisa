@@ -1,8 +1,7 @@
 package it.unive.lisa.util.collections.workset;
 
-import java.lang.reflect.InvocationTargetException;
-
 import it.unive.lisa.AnalysisSetupException;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * A working set, containing items to be processed.

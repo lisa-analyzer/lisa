@@ -1,7 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,6 +21,7 @@ import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.PushAny;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Type;
+import java.util.Set;
 
 /**
  * An interprocedural analysis based on a call graph.

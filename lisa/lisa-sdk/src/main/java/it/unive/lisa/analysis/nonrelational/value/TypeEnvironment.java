@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.nonrelational.value;
 
-import java.util.Map;
-import java.util.Set;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.FunctionalLattice;
 import it.unive.lisa.analysis.nonrelational.Environment;
@@ -16,6 +11,9 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Map;
+import java.util.Set;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalTypeDomain}, that maps
@@ -73,11 +71,6 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public TypeEnvironment<T> copy() {
-		return new TypeEnvironment<>(lattice, mkNewFunction(function), stack);
-	}
-
-	@Override
 	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
@@ -92,6 +85,8 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	@Override
 	public TypeEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		if (isBottom())
+			return this;
 		return new TypeEnvironment<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
@@ -114,6 +109,16 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	@Override
 	public TypeEnvironment<T> bottom() {
 		return isBottom() ? this : new TypeEnvironment<>(lattice.bottom(), null, lattice.bottom());
+	}
+
+	@Override
+	public boolean isTop() {
+		return super.isTop() && stack.isTop();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && stack.isBottom();
 	}
 
 	@Override

@@ -1,9 +1,8 @@
 package it.unive.lisa.checks.warnings;
 
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A warning reported by LiSA on one of the Globals under analysis.

@@ -1,16 +1,5 @@
 package it.unive.lisa.analysis.nonrelational;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -23,6 +12,15 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An environment for a {@link NonRelationalDomain}, that maps
@@ -72,14 +70,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		super(domain, function);
 	}
 
-	/**
-	 * Copies this environment. The function of the returned environment
-	 * <b>must</b> be a (shallow) copy of the one of the given environment.
-	 * 
-	 * @return a copy of the given environment
-	 */
-	public abstract M copy();
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public M assign(Identifier id, E expression, ProgramPoint pp) throws SemanticException {
@@ -91,9 +81,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		if (!lattice.canProcess(expression) || !lattice.tracksIdentifiers(id))
 			return (M) this;
 
-		// the mkNewFunction will return an empty function if the
-		// given one is null
-		Map<Identifier, T> func = mkNewFunction(function);
+		Map<Identifier, T> func = mkNewFunction(function, false);
 		Pair<T, V> eval = eval(expression, pp);
 		T value = eval.getLeft();
 		T v = lattice.variable(id, pp);
@@ -155,6 +143,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return (M) this;
+
 		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
@@ -223,6 +214,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
 		return lattice.satisfies(expression, (M) this, pp);
 	}
 
@@ -269,7 +263,7 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		if (isBottom() || isTop())
 			return (M) this;
 
-		Map<Identifier, T> function = mkNewFunction(null);
+		Map<Identifier, T> function = mkNewFunction(null, false);
 		for (Identifier id : getKeys()) {
 			Identifier lifted = lifter.apply(id);
 			if (lifted != null)
@@ -286,27 +280,27 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	@Override
 	@SuppressWarnings("unchecked")
 	public M forgetIdentifier(Identifier id) throws SemanticException {
-		if (isTop() || isBottom())
+		if (isTop() || isBottom() || function == null)
 			return (M) this;
 
-		M result = copy();
-		if (result.function.containsKey(id))
-			result.function.remove(id);
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		if (result.containsKey(id))
+			result.remove(id);
 
-		return result;
+		return mk(lattice, result);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public M forgetIdentifiersIf(Predicate<Identifier> test) throws SemanticException {
-		if (isTop() || isBottom())
+		if (isTop() || isBottom() || function == null)
 			return (M) this;
 
-		M result = copy();
-		Set<Identifier> keys = result.function.keySet().stream().filter(test::test).collect(Collectors.toSet());
-		keys.forEach(result.function::remove);
+		Map<Identifier, T> result = mkNewFunction(function, false);
+		Set<Identifier> keys = result.keySet().stream().filter(test::test).collect(Collectors.toSet());
+		keys.forEach(result::remove);
 
-		return result;
+		return mk(lattice, result);
 	}
 
 	@Override
@@ -316,6 +310,9 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 		if (isBottom())
 			return Lattice.bottomRepresentation();
+
+		if (function == null)
+			return new StringRepresentation("empty");
 
 		return new MapRepresentation(function, StringRepresentation::new, NonRelationalElement::representation);
 	}

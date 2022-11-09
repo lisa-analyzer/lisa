@@ -1,13 +1,12 @@
 package it.unive.lisa.analysis.representation;
 
-import java.util.SortedMap;
-import java.util.TreeMap;
-
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  * A structured representation of the abstract information present in a single

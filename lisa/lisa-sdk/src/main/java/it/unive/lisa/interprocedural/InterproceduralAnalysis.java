@@ -1,8 +1,5 @@
 package it.unive.lisa.interprocedural;
 
-import java.util.Collection;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -28,6 +25,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import java.util.Collection;
+import java.util.Set;
 
 /**
  * The definition of interprocedural analyses.

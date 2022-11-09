@@ -1,13 +1,12 @@
 package it.unive.lisa.type;
 
+import it.unive.lisa.program.Program;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.Program;
 
 /**
  * A type system, knowing about the types that can appear in a {@link Program}.
@@ -30,9 +29,6 @@ public abstract class TypeSystem {
 	 */
 	protected TypeSystem() {
 		this.types = new TreeMap<String, Type>();
-		registerType(getBooleanType());
-		registerType(getStringType());
-		registerType(getIntegerType());
 	}
 
 	/**
@@ -177,4 +173,16 @@ public abstract class TypeSystem {
 	 * @return the integer type
 	 */
 	public abstract NumericType getIntegerType();
+
+	/**
+	 * Yields whether or not values of the given type can be referenced, that
+	 * is, if a pointer to memory locations containing them can be created. If
+	 * this method returns {@code true}, LiSA will automatically register a
+	 * {@link ReferenceType} into this type system that contains the given type.
+	 *
+	 * @param type the type to check
+	 * 
+	 * @return {@code true} if and only if the given type can be referenced
+	 */
+	public abstract boolean canBeReferenced(Type type);
 }

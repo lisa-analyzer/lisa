@@ -1,15 +1,14 @@
 package it.unive.lisa.program;
 
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeMember;
+import it.unive.lisa.program.language.LanguageFeatures;
+import it.unive.lisa.type.TypeSystem;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeMember;
-import it.unive.lisa.program.language.LanguageFeatures;
-import it.unive.lisa.type.TypeSystem;
 
 /**
  * A program that LiSA can analyze. A program is a {@link Unit} that is defined

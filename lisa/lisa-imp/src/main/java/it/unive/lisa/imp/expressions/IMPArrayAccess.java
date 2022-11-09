@@ -1,8 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,6 +18,8 @@ import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.type.ArrayType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * An expression modeling the array element access operation
@@ -60,8 +59,8 @@ public class IMPArrayAccess extends BinaryExpression {
 		Set<Type> arraytypes = new HashSet<>();
 		TypeSystem types = getProgram().getTypes();
 		for (Type t : left.getRuntimeTypes(types))
-			if (t.isPointerType())
-				t.asPointerType().getInnerTypes().stream().filter(Type::isArrayType).forEach(arraytypes::add);
+			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
+				arraytypes.add(t.asPointerType().getInnerType().asArrayType());
 
 		if (arraytypes.isEmpty())
 			return state.bottom();

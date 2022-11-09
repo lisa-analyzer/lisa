@@ -1,9 +1,5 @@
 package it.unive.lisa.analysis;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -11,6 +7,9 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A control flow graph, that has {@link Statement}s as nodes and {@link Edge}s
@@ -41,7 +40,6 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 
 	private static final String CANNOT_GLB_ERROR = "Cannot perform the greatest lower bound of two graphs with different descriptor";
 
-	
 	/**
 	 * The map storing the analysis results
 	 */
@@ -217,7 +215,7 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		lub.setId(joinIDs(other));
 		return lub;
 	}
-	
+
 	@Override
 	public CFGWithAnalysisResults<A, H, V, T> glb(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()))

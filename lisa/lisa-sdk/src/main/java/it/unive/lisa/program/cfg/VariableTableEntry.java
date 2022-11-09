@@ -1,7 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Objects;
-
 import it.unive.lisa.program.CodeElement;
 import it.unive.lisa.program.annotations.Annotation;
 import it.unive.lisa.program.annotations.Annotations;
@@ -9,6 +7,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
+import java.util.Objects;
 
 /**
  * An entry in the variable table representing a CFG variable identified by its

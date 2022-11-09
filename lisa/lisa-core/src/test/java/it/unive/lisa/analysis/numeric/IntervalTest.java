@@ -4,10 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Random;
-
-import org.junit.Test;
-
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -30,6 +26,8 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.numeric.IntInterval;
+import java.util.Random;
+import org.junit.Test;
 
 public class IntervalTest {
 

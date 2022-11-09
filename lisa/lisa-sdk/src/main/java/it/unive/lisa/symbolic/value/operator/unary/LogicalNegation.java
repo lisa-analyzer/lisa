@@ -1,13 +1,12 @@
 package it.unive.lisa.symbolic.value.operator.unary;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.operator.LogicalOperator;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * Given an expression that evaluates to a Boolean value, a
@@ -28,7 +27,7 @@ public class LogicalNegation implements LogicalOperator, UnaryOperator {
 	public static final LogicalNegation INSTANCE = new LogicalNegation();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

@@ -1,9 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.Collections;
-
-import org.apache.commons.lang3.ArrayUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,8 +22,9 @@ import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.UnitType;
+import java.util.Collections;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
@@ -101,10 +98,11 @@ public class IMPNewObj extends NaryExpression {
 		sem = sem.smallStepSemantics(created, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();
-		TypeSystem types = getProgram().getTypes();
-		for (SymbolicExpression loc : sem.getComputedExpressions())
-			result = result.lub(sem.smallStepSemantics(
-					new HeapReference(new ReferenceType(loc.getRuntimeTypes(types)), loc, getLocation()), call));
+		for (SymbolicExpression loc : sem.getComputedExpressions()) {
+			ReferenceType staticType = new ReferenceType(loc.getStaticType());
+			HeapReference locref = new HeapReference(staticType, loc, getLocation());
+			result = result.lub(sem.smallStepSemantics(locref, call));
+		}
 
 		return result;
 	}
