@@ -75,8 +75,8 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 *                               node after which calls to
 	 *                               {@link Lattice#lub(Lattice)} gets replaced
 	 *                               with {@link Lattice#widening(Lattice)}.
-	 * @param doDescendingPhase whether or not the fixpoint should compute the 
-	 * 							  descending phase                              
+	 * @param doDescendingPhase  whether or not the fixpoint should compute the
+	 *                               descending phase
 	 *
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint

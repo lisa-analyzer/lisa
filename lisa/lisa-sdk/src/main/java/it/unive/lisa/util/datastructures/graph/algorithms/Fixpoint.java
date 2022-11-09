@@ -169,11 +169,13 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * @throws Exception if something goes wrong during the computation
 		 */
 		boolean equality(N node, T approx, T old) throws Exception;
-		
+
 		/**
-		 * Yields whether or not the fixpoint should compute the descending phase.
+		 * Yields whether or not the fixpoint should compute the descending
+		 * phase.
 		 * 
-		 * @return whether or not the fixpoint should compute the descending phase
+		 * @return whether or not the fixpoint should compute the descending
+		 *             phase
 		 */
 		boolean doDescendingPhase();
 	}
