@@ -16,6 +16,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
+/**
+ * The suffix string abstract domain.
+ *
+ * @link <a href=
+ *           "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
+ *           https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
+ *             Salvatore Evola</a>
+ */
 public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	private final Collection<Character> certainlyContained;
@@ -25,10 +36,19 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	private static final CharInclusion TOP = new CharInclusion();
 	private static final CharInclusion BOTTOM = new CharInclusion(null, null);
 
+	/**
+	 * Builds the top char inclusion abstract element.
+	 */
 	public CharInclusion() {
 		this(new HashSet<>(), getAlphabet());
 	}
 
+	/**
+	 * Builds a char inclusion abstract element.
+	 *
+	 * @param certainlyContained the set of certainly contained characters
+	 * @param maybeContained     the set of maybe contained characters
+	 */
 	public CharInclusion(Collection<Character> certainlyContained,
 			Collection<Character> maybeContained) {
 		this.certainlyContained = certainlyContained;
@@ -112,10 +132,20 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 		return new StringRepresentation(formatRepresentation());
 	}
 
+	/**
+	 * Yields the set of certainly contained characters of this abstract value.
+	 *
+	 * @return the set of certainly contained characters of this abstract value.
+	 */
 	public Collection<Character> getCertainlyContained() {
 		return this.certainlyContained;
 	}
 
+	/**
+	 * Yields the set of maybe contained characters of this abstract value.
+	 *
+	 * @return the set of maybe contained characters of this abstract value.
+	 */
 	public Collection<Character> getMaybeContained() {
 		return this.maybeContained;
 	}
