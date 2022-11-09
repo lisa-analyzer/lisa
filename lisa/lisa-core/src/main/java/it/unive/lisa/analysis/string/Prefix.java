@@ -13,16 +13,33 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Objects;
 
+/**
+ * The prefix string abstract domain.
+ * 
+ * @link https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34
+ * 
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
+ *             Salvatore Evola</a>
+ */
 public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);
 	private final String prefix;
 
+	/**
+	 * Builds the top prefix abstract element.
+	 */
 	public Prefix() {
 		this("");
 	}
 
+	/**
+	 * Builds a prefix abstract element.
+	 * 
+	 * @param prefix the prefix
+	 */
 	public Prefix(String prefix) {
 		this.prefix = prefix;
 	}
@@ -175,6 +192,11 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 		return Satisfiability.UNKNOWN;
 	}
 
+	/**
+	 * Yields the prefix of this abstract value.
+	 * 
+	 * @return the prefix of this abstract value.
+	 */
 	protected String getPrefix() {
 		return this.prefix;
 	}
