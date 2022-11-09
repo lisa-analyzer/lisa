@@ -16,7 +16,9 @@ import java.util.Objects;
 /**
  * The suffix string abstract domain.
  *
- * @link https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34
+ * @link <a href=
+ *           "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
+ *           https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
