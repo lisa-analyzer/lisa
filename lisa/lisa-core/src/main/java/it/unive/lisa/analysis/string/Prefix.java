@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -142,6 +143,32 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
     @Override
     public Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
         return TOP;
+    }
+
+    @Override
+    public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Prefix left, Prefix right, ProgramPoint pp) {
+        if(left.isTop() || right.isTop())
+            return Satisfiability.UNKNOWN;
+
+        if(operator == StringStartsWith.INSTANCE)
+            return Satisfiability.SATISFIED;
+
+        return Satisfiability.UNKNOWN;
+    }
+
+    @Override
+    public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right, ProgramPoint pp) {
+        return Satisfiability.UNKNOWN;
+    }
+
+    @Override
+    public Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
+        return Satisfiability.UNKNOWN;
+    }
+
+    @Override
+    public Satisfiability satisfiesNullConstant(ProgramPoint pp) {
+        return Satisfiability.UNKNOWN;
     }
 
     protected String getPrefix() {
