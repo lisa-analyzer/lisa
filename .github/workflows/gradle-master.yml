@@ -66,8 +66,8 @@ jobs:
         changelog=$(cat changelog.txt)
         echo "next version: $nextver"
         echo "changelog: $changelog.txt"
-        echo "::set-output name=nextver::$nextver"
-        echo "::set-output name=currentver::$currentver"
+        echo "nextver=$nextver" >> $GITHUB_OUTPUT
+        echo "currentver=$currentver" >> $GITHUB_OUTPUT
         echo "CHANGELOG<<EOF" >> $GITHUB_ENV
         echo "$changelog" >> $GITHUB_ENV
         echo "EOF" >> $GITHUB_ENV

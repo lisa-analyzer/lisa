@@ -24,7 +24,7 @@ public class ComparisonGe extends NumericComparison {
 	public static final ComparisonGe INSTANCE = new ComparisonGe();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

@@ -27,7 +27,7 @@ public class StringLength implements StringOperator, UnaryOperator {
 	public static final StringLength INSTANCE = new StringLength();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

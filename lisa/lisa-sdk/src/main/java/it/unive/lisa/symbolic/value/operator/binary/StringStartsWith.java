@@ -25,7 +25,7 @@ public class StringStartsWith extends StringOperation {
 	public static final StringStartsWith INSTANCE = new StringStartsWith();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

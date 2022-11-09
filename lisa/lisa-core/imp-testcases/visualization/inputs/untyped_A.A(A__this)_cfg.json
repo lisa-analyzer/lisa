@@ -1,0 +1,1 @@
+{"name":"untyped A::A(A* this)","description":null,"nodes":[{"id":0,"subNodes":[1,2],"text":"i1 = 0"},{"id":1,"text":"i1"},{"id":2,"text":"0"},{"id":3,"text":"ret"}],"edges":[{"sourceId":0,"destId":3,"kind":"SequentialEdge"}],"descriptions":[]}

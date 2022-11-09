@@ -59,8 +59,8 @@ public class IMPArrayAccess extends BinaryExpression {
 		Set<Type> arraytypes = new HashSet<>();
 		TypeSystem types = getProgram().getTypes();
 		for (Type t : left.getRuntimeTypes(types))
-			if (t.isPointerType())
-				t.asPointerType().getInnerTypes().stream().filter(Type::isArrayType).forEach(arraytypes::add);
+			if (t.isPointerType() && t.asPointerType().getInnerType().isArrayType())
+				arraytypes.add(t.asPointerType().getInnerType().asArrayType());
 
 		if (arraytypes.isEmpty())
 			return state.bottom();
