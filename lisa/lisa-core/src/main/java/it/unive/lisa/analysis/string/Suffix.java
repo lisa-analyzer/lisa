@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -144,6 +145,22 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
     @Override
     public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right, ProgramPoint pp) {
         return TOP;
+    }
+
+    @Override
+    public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Suffix left, Suffix right, ProgramPoint pp) {
+        if(left.isTop() || right.isTop())
+            return Satisfiability.UNKNOWN;
+
+        if(operator == StringEndsWith.INSTANCE)
+            return Satisfiability.SATISFIED;
+
+        return Satisfiability.UNKNOWN;
+    }
+
+    @Override
+    public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right, ProgramPoint pp) {
+        return Satisfiability.UNKNOWN;
     }
 
     protected String getSuffix() {
