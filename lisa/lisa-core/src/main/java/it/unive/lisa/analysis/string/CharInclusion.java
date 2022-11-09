@@ -40,7 +40,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
             if(other.getCertainlyContained().contains(certainlyContainedChar))
                 lubAuxCertainly.add(certainlyContainedChar);
 
-        return new CharInclusion(lubAuxCertainly,lubAuxMaybe);
+        return new CharInclusion(lubAuxCertainly, lubAuxMaybe);
     }
 
     @Override
@@ -51,18 +51,13 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
     @Override
     public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
         if (this.getCertainlyContained().size() > other.getCertainlyContained().size() ||
-                this.getMaybeContained().size() > other.getMaybeContained().size())
+                other.getMaybeContained().size() > this.getMaybeContained().size())
             return false;
 
-        for (Character certainlyContainedCharacter : this.getCertainlyContained())
-            if (!other.getCertainlyContained().contains(certainlyContainedCharacter))
-                return false;
+        if(!other.getCertainlyContained().containsAll(this.getCertainlyContained()))
+            return false;
 
-        for (Character maybeContainedCharacter : this.getMaybeContained())
-            if (!other.getMaybeContained().contains(maybeContainedCharacter))
-                return false;
-
-        return true;
+        return this.getMaybeContained().containsAll(other.getMaybeContained());
     }
 
     @Override
@@ -116,7 +111,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
         return this.maybeContained;
     }
 
-    private String formatRepresentation(){
+    private String formatRepresentation() {
         StringBuilder stringBuilder = new StringBuilder("CertainlyContained: {");
         int counter = 0;
 
@@ -146,7 +141,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
         return stringBuilder.toString();
     }
 
-    private static HashSet<Character> getAlphabet() {
+    private static Collection<Character> getAlphabet() { //TODO a separate class
         HashSet<Character> alphabet = new HashSet<>();
 
         for (char character = 'a'; character <= 'z'; character++) {
