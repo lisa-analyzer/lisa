@@ -13,16 +13,33 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Objects;
 
+/**
+ * The suffix string abstract domain.
+ *
+ * @link https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
+ *             Salvatore Evola</a>
+ */
 public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
 	private final static Suffix TOP = new Suffix();
 	private final static Suffix BOTTOM = new Suffix(null);
 	private final String suffix;
 
+	/**
+	 * Builds the top suffix abstract element.
+	 */
 	public Suffix() {
 		this("");
 	}
 
+	/**
+	 * Builds a suffix abstract element.
+	 *
+	 * @param suffix the suffix
+	 */
 	public Suffix(String suffix) {
 		this.suffix = suffix;
 	}
@@ -167,6 +184,11 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 		return Satisfiability.UNKNOWN;
 	}
 
+	/**
+	 * Yields the suffix of this abstract value.
+	 *
+	 * @return the suffix of this abstract value.
+	 */
 	protected String getSuffix() {
 		return this.suffix;
 	}
