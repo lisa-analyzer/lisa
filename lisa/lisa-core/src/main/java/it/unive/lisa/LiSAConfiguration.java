@@ -191,7 +191,7 @@ public class LiSAConfiguration {
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
-	 * Whether or not the fixpoint algorithm should compute the descending phase
+	 * Whether or not the fixpoint algorithm should compute the descending phase.
 	 */
 	public boolean doDescendingPhase;
 

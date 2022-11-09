@@ -250,6 +250,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            {@link Lattice#widening(Lattice)} call. Use
 	 *                            {@code 0} to <b>always</b> use
 	 *                            {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the 
+	 * 							  descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -274,6 +276,54 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		entrypoints.forEach(e -> start.put(e, entryState));
 		return fixpoint(entryState, start, interprocedural, ws, widenAfter, doDescendingPhase);
 	}
+
+	/**
+	 * Computes a fixpoint over this control flow graph. This method returns a
+	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to
+	 * the {@link AnalysisState} computed by this method. The computation uses
+	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
+	 * iterations, up to {@code widenAfter * predecessors_number} times, where
+	 * {@code predecessors_number} is the number of expressions that are
+	 * predecessors of the one being processed. After overcoming that threshold,
+	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
+	 * statements returned by {@link #getEntrypoints()}, using
+	 * {@code entryState} as entry state for all of them.
+	 * {@code interprocedural} will be invoked to get the approximation of all
+	 * invoked cfgs, while {@code ws} is used as working set for the statements
+	 * to process.
+	 * 
+	 * @param <A>             the type of {@link AbstractState} contained into
+	 *                            the analysis state
+	 * @param <H>             the type of {@link HeapDomain} contained into the
+	 *                            computed abstract state
+	 * @param <V>             the type of {@link ValueDomain} contained into the
+	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
+	 * @param entryState      the entry states to apply to each
+	 *                            {@link Statement} returned by
+	 *                            {@link #getEntrypoints()}
+	 * @param interprocedural the interprocedural analysis that can be queried
+	 *                            when a call towards an other cfg is
+	 *                            encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param widenAfter      the number of times after which the
+	 *                            {@link Lattice#lub(Lattice)} invocation gets
+	 *                            replaced by the
+	 *                            {@link Lattice#widening(Lattice)} call. Use
+	 *                            {@code 0} to <b>always</b> use
+	 *                            {@link Lattice#lub(Lattice)}
+	 *                            
+	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
+	 *             this control flow graph, and that stores for each
+	 *             {@link Statement} the result of the fixpoint computation
+	 * 
+	 * @throws FixpointException if an error occurs during the semantic
+	 *                               computation of a statement, or if some
+	 *                               unknown/invalid statement ends up in the
+	 *                               working set
+	 */
 
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
@@ -325,6 +375,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            {@link Lattice#widening(Lattice)} call. Use
 	 *                            {@code 0} to <b>always</b> use
 	 *                            {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the 
+	 * 							  descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -388,6 +440,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            {@link Lattice#widening(Lattice)} call. Use
 	 *                            {@code 0} to <b>always</b> use
 	 *                            {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the 
+	 * 							  descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
