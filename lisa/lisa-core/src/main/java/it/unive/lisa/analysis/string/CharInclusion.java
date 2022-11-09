@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * The suffix string abstract domain.
@@ -187,6 +188,13 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	@Override
 	public CharInclusion evalNonNullConstant(Constant constant, ProgramPoint pp) {
+		if (constant.getValue() instanceof String) {
+			HashSet<Character> charsSet = ((String) constant.getValue()).chars()
+					.mapToObj(e -> (char) e).collect(Collectors.toCollection(HashSet::new));
+
+			return new CharInclusion(charsSet, charsSet);
+		}
+
 		return TOP;
 	}
 
