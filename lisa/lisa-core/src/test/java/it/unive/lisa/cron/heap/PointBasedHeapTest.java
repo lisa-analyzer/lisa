@@ -16,23 +16,23 @@ public class PointBasedHeapTest extends AnalysisTestExecutor {
 
 	@Test
 	public void fieldInsensitivePointBasedHeapTest() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						new PointBasedHeap(),
-						new Interval(),
-						getDefaultFor(TypeDomain.class)));
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				new PointBasedHeap(),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
 		perform("heap/point-based-heap/field-insensitive", "program.imp", conf);
 	}
 
 	@Test
 	public void fieldSensitivePointBasedHeapTest() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						new FieldSensitivePointBasedHeap(),
-						new Interval(),
-						getDefaultFor(TypeDomain.class)));
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				new FieldSensitivePointBasedHeap(),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
 		perform("heap/point-based-heap/field-sensitive", "program.imp", conf);
 	}
 }

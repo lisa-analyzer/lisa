@@ -245,26 +245,22 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public AnalysisState<A, H, V, T> top() {
-		return new AnalysisState<>(state.top(), new ExpressionSet<>(), aliasing.top());
+		return new AnalysisState<>(state.top(), computedExpressions.top(), aliasing.top());
 	}
 
 	@Override
 	public AnalysisState<A, H, V, T> bottom() {
-		return new AnalysisState<>(state.bottom(), new ExpressionSet<>(), aliasing.bottom());
+		return new AnalysisState<>(state.bottom(), computedExpressions.bottom(), aliasing.bottom());
 	}
 
 	@Override
 	public boolean isTop() {
-		// we do not check the computed expressions since we still have to
-		// track what is on the stack even if it's the top state
-		return state.isTop();
+		return state.isTop() && computedExpressions.isTop() && aliasing.isTop();
 	}
 
 	@Override
 	public boolean isBottom() {
-		// we do not check the computed expressions since we still have to
-		// track what is on the stack even if it's the bottom state
-		return state.isBottom();
+		return state.isBottom() && computedExpressions.isBottom() && aliasing.isBottom();
 	}
 
 	@Override

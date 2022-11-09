@@ -14,32 +14,31 @@ import it.unive.lisa.interprocedural.callgraph.CHACallGraph;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import org.junit.Test;
 
-@SuppressWarnings("rawtypes")
 public class ModularWorstCaseAnalysisTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testCHACallGraph() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						new Sign(),
-						getDefaultFor(TypeDomain.class)))
-				.setSerializeResults(true)
-				.setInterproceduralAnalysis(new ModularWorstCaseAnalysis())
-				.setCallGraph(new CHACallGraph());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Sign(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
+		conf.callGraph = new CHACallGraph();
 		perform("interprocedural", "CHA", "program.imp", conf);
 	}
 
 	@Test
 	public void testRTACallGraph() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						new Sign(),
-						getDefaultFor(TypeDomain.class)))
-				.setSerializeResults(true)
-				.setInterproceduralAnalysis(new ModularWorstCaseAnalysis())
-				.setCallGraph(new RTACallGraph());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Sign(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ModularWorstCaseAnalysis<>();
+		conf.callGraph = new RTACallGraph();
 		perform("interprocedural", "RTA", "program.imp", conf);
 	}
 }

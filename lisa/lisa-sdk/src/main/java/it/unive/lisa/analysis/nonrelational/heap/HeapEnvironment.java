@@ -9,7 +9,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -93,11 +92,6 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> copy() {
-		return new HeapEnvironment<>(lattice, mkNewFunction(function), new ArrayList<>(substitution));
-	}
-
-	@Override
 	public Pair<T, T> eval(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
@@ -122,7 +116,8 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	@Override
 	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
-		// environment does not change without an assignment
+		if (isBottom())
+			return this;
 		T eval = lattice.eval(expression, this, pp);
 		return new HeapEnvironment<>(lattice, function, eval.getSubstitution());
 	}
@@ -137,6 +132,16 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	public HeapEnvironment<T> bottom() {
 		return isBottom() ? this
 				: new HeapEnvironment<>(lattice.bottom(), null, Collections.emptyList());
+	}
+
+	@Override
+	public boolean isTop() {
+		return super.isTop() && substitution.isEmpty();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && substitution.isEmpty();
 	}
 
 	@Override
