@@ -15,7 +15,7 @@ import it.unive.lisa.symbolic.value.UnaryExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.operator.AdditionOperator;
 import it.unive.lisa.symbolic.value.operator.DivisionOperator;
-import it.unive.lisa.symbolic.value.operator.ModuleOperator;
+import it.unive.lisa.symbolic.value.operator.ModuloOperator;
 import it.unive.lisa.symbolic.value.operator.MultiplicationOperator;
 import it.unive.lisa.symbolic.value.operator.SubtractionOperator;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
@@ -102,7 +102,7 @@ public class ConstantPropagation
 				return left + right;
 			if (binary.getOperator() instanceof DivisionOperator)
 				return left == 0 ? null : (int) left / right;
-			if (binary.getOperator() instanceof ModuleOperator)
+			if (binary.getOperator() instanceof ModuloOperator)
 				return right == 0 ? null : left % right;
 			if (binary.getOperator() instanceof MultiplicationOperator)
 				return left * right;

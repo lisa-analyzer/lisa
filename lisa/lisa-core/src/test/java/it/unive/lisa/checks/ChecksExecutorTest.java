@@ -55,7 +55,8 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testSyntacticChecks() throws IOException, ParsingException {
-		LiSAConfiguration conf = new LiSAConfiguration().addSyntacticCheck(new VariableI());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.syntacticChecks.add(new VariableI());
 		perform("syntactic", "expressions.imp", conf);
 	}
 }

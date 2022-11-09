@@ -33,38 +33,36 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						new MonolithicHeap(),
 						new InferenceSystem<>(new NonInterference()),
 						new TypeEnvironment<>(new InferredTypes()));
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(s)
-				.addSemanticCheck(new NICheck());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = s;
+		conf.semanticChecks.add(new NICheck());
 		perform("non-interference/confidentiality", "program.imp", conf);
 	}
 
 	@Test
 	public void testIntegrityNI() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(
-						new SimpleAbstractState<>(
-								new MonolithicHeap(),
-								new InferenceSystem<>(new NonInterference()),
-								new TypeEnvironment<>(new InferredTypes())))
-				.addSemanticCheck(new NICheck());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = new SimpleAbstractState<>(
+				new MonolithicHeap(),
+				new InferenceSystem<>(new NonInterference()),
+				new TypeEnvironment<>(new InferredTypes()));
+		conf.semanticChecks.add(new NICheck());
 		perform("non-interference/integrity", "program.imp", conf);
 	}
 
 	@Test
 	public void testDeclassification() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(
-						new SimpleAbstractState<>(
-								new MonolithicHeap(),
-								new InferenceSystem<>(new NonInterference()),
-								new TypeEnvironment<>(new InferredTypes())))
-				.setCallGraph(new RTACallGraph())
-				.setInterproceduralAnalysis(new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton()))
-				.addSemanticCheck(new NICheck());
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = new SimpleAbstractState<>(
+				new MonolithicHeap(),
+				new InferenceSystem<>(new NonInterference()),
+				new TypeEnvironment<>(new InferredTypes()));
+		conf.callGraph = new RTACallGraph();
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
+		conf.semanticChecks.add(new NICheck());
 		perform("non-interference/interproc", "program.imp", conf);
 	}
 
