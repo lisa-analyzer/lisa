@@ -209,11 +209,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					MemoryPointer pid = (MemoryPointer) rec;
 					for (Type t : pid.getRuntimeTypes(types))
 						if (t.isPointerType()) {
-							Set<Type> inner = t.asPointerType().getInnerTypes();
-							Type dynamic = Type.commonSupertype(inner, Untyped.INSTANCE);
-							HeapLocation e = new HeapLocation(dynamic, dynamic.toString(), true,
+							Type inner = t.asPointerType().getInnerType();
+							HeapLocation e = new HeapLocation(inner, inner.toString(), true,
 									expression.getCodeLocation());
-							e.setRuntimeTypes(inner);
+							e.setRuntimeTypes(Collections.singleton(inner));
 							result.add(e);
 						}
 				}
@@ -247,10 +246,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			TypeSystem types = pp.getProgram().getTypes();
 			for (ValueExpression refExp : ref)
 				if (refExp instanceof HeapLocation) {
-					Set<Type> all = refExp.getStaticType().allInstances(types);
 					Set<Type> rt = refExp.getRuntimeTypes(types);
+					Type sup = Type.commonSupertype(rt, Untyped.INSTANCE);
 					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(refExp.hasRuntimeTypes() ? rt : all),
+							new ReferenceType(refExp.hasRuntimeTypes() ? sup : Untyped.INSTANCE),
 							(HeapLocation) refExp,
 							refExp.getCodeLocation());
 					if (expression.hasRuntimeTypes())
@@ -274,12 +273,10 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 					Variable var = (Variable) derefExp;
 					for (Type t : var.getRuntimeTypes(types))
 						if (t.isPointerType()) {
-							Set<Type> inner = t.asPointerType().getInnerTypes();
-							Type dynamic = Type.commonSupertype(inner, Untyped.INSTANCE);
-
-							HeapLocation loc = new HeapLocation(dynamic, dynamic.toString(), true,
+							Type inner = t.asPointerType().getInnerType();
+							HeapLocation loc = new HeapLocation(inner, inner.toString(), true,
 									var.getCodeLocation());
-							loc.setRuntimeTypes(inner);
+							loc.setRuntimeTypes(Collections.singleton(inner));
 
 							MemoryPointer pointer = new MemoryPointer(t, loc, var.getCodeLocation());
 							result.add(pointer);

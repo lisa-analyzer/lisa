@@ -66,6 +66,8 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	public Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> putResult(CFG cfg, ContextSensitivityToken token,
 			CFGWithAnalysisResults<A, H, V, T> result)
 			throws SemanticException {
+		if (function == null)
+			function = mkNewFunction(null, false);
 		CFGResults<A, H, V, T> res = function.computeIfAbsent(cfg, c -> new CFGResults<>(result.top()));
 		return res.putResult(token, result);
 	}
@@ -87,18 +89,8 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public boolean isTop() {
-		return lattice.isTop() && (function == null || function.isEmpty());
-	}
-
-	@Override
 	public FixpointResults<A, H, V, T> bottom() {
 		return new FixpointResults<>(lattice.bottom());
-	}
-
-	@Override
-	public boolean isBottom() {
-		return lattice.isBottom() && (function == null || function.isEmpty());
 	}
 
 	/**
@@ -107,7 +99,11 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	 * @param cfg the cfg to forget
 	 */
 	public void forget(CFG cfg) {
+		if (function == null)
+			return;
 		function.remove(cfg);
+		if (function.isEmpty())
+			function = null;
 	}
 
 	@Override

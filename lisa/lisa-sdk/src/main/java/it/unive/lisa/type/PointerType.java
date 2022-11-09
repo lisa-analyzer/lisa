@@ -1,7 +1,5 @@
 package it.unive.lisa.type;
 
-import java.util.Set;
-
 /**
  * Pointer type interface. This can be used to represent whatever type that
  * represents an address to a memory location.
@@ -11,10 +9,10 @@ import java.util.Set;
 public interface PointerType extends Type {
 
 	/**
-	 * Yields the inner types, that is, the types of the memory region that
+	 * Yields the inner type, that is, the type of the memory region that
 	 * variables with this type point to.
 	 * 
 	 * @return the inner types
 	 */
-	Set<Type> getInnerTypes();
+	Type getInnerType();
 }
