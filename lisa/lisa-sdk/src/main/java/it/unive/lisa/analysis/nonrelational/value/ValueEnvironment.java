@@ -80,11 +80,6 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	public ValueEnvironment<T> copy() {
-		return new ValueEnvironment<>(lattice, mkNewFunction(function), stack);
-	}
-
-	@Override
 	public Pair<T, T> eval(ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		T eval = lattice.eval(expression, this, pp);
 		return Pair.of(eval, eval);
@@ -99,6 +94,8 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	@Override
 	public ValueEnvironment<T> smallStepSemantics(ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
+		if (isBottom())
+			return this;
 		return new ValueEnvironment<>(lattice, function, lattice.eval(expression, this, pp));
 	}
 
@@ -121,6 +118,16 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	@Override
 	public ValueEnvironment<T> bottom() {
 		return isBottom() ? this : new ValueEnvironment<>(lattice.bottom(), null, lattice.bottom());
+	}
+
+	@Override
+	public boolean isTop() {
+		return super.isTop() && stack.isTop();
+	}
+
+	@Override
+	public boolean isBottom() {
+		return super.isBottom() && stack.isBottom();
 	}
 
 	@Override

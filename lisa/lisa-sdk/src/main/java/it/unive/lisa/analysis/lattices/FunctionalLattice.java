@@ -41,8 +41,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @param lattice the underlying lattice
 	 */
 	public FunctionalLattice(V lattice) {
-		this.lattice = lattice;
-		this.function = mkNewFunction(null);
+		this(lattice, null);
 	}
 
 	/**
@@ -53,7 +52,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	public FunctionalLattice(V lattice, Map<K, V> function) {
 		this.lattice = lattice;
-		this.function = function;
+		this.function = function != null && function.isEmpty() ? null : function;
 	}
 
 	/**
@@ -61,14 +60,15 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * method is to provide a common function implementation to every subclass
 	 * that does not have implementation-specific requirements.
 	 * 
-	 * @param other an optional function to copy, can be {@code null}
+	 * @param other        an optional function to copy, can be {@code null}
+	 * @param preserveNull whether a null {@code other} should cause a
+	 *                         {@code null} return value or an empty function
 	 * 
-	 * @return a new function, either empty or containing the same data of the
-	 *             given one
+	 * @return a new function
 	 */
-	public Map<K, V> mkNewFunction(Map<K, V> other) {
+	public Map<K, V> mkNewFunction(Map<K, V> other, boolean preserveNull) {
 		if (other == null)
-			return new HashMap<>();
+			return preserveNull ? null : new HashMap<>();
 		return new HashMap<>(other);
 	}
 
@@ -95,7 +95,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 			return lattice.bottom();
 		if (isTop())
 			return lattice.top();
-		if (function.containsKey(key))
+		if (function != null && function.containsKey(key))
 			return function.get(key);
 		return lattice.bottom();
 	}
@@ -110,13 +110,14 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 * @return the new instance of this class with the updated mapping
 	 */
 	public F putState(K key, V state) {
-		F result = mk(lattice, mkNewFunction(null));
+		// we are only adding elements here, so it is fine to not preserve null
+		Map<K, V> result = mkNewFunction(null, false);
 
-		result.function.put(key, state);
+		result.put(key, state);
 		for (K k : getKeys())
 			if (!k.equals(key))
-				result.function.put(k, getState(k));
-		return result;
+				result.put(k, getState(k));
+		return mk(lattice, result);
 	}
 
 	/**
@@ -204,15 +205,15 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	public F functionalLift(F other, KeyFunctionalLift<K> keyLifter, FunctionalLift<V> valueLifter)
 			throws SemanticException {
-		F result = mk(lattice.lub(other.lattice), mkNewFunction(null));
+		Map<K, V> function = mkNewFunction(null, false);
 		Set<K> keys = keyLifter.keyLift(this.getKeys(), other.getKeys());
 		for (K key : keys)
 			try {
-				result.function.put(key, valueLifter.lift(getState(key), other.getState(key)));
+				function.put(key, valueLifter.lift(getState(key), other.getState(key)));
 			} catch (SemanticException e) {
 				throw new SemanticException("Exception during functional lifting of key '" + key + "'", e);
 			}
-		return result;
+		return mk(lattice.lub(other.lattice), function);
 	}
 
 	/**
@@ -318,7 +319,7 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 		if (isBottom())
 			return Lattice.BOTTOM_STRING;
 
-		return function.toString();
+		return function == null ? "{}" : function.toString();
 	}
 
 	@Override

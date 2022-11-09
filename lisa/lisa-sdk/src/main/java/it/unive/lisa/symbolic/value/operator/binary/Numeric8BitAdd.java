@@ -25,7 +25,7 @@ public class Numeric8BitAdd extends NumericOperation implements AdditionOperator
 	public static final Numeric8BitAdd INSTANCE = new Numeric8BitAdd();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

@@ -15,12 +15,12 @@ import org.junit.Test;
 public class TypesCollectionTest extends AnalysisTestExecutor {
 	@Test
 	public void testTypesCollection() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration()
-				.setSerializeResults(true)
-				.setAbstractState(getDefaultFor(AbstractState.class,
-						getDefaultFor(HeapDomain.class),
-						getDefaultFor(ValueDomain.class),
-						new TypeEnvironment<>(new InferredTypes())));
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				getDefaultFor(ValueDomain.class),
+				new TypeEnvironment<>(new InferredTypes()));
 		perform("type-inference", "program.imp", conf);
 	}
 }

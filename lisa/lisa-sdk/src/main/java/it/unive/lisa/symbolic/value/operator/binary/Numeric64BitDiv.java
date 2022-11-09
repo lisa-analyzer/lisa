@@ -25,7 +25,7 @@ public class Numeric64BitDiv extends NumericOperation implements DivisionOperato
 	public static final Numeric64BitDiv INSTANCE = new Numeric64BitDiv();
 
 	/**
-	 * Builds the type. This constructor is visible to allow subclassing:
+	 * Builds the operator. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */

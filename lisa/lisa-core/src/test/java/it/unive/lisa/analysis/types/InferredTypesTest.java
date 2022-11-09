@@ -43,7 +43,6 @@ import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.symbolic.value.operator.unary.StringLength;
 import it.unive.lisa.symbolic.value.operator.unary.TypeOf;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
@@ -70,23 +69,7 @@ public class InferredTypesTest {
 	private static final String WRONG_RESULT = "Wrong result for %s(%s)";
 	private static final String RESULT_NOT_BOTTOM = "Result is not bottom for %s(%s)";
 
-	private static final TypeSystem types = new TypeSystem() {
-
-		@Override
-		public it.unive.lisa.type.StringType getStringType() {
-			return StringType.INSTANCE;
-		}
-
-		@Override
-		public NumericType getIntegerType() {
-			return Int32Type.INSTANCE;
-		}
-
-		@Override
-		public BooleanType getBooleanType() {
-			return BoolType.INSTANCE;
-		}
-	};
+	private static final TypeSystem types = new IMPTypeSystem();
 
 	private static final InferredTypes untyped = new InferredTypes(types, Untyped.INSTANCE);
 	private static final InferredTypes bool = new InferredTypes(types, BoolType.INSTANCE);
