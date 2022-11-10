@@ -24,7 +24,7 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.descendingPhaseType = DescendingPhaseType.WIDENING;
 		perform("descending-widening", "program.imp", conf);
 	}
-	
+
 	@Test
 	public void testIntervalDescendingMAxGlb() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration();
