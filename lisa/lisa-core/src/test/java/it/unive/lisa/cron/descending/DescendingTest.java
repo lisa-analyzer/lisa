@@ -16,12 +16,23 @@ import org.junit.Test;
 public class DescendingTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testIntervalDescending() throws AnalysisSetupException {
+	public void testIntervalDescendingWidening() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.descendingPhaseType = DescendingPhaseType.WIDENING;
-		perform("descending", "program.imp", conf);
+		perform("descending-widening", "program.imp", conf);
+	}
+	
+	@Test
+	public void testIntervalDescendingMAxGlb() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
+				new TypeEnvironment<>(new InferredTypes()));
+		conf.descendingPhaseType = DescendingPhaseType.GLB;
+		conf.descendingGlbThreshold = 5;
+		perform("descending-maxglb", "program.imp", conf);
 	}
 }
