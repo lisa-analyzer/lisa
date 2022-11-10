@@ -69,7 +69,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	private DescendingPhaseType descendingPhase;
 
 	private int descendingGlbThreshold;
-	
+
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
 	 */
@@ -104,7 +104,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			throw new NoEntryPointException();
 
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
-				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold, descendingPhase, descendingGlbThreshold));
+				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold, descendingPhase,
+						descendingGlbThreshold));
 	}
 
 	private static String ordinal(int i) {
@@ -123,7 +124,8 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private void fixpointAux(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold) throws AnalysisExecutionException {
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
+			throws AnalysisExecutionException {
 		int iter = 0;
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));

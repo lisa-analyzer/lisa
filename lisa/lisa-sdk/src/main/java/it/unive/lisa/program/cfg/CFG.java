@@ -603,6 +603,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					newApprox = newApprox.glb(oldApprox);
 					newIntermediate = newIntermediate.glb(oldIntermediate);
 				}
+				else
+				{
+					newApprox = oldApprox;
+					newIntermediate = oldIntermediate;
+				}
 				glbs.put(node, --glb);
 			}
 			return Pair.of(newApprox, newIntermediate);

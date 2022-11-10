@@ -22,7 +22,6 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.descendingPhaseType = DescendingPhaseType.WIDENING;
-		conf.descendingGlbThreshold = 2;
 		perform("descending", "program.imp", conf);
 	}
 }
