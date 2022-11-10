@@ -26,8 +26,8 @@ External contributions are always welcome! Check out our [contributing guideline
 
 ## Releases
 
-Head to the [project's website](https://lisa-analyzer.github.io/releases/) for the full list of releases. 
+Head to the [Releases](https://github.com/lisa-analyzer/lisa/releases) page for the full list of releases. 
 
 ### Snapshots
 
-The snapshot of the last commit of the `master` branch is always available on [GitHub Packages](https://github.com/orgs/lisa-analyzer/packages?repo_name=lisa) (you can find the updated milestone [here](https://github.com/lisa-analyzer/lisa/releases/tag/latest)).
+The snapshot of the last commit of the `master` branch is always available on [GitHub Packages](https://github.com/orgs/lisa-analyzer/packages?repo_name=lisa). Be aware that you will need a personal access token to use packages as server for resolving dependencies. You can refer to the official GitHub guide for [Maven](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-apache-maven-registry#authenticating-to-github-packages) or [Gradle](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry#authenticating-to-github-packages) for more information.
