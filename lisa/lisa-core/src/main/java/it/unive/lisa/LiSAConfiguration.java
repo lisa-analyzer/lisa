@@ -86,9 +86,10 @@ public class LiSAConfiguration {
 	 * {@link Lattice#widening(Lattice)}.
 	 */
 	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
-	
+
 	/**
-	 * The default number of maximum time glb can be called on a node during the descending phase of fixpoint algorithm.
+	 * The default number of maximum time glb can be called on a node during the
+	 * descending phase of fixpoint algorithm.
 	 */
 	public static final int DEFAULT_DESCENDING_GLB_THRESHOLD = 5;
 
@@ -205,9 +206,10 @@ public class LiSAConfiguration {
 	public int descendingGlbThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
-	 * the type of descending phase that will be applied by the fixpoint algorithm.
+	 * the type of descending phase that will be applied by the fixpoint
+	 * algorithm.
 	 */
-	public DescendingPhaseType descendingPhase = DescendingPhaseType.NONE;
+	public DescendingPhaseType descendingPhaseType = DescendingPhaseType.NONE;
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.

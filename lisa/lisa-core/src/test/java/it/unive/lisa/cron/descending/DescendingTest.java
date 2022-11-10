@@ -11,7 +11,6 @@ import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis.DescendingPhaseType;
-
 import org.junit.Test;
 
 public class DescendingTest extends AnalysisTestExecutor {
@@ -22,7 +21,8 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
-		conf.descendingPhase = DescendingPhaseType.WIDENING;
+		conf.descendingPhaseType = DescendingPhaseType.WIDENING;
+		conf.descendingGlbThreshold = 2;
 		perform("descending", "program.imp", conf);
 	}
 }

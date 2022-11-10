@@ -271,7 +271,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					DescendingPhaseType descendingPhase, 
+					DescendingPhaseType descendingPhase,
 					int descendingGlbThreshold) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
@@ -392,12 +392,12 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					Collection<Statement> entrypoints, 
+					Collection<Statement> entrypoints,
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					DescendingPhaseType descendingPhase, 
+					DescendingPhaseType descendingPhase,
 					int descendingGlbThreshold) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
@@ -465,7 +465,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					DescendingPhaseType descendingPhase, 
+					DescendingPhaseType descendingPhase,
 					int descendingGlbThreshold) throws FixpointException {
 
 		Fixpoint<CFG, Statement, Edge,
@@ -500,7 +500,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		private final Map<Statement, Integer> glbs;
 		private final DescendingPhaseType descendingPhase;
 
-		private CFGFixpoint(int widenAfter, 
+		private CFGFixpoint(int widenAfter,
 				InterproceduralAnalysis<A, H, V, T> interprocedural,
 				DescendingPhaseType descendingPhase,
 				int descendingGlbThreshold) {
@@ -594,21 +594,17 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
 			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
 
-			newApprox = oldApprox.narrowing(newApprox);
-			newIntermediate = oldIntermediate.narrowing(newIntermediate);
-			/*
-			 * if (widenAfter == 0) { newApprox = newApprox.glb(oldApprox);
-			 * newIntermediate = newIntermediate.glb(oldIntermediate); } else {
-			 * // we multiply by the number of predecessors since // if we have
-			 * more than one // the threshold will be reached faster int glb =
-			 * glbs.computeIfAbsent(node, st -> widenAfter *
-			 * predecessorsOf(st).size()); if (glb > 0) { newApprox =
-			 * newApprox.glb(oldApprox); newIntermediate =
-			 * newIntermediate.glb(oldIntermediate); } else { newApprox =
-			 * oldApprox.narrowing(newApprox); newIntermediate =
-			 * oldIntermediate.narrowing(newIntermediate); } glbs.put(node,
-			 * --glb); }
-			 */
+			if (this.descendingPhase == DescendingPhaseType.WIDENING) {
+				newApprox = oldApprox.narrowing(newApprox);
+				newIntermediate = oldIntermediate.narrowing(newIntermediate);
+			} else if (this.descendingPhase == DescendingPhaseType.GLB) {
+				int glb = glbs.computeIfAbsent(node, st -> descendingGlbThreshold);
+				if (glb > 0) {
+					newApprox = newApprox.glb(oldApprox);
+					newIntermediate = newIntermediate.glb(oldIntermediate);
+				}
+				glbs.put(node, --glb);
+			}
 			return Pair.of(newApprox, newIntermediate);
 		}
 
