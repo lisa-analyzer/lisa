@@ -228,30 +228,30 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * invoked cfgs, while {@code ws} is used as working set for the statements
 	 * to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
-	 * @param entryState      the entry states to apply to each
-	 *                            {@link Statement} returned by
-	 *                            {@link #getEntrypoints()}
-	 * @param interprocedural the interprocedural analysis that can be queried
-	 *                            when a call towards an other cfg is
-	 *                            encountered
-	 * @param ws              the {@link WorkingSet} instance to use for this
-	 *                            computation
-	 * @param widenAfter      the number of times after which the
-	 *                            {@link Lattice#lub(Lattice)} invocation gets
-	 *                            replaced by the
-	 *                            {@link Lattice#widening(Lattice)} call. Use
-	 *                            {@code 0} to <b>always</b> use
-	 *                            {@link Lattice#lub(Lattice)}
-	 * @param doDescendingPhase whether or not the fixpoint should compute the 
-	 * 							  descending phase
+	 * @param <A>               the type of {@link AbstractState} contained into
+	 *                              the analysis state
+	 * @param <H>               the type of {@link HeapDomain} contained into
+	 *                              the computed abstract state
+	 * @param <V>               the type of {@link ValueDomain} contained into
+	 *                              the computed abstract state
+	 * @param <T>               the type of {@link TypeDomain} contained into
+	 *                              the computed abstract state
+	 * @param entryState        the entry states to apply to each
+	 *                              {@link Statement} returned by
+	 *                              {@link #getEntrypoints()}
+	 * @param interprocedural   the interprocedural analysis that can be queried
+	 *                              when a call towards an other cfg is
+	 *                              encountered
+	 * @param ws                the {@link WorkingSet} instance to use for this
+	 *                              computation
+	 * @param widenAfter        the number of times after which the
+	 *                              {@link Lattice#lub(Lattice)} invocation gets
+	 *                              replaced by the
+	 *                              {@link Lattice#widening(Lattice)} call. Use
+	 *                              {@code 0} to <b>always</b> use
+	 *                              {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the
+	 *                              descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -314,7 +314,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            {@link Lattice#widening(Lattice)} call. Use
 	 *                            {@code 0} to <b>always</b> use
 	 *                            {@link Lattice#lub(Lattice)}
-	 *                            
+	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
@@ -352,31 +352,31 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
-	 * @param entrypoints     the collection of {@link Statement}s that to use
-	 *                            as a starting point of the computation (that
-	 *                            must be nodes of this cfg)
-	 * @param entryState      the entry states to apply to each
-	 *                            {@link Statement} in {@code entrypoints}
-	 * @param interprocedural the callgraph that can be queried when a call
-	 *                            towards an other cfg is encountered
-	 * @param ws              the {@link WorkingSet} instance to use for this
-	 *                            computation
-	 * @param widenAfter      the number of times after which the
-	 *                            {@link Lattice#lub(Lattice)} invocation gets
-	 *                            replaced by the
-	 *                            {@link Lattice#widening(Lattice)} call. Use
-	 *                            {@code 0} to <b>always</b> use
-	 *                            {@link Lattice#lub(Lattice)}
-	 * @param doDescendingPhase whether or not the fixpoint should compute the 
-	 * 							  descending phase
+	 * @param <A>               the type of {@link AbstractState} contained into
+	 *                              the analysis state
+	 * @param <H>               the type of {@link HeapDomain} contained into
+	 *                              the computed abstract state
+	 * @param <V>               the type of {@link ValueDomain} contained into
+	 *                              the computed abstract state
+	 * @param <T>               the type of {@link TypeDomain} contained into
+	 *                              the computed abstract state
+	 * @param entrypoints       the collection of {@link Statement}s that to use
+	 *                              as a starting point of the computation (that
+	 *                              must be nodes of this cfg)
+	 * @param entryState        the entry states to apply to each
+	 *                              {@link Statement} in {@code entrypoints}
+	 * @param interprocedural   the callgraph that can be queried when a call
+	 *                              towards an other cfg is encountered
+	 * @param ws                the {@link WorkingSet} instance to use for this
+	 *                              computation
+	 * @param widenAfter        the number of times after which the
+	 *                              {@link Lattice#lub(Lattice)} invocation gets
+	 *                              replaced by the
+	 *                              {@link Lattice#widening(Lattice)} call. Use
+	 *                              {@code 0} to <b>always</b> use
+	 *                              {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the
+	 *                              descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -415,33 +415,34 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>             the type of {@link AbstractState} contained into
-	 *                            the analysis state
-	 * @param <H>             the type of {@link HeapDomain} contained into the
-	 *                            computed abstract state
-	 * @param <V>             the type of {@link ValueDomain} contained into the
-	 *                            computed abstract state
-	 * @param <T>             the type of {@link TypeDomain} contained into the
-	 *                            computed abstract state
-	 * @param singleton       an instance of the {@link AnalysisState}
-	 *                            containing the abstract state of the analysis
-	 *                            to run, used to retrieve top and bottom values
-	 * @param startingPoints  a map between {@link Statement}s that to use as a
-	 *                            starting point of the computation (that must
-	 *                            be nodes of this cfg) and the entry states to
-	 *                            apply on it
-	 * @param interprocedural the callgraph that can be queried when a call
-	 *                            towards an other cfg is encountered
-	 * @param ws              the {@link WorkingSet} instance to use for this
-	 *                            computation
-	 * @param widenAfter      the number of times after which the
-	 *                            {@link Lattice#lub(Lattice)} invocation gets
-	 *                            replaced by the
-	 *                            {@link Lattice#widening(Lattice)} call. Use
-	 *                            {@code 0} to <b>always</b> use
-	 *                            {@link Lattice#lub(Lattice)}
-	 * @param doDescendingPhase whether or not the fixpoint should compute the 
-	 * 							  descending phase
+	 * @param <A>               the type of {@link AbstractState} contained into
+	 *                              the analysis state
+	 * @param <H>               the type of {@link HeapDomain} contained into
+	 *                              the computed abstract state
+	 * @param <V>               the type of {@link ValueDomain} contained into
+	 *                              the computed abstract state
+	 * @param <T>               the type of {@link TypeDomain} contained into
+	 *                              the computed abstract state
+	 * @param singleton         an instance of the {@link AnalysisState}
+	 *                              containing the abstract state of the
+	 *                              analysis to run, used to retrieve top and
+	 *                              bottom values
+	 * @param startingPoints    a map between {@link Statement}s that to use as
+	 *                              a starting point of the computation (that
+	 *                              must be nodes of this cfg) and the entry
+	 *                              states to apply on it
+	 * @param interprocedural   the callgraph that can be queried when a call
+	 *                              towards an other cfg is encountered
+	 * @param ws                the {@link WorkingSet} instance to use for this
+	 *                              computation
+	 * @param widenAfter        the number of times after which the
+	 *                              {@link Lattice#lub(Lattice)} invocation gets
+	 *                              replaced by the
+	 *                              {@link Lattice#widening(Lattice)} call. Use
+	 *                              {@code 0} to <b>always</b> use
+	 *                              {@link Lattice#lub(Lattice)}
+	 * @param doDescendingPhase whether or not the fixpoint should compute the
+	 *                              descending phase
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each

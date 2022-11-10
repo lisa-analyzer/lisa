@@ -5,7 +5,6 @@ import static it.unive.lisa.LiSAFactory.getDefaultFor;
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
-import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
@@ -22,7 +21,6 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.doDescendingPhase = true;
-		conf.analysisGraphs = GraphType.DOT;
 		perform("descending", "program.imp", conf);
 	}
 }
