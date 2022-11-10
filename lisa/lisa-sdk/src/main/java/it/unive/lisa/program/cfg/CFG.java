@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis.DescendingPhaseType;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
@@ -270,11 +271,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					boolean doDescendingPhase)
-					throws FixpointException {
+					DescendingPhaseType descendingPhase, 
+					int descendingGlbThreshold) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, widenAfter, doDescendingPhase);
+		return fixpoint(entryState, start, interprocedural, ws, widenAfter, descendingPhase, descendingGlbThreshold);
 	}
 
 	/**
@@ -335,7 +336,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					int widenAfter)
 					throws FixpointException {
 
-		return fixpoint(entryState, interprocedural, ws, widenAfter, false);
+		return fixpoint(entryState, interprocedural, ws, widenAfter, DescendingPhaseType.NONE, 5);
 	}
 
 	/**
@@ -391,14 +392,16 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					Collection<Statement> entrypoints, AnalysisState<A, H, V, T> entryState,
+					Collection<Statement> entrypoints, 
+					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					boolean doDescendingPhase) throws FixpointException {
+					DescendingPhaseType descendingPhase, 
+					int descendingGlbThreshold) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, widenAfter, doDescendingPhase);
+		return fixpoint(entryState, start, interprocedural, ws, widenAfter, descendingPhase, descendingGlbThreshold);
 	}
 
 	/**
@@ -462,8 +465,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					int widenAfter,
-					boolean doDescendingPhase)
-					throws FixpointException {
+					DescendingPhaseType descendingPhase, 
+					int descendingGlbThreshold) throws FixpointException {
 
 		Fixpoint<CFG, Statement, Edge,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fix = new Fixpoint<>(this);
@@ -471,7 +474,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
 		Map<Statement,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint = fix.fixpoint(starting, ws,
-						new CFGFixpoint<>(widenAfter, interprocedural, doDescendingPhase));
+						new CFGFixpoint<>(widenAfter, interprocedural, descendingPhase, descendingGlbThreshold));
 
 		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
 		for (Entry<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> e : fixpoint.entrySet()) {
@@ -492,17 +495,21 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		private final InterproceduralAnalysis<A, H, V, T> interprocedural;
 		private final int widenAfter;
+		private final int descendingGlbThreshold;
 		private final Map<Statement, Integer> lubs;
 		private final Map<Statement, Integer> glbs;
-		private final boolean doDescendingPhase;
+		private final DescendingPhaseType descendingPhase;
 
-		private CFGFixpoint(int widenAfter, InterproceduralAnalysis<A, H, V, T> interprocedural,
-				boolean doDescendingPhase) {
+		private CFGFixpoint(int widenAfter, 
+				InterproceduralAnalysis<A, H, V, T> interprocedural,
+				DescendingPhaseType descendingPhase,
+				int descendingGlbThreshold) {
 			this.widenAfter = widenAfter;
 			this.interprocedural = interprocedural;
 			this.lubs = new HashMap<>(CFG.this.getNodesCount());
 			this.glbs = new HashMap<>(CFG.this.getNodesCount());
-			this.doDescendingPhase = doDescendingPhase;
+			this.descendingPhase = descendingPhase;
+			this.descendingGlbThreshold = descendingGlbThreshold;
 		}
 
 		@Override
@@ -613,7 +620,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		@Override
 		public boolean doDescendingPhase() {
-			return this.doDescendingPhase;
+			return !(this.descendingPhase == DescendingPhaseType.NONE);
 		}
 	}
 

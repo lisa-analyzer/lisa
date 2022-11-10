@@ -27,7 +27,6 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
 import java.util.Set;
-
 /**
  * The definition of interprocedural analyses.
  * 
@@ -45,6 +44,24 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>> {
 
+	public static enum DescendingPhaseType{
+		
+		/**
+		 * the descending phase is not computed.
+		 */
+		NONE, 
+		
+		/**
+		 * the descending phase is calculated with glb.
+		 */
+		GLB,
+		
+		/**
+		 * the descending phase always use the narowing operator.
+		 */
+		WIDENING;
+	}
+	
 	/**
 	 * Initializes the interprocedural analysis of the given program.
 	 *
@@ -83,7 +100,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 */
 	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, boolean doDescendingPhase) throws FixpointException;
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold) throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the

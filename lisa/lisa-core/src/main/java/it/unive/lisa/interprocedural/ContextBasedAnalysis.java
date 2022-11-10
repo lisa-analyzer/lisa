@@ -66,8 +66,10 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private int wideningThreshold;
 
-	private boolean doDescendingPhase;
+	private DescendingPhaseType descendingPhase;
 
+	private int descendingGlbThreshold;
+	
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
 	 */
@@ -90,18 +92,19 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	public void fixpoint(
 			AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, boolean doDescendingPhase)
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
 			throws FixpointException {
 		this.results = null;
 		this.fixpointWorkingSet = fixpointWorkingSet;
 		this.wideningThreshold = wideningThreshold;
-		this.doDescendingPhase = doDescendingPhase;
+		this.descendingPhase = descendingPhase;
+		this.descendingGlbThreshold = descendingGlbThreshold;
 
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
 
 		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
-				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold, doDescendingPhase));
+				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold, descendingPhase, descendingGlbThreshold));
 	}
 
 	private static String ordinal(int i) {
@@ -120,7 +123,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private void fixpointAux(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, boolean doDescendingPhase) throws AnalysisExecutionException {
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold) throws AnalysisExecutionException {
 		int iter = 0;
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
@@ -133,7 +136,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 						this.results = new FixpointResults<>(value.top());
 					results.putResult(cfg, token.empty(),
 							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), wideningThreshold,
-									doDescendingPhase));
+									descendingPhase, descendingGlbThreshold));
 				} catch (SemanticException | AnalysisSetupException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 				} catch (FixpointException e) {
@@ -242,7 +245,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			AnalysisState<A, H, V, T> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
 		CFGWithAnalysisResults<A, H, V, T> fixpointResult = cfg.fixpoint(computedEntryState, this,
-				WorkingSet.of(fixpointWorkingSet), wideningThreshold, doDescendingPhase);
+				WorkingSet.of(fixpointWorkingSet), wideningThreshold, descendingPhase, descendingGlbThreshold);
 		fixpointResult.setId(localToken.toString());
 		Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> res = results.putResult(cfg, localToken, fixpointResult);
 		if (Boolean.TRUE.equals(res.getLeft()))

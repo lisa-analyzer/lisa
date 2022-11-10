@@ -6,6 +6,7 @@ import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.InterproceduralAnalysis.DescendingPhaseType;
 import it.unive.lisa.interprocedural.OpenCallPolicy;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
@@ -85,6 +86,11 @@ public class LiSAConfiguration {
 	 * {@link Lattice#widening(Lattice)}.
 	 */
 	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
+	
+	/**
+	 * The default number of maximum time glb can be called on a node during the descending phase of fixpoint algorithm.
+	 */
+	public static final int DEFAULT_DESCENDING_GLB_THRESHOLD = 5;
 
 	/**
 	 * The collection of {@link SyntacticCheck}s to execute. These checks will
@@ -191,10 +197,17 @@ public class LiSAConfiguration {
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
-	 * Whether or not the fixpoint algorithm should compute the descending
-	 * phase.
+	 * The number of fixpoint iteration on a given node after which calls to
+	 * {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}. Defaults to
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
 	 */
-	public boolean doDescendingPhase;
+	public int descendingGlbThreshold = DEFAULT_WIDENING_THRESHOLD;
+
+	/**
+	 * the type of descending phase that will be applied by the fixpoint algorithm.
+	 */
+	public DescendingPhaseType descendingPhase = DescendingPhaseType.NONE;
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.

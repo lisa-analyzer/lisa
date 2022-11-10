@@ -18,10 +18,10 @@ class tutorial {
 	}
 	
 	doublewhile(t) {
-		while(t<200)
-			t = t+10;
+		while(t < 200)
+			t = t + 10;
 		while(t > 1000)
-			t = t-10;
+			t = t - 10;
 		return t;
 	}
 
