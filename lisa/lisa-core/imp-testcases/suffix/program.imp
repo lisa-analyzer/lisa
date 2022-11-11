@@ -1,0 +1,23 @@
+class prefix {
+
+	m1() {
+		def c = "a";
+		def b = "b";
+    }
+
+    m2(x) {
+    	def s = "";
+    	if (x == 0)
+    		s = "abc";
+    	else
+    		s = "abd";
+    }
+
+    m3(x) {
+    	def s = "abc";
+    	while (x < 100) {
+    		s = s + "abc";
+    		x = x + 1;
+    	}
+    }
+}
