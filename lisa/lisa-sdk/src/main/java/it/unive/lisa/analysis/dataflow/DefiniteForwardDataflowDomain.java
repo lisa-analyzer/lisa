@@ -51,7 +51,7 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 
 	@Override
 	public DefiniteForwardDataflowDomain<E> glbAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
-		// TODO Auto-generated method stub
-		return this.bottom();
+		Set<E> intersection = SetUtils.union(this.getDataflowElements(), other.getDataflowElements());
+		return new DefiniteForwardDataflowDomain<>(domain, intersection, false, false);
 	}
 }

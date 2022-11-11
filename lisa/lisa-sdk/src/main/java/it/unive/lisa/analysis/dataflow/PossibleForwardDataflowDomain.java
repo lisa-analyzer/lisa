@@ -50,7 +50,7 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 
 	@Override
 	public PossibleForwardDataflowDomain<E> glbAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
-		// TODO Auto-generated method stub
-		return this.bottom();
+		Set<E> intersection = SetUtils.intersection(this.getDataflowElements(), other.getDataflowElements());
+		return new PossibleForwardDataflowDomain<>(domain, intersection, false, false);
 	}
 }

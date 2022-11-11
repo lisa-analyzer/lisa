@@ -40,10 +40,4 @@ public class ValueCartesianProduct<T1 extends ValueDomain<T1>, T2 extends ValueD
 	public boolean isBottom() {
 		return left.isBottom() && right.isBottom();
 	}
-
-	@Override
-	public ValueCartesianProduct<T1, T2> glb(ValueCartesianProduct<T1, T2> other) throws SemanticException {
-		// TODO Auto-generated method stub
-		return this.bottom();
-	}
 }
