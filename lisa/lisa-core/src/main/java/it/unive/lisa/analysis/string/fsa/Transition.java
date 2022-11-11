@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.fsa;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;

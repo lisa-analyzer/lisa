@@ -1,4 +1,8 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.fsa;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
@@ -12,9 +16,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * A class that represent the Finite State Automaton domain for strings.

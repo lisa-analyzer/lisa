@@ -1,5 +1,9 @@
 package it.unive.lisa.checks;
 
+import java.io.IOException;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.checks.syntactic.CheckTool;
@@ -11,8 +15,6 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.io.IOException;
-import org.junit.Test;
 
 public class ChecksExecutorTest extends AnalysisTestExecutor {
 

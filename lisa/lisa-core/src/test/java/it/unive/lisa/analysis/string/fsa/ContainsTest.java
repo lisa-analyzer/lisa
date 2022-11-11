@@ -1,14 +1,16 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.fsa;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.Test;
 
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import org.junit.Test;
 
 public class ContainsTest {
 

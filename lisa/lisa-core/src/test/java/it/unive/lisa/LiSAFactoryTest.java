@@ -5,6 +5,15 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Test;
+
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
@@ -13,13 +22,6 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.Untyped;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
 
 public class LiSAFactoryTest {
 
