@@ -1,12 +1,5 @@
 package it.unive.lisa;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.checks.semantic.SemanticCheck;
@@ -22,6 +15,12 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.

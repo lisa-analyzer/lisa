@@ -5,7 +5,6 @@ package it.unive.lisa.analysis.string.fsa;
  * 
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
- 
  */
 public class CyclicAutomatonException extends Exception {
 	/**

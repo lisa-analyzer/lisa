@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-
 import org.junit.Test;
 
 public class CommonAlphabetTest {

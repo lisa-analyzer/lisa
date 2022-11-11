@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.types;
 
-import java.util.Collections;
-import java.util.Set;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -27,6 +24,8 @@ import it.unive.lisa.type.NullType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * An {@link InferredValue} holding a set of {@link Type}s, representing the
