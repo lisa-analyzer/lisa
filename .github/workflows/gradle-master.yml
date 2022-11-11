@@ -78,27 +78,4 @@ jobs:
         MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
         MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository
-    - name: Delete old latest tag
-      uses: dev-drprasad/delete-tag-and-release@v0.2.0
-      with:
-        tag_name: latest
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: Create snapshot release
-      uses: viperproject/create-nightly-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: latest
-        release_name: "Latest snapshot relese: ${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT"
-        body: |
-          Latest snapshot relese: ${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT.
-          This release is not stable: its contents will be replaced at each push on branch `master`.
-          No older copies of the snapshots will be kept in GitHub Packages.
-          
-          Contents (commits since ${{ steps.gitinfo.outputs.currentver }}):
-          ${{ env.CHANGELOG }}
-        keep_num: 0
-        keep_tags: false
-        
+      run: cd lisa && ./gradlew -Pversion=${{ steps.gitinfo.outputs.nextver }}-SNAPSHOT publishAllPublicationsToGitHubPackagesRepository        
