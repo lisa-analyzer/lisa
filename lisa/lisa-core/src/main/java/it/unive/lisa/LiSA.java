@@ -11,11 +11,10 @@ import it.unive.lisa.program.Application;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
 
 /**
  * This is the central class of the LiSA library. While LiSA's functionalities
@@ -28,12 +27,6 @@ import org.apache.logging.log4j.Logger;
 public class LiSA {
 
 	private static final Logger LOG = LogManager.getLogger(LiSA.class);
-
-	/**
-	 * The collection of warnings that will be filled with the results of all
-	 * the executed checks
-	 */
-	private final Collection<Warning> warnings;
 
 	/**
 	 * The {@link FileManager} instance that will be used during analyses
@@ -52,7 +45,6 @@ public class LiSA {
 	 * @param conf the configuration of the analysis to run
 	 */
 	public LiSA(LiSAConfiguration conf) {
-		this.warnings = new ArrayList<>();
 		this.conf = conf;
 		this.fileManager = new FileManager(conf.workdir);
 	}
@@ -63,11 +55,15 @@ public class LiSA {
 	 * @param programs the programs, each written in a single programming
 	 *                     language, to analyze
 	 * 
+	 * @return the {@link LiSAReport} containing the details of the analysis
+	 * 
 	 * @throws AnalysisException if anything goes wrong during the analysis
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public void run(Program... programs) throws AnalysisException {
-		printConfig();
+	public LiSAReport run(Program... programs) throws AnalysisException {
+		LOG.info(conf.toString());
+
+		DateTime start = new DateTime();
 
 		CallGraph callGraph;
 		try {
@@ -91,14 +87,17 @@ public class LiSA {
 
 		LiSARunner runner = new LiSARunner(conf, interproc, callGraph, conf.abstractState);
 		Application app = new Application(programs);
+		Collection<Warning> warnings;
 
 		try {
-			warnings.addAll(TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app, fileManager)));
+			warnings = TimerLogger.execSupplier(LOG, "Analysis time", () -> runner.run(app, fileManager));
 		} catch (AnalysisExecutionException e) {
 			throw new AnalysisException("LiSA has encountered an exception while executing the analysis", e);
 		}
 
-		printStats();
+		LiSARunInfo stats = new LiSARunInfo(warnings, fileManager.createdFiles(), app, start, new DateTime());
+		LOG.info("LiSA statistics:");
+		LOG.info(stats);
 
 		if (conf.jsonOutput) {
 			LOG.info("Dumping reported warnings to 'report.json'");
@@ -112,25 +111,7 @@ public class LiSA {
 				LOG.error("Unable to dump report file", e);
 			}
 		}
-	}
 
-	private void printConfig() {
-		LOG.info(conf.toString());
-	}
-
-	private void printStats() {
-		LOG.info("LiSA statistics:");
-		LOG.info("  {} warnings generated", warnings.size());
-	}
-
-	/**
-	 * Yields an unmodifiable view of the warnings that have been generated
-	 * during the analysis. Invoking this method before invoking
-	 * {@link #run(Program...)} will return an empty collection.
-	 * 
-	 * @return a view of the generated warnings
-	 */
-	public Collection<Warning> getWarnings() {
-		return Collections.unmodifiableCollection(warnings);
+		return new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
 	}
 }

@@ -46,6 +46,7 @@ spotless {
             exclude '**/build/generated/**'
             exclude '**/build/generated-src/**'
             exclude '**/target/generated-sources/**'
+            exclude '**/VersionInfo.java'
         }
     }
     antlr4 {

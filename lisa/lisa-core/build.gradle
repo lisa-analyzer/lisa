@@ -5,6 +5,7 @@ dependencies {
 
     // utils
 	api 'org.reflections:reflections:0.9.12'
+	api 'joda-time:joda-time:2.10.14'
 
 	// testing
 	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
