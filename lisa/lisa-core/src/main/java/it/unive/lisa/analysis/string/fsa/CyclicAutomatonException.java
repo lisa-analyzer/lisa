@@ -7,6 +7,9 @@ package it.unive.lisa.analysis.string.fsa;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class CyclicAutomatonException extends Exception {
+
+	private static final long serialVersionUID = -316595813050258650L;
+
 	/**
 	 * Default constructor for CyclicAutomatonException.
 	 */
