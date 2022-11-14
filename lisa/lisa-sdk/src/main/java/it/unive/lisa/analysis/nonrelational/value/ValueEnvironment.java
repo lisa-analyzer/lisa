@@ -105,9 +105,17 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
-	public ValueEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, ValueEnvironment<T> other)
+	public ValueEnvironment<T> glbAux(ValueEnvironment<T> other)
 			throws SemanticException {
-		return new ValueEnvironment<>(lattice, function, stack.glb(other.stack));
+		ValueEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.glb(other.stack));
+	}
+	
+	@Override
+	public ValueEnvironment<T> lubAux(ValueEnvironment<T> other)
+			throws SemanticException {
+		ValueEnvironment<T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.lub(other.stack));
 	}
 
 	@Override

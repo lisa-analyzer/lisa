@@ -96,9 +96,9 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	}
 
 	@Override
-	public TypeEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, TypeEnvironment<T> other)
-			throws SemanticException {
-		return new TypeEnvironment<>(lattice, function, stack.glb(other.stack));
+	public TypeEnvironment<T> glbAux(TypeEnvironment<T> other) throws SemanticException{
+		TypeEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new TypeEnvironment<>(newEnv.lattice, newEnv.function, stack.glb(other.stack));
 	}
 
 	@Override

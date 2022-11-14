@@ -169,47 +169,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 */
 	public abstract M assumeSatisfied(V eval) throws SemanticException;
 
-	/**
-	 * Performs the greatest lower bound between this environment and
-	 * {@code other}.
-	 * 
-	 * @param other the other environment
-	 * 
-	 * @return the greatest lower bound between this environment and
-	 *             {@code other}
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
-	@Override
-	@SuppressWarnings("unchecked")
-	public M glb(M other) throws SemanticException {
-		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
-				|| this.lessOrEqual(other))
-			return glbAux(lattice, function, other);
-
-		if (other.isBottom() || this.isTop() || other.lessOrEqual((M) this))
-			return glbAux(other.lattice, other.function, other);
-
-		M lift = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
-		return glbAux(lift.lattice, lift.function, other);
-	}
-
-	/**
-	 * Auxiliary glb operation, invoked after the result has been computed to
-	 * create the concrete instance of environment. Note that any additional
-	 * information that is instance-specific (i.e. anything but function and
-	 * lattice singleton) has to be computed by this method.
-	 * 
-	 * @param lattice  the lattice that is the result of the glb
-	 * @param function the function that is the result of the glb (might be
-	 *                     {@code null}
-	 * @param other    the other environment
-	 * 
-	 * @return the final instance of the glb
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public abstract M glbAux(T lattice, Map<Identifier, T> function, M other) throws SemanticException;
 
 	@Override
 	@SuppressWarnings("unchecked")
