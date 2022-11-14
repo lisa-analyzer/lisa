@@ -6,7 +6,7 @@ dependencies {
 	api project(':lisa-sdk')
 
 	// parser generation
-	antlr 'org.antlr:antlr4:4.8-1'
+	antlr 'org.antlr:antlr4:4.11.1'
 	
 	// testing
     testImplementation 'junit:junit:4.12'
