@@ -171,12 +171,6 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Suffix left, Suffix right,
 			ProgramPoint pp) {
-		if (left.isTop() || right.isTop())
-			return Satisfiability.UNKNOWN;
-
-		if (operator == StringEndsWith.INSTANCE)
-			return Satisfiability.SATISFIED;
-
 		return Satisfiability.UNKNOWN;
 	}
 
