@@ -9,7 +9,13 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.*;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Collection;
@@ -58,9 +64,9 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	@Override
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
-		HashSet<Character> lubAuxCertainly = new HashSet<>();
+		Collection<Character> lubAuxCertainly = new HashSet<>();
 
-		HashSet<Character> lubAuxMaybe = new HashSet<>(this.getMaybeContained());
+		Collection<Character> lubAuxMaybe = new HashSet<>(this.getMaybeContained());
 		lubAuxMaybe.addAll(other.getMaybeContained());
 
 		for (Character certainlyContainedChar : this.getCertainlyContained())
@@ -207,8 +213,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (operator == StringConcat.INSTANCE) {
-			HashSet<Character> resultCertainlyContained = new HashSet<>();
-			HashSet<Character> resultMaybeContained = new HashSet<>();
+			Collection<Character> resultCertainlyContained = new HashSet<>();
+			Collection<Character> resultMaybeContained = new HashSet<>();
 
 			resultCertainlyContained.addAll(left.getCertainlyContained());
 			resultCertainlyContained.addAll(right.getCertainlyContained());
@@ -246,11 +252,23 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 		if (left.isTop() || right.isBottom())
 			return Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE && left.getCertainlyContained().isEmpty()
-				&& left.getMaybeContained().isEmpty())
-			return Satisfiability.SATISFIED;
+		if (operator == StringContains.INSTANCE)
+			if (right.isEmptyString())
+				return Satisfiability.SATISFIED;
 
 		return Satisfiability.UNKNOWN;
+	}
+
+	/**
+	 * Checks whether this char inclusion abstract value models the empty
+	 * string, i.e., the sets of the maybe and certainly contained are both
+	 * empty.
+	 * 
+	 * @return whether this char inclusion abstract value models the empty
+	 *             string
+	 */
+	private boolean isEmptyString() {
+		return maybeContained.isEmpty() && certainlyContained.isEmpty();
 	}
 
 	@Override
@@ -260,7 +278,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	private static Collection<Character> getAlphabet() {
-		HashSet<Character> alphabet = new HashSet<>();
+		Collection<Character> alphabet = new HashSet<>();
 
 		for (char character = 'a'; character <= 'z'; character++) {
 			alphabet.add(character);

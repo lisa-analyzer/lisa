@@ -14,12 +14,12 @@ import org.junit.Test;
 
 public class CharInclusionAnalysisTest extends AnalysisTestExecutor {
 
-    @Test
-    public void testCharInclusion() throws AnalysisSetupException {
-        LiSAConfiguration conf = new LiSAConfiguration();
-        conf.serializeResults = true;
-        conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new CharInclusion(),
-                new TypeEnvironment<>(new InferredTypes()));
-        perform("char-inclusion", "program.imp", conf);
-    }
+	@Test
+	public void testCharInclusion() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new CharInclusion(),
+				new TypeEnvironment<>(new InferredTypes()));
+		perform("char-inclusion", "program.imp", conf);
+	}
 }
