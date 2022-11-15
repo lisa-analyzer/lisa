@@ -1,4 +1,4 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_prefix.m1(prefix__this).json", "untyped_prefix.m2(prefix__this,_untyped_x).json", "untyped_prefix.m3(prefix__this,_untyped_x).json" ]
+  "files" : [ "untyped_ci.m1(ci__this).json", "untyped_ci.m2(ci__this,_untyped_x).json", "untyped_ci.m3(ci__this,_untyped_x).json" ]
 }

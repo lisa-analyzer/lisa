@@ -1,4 +1,4 @@
-class prefix {
+class ci {
 
 	m1() {
 		def c = "Hello World!";
