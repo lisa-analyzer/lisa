@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -16,8 +15,8 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
@@ -77,11 +76,6 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	@Override
-	public CharInclusion wideningAux(CharInclusion other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
 		if (this.getCertainlyContained().size() > other.getCertainlyContained().size() ||
 				other.getMaybeContained().size() > this.getMaybeContained().size())
@@ -120,16 +114,6 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	@Override
-	public boolean isTop() {
-		return this.equals(TOP);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return this.equals(BOTTOM);
-	}
-
-	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
@@ -158,46 +142,15 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	private String formatRepresentation() {
-		StringBuilder stringBuilder = new StringBuilder("CertainlyContained: {");
-		int counter = 0;
+		StringBuilder stringBuilder = new StringBuilder("CertainlyContained: ");
+		stringBuilder.append(StringUtils.join(this.getCertainlyContained() + ", "));
 
-		for (Character certainlyContainedChar : this.getCertainlyContained()) {
-			String formattedCharacter;
+		stringBuilder.append("MaybeContained: ");
+		String maybeContainedString = StringUtils.join(this.getMaybeContained() + ", ");
 
-			formattedCharacter = counter != this.getCertainlyContained().size() - 1 ? certainlyContainedChar + ", "
-					: certainlyContainedChar + "}";
-			counter++;
-
-			stringBuilder.append(formattedCharacter);
-		}
-
-		if (counter == 0) {
-			stringBuilder.append("}");
-		}
-
-		counter = 0;
-		stringBuilder.append(", MaybeContained: {");
-
-		for (Character maybeContainedChar : this.getMaybeContained()) {
-			String formattedCharacter;
-
-			formattedCharacter = counter != this.getMaybeContained().size() - 1 ? maybeContainedChar + ", "
-					: maybeContainedChar + "}";
-			counter++;
-
-			stringBuilder.append(formattedCharacter);
-		}
-
-		if (counter == 0) {
-			stringBuilder.append("}");
-		}
+		stringBuilder.append(maybeContainedString, 0, maybeContainedString.length() - 2);
 
 		return stringBuilder.toString();
-	}
-
-	@Override
-	public CharInclusion evalNullConstant(ProgramPoint pp) {
-		return TOP;
 	}
 
 	@Override
@@ -209,11 +162,6 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 			return new CharInclusion(charsSet, charsSet);
 		}
 
-		return TOP;
-	}
-
-	@Override
-	public CharInclusion evalUnaryExpression(UnaryOperator operator, CharInclusion arg, ProgramPoint pp) {
 		return TOP;
 	}
 
@@ -245,16 +193,6 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	@Override
-	public Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public SemanticDomain.Satisfiability satisfiesNullConstant(ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (left.isTop() || right.isBottom())
@@ -277,12 +215,6 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 */
 	private boolean isEmptyString() {
 		return maybeContained.isEmpty() && certainlyContained.isEmpty();
-	}
-
-	@Override
-	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, CharInclusion left, CharInclusion middle,
-			CharInclusion right, ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
 	}
 
 	private static Collection<Character> getAlphabet() {
