@@ -1,7 +1,6 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -9,8 +8,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Objects;
 
 /**
@@ -68,11 +65,6 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	}
 
 	@Override
-	public Suffix wideningAux(Suffix other) throws SemanticException {
-		return lubAux(other);
-	}
-
-	@Override
 	public boolean lessOrEqualAux(Suffix other) throws SemanticException {
 		if (other.getSuffix().length() <= this.getSuffix().length()) {
 			Suffix lub = this.lubAux(other);
@@ -110,16 +102,6 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	}
 
 	@Override
-	public boolean isTop() {
-		return this.equals(TOP);
-	}
-
-	@Override
-	public boolean isBottom() {
-		return this.equals(BOTTOM);
-	}
-
-	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
@@ -130,20 +112,10 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	}
 
 	@Override
-	public Suffix evalNullConstant(ProgramPoint pp) {
-		return TOP;
-	}
-
-	@Override
 	public Suffix evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof String)
 			return new Suffix((String) constant.getValue());
 
-		return TOP;
-	}
-
-	@Override
-	public Suffix evalUnaryExpression(UnaryOperator operator, Suffix arg, ProgramPoint pp) {
 		return TOP;
 	}
 
@@ -162,30 +134,12 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 		return TOP;
 	}
 
-	@Override
-	public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
-			ProgramPoint pp) {
-		return TOP;
-	}
-
-	@Override
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Suffix left, Suffix right,
-			ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
-	@Override
-	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
-			ProgramPoint pp) {
-		return Satisfiability.UNKNOWN;
-	}
-
 	/**
 	 * Yields the suffix of this abstract value.
 	 *
 	 * @return the suffix of this abstract value.
 	 */
-	protected String getSuffix() {
+	public String getSuffix() {
 		return this.suffix;
 	}
 }
