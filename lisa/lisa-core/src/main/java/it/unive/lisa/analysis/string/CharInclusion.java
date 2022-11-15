@@ -26,13 +26,13 @@ import java.util.stream.Collectors;
 /**
  * The suffix string abstract domain.
  *
- * @link <a href=
- *           "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
- *           https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
- *
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
  *             Salvatore Evola</a>
+ * 
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
+ *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
