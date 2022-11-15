@@ -19,7 +19,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Collection;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -47,7 +47,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 * Builds the top char inclusion abstract element.
 	 */
 	public CharInclusion() {
-		this(new LinkedHashSet<>(), getAlphabet());
+		this(new HashSet<>(), getAlphabet());
 	}
 
 	/**
@@ -64,9 +64,9 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	@Override
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
-		Collection<Character> lubAuxCertainly = new LinkedHashSet<>();
+		Collection<Character> lubAuxCertainly = new HashSet<>();
 
-		Collection<Character> lubAuxMaybe = new LinkedHashSet<>(this.getMaybeContained());
+		Collection<Character> lubAuxMaybe = new HashSet<>(this.getMaybeContained());
 		lubAuxMaybe.addAll(other.getMaybeContained());
 
 		for (Character certainlyContainedChar : this.getCertainlyContained())
@@ -171,7 +171,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 			stringBuilder.append(formattedCharacter);
 		}
 
-		if(counter == 0){
+		if (counter == 0) {
 			stringBuilder.append("}");
 		}
 
@@ -188,7 +188,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 			stringBuilder.append(formattedCharacter);
 		}
 
-		if(counter == 0){
+		if (counter == 0) {
 			stringBuilder.append("}");
 		}
 
@@ -204,7 +204,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof String) {
 			Collection<Character> charsSet = ((String) constant.getValue()).chars()
-					.mapToObj(e -> (char) e).collect(Collectors.toCollection(LinkedHashSet::new));
+					.mapToObj(e -> (char) e).collect(Collectors.toCollection(HashSet::new));
 
 			return new CharInclusion(charsSet, charsSet);
 		}
@@ -221,8 +221,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (operator == StringConcat.INSTANCE) {
-			Collection<Character> resultCertainlyContained = new LinkedHashSet<>();
-			Collection<Character> resultMaybeContained = new LinkedHashSet<>();
+			Collection<Character> resultCertainlyContained = new HashSet<>();
+			Collection<Character> resultMaybeContained = new HashSet<>();
 
 			resultCertainlyContained.addAll(left.getCertainlyContained());
 			resultCertainlyContained.addAll(right.getCertainlyContained());
@@ -286,7 +286,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	private static Collection<Character> getAlphabet() {
-		Collection<Character> alphabet = new LinkedHashSet<>();
+		Collection<Character> alphabet = new HashSet<>();
 
 		for (char character = 'a'; character <= 'z'; character++) {
 			alphabet.add(character);
