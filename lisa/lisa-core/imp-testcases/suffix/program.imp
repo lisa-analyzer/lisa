@@ -1,4 +1,4 @@
-class prefix {
+class suffix {
 
 	m1() {
 		def c = "a";
@@ -8,9 +8,9 @@ class prefix {
     m2(x) {
     	def s = "";
     	if (x == 0)
-    		s = "abc";
+    		s = "Hello!";
     	else
-    		s = "abd";
+    		s = "World!";
     }
 
     m3(x) {
