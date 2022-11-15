@@ -14,12 +14,12 @@ import org.junit.Test;
 
 public class SuffixAnalysisTest extends AnalysisTestExecutor {
 
-    @Test
-    public void testSuffix() throws AnalysisSetupException {
-        LiSAConfiguration conf = new LiSAConfiguration();
-        conf.serializeResults = true;
-        conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Suffix(),
-                new TypeEnvironment<>(new InferredTypes()));
-        perform("suffix", "program.imp", conf);
-    }
+	@Test
+	public void testSuffix() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Suffix(),
+				new TypeEnvironment<>(new InferredTypes()));
+		perform("suffix", "program.imp", conf);
+	}
 }
