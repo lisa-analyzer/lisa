@@ -1,0 +1,23 @@
+class ci {
+
+	m1() {
+		def c = "Hello World!";
+		def b = "abcde";
+    }
+
+    m2(x) {
+    	def s = "";
+    	if (x == 0)
+    		s = "Hello";
+    	else
+    		s = "World!";
+    }
+
+    m3(x) {
+    	def s = "abc";
+    	while (x < 100) {
+    		s = s + "lmn";
+    		x = x + 1;
+    	}
+    }
+}
