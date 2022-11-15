@@ -126,7 +126,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(suffix);
+		return new StringRepresentation('*' + suffix);
 	}
 
 	@Override
