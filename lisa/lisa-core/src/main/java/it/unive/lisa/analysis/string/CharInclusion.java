@@ -15,12 +15,11 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The suffix string abstract domain.
