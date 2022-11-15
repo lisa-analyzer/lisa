@@ -169,12 +169,6 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Prefix left, Prefix right,
 			ProgramPoint pp) {
-		if (left.isTop() || right.isTop())
-			return Satisfiability.UNKNOWN;
-
-		if (operator == StringStartsWith.INSTANCE)
-			return Satisfiability.SATISFIED;
-
 		return Satisfiability.UNKNOWN;
 	}
 
