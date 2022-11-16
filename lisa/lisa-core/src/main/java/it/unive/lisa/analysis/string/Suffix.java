@@ -96,6 +96,11 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	}
 
 	@Override
+	public boolean isTop() {
+		return !isBottom() && suffix.isEmpty();
+	}
+
+	@Override
 	public Suffix bottom() {
 		return BOTTOM;
 	}

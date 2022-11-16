@@ -94,6 +94,11 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 	}
 
 	@Override
+	public boolean isTop() {
+		return !isBottom() && prefix.isEmpty();
+	}
+
+	@Override
 	public Prefix bottom() {
 		return BOTTOM;
 	}
