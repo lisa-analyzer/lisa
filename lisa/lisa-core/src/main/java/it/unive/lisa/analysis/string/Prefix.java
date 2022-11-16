@@ -45,7 +45,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
 	@Override
 	public Prefix lubAux(Prefix other) throws SemanticException {
-		String otherPrefixString = other.getPrefix();
+		String otherPrefixString = other.prefix;
 		StringBuilder result = new StringBuilder();
 
 		int i = 0;
@@ -64,11 +64,10 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
 	@Override
 	public boolean lessOrEqualAux(Prefix other) throws SemanticException {
-		if (other.getPrefix().length() <= this.getPrefix().length()) {
+		if (other.prefix.length() <= this.prefix.length()) {
 			Prefix lub = this.lubAux(other);
-			String lubString = lub.getPrefix();
 
-			return lubString.length() == other.getPrefix().length();
+			return lub.prefix.length() == other.prefix.length();
 		}
 
 		return false;
