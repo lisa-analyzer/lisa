@@ -58,14 +58,4 @@ public class PrefixTest {
 
 		assertTrue(result.lessOrEqualAux(new Prefix("abd")));
 	}
-
-	@Test
-	public void testIsTop() {
-		assertTrue(new Prefix("").isTop());
-	}
-
-	@Test
-	public void testIsBottom() {
-		assertTrue(new Prefix(null).isBottom());
-	}
 }

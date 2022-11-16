@@ -204,18 +204,4 @@ public class CharInclusionTest {
 		assertTrue(new CharInclusion(certainlyContained, maybeContained)
 				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
 	}
-
-	@Test
-	public void testIsTop() {
-		HashSet<Character> alphabet = new HashSet<>();
-		for (char character = 'a'; character <= 'z'; character++) {
-			alphabet.add(character);
-		}
-		assertTrue(new CharInclusion(new HashSet<>(), alphabet).isTop());
-	}
-
-	@Test
-	public void testIsBottom() {
-		assertTrue(new CharInclusion(null, null).isBottom());
-	}
 }

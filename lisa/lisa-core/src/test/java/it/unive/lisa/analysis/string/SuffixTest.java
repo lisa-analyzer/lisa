@@ -51,14 +51,4 @@ public class SuffixTest {
 
 		assertFalse(suffix.lessOrEqualAux(new Suffix("abd")));
 	}
-
-	@Test
-	public void testIsTop() {
-		assertTrue(new Suffix("").isTop());
-	}
-
-	@Test
-	public void testIsBottom() {
-		assertTrue(new Suffix(null).isBottom());
-	}
 }
