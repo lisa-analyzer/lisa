@@ -136,7 +136,7 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 	 * 
 	 * @return the prefix of this abstract value.
 	 */
-	protected String getPrefix() {
+	public String getPrefix() {
 		return this.prefix;
 	}
 }
