@@ -45,7 +45,7 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
 	@Override
 	public Suffix lubAux(Suffix other) throws SemanticException {
-		String otherSuffix = other.getSuffix();
+		String otherSuffix = other.suffix;
 		StringBuilder result = new StringBuilder();
 
 		int i = suffix.length() - 1;
@@ -66,11 +66,10 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
 	@Override
 	public boolean lessOrEqualAux(Suffix other) throws SemanticException {
-		if (other.getSuffix().length() <= this.getSuffix().length()) {
+		if (other.suffix.length() <= this.suffix.length()) {
 			Suffix lub = this.lubAux(other);
-			String lubString = lub.getSuffix();
 
-			return lubString.length() == other.getSuffix().length();
+			return lub.suffix.length() == other.suffix.length();
 		}
 
 		return false;
