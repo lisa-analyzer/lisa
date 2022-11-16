@@ -16,6 +16,9 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.fsa.Automaton;
+import it.unive.lisa.analysis.string.fsa.State;
+import it.unive.lisa.analysis.string.fsa.Transition;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.imp.IMPFeatures;
@@ -242,7 +245,7 @@ public class EqualityContractVerificationTest {
 		// caches are unique: we are fine in using object's equality and not
 		// caring about fields
 		verify(ExternalSetCache.class, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
-		// suppress nullity: the cache will never be null..
+		// suppress nullity: the cache will never be null
 		verify(BitExternalSet.class, false, Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS);
 		verify(UniversalExternalSet.class, false, Warning.NULL_FIELDS);
 
@@ -257,6 +260,16 @@ public class EqualityContractVerificationTest {
 		verify(FIFOWorkingSet.class);
 		verify(LIFOWorkingSet.class);
 		verify(VisitOnceWorkingSet.class);
+	}
+
+	@Test
+	public void testAutomatonClasses() {
+		verify(State.class, Warning.IDENTICAL_COPY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(Transition.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(Automaton.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
+				Warning.ALL_FIELDS_SHOULD_BE_USED);
 	}
 
 	@Test
