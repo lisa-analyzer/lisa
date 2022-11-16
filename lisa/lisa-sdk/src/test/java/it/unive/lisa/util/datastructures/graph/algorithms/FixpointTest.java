@@ -40,23 +40,13 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			return SetUtils.union(approx, old);
-		}
-
-		@Override
-		public Set<TestNode> meet(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
-			return SetUtils.intersection(approx, old);
 		}
 
 		@Override
 		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			return old.containsAll(approx);
-		}
-
-		@Override
-		public boolean doDescendingPhase() {
-			return false;
 		}
 	}
 
@@ -218,7 +208,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			if (type == 3)
 				throw new Exception();
 			return Collections.emptySet();
@@ -228,18 +218,6 @@ public class FixpointTest {
 		public boolean equality(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			if (type == 4)
 				throw new Exception();
-			return true;
-		}
-
-		@Override
-		public Set<TestNode> meet(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
-			if (type == 5)
-				throw new Exception();
-			return Collections.emptySet();
-		}
-
-		@Override
-		public boolean doDescendingPhase() {
 			return true;
 		}
 	}

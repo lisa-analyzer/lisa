@@ -26,7 +26,7 @@ public class DescendingTest extends AnalysisTestExecutor {
 	}
 
 	@Test
-	public void testIntervalDescendingMAxGlb() throws AnalysisSetupException {
+	public void testIntervalDescendingMaxGlb() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),

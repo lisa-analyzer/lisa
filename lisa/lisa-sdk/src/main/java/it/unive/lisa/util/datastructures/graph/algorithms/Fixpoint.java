@@ -31,7 +31,6 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	private final Map<N, T> result;
 
-	private boolean ascendingPhase;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
@@ -41,7 +40,6 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Fixpoint(Graph<G, N, E> graph) {
 		this.graph = graph;
 		result = new HashMap<>(graph.getNodesCount());
-		this.ascendingPhase = true;
 	}
 
 	/**
@@ -125,27 +123,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T join(N node, T approx, T old) throws Exception;
-
-		/**
-		 * Given a node and two states, meets the states (i.e. greatest lower
-		 * bound <i>or</i> narrowing) together.<br>
-		 * <br>
-		 * This callback is invoked after the exit state of a node has been
-		 * computed through {@link #semantics(Object, Object)}, to meet it with
-		 * results from older fixpoint iterations.
-		 * 
-		 * @param node   the node where the computation takes place
-		 * @param approx the most recent state
-		 * @param old    the older state
-		 * 
-		 * @return the met state
-		 * 
-		 * @throws Exception if something goes wrong during the computation
-		 */
-		default T meet(N node, T approx, T old) throws Exception {
-			return approx;
-		}
+		T operation(N node, T approx, T old) throws Exception;
 
 		/**
 		 * Given a node and two states, yields whether or not the most recent
@@ -169,15 +147,6 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * @throws Exception if something goes wrong during the computation
 		 */
 		boolean equality(N node, T approx, T old) throws Exception;
-
-		/**
-		 * Yields whether or not the fixpoint should compute the descending
-		 * phase.
-		 * 
-		 * @return whether or not the fixpoint should compute the descending
-		 *             phase
-		 */
-		boolean doDescendingPhase();
 	}
 
 	/**
@@ -201,10 +170,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
 
-		if (this.ascendingPhase) {
-			result.clear();
-			startingPoints.keySet().forEach(ws::push);
-		}
+		//result.clear();
+		startingPoints.keySet().forEach(ws::push);
 
 		T newApprox;
 		while (!ws.isEmpty()) {
@@ -227,23 +194,13 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 			T oldApprox = result.get(current);
 			if (oldApprox != null)
-				if (this.ascendingPhase) {
-					try {
-						newApprox = implementation.join(current, newApprox, oldApprox);
-					} catch (Exception e) {
-						throw new FixpointException(format(ERROR, "joining states", current, graph), e);
-					}
-				} else {
-					try {
-						newApprox = implementation.meet(current, newApprox, oldApprox);
-					} catch (Exception e) {
-						throw new FixpointException(format(ERROR, "meeting states", current, graph), e);
-					}
+				try {
+					newApprox = implementation.operation(current, newApprox, oldApprox);
+				} catch (Exception e) {
+					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
 			try {
-				if (oldApprox == null ||
-						(ascendingPhase && !implementation.equality(current, newApprox, oldApprox)) ||
-						(!ascendingPhase && !implementation.equality(current, oldApprox, newApprox))) {
+				if (oldApprox == null || !implementation.equality(current, newApprox, oldApprox)) {
 					result.put(current, newApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);
@@ -253,14 +210,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			}
 		}
 
-		if (!ascendingPhase || !implementation.doDescendingPhase())
-			return result;
-
-		this.ascendingPhase = false;
-
-		graph.getNodes().forEach(ws::push);
-
-		return this.fixpoint(startingPoints, ws, implementation);
+		return result;
 	}
 
 	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation)
