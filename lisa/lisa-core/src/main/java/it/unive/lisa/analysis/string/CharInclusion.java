@@ -64,11 +64,11 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
 		Collection<Character> lubAuxCertainly = new HashSet<>();
 
-		Collection<Character> lubAuxMaybe = new HashSet<>(this.getMaybeContained());
-		lubAuxMaybe.addAll(other.getMaybeContained());
+		Collection<Character> lubAuxMaybe = new HashSet<>(this.maybeContained);
+		lubAuxMaybe.addAll(other.maybeContained);
 
-		for (Character certainlyContainedChar : this.getCertainlyContained())
-			if (other.getCertainlyContained().contains(certainlyContainedChar))
+		for (Character certainlyContainedChar : this.certainlyContained)
+			if (other.certainlyContained.contains(certainlyContainedChar))
 				lubAuxCertainly.add(certainlyContainedChar);
 
 		return new CharInclusion(lubAuxCertainly, lubAuxMaybe);
@@ -76,14 +76,14 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	@Override
 	public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
-		if (this.getCertainlyContained().size() > other.getCertainlyContained().size() ||
-				other.getMaybeContained().size() > this.getMaybeContained().size())
+		if (this.certainlyContained.size() > other.certainlyContained.size() ||
+				other.maybeContained.size() > this.maybeContained.size())
 			return false;
 
-		if (!other.getCertainlyContained().containsAll(this.getCertainlyContained()))
+		if (!other.certainlyContained.containsAll(this.certainlyContained))
 			return false;
 
-		return this.getMaybeContained().containsAll(other.getMaybeContained());
+		return this.maybeContained.containsAll(other.maybeContained);
 	}
 
 	@Override
@@ -142,10 +142,10 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	private String formatRepresentation() {
 		StringBuilder stringBuilder = new StringBuilder("CertainlyContained: ");
-		stringBuilder.append(StringUtils.join(this.getCertainlyContained() + ", "));
+		stringBuilder.append(StringUtils.join(this.certainlyContained + ", "));
 
 		stringBuilder.append("MaybeContained: ");
-		String maybeContainedString = StringUtils.join(this.getMaybeContained() + ", ");
+		String maybeContainedString = StringUtils.join(this.maybeContained + ", ");
 
 		stringBuilder.append(maybeContainedString, 0, maybeContainedString.length() - 2);
 
@@ -171,11 +171,11 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 			Collection<Character> resultCertainlyContained = new HashSet<>();
 			Collection<Character> resultMaybeContained = new HashSet<>();
 
-			resultCertainlyContained.addAll(left.getCertainlyContained());
-			resultCertainlyContained.addAll(right.getCertainlyContained());
+			resultCertainlyContained.addAll(left.certainlyContained);
+			resultCertainlyContained.addAll(right.certainlyContained);
 
-			resultMaybeContained.addAll(left.getMaybeContained());
-			resultMaybeContained.addAll(right.getMaybeContained());
+			resultMaybeContained.addAll(left.maybeContained);
+			resultMaybeContained.addAll(right.maybeContained);
 
 			return new CharInclusion(resultCertainlyContained, resultMaybeContained);
 		}
