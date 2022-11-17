@@ -40,4 +40,31 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
+	@Test
+	public void testGetReps3() {
+		HashSet<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+		hashSet.add("re");
+
+		Brick brick = new Brick(1, 2, hashSet);
+
+		HashSet<String> result = new HashSet<>();
+		result.add("mo");
+		result.add("de");
+		result.add("re");
+		result.add("momo");
+		result.add("dede");
+		result.add("rere");
+		result.add("more");
+		result.add("remo");
+		result.add("dere");
+		result.add("rede");
+		result.add("mode");
+		result.add("demo");
+
+		System.out.println(brick.getReps());
+
+		assertEquals(brick.getReps(), result);
+	}
 }
