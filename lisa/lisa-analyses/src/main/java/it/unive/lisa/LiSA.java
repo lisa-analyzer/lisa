@@ -101,7 +101,11 @@ public class LiSA {
 
 		if (conf.jsonOutput) {
 			LOG.info("Dumping reported warnings to 'report.json'");
-			JsonReport report = new JsonReport(warnings, fileManager.createdFiles()); // TODO should use the report
+			JsonReport report = new JsonReport(warnings, fileManager.createdFiles()); // TODO
+																						// should
+																						// use
+																						// the
+																						// report
 			try {
 				fileManager.mkOutputFile("report.json", writer -> {
 					report.dump(writer);

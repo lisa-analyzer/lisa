@@ -451,6 +451,8 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testOutputs() {
 		verify(JsonReport.class);
+		verify(LiSARunInfo.class);
+		verify(LiSAReport.class);
 
 		verify(SerializableGraph.class);
 		verify(SerializableNode.class);
