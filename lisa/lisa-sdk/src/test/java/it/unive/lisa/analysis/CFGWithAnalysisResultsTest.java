@@ -14,9 +14,10 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
-import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import java.util.Map;
 import org.junit.Test;
 
@@ -29,9 +30,9 @@ public class CFGWithAnalysisResultsTest {
 	public void testIssue189() throws SemanticException {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		Return ret = new Return(cfg, unknown, constant);
-		cfg.addNode(ret, true);
+		VariableRef x = new VariableRef(cfg, unknown, "x");
+		OpenCall y = new OpenCall(cfg, unknown, CallType.STATIC, "bar", "foo", x);
+		cfg.addNode(y, true);
 
 		AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain,
@@ -40,16 +41,16 @@ public class CFGWithAnalysisResultsTest {
 						new ExpressionSet<>(), new SymbolAliasing());
 
 		Map<Statement, AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
-				TestHeapDomain, TestValueDomain, TestTypeDomain>> entries = Map.of(ret, state);
+				TestHeapDomain, TestValueDomain, TestTypeDomain>> entries = Map.of(y, state);
 		Map<Statement, AnalysisState<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>,
-				TestHeapDomain, TestValueDomain, TestTypeDomain>> results = Map.of(ret, state, constant, state);
+				TestHeapDomain, TestValueDomain, TestTypeDomain>> results = Map.of(y, state, x, state);
 
 		CFGWithAnalysisResults<SimpleAbstractState<TestHeapDomain, TestValueDomain, TestTypeDomain>, TestHeapDomain,
 				TestValueDomain, TestTypeDomain> res = new CFGWithAnalysisResults<>(cfg, state, entries, results);
 
-		assertEquals(state, res.getAnalysisStateAfter(ret));
-		assertEquals(state, res.getAnalysisStateBefore(ret));
-		assertEquals(state, res.getAnalysisStateAfter(constant));
-		assertEquals(state, res.getAnalysisStateBefore(constant));
+		assertEquals(state, res.getAnalysisStateAfter(y));
+		assertEquals(state, res.getAnalysisStateBefore(y));
+		assertEquals(state, res.getAnalysisStateAfter(x));
+		assertEquals(state, res.getAnalysisStateBefore(x));
 	}
 }

@@ -21,8 +21,6 @@ import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Return;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
-import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -51,14 +49,17 @@ public class SerializableGraphTest {
 	public void testSimpleIf() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleIf"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c3 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 3);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c3 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "3");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
 		VariableRef lvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "l");
 		VariableRef rvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "r");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, lvar, c3);
 		Assignment a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, rvar, c4);
 		Return ret = new Return(cfg, SyntheticLocation.INSTANCE, xvar);
@@ -108,10 +109,12 @@ public class SerializableGraphTest {
 	public void testEmptyIf() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyIf"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Return ret = new Return(cfg, SyntheticLocation.INSTANCE, xvar);
 
 		cfg.addNode(condition, true);
@@ -145,14 +148,18 @@ public class SerializableGraphTest {
 	public void testIfWithEmptyBranch() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyBranch"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c3 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 3);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c3 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "3");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
 		VariableRef lvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "l");
 		VariableRef rvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "r");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, lvar, c3);
 		Assignment a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, rvar, c4);
 		Return ret = new Return(cfg, SyntheticLocation.INSTANCE, xvar);
@@ -202,16 +209,20 @@ public class SerializableGraphTest {
 	public void testAsymmetricIf() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "asymmetricIf"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c3 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 3);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
-		Int32Literal c5 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 5);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c3 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "3");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
+		VariableRef c5 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "5");
 		VariableRef lvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "l");
 		VariableRef rvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "r");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
 		VariableRef yvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "y");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, lvar, c3);
 		Assignment a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, rvar, c4);
 		Assignment a3 = new Assignment(cfg, SyntheticLocation.INSTANCE, xvar, c5);
@@ -269,14 +280,18 @@ public class SerializableGraphTest {
 	public void testSimpleLoop() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "simpleLoop"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c3 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 3);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c3 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "3");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
 		VariableRef lvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "l");
 		VariableRef rvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "r");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, lvar, c3);
 		Assignment a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, rvar, c4);
 		Return ret = new Return(cfg, SyntheticLocation.INSTANCE, xvar);
@@ -326,12 +341,15 @@ public class SerializableGraphTest {
 	public void testEmptyLoop() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "emptyLoop"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
 		VariableRef rvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "r");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, rvar, c4);
 		Return ret = new Return(cfg, SyntheticLocation.INSTANCE, xvar);
 
@@ -373,25 +391,29 @@ public class SerializableGraphTest {
 	public void testNestedConditionals() {
 		CFG cfg = new CFG(new CodeMemberDescriptor(SyntheticLocation.INSTANCE, unit, false, "nested"));
 
-		Int32Literal c1 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 1);
-		Int32Literal c2 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 2);
-		Int32Literal c3 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 3);
-		Int32Literal c4 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 4);
-		Int32Literal c5 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 5);
-		Int32Literal c6 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 6);
-		Int32Literal c7 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 7);
-		Int32Literal c8 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 8);
-		Int32Literal c9 = new Int32Literal(cfg, SyntheticLocation.INSTANCE, 9);
+		VariableRef c1 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "1");
+		;
+		VariableRef c2 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "2");
+		;
+		VariableRef c3 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "3");
+		;
+		VariableRef c4 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "4");
+		;
+		VariableRef c5 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "5");
+		VariableRef c6 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "6");
+		VariableRef c7 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "7");
+		VariableRef c8 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "8");
+		VariableRef c9 = new VariableRef(cfg, SyntheticLocation.INSTANCE, "9");
 		VariableRef loop_a1var = new VariableRef(cfg, SyntheticLocation.INSTANCE, "loop_a1");
 		VariableRef loop_a2var = new VariableRef(cfg, SyntheticLocation.INSTANCE, "loop_a2");
 		VariableRef if_a1var = new VariableRef(cfg, SyntheticLocation.INSTANCE, "if_a1");
 		VariableRef if_a2var = new VariableRef(cfg, SyntheticLocation.INSTANCE, "if_a2");
 		VariableRef if_a3var = new VariableRef(cfg, SyntheticLocation.INSTANCE, "if_a3");
 		VariableRef xvar = new VariableRef(cfg, SyntheticLocation.INSTANCE, "x");
-		NotEqual loop_condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c1, c2);
+		Assignment loop_condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c1, c2);
 		Assignment loop_a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, loop_a1var, c3);
 		Assignment loop_a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, loop_a2var, c4);
-		NotEqual if_condition = new NotEqual(cfg, SyntheticLocation.INSTANCE, c5, c6);
+		Assignment if_condition = new Assignment(cfg, SyntheticLocation.INSTANCE, c5, c6);
 		Assignment if_a1 = new Assignment(cfg, SyntheticLocation.INSTANCE, if_a1var, c7);
 		Assignment if_a2 = new Assignment(cfg, SyntheticLocation.INSTANCE, if_a2var, c8);
 		Assignment if_a3 = new Assignment(cfg, SyntheticLocation.INSTANCE, if_a3var, c9);

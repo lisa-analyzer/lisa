@@ -36,10 +36,10 @@ import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import it.unive.lisa.type.Type;
 import java.util.Collection;
 import java.util.Collections;
@@ -134,7 +134,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Int32Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5), "foo"));
+		exp.add(build(tool, new VariableRef(cfg, new SourceCodeLocation("fake", 4, 0), "x"), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 4, 0)), "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 5, 0)), "foo"));
@@ -164,7 +164,7 @@ public class CheckToolWithAnalysisResultsTest {
 		exp.add(build(tool, descriptor, "foo"));
 		exp.add(build(tool, global, "foo"));
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
-		exp.add(build(tool, new Int32Literal(cfg, new SourceCodeLocation("fake", 4, 0), 5), "foo"));
+		exp.add(build(tool, new VariableRef(cfg, new SourceCodeLocation("fake", 4, 0), "x"), "foo"));
 
 		assertTrue("Wrong set of warnings", CollectionUtils.isEqualCollection(exp, tool.getWarnings()));
 	}
