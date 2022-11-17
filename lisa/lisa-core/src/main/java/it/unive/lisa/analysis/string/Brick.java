@@ -46,12 +46,14 @@ public class Brick {
 		HashSet<String> reps = new HashSet<>();
 
 		for (String string : this.strings) {
-			for (String innerString : this.strings) {
-				for (int i = this.min; i < this.max; ++i) {
-					reps.add(string);
-					reps.add(innerString);
-					reps.add(string + innerString);
-					reps.add(innerString + string);
+			reps.add(string.repeat(this.min));
+			reps.add(string.repeat(this.max));
+			for(String inner : this.strings){
+				for(int i = this.min; i< this.max; ++i) {
+					reps.add(inner.repeat(i) + string);
+					reps.add(inner.repeat(i) + string);
+					reps.add(string + inner.repeat(i));
+					reps.add(string + inner.repeat(i));
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
 import org.junit.Test;
@@ -23,8 +24,6 @@ public class BrickTest {
 		result.add("mode");
 		result.add("demo");
 
-		System.out.println(brick.getReps());
-
 		assertEquals(brick.getReps(), result);
 	}
 
@@ -41,7 +40,7 @@ public class BrickTest {
 		assertEquals(brick.getReps(), result);
 	}
 	@Test
-	public void testGetReps3() {
+	public void testGetReps2() {
 		HashSet<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
@@ -63,8 +62,19 @@ public class BrickTest {
 		result.add("mode");
 		result.add("demo");
 
+		assertEquals(brick.getReps(), result);
+	}
+	@Test
+	public void testGetReps3() {
+		HashSet<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+		hashSet.add("re");
+
+		Brick brick = new Brick(1, 3, hashSet);
+
 		System.out.println(brick.getReps());
 
-		assertEquals(brick.getReps(), result);
+		assertTrue(brick.getReps().contains("rerere"));
 	}
 }
