@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.types;
 
 import static org.apache.commons.collections4.CollectionUtils.intersection;
 
+import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -42,6 +43,7 @@ import java.util.stream.Collectors;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FallbackImplementation
 public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes BOTTOM = new InferredTypes(null, Collections.emptySet());

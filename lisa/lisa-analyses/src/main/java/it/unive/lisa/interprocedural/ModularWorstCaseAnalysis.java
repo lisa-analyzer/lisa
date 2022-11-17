@@ -1,6 +1,7 @@
 package it.unive.lisa.interprocedural;
 
 import it.unive.lisa.AnalysisSetupException;
+import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -45,6 +46,7 @@ import org.apache.logging.log4j.Logger;
  * @param <V> the value domain
  * @param <T> the type domain
  */
+@FallbackImplementation
 public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,

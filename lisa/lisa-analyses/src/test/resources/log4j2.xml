@@ -8,7 +8,7 @@
 
 	<Loggers>
 		<Logger name="it.unive.lisa" level="DEBUG" />
-		<Logger name="org.reflections" level="WARN" />
+		<Logger name="org.reflections" level="ERROR" />
 		
 		<Root level="DEBUG">
 			<AppenderRef ref="console" level="DEBUG"/>

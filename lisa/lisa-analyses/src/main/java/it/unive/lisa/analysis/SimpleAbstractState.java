@@ -1,9 +1,14 @@
 package it.unive.lisa.analysis;
 
+import it.unive.lisa.DefaultParameters;
+import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.heap.HeapDomain;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.ObjectRepresentation;
+import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.program.cfg.ProgramPoint;
@@ -26,6 +31,8 @@ import java.util.function.Predicate;
  * @param <V> the type of {@link ValueDomain} embedded in this state
  * @param <T> the type of {@link TypeDomain} embedded in this state
  */
+@FallbackImplementation
+@DefaultParameters({ MonolithicHeap.class, Interval.class, InferredTypes.class })
 public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>

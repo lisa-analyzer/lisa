@@ -2,7 +2,6 @@ package it.unive.lisa.program.cfg;
 
 import static org.junit.Assert.fail;
 
-import it.unive.lisa.LiSA;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -20,6 +19,7 @@ import it.unive.lisa.analysis.dataflow.ReachingDefinitions;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
@@ -34,7 +34,6 @@ import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.imp.IMPFeatures;
-import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -53,6 +52,13 @@ import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.program.cfg.statement.call.Call.CallType;
+import it.unive.lisa.program.cfg.statement.call.MultiCall;
+import it.unive.lisa.program.cfg.statement.call.TruncatedParamsCall;
+import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.program.cfg.statement.evaluation.EvaluationOrder;
+import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.program.language.resolution.StaticTypesMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
@@ -164,12 +170,6 @@ public class SemanticsSanityTest {
 			return "foo";
 		if (param == Expression.class)
 			return fake;
-		if (param == int.class || param == Integer.class)
-			return 0;
-		if (param == float.class || param == Float.class)
-			return -1f;
-		if (param == boolean.class || param == Boolean.class)
-			return false;
 		if (param == Global.class)
 			return new Global(new SourceCodeLocation("unknown", 0, 0), unit, "foo", false);
 		if (param == Object.class)
@@ -186,6 +186,26 @@ public class SemanticsSanityTest {
 			return unit;
 		if (param == CodeLocation.class)
 			return new SourceCodeLocation("unknown", 0, 0);
+		if (param == CallType.class)
+			return CallType.STATIC;
+		if (param == EvaluationOrder.class)
+			return LeftToRightEvaluation.INSTANCE;
+		if (param == UnresolvedCall.class || param == Call.class)
+			return new UnresolvedCall(cfg, new SourceCodeLocation("unknown", 0, 0), CallType.STATIC, "fake", "fake");
+		if (param == byte.class || param == Byte.class)
+			return (byte) 0;
+		if (param == short.class || param == Short.class)
+			return (short) 0;
+		if (param == int.class || param == Integer.class)
+			return 0;
+		if (param == float.class || param == Float.class)
+			return -1f;
+		if (param == boolean.class || param == Boolean.class)
+			return false;
+		if (param == long.class || param == Long.class)
+			return 0L;
+		if (param == double.class || param == Double.class)
+			return 0.1;
 
 		throw new UnsupportedOperationException("No default value for parameter of type " + param);
 	}
@@ -193,11 +213,11 @@ public class SemanticsSanityTest {
 	@Test
 	public void testSemanticsOfStatements() {
 		Map<Class<? extends Statement>, Map<String, Exception>> failures = new HashMap<>();
-		Reflections scanner = new Reflections(LiSA.class, IMPFrontend.class, new SubTypesScanner());
+		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends Statement>> statements = scanner.getSubTypesOf(Statement.class);
 		int total = 0;
 		for (Class<? extends Statement> statement : statements)
-			if (!Modifier.isAbstract(statement.getModifiers())) {
+			if (!Modifier.isAbstract(statement.getModifiers()) && !excluded(statement)) {
 				total++;
 				for (Constructor<?> c : statement.getConstructors())
 					try {
@@ -221,6 +241,12 @@ public class SemanticsSanityTest {
 
 		if (!failures.isEmpty())
 			fail(failures.size() + "/" + total + " semantics evaluation failed");
+	}
+
+	private boolean excluded(Class<? extends Statement> statement) {
+		// these just forward the semantics to the inner call
+		return statement == MultiCall.class
+				|| statement == TruncatedParamsCall.class;
 	}
 
 	private static class NRHeap implements NonRelationalHeapDomain<NRHeap> {
@@ -304,8 +330,10 @@ public class SemanticsSanityTest {
 			return new Sign();
 		if (root == HeapEnvironment.class)
 			return new NRHeap();
-		if (root == InferenceSystem.class)
+		if (root == TypeEnvironment.class)
 			return new InferredTypes();
+		if (root == InferenceSystem.class)
+			return new NonInterference();
 		if (root == PossibleForwardDataflowDomain.class)
 			return new ReachingDefinitions();
 		if (root == DefiniteForwardDataflowDomain.class)
@@ -318,17 +346,21 @@ public class SemanticsSanityTest {
 				return new Skip(new SourceCodeLocation("unknown", 0, 0));
 			else if (param == ExpressionSet.class)
 				return new ExpressionSet<>();
+			else if (param == SymbolAliasing.class)
+				return new SymbolAliasing();
 		if (root == SimpleAbstractState.class)
 			if (param == HeapDomain.class)
 				return new MonolithicHeap();
 			else if (param == ValueDomain.class)
 				return new ValueEnvironment<>(new Sign());
+			else if (param == TypeDomain.class)
+				return new TypeEnvironment<>(new InferredTypes());
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
 			return as;
 		if (root == InferredPair.class)
-			return new InferredTypes();
+			return new NonInterference();
 		if (param == CFG.class)
 			return cfg;
 		if (param == AnalysisState.class)
@@ -350,7 +382,9 @@ public class SemanticsSanityTest {
 		T instance;
 		for (Class<? extends T> clazz : classes)
 			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
-					&& !Satisfiability.class.isAssignableFrom(clazz)) {
+					&& !Satisfiability.class.isAssignableFrom(clazz)
+					// some testing domain that we do not care about end up here
+					&& !clazz.getName().contains("Test")) {
 				total++;
 				for (Constructor<?> c : clazz.getConstructors()) {
 					if (c.getParameterCount() == 0)
@@ -407,7 +441,7 @@ public class SemanticsSanityTest {
 
 		BoolType bool = BoolType.INSTANCE;
 
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends SemanticDomain>> domains = scanner.getSubTypesOf(SemanticDomain.class);
 		Set<SemanticDomain> instances = new HashSet<>();
 		int total = buildDomainsInstances(domains, instances, failures);
@@ -415,9 +449,18 @@ public class SemanticsSanityTest {
 		for (SemanticDomain instance : instances)
 			try {
 				instance = (SemanticDomain) ((Lattice) instance).bottom();
-				instance = instance.assign(new Variable(bool, "b", new SourceCodeLocation("unknown", 0, 0)),
-						new PushAny(bool, new SourceCodeLocation("unknown", 0, 0)), fake);
-				if (!((Lattice) instance).isBottom()) {
+				Variable v = new Variable(bool, "b", new SourceCodeLocation("unknown", 0, 0));
+				instance = instance.assign(v, new PushAny(bool, new SourceCodeLocation("unknown", 0, 0)), fake);
+				boolean isBottom = ((Lattice) instance).isBottom();
+				if (instance instanceof AnalysisState) {
+					AnalysisState state = (AnalysisState) instance;
+					isBottom = state.getState().isBottom() && state.getAliasing().isBottom()
+					// analysis state keeps the assigned id on the stack
+							&& state.getComputedExpressions().size() == 1
+							&& state.getComputedExpressions().iterator().next().equals(v);
+				}
+
+				if (!isBottom) {
 					failures.add(instance.getClass().getName());
 					System.err.println("Assigning to the bottom instance of " + instance.getClass().getName()
 							+ " returned a non-bottom instance");
@@ -437,7 +480,7 @@ public class SemanticsSanityTest {
 	public void testIsTopIsBottom() {
 		List<String> failures = new ArrayList<>();
 
-		Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends Lattice>> domains = scanner.getSubTypesOf(Lattice.class);
 
 		Set<Lattice> instances = new HashSet<>();

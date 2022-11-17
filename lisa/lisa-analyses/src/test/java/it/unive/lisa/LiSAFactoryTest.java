@@ -1,6 +1,5 @@
 package it.unive.lisa;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -21,16 +20,17 @@ import java.util.Map.Entry;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
+// This test must live here since the implementations are available only in lisa-analyses
 public class LiSAFactoryTest {
 
-	private static final Collection<ConfigurableComponent<?>> components = LiSAFactory.configurableComponents();
+	private static final Collection<ConfigurableComponent> components = LiSAFactory.configurableComponents();
 
 	@Test
 	public void ensureDefaultsConsistency() {
-		Collection<ConfigurableComponent<?>> getDefault = new ArrayList<>();
-		Collection<ConfigurableComponent<?>> getInstanceOfDefault = new ArrayList<>();
+		Collection<ConfigurableComponent> getDefault = new ArrayList<>();
+		Collection<ConfigurableComponent> getInstanceOfDefault = new ArrayList<>();
 		Map<Class<?>, Class<?>[]> getInstanceWithDefaultParams = new HashMap<>();
-		for (ConfigurableComponent<?> comp : components)
+		for (ConfigurableComponent comp : components)
 			if (comp.getDefaultInstance() != null) {
 				try {
 					LiSAFactory.getDefaultFor(comp.getComponent());
@@ -59,7 +59,7 @@ public class LiSAFactoryTest {
 		if (!getDefault.isEmpty()) {
 			System.err.println(
 					"The following default implementations cannot be created through LiSAFactory.getDefaultFor(...): ");
-			for (ConfigurableComponent<?> comp : getDefault)
+			for (ConfigurableComponent comp : getDefault)
 				System.err.println("  - " + comp.getDefaultInstance().getName() + " (default for: "
 						+ comp.getComponent().getName() + ")");
 		}
@@ -67,7 +67,7 @@ public class LiSAFactoryTest {
 		if (!getInstanceOfDefault.isEmpty()) {
 			System.err.println(
 					"The following default implementations cannot be created through LiSAFactory.getInstance(...): ");
-			for (ConfigurableComponent<?> comp : getInstanceOfDefault)
+			for (ConfigurableComponent comp : getInstanceOfDefault)
 				System.err.println("  - " + comp.getDefaultInstance().getName() + " (default for: "
 						+ comp.getComponent().getName() + ")");
 		}
@@ -94,14 +94,12 @@ public class LiSAFactoryTest {
 
 		String message = "Setting custom default for " + target.getName() + " to " + newDefault.getName()
 				+ " didn't have any effect on %s";
-		LiSAFactory.registerDefaultFor(target, newDefault);
+		LiSAFactory.DEFAULT_IMPLEMENTATIONS.put(target, newDefault);
 
 		assertSame(String.format(message, "LiSAFactory.getDefaultFor(...)"), newDefault, removeEnvironment(target));
 
-		for (ConfigurableComponent<?> comp : LiSAFactory.configurableComponents())
-			if (comp.getComponent() == target)
-				assertEquals(String.format(message, "LiSAFactory.configurableComponents()"), newDefault,
-						comp.getDefaultInstance());
+		// we do not check configurable components here, since those only
+		// contain information from the compiled code
 	}
 
 	private Class<?> removeEnvironment(Class<?> target) throws AnalysisSetupException {

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.heap;
 
+import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -31,6 +32,7 @@ import java.util.function.Predicate;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
+@FallbackImplementation
 public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap TOP = new MonolithicHeap();

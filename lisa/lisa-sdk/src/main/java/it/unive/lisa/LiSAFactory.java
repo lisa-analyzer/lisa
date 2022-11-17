@@ -1,13 +1,10 @@
 package it.unive.lisa;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.dataflow.DataflowElement;
 import it.unive.lisa.analysis.dataflow.DefiniteForwardDataflowDomain;
 import it.unive.lisa.analysis.dataflow.PossibleForwardDataflowDomain;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
-import it.unive.lisa.analysis.nonrelational.NonRelationalDomain;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
@@ -16,17 +13,10 @@ import it.unive.lisa.analysis.nonrelational.value.NonRelationalTypeDomain;
 import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
-import it.unive.lisa.analysis.numeric.Interval;
-import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.interprocedural.ContextBasedAnalysis;
-import it.unive.lisa.interprocedural.ContextSensitivityToken;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
-import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
-import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
-import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,13 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
@@ -53,8 +44,9 @@ import org.reflections.scanners.SubTypesScanner;
  * instance for a component can be retrieved through
  * {@link #getDefaultFor(Class, Object...)}, while a specific instance can be
  * retrieved through {@link #getInstance(Class, Object...)}. Note that custom
- * defaults for each component can be defined through
- * {@link #registerDefaultFor(Class, Class)}.
+ * defaults for each component can be defined by using
+ * {@link DefaultImplementation}, or by modifying
+ * {@link #DEFAULT_IMPLEMENTATIONS} and {@link #DEFAULT_PARAMETERS}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -62,31 +54,40 @@ public final class LiSAFactory {
 
 	/**
 	 * Default implementation for analysis components. Keys of this map are the
-	 * class objects of the analysis components (e.g.
-	 * {@link CallGraph}{@code .class}) while values are the key's default
-	 * implementation's class object (e.g. {@link RTACallGraph}{@code .class}).
+	 * class objects of the analysis components while values are the key's
+	 * default implementation's class object.
 	 */
-	static final Map<Class<?>, Class<?>> DEFAULT_IMPLEMENTATIONS = new HashMap<>();
+	public static final Map<Class<?>, Class<?>> DEFAULT_IMPLEMENTATIONS = new HashMap<>();
 
 	/**
 	 * Default parameters types for analysis components' implementations. Keys
-	 * of this map are the class objects of the analysis components (e.g.
-	 * {@link SimpleAbstractState}{@code .class}) while values are arrays
-	 * containing the key's default parameters' class objects (e.g.
-	 * {@code [}{@link MonolithicHeap}{@code .class, }{@link Interval}{@code .class]}).
+	 * of this map are the class objects of the analysis components while values
+	 * are arrays containing the key's default parameters' class objects.
 	 */
-	static final Map<Class<?>, Class<?>[]> DEFAULT_PARAMETERS = new HashMap<>();
+	public static final Map<Class<?>, Class<?>[]> DEFAULT_PARAMETERS = new HashMap<>();
 
 	static {
-		DEFAULT_IMPLEMENTATIONS.put(InterproceduralAnalysis.class, ModularWorstCaseAnalysis.class);
-		DEFAULT_IMPLEMENTATIONS.put(CallGraph.class, RTACallGraph.class);
-		DEFAULT_IMPLEMENTATIONS.put(HeapDomain.class, MonolithicHeap.class);
-		DEFAULT_IMPLEMENTATIONS.put(ValueDomain.class, Interval.class);
-		DEFAULT_IMPLEMENTATIONS.put(TypeDomain.class, InferredTypes.class);
-		DEFAULT_IMPLEMENTATIONS.put(AbstractState.class, SimpleAbstractState.class);
-		DEFAULT_PARAMETERS.put(SimpleAbstractState.class,
-				new Class[] { MonolithicHeap.class, Interval.class, InferredTypes.class });
-		DEFAULT_PARAMETERS.put(ContextBasedAnalysis.class, new Class[] { RecursionFreeToken.class });
+		for (ConfigurableComponent component : configurableComponents()) {
+			if (component.defaultInstance != null)
+				DEFAULT_IMPLEMENTATIONS.put(component.component, component.defaultInstance);
+
+			if (component.defaultParameters != null && component.defaultParameters.length > 0)
+				DEFAULT_PARAMETERS.put(component.component, component.defaultParameters);
+
+			for (Entry<Class<?>, Class<?>[]> alt : component.alternatives.entrySet())
+				if (alt.getValue().length > 0)
+					DEFAULT_PARAMETERS.put(alt.getKey(), alt.getValue());
+		}
+
+		// wrapped defaults
+		DEFAULT_IMPLEMENTATIONS.putIfAbsent(HeapDomain.class,
+				DEFAULT_IMPLEMENTATIONS.get(NonRelationalHeapDomain.class));
+		DEFAULT_IMPLEMENTATIONS.putIfAbsent(TypeDomain.class,
+				DEFAULT_IMPLEMENTATIONS.get(NonRelationalTypeDomain.class));
+		DEFAULT_IMPLEMENTATIONS.putIfAbsent(ValueDomain.class,
+				DEFAULT_IMPLEMENTATIONS.get(NonRelationalValueDomain.class));
+		DEFAULT_IMPLEMENTATIONS.putIfAbsent(ValueDomain.class, DEFAULT_IMPLEMENTATIONS.get(InferredValue.class));
+		DEFAULT_IMPLEMENTATIONS.putIfAbsent(ValueDomain.class, DEFAULT_IMPLEMENTATIONS.get(DataflowElement.class));
 	}
 
 	private LiSAFactory() {
@@ -96,26 +97,25 @@ public final class LiSAFactory {
 	@SuppressWarnings("unchecked")
 	private static <T> T construct(Class<T> component, Class<?>[] argTypes, Object[] params)
 			throws AnalysisSetupException {
-		if (ContextSensitivityToken.class.isAssignableFrom(component)) {
-			// tokens use the getSingleton() pattern for construction
+		if (argTypes.length == 0)
 			try {
+				// tokens use the getSingleton() pattern for construction
 				Method method = component.getMethod("getSingleton");
-				if (!Modifier.isStatic(method.getModifiers()))
-					throw new AnalysisSetupException(
-							"Unable to instantiate " + component.getSimpleName() + ": getSingleton() is not static");
-				return (T) method.invoke(null);
-			} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
+				if (method != null && Modifier.isStatic(method.getModifiers()))
+					return (T) method.invoke(null);
+			} catch (NoSuchMethodException e) {
+				// we don't do anything: the class does not have a
+				// getSingleton()
+			} catch (SecurityException | IllegalAccessException | IllegalArgumentException
 					| InvocationTargetException e) {
 				throw new AnalysisSetupException("Unable to instantiate " + component.getSimpleName(), e);
 			}
-		}
 
 		try {
 			Constructor<T> constructor = component.getConstructor(argTypes);
 			return constructor.newInstance(params);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException
-				| IllegalArgumentException
-				| InvocationTargetException e) {
+				| IllegalArgumentException | InvocationTargetException e) {
 			throw new AnalysisSetupException("Unable to instantiate " + component.getSimpleName(), e);
 		}
 	}
@@ -203,11 +203,10 @@ public final class LiSAFactory {
 	 * Creates an instance of the given {@code component}. If {@code params} are
 	 * provided, a suitable (and not ambiguous) constructor must exist in
 	 * {@code component}'s class. If no {@code params} have been provided but
-	 * default parameters have been registered through
-	 * {@link #registerDefaultParametersFor(Class, Class...)},
-	 * {@link #getInstance(Class, Object...)} will be used to create such
-	 * parameters and those will be used. Otherwise, the nullary constructor of
-	 * {@code component} is invoked.
+	 * the type has default parameters (that is, if it has been annotated with
+	 * {@link DefaultParameters}), {@link #getInstance(Class, Object...)} will
+	 * be used to create such parameters and those will be used. Otherwise, the
+	 * nullary constructor of {@code component} is invoked.
 	 * 
 	 * @param <T>       the type of the component
 	 * @param component the component to instantiate
@@ -239,53 +238,29 @@ public final class LiSAFactory {
 	}
 
 	/**
-	 * Registers a default implementation for {@code component}, taking
-	 * precedence over the predefined defaults. Any previous default for
-	 * {@code component} introduced by calling this method is removed.
-	 * 
-	 * @param component             the component whose default implementation
-	 *                                  is to be registered
-	 * @param defaultImplementation the new default implementation for
-	 *                                  {@code component}
-	 */
-	public static void registerDefaultFor(Class<?> component, Class<?> defaultImplementation) {
-		DEFAULT_IMPLEMENTATIONS.put(component, defaultImplementation);
-	}
-
-	/**
-	 * Registers the types (i.e. implementations) of the parameters to use for
-	 * the creation of the given component. These will be used whenever
-	 * {@link #getInstance(Class, Object...)} or
-	 * {@link #getDefaultFor(Class, Object...)} are invoked without specifying
-	 * parameters but a default exist. Any previous default for
-	 * {@code component} introduced by calling this method is removed.
-	 * 
-	 * @param component         the component whose default parameters are to be
-	 *                              registered
-	 * @param defaultParameters the new parameters for the creation of
-	 *                              {@code component}
-	 */
-	public static void registerDefaultParametersFor(Class<?> component, Class<?>... defaultParameters) {
-		DEFAULT_PARAMETERS.put(component, defaultParameters);
-	}
-
-	/**
 	 * Builds the default instance of the specified analysis component. The
 	 * instance to create is retrieved by first looking into the custom defaults
-	 * provided through {@link #registerDefaultFor(Class, Class)}. If no entry
-	 * for {@code component} has been provided, then the instance is looked up
-	 * in the predefined defaults. If {@code component} does not have a
+	 * (subtypes annotated with {@link DefaultImplementation}). If no entry for
+	 * {@code component} is found, then the instance is looked up in the
+	 * predefined defaults (subtypes annotated with
+	 * {@link FallbackImplementation}). If {@code component} does not have a
 	 * predefined default, then an {@link AnalysisSetupException} is thrown.
 	 * Then, {@link #getInstance(Class, Object...)} is invoked on the retrieved
 	 * instance, using the given {@code params}. If no {@code params} have been
-	 * provided but default parameters have been registered through
-	 * {@link #registerDefaultParametersFor(Class, Class...)},
+	 * provided but the type has default parameters (that is, if it has been
+	 * annotated with {@link DefaultParameters}),
 	 * {@link #getInstance(Class, Object...)} will be used to create such
-	 * parameters and those will be used. If the default instance is a
-	 * {@link NonRelationalDomain} and the component is a {@link HeapDomain} or
-	 * {@link ValueDomain}, then the instance is wrapped into the appropriate
-	 * environment (either {@link HeapEnvironment} or {@link ValueEnvironment})
-	 * before being returned.
+	 * parameters and those will be used. Note that some types are automatically
+	 * wrapped before being returned.
+	 * <ul>
+	 * <li>{@link NonRelationalHeapDomain} is wrapped into a
+	 * {@link HeapEnvironment}.</li>
+	 * <li>{@link NonRelationalValueDomain} is wrapped into a
+	 * {@link ValueEnvironment}.</li>
+	 * <li>{@link NonRelationalTypeDomain} is wrapped into a
+	 * {@link TypeEnvironment}.</li>
+	 * <li>{@link InferredValue} is wrapped into a {@link InferenceSystem}.</li>
+	 * </ul>
 	 * 
 	 * @param <T>       the type of the component
 	 * @param component the component to instantiate
@@ -327,41 +302,63 @@ public final class LiSAFactory {
 	 * {@link #getDefaultInstance()} yields the default implementation of the
 	 * component that will be used if no specific implementation is requested.
 	 * {@link #getAlternatives()} yields all the concrete implementations of the
-	 * components.
+	 * components. <br>
+	 * <br>
+	 * Note that all information present in instances of this class reflect the
+	 * static information known to LiSA, that is, what is present inside the
+	 * classpath. Any customization performed through {@link LiSAFactory} (i.e.,
+	 * changing the defaults) will not have any effect on the components.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
-	 * 
-	 * @param <T> the type of the component
 	 */
-	public static final class ConfigurableComponent<T> {
-		private static final Reflections scanner = new Reflections(LiSA.class, new SubTypesScanner());
+	public static final class ConfigurableComponent {
+		private static final Reflections scanner = new Reflections("", new SubTypesScanner());
 
-		private final Class<T> component;
-		private final Class<? extends T> defaultInstance;
+		private final Class<?> component;
+		private final Class<?> defaultInstance;
 		private final Class<?>[] defaultParameters;
-		private final Collection<Class<? extends T>> alternatives;
+		private final Map<Class<?>, Class<?>[]> alternatives;
 
-		@SuppressWarnings("unchecked")
-		private ConfigurableComponent(Class<T> component) {
+		private ConfigurableComponent(Class<?> component) {
 			this.component = component;
+			this.alternatives = new HashMap<>();
+			this.defaultParameters = component.isAnnotationPresent(DefaultParameters.class)
+					? component.getAnnotation(DefaultParameters.class).value()
+					: ArrayUtils.EMPTY_CLASS_ARRAY;
 
-			if (DEFAULT_IMPLEMENTATIONS.containsKey(component)) {
-				defaultInstance = (Class<? extends T>) DEFAULT_IMPLEMENTATIONS.get(component);
-				if (DEFAULT_PARAMETERS.containsKey(defaultInstance))
-					defaultParameters = DEFAULT_PARAMETERS.get(defaultInstance);
-				else
-					defaultParameters = null;
-			} else {
-				defaultInstance = null;
-				defaultParameters = null;
+			@SuppressWarnings("rawtypes")
+			Set subtypes = scanner.getSubTypesOf(component);
+			Set<Class<?>> fallbacks = new HashSet<>();
+			Set<Class<?>> defaults = new HashSet<>();
+			for (Object sub : subtypes) {
+				Class<?> subtype = (Class<?>) sub;
+				if (Modifier.isAbstract(subtype.getModifiers()) || subtype.isInterface())
+					continue;
+
+				Class<?>[] defaultParams = subtype.isAnnotationPresent(DefaultParameters.class)
+						? subtype.getAnnotation(DefaultParameters.class).value()
+						: ArrayUtils.EMPTY_CLASS_ARRAY;
+				alternatives.put(subtype, defaultParams);
+
+				if (subtype.isAnnotationPresent(DefaultImplementation.class))
+					defaults.add(subtype);
+				if (subtype.isAnnotationPresent(FallbackImplementation.class))
+					fallbacks.add(subtype);
 			}
 
-			this.alternatives = scanner.getSubTypesOf(component)
-					.stream()
-					.map(c -> Pair.of(c, c.getModifiers()))
-					.filter(p -> !Modifier.isAbstract(p.getRight()) && !Modifier.isInterface(p.getRight()))
-					.map(p -> p.getLeft())
-					.collect(Collectors.toList());
+			if (defaults.size() > 1)
+				throw new IllegalStateException(
+						"More than one user-default for " + component.getName() + ": " + defaults);
+			if (fallbacks.size() > 1)
+				throw new IllegalStateException(
+						"More than one LiSA-default for " + component.getName() + ": " + fallbacks);
+
+			if (!defaults.isEmpty())
+				defaultInstance = defaults.iterator().next();
+			else if (!fallbacks.isEmpty())
+				defaultInstance = fallbacks.iterator().next();
+			else
+				defaultInstance = null;
 		}
 
 		/**
@@ -370,7 +367,7 @@ public final class LiSAFactory {
 		 * 
 		 * @return the analysis component
 		 */
-		public Class<T> getComponent() {
+		public Class<?> getComponent() {
 			return component;
 		}
 
@@ -384,7 +381,7 @@ public final class LiSAFactory {
 		 * 
 		 * @return the default implementation for this component
 		 */
-		public Class<? extends T> getDefaultInstance() {
+		public Class<?> getDefaultInstance() {
 			return defaultInstance;
 		}
 
@@ -403,11 +400,12 @@ public final class LiSAFactory {
 
 		/**
 		 * Yields the alternatives for this component, that is, the concrete
-		 * classes that implements it.
+		 * classes that implements it. Each alternative is mapped to its default
+		 * parameters, if any.
 		 * 
 		 * @return the alternatives for this component
 		 */
-		public Collection<Class<? extends T>> getAlternatives() {
+		public Map<Class<?>, Class<?>[]> getAlternatives() {
 			return alternatives;
 		}
 
@@ -430,7 +428,7 @@ public final class LiSAFactory {
 				return false;
 			if (getClass() != obj.getClass())
 				return false;
-			ConfigurableComponent<?> other = (ConfigurableComponent<?>) obj;
+			ConfigurableComponent other = (ConfigurableComponent) obj;
 			if (alternatives == null) {
 				if (other.alternatives != null)
 					return false;
@@ -465,7 +463,10 @@ public final class LiSAFactory {
 				}
 				result += ")";
 			}
-			String[] alternatives = this.alternatives.stream().map(c -> c.getName()).toArray(String[]::new);
+			String[] alternatives = this.alternatives.entrySet().stream()
+					.map(e -> e.getKey().getName() + (e.getValue().length == 0 ? ""
+							: " (with default parameters: " + StringUtils.join(e.getValue(), ", ") + ")"))
+					.toArray(String[]::new);
 			result += " possible implementations: " + alternatives;
 			return result;
 		}
@@ -477,19 +478,19 @@ public final class LiSAFactory {
 	 * 
 	 * @return the components that can be configured
 	 */
-	public static Collection<ConfigurableComponent<?>> configurableComponents() {
-		Collection<ConfigurableComponent<?>> in = new ArrayList<>();
-		in.add(new ConfigurableComponent<>(InterproceduralAnalysis.class));
-		in.add(new ConfigurableComponent<>(CallGraph.class));
-		in.add(new ConfigurableComponent<>(AbstractState.class));
-		in.add(new ConfigurableComponent<>(HeapDomain.class));
-		in.add(new ConfigurableComponent<>(ValueDomain.class));
-		in.add(new ConfigurableComponent<>(TypeDomain.class));
-		in.add(new ConfigurableComponent<>(NonRelationalHeapDomain.class));
-		in.add(new ConfigurableComponent<>(NonRelationalValueDomain.class));
-		in.add(new ConfigurableComponent<>(NonRelationalTypeDomain.class));
-		in.add(new ConfigurableComponent<>(InferredValue.class));
-		in.add(new ConfigurableComponent<>(DataflowElement.class));
+	public static Collection<ConfigurableComponent> configurableComponents() {
+		Collection<ConfigurableComponent> in = new ArrayList<>();
+		in.add(new ConfigurableComponent(InterproceduralAnalysis.class));
+		in.add(new ConfigurableComponent(CallGraph.class));
+		in.add(new ConfigurableComponent(AbstractState.class));
+		in.add(new ConfigurableComponent(HeapDomain.class));
+		in.add(new ConfigurableComponent(ValueDomain.class));
+		in.add(new ConfigurableComponent(TypeDomain.class));
+		in.add(new ConfigurableComponent(NonRelationalHeapDomain.class));
+		in.add(new ConfigurableComponent(NonRelationalValueDomain.class));
+		in.add(new ConfigurableComponent(NonRelationalTypeDomain.class));
+		in.add(new ConfigurableComponent(InferredValue.class));
+		in.add(new ConfigurableComponent(DataflowElement.class));
 		return in;
 	}
 }

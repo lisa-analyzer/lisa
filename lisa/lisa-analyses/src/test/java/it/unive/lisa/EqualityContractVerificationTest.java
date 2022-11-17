@@ -22,7 +22,6 @@ import it.unive.lisa.analysis.string.fsa.Transition;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.imp.IMPFeatures;
-import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.ContextInsensitiveToken;
@@ -149,7 +148,7 @@ public class EqualityContractVerificationTest {
 	}
 
 	private static Reflections mkReflections() {
-		return new Reflections(LiSA.class, IMPFrontend.class, AnalysisException.class, new SubTypesScanner(false));
+		return new Reflections("it.unive.lisa", new SubTypesScanner(false));
 	}
 
 	@AfterClass
@@ -165,7 +164,10 @@ public class EqualityContractVerificationTest {
 					&& !Modifier.isAbstract(clazz.getModifiers())
 					&& !Modifier.isInterface(clazz.getModifiers())
 					&& !tested.contains(clazz)
-					&& definesEqualsHashcode(clazz))
+					&& definesEqualsHashcode(clazz)
+					// some testing classes that we do not care about end up
+					// here
+					&& !clazz.getName().contains("Test"))
 				notTested.add(clazz);
 		}
 
@@ -375,7 +377,10 @@ public class EqualityContractVerificationTest {
 		testable.addAll(scanner.getSubTypesOf(DataflowElement.class));
 
 		for (Class<?> subject : testable)
-			if (FunctionalLattice.class.isAssignableFrom(subject)
+			if (subject.getName().contains("Test"))
+				// some testing domain that we do not care about end up here
+				continue;
+			else if (FunctionalLattice.class.isAssignableFrom(subject)
 					|| SetLattice.class.isAssignableFrom(subject)
 					|| InverseSetLattice.class.isAssignableFrom(subject))
 				// fields function and elements can be null
