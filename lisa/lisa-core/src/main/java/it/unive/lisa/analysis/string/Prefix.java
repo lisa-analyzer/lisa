@@ -94,11 +94,6 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 	}
 
 	@Override
-	public boolean isTop() {
-		return !isBottom() && prefix.isEmpty();
-	}
-
-	@Override
 	public Prefix bottom() {
 		return BOTTOM;
 	}
@@ -115,8 +110,12 @@ public class Prefix extends BaseNonRelationalValueDomain<Prefix> {
 
 	@Override
 	public Prefix evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		if (constant.getValue() instanceof String)
-			return new Prefix((String) constant.getValue());
+		if (constant.getValue() instanceof String) {
+			String str = (String) constant.getValue();
+			if (!str.isEmpty())
+				return new Prefix(str);
+
+		}
 
 		return TOP;
 	}

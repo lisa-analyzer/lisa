@@ -96,11 +96,6 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 	}
 
 	@Override
-	public boolean isTop() {
-		return !isBottom() && suffix.isEmpty();
-	}
-
-	@Override
 	public Suffix bottom() {
 		return BOTTOM;
 	}
@@ -117,8 +112,11 @@ public class Suffix extends BaseNonRelationalValueDomain<Suffix> {
 
 	@Override
 	public Suffix evalNonNullConstant(Constant constant, ProgramPoint pp) {
-		if (constant.getValue() instanceof String)
-			return new Suffix((String) constant.getValue());
+		if (constant.getValue() instanceof String) {
+			String str = (String) constant.getValue();
+			if (!str.isEmpty())
+				return new Suffix(str);
+		}
 
 		return TOP;
 	}
