@@ -142,7 +142,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	private String formatRepresentation() {
 		StringBuilder stringBuilder = new StringBuilder("CertainlyContained: {");
-		stringBuilder.append(StringUtils.join(this.certainlyContained , ", "));
+		stringBuilder.append(StringUtils.join(this.certainlyContained, ", "));
 
 		stringBuilder.append("}, MaybeContained: {");
 
