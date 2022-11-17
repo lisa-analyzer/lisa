@@ -42,12 +42,17 @@ public class Brick {
 		return strings;
 	}
 
-	public Collection<String> getReps(){
+	public Collection<String> getReps() {
 		HashSet<String> reps = new HashSet<>();
-		for(String string: this.strings){
-			StringBuilder result = new StringBuilder();
-			for(int i = 0; i < this.min; ++i){
-				result.append(string);
+
+		for (String string : this.strings) {
+			for (String innerString : this.strings) {
+				for (int i = this.min; i < this.max; ++i) {
+					reps.add(string);
+					reps.add(innerString);
+					reps.add(string + innerString);
+					reps.add(innerString + string);
+				}
 			}
 		}
 		return reps;
