@@ -11,13 +11,17 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private List<Brick> bricks;
 
+	public Bricks(List<Brick> bricks){
+		this.bricks = bricks;
+	}
+
 	@Override
-	public Bricks lubAux(Bricks other) throws SemanticException {
+	public Bricks lubAux(Bricks other) throws SemanticException { //TODO
 		return null;
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
+	public boolean lessOrEqualAux(Bricks other) throws SemanticException { //TODO
 		return false;
 	}
 
@@ -37,25 +41,25 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
-	public Bricks top() {
+	public Bricks top() { //TODO
 		return null;
 	}
 
 	@Override
-	public Bricks bottom() {
+	public Bricks bottom() { //TODO
 		return null;
 	}
 
 	@Override
-	public DomainRepresentation representation() {
+	public DomainRepresentation representation() { //TODO
 		return null;
 	}
 
-	private Brick concatenate(Brick brick1, Brick brick2) {
+	private Brick concatenate(Brick brick1, Brick brick2) { //TODO
 		return null;
 	}
 
-	private void normalize() {
+	private void normalize() { //WIP
 		List<Brick> thisBricks = this.bricks;
 		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
 				brick.getMax() == 0 &&
