@@ -50,8 +50,8 @@ public class Brick {
 			reps.add(element.repeat(this.min));
 			reps.add(element.repeat(this.max));
 			return reps;
-
 		}
+
 		this.recGetReps(reps, this.min, "");
 
 		return reps;
@@ -64,13 +64,11 @@ public class Brick {
 		}
 		else {
 			for (String string : this.strings) {
-				for (int i = this.min; i < this.max ; ++i) {
-					if(!currentStr.equals("") || this.min == 0) {
-						reps.add(currentStr);
-					}
+				if(!currentStr.equals("") || this.min == 0)
+					reps.add(currentStr);
+
 					recGetReps(reps, min + 1,currentStr + string);
 				}
 			}
 		}
-	}
 }

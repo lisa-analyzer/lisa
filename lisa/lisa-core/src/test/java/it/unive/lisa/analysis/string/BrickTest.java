@@ -76,8 +76,6 @@ public class BrickTest {
 
 		Brick brick = new Brick(1, 4, hashSet);
 
-		System.out.println(brick.getReps());
-
 		assertTrue(brick.getReps().contains("derevemo"));
 	}
 }
