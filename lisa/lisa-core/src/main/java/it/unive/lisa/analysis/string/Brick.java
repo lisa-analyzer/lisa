@@ -50,7 +50,7 @@ public class Brick {
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, int size, String currentStr) { // Seems
+	private void recGetReps(HashSet<String> reps, int size, String currentStr) { // Seems to
 																					// be
 																					// correct,
 																					// further
