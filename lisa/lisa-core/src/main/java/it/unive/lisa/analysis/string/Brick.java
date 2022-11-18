@@ -42,6 +42,18 @@ public class Brick {
 		return strings;
 	}
 
+	public Brick merge(Brick other) {
+		Collection<String> resultSet = new HashSet<>();
+
+		for(String string: this.strings){
+			for(String otherStr: other.strings){
+				resultSet.add(string + otherStr);
+			}
+		}
+
+		return new Brick(1,1,resultSet);
+	}
+
 	public Collection<String> getReps() {
 		HashSet<String> reps = new HashSet<>();
 
@@ -51,22 +63,21 @@ public class Brick {
 			reps.add(element.repeat(this.max));
 			return reps;
 		}
-
-		this.recGetReps(reps, this.min, "");
+		this.recGetReps(reps, this.min,"");
 
 		return reps;
 	}
 
 	//Recursive function that gets all the possible combinations of the set between min and max
 	private void recGetReps(HashSet<String> reps, int min, String currentStr) {
-		if (min > this.max) //If the number of reps (starting from min) exceeds the max, then returns
+		if (min > this.max)//If the number of reps (starting from min) exceeds the max, then returns
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
-				if(!currentStr.equals("") || this.min == 0)
+				if((!currentStr.equals("") || this.min == 0))
 					reps.add(currentStr);
 
-				recGetReps(reps, min + 1,currentStr + string);
+				recGetReps(reps, min + 1, currentStr + string);
 				}
 			}
 		}
