@@ -39,6 +39,7 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
+
 	@Test
 	public void testGetReps2() {
 		HashSet<String> hashSet = new HashSet<>();
@@ -64,6 +65,7 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
+
 	@Test
 	public void testGetReps3() {
 		HashSet<String> hashSet = new HashSet<>();
