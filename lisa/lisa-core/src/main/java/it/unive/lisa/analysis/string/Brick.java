@@ -45,22 +45,30 @@ public class Brick {
 	public Collection<String> getReps() {
 		HashSet<String> reps = new HashSet<>();
 
-		this.recGetReps(reps, "");
+		if(this.strings.size() == 1){
+			String element = this.strings.iterator().next();
+			reps.add(element.repeat(this.min));
+			reps.add(element.repeat(this.max));
+			return reps;
+
+		}
+		this.recGetReps(reps, this.min, "");
 
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, String currentStr) { // Seems to be correct, needs further testing
-		if (currentStr.length() > this.max) {
+	private void recGetReps(HashSet<String> reps, int min, String currentStr) { // Seems to be correct, needs further testing
+		if (min > this.max) { //Se il numero di ripetizioni è maggiore del massimo!
 			reps.add(currentStr);
 			return;
-		} else {
+		}
+		else {
 			for (String string : this.strings) {
-				for (int i = this.min; i < this.max; i++) {
-					if(currentStr != "" || this.min != 0)
+				for (int i = this.min; i < this.max ; ++i) {
+					if(!currentStr.equals("") || this.min == 0) {
 						reps.add(currentStr);
-
-					recGetReps(reps, currentStr + string);
+					}
+					recGetReps(reps, min + 1,currentStr + string);
 				}
 			}
 		}
