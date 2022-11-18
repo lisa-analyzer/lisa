@@ -50,7 +50,12 @@ public class Brick {
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, int size, String currentStr) { //Should be correct, further tests needed
+	private void recGetReps(HashSet<String> reps, int size, String currentStr) { // Seems
+																					// be
+																					// correct,
+																					// further
+																					// tests
+																					// needed
 		if (size == 0) {
 			reps.add(currentStr);
 		} else {

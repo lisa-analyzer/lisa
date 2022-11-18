@@ -72,11 +72,12 @@ public class BrickTest {
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
+		hashSet.add("ve");
 
-		Brick brick = new Brick(1, 3, hashSet);
+		Brick brick = new Brick(1, 4, hashSet);
 
 		System.out.println(brick.getReps());
 
-		assertTrue(brick.getReps().contains("moremo"));
+		assertTrue(brick.getReps().contains("moredeve"));
 	}
 }
