@@ -23,11 +23,15 @@ plugins.withType(JavaPlugin) {
 compileJava {
     options.debug = true
     options.debugOptions.debugLevel = "source,lines,vars"
+  	sourceCompatibility = '11'
+  	targetCompatibility = '11'
 }
 
 compileTestJava {
     options.debug = true
     options.debugOptions.debugLevel = "source,lines,vars"
+  	sourceCompatibility = '11'
+  	targetCompatibility = '11'
 }
 
 java {
