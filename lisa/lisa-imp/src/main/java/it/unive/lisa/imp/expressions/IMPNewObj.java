@@ -24,6 +24,8 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import java.util.Collections;
+import java.util.Objects;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -38,7 +40,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewObj extends NaryExpression {
-
+	
+	private final boolean staticallyAllocated; 
+	
 	/**
 	 * Builds the object allocation and initialization.
 	 * 
@@ -49,8 +53,9 @@ public class IMPNewObj extends NaryExpression {
 	 * @param type       the type of the object that is being created
 	 * @param parameters the parameters of the constructor call
 	 */
-	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type, type, parameters);
+	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated, Expression... parameters) {
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "new " : "") + type, type, parameters);
+		this.staticallyAllocated = staticallyAllocated;
 	}
 
 	@Override
@@ -65,7 +70,7 @@ public class IMPNewObj extends NaryExpression {
 					throws SemanticException {
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
-		HeapAllocation created = new HeapAllocation(type, getLocation());
+		HeapAllocation created = new HeapAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, created, getLocation());
 		created.setRuntimeTypes(Collections.singleton(type));
 		ref.setRuntimeTypes(Collections.singleton(reftype));
@@ -106,4 +111,26 @@ public class IMPNewObj extends NaryExpression {
 
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(staticallyAllocated);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IMPNewObj other = (IMPNewObj) obj;
+		return staticallyAllocated == other.staticallyAllocated;
+	}
+	
+	
 }

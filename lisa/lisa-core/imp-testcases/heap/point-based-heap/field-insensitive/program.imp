@@ -64,4 +64,11 @@ class A {
 		z = y;  
 		z[0] =  1;
 	}
+	
+	f8() {
+		def x = bump int[3];
+		x[0] = 2;
+		def y = x;
+		y[0] = 1;
+	}
 }

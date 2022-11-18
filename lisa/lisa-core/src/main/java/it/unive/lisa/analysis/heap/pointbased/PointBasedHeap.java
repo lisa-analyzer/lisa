@@ -1,8 +1,9 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -51,11 +52,23 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 */
 	public final HeapEnvironment<AllocationSites> heapEnv;
 
+	
+	private final List<HeapReplacement> replacements;
 	/**
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
 	public PointBasedHeap() {
-		this(new HeapEnvironment<>(new AllocationSites()));
+		this(new HeapEnvironment<>(new AllocationSites()), new ArrayList<>());
+	}
+	
+	/**
+	 * Builds a new instance of field-insensitive point-based heap from its heap
+	 * environment.
+	 * 
+	 * @param heapEnv the heap environment that this instance tracks
+	 */
+	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+		this(heapEnv, new ArrayList<>());
 	}
 
 	/**
@@ -64,8 +77,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
-	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
 		this.heapEnv = heapEnv;
+		this.replacements = replacements;
 	}
 
 	/**
@@ -99,8 +113,24 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
-					result = result.lub(from(new PointBasedHeap(heap)));
+					if (star_y instanceof StaticAllocationSite) {
+						// no aliasing: star_y must be cloned and the clone must be assigned to id
+						StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
+								id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
+						result = result.lub(from(new PointBasedHeap(heap)));
+						
+						HeapReplacement replacement = new HeapReplacement();
+						replacement.addSource(star_y);
+						replacement.addTarget(star_y);
+						replacement.addTarget(clone);
+						
+						result.replacements.add(replacement);
+					} else {
+						// aliasing: id and star_y points to the same object
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
+						result = result.lub(from(new PointBasedHeap(heap)));
+					}
 				}
 			} else
 				result = result.lub(sss);
@@ -163,7 +193,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public List<HeapReplacement> getSubstitution() {
-		return Collections.emptyList();
+		return replacements;
 	}
 
 	@Override
@@ -183,10 +213,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((heapEnv == null) ? 0 : heapEnv.hashCode());
-		return result;
+		return Objects.hash(heapEnv, replacements);
 	}
 
 	@Override
@@ -198,12 +225,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		if (getClass() != obj.getClass())
 			return false;
 		PointBasedHeap other = (PointBasedHeap) obj;
-		if (heapEnv == null) {
-			if (other.heapEnv != null)
-				return false;
-		} else if (!heapEnv.equals(other.heapEnv))
-			return false;
-		return true;
+		return Objects.equals(heapEnv, other.heapEnv) && Objects.equals(replacements, other.replacements);
 	}
 
 	@Override
@@ -263,8 +285,6 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
-
-
 
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));

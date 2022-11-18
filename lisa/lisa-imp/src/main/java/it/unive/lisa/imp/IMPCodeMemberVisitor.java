@@ -3,6 +3,19 @@ package it.unive.lisa.imp;
 import static it.unive.lisa.imp.Antlr4Util.getCol;
 import static it.unive.lisa.imp.Antlr4Util.getLine;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
+
 import it.unive.lisa.imp.antlr.IMPParser.ArgContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArgumentsContext;
 import it.unive.lisa.imp.antlr.IMPParser.ArrayAccessContext;
@@ -43,8 +56,6 @@ import it.unive.lisa.imp.constructs.StringSubstring;
 import it.unive.lisa.imp.expressions.IMPAddOrConcat;
 import it.unive.lisa.imp.expressions.IMPArrayAccess;
 import it.unive.lisa.imp.expressions.IMPAssert;
-import it.unive.lisa.imp.expressions.IMPBumpArray;
-import it.unive.lisa.imp.expressions.IMPBumpObj;
 import it.unive.lisa.imp.expressions.IMPNewArray;
 import it.unive.lisa.imp.expressions.IMPNewObj;
 import it.unive.lisa.imp.types.ClassType;
@@ -99,17 +110,6 @@ import it.unive.lisa.type.common.BoolType;
 import it.unive.lisa.type.common.Float32Type;
 import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse the code of an IMP method or
@@ -621,14 +621,14 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	}
 
 	private Expression visitBumpBasicArrayExpr(NewBasicArrayExprContext ctx) {
-		return new IMPBumpArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
+				true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
 	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				 true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
@@ -654,10 +654,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPBumpArray(cfg, file, getLine(ctx), getCol(ctx), base,
+			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, true,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
-			return new IMPBumpObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
+			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, true, visitArguments(ctx.arguments()));
 	}
 
 	@Override
@@ -666,10 +666,10 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base,
+			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, false,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
-			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
+			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, false, visitArguments(ctx.arguments()));
 	}
 
 	@Override

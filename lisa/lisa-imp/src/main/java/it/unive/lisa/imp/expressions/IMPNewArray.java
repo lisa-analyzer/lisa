@@ -1,5 +1,7 @@
 package it.unive.lisa.imp.expressions;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -29,7 +31,9 @@ import it.unive.lisa.type.Type;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewArray extends NaryExpression {
-
+	
+	private final boolean staticallyAllocated;
+	
 	/**
 	 * Builds the array allocation.
 	 * 
@@ -40,9 +44,10 @@ public class IMPNewArray extends NaryExpression {
 	 * @param type       the type of the array's elements
 	 * @param dimensions the dimensions of the array
 	 */
-	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, Expression[] dimensions) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type + "[]",
+	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated, Expression[] dimensions) {
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "new " : "") + type + "[]",
 				ArrayType.lookup(type, dimensions.length), dimensions);
+		this.staticallyAllocated = staticallyAllocated;
 	}
 
 	@Override
@@ -55,7 +60,7 @@ public class IMPNewArray extends NaryExpression {
 					ExpressionSet<SymbolicExpression>[] params,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		HeapAllocation alloc = new HeapAllocation(getStaticType(), getLocation());
+		HeapAllocation alloc = new HeapAllocation(getStaticType(), getLocation(), staticallyAllocated);
 		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();
@@ -68,4 +73,26 @@ public class IMPNewArray extends NaryExpression {
 
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(staticallyAllocated);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IMPNewArray other = (IMPNewArray) obj;
+		return staticallyAllocated == other.staticallyAllocated;
+	}
+	
+	
 }
