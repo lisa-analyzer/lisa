@@ -74,7 +74,7 @@ public class Brick {
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
-				if((!currentStr.equals("") || this.min == 0) && numberOfReps >= this.min)
+				if((!currentStr.equals("") || this.min == 0) && numberOfReps >= this.min) //numberOfReps has to be ALWAYS greater or equal than the min
 					reps.add(currentStr);
 
 				recGetReps(reps, min + 1, numberOfReps + 1,currentStr + string);
