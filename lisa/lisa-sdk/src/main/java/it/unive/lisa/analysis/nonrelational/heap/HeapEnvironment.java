@@ -109,8 +109,9 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> glbAux(T lattice, Map<Identifier, T> function, HeapEnvironment<T> other) {
-		return new HeapEnvironment<>(lattice, function, other.substitution);
+	public HeapEnvironment<T> glbAux(HeapEnvironment<T> other) throws SemanticException {
+		HeapEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new HeapEnvironment<>(newEnv.lattice, newEnv.function, other.substitution);
 	}
 
 	@Override
@@ -160,6 +161,15 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 			return widen;
 		// TODO how do we widen the substitutions?
 		return new HeapEnvironment<>(widen.lattice, widen.function, other.substitution);
+	}
+
+	@Override
+	public HeapEnvironment<T> narrowingAux(HeapEnvironment<T> other) throws SemanticException {
+		HeapEnvironment<T> narrow = super.narrowingAux(other);
+		if (narrow.isTop() || narrow.isBottom())
+			return narrow;
+		// TODO how do we narrow the substitutions?
+		return new HeapEnvironment<>(narrow.lattice, narrow.function, other.substitution);
 	}
 
 	@Override

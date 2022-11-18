@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -86,11 +85,40 @@ public class LiSAConfiguration {
 	}
 
 	/**
+	 * The type of descending fixpoint phase algorithms that can be used.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static enum DescendingPhaseType {
+
+		/**
+		 * The descending phase is not computed.
+		 */
+		NONE,
+
+		/**
+		 * The descending phase is performed by applying the glb k-times.
+		 */
+		GLB,
+
+		/**
+		 * The descending phase always uses the narrowing operator.
+		 */
+		NARROWING;
+	}
+
+	/**
 	 * The default number of fixpoint iteration on a given node after which
 	 * calls to {@link Lattice#lub(Lattice)} gets replaced with
 	 * {@link Lattice#widening(Lattice)}.
 	 */
 	public static final int DEFAULT_WIDENING_THRESHOLD = 5;
+
+	/**
+	 * The default number of maximum time glb can be called on a node during the
+	 * descending phase of fixpoint algorithm.
+	 */
+	public static final int DEFAULT_DESCENDING_GLB_THRESHOLD = 5;
 
 	/**
 	 * The collection of {@link SyntacticCheck}s to execute. These checks will
@@ -195,6 +223,20 @@ public class LiSAConfiguration {
 	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
 	 */
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
+
+	/**
+	 * The number of fixpoint iteration on a given node after which calls to
+	 * {@link Lattice#lub(Lattice)} gets replaced with
+	 * {@link Lattice#widening(Lattice)}. Defaults to
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 */
+	public int descendingGlbThreshold = DEFAULT_WIDENING_THRESHOLD;
+
+	/**
+	 * the type of descending phase that will be applied by the fixpoint
+	 * algorithm.
+	 */
+	public DescendingPhaseType descendingPhaseType = DescendingPhaseType.NONE;
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
