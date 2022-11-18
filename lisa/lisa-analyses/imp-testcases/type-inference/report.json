@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_typing.test1(typing__this).json", "untyped_typing.test2(typing__this,_untyped_i).json", "untyped_typing.test3(typing__this,_untyped_i).json", "untyped_typing.test4(typing__this,_untyped_i).json", "untyped_typing.test5(typing__this,_untyped_i).json", "untyped_typing.test6(typing__this,_untyped_i).json", "untyped_typing.test7(typing__this).json" ]
+  "files" : [ "report.json", "untyped_typing.test1(typing__this).json", "untyped_typing.test2(typing__this,_untyped_i).json", "untyped_typing.test3(typing__this,_untyped_i).json", "untyped_typing.test4(typing__this,_untyped_i).json", "untyped_typing.test5(typing__this,_untyped_i).json", "untyped_typing.test6(typing__this,_untyped_i).json", "untyped_typing.test7(typing__this).json" ],
+  "info" : {
+    "cfgs" : "7",
+    "duration" : "119ms",
+    "end" : "2022-11-18T21:25:34.095+01:00",
+    "expressions" : "68",
+    "files" : "7",
+    "globals" : "0",
+    "members" : "7",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:33.976+01:00",
+    "statements" : "32",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\type-inference"
+  }
 }

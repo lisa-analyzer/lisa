@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_ae.f0(ae__this).json", "untyped_ae.f1(ae__this).json", "untyped_ae.f2(ae__this).json", "untyped_ae.f3(ae__this).json", "untyped_ae.f4(ae__this).json" ]
+  "files" : [ "report.json", "untyped_ae.f0(ae__this).json", "untyped_ae.f1(ae__this).json", "untyped_ae.f2(ae__this).json", "untyped_ae.f3(ae__this).json", "untyped_ae.f4(ae__this).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "1s 859ms",
+    "end" : "2022-11-18T21:25:28.801+01:00",
+    "expressions" : "151",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:26.942+01:00",
+    "statements" : "54",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\available-expressions"
+  }
 }

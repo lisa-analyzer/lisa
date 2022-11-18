@@ -20,7 +20,11 @@ import java.lang.reflect.Modifier;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -270,5 +274,43 @@ public class LiSAConfiguration {
 			throw new IllegalStateException("Cannot access one of this class' public fields", e);
 		}
 		return res.toString();
+	}
+
+	/**
+	 * Converts this configuration to a property bag, that is, a map from keys
+	 * (fields of this class) to values (their values). {@link #abstractState},
+	 * {@link #callGraph}, and {@link #interproceduralAnalysis} are omitted.
+	 * 
+	 * @return the property bag
+	 */
+	public Map<String, String> toPropertyBag() {
+		Map<String, String> bag = new TreeMap<>();
+		try {
+			for (Field field : LiSAConfiguration.class.getFields())
+				if (!Modifier.isStatic(field.getModifiers())
+						// we skip the semantic configuration
+						&& !AbstractState.class.isAssignableFrom(field.getType())
+						&& !CallGraph.class.isAssignableFrom(field.getType())
+						&& !InterproceduralAnalysis.class.isAssignableFrom(field.getType())) {
+					Object value = field.get(this);
+
+					String key = field.getName();
+
+					String val;
+					if (Collection.class.isAssignableFrom(field.getType()))
+						val = StringUtils.join(((Collection<?>) value).stream().map(e -> e.getClass().getSimpleName())
+								.sorted().collect(Collectors.toList()), ", ");
+					else if (Class.class.isAssignableFrom(field.getType()))
+						val = ((Class<?>) value).getSimpleName();
+					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
+						val = ((OpenCallPolicy) value).getClass().getSimpleName();
+					else
+						val = String.valueOf(value);
+					bag.put(key, val);
+				}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new IllegalStateException("Cannot access one of this class' public fields", e);
+		}
+		return bag;
 	}
 }

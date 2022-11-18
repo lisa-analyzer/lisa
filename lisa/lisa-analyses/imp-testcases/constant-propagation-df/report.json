@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_cp.f0(cp__this).json", "untyped_cp.f1(cp__this,_untyped_x,_untyped_y).json", "untyped_cp.f2(cp__this).json", "untyped_cp.f3(cp__this,_untyped_x,_untyped_y).json", "untyped_cp.f4(cp__this,_untyped_x,_untyped_y).json" ]
+  "files" : [ "report.json", "untyped_cp.f0(cp__this).json", "untyped_cp.f1(cp__this,_untyped_x,_untyped_y).json", "untyped_cp.f2(cp__this).json", "untyped_cp.f3(cp__this,_untyped_x,_untyped_y).json", "untyped_cp.f4(cp__this,_untyped_x,_untyped_y).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "211ms",
+    "end" : "2022-11-18T21:25:29.416+01:00",
+    "expressions" : "71",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:29.205+01:00",
+    "statements" : "33",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\constant-propagation-df"
+  }
 }

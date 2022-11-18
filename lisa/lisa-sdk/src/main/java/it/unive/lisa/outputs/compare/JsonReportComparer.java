@@ -18,14 +18,18 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
+import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.TriConsumer;
 
 /**
  * A class providing capabilities for finding differences between two
@@ -71,6 +75,18 @@ public class JsonReportComparer {
 	 */
 	public enum REPORTED_COMPONENT {
 		/**
+		 * Indicates that the difference was found in the information about the
+		 * analysis.
+		 */
+		INFO,
+
+		/**
+		 * Indicates that the difference was found in the configuration of the
+		 * analysis.
+		 */
+		CONFIGURATION,
+
+		/**
 		 * Indicates that the difference was found in the collection of
 		 * generated warnings.
 		 */
@@ -113,6 +129,26 @@ public class JsonReportComparer {
 		 * @param message the message reporting the difference
 		 */
 		void fileDiff(String first, String second, String message);
+
+		/**
+		 * Callback invoked by a {@link JsonReportComparer} whenever an analysis
+		 * information key is mapped to two different values.
+		 * 
+		 * @param key    the information key
+		 * @param first  the value in the first report
+		 * @param second the value in the second report
+		 */
+		void infoDiff(String key, String first, String second);
+
+		/**
+		 * Callback invoked by a {@link JsonReportComparer} whenever a
+		 * configuration key is mapped to two different values.
+		 * 
+		 * @param key    the configuration key
+		 * @param first  the value in the first report
+		 * @param second the value in the second report
+		 */
+		void configurationDiff(String key, String first, String second);
 	}
 
 	/**
@@ -164,31 +200,21 @@ public class JsonReportComparer {
 	 */
 	public static boolean compare(JsonReport first, JsonReport second, File firstFileRoot, File secondFileRoot,
 			DiffReporter reporter) throws IOException {
-		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(JsonWarning.class,
-				first.getWarnings(), second.getWarnings());
-		warnings.compute(JsonWarning::compareTo);
 
-		if (!warnings.getCommons().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
-		if (!warnings.getOnlyFirst().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_FIRST, warnings.getOnlyFirst());
-		if (!warnings.getOnlySecond().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
+		boolean sameConfs = compareConfs(first, second, reporter);
+		boolean sameInfos = compareInfos(first, second, reporter);
+		boolean sameWarnings = compareWarnings(first, second, reporter);
+		CollectionsDiffBuilder<String> files = compareFiles(first, second, reporter);
 
-		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
-				second.getFiles());
-		files.compute(String::compareTo);
-
-		if (!files.getCommons().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.COMMON, files.getCommons());
-		if (!files.getOnlyFirst().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_FIRST, files.getOnlyFirst());
-		if (!files.getOnlySecond().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_SECOND, files.getOnlySecond());
-
-		if (!warnings.sameContent() || !files.sameContent())
+		if (!sameConfs || !sameInfos || !sameWarnings || !files.sameContent())
 			return false;
 
+		boolean diffFound = compareFileContents(firstFileRoot, secondFileRoot, reporter, files);
+		return !diffFound;
+	}
+
+	private static boolean compareFileContents(File firstFileRoot, File secondFileRoot, DiffReporter reporter,
+			CollectionsDiffBuilder<String> files) throws FileNotFoundException, IOException {
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
@@ -200,6 +226,9 @@ public class JsonReportComparer {
 			if (!right.exists())
 				throw new FileNotFoundException(
 						pair.getRight() + " declared as output in the second report does not exist");
+
+			if (FilenameUtils.getName(left.getName()).equals("report.json"))
+				continue;
 
 			String ext = FilenameUtils.getExtension(left.getName());
 			if (ext.endsWith("json"))
@@ -213,8 +242,87 @@ public class JsonReportComparer {
 			else
 				throw new UnsupportedOperationException("Cannot compare files with extension " + ext);
 		}
+		return diffFound;
+	}
 
-		return !diffFound;
+	private static CollectionsDiffBuilder<String> compareFiles(JsonReport first, JsonReport second,
+			DiffReporter reporter) {
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+				second.getFiles());
+		files.compute(String::compareTo);
+
+		if (!files.getCommons().isEmpty())
+			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.COMMON, files.getCommons());
+		if (!files.getOnlyFirst().isEmpty())
+			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_FIRST, files.getOnlyFirst());
+		if (!files.getOnlySecond().isEmpty())
+			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_SECOND, files.getOnlySecond());
+		return files;
+	}
+
+	private static boolean compareConfs(JsonReport first, JsonReport second,
+			DiffReporter reporter) {
+		return compareBags(REPORTED_COMPONENT.CONFIGURATION, first.getConfiguration(), second.getConfiguration(),
+				reporter, (key, fvalue, svalue) -> reporter.configurationDiff(key, fvalue, svalue), key -> false);
+	}
+
+	private static final Set<String> INFO_BLACKLIST = Set.of("duration", "start", "end", "version");
+
+	private static boolean compareInfos(JsonReport first, JsonReport second,
+			DiffReporter reporter) {
+		return compareBags(REPORTED_COMPONENT.INFO, first.getInfo(), second.getInfo(), reporter,
+				(key, fvalue, svalue) -> reporter.infoDiff(key, fvalue, svalue),
+				// we are really only interested in code metrics here,
+				// information like timestamps and version are not useful for
+				// the test system - we still use a blacklist approach to ensure
+				// that new fields are tested by default
+				key -> INFO_BLACKLIST.contains(key));
+	}
+
+	private static boolean compareBags(REPORTED_COMPONENT component, Map<String, String> first,
+			Map<String, String> second, DiffReporter reporter, TriConsumer<String, String, String> diffReporter,
+			Predicate<String> ignore) {
+		CollectionsDiffBuilder<
+				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
+		builder.compute(String::compareTo);
+
+		if (!builder.getOnlyFirst().isEmpty())
+			reporter.report(component, REPORT_TYPE.ONLY_FIRST, builder.getOnlyFirst());
+		if (!builder.getOnlySecond().isEmpty())
+			reporter.report(component, REPORT_TYPE.ONLY_SECOND, builder.getOnlySecond());
+
+		Collection<Pair<String, String>> same = new HashSet<>();
+		if (!builder.getCommons().isEmpty()) {
+			for (Pair<String, String> entry : builder.getCommons()) {
+				String key = entry.getKey();
+				String fvalue = first.get(key);
+				String svalue = second.get(key);
+				if (fvalue.equals(svalue) || ignore.test(key))
+					same.add(Pair.of(key, fvalue));
+				else
+					diffReporter.accept(key, fvalue, svalue);
+			}
+		}
+
+		if (!same.isEmpty())
+			reporter.report(component, REPORT_TYPE.COMMON, same);
+
+		return builder.sameContent() && same.size() == builder.getCommons().size();
+	}
+
+	private static boolean compareWarnings(JsonReport first, JsonReport second,
+			DiffReporter reporter) {
+		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(JsonWarning.class,
+				first.getWarnings(), second.getWarnings());
+		warnings.compute(JsonWarning::compareTo);
+
+		if (!warnings.getCommons().isEmpty())
+			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
+		if (!warnings.getOnlyFirst().isEmpty())
+			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_FIRST, warnings.getOnlyFirst());
+		if (!warnings.getOnlySecond().isEmpty())
+			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
+		return warnings.sameContent();
 	}
 
 	private static boolean matchJsonGraphs(DiffReporter reporter, File left, File right)
@@ -335,6 +443,18 @@ public class JsonReportComparer {
 				else
 					LOG.warn("Warnings only in the second report:");
 				break;
+			case INFO:
+				if (isFirst)
+					LOG.warn("Run info keys only in the first report:");
+				else
+					LOG.warn("Run info keys only in the second report:");
+				break;
+			case CONFIGURATION:
+				if (isFirst)
+					LOG.warn("Configuration keys only in the first report:");
+				else
+					LOG.warn("Configuration keys only in the second report:");
+				break;
 			default:
 				break;
 			}
@@ -346,6 +466,16 @@ public class JsonReportComparer {
 		@Override
 		public void fileDiff(String first, String second, String message) {
 			LOG.warn("['" + first + "', '" + second + "'] " + message);
+		}
+
+		@Override
+		public void infoDiff(String key, String first, String second) {
+			LOG.warn("Different values for run info key '" + key + "': '" + first + "' and '" + second + "'");
+		}
+
+		@Override
+		public void configurationDiff(String key, String first, String second) {
+			LOG.warn("Different values for configuration key '" + key + "': '" + first + "' and '" + second + "'");
 		}
 	}
 

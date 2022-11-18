@@ -14,7 +14,12 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.file.FileManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.TreeMap;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -183,19 +188,13 @@ public class LiSARunInfo {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + cfgs;
-		result = prime * result + ((duration == null) ? 0 : duration.hashCode());
-		result = prime * result + ((end == null) ? 0 : end.hashCode());
-		result = prime * result + expressions;
-		result = prime * result + files;
-		result = prime * result + globals;
-		result = prime * result + members;
-		result = prime * result + programs;
-		result = prime * result + ((start == null) ? 0 : start.hashCode());
-		result = prime * result + statements;
-		result = prime * result + units;
-		result = prime * result + ((version == null) ? 0 : version.hashCode());
-		result = prime * result + warnings;
+		try {
+			for (Field field : LiSARunInfo.class.getFields())
+				if (!Modifier.isStatic(field.getModifiers()))
+					result = prime * result + Objects.hashCode(field.get(this));
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new IllegalStateException("Cannot access one of this class' public fields", e);
+		}
 		return result;
 	}
 
@@ -208,44 +207,17 @@ public class LiSARunInfo {
 		if (getClass() != obj.getClass())
 			return false;
 		LiSARunInfo other = (LiSARunInfo) obj;
-		if (cfgs != other.cfgs)
-			return false;
-		if (duration == null) {
-			if (other.duration != null)
-				return false;
-		} else if (!duration.equals(other.duration))
-			return false;
-		if (end == null) {
-			if (other.end != null)
-				return false;
-		} else if (!end.equals(other.end))
-			return false;
-		if (expressions != other.expressions)
-			return false;
-		if (files != other.files)
-			return false;
-		if (globals != other.globals)
-			return false;
-		if (members != other.members)
-			return false;
-		if (programs != other.programs)
-			return false;
-		if (start == null) {
-			if (other.start != null)
-				return false;
-		} else if (!start.equals(other.start))
-			return false;
-		if (statements != other.statements)
-			return false;
-		if (units != other.units)
-			return false;
-		if (version == null) {
-			if (other.version != null)
-				return false;
-		} else if (!version.equals(other.version))
-			return false;
-		if (warnings != other.warnings)
-			return false;
+		try {
+			for (Field field : LiSARunInfo.class.getFields())
+				if (!Modifier.isStatic(field.getModifiers())) {
+					Object value = field.get(this);
+					Object ovalue = field.get(other);
+					if (!Objects.equals(value, ovalue))
+						return false;
+				}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new IllegalStateException("Cannot access one of this class' public fields", e);
+		}
 		return true;
 	}
 
@@ -288,16 +260,38 @@ public class LiSARunInfo {
 
 	@Override
 	public String toString() {
-		return "LiSA version " + version +
-				"\nduration: " + duration + " (started: " + start + ", ended: " + end + ")" +
-				"\n# programs: " + programs +
-				"\n# units: " + units +
-				"\n# globals: " + globals +
-				"\n# code members: " + members +
-				"\n# cfgs: " + cfgs +
-				"\n# statements: " + statements +
-				"\n# expressions: " + expressions +
-				"\n# generated warnings: " + warnings +
-				"\n# generated files: " + files;
+		return "Version " + version +
+				"\nDuration: " + duration + " (started: " + start + ", ended: " + end + ")" +
+				"\nPrograms: " + programs +
+				"\nUnits: " + units +
+				"\nGlobals: " + globals +
+				"\nCode Members: " + members +
+				"\nCFGs: " + cfgs +
+				"\nStatements: " + statements +
+				"\nExpressions: " + expressions +
+				"\nGenerated Warnings: " + warnings +
+				"\nGenerated Files: " + files;
+	}
+
+	/**
+	 * Converts this configuration to a property bag, that is, a map from keys
+	 * (fields of this class) to values (their values).
+	 * 
+	 * @return the property bag
+	 */
+	public Map<String, String> toPropertyBag() {
+		Map<String, String> bag = new TreeMap<>();
+		try {
+			for (Field field : LiSARunInfo.class.getFields())
+				if (!Modifier.isStatic(field.getModifiers())) {
+					Object value = field.get(this);
+					String key = field.getName();
+					String val = String.valueOf(value);
+					bag.put(key, val);
+				}
+		} catch (IllegalArgumentException | IllegalAccessException e) {
+			throw new IllegalStateException("Cannot access one of this class' public fields", e);
+		}
+		return bag;
 	}
 }

@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_A.A(A__this)_-1723349409.json", "untyped_A.identity(A__this,_untyped_i)_-1696566215.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-1719653279.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-1721500476.json", "untyped_tests.main(tests__this).json" ]
+  "files" : [ "report.json", "untyped_A.A(A__this)_-1723349409.json", "untyped_A.identity(A__this,_untyped_i)_-1696566215.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-1719653279.json", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_-1721500476.json", "untyped_tests.main(tests__this).json" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "123ms",
+    "end" : "2022-11-18T21:25:31.128+01:00",
+    "expressions" : "32",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "6",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:31.005+01:00",
+    "statements" : "16",
+    "units" : "2",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\interprocedural\\RTAContextSensitive3"
+  }
 }

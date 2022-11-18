@@ -96,19 +96,15 @@ public class LiSA {
 		}
 
 		LiSARunInfo stats = new LiSARunInfo(warnings, fileManager.createdFiles(), app, start, new DateTime());
-		LOG.info("LiSA statistics:");
-		LOG.info(stats);
+		LOG.info("LiSA statistics:\n" + stats);
 
+		LiSAReport report = new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
 		if (conf.jsonOutput) {
-			LOG.info("Dumping reported warnings to 'report.json'");
-			JsonReport report = new JsonReport(warnings, fileManager.createdFiles()); // TODO
-																						// should
-																						// use
-																						// the
-																						// report
+			LOG.info("Dumping analysis report to 'report.json'");
 			try {
 				fileManager.mkOutputFile("report.json", writer -> {
-					report.dump(writer);
+					JsonReport json = new JsonReport(report);
+					json.dump(writer);
 					LOG.info("Report file dumped to report.json");
 				});
 			} catch (IOException e) {
@@ -116,6 +112,6 @@ public class LiSA {
 			}
 		}
 
-		return new LiSAReport(conf, stats, warnings, fileManager.createdFiles());
+		return report;
 	}
 }

@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_-2041686398.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_-2042609950.json", "untyped_A.identity(A__this,_untyped_x)_1603223804.json", "untyped_A.main(A__this).json" ]
+  "files" : [ "report.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_-2041686398.json", "untyped_A.build(A__this,_untyped_a,_untyped_b,_untyped_c)_-2042609950.json", "untyped_A.identity(A__this,_untyped_x)_1603223804.json", "untyped_A.main(A__this).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "91ms",
+    "end" : "2022-11-18T21:25:31.464+01:00",
+    "expressions" : "33",
+    "files" : "4",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:31.373+01:00",
+    "statements" : "10",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\interprocedural\\RTAContextSensitive5"
+  }
 }

@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_A.foo(A__this).json", "untyped_B.foo(B__this).json", "untyped_tests.subtyping(tests__this).json" ]
+  "files" : [ "report.json", "untyped_A.foo(A__this).json", "untyped_B.foo(B__this).json", "untyped_tests.subtyping(tests__this).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "47ms",
+    "end" : "2022-11-18T21:25:31.668+01:00",
+    "expressions" : "11",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:31.621+01:00",
+    "statements" : "8",
+    "units" : "3",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\interprocedural\\RTA"
+  }
 }

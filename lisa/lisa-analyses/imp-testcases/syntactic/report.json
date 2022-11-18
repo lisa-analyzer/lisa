@@ -18,5 +18,32 @@
   }, {
     "message" : "['imp-testcases/syntactic/expressions.imp':8:8] on 'untyped expressions::_throw1(expressions* this, untyped x, untyped i)': [EXPRESSION] Found variable i"
   } ],
-  "files" : [ ]
+  "files" : [ "report.json" ],
+  "info" : {
+    "cfgs" : "9",
+    "duration" : "1s 257ms",
+    "end" : "2022-11-18T21:12:04.267+01:00",
+    "expressions" : "34",
+    "files" : "0",
+    "globals" : "0",
+    "members" : "9",
+    "programs" : "1",
+    "start" : "2022-11-18T21:12:03.010+01:00",
+    "statements" : "16",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "9"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "VariableI",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\syntactic"
+  }
 }

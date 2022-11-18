@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_A.f1(A__this).json", "untyped_A.f2(A__this).json", "untyped_A.f3(A__this).json", "untyped_A.f4(A__this).json", "untyped_A.f5(A__this).json", "untyped_A.f6(A__this).json", "untyped_A.f7(A__this).json" ]
+  "files" : [ "report.json", "untyped_A.f1(A__this).json", "untyped_A.f2(A__this).json", "untyped_A.f3(A__this).json", "untyped_A.f4(A__this).json", "untyped_A.f5(A__this).json", "untyped_A.f6(A__this).json", "untyped_A.f7(A__this).json" ],
+  "info" : {
+    "cfgs" : "7",
+    "duration" : "326ms",
+    "end" : "2022-11-18T21:25:30.043+01:00",
+    "expressions" : "104",
+    "files" : "7",
+    "globals" : "2",
+    "members" : "7",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:29.717+01:00",
+    "statements" : "41",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\heap\\point-based-heap\\field-sensitive"
+  }
 }

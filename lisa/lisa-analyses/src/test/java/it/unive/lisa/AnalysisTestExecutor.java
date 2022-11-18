@@ -10,7 +10,6 @@ import it.unive.lisa.outputs.compare.JsonReportComparer.DiffReporter;
 import it.unive.lisa.outputs.compare.JsonReportComparer.REPORTED_COMPONENT;
 import it.unive.lisa.outputs.compare.JsonReportComparer.REPORT_TYPE;
 import it.unive.lisa.outputs.json.JsonReport;
-import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.util.file.FileManager;
 import java.io.File;
@@ -232,7 +231,7 @@ public abstract class AnalysisTestExecutor {
 
 	private void regen(Path expectedPath, Path actualPath, File expFile, File actFile, Accumulator acc)
 			throws IOException {
-		boolean updateReport = !acc.addedWarning.isEmpty() || !acc.removedWarning.isEmpty()
+		boolean updateReport = acc.changedWarnings || acc.changedConf || acc.changedInfos
 				|| !acc.addedFilePaths.isEmpty() || !acc.removedFilePaths.isEmpty()
 				|| !acc.changedFileName.isEmpty();
 		if (updateReport) {
@@ -243,11 +242,12 @@ public abstract class AnalysisTestExecutor {
 			Files.delete(Paths.get(expectedPath.toString(), f.toString()));
 			System.err.println("- Deleted " + f);
 		}
-		for (Path f : acc.addedFilePaths) {
-			Files.copy(Paths.get(actualPath.toString(), f.toString()),
-					Paths.get(expectedPath.toString(), f.toString()));
-			System.err.println("- Copied (new) " + f);
-		}
+		for (Path f : acc.addedFilePaths)
+			if (!f.getFileName().toString().equals("report.json")) {
+				Files.copy(Paths.get(actualPath.toString(), f.toString()),
+						Paths.get(expectedPath.toString(), f.toString()));
+				System.err.println("- Copied (new) " + f);
+			}
 		for (Path f : acc.changedFileName) {
 			Path fresh = Paths.get(expectedPath.toString(), f.toString());
 			Files.copy(
@@ -295,8 +295,10 @@ public abstract class AnalysisTestExecutor {
 		private final Collection<Path> changedFileName = new HashSet<>();
 		private final Collection<Path> addedFilePaths = new HashSet<>();
 		private final Collection<Path> removedFilePaths = new HashSet<>();
-		private final Collection<JsonWarning> addedWarning = new HashSet<>();
-		private final Collection<JsonWarning> removedWarning = new HashSet<>();
+		private boolean changedInfos = false;
+		private boolean changedConf = false;
+		private boolean changedWarnings = false;
+
 		private final Path exp;
 
 		public Accumulator(Path exp) {
@@ -312,7 +314,13 @@ public abstract class AnalysisTestExecutor {
 					reported.forEach(e -> removedFilePaths.add(Paths.get((String) e)));
 					break;
 				case WARNINGS:
-					reported.forEach(e -> removedWarning.add((JsonWarning) e));
+					changedWarnings = true;
+					break;
+				case INFO:
+					changedInfos = true;
+					break;
+				case CONFIGURATION:
+					changedConf = true;
 					break;
 				default:
 					break;
@@ -324,7 +332,13 @@ public abstract class AnalysisTestExecutor {
 					reported.forEach(e -> addedFilePaths.add(Paths.get((String) e)));
 					break;
 				case WARNINGS:
-					reported.forEach(e -> addedWarning.add((JsonWarning) e));
+					changedWarnings = true;
+					break;
+				case INFO:
+					changedInfos = true;
+					break;
+				case CONFIGURATION:
+					changedConf = true;
 					break;
 				default:
 					break;
@@ -341,6 +355,16 @@ public abstract class AnalysisTestExecutor {
 		public void fileDiff(String first, String second, String message) {
 			Path file = Paths.get(first);
 			changedFileName.add(exp.relativize(file));
+		}
+
+		@Override
+		public void infoDiff(String key, String first, String second) {
+			changedInfos = true;
+		}
+
+		@Override
+		public void configurationDiff(String key, String first, String second) {
+			changedConf = true;
 		}
 	}
 

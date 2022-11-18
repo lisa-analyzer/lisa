@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_ci.m1(ci__this).json", "untyped_ci.m2(ci__this,_untyped_x).json", "untyped_ci.m3(ci__this,_untyped_x).json" ]
+  "files" : [ "report.json", "untyped_ci.m1(ci__this).json", "untyped_ci.m2(ci__this,_untyped_x).json", "untyped_ci.m3(ci__this,_untyped_x).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "66ms",
+    "end" : "2022-11-18T21:25:33.424+01:00",
+    "expressions" : "24",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:33.358+01:00",
+    "statements" : "13",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\char-inclusion"
+  }
 }

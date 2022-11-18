@@ -1,4 +1,31 @@
 {
   "warnings" : [ ],
-  "files" : [ "untyped_A.A(A__this)_354460623.graphml", "untyped_A.getOne(A__this)_984360566.graphml", "untyped_A.getPositive(A__this,_untyped_i)_984361527.graphml", "untyped_A.identity(A__this,_untyped_i)_1012965692.graphml", "untyped_A.identity(A__this,_untyped_i)_1070248980.graphml", "untyped_A.identity(A__this,_untyped_i)_1726458834.graphml", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1098852184.graphml", "untyped_tests.main(tests__this).graphml" ]
+  "files" : [ "report.json", "untyped_A.A(A__this)_354460623.graphml", "untyped_A.getOne(A__this)_984360566.graphml", "untyped_A.getPositive(A__this,_untyped_i)_984361527.graphml", "untyped_A.identity(A__this,_untyped_i)_1012965692.graphml", "untyped_A.identity(A__this,_untyped_i)_1070248980.graphml", "untyped_A.identity(A__this,_untyped_i)_1726458834.graphml", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1098852184.graphml", "untyped_tests.main(tests__this).graphml" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "127ms",
+    "end" : "2022-11-18T21:25:35.466+01:00",
+    "expressions" : "49",
+    "files" : "8",
+    "globals" : "0",
+    "members" : "6",
+    "programs" : "1",
+    "start" : "2022-11-18T21:25:35.339+01:00",
+    "statements" : "21",
+    "units" : "2",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "GRAPHML",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs\\visualization\\graphml"
+  }
 }
