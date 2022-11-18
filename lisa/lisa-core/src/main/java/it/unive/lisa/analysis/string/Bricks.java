@@ -3,6 +3,8 @@ package it.unive.lisa.analysis.string;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,18 +58,21 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
-		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
+
+		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
-		for (Brick brick : thisBricks) {
-			if(brick.getMin() == brick.getMax())
-				transform(thisBricks.get(thisBricks.indexOf(brick)));
+		for (Brick brick : thisBricks) { //Rule 3
+			if(brick.getMin() == brick.getMax()) {
+				brick.setStrings(brick.getReps());
+				brick.setMin(1);
+				brick.setMax(1);
+			}
 
 			Brick nextBrick = thisBricks.get(thisBricks.indexOf(brick) + 1);
-
 			if (brick.getMin() == 1 && brick.getMax() == 1 &&
-					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) {
+					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
 
 				Brick newBrick = brick.merge(nextBrick);
 
@@ -75,7 +80,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				thisBricks.remove(nextBrick);
 				thisBricks.add(newBrick);
 			}
+			if(brick.getStrings().equals(nextBrick.getStrings())){ //Rule 4
+				brick.setMin(brick.getMin() + nextBrick.getMin());
+				brick.setMax(brick.getMax() + nextBrick.getMax());
+
+				thisBricks.remove(nextBrick);
+			}
 		}
 	}
-	private void transform(Brick brick){} //TODO
 }
