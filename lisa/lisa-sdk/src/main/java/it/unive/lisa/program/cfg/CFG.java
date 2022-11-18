@@ -506,7 +506,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint;
 		
 		if(descendingPhase != DescendingPhaseType.NONE) {
-			if(descendingPhase == DescendingPhaseType.WIDENING)
+			if(descendingPhase == DescendingPhaseType.NARROWING)
 				descendingGlbThreshold = 0;
 			this.getNodeList().forEach(ws::push);
 			starting.clear();

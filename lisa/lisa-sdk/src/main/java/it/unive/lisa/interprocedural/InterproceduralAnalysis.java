@@ -63,7 +63,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		/**
 		 * the descending phase always use the narrowing operator.
 		 */
-		WIDENING;
+		NARROWING;
 	}
 
 	/**

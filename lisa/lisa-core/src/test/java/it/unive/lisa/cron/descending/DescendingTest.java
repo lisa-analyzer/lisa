@@ -21,7 +21,7 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
-		conf.descendingPhaseType = DescendingPhaseType.WIDENING;
+		conf.descendingPhaseType = DescendingPhaseType.NARROWING;
 		perform("descending-widening", "program.imp", conf);
 	}
 
