@@ -75,6 +75,6 @@ public class BrickTest {
 
 		System.out.println(brick.getReps());
 
-		assertTrue(brick.getReps().contains("rerere"));
+		assertTrue(brick.getReps().contains("moremo"));
 	}
 }
