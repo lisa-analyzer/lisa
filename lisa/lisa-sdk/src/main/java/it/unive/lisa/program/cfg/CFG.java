@@ -496,34 +496,23 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> starting = new HashMap<>();
 		startingPoints.forEach((st, state) -> starting.put(st, Pair.of(state, new StatementStore<>(state.bottom()))));
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> ascendingResult = fix.fixpoint(
-				starting, 
+				starting,
 				ws,
-				new CFGFixpoint<>(widenAfter, interprocedural, 
-						(pair1, pair2) -> Pair.of(pair1.getLeft().lub(pair2.getLeft()),      pair1.getRight().lub(pair2.getRight())), 
-						(pair1, pair2) -> Pair.of(pair1.getLeft().widening(pair2.getLeft()), pair1.getRight().widening(pair2.getRight())),
-						(pair1, pair2) -> pair1.getLeft().lessOrEqual(pair2.getLeft()) && pair1.getRight().lessOrEqual(pair2.getRight())));
-		
+				new CFGFixpoint<>(widenAfter, interprocedural, DescendingPhaseType.NONE));
+
 		Map<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> fixpoint;
-		
-		if(descendingPhase != DescendingPhaseType.NONE) {
-			if(descendingPhase == DescendingPhaseType.NARROWING)
-				descendingGlbThreshold = 0;
+
+		if (descendingPhase != DescendingPhaseType.NONE) {
 			this.getNodeList().forEach(ws::push);
 			starting.clear();
 			startingPoints.forEach((st, state) -> starting.put(st, ascendingResult.get(st)));
-			
-			fixpoint = fix.fixpoint(
-					starting, 
+
+			fixpoint = fix.fixpoint(starting,
 					ws,
-					new CFGFixpoint<>(descendingGlbThreshold, interprocedural, 
-							(pair1, pair2) -> Pair.of(pair1.getLeft().glb(pair2.getLeft()),      pair1.getRight().glb(pair2.getRight())), 
-							(pair1, pair2) -> Pair.of(pair1.getLeft().narrowing(pair2.getLeft()), pair1.getRight().narrowing(pair2.getRight())),
-							(pair1, pair2) -> pair2.getLeft().lessOrEqual(pair1.getLeft()) && pair2.getRight().lessOrEqual(pair1.getRight())));
-		}
-		else
-		{
+					new CFGFixpoint<>(descendingGlbThreshold, interprocedural, descendingPhase),
+					ascendingResult);
+		} else
 			fixpoint = ascendingResult;
-		}
 
 		HashMap<Statement, AnalysisState<A, H, V, T>> finalResults = new HashMap<>(fixpoint.size());
 		for (Entry<Statement, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>>> e : fixpoint.entrySet()) {
@@ -534,80 +523,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		return new CFGWithAnalysisResults<>(this, singleton, startingPoints, finalResults);
 	}
-	
-	/**
-	 * Interface for the step operation of the fixpoint implementation (lub or glb).
-	 * 
-	 * @author
-	 *
-	 * @param <V> {@link Lattice} type of the values
-	 */
-	@FunctionalInterface
-	public interface StepOperation<V1 extends Lattice<V1>, V2 extends Lattice<V2>> {
 
-		/**
-		 * 
-		 * 
-		 * @param first  the first lattice element
-		 * @param second the second lattice element
-		 * 
-		 * @return the result of the operation of {@code first} and {@code second}
-		 * 
-		 * @throws SemanticException if something goes wrong while calculating the
-		 *                               values
-		 */
-		Pair<V1, V2> operation(Pair<V1, V2> newPair, Pair<V1, V2> oldPair) throws SemanticException;
-	}
-	
-	/**
-	 * Interface for the big step operation of the fixpoint implementation (widening or narrowing).
-	 * 
-	 * @author
-	 *
-	 * @param <V> {@link Lattice} type of the values
-	 */
-	@FunctionalInterface
-	public interface BigStepOperation<V1 extends Lattice<V1>, V2 extends Lattice<V2>> {
-
-		/**
-		 * 
-		 * 
-		 * @param first  the first lattice element
-		 * @param second the second lattice element
-		 * 
-		 * @return the result of the operation of {@code first} and {@code second}
-		 * 
-		 * @throws SemanticException if something goes wrong while calculating the
-		 *                               values
-		 */
-		Pair<V1, V2> operation(Pair<V1, V2> newPair, Pair<V1, V2> oldPair) throws SemanticException;
-	}
-	
-	/**
-	 * Interface for the equality operation.
-	 * 
-	 * @author
-	 *
-	 * @param <V> {@link Lattice} type of the values
-	 */
-	@FunctionalInterface
-	public interface Equality<V1 extends Lattice<V1>, V2 extends Lattice<V2>> {
-
-		/**
-		 * 
-		 * 
-		 * @param first  the first lattice element
-		 * @param second the second lattice element
-		 * 
-		 * @return whether or not {@code first} is equal to {@code second}
-		 * 
-		 * @throws SemanticException if something goes wrong while calculating the
-		 *                               values
-		 */
-		boolean equal(Pair<V1, V2> newPair, Pair<V1, V2> oldPair) throws SemanticException;
-	}	
-
-	
 	private class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -618,21 +534,14 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		private final InterproceduralAnalysis<A, H, V, T> interprocedural;
 		private final int threshold;
 		private final Map<Statement, Integer> counter;
-		private StepOperation<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> stepOperation;
-		private BigStepOperation<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> bigStepOperation;
-		private Equality<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> equalityOperation;
-		
+		private DescendingPhaseType descendingPhase;
+
 		private CFGFixpoint(int threshold,
-				InterproceduralAnalysis<A, H, V, T> interprocedural,
-				StepOperation<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> stepOperation,
-				BigStepOperation<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> bigStepOperation,
-				Equality<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> equality) {
+				InterproceduralAnalysis<A, H, V, T> interprocedural, DescendingPhaseType descendingPhase) {
 			this.threshold = threshold;
 			this.interprocedural = interprocedural;
-			this.counter  = new HashMap<>(CFG.this.getNodesCount());
-			this.stepOperation = stepOperation;
-			this.bigStepOperation = bigStepOperation;
-			this.equalityOperation = equality;
+			this.counter = new HashMap<>(CFG.this.getNodesCount());
+			this.descendingPhase = descendingPhase;
 		}
 
 		@Override
@@ -680,28 +589,40 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> operation(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
-			
-			Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> newPair;
-			
+			if (descendingPhase == DescendingPhaseType.NONE)
+				return join(node, approx, old);
+			else
+				return meet(node, approx, old);
+		}
+
+		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> join(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+
+			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
+			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
+
 			if (threshold == 0) {
-				newPair = bigStepOperation.operation(old,approx);
+				newApprox = newApprox.lub(oldApprox);
+				newIntermediate = newIntermediate.lub(oldIntermediate);
 			} else {
 				// we multiply by the number of predecessors since
 				// if we have more than one
 				// the threshold will be reached faster
-				int count = counter.computeIfAbsent(node, st -> threshold * predecessorsOf(st).size());
-				if (count > 0) {
-					newPair = stepOperation.operation(approx,old);
+				int lub = counter.computeIfAbsent(node, st -> threshold * predecessorsOf(st).size());
+				if (lub > 0) {
+					newApprox = newApprox.lub(oldApprox);
+					newIntermediate = newIntermediate.lub(oldIntermediate);
 				} else {
-					newPair = bigStepOperation.operation(old,approx);
+					newApprox = oldApprox.widening(newApprox);
+					newIntermediate = oldIntermediate.widening(newIntermediate);
 				}
-				counter.put(node, --count);
+				counter.put(node, --lub);
 			}
-			return newPair;
+
+			return Pair.of(newApprox, newIntermediate);
 		}
 
-		/*
-		@Override
 		public Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> meet(Statement node,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
@@ -709,11 +630,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 			AnalysisState<A, H, V, T> newApprox = approx.getLeft(), oldApprox = old.getLeft();
 			StatementStore<A, H, V, T> newIntermediate = approx.getRight(), oldIntermediate = old.getRight();
 
-			if (this.descendingPhase == DescendingPhaseType.WIDENING) {
+			if (this.descendingPhase == DescendingPhaseType.NARROWING) {
 				newApprox = oldApprox.narrowing(newApprox);
 				newIntermediate = oldIntermediate.narrowing(newIntermediate);
 			} else if (this.descendingPhase == DescendingPhaseType.GLB) {
-				int glb = glbs.computeIfAbsent(node, st -> descendingGlbThreshold);
+				int glb = counter.computeIfAbsent(node, st -> threshold);
 				if (glb > 0) {
 					newApprox = newApprox.glb(oldApprox);
 					newIntermediate = newIntermediate.glb(oldIntermediate);
@@ -721,16 +642,30 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					newApprox = oldApprox;
 					newIntermediate = oldIntermediate;
 				}
-				glbs.put(node, --glb);
+				counter.put(node, --glb);
 			}
 			return Pair.of(newApprox, newIntermediate);
 		}
-		*/
 
 		@Override
 		public boolean equality(Statement node, Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
 				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
-			return this.equalityOperation.equal(approx, old);
+			if (descendingPhase == DescendingPhaseType.NONE)
+				return equalityAscending(node, approx, old);
+			else
+				return equalityDescending(node, approx, old);
+		}
+
+		public boolean equalityAscending(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+			return approx.getLeft().lessOrEqual(old.getLeft()) && approx.getRight().lessOrEqual(old.getRight());
+		}
+
+		public boolean equalityDescending(Statement node,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> approx,
+				Pair<AnalysisState<A, H, V, T>, StatementStore<A, H, V, T>> old) throws SemanticException {
+			return old.getLeft().lessOrEqual(approx.getLeft()) && old.getRight().lessOrEqual(approx.getRight());
 		}
 	}
 

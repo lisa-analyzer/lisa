@@ -110,7 +110,7 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 		ValueEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.glb(other.stack));
 	}
-	
+
 	@Override
 	public ValueEnvironment<T> top() {
 		return isTop() ? this : new ValueEnvironment<>(lattice.top(), null, lattice.top());

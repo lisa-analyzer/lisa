@@ -317,20 +317,5 @@ public class FixpointTest {
 		if (!fail)
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
-
-		fail = false;
-		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
-					Map.of(source, Set.of()),
-					FIFOWorkingSet.mk(),
-					new ExceptionalTester(5));
-		} catch (FixpointException e) {
-			fail = true;
-			assertTrue("Wrong message: " + e.getMessage(), e.getMessage().contains("meeting states"));
-		}
-
-		if (!fail)
-			fail("The fixpoint computation hasn't thrown an exception");
-		assertNull("Fixpoint failed", res);
 	}
 }

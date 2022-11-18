@@ -169,7 +169,6 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 	 */
 	public abstract M assumeSatisfied(V eval) throws SemanticException;
 
-
 	@Override
 	@SuppressWarnings("unchecked")
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {

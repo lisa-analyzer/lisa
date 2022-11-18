@@ -110,7 +110,7 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 
 	@Override
 	public HeapEnvironment<T> glbAux(HeapEnvironment<T> other) throws SemanticException {
-		 HeapEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		HeapEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 		return new HeapEnvironment<>(newEnv.lattice, newEnv.function, other.substitution);
 	}
 

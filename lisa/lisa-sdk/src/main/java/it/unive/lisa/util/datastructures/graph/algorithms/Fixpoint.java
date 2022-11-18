@@ -29,8 +29,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	private final Graph<G, N, E> graph;
 
-	private final Map<N, T> result;
-
+	private Map<N, T> result;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
@@ -151,7 +150,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	/**
 	 * Runs the fixpoint. Invoking this method effectively recomputes the
-	 * result: no caching on previous runs is executed.
+	 * result: no caching on previous runs is executed. It starts with empty
+	 * result.
 	 * 
 	 * @param startingPoints a map containing all the nodes to start the
 	 *                           fixpoint at, each mapped to its entry state.
@@ -169,8 +169,33 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
+		return fixpoint(startingPoints, ws, implementation, new HashMap<>(graph.getNodesCount()));
+	}
 
-		//result.clear();
+	/**
+	 * Runs the fixpoint. Invoking this method effectively recomputes the
+	 * result: no caching on previous runs is executed.
+	 * 
+	 * @param startingPoints a map containing all the nodes to start the
+	 *                           fixpoint at, each mapped to its entry state.
+	 * @param ws             the instance of {@link WorkingSet} to use for the
+	 *                           fixpoint
+	 * @param implementation the {@link FixpointImplementation} to use for
+	 *                           running the fixpoint
+	 * @param initialResult  the map of initial result to use for running the
+	 *                           fixpoint
+	 * 
+	 * @return a mapping from each (reachable) node of the source graph to the
+	 *             fixpoint result computed at that node
+	 * 
+	 * @throws FixpointException if something goes wrong during the fixpoint
+	 *                               execution
+	 */
+	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
+			FixpointImplementation<N, E, T> implementation, Map<N, T> initialResult)
+			throws FixpointException {
+
+		result = initialResult;
 		startingPoints.keySet().forEach(ws::push);
 
 		T newApprox;

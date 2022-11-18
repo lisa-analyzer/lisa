@@ -16,7 +16,7 @@ class tutorial {
 			i = i - 1;
 		return i;
 	}
-	
+
 	doublewhile(t) {
 		while(t < 200)
 			t = t + 10;
