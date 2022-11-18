@@ -1,15 +1,20 @@
-package it.unive.lisa.program;
+package it.unive.lisa.imp;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.imp.IMPFrontend;
-import it.unive.lisa.imp.ParsingException;
+import org.junit.Test;
+
+import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.InterfaceUnit;
+import it.unive.lisa.program.Program;
+import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
-import org.junit.Test;
 
 public class HierarchyComputationTest {
 

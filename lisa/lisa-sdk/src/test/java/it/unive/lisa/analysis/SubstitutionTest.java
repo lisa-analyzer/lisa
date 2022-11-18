@@ -1,22 +1,8 @@
-package it.unive.lisa.analysis.value;
+package it.unive.lisa.analysis;
 
 import static it.unive.lisa.util.collections.CollectionUtilities.collect;
 import static org.junit.Assert.assertTrue;
 
-import it.unive.lisa.analysis.ScopeToken;
-import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
-import it.unive.lisa.analysis.lattices.ExpressionSet;
-import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.program.SyntheticLocation;
-import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.program.cfg.ProgramPoint;
-import it.unive.lisa.program.type.Int32Type;
-import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.symbolic.value.ValueExpression;
-import it.unive.lisa.symbolic.value.Variable;
-import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -24,7 +10,22 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
+
 import org.junit.Test;
+
+import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
+import it.unive.lisa.analysis.lattices.ExpressionSet;
+import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.program.SyntheticLocation;
+import it.unive.lisa.program.cfg.CFG;
+import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.Identifier;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.symbolic.value.Variable;
+import it.unive.lisa.type.Untyped;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 
 public class SubstitutionTest {
 
@@ -129,10 +130,10 @@ public class SubstitutionTest {
 		}
 	};
 
-	private final Variable x = new Variable(Int32Type.INSTANCE, "x", SyntheticLocation.INSTANCE);
-	private final Variable y = new Variable(Int32Type.INSTANCE, "y", SyntheticLocation.INSTANCE);
-	private final Variable z = new Variable(Int32Type.INSTANCE, "z", SyntheticLocation.INSTANCE);
-	private final Variable w = new Variable(Int32Type.INSTANCE, "w", SyntheticLocation.INSTANCE);
+	private final Variable x = new Variable(Untyped.INSTANCE, "x", SyntheticLocation.INSTANCE);
+	private final Variable y = new Variable(Untyped.INSTANCE, "y", SyntheticLocation.INSTANCE);
+	private final Variable z = new Variable(Untyped.INSTANCE, "z", SyntheticLocation.INSTANCE);
+	private final Variable w = new Variable(Untyped.INSTANCE, "w", SyntheticLocation.INSTANCE);
 	private final Comparator<Identifier> comparer = (l, r) -> l.getName().compareTo(r.getName());
 
 	private void check(List<HeapReplacement> sub,

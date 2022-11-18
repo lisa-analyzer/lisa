@@ -108,6 +108,7 @@ import org.junit.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
+//This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {
 
 	private static final SourceCodeLocation loc = new SourceCodeLocation("fake", 0, 0);
