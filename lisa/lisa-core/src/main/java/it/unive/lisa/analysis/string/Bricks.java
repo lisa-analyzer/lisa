@@ -3,13 +3,12 @@ package it.unive.lisa.analysis.string;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
-	private List<Brick> bricks;
+	private final List<Brick> bricks;
 
 	public Bricks(List<Brick> bricks) {
 		this.bricks = bricks;
@@ -55,24 +54,28 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return null;
 	}
 
-	private Brick concatenate(Brick brick1, Brick brick2) { // TODO
-		return null;
-	}
-
-	private void normalize() { // WIP
+	private void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
 		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
 		for (Brick brick : thisBricks) {
+			if(brick.getMin() == brick.getMax())
+				transform(thisBricks.get(thisBricks.indexOf(brick)));
+
 			Brick nextBrick = thisBricks.get(thisBricks.indexOf(brick) + 1);
 
 			if (brick.getMin() == 1 && brick.getMax() == 1 &&
 					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) {
 
-				Brick newBrick = new Brick(1, 1, new HashSet<>());
+				Brick newBrick = brick.merge(nextBrick);
+
+				thisBricks.remove(brick);
+				thisBricks.remove(nextBrick);
+				thisBricks.add(newBrick);
 			}
 		}
 	}
+	private void transform(Brick brick){} //TODO
 }
