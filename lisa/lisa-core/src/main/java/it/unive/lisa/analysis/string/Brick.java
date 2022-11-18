@@ -55,9 +55,9 @@ public class Brick {
 			reps.add(currentStr);
 		} else {
 			for (String string : this.strings) {
-				for (int i = this.min; i < this.max; i++) {
+				for (int i = this.min; i < this.max; i++)
 					recGetReps(reps, size - 1, currentStr + string);
-				}
+
 				reps.add(string.repeat(this.min));
 				reps.add(string.repeat(this.max));
 			}
