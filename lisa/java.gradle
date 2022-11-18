@@ -20,6 +20,16 @@ plugins.withType(JavaPlugin) {
 	}
 }
 
+compileJava {
+    options.debug = true
+    options.debugOptions.debugLevel = "source,lines,vars"
+}
+
+compileTestJava {
+    options.debug = true
+    options.debugOptions.debugLevel = "source,lines,vars"
+}
+
 java {
     withJavadocJar()
     withSourcesJar()
