@@ -50,7 +50,7 @@ public class Brick {
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, int size, String currentStr) {
+	private void recGetReps(HashSet<String> reps, int size, String currentStr) { //this is wrong, TODO
 		if (size == 0) {
 			reps.add(currentStr);
 		} else {
