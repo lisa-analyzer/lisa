@@ -63,21 +63,21 @@ public class Brick {
 			reps.add(element.repeat(this.max));
 			return reps;
 		}
-		this.recGetReps(reps, this.min,"");
+		this.recGetReps(reps, this.min,0,"");
 
 		return reps;
 	}
 
 	//Recursive function that gets all the possible combinations of the set between min and max
-	private void recGetReps(HashSet<String> reps, int min, String currentStr) {
-		if (min > this.max)//If the number of reps (starting from min) exceeds the max, then returns
+	private void recGetReps(HashSet<String> reps, int min, int numberOfReps, String currentStr) {
+		if (min > this.max && numberOfReps >= this.min)//If the number of reps (starting from min) exceeds the max, then returns
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
-				if((!currentStr.equals("") || this.min == 0))
+				if((!currentStr.equals("") || this.min == 0) && numberOfReps >= this.min)
 					reps.add(currentStr);
 
-				recGetReps(reps, min + 1, currentStr + string);
+				recGetReps(reps, min + 1, numberOfReps + 1,currentStr + string);
 				}
 			}
 		}
