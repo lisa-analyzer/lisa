@@ -1,4 +1,4 @@
-package it.unive.lisa.type.common;
+package it.unive.lisa.program.type;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * An unsigned 32-bit integral {@link NumericType}. The only singleton instance
+ * An unsigned 16-bit integral {@link NumericType}. The only singleton instance
  * of this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
  * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is32Bits()} yield {@code true}. An instance of Int32 is assumed to be
+ * {@link #is16Bits()} yield {@code true}. An instance of Int16 is assumed to be
  * assignable to any {@link NumericType}, with possible loss of information.
  * <br>
  * <br>
- * The common supertype between an Int32 instance {@code t1} and another type
+ * The common supertype between an Int16 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,19 +27,19 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class UInt32Type implements NumericType {
+public class UInt16Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final UInt32Type INSTANCE = new UInt32Type();
+	public static final UInt16Type INSTANCE = new UInt16Type();
 
 	/**
 	 * Builds the type. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
-	protected UInt32Type() {
+	protected UInt16Type() {
 	}
 
 	@Override
@@ -49,12 +49,12 @@ public class UInt32Type implements NumericType {
 
 	@Override
 	public boolean is16Bits() {
-		return false;
+		return true;
 	}
 
 	@Override
 	public boolean is32Bits() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class UInt32Type implements NumericType {
 
 	@Override
 	public String toString() {
-		return "int32";
+		return "int16";
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class UInt32Type implements NumericType {
 
 	@Override
 	public int hashCode() {
-		return UInt32Type.class.getName().hashCode();
+		return UInt16Type.class.getName().hashCode();
 	}
 
 	@Override

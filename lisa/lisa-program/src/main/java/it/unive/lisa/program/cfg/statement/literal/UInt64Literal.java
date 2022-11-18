@@ -2,7 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.UInt64Type;
+import it.unive.lisa.program.type.UInt64Type;
 
 /**
  * A 64-bit unsigned {@link Literal} representing a constant integral value.

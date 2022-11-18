@@ -1,4 +1,4 @@
-package it.unive.lisa.type.common;
+package it.unive.lisa.program.type;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;

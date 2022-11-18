@@ -1,4 +1,4 @@
-package it.unive.lisa.type.common;
+package it.unive.lisa.program.type;
 
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
@@ -8,16 +8,16 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * A signed 8-bit integral {@link NumericType}. The only singleton instance of
- * this class can be retrieved trough field {@link #INSTANCE}.<br>
+ * A signed 64-bit floating point {@link NumericType}. The only singleton
+ * instance of this class can be retrieved trough field {@link #INSTANCE}.<br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link NumericType} interface, and for which {@link #isIntegral()} and
- * {@link #is8Bits()} yield {@code true}. An instance of Int8 is assumed to be
- * assignable to any {@link NumericType}, with possible loss of information.
+ * {@link NumericType} interface, and for which {@link #isIntegral()} yields
+ * {@code false} and {@link #is64Bits()} yields {@code true}. An instance of
+ * Float64 is assumed to be assignable to any {@link NumericType}, with possible
+ * loss of information. <br>
  * <br>
- * <br>
- * The common supertype between an Int8 instance {@code t1} and another type
+ * The common supertype between an Float64 instance {@code t1} and another type
  * instance {@code t2} is {@link Untyped} if {@code t2} is not a
  * {@link NumericType}. Otherwise, the supertype is chosen according to
  * {@link NumericType#supertype(NumericType)}. <br>
@@ -27,24 +27,24 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Int8Type implements NumericType {
+public class Float64Type implements NumericType {
 
 	/**
 	 * The unique singleton instance of this type.
 	 */
-	public static final Int8Type INSTANCE = new Int8Type();
+	public static final Float64Type INSTANCE = new Float64Type();
 
 	/**
 	 * Builds the type. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
-	protected Int8Type() {
+	protected Float64Type() {
 	}
 
 	@Override
 	public boolean is8Bits() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class Int8Type implements NumericType {
 
 	@Override
 	public boolean is64Bits() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class Int8Type implements NumericType {
 
 	@Override
 	public boolean isIntegral() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class Int8Type implements NumericType {
 
 	@Override
 	public String toString() {
-		return "int8";
+		return "float64";
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class Int8Type implements NumericType {
 
 	@Override
 	public int hashCode() {
-		return Int8Type.class.getName().hashCode();
+		return Float64Type.class.getName().hashCode();
 	}
 
 	@Override

@@ -1,12 +1,12 @@
 package it.unive.lisa.imp.types;
 
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
 import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.NumericType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Int32Type;
-import it.unive.lisa.type.common.StringType;
 
 /**
  * THe {@link TypeSystem} for the IMP language.

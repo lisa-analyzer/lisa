@@ -2,7 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.Int8Type;
+import it.unive.lisa.program.type.Int8Type;
 
 /**
  * An 8-bit signed {@link Literal} representing a constant integral value.

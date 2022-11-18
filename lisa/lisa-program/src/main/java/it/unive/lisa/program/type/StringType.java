@@ -1,6 +1,5 @@
-package it.unive.lisa.type.common;
+package it.unive.lisa.program.type;
 
-import it.unive.lisa.type.BooleanType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeSystem;
 import it.unive.lisa.type.Untyped;
@@ -8,52 +7,53 @@ import java.util.Collections;
 import java.util.Set;
 
 /**
- * An internal implementation of the {@link BooleanType}. The only singleton
- * instance of this class can be retrieved trough field {@link #INSTANCE}. <br>
+ * An implementation of the {@link it.unive.lisa.type.StringType}. The only
+ * singleton instance of this class can be retrieved trough field
+ * {@link #INSTANCE}. <br>
  * <br>
  * Instances of this class are equal to all other classes that implement the
- * {@link BooleanType}.
+ * {@link it.unive.lisa.type.StringType}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class BoolType implements BooleanType {
+public class StringType implements it.unive.lisa.type.StringType {
 
 	/**
 	 * The singleton instance of this class.
 	 */
-	public static final BoolType INSTANCE = new BoolType();
+	public static final StringType INSTANCE = new StringType();
 
 	/**
 	 * Builds the type. This constructor is visible to allow subclassing:
 	 * instances of this class should be unique, and the singleton can be
 	 * retrieved through field {@link #INSTANCE}.
 	 */
-	protected BoolType() {
+	protected StringType() {
 	}
 
 	@Override
 	public boolean canBeAssignedTo(Type other) {
-		return other.isBooleanType() || other.isUntyped();
+		return other.isStringType() || other.isUntyped();
 	}
 
 	@Override
 	public Type commonSupertype(Type other) {
-		return other.isBooleanType() ? this : Untyped.INSTANCE;
+		return other.isStringType() ? this : Untyped.INSTANCE;
 	}
 
 	@Override
 	public String toString() {
-		return "bool";
+		return "string";
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		return other instanceof BooleanType;
+		return other instanceof it.unive.lisa.type.StringType;
 	}
 
 	@Override
 	public int hashCode() {
-		return BooleanType.class.getName().hashCode();
+		return it.unive.lisa.type.StringType.class.getName().hashCode();
 	}
 
 	@Override

@@ -2,7 +2,7 @@ package it.unive.lisa.program.cfg.statement.literal;
 
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
-import it.unive.lisa.type.common.Float64Type;
+import it.unive.lisa.program.type.Float64Type;
 
 /**
  * A 64-bit signed {@link Literal} representing a constant non-integral value.
