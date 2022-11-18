@@ -50,14 +50,17 @@ public class Brick {
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, int size, String currentStr) { //this is wrong, TODO
+	private void recGetReps(HashSet<String> reps, int size, String currentStr) { //Should be correct, further tests needed
 		if (size == 0) {
 			reps.add(currentStr);
 		} else {
-			for (String string : this.strings)
+			for (String string : this.strings) {
 				for (int i = this.min; i < this.max; i++) {
-					recGetReps(reps, size - 1, currentStr + string.repeat(i));
+					recGetReps(reps, size - 1, currentStr + string);
 				}
+				reps.add(string.repeat(this.min));
+				reps.add(string.repeat(this.max));
+			}
 		}
 	}
 }
