@@ -82,11 +82,11 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps4() {
-		Collection<String> set = new HashSet<>();
+		Collection<String> hashSet = new HashSet<>();
 
-		set.add("straw");
+		hashSet.add("straw");
 
-		Brick brick = new Brick(0, 1, set);
+		Brick brick = new Brick(0, 1, hashSet);
 
 		Collection<String> result = new HashSet<>();
 
@@ -95,4 +95,24 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
+	@Test
+	public void testGetReps5() {
+		Collection<String> set = new HashSet<>();
+
+		set.add("a");
+		set.add("b");
+
+		Brick brick = new Brick(2,2 , set);
+
+		Collection<String> result = new HashSet<>();
+
+		result.add("aa");
+		result.add("bb");
+		result.add("ab");
+		result.add("ab");
+		result.add("ba");
+
+		assertEquals(brick.getReps(), result);
+	}
+	
 }
