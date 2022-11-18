@@ -134,7 +134,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * <br>
 		 * This callback is invoked after the exit state of a node has been
 		 * computed through {@link #semantics(Object, Object)} and joined with
-		 * the older one through {@link #join(Object, Object, Object)}.
+		 * the older one through {@link #operation(Object, Object, Object)}.
 		 * 
 		 * @param node   the node where the computation takes place
 		 * @param approx the most recent state
