@@ -3,14 +3,14 @@
   "files" : [ "report.json", "untyped_tutorial.constants(tutorial__this).json", "untyped_tutorial.div(tutorial__this,_untyped_i,_untyped_j).json", "untyped_tutorial.gcd(tutorial__this,_untyped_a,_untyped_b).json", "untyped_tutorial.intv_dec(tutorial__this).json", "untyped_tutorial.sign_parity_example(tutorial__this).json", "untyped_tutorial.ub_example(tutorial__this,_untyped_y,_untyped_z).json" ],
   "info" : {
     "cfgs" : "6",
-    "duration" : "120ms",
-    "end" : "2022-11-18T21:25:33.306+01:00",
+    "duration" : "141ms",
+    "end" : "2022-11-18T22:44:22.040+01:00",
     "expressions" : "68",
     "files" : "6",
     "globals" : "0",
     "members" : "6",
     "programs" : "1",
-    "start" : "2022-11-18T21:25:33.186+01:00",
+    "start" : "2022-11-18T22:44:21.899+01:00",
     "statements" : "28",
     "units" : "1",
     "version" : "0.1b7",
@@ -26,6 +26,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs\\parity"
+    "workdir" : "test-outputs/parity"
   }
 }

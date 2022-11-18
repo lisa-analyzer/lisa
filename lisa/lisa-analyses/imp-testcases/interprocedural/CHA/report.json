@@ -4,13 +4,13 @@
   "info" : {
     "cfgs" : "3",
     "duration" : "52ms",
-    "end" : "2022-11-18T21:25:31.766+01:00",
+    "end" : "2022-11-18T22:44:19.901+01:00",
     "expressions" : "11",
     "files" : "3",
     "globals" : "0",
     "members" : "3",
     "programs" : "1",
-    "start" : "2022-11-18T21:25:31.714+01:00",
+    "start" : "2022-11-18T22:44:19.849+01:00",
     "statements" : "8",
     "units" : "3",
     "version" : "0.1b7",
@@ -26,6 +26,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs\\interprocedural\\CHA"
+    "workdir" : "test-outputs/interprocedural/CHA"
   }
 }

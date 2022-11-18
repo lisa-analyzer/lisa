@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -311,6 +313,11 @@ public class LiSAConfiguration {
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			throw new IllegalStateException("Cannot access one of this class' public fields", e);
 		}
+
+		// we force unix separators to have a uniform representation of
+		// that works across different machines
+		bag.put("workdir", FilenameUtils.separatorsToUnix(workdir));
+
 		return bag;
 	}
 }

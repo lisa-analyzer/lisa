@@ -3,14 +3,14 @@
   "files" : [ "report.json", "untyped_prefix.m1(prefix__this).json", "untyped_prefix.m2(prefix__this,_untyped_x).json", "untyped_prefix.m3(prefix__this,_untyped_x).json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "48ms",
-    "end" : "2022-11-18T21:25:33.822+01:00",
+    "duration" : "101ms",
+    "end" : "2022-11-18T22:44:22.919+01:00",
     "expressions" : "24",
     "files" : "3",
     "globals" : "0",
     "members" : "3",
     "programs" : "1",
-    "start" : "2022-11-18T21:25:33.774+01:00",
+    "start" : "2022-11-18T22:44:22.818+01:00",
     "statements" : "13",
     "units" : "1",
     "version" : "0.1b7",
@@ -26,6 +26,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs\\prefix"
+    "workdir" : "test-outputs/prefix"
   }
 }

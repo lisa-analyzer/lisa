@@ -44,6 +44,6 @@
     "serializeResults" : "false",
     "syntacticChecks" : "VariableI",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs\\syntactic"
+    "workdir" : "test-outputs/syntactic"
   }
 }
