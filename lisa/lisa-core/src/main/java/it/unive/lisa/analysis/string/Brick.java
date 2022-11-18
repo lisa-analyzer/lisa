@@ -45,7 +45,7 @@ public class Brick {
 	public Collection<String> getReps() {
 		HashSet<String> reps = new HashSet<>();
 
-		if(this.strings.size() == 1){
+		if(this.strings.size() == 1) {
 			String element = this.strings.iterator().next();
 			reps.add(element.repeat(this.min));
 			reps.add(element.repeat(this.max));
@@ -57,17 +57,16 @@ public class Brick {
 		return reps;
 	}
 
-	private void recGetReps(HashSet<String> reps, int min, String currentStr) { // Seems to be correct, needs further testing
-		if (min > this.max) { //Se il numero di ripetizioni è maggiore del massimo!
+	//Recursive function that gets all the possible combinations of the set between min and max
+	private void recGetReps(HashSet<String> reps, int min, String currentStr) {
+		if (min > this.max) //If the number of reps (starting from min) exceeds the max, then returns
 			reps.add(currentStr);
-			return;
-		}
 		else {
 			for (String string : this.strings) {
 				if(!currentStr.equals("") || this.min == 0)
 					reps.add(currentStr);
 
-					recGetReps(reps, min + 1,currentStr + string);
+				recGetReps(reps, min + 1,currentStr + string);
 				}
 			}
 		}

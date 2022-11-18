@@ -3,6 +3,7 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collection;
 import java.util.HashSet;
 import org.junit.Test;
 
@@ -10,13 +11,13 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps() {
-		HashSet<String> hashSet = new HashSet<>();
+		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		HashSet<String> result = new HashSet<>();
+		Collection<String> result = new HashSet<>();
 		result.add("mo");
 		result.add("de");
 		result.add("momo");
@@ -29,12 +30,12 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps1() {
-		HashSet<String> hashSet = new HashSet<>();
+		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("abc");
 
 		Brick brick = new Brick(1, 1, hashSet);
 
-		HashSet<String> result = new HashSet<>();
+		Collection<String> result = new HashSet<>();
 		result.add("abc");
 
 		assertEquals(brick.getReps(), result);
@@ -42,14 +43,14 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps2() {
-		HashSet<String> hashSet = new HashSet<>();
+		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		HashSet<String> result = new HashSet<>();
+		Collection<String> result = new HashSet<>();
 		result.add("mo");
 		result.add("de");
 		result.add("re");
@@ -68,7 +69,7 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps3() {
-		HashSet<String> hashSet = new HashSet<>();
+		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
@@ -77,5 +78,21 @@ public class BrickTest {
 		Brick brick = new Brick(1, 4, hashSet);
 
 		assertTrue(brick.getReps().contains("derevemo"));
+	}
+
+	@Test
+	public void testGetReps4() {
+		Collection<String> set = new HashSet<>();
+
+		set.add("straw");
+
+		Brick brick = new Brick(0, 1, set);
+
+		Collection<String> result = new HashSet<>();
+
+		result.add("");
+		result.add("straw");
+
+		assertEquals(brick.getReps(), result);
 	}
 }
