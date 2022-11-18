@@ -40,8 +40,8 @@ public class PointBasedHeapTest {
 	private final CodeLocation loc1 = new SourceCodeLocation("fake", 1, 1);
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);
 
-	private final AllocationSite alloc1 = new AllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
-	private final AllocationSite alloc2 = new AllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
+	private final DynamicAllocationSite alloc1 = new DynamicAllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
+	private final DynamicAllocationSite alloc2 = new DynamicAllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
 
 	private final ProgramPoint pp1 = new ProgramPoint() {
 

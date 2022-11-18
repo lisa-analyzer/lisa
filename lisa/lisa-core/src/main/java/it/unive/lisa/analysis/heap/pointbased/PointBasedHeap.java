@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,11 +29,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -249,11 +250,22 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
-					AllocationSite e = new AllocationSite(
-							expression.getStaticType(),
-							site.getLocationName(),
-							true,
-							expression.getCodeLocation());
+					AllocationSite e;
+					if (site instanceof StaticAllocationSite) 
+						e = new StaticAllocationSite(
+								expression.getStaticType(),
+								site.getLocationName(),
+								true,
+								expression.getCodeLocation());
+					else 
+						e = new DynamicAllocationSite(
+								expression.getStaticType(),
+								site.getLocationName(),
+								true,
+								expression.getCodeLocation());
+
+
+
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
@@ -266,11 +278,21 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
-			AllocationSite id = new AllocationSite(
-					expression.getStaticType(),
-					expression.getCodeLocation().getCodeLocation(),
-					true,
-					expression.getCodeLocation());
+			AllocationSite id;
+			if (expression.isStaticallyAllocated()) 
+				id = new StaticAllocationSite(
+						expression.getStaticType(),
+						expression.getCodeLocation().getCodeLocation(),
+						true,
+						expression.getCodeLocation());
+			else 
+				id = new DynamicAllocationSite(
+						expression.getStaticType(),
+						expression.getCodeLocation().getCodeLocation(),
+						true,
+						expression.getCodeLocation());
+
+
 			if (expression.hasRuntimeTypes())
 				id.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(id);
@@ -279,7 +301,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression loc : arg)
@@ -299,7 +321,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)
