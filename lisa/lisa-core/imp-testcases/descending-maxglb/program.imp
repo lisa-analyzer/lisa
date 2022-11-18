@@ -1,0 +1,38 @@
+class tutorial {
+
+	sat() { 
+		def x = 0;
+		while (x < 100)
+			if (x < 50)
+				x = x + 2;
+			else
+				x = x + 10;
+		return x;
+	}	
+
+	intv_dec() {
+		def i = 1000;
+		while (i > 0) 
+			i = i - 1;
+		return i;
+	}
+	
+	doublewhile(t) {
+		while(t < 200)
+			t = t + 10;
+		while(t > 1000)
+			t = t - 10;
+		return t;
+	}
+
+	sat2() {
+		def x = 0;
+		while (x < 51) {
+			if (x < 50)
+				x = x + 2;
+			else
+				x = x - 10;
+		}
+		return x;
+	}
+}

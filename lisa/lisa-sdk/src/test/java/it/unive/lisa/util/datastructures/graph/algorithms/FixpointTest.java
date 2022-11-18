@@ -40,7 +40,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			return SetUtils.union(approx, old);
 		}
 
@@ -208,7 +208,7 @@ public class FixpointTest {
 		}
 
 		@Override
-		public Set<TestNode> join(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
+		public Set<TestNode> operation(TestNode node, Set<TestNode> approx, Set<TestNode> old) throws Exception {
 			if (type == 3)
 				throw new Exception();
 			return Collections.emptySet();
@@ -284,6 +284,7 @@ public class FixpointTest {
 		}
 
 		if (!fail)
+
 			fail("The fixpoint computation hasn't thrown an exception");
 		assertNull("Fixpoint failed", res);
 

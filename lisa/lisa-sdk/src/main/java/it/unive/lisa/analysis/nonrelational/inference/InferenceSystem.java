@@ -167,10 +167,11 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> glbAux(T lattice, Map<Identifier, T> function, InferenceSystem<T> other) {
-		return new InferenceSystem<>(lattice, function,
+	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
+		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function,
 				// we take the updated execution state
-				new InferredPair<>(lattice, getInferredValue(), other.getExecutionState()));
+				new InferredPair<>(newEnv.lattice, getInferredValue(), other.getExecutionState()));
 	}
 
 	@Override

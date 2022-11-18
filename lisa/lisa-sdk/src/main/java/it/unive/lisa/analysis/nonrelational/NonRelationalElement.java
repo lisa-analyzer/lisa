@@ -67,18 +67,6 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
 
 	/**
-	 * Performs the greatest lower bound operation between this domain element
-	 * and {@code other}.
-	 * 
-	 * @param other the other domain element
-	 * 
-	 * @return the greatest lowe bound between {@code this} and {@code other}
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	T glb(T other) throws SemanticException;
-
-	/**
 	 * Yields a fixed abstraction of the given variable. The abstraction does
 	 * not depend on the abstract values that get assigned to the variable, but
 	 * is instead fixed among all possible execution paths. If this method does

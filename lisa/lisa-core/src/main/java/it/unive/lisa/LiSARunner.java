@@ -171,7 +171,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
-								conf.wideningThreshold);
+								conf.wideningThreshold, conf.descendingPhaseType, conf.descendingGlbThreshold);
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);
