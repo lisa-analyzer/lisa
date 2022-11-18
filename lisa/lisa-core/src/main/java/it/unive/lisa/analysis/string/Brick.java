@@ -5,9 +5,9 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class Brick {
-	private final int min;
-	private final int max;
-	private final Collection<String> strings;
+	private int min;
+	private int max;
+	private Collection<String> strings;
 
 	public Brick(int min, int max, Collection<String> strings) {
 		this.min = min;
@@ -36,6 +36,17 @@ public class Brick {
 
 	public int getMax() {
 		return max;
+	}
+
+	public void setMin(int min){
+		this.min = min;
+	}
+	public void setMax(int max){
+		this.max = max;
+	}
+
+	public void setStrings(Collection<String> strings){
+		this.strings = strings;
 	}
 
 	public Collection<String> getStrings() {
@@ -70,7 +81,7 @@ public class Brick {
 
 	//Recursive function that gets all the possible combinations of the set between min and max
 	private void recGetReps(HashSet<String> reps, int min, int numberOfReps, String currentStr) {
-		if (min > this.max && numberOfReps >= this.min)//If the number of reps (starting from min) exceeds the max, then returns
+		if (min > this.max && numberOfReps >= this.min)//If the number of reps (starting from min) exceeds the max, then stops the recursion
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
