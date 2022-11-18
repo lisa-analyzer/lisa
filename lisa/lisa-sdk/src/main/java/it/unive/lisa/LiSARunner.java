@@ -117,7 +117,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 				}
 			}
 
-		CheckTool tool = new CheckTool();
+		CheckTool tool = new CheckTool(conf, fileManager);
 		if (!conf.syntacticChecks.isEmpty())
 			ChecksExecutor.executeAll(tool, app, conf.syntacticChecks);
 		else

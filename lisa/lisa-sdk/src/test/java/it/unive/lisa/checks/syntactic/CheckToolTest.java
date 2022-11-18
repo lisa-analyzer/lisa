@@ -2,6 +2,7 @@ package it.unive.lisa.checks.syntactic;
 
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.TestLanguageFeatures;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
@@ -22,6 +23,7 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
+import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.HashSet;
 import org.apache.commons.collections4.CollectionUtils;
@@ -65,7 +67,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testCopy() {
-		CheckTool tool = new CheckTool();
+		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -93,7 +95,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testSimpleFill() {
-		CheckTool tool = new CheckTool();
+		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, null, "foo"));
@@ -108,7 +110,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testDisjointWarnings() {
-		CheckTool tool = new CheckTool();
+		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
@@ -121,7 +123,7 @@ public class CheckToolTest {
 
 	@Test
 	public void testDuplicateWarnings() {
-		CheckTool tool = new CheckTool();
+		CheckTool tool = new CheckTool(new LiSAConfiguration(), new FileManager("foo"));
 		Collection<Warning> exp = new HashSet<>();
 
 		exp.add(build(tool, new NoOp(cfg, new SourceCodeLocation("fake", 3, 0)), "foo"));
