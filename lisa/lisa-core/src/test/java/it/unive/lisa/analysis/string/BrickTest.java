@@ -114,5 +114,16 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
-	
+
+	@Test
+	public void testToString(){
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+		hashSet.add("re");
+
+		Brick brick = new Brick(1, 2, hashSet);
+
+		assertEquals(brick.toString(), "{ [min: 1], [max: 2], [strings: de, mo, re] }");
+	}
 }
