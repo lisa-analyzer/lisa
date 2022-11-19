@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -67,10 +66,11 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private List<Brick> rule5(Brick brick){
 		List<Brick> list = new ArrayList<>();
-		Brick br = new Brick(brick.getStrings().size(),brick.getMin(),brick.getStrings());
+		Brick br = new Brick(brick.getStrings().size(), brick.getMin(), brick.getStrings());
 
-		list.add(new Brick(0, brick.getMax() - brick.getMin(),brick.getStrings()));
 		list.add(new Brick(1,1, br.getReps()));
+		list.add(new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
+
 
 		return list;
 	}
@@ -83,20 +83,13 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
-		for(int i = 0; i < thisBricks.size(); ++i) { //Rule 3
+		for(int i = 0; i < thisBricks.size(); ++i) {
 			Brick brick = thisBricks.get(i);
 
-			if(brick.getMin() == brick.getMax()) { //Rule 2
+			if(brick.getMin() == brick.getMax()) { //Rule 3
 				brick.setStrings(brick.getReps());
 				brick.setMin(1);
 				brick.setMax(1);
-			}
-
-			if(brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
-				List<Brick> list = rule5(brick);
-
-				thisBricks.set(i, list.get(0));
-				thisBricks.add(i + 1, list.get(1));
 			}
 
 			if(i != thisBricks.size() - 1) {
@@ -117,6 +110,13 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 					thisBricks.remove(nextBrick);
 				}
+			}
+
+			if(brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
+				List<Brick> list = rule5(brick);
+
+				thisBricks.set(i, list.get(0));
+				thisBricks.add(i + 1, list.get(1));
 			}
 		}
 	}

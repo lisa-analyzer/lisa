@@ -29,6 +29,8 @@ public class BricksTest {
         Bricks bricks = new Bricks(list);
 
         bricks.normalize();
+        bricks.normalize();
+        bricks.normalize();
 
         List<Brick> resultList = new ArrayList<>();
 
