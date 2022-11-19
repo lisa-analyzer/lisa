@@ -5,6 +5,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,7 +62,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(formatRepresentation());
+		return new StringRepresentation(StringUtils.join(this.bricks, ", "));
 	}
 
 	private List<Brick> rule5(Brick brick){
@@ -118,9 +119,5 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				}
 			}
 		}
-	}
-
-	private String formatRepresentation(){
-		return null;
 	}
 }
