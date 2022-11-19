@@ -62,7 +62,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(StringUtils.join(this.bricks, ", "));
+		return new StringRepresentation(StringUtils.join(this.bricks, ",\n"));
 	}
 
 	private List<Brick> rule5(Brick brick){
