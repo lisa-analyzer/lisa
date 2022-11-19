@@ -64,11 +64,11 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return new StringRepresentation(StringUtils.join(this.bricks, ",\n"));
 	}
 
-	private List<Brick> rule5(Brick brick){
+	private List<Brick> rule5(Brick brick) {
 		List<Brick> list = new ArrayList<>();
 		Brick br = new Brick(brick.getStrings().size(), brick.getMin(), brick.getStrings());
 
-		list.add(new Brick(1,1, br.getReps()));
+		list.add(new Brick(1, 1, br.getReps()));
 		list.add(new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
 
 
@@ -83,36 +83,39 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
-		for(int i = 0; i < thisBricks.size(); ++i) {
+		for (int i = 0; i < thisBricks.size(); ++i) {
+			Boolean lastBrick = i == thisBricks.size() - 1;
+			Brick nextBrick = null;
+
 			Brick brick = thisBricks.get(i);
 
-			if(brick.getMin() == brick.getMax()) { //Rule 3
+			if (!lastBrick)
+				nextBrick = thisBricks.get(i + 1);
+
+			if (!lastBrick && brick.getMin() == 1 && brick.getMax() == 1 &&
+					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+
+				Brick br = brick.merge(nextBrick);
+
+				thisBricks.set(i, br);
+				thisBricks.remove(nextBrick);
+			}
+
+			if (brick.getMin() == brick.getMax()) { //Rule 3
 				brick.setStrings(brick.getReps());
 				brick.setMin(1);
 				brick.setMax(1);
 			}
 
-			if(i != thisBricks.size() - 1) {
-				Brick nextBrick = thisBricks.get(i + 1);
+			if (!lastBrick && brick.getStrings().equals(nextBrick.getStrings())) { //Rule 4
+				brick.setMin(brick.getMin() + nextBrick.getMin());
+				brick.setMax(brick.getMax() + nextBrick.getMax());
 
-				if (brick.getMin() == 1 && brick.getMax() == 1 &&
-						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
-
-					Brick br = brick.merge(nextBrick);
-
-					thisBricks.set(i, br);
-					thisBricks.remove(nextBrick);
-				}
-
-				if (brick.getStrings().equals(nextBrick.getStrings())) { //Rule 4
-					brick.setMin(brick.getMin() + nextBrick.getMin());
-					brick.setMax(brick.getMax() + nextBrick.getMax());
-
-					thisBricks.remove(nextBrick);
-				}
+				thisBricks.remove(nextBrick);
 			}
 
-			if(brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
+
+			if (brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
 				List<Brick> list = rule5(brick);
 
 				thisBricks.set(i, list.get(0));
