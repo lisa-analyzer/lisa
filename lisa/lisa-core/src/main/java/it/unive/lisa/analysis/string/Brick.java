@@ -102,12 +102,12 @@ public class Brick {
 
 	@Override
 	public String toString() {
-		return "{[min: " +
+		return "[ {min: " +
 				this.min +
-				"], [max: " +
+				"}, {max: " +
 				this.max +
-				"], [strings: " +
+				"}, {strings: " +
 				StringUtils.join(this.strings, ", ") +
-				"]}";
+				"} ]";
 	}
 }
