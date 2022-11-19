@@ -1,9 +1,12 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -53,39 +56,71 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public DomainRepresentation representation() { // TODO
-		return null;
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+
+		return new StringRepresentation(formatRepresentation());
 	}
 
-	private void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
+	private List<Brick> rule5(Brick brick){
+		List<Brick> list = new ArrayList<>();
+		Brick br = new Brick(brick.getStrings().size(),brick.getMin(),brick.getStrings());
+
+		list.add(new Brick(0, brick.getMax() - brick.getMin(),brick.getStrings()));
+		list.add(new Brick(1,1, br.getReps()));
+
+		return list;
+	}
+
+
+	public void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
 
 		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
-		for (Brick brick : thisBricks) { //Rule 3
-			if(brick.getMin() == brick.getMax()) {
+		for(int i = 0; i < thisBricks.size(); ++i) { //Rule 3
+			Brick brick = thisBricks.get(i);
+
+			if(brick.getMin() == brick.getMax()) { //Rule 2
 				brick.setStrings(brick.getReps());
 				brick.setMin(1);
 				brick.setMax(1);
 			}
 
-			Brick nextBrick = thisBricks.get(thisBricks.indexOf(brick) + 1);
-			if (brick.getMin() == 1 && brick.getMax() == 1 &&
-					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+			if(brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
+				List<Brick> list = rule5(brick);
 
-				Brick newBrick = brick.merge(nextBrick);
-
-				thisBricks.remove(brick);
-				thisBricks.remove(nextBrick);
-				thisBricks.add(newBrick);
+				thisBricks.set(i, list.get(0));
+				thisBricks.add(i + 1, list.get(1));
 			}
-			if(brick.getStrings().equals(nextBrick.getStrings())){ //Rule 4
-				brick.setMin(brick.getMin() + nextBrick.getMin());
-				brick.setMax(brick.getMax() + nextBrick.getMax());
 
-				thisBricks.remove(nextBrick);
+			if(i != thisBricks.size() - 1) {
+				Brick nextBrick = thisBricks.get(i + 1);
+
+				if (brick.getMin() == 1 && brick.getMax() == 1 &&
+						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+
+					Brick br = brick.merge(nextBrick);
+
+					thisBricks.set(i, br);
+					thisBricks.remove(nextBrick);
+				}
+
+				if (brick.getStrings().equals(nextBrick.getStrings())) { //Rule 4
+					brick.setMin(brick.getMin() + nextBrick.getMin());
+					brick.setMax(brick.getMax() + nextBrick.getMax());
+
+					thisBricks.remove(nextBrick);
+				}
 			}
 		}
+	}
+
+	private String formatRepresentation(){
+		return null;
 	}
 }
