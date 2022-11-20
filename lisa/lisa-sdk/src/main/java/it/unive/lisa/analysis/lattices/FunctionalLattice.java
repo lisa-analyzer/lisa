@@ -139,8 +139,18 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	}
 
 	@Override
+	public F glbAux(F other) throws SemanticException {
+		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+	}
+
+	@Override
 	public F wideningAux(F other) throws SemanticException {
 		return functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+	}
+
+	@Override
+	public F narrowingAux(F other) throws SemanticException {
+		return functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
 	}
 
 	/**

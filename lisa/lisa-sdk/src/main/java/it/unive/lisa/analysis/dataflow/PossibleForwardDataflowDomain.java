@@ -47,4 +47,10 @@ public class PossibleForwardDataflowDomain<E extends DataflowElement<PossibleFor
 	public boolean lessOrEqualAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
 		return other.getDataflowElements().containsAll(this.getDataflowElements());
 	}
+
+	@Override
+	public PossibleForwardDataflowDomain<E> glbAux(PossibleForwardDataflowDomain<E> other) throws SemanticException {
+		Set<E> intersection = SetUtils.intersection(this.getDataflowElements(), other.getDataflowElements());
+		return new PossibleForwardDataflowDomain<>(domain, intersection, false, false);
+	}
 }

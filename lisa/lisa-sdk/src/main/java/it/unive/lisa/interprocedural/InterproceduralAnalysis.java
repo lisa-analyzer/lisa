@@ -46,6 +46,27 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		T extends TypeDomain<T>> {
 
 	/**
+	 * The type of descending phase algorithms that can be used.
+	 */
+	public static enum DescendingPhaseType {
+
+		/**
+		 * the descending phase is not computed.
+		 */
+		NONE,
+
+		/**
+		 * the descending phase is calculated with glb.
+		 */
+		GLB,
+
+		/**
+		 * the descending phase always use the narrowing operator.
+		 */
+		NARROWING;
+	}
+
+	/**
 	 * Initializes the interprocedural analysis of the given program.
 	 *
 	 * @param callgraph the callgraph used to resolve method calls
@@ -67,21 +88,31 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * or one of its overloads. Results of individual cfgs are then available
 	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState         the entry state for the {@link CFG}s that are
-	 *                               the entrypoints of the computation
-	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
-	 *                               used in fixpoints.
-	 * @param wideningThreshold  the number of fixpoint iteration on a given
-	 *                               node after which calls to
-	 *                               {@link Lattice#lub(Lattice)} gets replaced
-	 *                               with {@link Lattice#widening(Lattice)}.
-	 *
+	 * @param entryState             the entry state for the {@link CFG}s that
+	 *                                   are the entrypoints of the computation
+	 * @param fixpointWorkingSet     the concrete class of {@link WorkingSet} to
+	 *                                   be used in fixpoints.
+	 * @param wideningThreshold      the number of fixpoint iteration on a given
+	 *                                   node after which calls to
+	 *                                   {@link Lattice#lub(Lattice)} gets
+	 *                                   replaced with
+	 *                                   {@link Lattice#widening(Lattice)}.
+	 * @param descendingPhase        the type of descending phase algorithm that
+	 *                                   will be used during fixpoint
+	 *                                   calculation
+	 * @param descendingGlbThreshold the number of fixpoint iteration on a given
+	 *                                   node during descending phase after
+	 *                                   which calls to
+	 *                                   {@link Lattice#glb(Lattice)} does not
+	 *                                   do anything
+	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
 	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold) throws FixpointException;
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
+			throws FixpointException;
 
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
