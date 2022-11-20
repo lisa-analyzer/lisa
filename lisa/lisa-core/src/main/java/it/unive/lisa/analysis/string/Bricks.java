@@ -7,9 +7,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
@@ -64,19 +62,51 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return new StringRepresentation(StringUtils.join(this.bricks, ",\n"));
 	}
 
-	private List<Brick> rule5(Brick brick) {
-		List<Brick> list = new ArrayList<>();
+	private void rule2(int first, int second) {
+		Brick firstBrick = this.bricks.get(first);
+		Brick secondBrick = this.bricks.get(second);
+
+		Collection<String> resultSet = new HashSet<>();
+
+		for (String string : firstBrick.getStrings()) {
+			for (String otherStr : secondBrick.getStrings()) {
+				resultSet.add(string + otherStr);
+			}
+		}
+
+		this.bricks.set(first, new Brick(1, 1, resultSet));
+		this.bricks.remove(secondBrick);
+	}
+
+	private void rule3(int index) {
+		Brick brick = this.bricks.get(index);
+
+		this.bricks.set(index, new Brick(1, 1, brick.getReps()));
+	}
+
+	private void rule4(int first, int second){
+		Brick firstBrick = this.bricks.get(first);
+		Brick secondBrick = this.bricks.get(second);
+
+		this.bricks.set(first, new Brick(firstBrick.getMin() + secondBrick.getMin(),
+				firstBrick.getMax() + secondBrick.getMax(),
+				firstBrick.getStrings()));
+
+		this.bricks.remove(second);
+	}
+
+	private void rule5(int index) {
+		Brick brick = this.bricks.get(index);
+
 		Brick br = new Brick(brick.getStrings().size(), brick.getMin(), brick.getStrings());
 
-		list.add(new Brick(1, 1, br.getReps()));
-		list.add(new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
+		this.bricks.set(index, new Brick(1, 1, br.getReps()));
+		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
 
-
-		return list;
 	}
 
 
-	public void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
+	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
 
 		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
@@ -84,7 +114,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
-			Boolean lastBrick = i == thisBricks.size() - 1;
+			boolean lastBrick = i == thisBricks.size() - 1;
 			Brick nextBrick = null;
 
 			Brick brick = thisBricks.get(i);
@@ -92,35 +122,25 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			if (!lastBrick)
 				nextBrick = thisBricks.get(i + 1);
 
-			if (!lastBrick && brick.getMin() == 1 && brick.getMax() == 1 &&
-					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
-
-				Brick br = brick.merge(nextBrick);
-
-				thisBricks.set(i, br);
-				thisBricks.remove(nextBrick);
-			}
-
-			if (brick.getMin() == brick.getMax()) { //Rule 3
-				brick.setStrings(brick.getReps());
-				brick.setMin(1);
-				brick.setMax(1);
-			}
-
-			if (!lastBrick && brick.getStrings().equals(nextBrick.getStrings())) { //Rule 4
-				brick.setMin(brick.getMin() + nextBrick.getMin());
-				brick.setMax(brick.getMax() + nextBrick.getMax());
-
-				thisBricks.remove(nextBrick);
-			}
+			if (!lastBrick)
+				if (brick.getMin() == 1 && brick.getMax() == 1 &&
+						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) //Rule 2
+					rule2(i, i + 1);
 
 
-			if (brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
-				List<Brick> list = rule5(brick);
+			if (brick.getMin() == brick.getMax()) //Rule 3
+				rule3(i);
 
-				thisBricks.set(i, list.get(0));
-				thisBricks.add(i + 1, list.get(1));
-			}
+
+			if (!lastBrick)
+				if (brick.getStrings().equals(nextBrick.getStrings()))//Rule 4
+					rule4(i, i + 1);
+
+
+			if (brick.getMin() >= 1 &&
+					brick.getMin() != brick.getMax()) //Rule 5
+				rule5(i);
 		}
 	}
 }
+
