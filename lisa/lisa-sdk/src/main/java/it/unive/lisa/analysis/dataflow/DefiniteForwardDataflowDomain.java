@@ -48,4 +48,10 @@ public class DefiniteForwardDataflowDomain<E extends DataflowElement<DefiniteFor
 	public boolean lessOrEqualAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
 		return this.getDataflowElements().containsAll(other.getDataflowElements());
 	}
+
+	@Override
+	public DefiniteForwardDataflowDomain<E> glbAux(DefiniteForwardDataflowDomain<E> other) throws SemanticException {
+		Set<E> intersection = SetUtils.union(this.getDataflowElements(), other.getDataflowElements());
+		return new DefiniteForwardDataflowDomain<>(domain, intersection, false, false);
+	}
 }

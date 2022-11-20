@@ -38,6 +38,8 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 
 	private static final String CANNOT_LUB_ERROR = "Cannot perform the least upper bound of two graphs with different descriptor";
 
+	private static final String CANNOT_GLB_ERROR = "Cannot perform the greatest lower bound of two graphs with different descriptor";
+
 	/**
 	 * The map storing the analysis results
 	 */
@@ -212,6 +214,17 @@ public class CFGWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 				results.lub(other.results));
 		lub.setId(joinIDs(other));
 		return lub;
+	}
+
+	@Override
+	public CFGWithAnalysisResults<A, H, V, T> glb(CFGWithAnalysisResults<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()))
+			throw new SemanticException(CANNOT_GLB_ERROR);
+
+		CFGWithAnalysisResults<A, H, V, T> glb = new CFGWithAnalysisResults<>(this, entryStates.glb(other.entryStates),
+				results.glb(other.results));
+		glb.setId(joinIDs(other));
+		return glb;
 	}
 
 	@Override

@@ -229,11 +229,27 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
+	public AnalysisState<A, H, V, T> glbAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+		return new AnalysisState<>(
+				state.glb(other.state),
+				computedExpressions.glb(other.computedExpressions),
+				aliasing.glb(other.aliasing));
+	}
+
+	@Override
 	public AnalysisState<A, H, V, T> wideningAux(AnalysisState<A, H, V, T> other) throws SemanticException {
 		return new AnalysisState<>(
 				state.widening(other.state),
 				computedExpressions.lub(other.computedExpressions),
 				aliasing.widening(other.aliasing));
+	}
+
+	@Override
+	public AnalysisState<A, H, V, T> narrowingAux(AnalysisState<A, H, V, T> other) throws SemanticException {
+		return new AnalysisState<>(
+				state.narrowing(other.state),
+				computedExpressions.glb(other.computedExpressions),
+				aliasing.narrowing(other.aliasing));
 	}
 
 	@Override
@@ -330,4 +346,5 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 		return state.getDomainInstance(domain);
 	}
+
 }

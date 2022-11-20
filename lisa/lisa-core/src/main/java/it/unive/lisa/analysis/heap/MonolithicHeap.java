@@ -95,6 +95,11 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
+	public MonolithicHeap glbAux(MonolithicHeap other) throws SemanticException {
+		return TOP;
+	}
+
+	@Override
 	public boolean lessOrEqualAux(MonolithicHeap other) throws SemanticException {
 		return true;
 	}
