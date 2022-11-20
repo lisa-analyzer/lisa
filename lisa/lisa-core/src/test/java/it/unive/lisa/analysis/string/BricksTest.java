@@ -11,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class BricksTest {
 
     @Test
-    public void normalizeTest(){
+    public void normBricksTest(){
         List<Brick> list = new ArrayList<>();
 
         HashSet<String> hashSet = new HashSet<>();
@@ -28,8 +28,6 @@ public class BricksTest {
 
         Bricks bricks = new Bricks(list);
 
-        bricks.normBricks();
-        bricks.normBricks();
         bricks.normBricks();
 
         List<Brick> resultList = new ArrayList<>();

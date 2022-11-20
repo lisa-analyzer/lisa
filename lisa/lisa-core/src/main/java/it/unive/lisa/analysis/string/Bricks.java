@@ -109,38 +109,40 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
 
+		List<Brick> tempList = new ArrayList<>(thisBricks);
+
 		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
-			boolean lastBrick = i == thisBricks.size() - 1;
+			Brick currentBrick = thisBricks.get(i);
 			Brick nextBrick = null;
-
-			Brick brick = thisBricks.get(i);
+			
+			boolean lastBrick = i == thisBricks.size() - 1;
 
 			if (!lastBrick)
 				nextBrick = thisBricks.get(i + 1);
 
 			if (!lastBrick)
-				if (brick.getMin() == 1 && brick.getMax() == 1 &&
+				if (currentBrick.getMin() == 1 && currentBrick.getMax() == 1 &&
 						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) //Rule 2
 					rule2(i, i + 1);
 
-
-			if (brick.getMin() == brick.getMax()) //Rule 3
+			if (currentBrick.getMin() == currentBrick.getMax()) //Rule 3
 				rule3(i);
 
-
 			if (!lastBrick)
-				if (brick.getStrings().equals(nextBrick.getStrings()))//Rule 4
+				if (currentBrick.getStrings().equals(nextBrick.getStrings()))//Rule 4
 					rule4(i, i + 1);
 
-
-			if (brick.getMin() >= 1 &&
-					brick.getMin() != brick.getMax()) //Rule 5
+			if (currentBrick.getMin() >= 1 &&
+					currentBrick.getMin() != currentBrick.getMax()) //Rule 5
 				rule5(i);
 		}
+		
+		if(!thisBricks.equals(tempList))
+			normBricks();
 	}
 }
 
