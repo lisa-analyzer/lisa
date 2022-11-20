@@ -68,14 +68,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 		Collection<String> resultSet = new HashSet<>();
 
-		for (String string : firstBrick.getStrings()) {
-			for (String otherStr : secondBrick.getStrings()) {
-				resultSet.add(string + otherStr);
-			}
-		}
+		firstBrick.getStrings().forEach(string ->
+				secondBrick.getStrings().forEach(otherStr ->
+						resultSet.add(string + otherStr)));
 
 		this.bricks.set(first, new Brick(1, 1, resultSet));
-		this.bricks.remove(secondBrick);
+		this.bricks.remove(second);
 	}
 
 	private void rule3(int index) {

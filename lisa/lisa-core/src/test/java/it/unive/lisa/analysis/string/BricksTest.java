@@ -21,7 +21,6 @@ public class BricksTest {
         hashSet1.add("a");
         hashSet1.add("b");
 
-
         list.add(new Brick(1,1,hashSet));
         list.add(new Brick(2,3,hashSet1));
         list.add(new Brick(0,1,hashSet1));
