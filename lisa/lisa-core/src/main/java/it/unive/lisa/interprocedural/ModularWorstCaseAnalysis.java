@@ -80,7 +80,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	@Override
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold) throws FixpointException {
+			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
+			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
 			try {
@@ -94,7 +95,8 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 				}
 
 				results.put(cfg, Optional
-						.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), wideningThreshold)));
+						.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet),
+								wideningThreshold, descendingPhase, descendingGlbThreshold)));
 			} catch (SemanticException | AnalysisSetupException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}
