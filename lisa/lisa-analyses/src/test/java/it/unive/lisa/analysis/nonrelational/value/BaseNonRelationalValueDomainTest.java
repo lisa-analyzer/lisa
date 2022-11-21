@@ -82,7 +82,7 @@ public class BaseNonRelationalValueDomainTest {
 	@Test
 	public void testDefaults() throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 		for (Method mtd : BaseNonRelationalValueDomain.class.getDeclaredMethods())
-			if (Modifier.isProtected(mtd.getModifiers()))
+			if (Modifier.isPublic(mtd.getModifiers()) && !isExcluded(mtd))
 				try {
 					AtomicReference<Integer> envPos = new AtomicReference<>();
 					Object[] params = provideParams(mtd, mtd.getParameterTypes(), envPos);
@@ -103,6 +103,17 @@ public class BaseNonRelationalValueDomainTest {
 					e.printStackTrace();
 					fail(mtd + " failed due to " + e.getMessage());
 				}
+	}
+
+	private static boolean isExcluded(Method mtd) {
+		if (mtd.getName().equals("canProcess")
+				|| mtd.getName().equals("tracksIdentifiers")
+				|| mtd.getName().equals("satisfies")
+				|| mtd.getName().equals("assume")
+				|| mtd.getName().equals("eval")
+				|| mtd.getName().equals("toString"))
+			return true;
+		return false;
 	}
 
 	private static Object[] provideParams(Method mtd, Class<?>[] params, AtomicReference<Integer> envPos) {
