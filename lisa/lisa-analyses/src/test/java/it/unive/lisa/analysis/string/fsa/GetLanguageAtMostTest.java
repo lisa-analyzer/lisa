@@ -3,8 +3,8 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class GetLanguageAtMostTest {
@@ -12,18 +12,18 @@ public class GetLanguageAtMostTest {
 	// TODO: add more tests
 	@Test
 	public void tets01() {
-		Set<String> expected = new HashSet<>();
+		SortedSet<String> expected = new TreeSet<>();
 		expected.add("");
 		expected.add("a");
 		expected.add("aa");
 		expected.add("aaa");
 
 		State q0 = new State(true, true);
-		Set<State> sts = new HashSet<>();
+		SortedSet<State> sts = new TreeSet<>();
 		sts.add(q0);
 
 		Transition t = new Transition(q0, q0, "a");
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(t);
 
 		Automaton a = new Automaton(sts, delta);
@@ -32,14 +32,14 @@ public class GetLanguageAtMostTest {
 
 	@Test
 	public void test02() {
-		Set<String> expected = new HashSet<>();
+		SortedSet<String> expected = new TreeSet<>();
 		expected.add("");
 		expected.add("a");
 		expected.add("ab");
 		expected.add("abc");
 
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -59,7 +59,7 @@ public class GetLanguageAtMostTest {
 
 	@Test
 	public void test03() {
-		Set<String> expected = new HashSet<>();
+		SortedSet<String> expected = new TreeSet<>();
 		expected.add("");
 		expected.add("b");
 		expected.add("bc");
@@ -68,8 +68,8 @@ public class GetLanguageAtMostTest {
 		expected.add("cb");
 		expected.add("cbb");
 
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);

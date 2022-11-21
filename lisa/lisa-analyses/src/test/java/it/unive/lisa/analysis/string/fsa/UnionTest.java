@@ -3,16 +3,16 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class UnionTest {
 
 	@Test
 	public void test01() throws CyclicAutomatonException {
-		Set<State> states1 = new HashSet<>();
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states1 = new TreeSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st1 = new State[3];
 		State[] st2 = new State[2];
 		st1[0] = new State(true, false);
@@ -24,14 +24,14 @@ public class UnionTest {
 		st2[1] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta1 = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta1 = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 
 		delta1.add(new Transition(st1[0], st1[1], "a"));
 		delta1.add(new Transition(st1[1], st1[2], "b"));
 		delta2.add(new Transition(st2[0], st2[1], "a"));
 
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("ab");
 		exp.add("a");
 
@@ -43,21 +43,21 @@ public class UnionTest {
 
 	@Test
 	public void test02() throws CyclicAutomatonException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st1 = new State[3];
 		st1[0] = new State(true, false);
 		st1[1] = new State(false, false);
 		st1[2] = new State(false, true);
 		Collections.addAll(states, st1);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st1[0], st1[1], "a"));
 		delta.add(new Transition(st1[1], st1[2], "b"));
 
 		Automaton a1 = new Automaton(states, delta);
 		Automaton a2 = new Automaton(states, delta);
 
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("ab");
 
 		assertEquals(a1.union(a2).getLanguage(), exp);
@@ -65,8 +65,8 @@ public class UnionTest {
 
 	@Test
 	public void test03() throws CyclicAutomatonException {
-		Set<State> states1 = new HashSet<>();
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states1 = new TreeSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st1 = new State[4];
 		State[] st2 = new State[3];
 		st1[0] = new State(true, false);
@@ -80,8 +80,8 @@ public class UnionTest {
 		st2[2] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta1 = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta1 = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta1.add(new Transition(st1[0], st1[1], "a"));
 		delta1.add(new Transition(st1[0], st1[2], ""));
 		delta1.add(new Transition(st1[1], st1[3], "b"));
@@ -91,7 +91,7 @@ public class UnionTest {
 
 		Automaton a1 = new Automaton(states1, delta1);
 		Automaton a2 = new Automaton(states2, delta2);
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("ab");
 		exp.add("a");
 		exp.add("c");

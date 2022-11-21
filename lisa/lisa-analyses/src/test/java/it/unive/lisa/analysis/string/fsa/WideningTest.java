@@ -3,15 +3,15 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class WideningTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, true);
 		st[1] = new State(false, true);
@@ -21,7 +21,7 @@ public class WideningTest {
 
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[1], st[2], "a"));
 		delta.add(new Transition(st[2], st[3], "a"));
@@ -29,10 +29,10 @@ public class WideningTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> expStates = new HashSet<>();
+		SortedSet<State> expStates = new TreeSet<>();
 		State q = new State(true, true);
 		expStates.add(q);
-		Set<Transition> expDelta = new HashSet<>();
+		SortedSet<Transition> expDelta = new TreeSet<>();
 		expDelta.add(new Transition(q, q, "a"));
 
 		Automaton exp = new Automaton(expStates, expDelta);

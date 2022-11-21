@@ -3,15 +3,15 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class DeterminizeTest {
 
 	@Test
 	public void testDfa() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -20,7 +20,7 @@ public class DeterminizeTest {
 		st[4] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[1], "b"));
 		transitions.add(new Transition(st[1], st[0], "a"));
@@ -38,13 +38,13 @@ public class DeterminizeTest {
 	// expected
 	@Test
 	public void testNfa() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[0], "b"));
 		transitions.add(new Transition(st[0], st[1], "b"));
@@ -52,13 +52,13 @@ public class DeterminizeTest {
 		// accepts language {a^nb^m}^p
 		Automaton nfa = new Automaton(states, transitions);
 
-		Set<State> expStates = new HashSet<>();
+		SortedSet<State> expStates = new TreeSet<>();
 		State[] st2 = new State[2];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, true);
 		Collections.addAll(expStates, st2);
 
-		Set<Transition> expDelta = new HashSet<>();
+		SortedSet<Transition> expDelta = new TreeSet<>();
 		expDelta.add(new Transition(st2[0], st2[0], "a"));
 		expDelta.add(new Transition(st2[0], st2[1], "b"));
 		expDelta.add(new Transition(st2[1], st2[0], "a"));
@@ -71,8 +71,8 @@ public class DeterminizeTest {
 
 	@Test
 	public void testEpsNfa() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[11];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -103,8 +103,8 @@ public class DeterminizeTest {
 		// {a ,b}^n abb
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> expStates = new HashSet<>();
-		Set<Transition> expDelta = new HashSet<>();
+		SortedSet<State> expStates = new TreeSet<>();
+		SortedSet<Transition> expDelta = new TreeSet<>();
 		State[] st2 = new State[5];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, false);

@@ -3,15 +3,15 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class ReverseTest {
 
 	@Test
 	public void test01() throws CyclicAutomatonException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -19,12 +19,12 @@ public class ReverseTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[1], st[2], "b"));
 		delta.add(new Transition(st[2], st[3], "c"));
 
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("cba");
 		Automaton a = new Automaton(states, delta);
 
@@ -33,7 +33,7 @@ public class ReverseTest {
 
 	@Test
 	public void test02() throws CyclicAutomatonException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -42,13 +42,13 @@ public class ReverseTest {
 		st[4] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "c"));
 		delta.add(new Transition(st[2], st[4], "b"));
 
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("ca");
 		exp.add("bb");
 		Automaton a = new Automaton(states, delta);
@@ -58,7 +58,7 @@ public class ReverseTest {
 
 	@Test
 	public void test03() throws CyclicAutomatonException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[7];
 		st[0] = new State(true, false);
 		st[1] = new State(true, false);
@@ -69,7 +69,7 @@ public class ReverseTest {
 		st[6] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[2], "a"));
 		delta.add(new Transition(st[1], st[3], "c"));
 		delta.add(new Transition(st[2], st[4], ""));
@@ -77,7 +77,7 @@ public class ReverseTest {
 		delta.add(new Transition(st[4], st[5], ""));
 		delta.add(new Transition(st[4], st[6], "b"));
 
-		Set<String> exp = new HashSet<>();
+		SortedSet<String> exp = new TreeSet<>();
 		exp.add("a");
 		exp.add("bc");
 		exp.add("ba");

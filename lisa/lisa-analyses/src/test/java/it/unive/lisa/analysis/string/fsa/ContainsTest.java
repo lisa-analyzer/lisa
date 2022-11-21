@@ -6,15 +6,15 @@ import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class ContainsTest {
 
 	@Test
 	public void test01() throws SemanticException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -22,7 +22,7 @@ public class ContainsTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "a"));
@@ -30,13 +30,13 @@ public class ContainsTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[2];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta2.add(new Transition(st2[0], st2[1], "a"));
 
 		Automaton a2 = new Automaton(states2, delta2);
@@ -50,7 +50,7 @@ public class ContainsTest {
 
 	@Test
 	public void test02() throws SemanticException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -58,7 +58,7 @@ public class ContainsTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "a"));
@@ -66,13 +66,13 @@ public class ContainsTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[2];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta2.add(new Transition(st2[0], st2[1], "d"));
 
 		Automaton a2 = new Automaton(states2, delta2);
@@ -86,7 +86,7 @@ public class ContainsTest {
 
 	@Test
 	public void test03() throws SemanticException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -94,7 +94,7 @@ public class ContainsTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "a"));
@@ -102,13 +102,13 @@ public class ContainsTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[2];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta2.add(new Transition(st2[0], st2[1], ""));
 
 		Automaton a2 = new Automaton(states2, delta2);
@@ -122,7 +122,7 @@ public class ContainsTest {
 
 	@Test
 	public void test04() throws SemanticException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -130,7 +130,7 @@ public class ContainsTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "a"));
@@ -138,14 +138,14 @@ public class ContainsTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[3];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, true);
 		st2[2] = new State(false, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta2.add(new Transition(st2[0], st2[1], "a"));
 		delta2.add(new Transition(st2[0], st2[2], "d"));
 
@@ -160,7 +160,7 @@ public class ContainsTest {
 
 	@Test
 	public void test05() throws SemanticException {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -168,7 +168,7 @@ public class ContainsTest {
 		st[3] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[0], st[2], "b"));
 		delta.add(new Transition(st[1], st[3], "a"));
@@ -176,12 +176,12 @@ public class ContainsTest {
 
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[1];
 		st2[0] = new State(true, true);
 		Collections.addAll(states2, st2);
 
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		delta2.add(new Transition(st2[0], st2[0], "a"));
 
 		Automaton a2 = new Automaton(states2, delta2);

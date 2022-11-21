@@ -3,21 +3,21 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class IsContainedTest {
 
 	@Test
 	public void simpleTest() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[2];
 
-		Set<Transition> delta = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
@@ -44,12 +44,12 @@ public class IsContainedTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[3];
-		Set<Transition> delta = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
 		st[2] = new State(false, false);

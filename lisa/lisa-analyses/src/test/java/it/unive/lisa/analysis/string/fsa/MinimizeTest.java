@@ -4,16 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class MinimizeTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -34,8 +34,8 @@ public class MinimizeTest {
 
 	@Test
 	public void test02() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[3];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -55,8 +55,8 @@ public class MinimizeTest {
 
 	@Test
 	public void test03() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, true);
 		st[1] = new State(false, false);
@@ -79,8 +79,8 @@ public class MinimizeTest {
 
 	@Test
 	public void returnThisIfMinimized() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[3];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);

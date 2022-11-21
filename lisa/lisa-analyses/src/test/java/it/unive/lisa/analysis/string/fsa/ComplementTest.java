@@ -3,16 +3,16 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class ComplementTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[3];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -21,15 +21,15 @@ public class ComplementTest {
 
 		delta.add(new Transition(st[0], st[1], "a"));
 		delta.add(new Transition(st[1], st[2], "b"));
-		Set<String> sigma = new HashSet<>();
+		SortedSet<String> sigma = new TreeSet<>();
 		sigma.add("a");
 		sigma.add("b");
 
 		// ab
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> expStates = new HashSet<>();
-		Set<Transition> expDelta = new HashSet<>();
+		SortedSet<State> expStates = new TreeSet<>();
+		SortedSet<Transition> expDelta = new TreeSet<>();
 		State[] expSt = new State[4];
 		expSt[0] = new State(true, true);
 		expSt[1] = new State(false, true);
@@ -53,8 +53,8 @@ public class ComplementTest {
 
 	@Test
 	public void test02() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
@@ -67,12 +67,12 @@ public class ComplementTest {
 		// ab+
 		Automaton a = new Automaton(states, delta);
 
-		Set<String> sigma = new HashSet<>();
+		SortedSet<String> sigma = new TreeSet<>();
 		sigma.add("a");
 		sigma.add("b");
 
-		Set<State> expStates = new HashSet<>();
-		Set<Transition> expDelta = new HashSet<>();
+		SortedSet<State> expStates = new TreeSet<>();
+		SortedSet<Transition> expDelta = new TreeSet<>();
 		State[] expSt = new State[3];
 		expSt[0] = new State(true, true);
 		expSt[1] = new State(false, false);

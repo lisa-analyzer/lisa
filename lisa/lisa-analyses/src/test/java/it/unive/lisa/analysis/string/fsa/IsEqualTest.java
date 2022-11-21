@@ -3,20 +3,20 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class IsEqualTest {
 
 	@Test
 	public void test01() {
-		Set<State> thisStates = new HashSet<>();
+		SortedSet<State> thisStates = new TreeSet<>();
 		State[] st = new State[4];
-		Set<State> otherStates = new HashSet<>();
+		SortedSet<State> otherStates = new TreeSet<>();
 		State[] st2 = new State[3];
-		Set<Transition> thisDelta = new HashSet<>();
-		Set<Transition> otherDelta = new HashSet<>();
+		SortedSet<Transition> thisDelta = new TreeSet<>();
+		SortedSet<Transition> otherDelta = new TreeSet<>();
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
 		st[2] = new State(false, false);
@@ -45,14 +45,14 @@ public class IsEqualTest {
 
 	@Test
 	public void twoNotEqualStrings() {
-		Set<State> thisStates = new HashSet<>();
+		SortedSet<State> thisStates = new TreeSet<>();
 		State[] st = new State[2];
 
-		Set<State> otherStates = new HashSet<>();
+		SortedSet<State> otherStates = new TreeSet<>();
 		State[] st2 = new State[2];
 
-		Set<Transition> thisDelta = new HashSet<>();
-		Set<Transition> otherDelta = new HashSet<>();
+		SortedSet<Transition> thisDelta = new TreeSet<>();
+		SortedSet<Transition> otherDelta = new TreeSet<>();
 
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
@@ -75,14 +75,14 @@ public class IsEqualTest {
 
 	@Test
 	public void twoEqualsStringsWithEpsilon() {
-		Set<State> thisStates = new HashSet<>();
+		SortedSet<State> thisStates = new TreeSet<>();
 		State[] st = new State[3];
 
-		Set<State> otherStates = new HashSet<>();
+		SortedSet<State> otherStates = new TreeSet<>();
 		State[] st2 = new State[2];
 
-		Set<Transition> thisDelta = new HashSet<>();
-		Set<Transition> otheDelta = new HashSet<>();
+		SortedSet<Transition> thisDelta = new TreeSet<>();
+		SortedSet<Transition> otheDelta = new TreeSet<>();
 
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -108,14 +108,14 @@ public class IsEqualTest {
 
 	@Test
 	public void twoNotEqualsStringsWithEpsilon() {
-		Set<State> thisStates = new HashSet<>();
+		SortedSet<State> thisStates = new TreeSet<>();
 		State[] st = new State[3];
 
-		Set<State> otherStates = new HashSet<>();
+		SortedSet<State> otherStates = new TreeSet<>();
 		State[] st2 = new State[2];
 
-		Set<Transition> thisDelta = new HashSet<>();
-		Set<Transition> otherDelta = new HashSet<>();
+		SortedSet<Transition> thisDelta = new TreeSet<>();
+		SortedSet<Transition> otherDelta = new TreeSet<>();
 
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -141,14 +141,14 @@ public class IsEqualTest {
 
 	@Test
 	public void nonDeterministicAutomaton() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[4];
 
-		Set<State> states2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
 		State[] st2 = new State[2];
 
-		Set<Transition> delta = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);

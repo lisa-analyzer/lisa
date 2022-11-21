@@ -3,16 +3,16 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class CommonAlphabetTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[3];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -25,8 +25,8 @@ public class CommonAlphabetTest {
 		// ab
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		State[] st2 = new State[3];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, false);
@@ -38,7 +38,7 @@ public class CommonAlphabetTest {
 
 		Automaton a2 = new Automaton(states2, delta2);
 
-		Set<String> sigma = new HashSet<>();
+		SortedSet<String> sigma = new TreeSet<>();
 		sigma.add("a");
 		sigma.add("b");
 		sigma.add("c");
@@ -48,8 +48,8 @@ public class CommonAlphabetTest {
 
 	@Test
 	public void test02() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[4];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -64,8 +64,8 @@ public class CommonAlphabetTest {
 		// ab | ac
 		Automaton a = new Automaton(states, delta);
 
-		Set<State> states2 = new HashSet<>();
-		Set<Transition> delta2 = new HashSet<>();
+		SortedSet<State> states2 = new TreeSet<>();
+		SortedSet<Transition> delta2 = new TreeSet<>();
 		State[] st2 = new State[3];
 		st2[0] = new State(true, false);
 		st2[1] = new State(false, false);
@@ -78,7 +78,7 @@ public class CommonAlphabetTest {
 		// ac
 		Automaton a2 = new Automaton(states2, delta2);
 
-		Set<String> sigma = new HashSet<>();
+		SortedSet<String> sigma = new TreeSet<>();
 		sigma.add("a");
 		sigma.add("b");
 		sigma.add("c");

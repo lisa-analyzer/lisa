@@ -12,9 +12,10 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings.
@@ -95,9 +96,9 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 
 	@Override
 	public FSA bottom() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		states.add(new State(true, false));
-		return new FSA(new Automaton(states, new HashSet<Transition>()));
+		return new FSA(new Automaton(states, new TreeSet<>()));
 	}
 
 	@Override

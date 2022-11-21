@@ -4,16 +4,16 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class AcceptsEmptyLanguageTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -28,8 +28,8 @@ public class AcceptsEmptyLanguageTest {
 
 	@Test
 	public void test02() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);

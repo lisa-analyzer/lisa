@@ -4,21 +4,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class HasCycleTest {
 
 	@Test
 	public void test01() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[0], "b"));
 		transitions.add(new Transition(st[0], st[1], "b"));
@@ -30,8 +30,8 @@ public class HasCycleTest {
 
 	@Test
 	public void test02() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> tr = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> tr = new TreeSet<>();
 		State[] st = new State[3];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -45,8 +45,8 @@ public class HasCycleTest {
 
 	@Test
 	public void test03() {
-		Set<State> states = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		State q = new State(true, true);
 		delta.add(new Transition(q, q, "a"));
 		states.add(q);

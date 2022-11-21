@@ -4,8 +4,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class ValidateStringTest {
@@ -13,7 +13,7 @@ public class ValidateStringTest {
 	// testing dfa
 	@Test
 	public void testDfa() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -22,7 +22,7 @@ public class ValidateStringTest {
 		st[4] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[1], "b"));
 		transitions.add(new Transition(st[1], st[0], "a"));
@@ -45,13 +45,13 @@ public class ValidateStringTest {
 	// testing nfa
 	@Test
 	public void testNfa() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
 		st[0] = new State(true, false);
 		st[1] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[0], "a"));
 		transitions.add(new Transition(st[0], st[0], "b"));
 		transitions.add(new Transition(st[0], st[1], "b"));
@@ -69,7 +69,7 @@ public class ValidateStringTest {
 	// testing epsilon nfa
 	@Test
 	public void testEpsNfa() {
-		Set<State> states = new HashSet<>();
+		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[11];
 		st[0] = new State(true, false);
 		st[1] = new State(false, false);
@@ -84,7 +84,7 @@ public class ValidateStringTest {
 		st[10] = new State(false, true);
 		Collections.addAll(states, st);
 
-		Set<Transition> transitions = new HashSet<>();
+		SortedSet<Transition> transitions = new TreeSet<>();
 		transitions.add(new Transition(st[0], st[1], ""));
 		transitions.add(new Transition(st[0], st[7], ""));
 		transitions.add(new Transition(st[1], st[2], ""));

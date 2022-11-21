@@ -137,19 +137,30 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> lubAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<T> lub = super.lubAux(other);
-		if (lub.isTop() || lub.isBottom())
-			return lub;
-		return new InferenceSystem<>(lub.lattice, lub.function, inferred.lub(other.inferred));
+	public InferenceSystem<T> lubAux(InferenceSystem<T> other)
+			throws SemanticException {
+		InferenceSystem<T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.lub(o2));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.lub(other.inferred));
 	}
 
 	@Override
 	public InferenceSystem<T> wideningAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<T> widen = super.wideningAux(other);
-		if (widen.isTop() || widen.isBottom())
-			return widen;
-		return new InferenceSystem<>(widen.lattice, widen.function, inferred.widening(other.inferred));
+		InferenceSystem<
+				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.widening(other.inferred));
+	}
+
+	@Override
+	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
+		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.glb(other.inferred));
+	}
+
+	@Override
+	public InferenceSystem<T> narrowingAux(InferenceSystem<T> other) throws SemanticException {
+		InferenceSystem<
+				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.narrowing(other.inferred));
 	}
 
 	@Override
@@ -164,14 +175,6 @@ public class InferenceSystem<T extends InferredValue<T>>
 	public InferenceSystem<T> assumeSatisfied(InferredPair<T> eval) {
 		return new InferenceSystem<>(lattice, function,
 				new InferredPair<>(lattice, eval.getInferred(), eval.getState()));
-	}
-
-	@Override
-	public InferenceSystem<T> glbAux(InferenceSystem<T> other) throws SemanticException {
-		InferenceSystem<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
-		return new InferenceSystem<>(newEnv.lattice, newEnv.function,
-				// we take the updated execution state
-				new InferredPair<>(newEnv.lattice, getInferredValue(), other.getExecutionState()));
 	}
 
 	@Override

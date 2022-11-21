@@ -1,14 +1,22 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import it.unive.lisa.analysis.string.fsa.regex.Atom;
+import it.unive.lisa.analysis.string.fsa.regex.Comp;
+import it.unive.lisa.analysis.string.fsa.regex.EmptySet;
+import it.unive.lisa.analysis.string.fsa.regex.Or;
+import it.unive.lisa.analysis.string.fsa.regex.RegularExpression;
+import it.unive.lisa.analysis.string.fsa.regex.Star;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -23,12 +31,12 @@ public final class Automaton {
 	/**
 	 * The states of the automaton
 	 */
-	private final Set<State> states;
+	private final SortedSet<State> states;
 
 	/**
 	 * The transitions of the automaton
 	 */
-	private final Set<Transition> transitions;
+	private final SortedSet<Transition> transitions;
 
 	/**
 	 * Set to {@code true} if and only if the automaton is determinized, i.e.,
@@ -67,7 +75,7 @@ public final class Automaton {
 	 * @param states      the set of states of the new automaton
 	 * @param transitions the set of the transitions of the new automaton
 	 */
-	public Automaton(Set<State> states, Set<Transition> transitions) {
+	public Automaton(SortedSet<State> states, SortedSet<Transition> transitions) {
 		this.states = states;
 		this.transitions = transitions;
 		this.IS_DETERMINIZED = false;
@@ -81,13 +89,13 @@ public final class Automaton {
 	 */
 	public Automaton(String s) {
 		if (s.isEmpty()) {
-			states = new HashSet<>();
-			transitions = new HashSet<>();
+			states = new TreeSet<>();
+			transitions = new TreeSet<>();
 			State last = new State(true, true);
 			states.add(last);
 		} else {
-			states = new HashSet<>();
-			transitions = new HashSet<>();
+			states = new TreeSet<>();
+			transitions = new TreeSet<>();
 			State last = new State(true, false);
 			State next;
 			states.add(last);
@@ -102,24 +110,6 @@ public final class Automaton {
 				states.add(last);
 			}
 		}
-	}
-
-	/**
-	 * Return an ordered set containing this automaton states.
-	 * 
-	 * @return a set containing the states ordered by ids
-	 */
-	private Set<State> getOrderedStates() {
-		return new TreeSet<>(this.states);
-	}
-
-	/**
-	 * Return an ordered set containing this automaton transitions.
-	 * 
-	 * @return a set containing the transitions ordered by ids
-	 */
-	private Set<Transition> getOrderedTransitions() {
-		return new TreeSet<>(this.transitions);
 	}
 
 	/**
@@ -140,7 +130,7 @@ public final class Automaton {
 			String c = "" + str.charAt(i);
 
 			// stores temporally the new currentStates
-			Set<State> newCurr = new HashSet<>();
+			Set<State> newCurr = new TreeSet<>();
 			for (State s : currentStates) {
 
 				// stores all the states reached after char computation
@@ -182,15 +172,15 @@ public final class Automaton {
 	 */
 	Automaton reach() {
 		// used to store temporarily the states reached from the states in NS
-		Set<State> T;
-		Set<State> initialStates = epsClosure();
+		SortedSet<State> T;
+		SortedSet<State> initialStates = epsClosure();
 		// stores the reached states of the automaton
-		Set<State> RS = new HashSet<>(initialStates);
+		SortedSet<State> RS = new TreeSet<>(initialStates);
 		// states that will be checked in the following iteration
-		Set<State> NS = new HashSet<>(initialStates);
+		SortedSet<State> NS = new TreeSet<>(initialStates);
 
 		do {
-			T = new HashSet<>();
+			T = new TreeSet<>();
 
 			for (State q : NS) {
 				T.addAll(transitions.stream().filter(t -> t.getSource().equals(q) && !RS.contains(t.getDestination()))
@@ -201,7 +191,7 @@ public final class Automaton {
 		} while (!NS.isEmpty());
 		// add to the new automaton only the transitions between the states of
 		// the new Automaton
-		Set<Transition> tr = transitions;
+		SortedSet<Transition> tr = transitions;
 		tr.removeIf(t -> !RS.contains(t.getSource()) || !RS.contains(t.getDestination()));
 
 		return new Automaton(RS, tr);
@@ -214,8 +204,8 @@ public final class Automaton {
 	 *             {@code this}.
 	 */
 	Automaton reverse() {
-		Set<Transition> tr = new HashSet<>();
-		Set<State> st = new HashSet<>();
+		SortedSet<Transition> tr = new TreeSet<>();
+		SortedSet<State> st = new TreeSet<>();
 		// used to associate states of the Automaton this to the reverse one
 		Map<State, State> revStates = new HashMap<>();
 
@@ -250,24 +240,24 @@ public final class Automaton {
 			return this;
 
 		// transitions of the new deterministic automaton
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		// states of the new deterministic automaton
-		Set<State> sts = new HashSet<>();
+		SortedSet<State> sts = new TreeSet<>();
 		// store the macrostates of the new Automaton
-		List<Set<State>> detStates = new ArrayList<>();
+		List<SortedSet<State>> detStates = new ArrayList<>();
 		// used to map the macrostate with the corresponding state of the new
 		// automaton
-		Map<State, Set<State>> stateToMacro = new HashMap<>();
-		Map<Set<State>, State> macroToState = new HashMap<>();
+		Map<State, SortedSet<State>> stateToMacro = new HashMap<>();
+		Map<SortedSet<State>, State> macroToState = new HashMap<>();
 		// stores the already controlled states
-		Set<State> marked = new HashSet<>();
+		Set<State> marked = new TreeSet<>();
 		// automaton alphabet
 		Set<String> alphabet = transitions.stream().map(Transition::getSymbol).filter(s -> !s.equals(""))
 				.collect(Collectors.toSet());
 
 		// the first macrostate is the one associated with the epsilon closure
 		// of the initial states
-		Set<State> initialStates = epsClosure();
+		SortedSet<State> initialStates = epsClosure();
 		detStates.add(initialStates);
 		State q = null;
 		for (State s : initialStates)
@@ -303,7 +293,7 @@ public final class Automaton {
 						.map(Transition::getDestination).collect(Collectors.toSet()));
 				// add R to detStates only if it is a new macrostate
 				if (!detStates.contains(R) && !R.isEmpty()) {
-					HashSet<State> currentStates = (HashSet<State>) R;
+					TreeSet<State> currentStates = (TreeSet<State>) R;
 					detStates.add(currentStates);
 					State nq = null;
 					// make nq final if any of the state in the correspondent
@@ -339,7 +329,7 @@ public final class Automaton {
 	 * @return the set of states that are reachable from all the initial states
 	 *             just with epsilon transitions.
 	 */
-	Set<State> epsClosure() {
+	SortedSet<State> epsClosure() {
 		return epsClosure(states.stream().filter(State::isInitial).collect(Collectors.toSet()));
 	}
 
@@ -355,17 +345,17 @@ public final class Automaton {
 	 *             epsilon transitions.
 	 */
 	Set<State> epsClosure(State state) {
-		Set<State> eps = new HashSet<>();
+		Set<State> eps = new TreeSet<>();
 		eps.add(state);
 		// used to make sure that a state isn't checked twice
-		Set<State> checked = new HashSet<>();
+		Set<State> checked = new TreeSet<>();
 
 		// add current state
 		do {
 			// used to collect new states that have to be added to eps inside
 			// for
 			// loop
-			Set<State> temp = new HashSet<>();
+			Set<State> temp = new TreeSet<>();
 			for (State s : eps) {
 				if (!checked.contains(s)) {
 					checked.add(s);
@@ -397,8 +387,8 @@ public final class Automaton {
 	 * @return the set of states that are reachable from {@code state} just with
 	 *             epsilon transitions.
 	 */
-	private Set<State> epsClosure(Set<State> st) {
-		Set<State> eps = new HashSet<>();
+	private SortedSet<State> epsClosure(Set<State> st) {
+		SortedSet<State> eps = new TreeSet<>();
 
 		for (State s : st)
 			eps.addAll(epsClosure(s));
@@ -420,8 +410,8 @@ public final class Automaton {
 		if (this == other)
 			return this;
 
-		Set<State> sts = new HashSet<>();
-		Set<Transition> ts = new HashSet<>();
+		SortedSet<State> sts = new TreeSet<>();
+		SortedSet<Transition> ts = new TreeSet<>();
 
 		Map<State, State> thisInitMapping = new HashMap<>();
 		Map<State, State> otherInitMapping = new HashMap<>();
@@ -479,7 +469,7 @@ public final class Automaton {
 	 * @return a set containing the subset of strings accepted by {@code this}
 	 */
 	public Set<String> getLanguageAtMost(int length) {
-		Set<String> lang = new HashSet<>();
+		Set<String> lang = new TreeSet<>();
 		Set<State> initialStates = epsClosure();
 
 		for (State s : initialStates)
@@ -499,13 +489,13 @@ public final class Automaton {
 	 *             starting from the state {@code q} of maximum length
 	 *             {@code length}.
 	 */
-	public Set<String> getLanguageAtMost(State q, int length) {
+	public SortedSet<String> getLanguageAtMost(State q, int length) {
 
 		if (length == 0)
-			return new HashSet<>();
+			return new TreeSet<>();
 
 		// the set representing the accepted language
-		Set<String> lang = new HashSet<>();
+		SortedSet<String> lang = new TreeSet<>();
 		lang.add("");
 		// used to keep track of every single possible path
 		LinkedList<AbstractMap.SimpleImmutableEntry<String, State>> stack = new LinkedList<>();
@@ -559,9 +549,9 @@ public final class Automaton {
 		}
 		// visit the automaton to check if there is any cycle
 		Set<State> currentStates = states.stream().filter(State::isInitial).collect(Collectors.toSet());
-		Set<State> visited = new HashSet<>();
+		Set<State> visited = new TreeSet<>();
 		while (!visited.containsAll(states)) {
-			Set<State> temp = new HashSet<>();
+			Set<State> temp = new TreeSet<>();
 			for (State s : currentStates) {
 				temp.addAll(transitions.stream().filter(t -> t.getSource().equals(s)).map(Transition::getDestination)
 						.collect(Collectors.toSet()));
@@ -585,7 +575,7 @@ public final class Automaton {
 	 * @throws CyclicAutomatonException thrown if the automaton is cyclic.
 	 */
 	public Set<String> getLanguage() throws CyclicAutomatonException {
-		Set<String> lang = new HashSet<>();
+		Set<String> lang = new TreeSet<>();
 		if (hasCycle())
 			throw new CyclicAutomatonException();
 
@@ -623,8 +613,8 @@ public final class Automaton {
 	 * complete.
 	 */
 	private Automaton complete(Set<String> sigma) {
-		Set<State> newStates = new HashSet<>(states);
-		Set<Transition> newTransitions = new HashSet<>(transitions);
+		SortedSet<State> newStates = new TreeSet<>(states);
+		SortedSet<Transition> newTransitions = new TreeSet<>(transitions);
 		// add a new "garbage" state
 		State garbage = new State(false, false);
 		newStates.add(garbage);
@@ -648,8 +638,8 @@ public final class Automaton {
 	 */
 	public Automaton complement(Set<String> sigma) {
 		// states and transitions for the newly created automaton
-		Set<State> sts = new HashSet<>();
-		Set<Transition> delta = new HashSet<>();
+		SortedSet<State> sts = new TreeSet<>();
+		SortedSet<Transition> delta = new TreeSet<>();
 		// keep track of the corresponding newly created states
 		Map<State, State> oldToNew = new HashMap<>();
 		Automaton r = this.determinize().complete(sigma);
@@ -734,7 +724,7 @@ public final class Automaton {
 	 * @return a set of strings representing the common alphabet.
 	 */
 	Set<String> commonAlphabet(Automaton other) {
-		Set<String> result = new HashSet<>();
+		Set<String> result = new TreeSet<>();
 		result.addAll(transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 		result.addAll(other.transitions.stream().map(Transition::getSymbol).collect(Collectors.toSet()));
 
@@ -752,20 +742,23 @@ public final class Automaton {
 	 * @return a newly created automaton representing the widening automaton.
 	 */
 	public Automaton widening(int n) {
-		Set<State> newStates = new HashSet<>();
-		// stores all the powerstates
-		Set<Set<State>> powerStates = new HashSet<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		// stores all the powerstates - note that this does not need to be
+		// sorted: this is used only to iterate and produce a transition
+		// that is added to sorted set, and thus the order in which those are
+		// created does not matter
+		Set<SortedSet<State>> powerStates = new HashSet<>();
 		// used to store a mapping between the powerstate and the new state
-		Map<Set<State>, State> powerToNew = new HashMap<>();
+		Map<SortedSet<State>, State> powerToNew = new HashMap<>();
 		// used to store languages to improve performance
-		Map<State, Set<String>> languages = new HashMap<>();
+		Map<State, SortedSet<String>> languages = new HashMap<>();
 		// generate all the languages for the states
 		for (State s : states)
 			languages.put(s, getLanguageAtMost(s, n));
 
 		// create the new states for the new automaton
 		for (State s : states) {
-			Set<State> ps = new HashSet<>();
+			SortedSet<State> ps = new TreeSet<>();
 			ps.add(s);
 			for (State q : states)
 				if (!q.equals(s) && languages.get(s).equals(languages.get(q)))
@@ -786,16 +779,21 @@ public final class Automaton {
 		}
 
 		// add transitions between the new states
-		Set<Transition> newTransitions = new HashSet<>();
+		SortedSet<Transition> newTransitions = new TreeSet<>();
 		for (Transition t : transitions)
-			for (Set<State> ps : powerStates)
+			for (SortedSet<State> ps : powerStates)
 				if (ps.contains(t.getSource()))
-					for (Set<State> psd : powerStates)
+					for (SortedSet<State> psd : powerStates)
 						if (psd.contains(t.getDestination()))
 							newTransitions.add(new Transition(powerToNew.get(ps), powerToNew.get(psd), t.getSymbol()));
 
 		Automaton automaton = new Automaton(newStates, newTransitions);
 		return automaton.minimize();
+	}
+
+	@Override
+	public String toString() {
+		return toRegex();
 	}
 
 	/**
@@ -808,8 +806,8 @@ public final class Automaton {
 	 *             given automata.
 	 */
 	public Automaton concat(Automaton other) {
-		Set<State> newStates = new HashSet<>();
-		Set<Transition> newTransitions = new HashSet<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition> newTransitions = new TreeSet<>();
 		Map<State, State> oldToNew = new HashMap<>();
 
 		Set<State> thisFinalStates = states.stream().filter(State::isFinal).collect(Collectors.toSet());
@@ -862,8 +860,47 @@ public final class Automaton {
 	}
 
 	/**
+	 * If this automaton has a single initial state, this method returns
+	 * {@code this}. Otherwise,it yields a new one where a new unique initial
+	 * state has been introduced, connected to the original initial states
+	 * through epsilon-transitions.
+	 * 
+	 * @return an automaton with a single initial state
+	 */
+	public Automaton toSingleInitalState() {
+		SortedSet<State> initialStates = new TreeSet<>();
+		for (State s : states)
+			if (s.isInitial())
+				initialStates.add(s);
+
+		if (initialStates.size() < 2)
+			return this;
+
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition> newDelta = new TreeSet<>();
+
+		for (State s : states) {
+			State mock = new State(false, s.isFinal());
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition t : transitions)
+			newDelta.add(new Transition(nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()), t.getSymbol()));
+
+		State newInit = new State(true, false);
+		for (State init : initialStates)
+			newDelta.add(new Transition(newInit, nameToStates.get(init.getId()), ""));
+
+		return new Automaton(newStates, newDelta);
+	}
+
+	/**
 	 * Creates and return the regex that represent the accepted language by the
-	 * automaton {@code this}.
+	 * automaton {@code this}, using Brzozowski algebraic method (see <a href=
+	 * "https://cs.stackexchange.com/questions/2016/how-to-convert-finite-automata-to-regular-expressions">here</a>).
 	 * 
 	 * @return a String representing that is the regex that represent the
 	 *             accepted language.
@@ -871,211 +908,123 @@ public final class Automaton {
 	public String toRegex() {
 		// this algorithm works only with deterministic automata
 		Automaton a = this.minimize();
+
 		// automaton that accepts only the empty string
 		if (a.states.size() == 1 && a.transitions.size() == 0)
 			return "";
+
 		// automaton with one state -> cyclic automaton
 		if (a.states.size() == 1) {
-			StringBuilder string = new StringBuilder();
-			if (a.transitions.size() > 1)
-				string.append("(");
-			for (Transition t : a.getOrderedTransitions())
-				string.append(t.getSymbol()).append(" | ");
-			if (!a.transitions.isEmpty())
-				string.delete(string.length() - 3, string.length());
-			if (a.transitions.size() > 1)
-				string.append(")");
-			string.append("*");
-			return string.toString();
+			RegularExpression regex = null;
+			for (Transition t : a.transitions)
+				if (regex == null)
+					regex = new Atom(t.getSymbol());
+				else
+					regex = new Or(regex, new Atom(t.getSymbol()));
+			return new Star(regex).toString();
 		}
+
 		// automaton with only one transition returns the symbol of that
 		// transition
 		if (a.transitions.size() == 1)
 			return a.transitions.stream().findFirst().get().getSymbol();
-		// states and transitions of the automaton used to compute the regex
-		Set<State> regStates = new HashSet<>();
-		Set<Transition> regTransitions = new HashSet<>();
-		// stores mapping between old and new states
-		Map<State, State> oldToNew = new HashMap<>();
 
-		State initialState = a.states.stream().filter(State::isInitial).findFirst().get();
+		a = a.toSingleInitalState();
+		int m = a.states.size();
 
-		Set<State> finalStates = a.states.stream().filter(State::isFinal).collect(Collectors.toSet());
+		// in both A and B, the initial state is at index 0
+		RegularExpression[][] A = new RegularExpression[m][m];
+		RegularExpression[] B = new RegularExpression[m];
 
-		Set<Transition> initialStateIngoing = a.transitions.stream()
-				.filter(t -> !t.getSource().equals(t.getDestination()) && t.getDestination().equals(initialState))
-				.collect(Collectors.toSet());
+		Map<Integer, State> mapping = new HashMap<>();
+		mapping.put(0, a.states.stream().filter(State::isInitial).findFirst().get());
 
-		Set<Transition> finalStateOutgoing = a.transitions.stream()
-				.filter(t -> !t.getSource().equals(t.getDestination()) && finalStates.contains(t.getSource()))
-				.collect(Collectors.toSet());
+		// NOTE: algorithm's indexing is 1-based, java is 0-based
 
-		if (!initialStateIngoing.isEmpty()) {
-			State newInitial = new State(true, false);
-			State q = new State(false, initialState.isFinal());
-			a.states.remove(initialState);
-			regStates.add(q);
-			regStates.add(newInitial);
-			oldToNew.put(initialState, q);
-			regTransitions.add(new Transition(newInitial, q, ""));
-		}
-		regStates.addAll(a.getOrderedStates());
-
-		if (finalStates.size() > 1) {
-			State newFinal = new State(false, true);
-			regStates.add(newFinal);
-			for (State s : new TreeSet<>(finalStates)) {
-				State q = new State(s.isInitial(), false);
-				regStates.remove(s);
-				regStates.add(q);
-				regTransitions.add(new Transition(q, newFinal, ""));
-				oldToNew.put(s, q);
+		/*
+		 * for i = 1 to m: if final(i): B[i] := ε else: B[i] := ∅ for i = 1 to
+		 * m: for j = 1 to m: for a in Σ: if trans(i, a, j): A[i,j] := a else:
+		 * A[i,j] := ∅
+		 */
+		Iterator<State> it = a.states.iterator();
+		for (int i = 0; i < m; i++) {
+			State source = mapping.get(i);
+			if (source == null) {
+				source = nextNonInitialState(it);
+				mapping.put(i, source);
 			}
-		} else {
-			if (!finalStateOutgoing.isEmpty()) {
-				State newFinal = new State(false, true);
-				State finalState = finalStates.stream().findFirst().get();
-				regStates.remove(finalState);
-				State q = new State(finalState.isInitial(), false);
-				regStates.add(q);
-				regStates.add(newFinal);
-				regTransitions.add(new Transition(q, newFinal, ""));
-				oldToNew.put(finalState, q);
+
+			if (source.isFinal())
+				B[i] = Atom.EPSILON;
+			else
+				B[i] = EmptySet.INSTANCE;
+
+			for (int j = 0; j < m; j++) {
+				State dest = mapping.get(j);
+				if (dest == null) {
+					dest = nextNonInitialState(it);
+					mapping.put(j, dest);
+				}
+
+				Iterator<Transition> tt = a.getAllTransitionsConnecting(source, dest).iterator();
+				if (!tt.hasNext())
+					A[i][j] = EmptySet.INSTANCE;
+				else {
+					A[i][j] = new Atom(tt.next().getSymbol());
+					while (tt.hasNext())
+						A[i][j] = new Or(A[i][j], new Atom(tt.next().getSymbol()));
+				}
 			}
 		}
 
-		for (Transition t : a.getOrderedTransitions()) {
-			State source = t.getSource();
-			State dest = t.getDestination();
-			if (!initialStateIngoing.isEmpty()) {
-				if (t.getSource().equals(initialState))
-					source = oldToNew.get(initialState);
-				if (t.getDestination().equals(initialState))
-					dest = oldToNew.get(initialState);
+		/*
+		 * for n = m decreasing to 1: B[n] := star(A[n,n]) . B[n] for j = 1 to
+		 * n: A[n,j] := star(A[n,n]) . A[n,j]; for i = 1 to n: B[i] += A[i,n] .
+		 * B[n] for j = 1 to n: A[i,j] += A[i,n] . A[n,j]
+		 */
+		for (int n = m - 1; n >= 0; n--) {
+			Star star_nn = new Star(A[n][n]);
+			B[n] = new Comp(star_nn, B[n]);
+
+			for (int j = 0; j < n; j++)
+				A[n][j] = new Comp(star_nn, A[n][j]);
+
+			for (int i = 0; i < n; i++) {
+				B[i] = new Or(B[i], new Comp(A[i][n], B[n]));
+
+				for (int j = 0; j < n; j++)
+					A[i][j] = new Or(A[i][j], new Comp(A[i][n], A[n][j]));
 			}
-			if (finalStates.size() > 1 || !finalStateOutgoing.isEmpty()) {
-				if (finalStates.contains(t.getSource()))
-					source = oldToNew.get(t.getSource());
-				if (finalStates.contains(t.getDestination()))
-					dest = oldToNew.get(t.getDestination());
-			}
-			regTransitions.add(new Transition(source, dest, t.getSymbol()));
 		}
 
-		// the automaton used to compute the regex
-		Automaton reg = new Automaton(regStates, regTransitions);
+		return B[0].simplify().toString();
+	}
 
-		// reg initial state
-		State regInitialState = reg.getOrderedStates().stream().filter(State::isInitial).findFirst().get();
+	private static State nextNonInitialState(Iterator<State> it) {
+		while (it.hasNext()) {
+			State cursor = it.next();
+			if (!cursor.isInitial())
+				return cursor;
+		}
 
-		// reg final state
-		State regFinalState = reg.getOrderedStates().stream().filter(State::isFinal).findFirst().get();
+		return null;
+	}
 
-		do {
+	/**
+	 * Yields the set of transitions going from {@code s1} to {@code s2}.
+	 * 
+	 * @param s1 the source state
+	 * @param s2 the destination state
+	 * 
+	 * @return the set of transitions connecting the two states
+	 */
+	public Set<Transition> getAllTransitionsConnecting(State s1, State s2) {
+		Set<Transition> result = new TreeSet<>();
 
-			Set<State> newLevel = reg.getOrderedTransitions().stream()
-					.filter(t -> t.getSource().equals(regInitialState))
-					.map(Transition::getDestination).collect(Collectors.toSet());
+		for (Transition t : this.transitions)
+			if (t.getSource().equals(s1) && t.getDestination().equals(s2))
+				result.add(t);
 
-			for (State s : new TreeSet<>(newLevel)) {
-				if (!s.equals(regFinalState))
-					reg.states.remove(s);
-				Set<State> nextLevel = reg.getOrderedTransitions().stream()
-						.filter(t -> t.getSource().equals(s) && !t.getSource().equals(t.getDestination()))
-						.map(Transition::getDestination).collect(Collectors.toSet());
-				Set<Transition> outgoingTransitions = reg.getOrderedTransitions().stream()
-						.filter(t -> t.getSource().equals(s) && !t.getDestination().equals(s))
-						.collect(Collectors.toSet());
-				Set<Transition> ingoingTransitions = reg.getOrderedTransitions().stream()
-						.filter(t -> !t.getSource().equals(s) && t.getDestination().equals(s))
-						.collect(Collectors.toSet());
-				Set<Transition> selfTransitions = reg.getOrderedTransitions().stream()
-						.filter(t -> t.getDestination().equals(t.getSource()) && t.getDestination().equals(s))
-						.collect(Collectors.toSet());
-
-				StringBuilder selfString = new StringBuilder();
-				StringBuilder outgoingString = new StringBuilder();
-				StringBuilder ingoingString = new StringBuilder();
-
-				// compute the string generated by self transitions
-				if (!selfTransitions.isEmpty()) {
-					if (selfTransitions.size() > 1)
-						selfString.append("(");
-					for (Transition t : new TreeSet<>(selfTransitions))
-						selfString.append(t.getSymbol()).append("|");
-					selfString.delete(selfString.length() - 1, selfString.length());
-					if (selfTransitions.size() > 1)
-						selfString.append(")");
-					selfString.append("*");
-					reg.transitions.removeAll(selfTransitions);
-				}
-
-				// compute the string generated by outgoing transitions
-				if (!outgoingTransitions.isEmpty()) {
-					if (!(outgoingTransitions.size() == 1
-							&& outgoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
-						if (outgoingTransitions.size() > 1)
-							outgoingString.append("(");
-						for (Transition t : new TreeSet<>(outgoingTransitions))
-							if (!t.getSymbol().equals(""))
-								outgoingString.append(t.getSymbol()).append("|");
-						outgoingString.delete(outgoingString.length() - 1, outgoingString.length());
-						if (outgoingTransitions.size() > 1)
-							outgoingString.append(")");
-					}
-					reg.transitions.removeAll(outgoingTransitions);
-					StringBuilder ingString = new StringBuilder();
-					for (Transition t : new TreeSet<>(ingoingTransitions))
-						if (!t.getSymbol().equals("") && t.getSource().equals(regInitialState))
-							ingString.append(t.getSymbol()).append("|");
-					if (!ingString.toString().equals(""))
-						ingString.delete(ingString.length() - 1, ingString.length());
-					if (ingString.length() > 1) {
-						ingString.insert(0, "(");
-						ingString.append(")");
-					}
-					for (State q : new TreeSet<>(nextLevel))
-						if (reg.states.size() != 2)
-							reg.transitions.add(new Transition(regInitialState, q,
-									selfString.toString() + ingString + outgoingString));
-				}
-
-				// compute the string generated by ingoing transitions
-				if (!ingoingTransitions.isEmpty()) {
-					if (!(ingoingTransitions.size() == 1
-							&& ingoingTransitions.stream().findFirst().get().getSymbol().equals(""))) {
-						for (Transition t : new TreeSet<>(ingoingTransitions))
-							if (!t.getSymbol().equals(""))
-								ingoingString.append(t.getSymbol()).append("|");
-						ingoingString.delete(ingoingString.length() - 1, ingoingString.length());
-						if (ingoingString.length() > 1) {
-							ingoingString.insert(0, "(");
-							ingoingString.append(")");
-						}
-					}
-					reg.transitions.removeAll(ingoingTransitions);
-					for (Transition t : new TreeSet<>(ingoingTransitions))
-						if (reg.states.size() > 2 && !t.getSource().equals(regInitialState))
-							reg.transitions.add(new Transition(t.getSource(), t.getSource(),
-									ingoingString.toString() + selfString + outgoingString));
-						else if (reg.states.size() == 2)
-							reg.transitions.add(new Transition(regInitialState, regFinalState,
-									ingoingString.toString() + selfString + outgoingString));
-				}
-			}
-
-			if (reg.states.size() == 2) {
-				if (reg.transitions.size() > 1) {
-					StringBuilder finalValue = new StringBuilder();
-					for (Transition t : reg.getOrderedTransitions())
-						finalValue.append(t.getSymbol()).append("|");
-					finalValue.delete(finalValue.length() - 1, finalValue.length());
-					reg.transitions.clear();
-					reg.transitions.add(new Transition(regInitialState, regFinalState, finalValue.toString()));
-				}
-			}
-		} while (reg.states.size() > 2);
-
-		return reg.transitions.stream().findFirst().get().getSymbol();
+		return result;
 	}
 }
