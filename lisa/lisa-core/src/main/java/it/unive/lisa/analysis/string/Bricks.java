@@ -96,7 +96,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	private void rule5(int index) {
 		Brick brick = this.bricks.get(index);
 
-		Brick br = new Brick(brick.getStrings().size(), brick.getMin(), brick.getStrings());
+		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
 
 		this.bricks.set(index, new Brick(1, 1, br.getReps()));
 		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
