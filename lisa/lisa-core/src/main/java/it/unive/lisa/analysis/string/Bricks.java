@@ -124,8 +124,11 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 			if (!lastBrick)
 				if (currentBrick.getMin() == 1 && currentBrick.getMax() == 1 &&
-						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) //Rule 2
+						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
 					rule2(i, i + 1);
+
+					lastBrick = i == thisBricks.size() - 1;
+				}
 
 			if (currentBrick.getMin() == currentBrick.getMax()) //Rule 3
 				rule3(i);
