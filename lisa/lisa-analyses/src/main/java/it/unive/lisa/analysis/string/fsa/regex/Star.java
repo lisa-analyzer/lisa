@@ -9,7 +9,7 @@ package it.unive.lisa.analysis.string.fsa.regex;
  */
 public class Star extends RegularExpression {
 
-	private RegularExpression op;
+	private final RegularExpression op;
 
 	/**
 	 * Builds the star.
@@ -22,12 +22,27 @@ public class Star extends RegularExpression {
 
 	@Override
 	public int hashCode() {
-		return op.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((op == null) ? 0 : op.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		return other instanceof Star && ((Star) other).getOperand().equals(op);
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Star other = (Star) obj;
+		if (op == null) {
+			if (other.op != null)
+				return false;
+		} else if (!op.equals(other.op))
+			return false;
+		return true;
 	}
 
 	@Override

@@ -159,7 +159,7 @@ public class InferenceSystem<T extends InferredValue<T>>
 	@Override
 	public InferenceSystem<T> narrowingAux(InferenceSystem<T> other) throws SemanticException {
 		InferenceSystem<
-				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
 		return new InferenceSystem<>(newEnv.lattice, newEnv.function, inferred.narrowing(other.inferred));
 	}
 

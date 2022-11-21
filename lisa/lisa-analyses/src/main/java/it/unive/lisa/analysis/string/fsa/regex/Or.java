@@ -12,12 +12,12 @@ public class Or extends RegularExpression {
 	/**
 	 * The first regular expression
 	 */
-	private RegularExpression first;
+	private final RegularExpression first;
 
 	/**
 	 * The second regular expression
 	 */
-	private RegularExpression second;
+	private final RegularExpression second;
 
 	/**
 	 * Builds the or.
@@ -70,17 +70,33 @@ public class Or extends RegularExpression {
 
 	@Override
 	public int hashCode() {
-		return first.hashCode() + second.hashCode();
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((first == null) ? 0 : first.hashCode());
+		result = prime * result + ((second == null) ? 0 : second.hashCode());
+		return result;
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if (other instanceof Or) {
-			return (first.equals(((Or) other).first) && second.equals(((Or) other).second))
-					|| (first.equals(((Or) other).second) && second.equals(((Or) other).first));
-		}
-		return false;
-
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Or other = (Or) obj;
+		if (first == null) {
+			if (other.first != null)
+				return false;
+		} else if (!first.equals(other.first))
+			return false;
+		if (second == null) {
+			if (other.second != null)
+				return false;
+		} else if (!second.equals(other.second))
+			return false;
+		return true;
 	}
 
 	@Override

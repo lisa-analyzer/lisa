@@ -53,7 +53,10 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 
 	/**
 	 * Yields the environment {@code environment} on which the expression
-	 * {@code expression} is assumed to hold by this domain.
+	 * {@code expression} is assumed to hold by this domain. The returned
+	 * environment must be an updated version of the given one, where the
+	 * relevant abstractions have been (optionally) updated. Returning the given
+	 * environment as-is is always a sound implementation.
 	 * 
 	 * @param environment the environment
 	 * @param expression  the expression to be assumed

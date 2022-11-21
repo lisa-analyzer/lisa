@@ -19,6 +19,12 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.fsa.Automaton;
 import it.unive.lisa.analysis.string.fsa.State;
 import it.unive.lisa.analysis.string.fsa.Transition;
+import it.unive.lisa.analysis.string.fsa.regex.Atom;
+import it.unive.lisa.analysis.string.fsa.regex.Comp;
+import it.unive.lisa.analysis.string.fsa.regex.EmptySet;
+import it.unive.lisa.analysis.string.fsa.regex.Or;
+import it.unive.lisa.analysis.string.fsa.regex.RegularExpression;
+import it.unive.lisa.analysis.string.fsa.regex.Star;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.imp.IMPFeatures;
@@ -70,7 +76,6 @@ import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.TypeTokenType;
 import it.unive.lisa.type.Untyped;
@@ -130,6 +135,9 @@ public class EqualityContractVerificationTest {
 	private static final AbstractCodeMember signCfg2 = new AbstractCodeMember(signDescr2);
 	private static final NodeList<CFG, Statement, Edge> adj1 = new NodeList<>(new SequentialEdge());
 	private static final NodeList<CFG, Statement, Edge> adj2 = new NodeList<>(new SequentialEdge());
+
+	private static final RegularExpression re1 = new Atom("a");
+	private static final RegularExpression re2 = new Atom("b");
 
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
@@ -216,6 +224,7 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(InterfaceUnit.class, interface1, interface2)
 				.withPrefabValues(NodeList.class, adj1, adj2)
 				.withPrefabValues(DomainRepresentation.class, dr1, dr2)
+				.withPrefabValues(RegularExpression.class, re1, re2)
 				.withPrefabValues(Pair.class, Pair.of(1, 2), Pair.of(3, 4))
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
@@ -273,6 +282,12 @@ public class EqualityContractVerificationTest {
 				Warning.ALL_FIELDS_SHOULD_BE_USED);
 		verify(Automaton.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
 				Warning.ALL_FIELDS_SHOULD_BE_USED);
+
+		verify(EmptySet.class);
+		verify(Atom.class);
+		verify(Comp.class);
+		verify(Or.class);
+		verify(Star.class);
 	}
 
 	@Test
@@ -285,13 +300,8 @@ public class EqualityContractVerificationTest {
 	public void testTypes() {
 		Reflections scanner = mkReflections();
 		for (Class<? extends Type> type : scanner.getSubTypesOf(Type.class))
-			if (type == ReferenceType.class)
-				// TODO to avoid using the cache early, we have non-final fields
-				// in here and not all of them are used
-				verify(type, Warning.NONFINAL_FIELDS, Warning.ALL_FIELDS_SHOULD_BE_USED);
-			else
-				// type token is the only one with an eclipse-like equals
-				verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
+			// type token is the only one with an eclipse-like equals
+			verify(type, type == TypeTokenType.class, Warning.STRICT_INHERITANCE);
 	}
 
 	@Test

@@ -404,6 +404,7 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 		if (eval.isBottom())
 			return environment.bottom();
 
+		Interval starting = environment.getState(id);
 		boolean lowIsMinusInfinity = eval.interval.lowIsMinusInfinity();
 		Interval low_inf = new Interval(eval.interval.getLow(), MathNumber.PLUS_INFINITY);
 		Interval lowp1_inf = new Interval(eval.interval.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
@@ -414,24 +415,24 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 			return environment.putState(id, eval);
 		else if (operator == ComparisonGe.INSTANCE)
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(low_inf));
 			else
-				return environment.putState(id, inf_high);
+				return environment.putState(id, starting.glb(inf_high));
 		else if (operator == ComparisonGt.INSTANCE)
 			if (rightIsExpr)
-				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(lowp1_inf));
 			else
-				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
+				return environment.putState(id, lowIsMinusInfinity ? eval : starting.glb(inf_highm1));
 		else if (operator == ComparisonLe.INSTANCE)
 			if (rightIsExpr)
-				return environment.putState(id, inf_high);
+				return environment.putState(id, starting.glb(inf_high));
 			else
-				return lowIsMinusInfinity ? environment : environment.putState(id, low_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(low_inf));
 		else if (operator == ComparisonLt.INSTANCE)
 			if (rightIsExpr)
-				return environment.putState(id, lowIsMinusInfinity ? eval : inf_highm1);
+				return environment.putState(id, lowIsMinusInfinity ? eval : starting.glb(inf_highm1));
 			else
-				return lowIsMinusInfinity ? environment : environment.putState(id, lowp1_inf);
+				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(lowp1_inf));
 		else
 			return environment;
 	}

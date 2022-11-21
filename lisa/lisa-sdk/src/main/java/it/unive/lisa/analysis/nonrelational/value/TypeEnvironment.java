@@ -119,7 +119,7 @@ public class TypeEnvironment<T extends NonRelationalTypeDomain<T>>
 	@Override
 	public TypeEnvironment<T> narrowingAux(TypeEnvironment<T> other) throws SemanticException {
 		TypeEnvironment<
-				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
 		return new TypeEnvironment<>(newEnv.lattice, newEnv.function, stack.narrowing(other.stack));
 	}
 

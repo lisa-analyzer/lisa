@@ -34,8 +34,6 @@ public class IntervalTest {
 	private static final int TEST_LIMIT = 5000;
 
 	private final Random rand = new Random();
-	private final Interval singleton = new Interval();
-	private final ValueEnvironment<Interval> env = new ValueEnvironment<>(singleton);
 	private final ProgramPoint pp = new ProgramPoint() {
 
 		@Override
@@ -48,8 +46,11 @@ public class IntervalTest {
 			return null;
 		}
 	};
+	private final Interval singleton = new Interval();
 	private final Variable variable = new Variable(Int32Type.INSTANCE, "x", pp.getLocation());
 	private final Variable varAux = new Variable(Int32Type.INSTANCE, "aux", pp.getLocation());
+	private final ValueEnvironment<
+			Interval> env = new ValueEnvironment<>(singleton).putState(variable, singleton.top());
 
 	@Test
 	public void testEvalConstant() {
