@@ -152,4 +152,32 @@ public class BricksTest {
 
         assertEquals(bricks, new Bricks(resultList));
     }
+
+    @Test
+    public void normBricksRule5Test(){
+        List<Brick> list = new ArrayList<>();
+
+        HashSet<String> strings = new HashSet<>();
+        strings.add("a");
+
+        list.add(new Brick(2,5,strings));
+
+        Bricks bricks = new Bricks(list);
+
+        bricks.normBricks();
+
+        List<Brick> resultList = new ArrayList<>();
+
+        HashSet<String> resultStrings = new HashSet<>();
+        resultStrings.add("aa");
+
+        HashSet<String> resultStrings1 = new HashSet<>();
+        resultStrings1.add("a");
+
+        resultList.add(new Brick(1,1,resultStrings));
+
+        resultList.add(new Brick(0,3,resultStrings1));
+
+        assertEquals(bricks, new Bricks(resultList));
+    }
 }
