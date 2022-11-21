@@ -279,6 +279,14 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	}
 
 	@Override
+	public Interval narrowingAux(Interval other) throws SemanticException {
+		MathNumber newLow, newHigh;
+		newHigh = interval.getHigh().isInfinite() ? other.interval.getHigh() : interval.getHigh();
+		newLow = interval.getLow().isInfinite() ? other.interval.getLow() : interval.getLow();
+		return new Interval(newLow, newHigh);
+	}
+
+	@Override
 	public boolean lessOrEqualAux(Interval other) throws SemanticException {
 		return other.interval.includes(interval);
 	}
@@ -286,7 +294,6 @@ public class Interval extends BaseNonRelationalValueDomain<Interval> {
 	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Interval left, Interval right,
 			ProgramPoint pp) {
-
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 

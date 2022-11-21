@@ -71,25 +71,8 @@ public abstract class InverseSetLattice<S extends InverseSetLattice<S, E>, E> ex
 		return mk(lub);
 	}
 
-	/**
-	 * Performs the greatest lower bound between this inverse set lattice
-	 * element and the given one.
-	 * 
-	 * @param other the other inverse set lattice element
-	 * 
-	 * @return the greatest lower bound between this and other
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	@SuppressWarnings("unchecked")
-	public S glb(S other) throws SemanticException {
-		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
-				|| this.lessOrEqual(other))
-			return (S) this;
-
-		if (other.isBottom() || this.isTop() || other.lessOrEqual((S) this))
-			return other;
-
+	@Override
+	public S glbAux(S other) throws SemanticException {
 		Set<E> glb = new HashSet<>(elements);
 		glb.addAll(other.elements);
 		return mk(glb);

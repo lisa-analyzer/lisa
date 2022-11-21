@@ -207,6 +207,11 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
+	public PointBasedHeap glbAux(PointBasedHeap other) throws SemanticException {
+		return from(new PointBasedHeap(heapEnv.glb(other.heapEnv)));
+	}
+
+	@Override
 	public boolean lessOrEqualAux(PointBasedHeap other) throws SemanticException {
 		return heapEnv.lessOrEqual(other.heapEnv);
 	}

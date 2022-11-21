@@ -29,7 +29,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	private final Graph<G, N, E> graph;
 
-	private final Map<N, T> result;
+	private Map<N, T> result;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
@@ -122,7 +122,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * 
 		 * @throws Exception if something goes wrong during the computation
 		 */
-		T join(N node, T approx, T old) throws Exception;
+		T operation(N node, T approx, T old) throws Exception;
 
 		/**
 		 * Given a node and two states, yields whether or not the most recent
@@ -134,7 +134,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		 * <br>
 		 * This callback is invoked after the exit state of a node has been
 		 * computed through {@link #semantics(Object, Object)} and joined with
-		 * the older one through {@link #join(Object, Object, Object)}.
+		 * the older one through {@link #operation(Object, Object, Object)}.
 		 * 
 		 * @param node   the node where the computation takes place
 		 * @param approx the most recent state
@@ -150,7 +150,8 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	/**
 	 * Runs the fixpoint. Invoking this method effectively recomputes the
-	 * result: no caching on previous runs is executed.
+	 * result: no caching on previous runs is executed. It starts with empty
+	 * result.
 	 * 
 	 * @param startingPoints a map containing all the nodes to start the
 	 *                           fixpoint at, each mapped to its entry state.
@@ -168,7 +169,33 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
-		result.clear();
+		return fixpoint(startingPoints, ws, implementation, new HashMap<>(graph.getNodesCount()));
+	}
+
+	/**
+	 * Runs the fixpoint. Invoking this method effectively recomputes the
+	 * result: no caching on previous runs is executed.
+	 * 
+	 * @param startingPoints a map containing all the nodes to start the
+	 *                           fixpoint at, each mapped to its entry state.
+	 * @param ws             the instance of {@link WorkingSet} to use for the
+	 *                           fixpoint
+	 * @param implementation the {@link FixpointImplementation} to use for
+	 *                           running the fixpoint
+	 * @param initialResult  the map of initial result to use for running the
+	 *                           fixpoint
+	 * 
+	 * @return a mapping from each (reachable) node of the source graph to the
+	 *             fixpoint result computed at that node
+	 * 
+	 * @throws FixpointException if something goes wrong during the fixpoint
+	 *                               execution
+	 */
+	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
+			FixpointImplementation<N, E, T> implementation, Map<N, T> initialResult)
+			throws FixpointException {
+
+		result = initialResult;
 		startingPoints.keySet().forEach(ws::push);
 
 		T newApprox;
@@ -193,11 +220,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			T oldApprox = result.get(current);
 			if (oldApprox != null)
 				try {
-					newApprox = implementation.join(current, newApprox, oldApprox);
+					newApprox = implementation.operation(current, newApprox, oldApprox);
 				} catch (Exception e) {
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
-
 			try {
 				if (oldApprox == null || !implementation.equality(current, newApprox, oldApprox)) {
 					result.put(current, newApprox);
