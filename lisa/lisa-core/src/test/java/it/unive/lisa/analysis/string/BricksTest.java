@@ -47,6 +47,26 @@ public class BricksTest {
     }
 
     @Test
+    public void normBricksRule1Test(){
+        List<Brick> list = new ArrayList<>();
+
+        HashSet<String> strings = new HashSet<>();
+        strings.add("a");
+        strings.add("b");
+
+        list.add(new Brick(1,1,strings));
+        list.add(new Brick(0,0,new HashSet<>()));
+
+        Bricks bricks = new Bricks(list);
+
+        list.remove(1);
+
+        Bricks resultBricks = new Bricks(list);
+
+        assertEquals(bricks,resultBricks);
+    }
+
+    @Test
     public void normBricksRule2Test(){
         List<Brick> list = new ArrayList<>();
 
