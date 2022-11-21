@@ -135,4 +135,31 @@ public class BricksTest {
 
         assertEquals(bricks,resultBricks);
     }
+    @Test
+    public void normBricksRule4Test(){
+        List<Brick> list = new ArrayList<>();
+
+        HashSet<String> strings = new HashSet<>();
+        strings.add("a");
+        strings.add("b");
+
+        HashSet<String> strings1 = new HashSet<>();
+        strings1.add("a");
+        strings1.add("b");
+
+        list.add(new Brick(0,1,strings));
+        list.add(new Brick(0,2,strings1));
+
+        Bricks bricks = new Bricks(list);
+
+        bricks.normBricks();
+
+        List<Brick> resultList = new ArrayList<>();
+
+        resultList.add(new Brick(0,3,strings));
+
+        Bricks resultBricks = new Bricks(resultList);
+
+        assertEquals(bricks,resultBricks);
+    }
 }
