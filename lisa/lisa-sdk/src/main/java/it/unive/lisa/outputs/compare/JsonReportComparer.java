@@ -540,6 +540,7 @@ public class JsonReportComparer {
 						.append(">ELEMENT #")
 						.append(i)
 						.append(":\n")
+						.append("\t".repeat(depth + 2))
 						.append(felements.get(i))
 						.append("\n");
 			}
@@ -556,6 +557,7 @@ public class JsonReportComparer {
 						.append(">ELEMENT #")
 						.append(i)
 						.append(":\n")
+						.append("\t".repeat(depth + 2))
 						.append(selements.get(i))
 						.append("\n");
 			}
@@ -601,6 +603,7 @@ public class JsonReportComparer {
 						.append(">FIELD ")
 						.append(field)
 						.append(":\n")
+						.append("\t".repeat(depth + 2))
 						.append(felements.get(field))
 						.append("\n");
 			}
@@ -617,6 +620,7 @@ public class JsonReportComparer {
 						.append(">FIELD ")
 						.append(field)
 						.append(":\n")
+						.append("\t".repeat(depth + 2))
 						.append(selements.get(field))
 						.append("\n");
 			}

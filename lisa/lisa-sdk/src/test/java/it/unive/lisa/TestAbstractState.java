@@ -28,4 +28,18 @@ public class TestAbstractState extends TestDomain<TestAbstractState, SymbolicExp
 		return new TestTypeDomain();
 	}
 
+	@Override
+	public TestAbstractState withTopHeap() {
+		return new TestAbstractState();
+	}
+
+	@Override
+	public TestAbstractState withTopValue() {
+		return new TestAbstractState();
+	}
+
+	@Override
+	public TestAbstractState withTopType() {
+		return new TestAbstractState();
+	}
 }

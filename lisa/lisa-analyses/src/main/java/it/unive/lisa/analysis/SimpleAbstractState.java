@@ -348,4 +348,19 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 		return valueState.getDomainInstance(domain);
 	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> withTopHeap() {
+		return new SimpleAbstractState<>(heapState.top(), valueState, typeState);
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> withTopValue() {
+		return new SimpleAbstractState<>(heapState, valueState.top(), typeState);
+	}
+
+	@Override
+	public SimpleAbstractState<H, V, T> withTopType() {
+		return new SimpleAbstractState<>(heapState, valueState, typeState.top());
+	}
 }
