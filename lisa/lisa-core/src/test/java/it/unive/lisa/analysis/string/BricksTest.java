@@ -41,9 +41,7 @@ public class BricksTest {
         resultList.add(new Brick(1,1,resultHashSet));
         resultList.add(new Brick(0,2,strings1));
 
-        Bricks resultBricks = new Bricks(resultList);
-
-        assertEquals(bricks,resultBricks);
+        assertEquals(bricks, new Bricks(resultList));
     }
 
     @Test
@@ -61,9 +59,7 @@ public class BricksTest {
 
         list.remove(1);
 
-        Bricks resultBricks = new Bricks(list);
-
-        assertEquals(bricks,resultBricks);
+        assertEquals(bricks,new Bricks(list));
     }
 
     @Test
@@ -96,9 +92,7 @@ public class BricksTest {
 
         resultList.add(new Brick(1,1,resultStrings));
 
-        Bricks resultBricks = new Bricks(resultList);
-
-        assertEquals(bricks,resultBricks);
+        assertEquals(bricks, new Bricks(resultList));
     }
     @Test
     public void normBricksRule3Test(){
@@ -131,9 +125,7 @@ public class BricksTest {
 
         resultList.add(new Brick(1,1,resultStrings));
 
-        Bricks resultBricks = new Bricks(resultList);
-
-        assertEquals(bricks,resultBricks);
+        assertEquals(bricks, new Bricks(resultList));
     }
     @Test
     public void normBricksRule4Test(){
@@ -158,8 +150,6 @@ public class BricksTest {
 
         resultList.add(new Brick(0,3,strings));
 
-        Bricks resultBricks = new Bricks(resultList);
-
-        assertEquals(bricks,resultBricks);
+        assertEquals(bricks, new Bricks(resultList));
     }
 }
