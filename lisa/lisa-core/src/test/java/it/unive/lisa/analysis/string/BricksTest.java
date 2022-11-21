@@ -89,11 +89,45 @@ public class BricksTest {
 
         List<Brick> resultList = new ArrayList<>();
 
-
         resultStrings.add("ab");
         resultStrings.add("aef");
         resultStrings.add("cdb");
         resultStrings.add("cdef");
+
+        resultList.add(new Brick(1,1,resultStrings));
+
+        Bricks resultBricks = new Bricks(resultList);
+
+        assertEquals(bricks,resultBricks);
+    }
+    @Test
+    public void normBricksRule3Test(){
+        List<Brick> list = new ArrayList<>();
+
+        Collection<String> strings = new HashSet<>();
+        strings.add("a");
+        strings.add("b");
+        strings.add("c");
+
+        list.add(new Brick(2,2,strings));
+
+        Bricks bricks = new Bricks(list);
+
+        bricks.normBricks();
+
+        Collection<String> resultStrings = new HashSet<>();
+
+        List<Brick> resultList = new ArrayList<>();
+
+        resultStrings.add("aa");
+        resultStrings.add("bb");
+        resultStrings.add("cc");
+        resultStrings.add("ab");
+        resultStrings.add("ac");
+        resultStrings.add("ba");
+        resultStrings.add("bc");
+        resultStrings.add("ca");
+        resultStrings.add("cb");
 
         resultList.add(new Brick(1,1,resultStrings));
 
