@@ -7,9 +7,9 @@ import java.util.HashSet;
 import java.util.Objects;
 
 public class Brick {
-    private int min;
-    private int max;
-    private Collection<String> strings;
+    private final int min;
+    private final int max;
+    private final Collection<String> strings;
 
     public Brick(int min, int max, Collection<String> strings) {
         this.min = min;
@@ -36,44 +36,16 @@ public class Brick {
         return min;
     }
 
-    public void setMin(int min) {
-        this.min = min;
-    }
-
     public int getMax() {
         return max;
-    }
-
-    public void setMax(int max) {
-        this.max = max;
     }
 
     public Collection<String> getStrings() {
         return strings;
     }
 
-    public void setStrings(Collection<String> strings) {
-        this.strings = strings;
-    }
-
-    public Brick merge(Brick other) {
-        if (this.min != 1 || this.max != 1 ||
-                other.min != 1 || other.max != 1)
-            throw new IllegalStateException("Cannot call this method when all min and max are not 1");
-
-        Collection<String> resultSet = new HashSet<>();
-
-        for (String string : this.strings) {
-            for (String otherStr : other.strings) {
-                resultSet.add(string + otherStr);
-            }
-        }
-
-        return new Brick(1, 1, resultSet);
-    }
-
     public Collection<String> getReps() {
-        HashSet<String> reps = new HashSet<>();
+        Collection<String> reps = new HashSet<>();
 
         if (this.strings.size() == 1) {
             String element = this.strings.iterator().next();
@@ -87,7 +59,7 @@ public class Brick {
     }
 
     //Recursive function that gets all the possible combinations of the set between min and max
-    private void recGetReps(HashSet<String> reps, int min, int numberOfReps, String currentStr) {
+    private void recGetReps(Collection<String> reps, int min, int numberOfReps, String currentStr) {
         if (min > this.max && numberOfReps >= this.min)//If the number of reps (starting from min) exceeds the max, then stops the recursion
             reps.add(currentStr);
         else {

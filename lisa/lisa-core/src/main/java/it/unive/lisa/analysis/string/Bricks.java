@@ -7,9 +7,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
@@ -64,63 +62,88 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return new StringRepresentation(StringUtils.join(this.bricks, ",\n"));
 	}
 
-	private List<Brick> rule5(Brick brick) {
-		List<Brick> list = new ArrayList<>();
-		Brick br = new Brick(brick.getStrings().size(), brick.getMin(), brick.getStrings());
+	private void rule2(int first, int second) {
+		Brick firstBrick = this.bricks.get(first);
+		Brick secondBrick = this.bricks.get(second);
 
-		list.add(new Brick(1, 1, br.getReps()));
-		list.add(new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
+		Collection<String> resultSet = new HashSet<>();
 
+		firstBrick.getStrings().forEach(string ->
+				secondBrick.getStrings().forEach(otherStr ->
+						resultSet.add(string + otherStr)));
 
-		return list;
+		this.bricks.set(first, new Brick(1, 1, resultSet));
+		this.bricks.remove(second);
+	}
+
+	private void rule3(int index) {
+		Brick brick = this.bricks.get(index);
+
+		this.bricks.set(index, new Brick(1, 1, brick.getReps()));
+	}
+
+	private void rule4(int first, int second){
+		Brick firstBrick = this.bricks.get(first);
+		Brick secondBrick = this.bricks.get(second);
+
+		this.bricks.set(first, new Brick(firstBrick.getMin() + secondBrick.getMin(),
+				firstBrick.getMax() + secondBrick.getMax(),
+				firstBrick.getStrings()));
+
+		this.bricks.remove(second);
+	}
+
+	private void rule5(int index) {
+		Brick brick = this.bricks.get(index);
+
+		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
+
+		this.bricks.set(index, new Brick(1, 1, br.getReps()));
+		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
+
 	}
 
 
-	public void normalize() { // Applies the 5 normalization rules of the Bricks domain TODO
+	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain TODO
 		List<Brick> thisBricks = this.bricks;
+
+		List<Brick> tempList = new ArrayList<>(thisBricks);
 
 		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
-			Boolean lastBrick = i == thisBricks.size() - 1;
+			Brick currentBrick = thisBricks.get(i);
 			Brick nextBrick = null;
-
-			Brick brick = thisBricks.get(i);
+			
+			boolean lastBrick = i == thisBricks.size() - 1;
 
 			if (!lastBrick)
 				nextBrick = thisBricks.get(i + 1);
 
-			if (!lastBrick && brick.getMin() == 1 && brick.getMax() == 1 &&
-					nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+			if (!lastBrick)
+				if (currentBrick.getMin() == 1 && currentBrick.getMax() == 1 &&
+						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+					rule2(i, i + 1);
 
-				Brick br = brick.merge(nextBrick);
+					lastBrick = i == thisBricks.size() - 1;
+				}
 
-				thisBricks.set(i, br);
-				thisBricks.remove(nextBrick);
-			}
+			if (currentBrick.getMin() == currentBrick.getMax()) //Rule 3
+				rule3(i);
 
-			if (brick.getMin() == brick.getMax()) { //Rule 3
-				brick.setStrings(brick.getReps());
-				brick.setMin(1);
-				brick.setMax(1);
-			}
+			if (!lastBrick)
+				if (currentBrick.getStrings().equals(nextBrick.getStrings()))//Rule 4
+					rule4(i, i + 1);
 
-			if (!lastBrick && brick.getStrings().equals(nextBrick.getStrings())) { //Rule 4
-				brick.setMin(brick.getMin() + nextBrick.getMin());
-				brick.setMax(brick.getMax() + nextBrick.getMax());
-
-				thisBricks.remove(nextBrick);
-			}
-
-
-			if (brick.getMin() >= 1 && brick.getMin() != brick.getMax()) { //Rule 5
-				List<Brick> list = rule5(brick);
-
-				thisBricks.set(i, list.get(0));
-				thisBricks.add(i + 1, list.get(1));
-			}
+			if (currentBrick.getMin() >= 1 &&
+					currentBrick.getMin() != currentBrick.getMax()) //Rule 5
+				rule5(i);
 		}
+		
+		if(!thisBricks.equals(tempList))
+			normBricks();
 	}
 }
+
