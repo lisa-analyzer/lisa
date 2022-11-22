@@ -118,13 +118,17 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 						// be assigned to id
 						StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
 								id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
+						// also runtime types are inherited, if already inferred
+						if (star_y.hasRuntimeTypes())
+							clone.setRuntimeTypes(star_y.getRuntimeTypes(null));
+
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
 						result = result.lub(from(new PointBasedHeap(heap)));
 
 						HeapReplacement replacement = new HeapReplacement();
 						replacement.addSource(star_y);
-						replacement.addTarget(star_y);
 						replacement.addTarget(clone);
+						replacement.addTarget(star_y);
 
 						result.replacements.add(replacement);
 					} else {
@@ -326,7 +330,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression loc : arg)
@@ -346,7 +350,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-				throws SemanticException {
+						throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)

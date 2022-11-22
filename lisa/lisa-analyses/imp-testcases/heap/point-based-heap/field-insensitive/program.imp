@@ -71,4 +71,13 @@ class A {
 		def y = x;
 		y[0] = 1;
 	}
+	
+	f9() {
+		def x = bump A(1,2);
+		x.a = 1;
+		x.b = 2;
+		def y = x;
+		y.a = 3;
+		y.b = 4;
+	}
 }
