@@ -74,7 +74,8 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap from its heap
 	 * environment.
 	 * 
-	 * @param heapEnv the heap environment that this instance tracks
+	 * @param heapEnv      the heap environment that this instance tracks
+	 * @param replacements the heap replacements of this instance
 	 */
 	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
 		this.heapEnv = heapEnv;

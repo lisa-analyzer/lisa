@@ -36,12 +36,15 @@ public class IMPNewArray extends NaryExpression {
 	/**
 	 * Builds the array allocation.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
-	 * @param sourceFile the source file name where this operation is defined
-	 * @param line       the line number where this operation is defined
-	 * @param col        the column where this operation is defined
-	 * @param type       the type of the array's elements
-	 * @param dimensions the dimensions of the array
+	 * @param cfg                 the {@link CFG} where this operation lies
+	 * @param sourceFile          the source file name where this operation is
+	 *                                defined
+	 * @param line                the line number where this operation is
+	 *                                defined
+	 * @param col                 the column where this operation is defined
+	 * @param type                the type of the array's elements
+	 * @param staticallyAllocated if this allocation is static or not
+	 * @param dimensions          the dimensions of the array
 	 */
 	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
 			Expression[] dimensions) {

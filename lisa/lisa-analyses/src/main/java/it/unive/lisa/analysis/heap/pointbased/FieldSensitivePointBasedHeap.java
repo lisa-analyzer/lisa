@@ -64,6 +64,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	 * environment.
 	 * 
 	 * @param heapEnv the heap environment that this instance tracks
+	 * @param fields  the mapping between allocation sites and their fields that
+	 *                    this instance tracks
 	 */
 	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv,
 			Map<AllocationSite, Set<SymbolicExpression>> fields) {
@@ -99,6 +101,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
 						result = result.lub(from(new PointBasedHeap(heap)));
 
+						// all the allocation sites fields of star_y
 						if (fields.containsKey(star_y))
 							for (SymbolicExpression field : fields.get(star_y)) {
 								HeapReplacement replacement = new HeapReplacement();

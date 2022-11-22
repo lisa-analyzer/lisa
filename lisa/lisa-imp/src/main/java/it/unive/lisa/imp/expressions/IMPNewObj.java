@@ -45,12 +45,15 @@ public class IMPNewObj extends NaryExpression {
 	/**
 	 * Builds the object allocation and initialization.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
-	 * @param sourceFile the source file name where this operation is defined
-	 * @param line       the line number where this operation is defined
-	 * @param col        the column where this operation is defined
-	 * @param type       the type of the object that is being created
-	 * @param parameters the parameters of the constructor call
+	 * @param cfg                 the {@link CFG} where this operation lies
+	 * @param sourceFile          the source file name where this operation is
+	 *                                defined
+	 * @param line                the line number where this operation is
+	 *                                defined
+	 * @param col                 the column where this operation is defined
+	 * @param type                the type of the object that is being created
+	 * @param staticallyAllocated if this allocation is static or not
+	 * @param parameters          the parameters of the constructor call
 	 */
 	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
 			Expression... parameters) {

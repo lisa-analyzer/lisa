@@ -16,7 +16,7 @@ public class HeapAllocation extends HeapExpression {
 	/**
 	 * If this allocation is statically or dynamically allocated.
 	 */
-	private final boolean isStaticalltAllocated;
+	private final boolean staticallyAllocated;
 
 	/**
 	 * Builds the heap allocation.
@@ -32,25 +32,32 @@ public class HeapAllocation extends HeapExpression {
 	/**
 	 * Builds the heap allocation.
 	 * 
-	 * @param staticType the static type of this expression
-	 * @param location   the code location of the statement that has generated
-	 *                       this expression
+	 * @param staticType          the static type of this expression
+	 * @param location            the code location of the statement that has
+	 *                                generated this expression
+	 * @param staticallyAllocated if this allocation is statically allocated or
+	 *                                not
 	 */
-	public HeapAllocation(Type staticType, CodeLocation location, boolean isStaticalltAllocated) {
+	public HeapAllocation(Type staticType, CodeLocation location, boolean staticallyAllocated) {
 		super(staticType, location);
-		this.isStaticalltAllocated = isStaticalltAllocated;
+		this.staticallyAllocated = staticallyAllocated;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(isStaticalltAllocated);
+		result = prime * result + Objects.hash(staticallyAllocated);
 		return result;
 	}
 
+	/**
+	 * Yields whether this heap allocation is static or not.
+	 * 
+	 * @return whether this heap allocation is static or not
+	 */
 	public boolean isStaticallyAllocated() {
-		return isStaticalltAllocated;
+		return staticallyAllocated;
 	}
 
 	@Override
@@ -62,12 +69,12 @@ public class HeapAllocation extends HeapExpression {
 		if (getClass() != obj.getClass())
 			return false;
 		HeapAllocation other = (HeapAllocation) obj;
-		return isStaticalltAllocated == other.isStaticalltAllocated;
+		return staticallyAllocated == other.staticallyAllocated;
 	}
 
 	@Override
 	public String toString() {
-		return (isStaticalltAllocated ? "" : "new ") + getStaticType();
+		return (staticallyAllocated ? "" : "new ") + getStaticType();
 	}
 
 	@Override
