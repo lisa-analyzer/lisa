@@ -50,12 +50,6 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
     @Override
     public boolean lessOrEqualAux(Brick other) throws SemanticException {
-        if(this.isBottom())
-            return true;
-
-        if(other.isTop())
-            return true;
-
         if(this.strings.size() > other.strings.size())
             return false;
 
