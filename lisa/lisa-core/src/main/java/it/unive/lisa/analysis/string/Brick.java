@@ -37,7 +37,15 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
     @Override
     public Brick lubAux(Brick other) throws SemanticException {
-        return null;
+        Collection<String> resultStrings = new HashSet<>();
+
+        resultStrings.addAll(this.strings);
+        resultStrings.addAll(other.strings);
+
+        return new Brick(Math.max(this.getMin(), other.getMin()),
+                Math.max(this.getMax(), other.getMax()),
+                resultStrings);
+
     }
 
     @Override
