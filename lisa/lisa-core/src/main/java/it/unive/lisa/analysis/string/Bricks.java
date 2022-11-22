@@ -13,6 +13,14 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private final List<Brick> bricks;
 
+	private final static Bricks TOP = new Bricks();
+
+	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
+
+	public Bricks(){
+		this(getTopList());
+	}
+
 	public Bricks(List<Brick> bricks) {
 		this.bricks = bricks;
 	}
@@ -44,12 +52,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks top() { // TODO
-		return null;
+		return TOP;
 	}
 
 	@Override
 	public Bricks bottom() { // TODO
-		return null;
+		return BOTTOM;
 	}
 
 	@Override
@@ -104,7 +112,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 
-	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain TODO
+	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain
 		List<Brick> thisBricks = this.bricks;
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
@@ -143,6 +151,13 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		
 		if(!thisBricks.equals(tempList))
 			normBricks();
+	}
+
+	private static List<Brick> getTopList(){
+		List<Brick> bricks = new ArrayList<>();
+		bricks.add(new Brick());
+
+		return bricks;
 	}
 }
 
