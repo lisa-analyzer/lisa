@@ -124,6 +124,6 @@ public class BrickTest {
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		assertEquals(brick.toString(), "{ [min: 1], [max: 2], [strings: de, mo, re] }");
+		assertEquals(brick.toString(), "[ {min: 1}, {max: 2}, {strings: de, mo, re} ]");
 	}
 }

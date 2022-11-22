@@ -116,8 +116,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		for (int i = 0; i < thisBricks.size(); ++i) {
 			Brick currentBrick = thisBricks.get(i);
 			Brick nextBrick = null;
-			
-			boolean lastBrick = i == thisBricks.size() - 1;
+				boolean lastBrick = i == thisBricks.size() - 1;
 
 			if (!lastBrick)
 				nextBrick = thisBricks.get(i + 1);
