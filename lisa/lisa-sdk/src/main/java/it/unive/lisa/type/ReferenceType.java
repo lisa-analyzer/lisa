@@ -14,7 +14,7 @@ import java.util.Set;
  */
 public class ReferenceType implements PointerType {
 
-	private Type innerType;
+	private final Type innerType;
 
 	/**
 	 * Builds the type for a reference to a location containing values of types

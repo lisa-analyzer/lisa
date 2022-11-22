@@ -1,0 +1,7 @@
+dependencies {
+	// internal
+	api project(':lisa-sdk')
+
+	// testing
+    testImplementation 'junit:junit:4.12'
+}

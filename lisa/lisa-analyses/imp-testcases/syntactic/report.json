@@ -1,0 +1,51 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/syntactic/expressions.imp':16:9] on 'untyped expressions::_return1(expressions* this, untyped x, untyped i)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':25:12] on 'untyped expressions::call(expressions* this, untyped i)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':29:25] on 'untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':30:25] on 'untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':31:16] on 'untyped expressions::nestedCall1(expressions* this, untyped i, untyped x)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':35:19] on 'untyped expressions::nestedCall2(expressions* this, untyped i, untyped x)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':39:18] on 'untyped expressions::nestedCall3(expressions* this, untyped i, untyped x)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':3:6] on 'untyped expressions::assignment(expressions* this)': [EXPRESSION] Found variable i"
+  }, {
+    "message" : "['imp-testcases/syntactic/expressions.imp':8:8] on 'untyped expressions::_throw1(expressions* this, untyped x, untyped i)': [EXPRESSION] Found variable i"
+  } ],
+  "files" : [ "report.json" ],
+  "info" : {
+    "cfgs" : "9",
+    "duration" : "1s 855ms",
+    "end" : "2022-11-18T23:12:16.528+01:00",
+    "expressions" : "34",
+    "files" : "0",
+    "globals" : "0",
+    "members" : "9",
+    "programs" : "1",
+    "start" : "2022-11-18T23:12:14.673+01:00",
+    "statements" : "16",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "9"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "VariableI",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/syntactic"
+  }
+}

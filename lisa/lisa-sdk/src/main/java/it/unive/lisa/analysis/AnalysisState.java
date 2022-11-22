@@ -347,4 +347,33 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		return state.getDomainInstance(domain);
 	}
 
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * {@link HeapDomain} set to top.
+	 * 
+	 * @return the copy with top heap
+	 */
+	public AnalysisState<A, H, V, T> withTopHeap() {
+		return new AnalysisState<>(state.withTopHeap(), computedExpressions, aliasing);
+	}
+
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * {@link ValueDomain} set to top.
+	 * 
+	 * @return the copy with top value
+	 */
+	public AnalysisState<A, H, V, T> withTopValue() {
+		return new AnalysisState<>(state.withTopValue(), computedExpressions, aliasing);
+	}
+
+	/**
+	 * Yields a copy of this state, but with the {@link AbstractState}'s inner
+	 * {@link TypeDomain} set to top.
+	 * 
+	 * @return the copy with top type
+	 */
+	public AnalysisState<A, H, V, T> withTopType() {
+		return new AnalysisState<>(state.withTopType(), computedExpressions, aliasing);
+	}
 }

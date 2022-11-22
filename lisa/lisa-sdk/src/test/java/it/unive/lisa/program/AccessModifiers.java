@@ -17,7 +17,7 @@ public class AccessModifiers {
 	@Test
 	public void testVisibilityOfSymbolicOperators() {
 		Set<String> failures = new HashSet<>();
-		Reflections scanner = new Reflections(Operator.class, new SubTypesScanner());
+		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends Operator>> operators = scanner.getSubTypesOf(Operator.class);
 		for (Class<? extends Operator> operator : operators)
 			if (!Modifier.isAbstract(operator.getModifiers())) {
@@ -39,7 +39,7 @@ public class AccessModifiers {
 	@Test
 	public void testVisibilityOfTypes() {
 		Set<String> failures = new HashSet<>();
-		Reflections scanner = new Reflections(Type.class, new SubTypesScanner());
+		Reflections scanner = new Reflections("it.unive.lisa", new SubTypesScanner());
 		Set<Class<? extends Type>> types = scanner.getSubTypesOf(Type.class);
 		for (Class<? extends Type> type : types)
 			if (!Modifier.isAbstract(type.getModifiers())) {

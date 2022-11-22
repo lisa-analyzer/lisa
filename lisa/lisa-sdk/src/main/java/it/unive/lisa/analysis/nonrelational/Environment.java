@@ -146,13 +146,14 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 		if (isBottom())
 			return (M) this;
 
-		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.NOT_SATISFIED)
+		Satisfiability sat = lattice.satisfies(expression, (M) this, pp);
+		if (sat == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
-		if (lattice.satisfies(expression, (M) this, pp) == Satisfiability.SATISFIED)
+		if (sat == Satisfiability.SATISFIED)
 			return assumeSatisfied(eval(expression, pp).getRight());
 
-		return glb(lattice.assume((M) this, expression, pp));
+		return lattice.assume((M) this, expression, pp);
 	}
 
 	/**

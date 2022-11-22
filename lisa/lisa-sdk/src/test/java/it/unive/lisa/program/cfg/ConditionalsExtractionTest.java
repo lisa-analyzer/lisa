@@ -25,8 +25,6 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
-import it.unive.lisa.program.cfg.statement.comparison.NotEqual;
-import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -73,8 +71,8 @@ public class ConditionalsExtractionTest {
 	public void testSimpleIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleIf"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -103,8 +101,7 @@ public class ConditionalsExtractionTest {
 	public void testEmptyIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyIf"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Return ret = new Return(cfg, unknown, new VariableRef(cfg, unknown, "x"));
 		cfg.addNode(condition, true);
 		cfg.addNode(ret);
@@ -125,8 +122,8 @@ public class ConditionalsExtractionTest {
 	public void testIfWithEmptyBranch() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyBranch"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -155,8 +152,8 @@ public class ConditionalsExtractionTest {
 	public void testAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "asymmetricIf"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -189,8 +186,8 @@ public class ConditionalsExtractionTest {
 	public void testBigAsymmetricIf() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "bigAsymmetricIf"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -235,8 +232,8 @@ public class ConditionalsExtractionTest {
 	public void testSimpleLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleLoop"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -265,8 +262,8 @@ public class ConditionalsExtractionTest {
 	public void testEmptyLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "emptyLoop"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -294,8 +291,8 @@ public class ConditionalsExtractionTest {
 	public void testLongLoop() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "longLoop"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 15);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		Assignment a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "l"), constant);
 		Assignment a2 = new Assignment(cfg, unknown,
@@ -340,16 +337,15 @@ public class ConditionalsExtractionTest {
 	public void testNestedConditionals() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "nested"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 10);
-		Int32Literal constant1 = new Int32Literal(cfg, unknown, 100);
-		NotEqual loop_condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef loop_condition = new VariableRef(cfg, unknown, "b");
 		Assignment loop_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a1"),
 				constant);
 		Assignment loop_a2 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "loop_a2"),
 				constant);
-		NotEqual if_condition = new NotEqual(cfg, unknown, constant, constant1);
+		VariableRef if_condition = new VariableRef(cfg, unknown, "c");
 		Assignment if_a1 = new Assignment(cfg, unknown,
 				new VariableRef(cfg, unknown, "if_a1"),
 				constant);
@@ -407,8 +403,8 @@ public class ConditionalsExtractionTest {
 	public void testIssue188() {
 		SourceCodeLocation unknown = new SourceCodeLocation("unknown", 0, 0);
 		CFG cfg = new CFG(new CodeMemberDescriptor(unknown, unit, false, "simpleLoop"));
-		Int32Literal constant = new Int32Literal(cfg, unknown, 5);
-		NotEqual condition = new NotEqual(cfg, unknown, constant, constant);
+		VariableRef constant = new VariableRef(cfg, unknown, "a");
+		VariableRef condition = new VariableRef(cfg, unknown, "b");
 		VariableRef inner = new VariableRef(cfg, unknown, "l");
 		UnresolvedCall a1 = new UnresolvedCall(cfg, unknown,
 				CallType.STATIC,

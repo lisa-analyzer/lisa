@@ -72,4 +72,25 @@ public interface AbstractState<A extends AbstractState<A, H, V, T>,
 	 * @return the type domain
 	 */
 	T getTypeState();
+
+	/**
+	 * Yields a copy of this state, but with the {@link HeapDomain} set to top.
+	 * 
+	 * @return the copy with top heap
+	 */
+	A withTopHeap();
+
+	/**
+	 * Yields a copy of this state, but with the {@link ValueDomain} set to top.
+	 * 
+	 * @return the copy with top value
+	 */
+	A withTopValue();
+
+	/**
+	 * Yields a copy of this state, but with the {@link TypeDomain} set to top.
+	 * 
+	 * @return the copy with top type
+	 */
+	A withTopType();
 }
