@@ -1,0 +1,33 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_fsa.branching(fsa__this,_untyped_x).json", "untyped_fsa.constants(fsa__this).json", "untyped_fsa.loops(fsa__this,_untyped_x).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "375ms",
+    "end" : "2022-11-18T23:16:21.989+01:00",
+    "expressions" : "20",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2022-11-18T23:16:21.614+01:00",
+    "statements" : "12",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/fsa"
+  }
+}

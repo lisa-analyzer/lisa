@@ -1,4 +1,0 @@
-{
-  "warnings" : [ ],
-  "files" : [ "untyped_A.foo(A__this).json", "untyped_B.foo(B__this).json", "untyped_tests.subtyping(tests__this).json" ]
-}

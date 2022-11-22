@@ -1,0 +1,33 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_A.f1(A__this).json", "untyped_A.f2(A__this).json", "untyped_A.f3(A__this).json", "untyped_A.f4(A__this).json", "untyped_A.f5(A__this).json", "untyped_A.f6(A__this).json", "untyped_A.f7(A__this).json", "untyped_A.f8(A__this).json" ],
+  "info" : {
+    "cfgs" : "8",
+    "duration" : "184ms",
+    "end" : "2022-11-22T09:20:21.423+01:00",
+    "expressions" : "119",
+    "files" : "8",
+    "globals" : "2",
+    "members" : "8",
+    "programs" : "1",
+    "start" : "2022-11-22T09:20:21.239+01:00",
+    "statements" : "46",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/heap/point-based-heap/field-insensitive"
+  }
+}

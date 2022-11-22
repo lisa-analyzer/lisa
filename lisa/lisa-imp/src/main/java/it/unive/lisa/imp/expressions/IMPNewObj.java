@@ -54,7 +54,7 @@ public class IMPNewObj extends NaryExpression {
 	 * @param parameters the parameters of the constructor call
 	 */
 	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated, Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "new " : "") + type, type, parameters);
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type, parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
 

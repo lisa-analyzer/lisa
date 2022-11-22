@@ -104,11 +104,11 @@ import it.unive.lisa.program.cfg.statement.numeric.Multiplication;
 import it.unive.lisa.program.cfg.statement.numeric.Negation;
 import it.unive.lisa.program.cfg.statement.numeric.Remainder;
 import it.unive.lisa.program.cfg.statement.numeric.Subtraction;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Float32Type;
+import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.Untyped;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Float32Type;
-import it.unive.lisa.type.common.Int32Type;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
 
 /**
@@ -628,7 +628,7 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 	@Override
 	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				 true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				 false, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override

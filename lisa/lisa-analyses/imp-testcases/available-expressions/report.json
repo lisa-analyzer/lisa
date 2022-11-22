@@ -1,0 +1,33 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_ae.f0(ae__this).json", "untyped_ae.f1(ae__this).json", "untyped_ae.f2(ae__this).json", "untyped_ae.f3(ae__this).json", "untyped_ae.f4(ae__this).json" ],
+  "info" : {
+    "cfgs" : "5",
+    "duration" : "1s 977ms",
+    "end" : "2022-11-18T23:16:15.450+01:00",
+    "expressions" : "151",
+    "files" : "5",
+    "globals" : "0",
+    "members" : "5",
+    "programs" : "1",
+    "start" : "2022-11-18T23:16:13.473+01:00",
+    "statements" : "54",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/available-expressions"
+  }
+}

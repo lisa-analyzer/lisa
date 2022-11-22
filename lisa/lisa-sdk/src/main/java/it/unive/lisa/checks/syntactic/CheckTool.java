@@ -1,5 +1,6 @@
 package it.unive.lisa.checks.syntactic;
 
+import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.checks.warnings.CFGDescriptorWarning;
 import it.unive.lisa.checks.warnings.CFGWarning;
 import it.unive.lisa.checks.warnings.ExpressionWarning;
@@ -13,6 +14,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
+import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,10 +34,43 @@ public class CheckTool {
 	private final Collection<Warning> warnings;
 
 	/**
-	 * Build the tool.
+	 * The configuration of the analysis
 	 */
-	public CheckTool() {
+	private final LiSAConfiguration configuration;
+
+	/**
+	 * The file manager of the analysis
+	 */
+	private final FileManager fileManager;
+
+	/**
+	 * Build the tool.
+	 * 
+	 * @param configuration the configuration of the analysis
+	 * @param fileManager   the file manager of the analysis
+	 */
+	public CheckTool(LiSAConfiguration configuration, FileManager fileManager) {
 		warnings = Collections.newSetFromMap(new ConcurrentHashMap<>());
+		this.configuration = configuration;
+		this.fileManager = fileManager;
+	}
+
+	/**
+	 * Yields the {@link LiSAConfiguration} of the current analysis.
+	 * 
+	 * @return the configuration
+	 */
+	public LiSAConfiguration getConfiguration() {
+		return configuration;
+	}
+
+	/**
+	 * Yields the {@link FileManager} of the current analysis.
+	 * 
+	 * @return the file manager
+	 */
+	public FileManager getFileManager() {
+		return fileManager;
 	}
 
 	/**
@@ -44,7 +79,7 @@ public class CheckTool {
 	 * @param other the original tool to copy
 	 */
 	protected CheckTool(CheckTool other) {
-		this();
+		this(other.configuration, other.fileManager);
 		warnings.addAll(other.warnings);
 	}
 

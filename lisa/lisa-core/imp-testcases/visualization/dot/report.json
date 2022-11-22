@@ -1,4 +1,0 @@
-{
-  "warnings" : [ ],
-  "files" : [ "untyped_A.A(A__this)_354460623.dot", "untyped_A.getOne(A__this)_984360566.dot", "untyped_A.getPositive(A__this,_untyped_i)_984361527.dot", "untyped_A.identity(A__this,_untyped_i)_1012965692.dot", "untyped_A.identity(A__this,_untyped_i)_1070248980.dot", "untyped_A.identity(A__this,_untyped_i)_1726458834.dot", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1098852184.dot", "untyped_tests.main(tests__this).dot" ]
-}

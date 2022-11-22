@@ -4,6 +4,7 @@ plugins {
 
 dependencies {
 	api project(':lisa-sdk')
+	api project(':lisa-program')
 
 	// parser generation
 	antlr 'org.antlr:antlr4:4.11.1'

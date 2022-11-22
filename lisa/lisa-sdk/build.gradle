@@ -17,7 +17,26 @@ dependencies {
 	runtimeOnly 'org.apache.logging.log4j:log4j-core:2.17.1'
 	runtimeOnly 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
 	
+    // reflective lookup
+	api 'org.reflections:reflections:0.9.12'
+	
+	// time handling
+	api 'joda-time:joda-time:2.10.14'
+	
 	// testing
     testImplementation 'junit:junit:4.12'
 	testImplementation 'org.reflections:reflections:0.9.12'
 }
+
+tasks.register('generateVersionInfo', Copy) {
+    description = 'Generates VersionInfo.java'
+    group = 'build'
+
+	from "$projectDir"
+    into "$projectDir/src/main/java/it/unive/lisa"
+    include('VersionInfo.template')
+	rename ('VersionInfo.template', 'VersionInfo.java')
+	filter { line -> line.replaceAll("@PRJ_VERSION@", project.version) }
+}
+
+compileJava.dependsOn generateVersionInfo

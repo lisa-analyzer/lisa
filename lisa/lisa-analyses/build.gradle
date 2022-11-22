@@ -1,0 +1,9 @@
+dependencies {
+	// internal
+	api project(':lisa-sdk')
+	testImplementation project(':lisa-imp')
+
+	// testing
+	testImplementation 'nl.jqno.equalsverifier:equalsverifier:3.6'
+    testImplementation 'junit:junit:4.12'
+}
