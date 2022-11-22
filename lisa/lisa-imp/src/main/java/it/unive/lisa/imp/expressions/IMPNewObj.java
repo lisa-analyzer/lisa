@@ -25,7 +25,6 @@ import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import java.util.Collections;
 import java.util.Objects;
-
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
@@ -40,9 +39,9 @@ import org.apache.commons.lang3.ArrayUtils;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewObj extends NaryExpression {
-	
-	private final boolean staticallyAllocated; 
-	
+
+	private final boolean staticallyAllocated;
+
 	/**
 	 * Builds the object allocation and initialization.
 	 * 
@@ -53,8 +52,10 @@ public class IMPNewObj extends NaryExpression {
 	 * @param type       the type of the object that is being created
 	 * @param parameters the parameters of the constructor call
 	 */
-	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated, Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type, parameters);
+	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
+			Expression... parameters) {
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
+				parameters);
 		this.staticallyAllocated = staticallyAllocated;
 	}
 
@@ -131,6 +132,5 @@ public class IMPNewObj extends NaryExpression {
 		IMPNewObj other = (IMPNewObj) obj;
 		return staticallyAllocated == other.staticallyAllocated;
 	}
-	
-	
+
 }

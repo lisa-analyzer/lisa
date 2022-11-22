@@ -1,7 +1,5 @@
 package it.unive.lisa.imp.expressions;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,6 +19,7 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import java.util.Objects;
 
 /**
  * An expression modeling the array allocation operation
@@ -31,9 +30,9 @@ import it.unive.lisa.type.Type;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class IMPNewArray extends NaryExpression {
-	
+
 	private final boolean staticallyAllocated;
-	
+
 	/**
 	 * Builds the array allocation.
 	 * 
@@ -44,7 +43,8 @@ public class IMPNewArray extends NaryExpression {
 	 * @param type       the type of the array's elements
 	 * @param dimensions the dimensions of the array
 	 */
-	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated, Expression[] dimensions) {
+	public IMPNewArray(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
+			Expression[] dimensions) {
 		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type + "[]",
 				ArrayType.lookup(type, dimensions.length), dimensions);
 		this.staticallyAllocated = staticallyAllocated;
@@ -93,6 +93,5 @@ public class IMPNewArray extends NaryExpression {
 		IMPNewArray other = (IMPNewArray) obj;
 		return staticallyAllocated == other.staticallyAllocated;
 	}
-	
-	
+
 }

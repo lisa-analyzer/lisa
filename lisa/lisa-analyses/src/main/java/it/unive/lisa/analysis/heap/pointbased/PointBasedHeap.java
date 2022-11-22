@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -30,6 +23,12 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -52,15 +51,15 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 */
 	public final HeapEnvironment<AllocationSites> heapEnv;
 
-	
 	private final List<HeapReplacement> replacements;
+
 	/**
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
 	public PointBasedHeap() {
 		this(new HeapEnvironment<>(new AllocationSites()), new ArrayList<>());
 	}
-	
+
 	/**
 	 * Builds a new instance of field-insensitive point-based heap from its heap
 	 * environment.
@@ -114,17 +113,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
 					if (star_y instanceof StaticAllocationSite) {
-						// no aliasing: star_y must be cloned and the clone must be assigned to id
+						// no aliasing: star_y must be cloned and the clone must
+						// be assigned to id
 						StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
 								id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
 						result = result.lub(from(new PointBasedHeap(heap)));
-						
+
 						HeapReplacement replacement = new HeapReplacement();
 						replacement.addSource(star_y);
 						replacement.addTarget(star_y);
 						replacement.addTarget(clone);
-						
+
 						result.replacements.add(replacement);
 					} else {
 						// aliasing: id and star_y points to the same object
@@ -278,13 +278,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
 					AllocationSite e;
-					if (site instanceof StaticAllocationSite) 
+					if (site instanceof StaticAllocationSite)
 						e = new StaticAllocationSite(
 								expression.getStaticType(),
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
-					else 
+					else
 						e = new DynamicAllocationSite(
 								expression.getStaticType(),
 								site.getLocationName(),
@@ -304,19 +304,18 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id;
-			if (expression.isStaticallyAllocated()) 
+			if (expression.isStaticallyAllocated())
 				id = new StaticAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
-			else 
+			else
 				id = new DynamicAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
-
 
 			if (expression.hasRuntimeTypes())
 				id.setRuntimeTypes(expression.getRuntimeTypes(null));
@@ -326,7 +325,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapReference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-						throws SemanticException {
+				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression loc : arg)
@@ -346,7 +345,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(HeapDereference expression, ExpressionSet<ValueExpression> arg,
 				Object... params)
-						throws SemanticException {
+				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)

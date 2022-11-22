@@ -1,11 +1,10 @@
 package it.unive.lisa.symbolic.heap;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.type.Type;
+import java.util.Objects;
 
 /**
  * An allocation of a memory location.
@@ -15,11 +14,10 @@ import it.unive.lisa.type.Type;
 public class HeapAllocation extends HeapExpression {
 
 	/**
-	 * If this allocation is statically or dynamically allocated. 
+	 * If this allocation is statically or dynamically allocated.
 	 */
 	private final boolean isStaticalltAllocated;
-	
-	
+
 	/**
 	 * Builds the heap allocation.
 	 * 
@@ -30,7 +28,7 @@ public class HeapAllocation extends HeapExpression {
 	public HeapAllocation(Type staticType, CodeLocation location) {
 		this(staticType, location, false);
 	}
-	
+
 	/**
 	 * Builds the heap allocation.
 	 * 
@@ -54,7 +52,7 @@ public class HeapAllocation extends HeapExpression {
 	public boolean isStaticallyAllocated() {
 		return isStaticalltAllocated;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
