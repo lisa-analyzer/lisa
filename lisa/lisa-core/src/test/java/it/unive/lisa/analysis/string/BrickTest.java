@@ -1,14 +1,14 @@
 package it.unive.lisa.analysis.string;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Collection;
 import java.util.HashSet;
+
+import it.unive.lisa.analysis.SemanticException;
 import org.junit.Test;
 
-public class BrickTest {
+import static org.junit.Assert.*;
 
+public class BrickTest {
 	@Test
 	public void testGetReps() {
 		Collection<String> hashSet = new HashSet<>();
@@ -125,5 +125,74 @@ public class BrickTest {
 		Brick brick = new Brick(1, 2, hashSet);
 
 		assertEquals(brick.toString(), "[ {min: 1}, {max: 2}, {strings: de, mo, re} ]");
+	}
+
+	@Test
+	public void testLessOrEqualsAux() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+
+		Brick brick = new Brick(1, 2, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("mo");
+		hashSet1.add("de");
+		hashSet1.add("re");
+
+		Brick brick1 = new Brick(0, 3, hashSet1);
+
+		assertTrue(brick.lessOrEqualAux(brick1));
+	}
+	@Test
+	public void testLessOrEqualsAux1() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+		hashSet.add("re");
+
+		Brick brick = new Brick(1, 2, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("mo");
+		hashSet1.add("de");
+
+		Brick brick1 = new Brick(0, 3, hashSet1);
+
+		assertFalse(brick.lessOrEqualAux(brick1));
+	}
+	@Test
+	public void testLessOrEqualsAux2() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+
+		Brick brick = new Brick(0, 2, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("mo");
+		hashSet1.add("de");
+		hashSet1.add("re");
+
+		Brick brick1 = new Brick(1, 3, hashSet1);
+
+		assertFalse(brick.lessOrEqualAux(brick1));
+	}
+	@Test
+	public void testLessOrEqualsAux3() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+
+		Brick brick = new Brick(1, 4, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("mo");
+		hashSet1.add("de");
+		hashSet1.add("re");
+
+		Brick brick1 = new Brick(0, 3, hashSet1);
+
+		assertFalse(brick.lessOrEqualAux(brick1));
 	}
 }
