@@ -1,0 +1,33 @@
+{
+  "warnings" : [ ],
+  "files" : [ "js/cytoscape-3.21.1.min.js", "js/cytoscape-graphml-1.0.6-hier.js", "js/jquery-3.0.0.min.js", "report.json", "untyped_A.A(A__this)_354460623.html", "untyped_A.getOne(A__this)_984360566.html", "untyped_A.getPositive(A__this,_untyped_i)_984361527.html", "untyped_A.identity(A__this,_untyped_i)_1012965692.html", "untyped_A.identity(A__this,_untyped_i)_1070248980.html", "untyped_A.identity(A__this,_untyped_i)_1726458834.html", "untyped_tests.helper(tests__this,_untyped_i,_untyped_dispatcher)_1098852184.html", "untyped_tests.main(tests__this).html" ],
+  "info" : {
+    "cfgs" : "6",
+    "duration" : "463ms",
+    "end" : "2022-11-18T23:16:23.791+01:00",
+    "expressions" : "49",
+    "files" : "11",
+    "globals" : "0",
+    "members" : "6",
+    "programs" : "1",
+    "start" : "2022-11-18T23:16:23.328+01:00",
+    "statements" : "21",
+    "units" : "2",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "HTML",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/visualization/html"
+  }
+}

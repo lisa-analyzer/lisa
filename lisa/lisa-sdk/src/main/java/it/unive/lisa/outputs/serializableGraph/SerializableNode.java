@@ -1,10 +1,16 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * A node of a {@link SerializableGraph}, represented by a numeric id.
@@ -18,6 +24,10 @@ public class SerializableNode implements Comparable<SerializableNode> {
 	private final List<Integer> subNodes;
 
 	private final String text;
+
+	// Capture all other fields that Jackson does not match during
+	// deserialization
+	private final Map<String, String> unknownFields;
 
 	/**
 	 * Builds an empty (invalid) node.
@@ -38,6 +48,7 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		this.id = id;
 		this.subNodes = subNodes;
 		this.text = text;
+		unknownFields = new TreeMap<>();
 	}
 
 	/**
@@ -71,6 +82,27 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		return text;
 	}
 
+	/**
+	 * Yields all fields that were unrecognized during deserialization.
+	 * 
+	 * @return the other fields
+	 */
+	@JsonAnyGetter
+	public Map<String, String> otherFields() {
+		return unknownFields;
+	}
+
+	/**
+	 * Adds a field that was not recognized during deserialization.
+	 * 
+	 * @param name  he name of the field
+	 * @param value the value of the field
+	 */
+	@JsonAnySetter
+	public void setOtherField(String name, String value) {
+		unknownFields.put(name, value);
+	}
+
 	@Override
 	public int compareTo(SerializableNode o) {
 		int cmp;
@@ -83,6 +115,27 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		for (int i = 0; i < subNodes.size(); i++)
 			if ((cmp = subNodes.get(i) - o.subNodes.get(i)) != 0)
 				return cmp;
+
+		if ((cmp = Integer.compare(unknownFields.keySet().size(), o.unknownFields.keySet().size())) != 0)
+			return cmp;
+
+		CollectionsDiffBuilder<
+				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
+						o.unknownFields.keySet());
+		builder.compute(String::compareTo);
+
+		if (!builder.sameContent())
+			// same size means that both have at least one element that is
+			// different
+			return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
+
+		// same keys: just iterate over them and apply comparisons
+		// since unknownFields is sorted, the order of iteration will be
+		// consistent
+		for (Entry<String, String> entry : unknownFields.entrySet())
+			if ((cmp = entry.getValue().compareTo(o.unknownFields.get(entry.getKey()))) != 0)
+				return cmp;
+
 		return 0;
 	}
 
@@ -93,6 +146,7 @@ public class SerializableNode implements Comparable<SerializableNode> {
 		result = prime * result + id;
 		result = prime * result + ((subNodes == null) ? 0 : subNodes.hashCode());
 		result = prime * result + ((text == null) ? 0 : text.hashCode());
+		result = prime * result + ((unknownFields == null) ? 0 : unknownFields.hashCode());
 		return result;
 	}
 
@@ -116,6 +170,11 @@ public class SerializableNode implements Comparable<SerializableNode> {
 			if (other.text != null)
 				return false;
 		} else if (!text.equals(other.text))
+			return false;
+		if (unknownFields == null) {
+			if (other.unknownFields != null)
+				return false;
+		} else if (!unknownFields.equals(other.unknownFields))
 			return false;
 		return true;
 	}

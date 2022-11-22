@@ -659,40 +659,4 @@ public abstract class BaseNonRelationalValueDomain<T extends BaseNonRelationalVa
 			UnaryOperator operator, ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		return environment;
 	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public T glb(T other) throws SemanticException {
-		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other)
-				|| this.lessOrEqual(other))
-			return (T) this;
-
-		if (other.isBottom() || this.isTop() || other.lessOrEqual((T) this))
-			return other;
-
-		return glbAux(other);
-	}
-
-	/**
-	 * Performs the greatest lower bound operation between this domain element
-	 * and {@code other}, assuming that base cases have already been handled. In
-	 * particular, it is guaranteed that:
-	 * <ul>
-	 * <li>{@code other} is not {@code null}</li>
-	 * <li>{@code other} is neither <i>top</i> nor <i>bottom</i></li>
-	 * <li>{@code this} is neither <i>top</i> nor <i>bottom</i></li>
-	 * <li>{@code this} and {@code other} are not the same object (according
-	 * both to {@code ==} and to {@link Object#equals(Object)})</li>
-	 * <li>{@code this} and {@code other} are not comparable</li>
-	 * </ul>
-	 * 
-	 * @param other the other domain element
-	 * 
-	 * @return the greatest lower bound between this domain element and other
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	public T glbAux(T other) throws SemanticException {
-		return bottom();
-	}
 }

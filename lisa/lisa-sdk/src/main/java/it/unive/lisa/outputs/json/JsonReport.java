@@ -2,12 +2,16 @@ package it.unive.lisa.outputs.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import it.unive.lisa.LiSAConfiguration;
+import it.unive.lisa.LiSAReport;
+import it.unive.lisa.LiSARunInfo;
 import it.unive.lisa.checks.warnings.Warning;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -23,22 +27,33 @@ public class JsonReport {
 
 	private final Set<String> files;
 
+	private final Map<String, String> info;
+
+	private final Map<String, String> configuration;
+
 	/**
 	 * Builds an empty report.
 	 */
 	public JsonReport() {
-		this(Collections.emptyList(), Collections.emptyList());
+		this(Collections.emptyList(), Collections.emptyList(), Map.of(), Map.of());
 	}
 
 	/**
-	 * Builds the report, containing the given warnings and files.
+	 * Builds the report, starting from the given one.
 	 * 
-	 * @param warnings the collection of warnings to map to {@link JsonWarning}s
-	 * @param files    the collections of file names to include
+	 * @param report the original report
 	 */
-	public JsonReport(Collection<Warning> warnings, Collection<String> files) {
-		this.warnings = new TreeSet<>();
+	public JsonReport(LiSAReport report) {
+		this(report.getWarnings(), report.getCreatedFiles(), report.getInfo().toPropertyBag(),
+				report.getConfiguration().toPropertyBag());
+	}
+
+	private JsonReport(Collection<Warning> warnings, Collection<String> files, Map<String, String> info,
+			Map<String, String> configuration) {
 		this.files = new TreeSet<>(files);
+		this.info = info;
+		this.configuration = configuration;
+		this.warnings = new TreeSet<>();
 		for (Warning warn : warnings)
 			this.warnings.add(new JsonWarning(warn));
 	}
@@ -63,6 +78,28 @@ public class JsonReport {
 	 */
 	public Collection<String> getFiles() {
 		return files;
+	}
+
+	/**
+	 * Yields the configuration of the analysis, in the form of a property bag.
+	 * This corresponds to the object returned by
+	 * {@link LiSAConfiguration#toPropertyBag()}.
+	 * 
+	 * @return the configuration
+	 */
+	public Map<String, String> getConfiguration() {
+		return configuration;
+	}
+
+	/**
+	 * Yields the information about the analysis ran, in the form of a property
+	 * bag. This corresponds to the object returned by
+	 * {@link LiSARunInfo#toPropertyBag()}.
+	 * 
+	 * @return the configuration
+	 */
+	public Map<String, String> getInfo() {
+		return info;
 	}
 
 	/**
@@ -101,6 +138,8 @@ public class JsonReport {
 		int result = 1;
 		result = prime * result + ((files == null) ? 0 : files.hashCode());
 		result = prime * result + ((warnings == null) ? 0 : warnings.hashCode());
+		result = prime * result + ((info == null) ? 0 : info.hashCode());
+		result = prime * result + ((configuration == null) ? 0 : configuration.hashCode());
 		return result;
 	}
 
@@ -123,12 +162,23 @@ public class JsonReport {
 				return false;
 		} else if (!warnings.equals(other.warnings))
 			return false;
+		if (info == null) {
+			if (other.info != null)
+				return false;
+		} else if (!info.equals(other.info))
+			return false;
+		if (configuration == null) {
+			if (other.configuration != null)
+				return false;
+		} else if (!configuration.equals(other.configuration))
+			return false;
 		return true;
 	}
 
 	@Override
 	public String toString() {
-		return "JsonAnalysisReport [findings=" + warnings + ", files=" + files + "]";
+		return "JsonReport [warnings=" + warnings + ", files=" + files + ", info=" + info + ", configuration="
+				+ configuration + "]";
 	}
 
 	/**

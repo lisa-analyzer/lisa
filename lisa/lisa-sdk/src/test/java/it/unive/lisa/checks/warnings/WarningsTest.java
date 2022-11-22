@@ -15,7 +15,7 @@ import it.unive.lisa.program.cfg.CodeMemberDescriptor;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.literal.Int32Literal;
+import it.unive.lisa.program.cfg.statement.VariableRef;
 import java.util.List;
 import org.junit.Test;
 
@@ -34,14 +34,14 @@ public class WarningsTest {
 			false, "foo1");
 	private static final CFG cfg1 = new CFG(descriptor1);
 	private static final Statement st1 = new NoOp(cfg1, new SourceCodeLocation("fake", 3, 0));
-	private static final Expression e1 = new Int32Literal(cfg1, new SourceCodeLocation("fake", 4, 0), 5);
+	private static final Expression e1 = new VariableRef(cfg1, new SourceCodeLocation("fake", 4, 0), "x");
 
 	private static final CodeMemberDescriptor descriptor2 = new CodeMemberDescriptor(
 			new SourceCodeLocation("fake", 2, 1), unit2,
 			false, "foo2");
 	private static final CFG cfg2 = new CFG(descriptor2);
 	private static final Statement st2 = new NoOp(cfg2, new SourceCodeLocation("fake", 3, 1));
-	private static final Expression e2 = new Int32Literal(cfg2, new SourceCodeLocation("fake", 4, 1), 5);
+	private static final Expression e2 = new VariableRef(cfg2, new SourceCodeLocation("fake", 4, 1), "x");
 
 	@Test
 	public void testSameTypeDifferentMessage() {

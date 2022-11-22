@@ -11,9 +11,9 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.Substring;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.Int32Type;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.Int32Type;
+import it.unive.lisa.program.type.StringType;
 
 /**
  * The native construct representing the substring operation. This construct can

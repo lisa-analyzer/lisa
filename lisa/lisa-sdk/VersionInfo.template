@@ -1,0 +1,16 @@
+package it.unive.lisa;
+
+/**
+ * Compiler-generated class that holds information about 
+ * versioning and other build metadata. 
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class VersionInfo {
+
+	/**
+	* The current version of LiSA.
+	*/
+	public static final String VERSION = "@PRJ_VERSION@";
+
+}
