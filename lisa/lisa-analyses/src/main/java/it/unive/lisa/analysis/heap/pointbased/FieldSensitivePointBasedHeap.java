@@ -7,9 +7,14 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.value.HeapLocation;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -31,10 +36,17 @@ import java.util.Set;
 public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	/**
+	 * Tracks the fields of each allocation site.
+	 */
+	private final Map<AllocationSite, Set<SymbolicExpression>> fields;
+
+	/**
 	 * Builds a new instance of field-sensitive point-based heap.
 	 */
 	public FieldSensitivePointBasedHeap() {
 		super();
+		this.fields = new HashMap<AllocationSite, Set<SymbolicExpression>>();
+
 	}
 
 	/**
@@ -44,7 +56,74 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+		this(heapEnv, new HashMap<>());
+	}
+
+	/**
+	 * Builds a new instance of field-sensitive point-based heap from its heap
+	 * environment.
+	 * 
+	 * @param heapEnv the heap environment that this instance tracks
+	 */
+	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv,
+			Map<AllocationSite, Set<SymbolicExpression>> fields) {
 		super(heapEnv);
+		this.fields = fields;
+	}
+
+	@Override
+	public PointBasedHeap assign(Identifier id, SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+
+		PointBasedHeap sss = smallStepSemantics(expression, pp);
+		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
+
+		PointBasedHeap result = bottom();
+		for (ValueExpression exp : rewrittenExp)
+			if (exp instanceof MemoryPointer) {
+				MemoryPointer pid = (MemoryPointer) exp;
+				HeapLocation star_y = pid.getReferencedLocation();
+				if (id instanceof MemoryPointer) {
+					// we have x = y, where both are pointers
+					// we perform *x = *y so that x and y
+					// become aliases
+					Identifier star_x = ((MemoryPointer) id).getReferencedLocation();
+					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
+					result = result.lub(from(new PointBasedHeap(heap)));
+				} else {
+					if (star_y instanceof StaticAllocationSite) {
+						// no aliasing: star_y must be cloned and the clone must
+						// be assigned to id
+						StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
+								id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
+						result = result.lub(from(new PointBasedHeap(heap)));
+
+						if (fields.containsKey(star_y))
+							for (SymbolicExpression field : fields.get(star_y)) {
+								HeapReplacement replacement = new HeapReplacement();
+								StaticAllocationSite cloneWithField = new StaticAllocationSite(field.getStaticType(),
+										id.getCodeLocation().toString(), field, star_y.isWeak(), id.getCodeLocation());
+
+								StaticAllocationSite star_yWithField = new StaticAllocationSite(field.getStaticType(),
+										star_y.getCodeLocation().toString(), field, star_y.isWeak(),
+										star_y.getCodeLocation());
+								replacement.addSource(star_yWithField);
+								replacement.addTarget(cloneWithField);
+								replacement.addTarget(star_yWithField);
+
+								result.getSubstitution().add(replacement);
+							}
+					} else {
+						// aliasing: id and star_y points to the same object
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
+						result = result.lub(from(new PointBasedHeap(heap)));
+					}
+				}
+			} else
+				result = result.lub(sss);
+
+		return result;
 	}
 
 	@Override
@@ -86,12 +165,24 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		private void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
 				Set<ValueExpression> result, AllocationSite site) {
 			for (SymbolicExpression target : child) {
-				AllocationSite e = new AllocationSite(
-						expression.getStaticType(),
-						site.getLocationName(),
-						target,
-						site.isWeak(),
-						site.getCodeLocation());
+				AllocationSite e;
+
+				if (site instanceof StaticAllocationSite)
+					e = new StaticAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							target,
+							site.isWeak(),
+							site.getCodeLocation());
+				else
+					e = new DynamicAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							target,
+							site.isWeak(),
+							site.getCodeLocation());
+
+				addField(site, target);
 				if (expression.hasRuntimeTypes())
 					e.setRuntimeTypes(expression.getRuntimeTypes(null));
 				result.add(e);
@@ -108,7 +199,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				weak = true;
 			else
 				weak = false;
-			AllocationSite e = new AllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
+			AllocationSite e;
+			if (expression.isStaticallyAllocated())
+				e = new StaticAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			else
+				e = new DynamicAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(e);
@@ -122,5 +219,37 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			return null;
 		}
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap mk(PointBasedHeap reference) {
+		return new FieldSensitivePointBasedHeap(reference.heapEnv, ((FieldSensitivePointBasedHeap) reference).fields);
+
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(fields);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FieldSensitivePointBasedHeap other = (FieldSensitivePointBasedHeap) obj;
+		return Objects.equals(fields, other.fields);
+	}
+
+	private void addField(AllocationSite site, SymbolicExpression field) {
+		if (!fields.containsKey(site))
+			fields.put(site, new HashSet<>());
+		fields.get(site).add(field);
 	}
 }
