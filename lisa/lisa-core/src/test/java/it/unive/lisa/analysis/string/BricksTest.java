@@ -320,4 +320,65 @@ public class BricksTest {
 
 		assertFalse(bricks.lessOrEqualAux(bricks1));
 	}
+
+	@Test
+	public void testLubAux() throws SemanticException {
+		List<Brick> bricksList = new ArrayList<>();
+		List<Brick> bricksList1 = new ArrayList<>();
+
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+
+		Brick brick = new Brick(1, 4, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("mo");
+		hashSet1.add("de");
+		hashSet1.add("re");
+
+		Brick brick1 = new Brick(0, 5, hashSet1);
+
+		Collection<String> hashSet2 = new HashSet<>();
+		hashSet2.add("ge");
+		hashSet2.add("ze");
+
+		Brick brick2 = new Brick(2, 3, hashSet2);
+
+		Collection<String> hashSet3 = new HashSet<>();
+		hashSet3.add("ge");
+		hashSet3.add("ze");
+		hashSet3.add("le");
+
+		Brick brick3 = new Brick(1, 4, hashSet3);
+
+		bricksList.add(brick);
+		bricksList.add(brick2);
+
+		bricksList1.add(brick1);
+		bricksList1.add(brick3);
+
+		Bricks bricks = new Bricks(bricksList);
+		Bricks bricks1 = new Bricks(bricksList1);
+
+		List<Brick> resultList = new ArrayList<>();
+
+		Collection<String> resultStrings = new HashSet<>();
+
+		resultStrings.add("mo");
+		resultStrings.add("de");
+		resultStrings.add("re");
+
+		Collection<String> resultStrings1 = new HashSet<>();
+
+		resultStrings1.add("ge");
+		resultStrings1.add("ze");
+		resultStrings1.add("le");
+
+		resultList.add(new Brick(0,5,resultStrings));
+		resultList.add(new Brick(1,4,resultStrings1));
+
+		assertEquals(bricks.lubAux(bricks1), new Bricks(resultList));
+
+	}
 }

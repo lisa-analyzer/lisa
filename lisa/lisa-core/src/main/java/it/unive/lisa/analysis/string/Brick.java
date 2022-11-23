@@ -111,30 +111,11 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
 	private void recGetReps(Collection<String> reps, int min, int numberOfReps, String currentStr) {
-		if (min > this.getMax() && numberOfReps >= this.getMin())// If the
-																	// number of
-																	// reps
-																	// (starting
-																	// from min)
-																	// exceeds
-																	// the max,
-																	// then
-																	// stops the
-																	// recursion
+		if (min > this.getMax() && numberOfReps >= this.getMin())
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
-				if ((!currentStr.equals("") || this.getMin() == 0) && numberOfReps >= this.getMin()) // numberOfReps
-																										// has
-																										// to
-																										// be
-																										// ALWAYS
-																										// greater
-																										// or
-																										// equal
-																										// than
-																										// the
-																										// min
+				if ((!currentStr.equals("") || this.getMin() == 0) && numberOfReps >= this.getMin())
 					reps.add(currentStr);
 
 				recGetReps(reps, min + 1, numberOfReps + 1, currentStr + string);
