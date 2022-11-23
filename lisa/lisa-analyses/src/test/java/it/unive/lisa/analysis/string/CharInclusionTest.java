@@ -4,14 +4,16 @@ import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
 import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Test;
 
 public class CharInclusionTest {
 
 	@Test
 	public void representationTest() {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -27,11 +29,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void lubAuxTest() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -65,11 +67,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -91,11 +93,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux1() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -120,11 +122,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux2() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -147,11 +149,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux3() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -177,11 +179,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux4() throws SemanticException {
-		HashSet<Character> certainlyContained = new HashSet<>();
-		HashSet<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new HashSet<>();
+		Set<Character> maybeContained = new HashSet<>();
 
-		HashSet<Character> otherCertainlyContained = new HashSet<>();
-		HashSet<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new HashSet<>();
+		Set<Character> otherMaybeContained = new HashSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
