@@ -8,9 +8,8 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.*;
+import org.apache.commons.lang3.StringUtils;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
@@ -20,7 +19,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
 
-	public Bricks(){
+	public Bricks() {
 		this(getTopList());
 	}
 
@@ -30,14 +29,15 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks lubAux(Bricks other) throws SemanticException {
-		if(this.bricks.size() < other.bricks.size())
-			this.bricks = this.padList(other);
-		else
-			other.bricks = other.padList(this);
+		if (this.bricks.size() != other.bricks.size())
+			if (this.bricks.size() < other.bricks.size())
+				this.bricks = this.padList(other);
+			else
+				other.bricks = other.padList(this);
 
 		List<Brick> bricks = new ArrayList<>();
 
-		for(int i = 0; i < this.bricks.size(); ++i )
+		for (int i = 0; i < this.bricks.size(); ++i)
 			bricks.add(this.bricks.get(i).lubAux(other.bricks.get(i)));
 
 		return new Bricks(bricks);
@@ -45,20 +45,22 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
-		if(this.bricks.size() < other.bricks.size())
-			this.bricks = this.padList(other);
-		else
-			other.bricks = other.padList(this);
+		if (this.bricks.size() != other.bricks.size())
+			if (this.bricks.size() < other.bricks.size())
+				this.bricks = this.padList(other);
+			else
+				other.bricks = other.padList(this);
 
-		for(int i = 0; i < this.bricks.size(); ++i )
-			if(!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
+		for (int i = 0; i < this.bricks.size(); ++i)
+			if (!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
 				return false;
 
 		return true;
 	}
 
 	@Override
-	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) throws SemanticException {
+	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp)
+			throws SemanticException {
 		return super.evalBinaryExpression(operator, left, right, pp);
 	}
 
@@ -67,7 +69,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 
-			if(!str.isEmpty()) {
+			if (!str.isEmpty()) {
 				Collection<String> strings = new HashSet<>();
 				strings.add(str);
 
@@ -122,9 +124,8 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 		Collection<String> resultSet = new HashSet<>();
 
-		firstBrick.getStrings().forEach(string ->
-				secondBrick.getStrings().forEach(otherStr ->
-						resultSet.add(string + otherStr)));
+		firstBrick.getStrings()
+				.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
 
 		this.bricks.set(first, new Brick(1, 1, resultSet));
 		this.bricks.remove(second);
@@ -136,7 +137,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		this.bricks.set(index, new Brick(1, 1, brick.getReps()));
 	}
 
-	private void rule4(int first, int second){
+	private void rule4(int first, int second) {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
@@ -157,69 +158,62 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	}
 
-
-	public void normBricks() { // Applies the 5 normalization rules of the Bricks domain
+	public void normBricks() {
 		List<Brick> thisBricks = this.bricks;
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
-		thisBricks.removeIf(brick -> brick.getMin() == 0 && //Rule 1
+		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
 				brick.getMax() == 0 &&
 				brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
 			Brick currentBrick = thisBricks.get(i);
 			Brick nextBrick = null;
-				boolean lastBrick = i == thisBricks.size() - 1;
+			boolean lastBrick = i == thisBricks.size() - 1;
 
 			if (!lastBrick)
 				nextBrick = thisBricks.get(i + 1);
 
 			if (!lastBrick)
 				if (currentBrick.getMin() == 1 && currentBrick.getMax() == 1 &&
-						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) { //Rule 2
+						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) {
+
 					rule2(i, i + 1);
 
 					lastBrick = i == thisBricks.size() - 1;
 				}
 
-			if (currentBrick.getMin() == currentBrick.getMax()) //Rule 3
+			if (currentBrick.getMin() == currentBrick.getMax())
 				rule3(i);
 
 			if (!lastBrick)
-				if (currentBrick.getStrings().equals(nextBrick.getStrings()))//Rule 4
+				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
+
 					rule4(i, i + 1);
 
 			if (currentBrick.getMin() >= 1 &&
-					currentBrick.getMin() != currentBrick.getMax()) //Rule 5
+					currentBrick.getMin() != currentBrick.getMax())
 				rule5(i);
 		}
-		
-		if(!thisBricks.equals(tempList))
+
+		if (!thisBricks.equals(tempList))
 			normBricks();
 	}
 
-	private static List<Brick> getTopList(){
+	private static List<Brick> getTopList() {
 		List<Brick> bricks = new ArrayList<>();
 		bricks.add(new Brick());
 
 		return bricks;
 	}
 
-	public List<Brick> padList(Bricks other){
-		int thisSize = this.bricks.size();
-		int otherSize = other.bricks.size();
-
-		if(thisSize > otherSize)
+	public List<Brick> padList(Bricks other) {
+		if (this.bricks.size() >= other.bricks.size())
 			throw new IllegalArgumentException();
 
-		List<Brick> shorter = other.bricks;
-		List<Brick> longer = this.bricks;
-
-		if(thisSize < otherSize) {
-			shorter = this.bricks;
-			longer = other.bricks;
-		}
+		List<Brick> shorter = this.bricks;
+		List<Brick> longer = other.bricks;
 
 		int diff = longer.size() - shorter.size();
 		int emptyAdded = 0;
@@ -243,4 +237,3 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 }
-

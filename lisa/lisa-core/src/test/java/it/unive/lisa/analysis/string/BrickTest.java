@@ -1,12 +1,11 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Collection;
-import java.util.HashSet;
+import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
+import java.util.Collection;
+import java.util.HashSet;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class BrickTest {
 	@Test
@@ -95,6 +94,7 @@ public class BrickTest {
 
 		assertEquals(brick.getReps(), result);
 	}
+
 	@Test
 	public void testGetReps5() {
 		Collection<String> set = new HashSet<>();
@@ -102,7 +102,7 @@ public class BrickTest {
 		set.add("a");
 		set.add("b");
 
-		Brick brick = new Brick(2,2 , set);
+		Brick brick = new Brick(2, 2, set);
 
 		Collection<String> result = new HashSet<>();
 
@@ -116,7 +116,7 @@ public class BrickTest {
 	}
 
 	@Test
-	public void testToString(){
+	public void testToString() {
 		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
@@ -144,6 +144,7 @@ public class BrickTest {
 
 		assertTrue(brick.lessOrEqualAux(brick1));
 	}
+
 	@Test
 	public void testLessOrEqualsAux1() throws SemanticException {
 		Collection<String> hashSet = new HashSet<>();
@@ -161,6 +162,7 @@ public class BrickTest {
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
+
 	@Test
 	public void testLessOrEqualsAux2() throws SemanticException {
 		Collection<String> hashSet = new HashSet<>();
@@ -178,6 +180,7 @@ public class BrickTest {
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
+
 	@Test
 	public void testLessOrEqualsAux3() throws SemanticException {
 		Collection<String> hashSet = new HashSet<>();
@@ -195,6 +198,7 @@ public class BrickTest {
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
+
 	@Test
 	public void testLubAux() throws SemanticException {
 		Collection<String> hashSet = new HashSet<>();
@@ -219,17 +223,18 @@ public class BrickTest {
 		resultHashSet.add("le");
 		resultHashSet.add("lo");
 
-		Brick resultBrick = new Brick(0,4,resultHashSet);
+		Brick resultBrick = new Brick(0, 4, resultHashSet);
 
 		assertEquals(brick.lubAux(brick1), resultBrick);
 	}
+
 	@Test
 	public void testLubAux1() throws SemanticException {
 		Collection<String> hashSet = new HashSet<>();
 		hashSet.add("a");
 		hashSet.add("b");
 
-		Brick brick = new Brick(1,3, hashSet);
+		Brick brick = new Brick(1, 3, hashSet);
 
 		Collection<String> hashSet1 = new HashSet<>();
 		hashSet1.add("a");
@@ -243,7 +248,7 @@ public class BrickTest {
 		resultHashSet.add("c");
 		resultHashSet.add("b");
 
-		Brick resultBrick = new Brick(0,3,resultHashSet);
+		Brick resultBrick = new Brick(0, 3, resultHashSet);
 
 		assertEquals(brick.lubAux(brick1), resultBrick);
 	}
