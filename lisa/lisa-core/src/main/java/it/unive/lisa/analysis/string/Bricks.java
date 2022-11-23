@@ -51,17 +51,17 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
-	public Bricks top() { // TODO
+	public Bricks top() {
 		return TOP;
 	}
 
 	@Override
-	public Bricks bottom() { // TODO
+	public Bricks bottom() {
 		return BOTTOM;
 	}
 
 	@Override
-	public DomainRepresentation representation() { // TODO
+	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
