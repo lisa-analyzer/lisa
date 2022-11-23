@@ -1,2 +1,2 @@
 rootProject.name = 'lisa'
-include 'lisa-sdk', 'lisa-imp', 'lisa-core'
+include 'lisa-sdk', 'lisa-imp', 'lisa-analyses', 'lisa-program'

@@ -112,10 +112,24 @@ public class ValueEnvironment<T extends NonRelationalValueDomain<T>>
 	}
 
 	@Override
+	public ValueEnvironment<T> wideningAux(ValueEnvironment<T> other) throws SemanticException {
+		ValueEnvironment<
+				T> newEnv = functionalLift(other, this::lubKeys, (o1, o2) -> o1 == null ? o2 : o1.widening(o2));
+		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.widening(other.stack));
+	}
+
+	@Override
 	public ValueEnvironment<T> glbAux(ValueEnvironment<T> other)
 			throws SemanticException {
 		ValueEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
 		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.glb(other.stack));
+	}
+
+	@Override
+	public ValueEnvironment<T> narrowingAux(ValueEnvironment<T> other) throws SemanticException {
+		ValueEnvironment<
+				T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.narrowing(o2));
+		return new ValueEnvironment<>(newEnv.lattice, newEnv.function, stack.narrowing(other.stack));
 	}
 
 	@Override

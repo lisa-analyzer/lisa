@@ -109,12 +109,6 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 	}
 
 	@Override
-	public HeapEnvironment<T> glbAux(HeapEnvironment<T> other) throws SemanticException {
-		HeapEnvironment<T> newEnv = functionalLift(other, this::glbKeys, (o1, o2) -> o1 == null ? o2 : o1.glb(o2));
-		return new HeapEnvironment<>(newEnv.lattice, newEnv.function, other.substitution);
-	}
-
-	@Override
 	public HeapEnvironment<T> smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		if (isBottom())
@@ -145,32 +139,7 @@ public class HeapEnvironment<T extends NonRelationalHeapDomain<T>>
 		return super.isBottom() && substitution.isEmpty();
 	}
 
-	@Override
-	public HeapEnvironment<T> lubAux(HeapEnvironment<T> other) throws SemanticException {
-		HeapEnvironment<T> lub = super.lubAux(other);
-		if (lub.isTop() || lub.isBottom())
-			return lub;
-		// TODO how do we lub the substitutions?
-		return new HeapEnvironment<>(lub.lattice, lub.function, other.substitution);
-	}
-
-	@Override
-	public HeapEnvironment<T> wideningAux(HeapEnvironment<T> other) throws SemanticException {
-		HeapEnvironment<T> widen = super.wideningAux(other);
-		if (widen.isTop() || widen.isBottom())
-			return widen;
-		// TODO how do we widen the substitutions?
-		return new HeapEnvironment<>(widen.lattice, widen.function, other.substitution);
-	}
-
-	@Override
-	public HeapEnvironment<T> narrowingAux(HeapEnvironment<T> other) throws SemanticException {
-		HeapEnvironment<T> narrow = super.narrowingAux(other);
-		if (narrow.isTop() || narrow.isBottom())
-			return narrow;
-		// TODO how do we narrow the substitutions?
-		return new HeapEnvironment<>(narrow.lattice, narrow.function, other.substitution);
-	}
+	// TODO how do we lub/widen/glb/narrow the substitutions?
 
 	@Override
 	public boolean lessOrEqualAux(HeapEnvironment<T> other) throws SemanticException {

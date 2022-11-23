@@ -11,8 +11,8 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.string.EndsWith;
-import it.unive.lisa.type.common.BoolType;
-import it.unive.lisa.type.common.StringType;
+import it.unive.lisa.program.type.BoolType;
+import it.unive.lisa.program.type.StringType;
 
 /**
  * The native construct representing the endsWith operation. This construct can

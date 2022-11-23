@@ -1,5 +1,6 @@
 package it.unive.lisa.checks.semantic;
 
+import it.unive.lisa.LiSAConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -12,6 +13,7 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import it.unive.lisa.util.file.FileManager;
 import java.util.Collection;
 import java.util.Map;
 
@@ -38,11 +40,16 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Builds the tool, storing the given results.
 	 * 
-	 * @param results   the results to store
-	 * @param callgraph the callgraph that has been built during the analysis
+	 * @param configuration the configuration of the analysis
+	 * @param fileManager   the file manager of the analysis
+	 * @param results       the results to store
+	 * @param callgraph     the callgraph that has been built during the
+	 *                          analysis
 	 */
-	public CheckToolWithAnalysisResults(Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results,
+	public CheckToolWithAnalysisResults(LiSAConfiguration configuration, FileManager fileManager,
+			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results,
 			CallGraph callgraph) {
+		super(configuration, fileManager);
 		this.results = results;
 		this.callgraph = callgraph;
 	}

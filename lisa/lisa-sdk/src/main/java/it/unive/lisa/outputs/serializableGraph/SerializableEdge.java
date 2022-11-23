@@ -1,6 +1,12 @@
 package it.unive.lisa.outputs.serializableGraph;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import it.unive.lisa.util.collections.CollectionUtilities;
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.TreeMap;
 
 /**
  * An edge of a {@link SerializableGraph}.
@@ -14,6 +20,10 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 	private final int destId;
 
 	private final String kind;
+
+	// Capture all other fields that Jackson does not match during
+	// deserialization
+	private final Map<String, String> unknownFields;
 
 	/**
 	 * Builds an empty (invalid) edge.
@@ -33,6 +43,7 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		this.sourceId = sourceId;
 		this.destId = destId;
 		this.kind = kind;
+		unknownFields = new TreeMap<>();
 	}
 
 	/**
@@ -62,6 +73,27 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		return kind;
 	}
 
+	/**
+	 * Yields all fields that were unrecognized during deserialization.
+	 * 
+	 * @return the other fields
+	 */
+	@JsonAnyGetter
+	public Map<String, String> otherFields() {
+		return unknownFields;
+	}
+
+	/**
+	 * Adds a field that was not recognized during deserialization.
+	 * 
+	 * @param name  he name of the field
+	 * @param value the value of the field
+	 */
+	@JsonAnySetter
+	public void setOtherField(String name, String value) {
+		unknownFields.put(name, value);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -69,6 +101,7 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 		result = prime * result + destId;
 		result = prime * result + ((kind == null) ? 0 : kind.hashCode());
 		result = prime * result + sourceId;
+		result = prime * result + ((unknownFields == null) ? 0 : unknownFields.hashCode());
 		return result;
 	}
 
@@ -90,6 +123,11 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 			return false;
 		if (sourceId != other.sourceId)
 			return false;
+		if (unknownFields == null) {
+			if (other.unknownFields != null)
+				return false;
+		} else if (!unknownFields.equals(other.unknownFields))
+			return false;
 		return true;
 	}
 
@@ -105,6 +143,28 @@ public class SerializableEdge implements Comparable<SerializableEdge> {
 			return cmp;
 		if ((cmp = Integer.compare(destId, o.destId)) != 0)
 			return cmp;
-		return CollectionUtilities.nullSafeCompare(true, kind, o.kind, String::compareTo);
+		if ((cmp = Integer.compare(unknownFields.keySet().size(), o.unknownFields.keySet().size())) != 0)
+			return cmp;
+		if ((cmp = CollectionUtilities.nullSafeCompare(true, kind, o.kind, String::compareTo)) != 0)
+			return cmp;
+
+		CollectionsDiffBuilder<
+				String> builder = new CollectionsDiffBuilder<>(String.class, unknownFields.keySet(),
+						o.unknownFields.keySet());
+		builder.compute(String::compareTo);
+
+		if (!builder.sameContent())
+			// same size means that both have at least one element that is
+			// different
+			return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
+
+		// same keys: just iterate over them and apply comparisons
+		// since unknownFields is sorted, the order of iteration will be
+		// consistent
+		for (Entry<String, String> entry : unknownFields.entrySet())
+			if ((cmp = entry.getValue().compareTo(o.unknownFields.get(entry.getKey()))) != 0)
+				return cmp;
+
+		return 0;
 	}
 }

@@ -1,5 +1,6 @@
 package it.unive.lisa.interprocedural;
 
+import it.unive.lisa.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
@@ -44,27 +45,6 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>> {
-
-	/**
-	 * The type of descending phase algorithms that can be used.
-	 */
-	public static enum DescendingPhaseType {
-
-		/**
-		 * the descending phase is not computed.
-		 */
-		NONE,
-
-		/**
-		 * the descending phase is calculated with glb.
-		 */
-		GLB,
-
-		/**
-		 * the descending phase always use the narrowing operator.
-		 */
-		NARROWING;
-	}
 
 	/**
 	 * Initializes the interprocedural analysis of the given program.
