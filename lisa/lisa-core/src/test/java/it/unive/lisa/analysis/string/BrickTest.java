@@ -195,4 +195,32 @@ public class BrickTest {
 
 		assertFalse(brick.lessOrEqualAux(brick1));
 	}
+	@Test
+	public void testLubAux() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("mo");
+		hashSet.add("de");
+		hashSet.add("re");
+
+		Brick brick = new Brick(1, 4, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("le");
+		hashSet1.add("de");
+		hashSet1.add("lo");
+
+		Brick brick1 = new Brick(0, 3, hashSet1);
+
+		Collection<String> resultHashSet = new HashSet<>();
+
+		resultHashSet.add("mo");
+		resultHashSet.add("de");
+		resultHashSet.add("re");
+		resultHashSet.add("le");
+		resultHashSet.add("lo");
+
+		Brick resultBrick = new Brick(0,4,resultHashSet);
+
+		assertEquals(brick.lubAux(brick1), resultBrick);
+	}
 }
