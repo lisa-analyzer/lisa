@@ -5,6 +5,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.program.cfg.ProgramPoint;
+import it.unive.lisa.symbolic.value.Constant;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -26,12 +29,22 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
-	public Bricks lubAux(Bricks other) throws SemanticException { // TODO
-		return null;
+	public Bricks lubAux(Bricks other) throws SemanticException {
+		if(this.bricks.size() < other.bricks.size())
+			this.bricks = this.padList(other);
+		else
+			other.bricks = other.padList(this);
+
+		List<Brick> bricks = new ArrayList<>();
+
+		for(int i = 0; i < this.bricks.size(); ++i )
+			bricks.add(this.bricks.get(i).lubAux(other.bricks.get(i)));
+
+		return new Bricks(bricks);
 	}
 
 	@Override
-	public boolean lessOrEqualAux(Bricks other) throws SemanticException { // TODO
+	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
 		if(this.bricks.size() < other.bricks.size())
 			this.bricks = this.padList(other);
 		else
@@ -42,6 +55,30 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				return false;
 
 		return true;
+	}
+
+	@Override
+	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) throws SemanticException {
+		return super.evalBinaryExpression(operator, left, right, pp);
+	}
+
+	@Override
+	public Bricks evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+		if (constant.getValue() instanceof String) {
+			String str = (String) constant.getValue();
+
+			if(!str.isEmpty()) {
+				Collection<String> strings = new HashSet<>();
+				strings.add(str);
+
+				List<Brick> bricks = new ArrayList<>();
+
+				bricks.add(new Brick(1, 1, strings));
+
+				return new Bricks(bricks);
+			}
+		}
+		return TOP;
 	}
 
 	@Override
