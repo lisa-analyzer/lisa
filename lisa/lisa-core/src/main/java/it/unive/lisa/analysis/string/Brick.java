@@ -19,7 +19,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
     private final static Brick TOP = new Brick();
 
-    private final static Brick BOTTOM = new Brick(new IntInterval(0,1), new HashSet<>());
+    private final static Brick BOTTOM = new Brick(new IntInterval(1,1), new HashSet<>());
 
     public Brick() {
         this(new IntInterval(new MathNumber(0), MathNumber.PLUS_INFINITY),getAlphabet());
@@ -42,7 +42,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
         resultStrings.addAll(this.strings);
         resultStrings.addAll(other.strings);
 
-        return new Brick(Math.max(this.getMin(), other.getMin()),
+        return new Brick(Math.min(this.getMin(), other.getMin()),
                 Math.max(this.getMax(), other.getMax()),
                 resultStrings);
 
