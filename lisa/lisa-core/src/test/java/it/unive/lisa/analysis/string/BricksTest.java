@@ -375,8 +375,8 @@ public class BricksTest {
 		resultStrings1.add("ze");
 		resultStrings1.add("le");
 
-		resultList.add(new Brick(0,5,resultStrings));
-		resultList.add(new Brick(1,4,resultStrings1));
+		resultList.add(new Brick(0, 5, resultStrings));
+		resultList.add(new Brick(1, 4, resultStrings1));
 
 		assertEquals(bricks.lubAux(bricks1), new Bricks(resultList));
 

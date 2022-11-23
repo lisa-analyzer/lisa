@@ -59,7 +59,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
-	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) //TODO
+	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) // TODO
 			throws SemanticException {
 		return super.evalBinaryExpression(operator, left, right, pp);
 	}
@@ -155,7 +155,6 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 		this.bricks.set(index, new Brick(1, 1, br.getReps()));
 		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
-
 	}
 
 	public void normBricks() {
