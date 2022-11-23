@@ -223,4 +223,28 @@ public class BrickTest {
 
 		assertEquals(brick.lubAux(brick1), resultBrick);
 	}
+	@Test
+	public void testLubAux1() throws SemanticException {
+		Collection<String> hashSet = new HashSet<>();
+		hashSet.add("a");
+		hashSet.add("b");
+
+		Brick brick = new Brick(1,3, hashSet);
+
+		Collection<String> hashSet1 = new HashSet<>();
+		hashSet1.add("a");
+		hashSet1.add("c");
+
+		Brick brick1 = new Brick(0, 2, hashSet1);
+
+		Collection<String> resultHashSet = new HashSet<>();
+
+		resultHashSet.add("a");
+		resultHashSet.add("c");
+		resultHashSet.add("b");
+
+		Brick resultBrick = new Brick(0,3,resultHashSet);
+
+		assertEquals(brick.lubAux(brick1), resultBrick);
+	}
 }
