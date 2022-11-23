@@ -159,5 +159,37 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 		return bricks;
 	}
+
+	public Bricks padList(Bricks other){
+		int thisSize = this.bricks.size();
+		int otherSize = other.bricks.size();
+
+		List<Brick> shorter = other.bricks;
+		List<Brick> longer = this.bricks;
+
+		if(thisSize < otherSize) {
+			shorter = this.bricks;
+			longer = other.bricks;
+		}
+
+		int diff = longer.size() - shorter.size();
+		int emptyAdded = 0;
+
+		List<Brick> newList = new ArrayList<>();
+
+		for (Brick brick : longer) {
+			if (emptyAdded >= diff) {
+				newList.addAll(shorter);
+				break;
+			} else if (shorter.isEmpty() || shorter.get(0) != brick) {
+				newList.add(new Brick(0, 0, new HashSet<>()));
+				emptyAdded++;
+			} else {
+				newList.add(shorter.get(0));
+				shorter.remove(0);
+			}
+		}
+		return new Bricks(newList);
+	}
 }
 
