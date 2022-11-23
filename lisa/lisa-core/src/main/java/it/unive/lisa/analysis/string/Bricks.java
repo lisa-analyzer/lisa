@@ -11,7 +11,7 @@ import java.util.*;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
-	private final List<Brick> bricks;
+	private List<Brick> bricks;
 
 	private final static Bricks TOP = new Bricks();
 
@@ -32,7 +32,16 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public boolean lessOrEqualAux(Bricks other) throws SemanticException { // TODO
-		return false;
+		if(this.bricks.size() < other.bricks.size())
+			this.bricks = this.padList(other);
+		else
+			other.bricks = other.padList(this);
+
+		for(int i = 0; i < this.bricks.size(); ++i )
+			if(!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
+				return false;
+
+		return true;
 	}
 
 	@Override
@@ -160,9 +169,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return bricks;
 	}
 
-	public Bricks padList(Bricks other){
+	public List<Brick> padList(Bricks other){
 		int thisSize = this.bricks.size();
 		int otherSize = other.bricks.size();
+
+		if(thisSize > otherSize)
+			throw new IllegalArgumentException();
 
 		List<Brick> shorter = other.bricks;
 		List<Brick> longer = this.bricks;
@@ -181,6 +193,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			if (emptyAdded >= diff) {
 				newList.addAll(shorter);
 				break;
+
 			} else if (shorter.isEmpty() || shorter.get(0) != brick) {
 				newList.add(new Brick(0, 0, new HashSet<>()));
 				emptyAdded++;
@@ -189,7 +202,8 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				shorter.remove(0);
 			}
 		}
-		return new Bricks(newList);
+		return newList;
 	}
+
 }
 

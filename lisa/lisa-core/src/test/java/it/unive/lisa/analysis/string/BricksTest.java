@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string;
 
+import it.unive.lisa.analysis.SemanticException;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -7,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class BricksTest {
 
@@ -185,33 +186,33 @@ public class BricksTest {
 
     @Test
     public void testPadList() {
-        HashSet<String> strings0 = new HashSet<>();
+        Collection<String> strings0 = new HashSet<>();
         strings0.add("a");
 
         Brick b0 = new Brick(2, 5, strings0);
 
-        HashSet<String> strings1 = new HashSet<>();
+        Collection<String> strings1 = new HashSet<>();
         strings1.add("b");
 
         Brick b1 = new Brick(1, 3, strings1);
 
 
-        HashSet<String> strings2 = new HashSet<>();
+        Collection<String> strings2 = new HashSet<>();
         strings2.add("c");
 
         Brick b2 = new Brick(0, 2, strings2);
 
-        HashSet<String> strings3 = new HashSet<>();
+        Collection<String> strings3 = new HashSet<>();
         strings3.add("d");
 
         Brick b3 = new Brick(0, 1, strings3);
 
-        HashSet<String> strings4 = new HashSet<>();
+        Collection<String> strings4 = new HashSet<>();
         strings4.add("e");
 
         Brick b4 = new Brick(2, 2, strings4);
 
-        HashSet<String> strings5 = new HashSet<>();
+        Collection<String> strings5 = new HashSet<>();
         strings5.add("f");
 
         Brick b5 = new Brick(0, 2, strings5);
@@ -240,8 +241,84 @@ public class BricksTest {
         resultList.add(new Brick(0, 0, new HashSet<>()));
         resultList.add(b2);
 
-        System.out.println("bricks1: \n" + bricks1);
-        System.out.println("bricks2: \n" + bricks2);
-        assertEquals(bricks1.padList(bricks2), new Bricks(resultList));
+        assertEquals(bricks1.padList(bricks2), resultList);
+    }
+
+    @Test
+    public void testLessOrEqualAux() throws SemanticException {
+        List<Brick> bricksList = new ArrayList<>();
+        List<Brick> bricksList1 = new ArrayList<>();
+
+        Collection<String> hashSet = new HashSet<>();
+        hashSet.add("mo");
+        hashSet.add("de");
+
+        Brick brick = new Brick(1, 4, hashSet);
+
+        Collection<String> hashSet1 = new HashSet<>();
+        hashSet1.add("mo");
+        hashSet1.add("de");
+        hashSet1.add("re");
+
+        Brick brick1 = new Brick(0, 5, hashSet1);
+
+        Collection<String> hashSet2 = new HashSet<>();
+        hashSet2.add("ge");
+        hashSet2.add("ze");
+
+        Brick brick2 = new Brick(2, 3, hashSet2);
+
+        Collection<String> hashSet3 = new HashSet<>();
+        hashSet.add("ge");
+        hashSet.add("ze");
+        hashSet.add("le");
+
+        Brick brick3 = new Brick(1, 4, hashSet3);
+
+        bricksList.add(brick);
+        bricksList.add(brick2);
+
+        bricksList1.add(brick1);
+        bricksList1.add(brick3);
+
+        Bricks bricks = new Bricks(bricksList);
+        Bricks bricks1 = new Bricks(bricksList1);
+
+        assertTrue(bricks.lessOrEqualAux(bricks1));
+
+    }
+    @Test
+    public void testLessOrEqualAux1() throws SemanticException {
+        List<Brick> bricksList = new ArrayList<>();
+        List<Brick> bricksList1 = new ArrayList<>();
+
+        Collection<String> hashSet = new HashSet<>();
+        hashSet.add("mo");
+        hashSet.add("de");
+
+        Brick brick = new Brick(1, 4, hashSet);
+
+        Collection<String> hashSet1 = new HashSet<>();
+        hashSet1.add("mo");
+        hashSet1.add("de");
+        hashSet1.add("re");
+
+        Brick brick1 = new Brick(0, 5, hashSet1);
+
+        Collection<String> hashSet2 = new HashSet<>();
+        hashSet2.add("ge");
+        hashSet2.add("ze");
+
+        Brick brick2 = new Brick(2, 3, hashSet2);
+
+        bricksList.add(brick);
+        bricksList.add(brick2);
+
+        bricksList1.add(brick1);
+
+        Bricks bricks = new Bricks(bricksList);
+        Bricks bricks1 = new Bricks(bricksList1);
+
+        assertFalse(bricks.lessOrEqualAux(bricks1));
     }
 }
