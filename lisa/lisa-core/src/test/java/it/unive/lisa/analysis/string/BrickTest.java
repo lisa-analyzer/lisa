@@ -3,20 +3,20 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
-import java.util.Collection;
+import java.util.Set;
 import java.util.HashSet;
 import org.junit.Test;
 
 public class BrickTest {
 	@Test
 	public void testGetReps() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		Collection<String> result = new HashSet<>();
+		Set<String> result = new HashSet<>();
 		result.add("mo");
 		result.add("de");
 		result.add("momo");
@@ -29,12 +29,12 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps1() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("abc");
 
 		Brick brick = new Brick(1, 1, hashSet);
 
-		Collection<String> result = new HashSet<>();
+		Set<String> result = new HashSet<>();
 		result.add("abc");
 
 		assertEquals(brick.getReps(), result);
@@ -42,14 +42,14 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps2() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		Collection<String> result = new HashSet<>();
+		Set<String> result = new HashSet<>();
 		result.add("mo");
 		result.add("de");
 		result.add("re");
@@ -68,7 +68,7 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps3() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
@@ -81,13 +81,13 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps4() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 
 		hashSet.add("straw");
 
 		Brick brick = new Brick(0, 1, hashSet);
 
-		Collection<String> result = new HashSet<>();
+		Set<String> result = new HashSet<>();
 
 		result.add("");
 		result.add("straw");
@@ -97,18 +97,17 @@ public class BrickTest {
 
 	@Test
 	public void testGetReps5() {
-		Collection<String> set = new HashSet<>();
+		Set<String> set = new HashSet<>();
 
 		set.add("a");
 		set.add("b");
 
 		Brick brick = new Brick(2, 2, set);
 
-		Collection<String> result = new HashSet<>();
+		Set<String> result = new HashSet<>();
 
 		result.add("aa");
 		result.add("bb");
-		result.add("ab");
 		result.add("ab");
 		result.add("ba");
 
@@ -117,7 +116,7 @@ public class BrickTest {
 
 	@Test
 	public void testToString() {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
@@ -129,13 +128,13 @@ public class BrickTest {
 
 	@Test
 	public void testLessOrEqualsAux() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
@@ -147,14 +146,14 @@ public class BrickTest {
 
 	@Test
 	public void testLessOrEqualsAux1() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
 		Brick brick = new Brick(1, 2, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 
@@ -165,13 +164,13 @@ public class BrickTest {
 
 	@Test
 	public void testLessOrEqualsAux2() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
 		Brick brick = new Brick(0, 2, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
@@ -183,13 +182,13 @@ public class BrickTest {
 
 	@Test
 	public void testLessOrEqualsAux3() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 
 		Brick brick = new Brick(1, 4, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("mo");
 		hashSet1.add("de");
 		hashSet1.add("re");
@@ -201,21 +200,21 @@ public class BrickTest {
 
 	@Test
 	public void testLubAux() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
 		hashSet.add("re");
 
 		Brick brick = new Brick(1, 4, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("le");
 		hashSet1.add("de");
 		hashSet1.add("lo");
 
 		Brick brick1 = new Brick(0, 3, hashSet1);
 
-		Collection<String> resultHashSet = new HashSet<>();
+		Set<String> resultHashSet = new HashSet<>();
 
 		resultHashSet.add("mo");
 		resultHashSet.add("de");
@@ -230,19 +229,19 @@ public class BrickTest {
 
 	@Test
 	public void testLubAux1() throws SemanticException {
-		Collection<String> hashSet = new HashSet<>();
+		Set<String> hashSet = new HashSet<>();
 		hashSet.add("a");
 		hashSet.add("b");
 
 		Brick brick = new Brick(1, 3, hashSet);
 
-		Collection<String> hashSet1 = new HashSet<>();
+		Set<String> hashSet1 = new HashSet<>();
 		hashSet1.add("a");
 		hashSet1.add("c");
 
 		Brick brick1 = new Brick(0, 2, hashSet1);
 
-		Collection<String> resultHashSet = new HashSet<>();
+		Set<String> resultHashSet = new HashSet<>();
 
 		resultHashSet.add("a");
 		resultHashSet.add("c");

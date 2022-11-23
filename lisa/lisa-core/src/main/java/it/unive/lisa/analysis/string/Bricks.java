@@ -70,7 +70,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			String str = (String) constant.getValue();
 
 			if (!str.isEmpty()) {
-				Collection<String> strings = new HashSet<>();
+				Set<String> strings = new HashSet<>();
 				strings.add(str);
 
 				List<Brick> bricks = new ArrayList<>();
@@ -122,7 +122,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
-		Collection<String> resultSet = new HashSet<>();
+		Set<String> resultSet = new HashSet<>();
 
 		firstBrick.getStrings()
 				.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));

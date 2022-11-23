@@ -7,7 +7,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.Collection;
+import java.util.Set;
 import java.util.HashSet;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +21,7 @@ import org.apache.commons.lang3.StringUtils;
  * https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class Brick extends BaseNonRelationalValueDomain<Brick> {
-	private final Collection<String> strings;
+	private final Set<String> strings;
 	private final IntInterval brickInterval;
 
 	private final static Brick TOP = new Brick();
@@ -46,7 +46,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @throws IllegalArgumentException if min or max are negative numbers.
 	 */
-	public Brick(int min, int max, Collection<String> strings) {
+	public Brick(int min, int max, Set<String> strings) {
 		if (min < 0 || max < 0)
 			throw new IllegalArgumentException();
 		this.brickInterval = new IntInterval(min, max);
@@ -60,14 +60,14 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	 *                     maximum of the brick respectively
 	 * @param strings  the set of strings
 	 */
-	public Brick(IntInterval interval, Collection<String> strings) {
+	public Brick(IntInterval interval, Set<String> strings) {
 		this.brickInterval = interval;
 		this.strings = strings;
 	}
 
 	@Override
 	public Brick lubAux(Brick other) throws SemanticException {
-		Collection<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new HashSet<>();
 
 		resultStrings.addAll(this.strings);
 		resultStrings.addAll(other.strings);
@@ -128,7 +128,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the set of strings of this abstract value
 	 */
-	public Collection<String> getStrings() {
+	public Set<String> getStrings() {
 		return strings;
 	}
 
@@ -149,8 +149,8 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max
 	 */
-	public Collection<String> getReps() {
-		Collection<String> reps = new HashSet<>();
+	public Set<String> getReps() {
+		Set<String> reps = new HashSet<>();
 
 		if (this.strings.size() == 1) {
 			String element = this.strings.iterator().next();
@@ -165,7 +165,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Collection<String> reps, int min, int numberOfReps, String currentStr) {
+	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr) {
 		if (min > this.getMax() && numberOfReps >= this.getMin())
 			reps.add(currentStr);
 		else {
@@ -188,8 +188,8 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 				"} ]";
 	}
 
-	private static Collection<String> getAlphabet() {
-		Collection<String> alphabet = new HashSet<>();
+	private static Set<String> getAlphabet() {
+		Set<String> alphabet = new HashSet<>();
 
 		for (char c = 'a'; c <= 'z'; c++) {
 			alphabet.add(String.valueOf(c));
