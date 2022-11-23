@@ -12,6 +12,14 @@ import java.util.HashSet;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * * The brick string abstract domain. * * @author
+ * <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a> * @author
+ * <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio * Salvatore
+ * Evola</a> * * @see <a href= *
+ * "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34"> *
+ * https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ */
 public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	private final Collection<String> strings;
 	private final IntInterval brickInterval;
@@ -20,15 +28,38 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
 	private final static Brick BOTTOM = new Brick(new IntInterval(1, 1), new HashSet<>());
 
+	/**
+	 * Builds the top brick abstract element.
+	 */
 	public Brick() {
 		this(new IntInterval(new MathNumber(0), MathNumber.PLUS_INFINITY), getAlphabet());
 	}
 
+	/**
+	 * Builds a brick abstract element
+	 * 
+	 * @param min     a positive integer that represents the minimum
+	 *                    concatenations of the strings set
+	 * @param max     a positive integer that represents the maximum
+	 *                    concatenations of the strings set
+	 * @param strings the set of strings
+	 * 
+	 * @throws IllegalArgumentException if min or max are negative numbers.
+	 */
 	public Brick(int min, int max, Collection<String> strings) {
+		if (min < 0 || max < 0)
+			throw new IllegalArgumentException();
 		this.brickInterval = new IntInterval(min, max);
 		this.strings = strings;
 	}
 
+	/**
+	 * Builds a brick abstract element.
+	 *
+	 * @param interval an interval that yields the minimum of the brick and the
+	 *                     maximum of the brick respectively
+	 * @param strings  the set of strings
+	 */
 	public Brick(IntInterval interval, Collection<String> strings) {
 		this.brickInterval = interval;
 		this.strings = strings;
@@ -74,26 +105,50 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 		return Objects.hash(strings, brickInterval);
 	}
 
+	/**
+	 * Yields the min of this abstract value
+	 * 
+	 * @return the min of this abstract value
+	 */
 	public int getMin() {
 		return this.brickInterval.getLow().getNumber().intValue();
 	}
 
+	/**
+	 * Yields the max of this abstract value
+	 * 
+	 * @return the max of this abstract value
+	 */
 	public int getMax() {
 		return this.brickInterval.getHigh().getNumber().intValue();
 	}
 
+	/**
+	 * Yields the set of strings of this abstract value
+	 * 
+	 * @return the set of strings of this abstract value
+	 */
 	public Collection<String> getStrings() {
 		return strings;
 	}
 
+	@Override
 	public Brick top() {
 		return TOP;
 	}
 
+	@Override
 	public Brick bottom() {
 		return BOTTOM;
 	}
 
+	/**
+	 * Yields all the possible concatenations between min and max of the strings
+	 * set
+	 * 
+	 * @return the set of strings with all possible concatenations between min
+	 *             and max
+	 */
 	public Collection<String> getReps() {
 		Collection<String> reps = new HashSet<>();
 
