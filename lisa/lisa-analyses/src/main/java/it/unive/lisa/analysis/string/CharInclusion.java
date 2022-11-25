@@ -15,9 +15,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -45,7 +45,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 * Builds the top char inclusion abstract element.
 	 */
 	public CharInclusion() {
-		this(new HashSet<>(), getAlphabet());
+		this(new TreeSet<>(), getAlphabet());
 	}
 
 	/**
@@ -62,9 +62,9 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
 	@Override
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
-		Set<Character> lubAuxCertainly = new HashSet<>();
+		Set<Character> lubAuxCertainly = new TreeSet<>();
 
-		Set<Character> lubAuxMaybe = new HashSet<>(this.maybeContained);
+		Set<Character> lubAuxMaybe = new TreeSet<>(this.maybeContained);
 		lubAuxMaybe.addAll(other.maybeContained);
 
 		for (Character certainlyContainedChar : this.certainlyContained)
@@ -151,7 +151,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof String) {
 			Set<Character> charsSet = ((String) constant.getValue()).chars()
-					.mapToObj(e -> (char) e).collect(Collectors.toSet());
+					.mapToObj(e -> (char) e).collect(Collectors.toCollection(TreeSet::new));
 
 			return new CharInclusion(charsSet, charsSet);
 		}
@@ -163,8 +163,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (operator == StringConcat.INSTANCE) {
-			Set<Character> resultCertainlyContained = new HashSet<>();
-			Set<Character> resultMaybeContained = new HashSet<>();
+			Set<Character> resultCertainlyContained = new TreeSet<>();
+			Set<Character> resultMaybeContained = new TreeSet<>();
 
 			resultCertainlyContained.addAll(left.certainlyContained);
 			resultCertainlyContained.addAll(right.certainlyContained);
@@ -212,7 +212,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	}
 
 	private static Set<Character> getAlphabet() {
-		Set<Character> alphabet = new HashSet<>();
+		Set<Character> alphabet = new TreeSet<>();
 
 		for (char character = 'a'; character <= 'z'; character++) {
 			alphabet.add(character);

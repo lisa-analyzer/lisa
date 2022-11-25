@@ -3,16 +3,16 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import org.junit.Test;
 
 public class CharInclusionTest {
 
 	@Test
 	public void representationTest() {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -28,11 +28,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void lubAuxTest() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -48,8 +48,8 @@ public class CharInclusionTest {
 		otherMaybeContained.add('e');
 		otherMaybeContained.add('z');
 
-		HashSet<Character> certainlyContainedResult = new HashSet<>();
-		HashSet<Character> maybeContainedResult = new HashSet<>();
+		TreeSet<Character> certainlyContainedResult = new TreeSet<>();
+		TreeSet<Character> maybeContainedResult = new TreeSet<>();
 
 		certainlyContainedResult.add('a');
 
@@ -66,11 +66,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -92,11 +92,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux1() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -121,11 +121,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux2() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -148,11 +148,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux3() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
@@ -178,11 +178,11 @@ public class CharInclusionTest {
 
 	@Test
 	public void testLessOrEqualAux4() throws SemanticException {
-		Set<Character> certainlyContained = new HashSet<>();
-		Set<Character> maybeContained = new HashSet<>();
+		Set<Character> certainlyContained = new TreeSet<>();
+		Set<Character> maybeContained = new TreeSet<>();
 
-		Set<Character> otherCertainlyContained = new HashSet<>();
-		Set<Character> otherMaybeContained = new HashSet<>();
+		Set<Character> otherCertainlyContained = new TreeSet<>();
+		Set<Character> otherMaybeContained = new TreeSet<>();
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
