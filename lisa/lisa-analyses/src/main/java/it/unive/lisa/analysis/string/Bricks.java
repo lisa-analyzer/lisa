@@ -7,8 +7,10 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.*;
+
 import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
@@ -61,7 +63,21 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	@Override
 	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) // TODO
 			throws SemanticException {
-		return super.evalBinaryExpression(operator, left, right, pp);
+				if (operator == StringConcat.INSTANCE) {
+					List<Brick> list = new ArrayList<>();
+					list.addAll(left.bricks);
+					list.addAll(right.bricks);
+
+					return new Bricks(list);
+				}
+				else if (operator == StringContains.INSTANCE ||
+						operator == StringEndsWith.INSTANCE ||
+						operator == StringEquals.INSTANCE ||
+						operator == StringIndexOf.INSTANCE ||
+						operator == StringStartsWith.INSTANCE) {
+					return TOP;
+				}
+				return TOP;
 	}
 
 	@Override
