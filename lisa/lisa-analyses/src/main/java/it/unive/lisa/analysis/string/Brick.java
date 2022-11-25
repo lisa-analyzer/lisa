@@ -8,7 +8,7 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,7 +26,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
 	private final static Brick TOP = new Brick();
 
-	private final static Brick BOTTOM = new Brick(new IntInterval(1, 1), new HashSet<>());
+	private final static Brick BOTTOM = new Brick(new IntInterval(1, 1), new TreeSet<>());
 
 	/**
 	 * Builds the top brick abstract element.
@@ -67,7 +67,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
 	@Override
 	public Brick lubAux(Brick other) throws SemanticException {
-		Set<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new TreeSet<>();
 
 		resultStrings.addAll(this.strings);
 		resultStrings.addAll(other.strings);
@@ -150,7 +150,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	 *             and max
 	 */
 	public Set<String> getReps() {
-		Set<String> reps = new HashSet<>();
+		Set<String> reps = new TreeSet<>();
 
 		if (this.strings.size() == 1) {
 			String element = this.strings.iterator().next();
@@ -189,7 +189,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	private static Set<String> getAlphabet() {
-		Set<String> alphabet = new HashSet<>();
+		Set<String> alphabet = new TreeSet<>();
 
 		for (char c = 'a'; c <= 'z'; c++) {
 			alphabet.add(String.valueOf(c));

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import it.unive.lisa.analysis.SemanticException;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.List;
 import org.junit.Test;
 
@@ -15,10 +15,10 @@ public class BricksTest {
 	public void normBricksTest() {
 		List<Brick> list = new ArrayList<>();
 
-		HashSet<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 
-		HashSet<String> strings1 = new HashSet<>();
+		Set<String> strings1 = new TreeSet<>();
 		strings1.add("a");
 		strings1.add("b");
 
@@ -32,13 +32,13 @@ public class BricksTest {
 
 		List<Brick> resultList = new ArrayList<>();
 
-		Set<String> resultHashSet = new HashSet<>();
-		resultHashSet.add("aaa");
-		resultHashSet.add("aab");
-		resultHashSet.add("aba");
-		resultHashSet.add("abb");
+		Set<String> resultTreeSet = new TreeSet<>();
+		resultTreeSet.add("aaa");
+		resultTreeSet.add("aab");
+		resultTreeSet.add("aba");
+		resultTreeSet.add("abb");
 
-		resultList.add(new Brick(1, 1, resultHashSet));
+		resultList.add(new Brick(1, 1, resultTreeSet));
 		resultList.add(new Brick(0, 2, strings1));
 
 		assertEquals(bricks, new Bricks(resultList));
@@ -48,12 +48,12 @@ public class BricksTest {
 	public void normBricksRule1Test() {
 		List<Brick> list = new ArrayList<>();
 
-		HashSet<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 		strings.add("b");
 
 		list.add(new Brick(1, 1, strings));
-		list.add(new Brick(0, 0, new HashSet<>()));
+		list.add(new Brick(0, 0, new TreeSet<>()));
 
 		Bricks bricks = new Bricks(list);
 
@@ -66,11 +66,11 @@ public class BricksTest {
 	public void normBricksRule2Test() {
 		List<Brick> list = new ArrayList<>();
 
-		Set<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 		strings.add("cd");
 
-		Set<String> strings1 = new HashSet<>();
+		Set<String> strings1 = new TreeSet<>();
 
 		strings1.add("b");
 		strings1.add("ef");
@@ -81,7 +81,7 @@ public class BricksTest {
 		Bricks bricks = new Bricks(list);
 		bricks.normBricks();
 
-		Set<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new TreeSet<>();
 
 		List<Brick> resultList = new ArrayList<>();
 
@@ -99,7 +99,7 @@ public class BricksTest {
 	public void normBricksRule3Test() {
 		List<Brick> list = new ArrayList<>();
 
-		Set<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 		strings.add("b");
 		strings.add("c");
@@ -110,7 +110,7 @@ public class BricksTest {
 
 		bricks.normBricks();
 
-		Set<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new TreeSet<>();
 
 		List<Brick> resultList = new ArrayList<>();
 
@@ -133,11 +133,11 @@ public class BricksTest {
 	public void normBricksRule4Test() {
 		List<Brick> list = new ArrayList<>();
 
-		HashSet<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 		strings.add("b");
 
-		HashSet<String> strings1 = new HashSet<>();
+		Set<String> strings1 = new TreeSet<>();
 		strings1.add("a");
 		strings1.add("b");
 
@@ -159,7 +159,7 @@ public class BricksTest {
 	public void normBricksRule5Test() {
 		List<Brick> list = new ArrayList<>();
 
-		HashSet<String> strings = new HashSet<>();
+		Set<String> strings = new TreeSet<>();
 		strings.add("a");
 
 		list.add(new Brick(2, 5, strings));
@@ -170,10 +170,10 @@ public class BricksTest {
 
 		List<Brick> resultList = new ArrayList<>();
 
-		HashSet<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new TreeSet<>();
 		resultStrings.add("aa");
 
-		HashSet<String> resultStrings1 = new HashSet<>();
+		TreeSet<String> resultStrings1 = new TreeSet<>();
 		resultStrings1.add("a");
 
 		resultList.add(new Brick(1, 1, resultStrings));
@@ -185,32 +185,32 @@ public class BricksTest {
 
 	@Test
 	public void testPadList() {
-		Set<String> strings0 = new HashSet<>();
+		Set<String> strings0 = new TreeSet<>();
 		strings0.add("a");
 
 		Brick b0 = new Brick(2, 5, strings0);
 
-		Set<String> strings1 = new HashSet<>();
+		Set<String> strings1 = new TreeSet<>();
 		strings1.add("b");
 
 		Brick b1 = new Brick(1, 3, strings1);
 
-		Set<String> strings2 = new HashSet<>();
+		Set<String> strings2 = new TreeSet<>();
 		strings2.add("c");
 
 		Brick b2 = new Brick(0, 2, strings2);
 
-		Set<String> strings3 = new HashSet<>();
+		Set<String> strings3 = new TreeSet<>();
 		strings3.add("d");
 
 		Brick b3 = new Brick(0, 1, strings3);
 
-		Set<String> strings4 = new HashSet<>();
+		Set<String> strings4 = new TreeSet<>();
 		strings4.add("e");
 
 		Brick b4 = new Brick(2, 2, strings4);
 
-		Set<String> strings5 = new HashSet<>();
+		Set<String> strings5 = new TreeSet<>();
 		strings5.add("f");
 
 		Brick b5 = new Brick(0, 2, strings5);
@@ -233,10 +233,10 @@ public class BricksTest {
 
 		List<Brick> resultList = new ArrayList<>();
 
-		resultList.add(new Brick(0, 0, new HashSet<>()));
+		resultList.add(new Brick(0, 0, new TreeSet<>()));
 		resultList.add(b0);
 		resultList.add(b1);
-		resultList.add(new Brick(0, 0, new HashSet<>()));
+		resultList.add(new Brick(0, 0, new TreeSet<>()));
 		resultList.add(b2);
 
 		assertEquals(bricks1.padList(bricks2), resultList);
@@ -247,31 +247,31 @@ public class BricksTest {
 		List<Brick> bricksList = new ArrayList<>();
 		List<Brick> bricksList1 = new ArrayList<>();
 
-		Set<String> hashSet = new HashSet<>();
-		hashSet.add("mo");
-		hashSet.add("de");
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("mo");
+		treeSet.add("de");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Brick brick = new Brick(1, 4, treeSet);
 
-		Set<String> hashSet1 = new HashSet<>();
-		hashSet1.add("mo");
-		hashSet1.add("de");
-		hashSet1.add("re");
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("mo");
+		treeSet1.add("de");
+		treeSet1.add("re");
 
-		Brick brick1 = new Brick(0, 5, hashSet1);
+		Brick brick1 = new Brick(0, 5, treeSet1);
 
-		Set<String> hashSet2 = new HashSet<>();
-		hashSet2.add("ge");
-		hashSet2.add("ze");
+		Set<String> treeSet2 = new TreeSet<>();
+		treeSet2.add("ge");
+		treeSet2.add("ze");
 
-		Brick brick2 = new Brick(2, 3, hashSet2);
+		Brick brick2 = new Brick(2, 3, treeSet2);
 
-		Set<String> hashSet3 = new HashSet<>();
-		hashSet3.add("ge");
-		hashSet3.add("ze");
-		hashSet3.add("le");
+		Set<String> treeSet3 = new TreeSet<>();
+		treeSet3.add("ge");
+		treeSet3.add("ze");
+		treeSet3.add("le");
 
-		Brick brick3 = new Brick(1, 4, hashSet3);
+		Brick brick3 = new Brick(1, 4, treeSet3);
 
 		bricksList.add(brick);
 		bricksList.add(brick2);
@@ -291,24 +291,24 @@ public class BricksTest {
 		List<Brick> bricksList = new ArrayList<>();
 		List<Brick> bricksList1 = new ArrayList<>();
 
-		Set<String> hashSet = new HashSet<>();
-		hashSet.add("mo");
-		hashSet.add("de");
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("mo");
+		treeSet.add("de");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Brick brick = new Brick(1, 4, treeSet);
 
-		Set<String> hashSet1 = new HashSet<>();
-		hashSet1.add("mo");
-		hashSet1.add("de");
-		hashSet1.add("re");
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("mo");
+		treeSet1.add("de");
+		treeSet1.add("re");
 
-		Brick brick1 = new Brick(0, 5, hashSet1);
+		Brick brick1 = new Brick(0, 5, treeSet1);
 
-		Set<String> hashSet2 = new HashSet<>();
-		hashSet2.add("ge");
-		hashSet2.add("ze");
+		Set<String> treeSet2 = new TreeSet<>();
+		treeSet2.add("ge");
+		treeSet2.add("ze");
 
-		Brick brick2 = new Brick(2, 3, hashSet2);
+		Brick brick2 = new Brick(2, 3, treeSet2);
 
 		bricksList.add(brick);
 		bricksList.add(brick2);
@@ -326,31 +326,31 @@ public class BricksTest {
 		List<Brick> bricksList = new ArrayList<>();
 		List<Brick> bricksList1 = new ArrayList<>();
 
-		Set<String> hashSet = new HashSet<>();
-		hashSet.add("mo");
-		hashSet.add("de");
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("mo");
+		treeSet.add("de");
 
-		Brick brick = new Brick(1, 4, hashSet);
+		Brick brick = new Brick(1, 4, treeSet);
 
-		Set<String> hashSet1 = new HashSet<>();
-		hashSet1.add("mo");
-		hashSet1.add("de");
-		hashSet1.add("re");
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("mo");
+		treeSet1.add("de");
+		treeSet1.add("re");
 
-		Brick brick1 = new Brick(0, 5, hashSet1);
+		Brick brick1 = new Brick(0, 5, treeSet1);
 
-		Set<String> hashSet2 = new HashSet<>();
-		hashSet2.add("ge");
-		hashSet2.add("ze");
+		Set<String> treeSet2 = new TreeSet<>();
+		treeSet2.add("ge");
+		treeSet2.add("ze");
 
-		Brick brick2 = new Brick(2, 3, hashSet2);
+		Brick brick2 = new Brick(2, 3, treeSet2);
 
-		Set<String> hashSet3 = new HashSet<>();
-		hashSet3.add("ge");
-		hashSet3.add("ze");
-		hashSet3.add("le");
+		Set<String> treeSet3 = new TreeSet<>();
+		treeSet3.add("ge");
+		treeSet3.add("ze");
+		treeSet3.add("le");
 
-		Brick brick3 = new Brick(1, 4, hashSet3);
+		Brick brick3 = new Brick(1, 4, treeSet3);
 
 		bricksList.add(brick);
 		bricksList.add(brick2);
@@ -363,13 +363,13 @@ public class BricksTest {
 
 		List<Brick> resultList = new ArrayList<>();
 
-		Set<String> resultStrings = new HashSet<>();
+		Set<String> resultStrings = new TreeSet<>();
 
 		resultStrings.add("mo");
 		resultStrings.add("de");
 		resultStrings.add("re");
 
-		Set<String> resultStrings1 = new HashSet<>();
+		Set<String> resultStrings1 = new TreeSet<>();
 
 		resultStrings1.add("ge");
 		resultStrings1.add("ze");

@@ -31,9 +31,9 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	public Bricks lubAux(Bricks other) throws SemanticException {
 		if (this.bricks.size() != other.bricks.size())
 			if (this.bricks.size() < other.bricks.size())
-				this.bricks = this.padList(other);
+				this.padList(other);
 			else
-				other.bricks = other.padList(this);
+				other.padList(this);
 
 		List<Brick> bricks = new ArrayList<>();
 
@@ -70,7 +70,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			String str = (String) constant.getValue();
 
 			if (!str.isEmpty()) {
-				Set<String> strings = new HashSet<>();
+				Set<String> strings = new TreeSet<>();
 				strings.add(str);
 
 				List<Brick> bricks = new ArrayList<>();
@@ -122,7 +122,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
-		Set<String> resultSet = new HashSet<>();
+		Set<String> resultSet = new TreeSet<>();
 
 		firstBrick.getStrings()
 				.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
@@ -225,13 +225,16 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				break;
 
 			} else if (shorter.isEmpty() || shorter.get(0) != brick) {
-				newList.add(new Brick(0, 0, new HashSet<>()));
+				newList.add(new Brick(0, 0, new TreeSet<>()));
 				emptyAdded++;
 			} else {
 				newList.add(shorter.get(0));
 				shorter.remove(0);
 			}
 		}
+
+		this.bricks = newList;
+
 		return newList;
 	}
 
