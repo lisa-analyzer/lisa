@@ -13,12 +13,15 @@ import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * * The brick string abstract domain. * * @author
- * <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a> * @author
- * <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio * Salvatore
- * Evola</a> * * @see <a href= *
- * "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34"> *
- * https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ * The brick string abstract domain.
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
+ *             Salvatore Evola</a>
+ *
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
+ *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	private final Set<String> strings;
@@ -36,7 +39,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Builds a brick abstract element
+	 * Builds a brick abstract element.
 	 * 
 	 * @param min     a positive integer that represents the minimum
 	 *                    concatenations of the strings set
@@ -106,7 +109,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Yields the min of this abstract value
+	 * Yields the min of this abstract value.
 	 * 
 	 * @return the min of this abstract value
 	 */
@@ -115,7 +118,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Yields the max of this abstract value
+	 * Yields the max of this abstract value.
 	 * 
 	 * @return the max of this abstract value
 	 */
@@ -124,7 +127,7 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Yields the set of strings of this abstract value
+	 * Yields the set of strings of this abstract value.
 	 * 
 	 * @return the set of strings of this abstract value
 	 */
@@ -143,8 +146,8 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Yields all the possible concatenations between min and max of the strings
-	 * set
+	 * Yields all the possible concatenations between min and max of the
+	 * strings. set
 	 * 
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max

@@ -13,6 +13,17 @@ import it.unive.lisa.util.numeric.MathNumber;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * The bricks string abstract domain.
+ *
+ * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
+ * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
+ *             Salvatore Evola</a>
+ *
+ * @see <a href=
+ *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
+ *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
+ */
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private List<Brick> bricks;
@@ -23,14 +34,22 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private final static int kL = 10;
 
-	private final static int kI = 5;
+	private final static int kI = 10;
 
 	private final static int kS = 20;
 
+	/**
+	 * Builds the top brick abstract element.
+	 */
 	public Bricks() {
 		this(getTopList());
 	}
 
+	/**
+	 * Builds a bricks abstract element.
+	 * 
+	 * @param bricks the list of brick
+	 */
 	public Bricks(List<Brick> bricks) {
 		this.bricks = bricks;
 	}
@@ -72,7 +91,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				!other.lessOrEqualAux(this))
 			return TOP;
 
-		if(this.bricks.size() > kL ||
+		if (this.bricks.size() > kL ||
 				other.bricks.size() > kL)
 			return TOP;
 
@@ -231,6 +250,10 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
 	}
 
+	/**
+	 * The normalization method of the bricks domain. Modify bricks to its
+	 * normalized form.
+	 */
 	public void normBricks() {
 		List<Brick> thisBricks = this.bricks;
 
@@ -281,6 +304,18 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 		return bricks;
 	}
 
+	/**
+	 * Pads the shortest brick list and adds empty brick elements to it, in
+	 * order to make it the same size of the longer brick list, while
+	 * maintaining the same position of equals elements between the two lists.
+	 * 
+	 * @param other the other bricks object, which has to yield the longer list
+	 * 
+	 * @return the shorter list with empty brick in it
+	 * 
+	 * @throws IllegalArgumentException if the other brick list is longer than
+	 *                                      the caller bricks object
+	 */
 	public List<Brick> padList(Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
 			throw new IllegalArgumentException();

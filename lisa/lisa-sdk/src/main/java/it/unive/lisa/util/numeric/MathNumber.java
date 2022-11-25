@@ -432,14 +432,14 @@ public class MathNumber implements Comparable<MathNumber> {
 	/**
 	 * Yields the BigDecimal of this abstract value.
 	 * 
+	 * @return the BigDecimal of this abstract value
+	 * 
 	 * @throws IllegalStateException If this number is not a number or is plus
 	 *                                   infinite or is minus infinite
 	 *                                   (according to {@link #isNaN()},
 	 *                                   {@link #isPlusInfinity()} and
 	 *                                   {@link #isMinusInfinity()}
 	 *                                   respectively).
-	 * 
-	 * @return the BigDecimal of this abstract value
 	 */
 	public BigDecimal getNumber() {
 		if (isNaN())
