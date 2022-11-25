@@ -7,9 +7,9 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 
 /**

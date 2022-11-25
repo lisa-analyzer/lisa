@@ -8,9 +8,9 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.*;
-
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 import java.util.*;
-
 import org.apache.commons.lang3.StringUtils;
 
 public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
@@ -49,9 +49,9 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
 		if (this.bricks.size() != other.bricks.size())
 			if (this.bricks.size() < other.bricks.size())
-				this.bricks = this.padList(other);
+				this.padList(other);
 			else
-				other.bricks = other.padList(this);
+				other.padList(this);
 
 		for (int i = 0; i < this.bricks.size(); ++i)
 			if (!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
@@ -61,23 +61,75 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
+	public Bricks wideningAux(Bricks other) throws SemanticException {
+		if (!this.lessOrEqualAux(other) &&
+				!other.lessOrEqualAux(this))
+			return TOP;
+
+		if(this.bricks.size() > other.bricks.size() ||
+				other.bricks.size() > this.bricks.size())
+			return TOP;
+
+		return w(other);
+	}
+
+	private Bricks w(Bricks other) {
+		if (this.bricks.size() != other.bricks.size())
+			if (this.bricks.size() < other.bricks.size())
+				this.padList(other);
+			else
+				other.padList(this);
+
+		List<Brick> resultList = new ArrayList<>();
+
+		for (int i = 0; i < this.bricks.size(); ++i) {
+			Brick thisCurrent = this.bricks.get(i);
+			Brick otherCurrent = other.bricks.get(i);
+
+			if (thisCurrent.isTop() || otherCurrent.isTop()) {
+				resultList.add(new Brick());
+				break;
+			}
+
+			Set<String> resultSet = new TreeSet<>();
+
+			resultSet.addAll(thisCurrent.getStrings());
+			resultSet.addAll(otherCurrent.getStrings());
+
+			int minOfMins = Math.min(thisCurrent.getMin(), otherCurrent.getMin());
+			int maxOfMaxs = Math.max(thisCurrent.getMax(), otherCurrent.getMax());
+
+			if (resultSet.size() > thisCurrent.getStrings().size())
+				resultList.add(new Brick());
+
+			else if (maxOfMaxs - minOfMins > thisCurrent.getMax() - thisCurrent.getMin()) {
+				IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+				Brick resultBrick = new Brick(interval, resultSet);
+				resultList.add(resultBrick);
+			} else
+				resultList.add(new Brick(minOfMins, maxOfMaxs, resultSet));
+		}
+
+		return new Bricks(resultList);
+	}
+
+	@Override
 	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) // TODO
 			throws SemanticException {
-				if (operator == StringConcat.INSTANCE) {
-					List<Brick> list = new ArrayList<>();
-					list.addAll(left.bricks);
-					list.addAll(right.bricks);
+		if (operator == StringConcat.INSTANCE) {
+			List<Brick> list = new ArrayList<>();
+			list.addAll(left.bricks);
+			list.addAll(right.bricks);
 
-					return new Bricks(list);
-				}
-				else if (operator == StringContains.INSTANCE ||
-						operator == StringEndsWith.INSTANCE ||
-						operator == StringEquals.INSTANCE ||
-						operator == StringIndexOf.INSTANCE ||
-						operator == StringStartsWith.INSTANCE) {
-					return TOP;
-				}
-				return TOP;
+			return new Bricks(list);
+		} else if (operator == StringContains.INSTANCE ||
+				operator == StringEndsWith.INSTANCE ||
+				operator == StringEquals.INSTANCE ||
+				operator == StringIndexOf.INSTANCE ||
+				operator == StringStartsWith.INSTANCE) {
+			return TOP;
+		}
+		return TOP;
 	}
 
 	@Override

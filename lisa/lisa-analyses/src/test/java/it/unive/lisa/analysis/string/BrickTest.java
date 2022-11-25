@@ -3,8 +3,8 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 import org.junit.Test;
 
 public class BrickTest {

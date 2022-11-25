@@ -4,9 +4,9 @@ import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.List;
 import org.junit.Test;
 
 public class BricksTest {
