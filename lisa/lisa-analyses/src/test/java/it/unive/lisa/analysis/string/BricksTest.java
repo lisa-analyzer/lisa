@@ -396,7 +396,6 @@ public class BricksTest {
 		treeSet.add("f");
 		treeSet.add("g");
 
-
 		Set<String> treeSet1 = new TreeSet<>();
 		treeSet1.add("h");
 		treeSet1.add("i");
@@ -404,10 +403,9 @@ public class BricksTest {
 		treeSet1.add("m");
 		treeSet1.add("n");
 
+		bricksList.add(new Brick(1, 1, treeSet));
 
-		bricksList.add(new Brick(1,1,treeSet));
-
-		bricksList1.add(new Brick(1,1,treeSet1));
+		bricksList1.add(new Brick(1, 1, treeSet1));
 
 		Bricks bricks = new Bricks(bricksList);
 
