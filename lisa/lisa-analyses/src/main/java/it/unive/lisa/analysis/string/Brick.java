@@ -183,9 +183,9 @@ public class Brick extends BaseNonRelationalValueDomain<Brick> {
 
 	private String formatRepresentation() {
 		return "[ {min: " +
-				this.getMin() +
+				this.brickInterval.getLow().toString() +
 				"}, {max: " +
-				this.getMax() +
+				this.brickInterval.getHigh().toString() +
 				"}, {strings: " +
 				StringUtils.join(this.strings, ", ") +
 				"} ]";
