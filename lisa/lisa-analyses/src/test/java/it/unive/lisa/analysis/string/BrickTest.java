@@ -115,7 +115,7 @@ public class BrickTest {
 	}
 
 	@Test
-	public void testToString() {
+	public void testRepresentation() {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
 		hashSet.add("de");
