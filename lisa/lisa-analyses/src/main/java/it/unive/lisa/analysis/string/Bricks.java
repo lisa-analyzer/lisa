@@ -141,7 +141,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
-	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) // TODO
+	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE) {
 			List<Brick> list = new ArrayList<>();
