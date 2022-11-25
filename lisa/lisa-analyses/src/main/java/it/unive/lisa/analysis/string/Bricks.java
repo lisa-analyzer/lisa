@@ -21,6 +21,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
 
+	private final static int kL = 10;
+
+	private final static int kI = 5;
+
+	private final static int kS = 20;
+
 	public Bricks() {
 		this(getTopList());
 	}
@@ -66,8 +72,8 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 				!other.lessOrEqualAux(this))
 			return TOP;
 
-		if(this.bricks.size() > other.bricks.size() ||
-				other.bricks.size() > this.bricks.size())
+		if(this.bricks.size() > kL ||
+				other.bricks.size() > kL)
 			return TOP;
 
 		return w(other);
@@ -99,10 +105,10 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			int minOfMins = Math.min(thisCurrent.getMin(), otherCurrent.getMin());
 			int maxOfMaxs = Math.max(thisCurrent.getMax(), otherCurrent.getMax());
 
-			if (resultSet.size() > thisCurrent.getStrings().size())
+			if (resultSet.size() > kS)
 				resultList.add(new Brick());
 
-			else if (maxOfMaxs - minOfMins > thisCurrent.getMax() - thisCurrent.getMin()) {
+			else if (maxOfMaxs - minOfMins > kI) {
 				IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 				Brick resultBrick = new Brick(interval, resultSet);
 				resultList.add(resultBrick);
