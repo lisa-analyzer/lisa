@@ -3,6 +3,8 @@ package it.unive.lisa.analysis.string;
 import static org.junit.Assert.*;
 
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -412,6 +414,68 @@ public class BricksTest {
 		Bricks bricks1 = new Bricks(bricksList1);
 
 		assertEquals(bricks.wideningAux(bricks1), new Bricks());
+	}
 
+	@Test
+	public void wideningAuxTest2() throws SemanticException {
+		List<Brick> bricksList = new ArrayList<>();
+		List<Brick> bricksList1 = new ArrayList<>();
+
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("a");
+
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("a");
+
+		bricksList.add(new Brick(1, 13, treeSet));
+
+		bricksList1.add(new Brick(2, 12, treeSet1));
+
+		Bricks bricks = new Bricks(bricksList);
+
+		Bricks bricks1 = new Bricks(bricksList1);
+
+		Set<String> resultSet = new TreeSet<>();
+
+		resultSet.addAll(treeSet);
+		resultSet.addAll(treeSet1);
+
+		List<Brick> resultList = new ArrayList<>();
+
+		IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+		resultList.add(new Brick(interval, resultSet));
+
+		assertEquals(bricks.wideningAux(bricks1), new Bricks(resultList));
+	}
+
+	@Test
+	public void wideningAuxTest3() throws SemanticException {
+		List<Brick> bricksList = new ArrayList<>();
+		List<Brick> bricksList1 = new ArrayList<>();
+
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("a");
+
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("a");
+
+		bricksList.add(new Brick(1, 6, treeSet));
+
+		bricksList1.add(new Brick(2, 5, treeSet1));
+
+		Bricks bricks = new Bricks(bricksList);
+
+		Bricks bricks1 = new Bricks(bricksList1);
+
+		Set<String> resultSet = new TreeSet<>();
+
+		resultSet.addAll(treeSet);
+		resultSet.addAll(treeSet1);
+
+		List<Brick> resultList = new ArrayList<>();
+
+		resultList.add(new Brick(1, 6, resultSet));
+
+		assertEquals(bricks.wideningAux(bricks1), new Bricks(resultList));
 	}
 }
