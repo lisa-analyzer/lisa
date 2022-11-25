@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -12,6 +13,7 @@ import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.util.*;
 import org.apache.commons.lang3.StringUtils;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 
 /**
  * The bricks string abstract domain.
@@ -174,6 +176,18 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			}
 		}
 		return TOP;
+	}
+
+	@Override
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp) throws SemanticException {
+		if (left.isTop() || right.isBottom())
+			return SemanticDomain.Satisfiability.UNKNOWN;
+
+		if (operator == StringContains.INSTANCE)
+			if (left.bricks.stream().anyMatch(brick -> right.bricks.contains(brick)))
+				return Satisfiability.SATISFIED;
+
+		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
