@@ -381,4 +381,39 @@ public class BricksTest {
 		assertEquals(bricks.lubAux(bricks1), new Bricks(resultList));
 
 	}
+
+	@Test
+	public void wideningAuxTest() throws SemanticException {
+		List<Brick> bricksList = new ArrayList<>();
+		List<Brick> bricksList1 = new ArrayList<>();
+
+		Set<String> treeSet = new TreeSet<>();
+		treeSet.add("a");
+		treeSet.add("b");
+		treeSet.add("c");
+		treeSet.add("d");
+		treeSet.add("e");
+		treeSet.add("f");
+		treeSet.add("g");
+
+
+		Set<String> treeSet1 = new TreeSet<>();
+		treeSet1.add("h");
+		treeSet1.add("i");
+		treeSet1.add("l");
+		treeSet1.add("m");
+		treeSet1.add("n");
+
+
+		bricksList.add(new Brick(1,1,treeSet));
+
+		bricksList1.add(new Brick(1,1,treeSet1));
+
+		Bricks bricks = new Bricks(bricksList);
+
+		Bricks bricks1 = new Bricks(bricksList1);
+
+		assertEquals(bricks.wideningAux(bricks1), new Bricks());
+
+	}
 }
