@@ -15,9 +15,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -27,16 +27,16 @@ import org.apache.commons.lang3.StringUtils;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  * @author <a href="mailto:sergiosalvatore.evola@studenti.unipr.it">Sergio
  *             Salvatore Evola</a>
- * 
+ *
  * @see <a href=
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 
-	private final Collection<Character> certainlyContained;
+	private final Set<Character> certainlyContained;
 
-	private final Collection<Character> maybeContained;
+	private final Set<Character> maybeContained;
 
 	private static final CharInclusion TOP = new CharInclusion();
 	private static final CharInclusion BOTTOM = new CharInclusion(null, null);
@@ -45,7 +45,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 * Builds the top char inclusion abstract element.
 	 */
 	public CharInclusion() {
-		this(new HashSet<>(), getAlphabet());
+		this(new TreeSet<>(), getAlphabet());
 	}
 
 	/**
@@ -54,17 +54,17 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 * @param certainlyContained the set of certainly contained characters
 	 * @param maybeContained     the set of maybe contained characters
 	 */
-	public CharInclusion(Collection<Character> certainlyContained,
-			Collection<Character> maybeContained) {
+	public CharInclusion(Set<Character> certainlyContained,
+			Set<Character> maybeContained) {
 		this.certainlyContained = certainlyContained;
 		this.maybeContained = maybeContained;
 	}
 
 	@Override
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
-		Collection<Character> lubAuxCertainly = new HashSet<>();
+		Set<Character> lubAuxCertainly = new TreeSet<>();
 
-		Collection<Character> lubAuxMaybe = new HashSet<>(this.maybeContained);
+		Set<Character> lubAuxMaybe = new TreeSet<>(this.maybeContained);
 		lubAuxMaybe.addAll(other.maybeContained);
 
 		for (Character certainlyContainedChar : this.certainlyContained)
@@ -127,7 +127,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 *
 	 * @return the set of certainly contained characters of this abstract value.
 	 */
-	public Collection<Character> getCertainlyContained() {
+	public Set<Character> getCertainlyContained() {
 		return this.certainlyContained;
 	}
 
@@ -136,7 +136,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 *
 	 * @return the set of maybe contained characters of this abstract value.
 	 */
-	public Collection<Character> getMaybeContained() {
+	public Set<Character> getMaybeContained() {
 		return this.maybeContained;
 	}
 
@@ -150,8 +150,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	@Override
 	public CharInclusion evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof String) {
-			Collection<Character> charsSet = ((String) constant.getValue()).chars()
-					.mapToObj(e -> (char) e).collect(Collectors.toCollection(HashSet::new));
+			Set<Character> charsSet = ((String) constant.getValue()).chars()
+					.mapToObj(e -> (char) e).collect(Collectors.toCollection(TreeSet::new));
 
 			return new CharInclusion(charsSet, charsSet);
 		}
@@ -163,8 +163,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	public CharInclusion evalBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (operator == StringConcat.INSTANCE) {
-			Collection<Character> resultCertainlyContained = new HashSet<>();
-			Collection<Character> resultMaybeContained = new HashSet<>();
+			Set<Character> resultCertainlyContained = new TreeSet<>();
+			Set<Character> resultMaybeContained = new TreeSet<>();
 
 			resultCertainlyContained.addAll(left.certainlyContained);
 			resultCertainlyContained.addAll(right.certainlyContained);
@@ -203,7 +203,7 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 	 * Checks whether this char inclusion abstract value models the empty
 	 * string, i.e., the sets of the maybe and certainly contained are both
 	 * empty.
-	 * 
+	 *
 	 * @return whether this char inclusion abstract value models the empty
 	 *             string
 	 */
@@ -211,8 +211,8 @@ public class CharInclusion extends BaseNonRelationalValueDomain<CharInclusion> {
 		return maybeContained.isEmpty() && certainlyContained.isEmpty();
 	}
 
-	private static Collection<Character> getAlphabet() {
-		Collection<Character> alphabet = new HashSet<>();
+	private static Set<Character> getAlphabet() {
+		Set<Character> alphabet = new TreeSet<>();
 
 		for (char character = 'a'; character <= 'z'; character++) {
 			alphabet.add(character);
