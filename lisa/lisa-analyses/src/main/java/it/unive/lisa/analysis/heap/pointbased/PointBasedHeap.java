@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,12 +30,6 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -57,7 +58,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
 	public PointBasedHeap() {
-		this(new HeapEnvironment<>(new AllocationSites()), new ArrayList<>());
+		this(new HeapEnvironment<>(new AllocationSites()));
 	}
 
 	/**
@@ -67,7 +68,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
-		this(heapEnv, new ArrayList<>());
+		this(heapEnv, Collections.emptyList());
 	}
 
 	/**
@@ -79,7 +80,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 */
 	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
 		this.heapEnv = heapEnv;
-		this.replacements = replacements;
+		this.replacements = replacements.isEmpty() ? Collections.emptyList() : replacements;
 	}
 
 	/**

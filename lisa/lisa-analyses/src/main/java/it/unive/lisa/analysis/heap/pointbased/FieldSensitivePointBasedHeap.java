@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -11,11 +17,6 @@ import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -45,8 +46,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	 */
 	public FieldSensitivePointBasedHeap() {
 		super();
-		this.fields = new HashMap<AllocationSite, Set<SymbolicExpression>>();
-
+		this.fields = Collections.emptyMap();
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
-		this(heapEnv, new HashMap<>());
+		this(heapEnv, Collections.emptyMap());
 	}
 
 	/**
