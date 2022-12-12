@@ -58,11 +58,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks lubAux(Bricks other) throws SemanticException {
-		if (this.bricks.size() != other.bricks.size())
-			if (this.bricks.size() < other.bricks.size())
-				this.padList(other);
-			else
-				other.padList(this);
+		this.padList(other);
 
 		List<Brick> bricks = new ArrayList<>();
 
@@ -74,11 +70,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
-		if (this.bricks.size() != other.bricks.size())
-			if (this.bricks.size() < other.bricks.size())
-				this.padList(other);
-			else
-				other.padList(this);
+		this.padList(other);
 
 		for (int i = 0; i < this.bricks.size(); ++i)
 			if (!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
@@ -101,11 +93,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	private Bricks w(Bricks other) {
-		if (this.bricks.size() != other.bricks.size())
-			if (this.bricks.size() < other.bricks.size())
-				this.padList(other);
-			else
-				other.padList(this);
+		this.padList(other);
 
 		List<Brick> resultList = new ArrayList<>();
 
@@ -332,11 +320,22 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	 *                                      the caller bricks object
 	 */
 	public List<Brick> padList(Bricks other) {
-		if (this.bricks.size() >= other.bricks.size())
-			throw new IllegalArgumentException();
+		if (this.bricks.size() == other.bricks.size())
+			return null;
 
-		List<Brick> shorter = this.bricks;
-		List<Brick> longer = other.bricks;
+		List<Brick> shorter;
+		List<Brick> longer;
+		boolean thisShorter = false;
+
+		if(this.bricks.size() > other.bricks.size()) {
+			longer = this.bricks;
+			shorter = other.bricks;
+		}
+		else{
+			shorter = this.bricks;
+			longer = other.bricks;
+			thisShorter = true;
+		}
 
 		int diff = longer.size() - shorter.size();
 		int emptyAdded = 0;
@@ -357,9 +356,11 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			}
 		}
 
-		this.bricks = newList;
+		if(thisShorter)
+			this.bricks = newList;
+		else
+			other.bricks = newList;
 
 		return newList;
 	}
-
 }
