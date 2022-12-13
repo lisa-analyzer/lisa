@@ -41,7 +41,7 @@ import org.junit.Test;
 
 public class BaseNonRelationalValueDomainTest {
 
-	private static class Sample extends BaseNonRelationalValueDomain<Sample> {
+	private static class Sample implements BaseNonRelationalValueDomain<Sample> {
 
 		@Override
 		public DomainRepresentation representation() {

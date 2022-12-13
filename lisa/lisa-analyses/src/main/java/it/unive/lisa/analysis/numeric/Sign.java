@@ -40,7 +40,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Sign extends BaseNonRelationalValueDomain<Sign> {
+public class Sign implements BaseNonRelationalValueDomain<Sign> {
 
 	/**
 	 * The abstract positive element.

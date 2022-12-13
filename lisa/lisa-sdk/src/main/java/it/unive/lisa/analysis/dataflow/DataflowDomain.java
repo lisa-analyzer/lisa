@@ -28,7 +28,7 @@ import java.util.function.Predicate;
  *                domain
  */
 public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends DataflowElement<D, E>>
-		extends BaseLattice<D> implements ValueDomain<D> {
+		implements BaseLattice<D>, ValueDomain<D> {
 
 	private final boolean isTop;
 

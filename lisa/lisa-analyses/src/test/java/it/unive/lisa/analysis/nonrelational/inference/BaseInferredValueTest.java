@@ -43,7 +43,7 @@ import org.junit.Test;
 
 public class BaseInferredValueTest {
 
-	private static class Sample extends BaseInferredValue<Sample> {
+	private static class Sample implements BaseInferredValue<Sample> {
 
 		@Override
 		public DomainRepresentation representation() {

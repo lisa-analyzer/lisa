@@ -41,7 +41,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class IntegerConstantPropagation extends BaseNonRelationalValueDomain<IntegerConstantPropagation> {
+public class IntegerConstantPropagation implements BaseNonRelationalValueDomain<IntegerConstantPropagation> {
 
 	private static final IntegerConstantPropagation TOP = new IntegerConstantPropagation(true, false);
 	private static final IntegerConstantPropagation BOTTOM = new IntegerConstantPropagation(false, true);

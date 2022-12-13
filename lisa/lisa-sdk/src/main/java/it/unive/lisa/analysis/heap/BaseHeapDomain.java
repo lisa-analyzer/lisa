@@ -29,16 +29,11 @@ import java.util.Set;
  * 
  * @param <H> the concrete {@link BaseHeapDomain} instance
  */
-public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H> implements HeapDomain<H> {
-
-	@Override
-	public final String toString() {
-		return representation().toString();
-	}
+public interface BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLattice<H>, HeapDomain<H> {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	default H smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof HeapExpression)
 			return semanticsOf((HeapExpression) expression, pp);
 
@@ -86,13 +81,13 @@ public abstract class BaseHeapDomain<H extends BaseHeapDomain<H>> extends BaseLa
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public H pushScope(ScopeToken scope) throws SemanticException {
+	default H pushScope(ScopeToken scope) throws SemanticException {
 		return (H) this;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public H popScope(ScopeToken scope) throws SemanticException {
+	default H popScope(ScopeToken scope) throws SemanticException {
 		return (H) this;
 	}
 
