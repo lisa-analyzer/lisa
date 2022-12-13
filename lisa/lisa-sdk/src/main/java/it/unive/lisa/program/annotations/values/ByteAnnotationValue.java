@@ -44,4 +44,13 @@ public class ByteAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(b);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof ByteAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		ByteAnnotationValue other = (ByteAnnotationValue) o;
+		return Byte.compare(b, other.b);
+	}
 }

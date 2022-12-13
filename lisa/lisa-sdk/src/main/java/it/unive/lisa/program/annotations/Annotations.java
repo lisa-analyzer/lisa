@@ -1,10 +1,10 @@
 package it.unive.lisa.program.annotations;
 
 import it.unive.lisa.program.annotations.matcher.AnnotationMatcher;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 
@@ -15,23 +15,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Annotations implements Iterable<Annotation> {
 
-	private final Collection<Annotation> annotations;
-
-	/**
-	 * Builds an empty list of annotations.
-	 */
-	public Annotations() {
-		this(new ArrayList<>());
-	}
-
-	/**
-	 * Builds a collection of annotations containing only the given one.
-	 * 
-	 * @param annotation the annotation
-	 */
-	public Annotations(Annotation annotation) {
-		this(List.of(annotation));
-	}
+	private final Set<Annotation> annotations;
 
 	/**
 	 * Builds a collection of annotations from an array of annotations.
@@ -39,7 +23,14 @@ public class Annotations implements Iterable<Annotation> {
 	 * @param annotations the array of annotations
 	 */
 	public Annotations(Annotation... annotations) {
-		this(List.of(annotations));
+		this(make(annotations));
+	}
+
+	private static Set<Annotation> make(Annotation... annotations) {
+		Set<Annotation> annots = new TreeSet<>();
+		for (Annotation a : annotations)
+			annots.add(a);
+		return annots;
 	}
 
 	/**
@@ -48,7 +39,9 @@ public class Annotations implements Iterable<Annotation> {
 	 * @param annotations the collection of annotations
 	 */
 	public Annotations(Collection<Annotation> annotations) {
-		this.annotations = annotations;
+		this.annotations = annotations instanceof TreeSet<?>
+				? (TreeSet<Annotation>) annotations
+				: new TreeSet<>(annotations);
 	}
 
 	/**
@@ -125,7 +118,7 @@ public class Annotations implements Iterable<Annotation> {
 	 * @return the annotations that are matched by the matcher {@code m}
 	 */
 	public final Annotations getAnnotations(AnnotationMatcher m) {
-		return new Annotations(annotations.stream().filter(m::matches).collect(Collectors.toList()));
+		return new Annotations(annotations.stream().filter(m::matches).collect(Collectors.toSet()));
 	}
 
 	/**

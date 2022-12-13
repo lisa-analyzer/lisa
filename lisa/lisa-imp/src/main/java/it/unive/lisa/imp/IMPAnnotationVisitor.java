@@ -21,6 +21,8 @@ import it.unive.lisa.program.annotations.values.IntAnnotationValue;
 import it.unive.lisa.program.annotations.values.StringAnnotationValue;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An {@link IMPParserBaseVisitor} that will parse annotations from IMP code.
@@ -33,7 +35,7 @@ public class IMPAnnotationVisitor extends IMPParserBaseVisitor<Object> {
 	public Annotations visitAnnotations(AnnotationsContext ctx) {
 		if (ctx == null)
 			return new Annotations();
-		List<Annotation> anns = new ArrayList<>();
+		Set<Annotation> anns = new TreeSet<>();
 		for (int i = 0; i < ctx.annotation().size(); i++)
 			anns.add(visitAnnotation(ctx.annotation(i)));
 		return new Annotations(anns);

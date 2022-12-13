@@ -56,4 +56,16 @@ public class EnumAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return name + "." + field;
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof EnumAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		EnumAnnotationValue other = (EnumAnnotationValue) o;
+		int cmp;
+		if ((cmp = name.compareTo(other.name)) != 0)
+			return cmp;
+		return field.compareTo(other.field);
+	}
 }

@@ -47,4 +47,13 @@ public class CompilationUnitAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return unitName;
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof CompilationUnitAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		CompilationUnitAnnotationValue other = (CompilationUnitAnnotationValue) o;
+		return unitName.compareTo(other.unitName);
+	}
 }

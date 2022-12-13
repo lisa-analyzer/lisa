@@ -44,4 +44,13 @@ public class LongAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(l);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof LongAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		LongAnnotationValue other = (LongAnnotationValue) o;
+		return Long.compare(l, other.l);
+	}
 }
