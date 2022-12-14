@@ -255,7 +255,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			return new FieldSensitivePointBasedHeap(reference.heapEnv,
 					((FieldSensitivePointBasedHeap) reference).fields);
 		else
-			return new FieldSensitivePointBasedHeap(reference.heapEnv, new HashMap<>());
+			return new FieldSensitivePointBasedHeap(reference.heapEnv);
 	}
 
 	@Override
