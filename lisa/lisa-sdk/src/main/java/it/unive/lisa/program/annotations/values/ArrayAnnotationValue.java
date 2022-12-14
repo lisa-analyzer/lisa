@@ -1,6 +1,8 @@
 package it.unive.lisa.program.annotations.values;
 
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Arrays;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -46,5 +48,26 @@ public class ArrayAnnotationValue implements AnnotationValue {
 	@Override
 	public String toString() {
 		return arr == null ? "[]" : "[" + StringUtils.join(arr, ", ") + "]";
+	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof ArrayAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		ArrayAnnotationValue other = (ArrayAnnotationValue) o;
+		int cmp;
+		if ((cmp = Integer.compare(arr.length, other.arr.length)) != 0)
+			return cmp;
+
+		CollectionsDiffBuilder<
+				BasicAnnotationValue> builder = new CollectionsDiffBuilder<>(BasicAnnotationValue.class, List.of(arr),
+						List.of(other.arr));
+		builder.compute(BasicAnnotationValue::compareTo);
+
+		if (builder.sameContent())
+			return 0;
+
+		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}
 }

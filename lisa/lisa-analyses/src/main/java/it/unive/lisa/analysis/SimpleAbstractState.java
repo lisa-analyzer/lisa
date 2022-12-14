@@ -36,8 +36,7 @@ import java.util.function.Predicate;
 public class SimpleAbstractState<H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends BaseLattice<SimpleAbstractState<H, V, T>>
-		implements AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
 
 	/**
 	 * The domain containing information regarding heap structures

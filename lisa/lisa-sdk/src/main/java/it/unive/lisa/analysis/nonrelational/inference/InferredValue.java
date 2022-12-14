@@ -54,7 +54,7 @@ public interface InferredValue<T extends InferredValue<T>>
 	 * 
 	 * @param <T> the type of {@link InferredValue}
 	 */
-	class InferredPair<T extends InferredValue<T>> extends BaseLattice<InferredPair<T>> {
+	class InferredPair<T extends InferredValue<T>> implements BaseLattice<InferredPair<T>> {
 
 		private final T domain;
 

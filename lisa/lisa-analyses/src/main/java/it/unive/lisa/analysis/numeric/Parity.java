@@ -33,7 +33,7 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Parity extends BaseNonRelationalValueDomain<Parity> {
+public class Parity implements BaseNonRelationalValueDomain<Parity> {
 
 	/**
 	 * The abstract even element.

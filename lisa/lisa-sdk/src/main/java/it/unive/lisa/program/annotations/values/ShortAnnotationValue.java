@@ -44,4 +44,13 @@ public class ShortAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(s);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof ShortAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		ShortAnnotationValue other = (ShortAnnotationValue) o;
+		return Short.compare(s, other.s);
+	}
 }

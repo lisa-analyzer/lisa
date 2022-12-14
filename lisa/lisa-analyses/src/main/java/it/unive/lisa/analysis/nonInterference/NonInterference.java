@@ -28,7 +28,7 @@ import java.util.Map;
  * @see <a href=
  *          "https://en.wikipedia.org/wiki/Non-interference_(security)">Non-interference</a>
  */
-public class NonInterference extends BaseInferredValue<NonInterference> {
+public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	/**
 	 * The annotation used to mark low confidentiality variables.

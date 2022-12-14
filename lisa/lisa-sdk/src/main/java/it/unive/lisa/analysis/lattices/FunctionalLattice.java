@@ -23,7 +23,7 @@ import java.util.Set;
  * @param <V> the concrete {@link Lattice} type of the values of this function
  */
 public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K, V extends Lattice<V>>
-		extends BaseLattice<F> implements Iterable<Map.Entry<K, V>> {
+		implements BaseLattice<F>, Iterable<Map.Entry<K, V>> {
 
 	/**
 	 * The function implemented by this lattice.

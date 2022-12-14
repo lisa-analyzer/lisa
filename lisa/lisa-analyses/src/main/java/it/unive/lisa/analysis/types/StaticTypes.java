@@ -33,7 +33,7 @@ import java.util.Set;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
+public class StaticTypes implements BaseNonRelationalTypeDomain<StaticTypes> {
 
 	private static final StaticTypes BOTTOM = new StaticTypes(null, null);
 
@@ -103,7 +103,7 @@ public class StaticTypes extends BaseNonRelationalTypeDomain<StaticTypes> {
 	@Override
 	public StaticTypes evalIdentifier(Identifier id, TypeEnvironment<StaticTypes> environment,
 			ProgramPoint pp) throws SemanticException {
-		StaticTypes eval = super.evalIdentifier(id, environment, pp);
+		StaticTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
 		return new StaticTypes(pp.getProgram().getTypes(), id.getStaticType());

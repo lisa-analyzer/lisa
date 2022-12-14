@@ -45,6 +45,19 @@ public interface Lattice<L extends Lattice<L>> {
 	}
 
 	/**
+	 * Yields {@code true} if and only if this lattice element is in relation
+	 * with (usually represented through &le;) the given one. This operation is
+	 * not commutative.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return {@code true} if and only if that condition holds
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	boolean lessOrEqual(L other) throws SemanticException;
+
+	/**
 	 * Performs the least upper bound operation between this lattice element and
 	 * the given one. This operation is commutative.
 	 * 
@@ -69,51 +82,6 @@ public interface Lattice<L extends Lattice<L>> {
 	default L glb(L other) throws SemanticException {
 		return bottom();
 	}
-
-	/**
-	 * Performs the narrowing operation between this lattice element and the
-	 * given one. This operation is not commutative. The default implementation
-	 * of this method delegates to {@link #glb(Lattice)}, and is thus safe for
-	 * finite lattices and DCC ones.
-	 * 
-	 * @param other the other lattice element
-	 * 
-	 * @return the narrowing between this and other
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default L narrowing(L other) throws SemanticException {
-		return glb(other);
-	}
-
-	/**
-	 * Performs the widening operation between this lattice element and the
-	 * given one. This operation is not commutative. The default implementation
-	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for
-	 * finite lattices and ACC ones.
-	 * 
-	 * @param other the other lattice element
-	 * 
-	 * @return the widening between this and other
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	default L widening(L other) throws SemanticException {
-		return lub(other);
-	}
-
-	/**
-	 * Yields {@code true} if and only if this lattice element is in relation
-	 * with (usually represented through &le;) the given one. This operation is
-	 * not commutative.
-	 * 
-	 * @param other the other lattice element
-	 * 
-	 * @return {@code true} if and only if that condition holds
-	 * 
-	 * @throws SemanticException if an error occurs during the computation
-	 */
-	boolean lessOrEqual(L other) throws SemanticException;
 
 	/**
 	 * Yields the top element of this lattice. The returned element should be
@@ -162,5 +130,37 @@ public interface Lattice<L extends Lattice<L>> {
 	 */
 	default boolean isBottom() {
 		return this == bottom();
+	}
+
+	/**
+	 * Performs the widening operation between this lattice element and the
+	 * given one. This operation is not commutative. The default implementation
+	 * of this method delegates to {@link #lub(Lattice)}, and is thus safe for
+	 * finite lattices and ACC ones.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the widening between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L widening(L other) throws SemanticException {
+		return lub(other);
+	}
+
+	/**
+	 * Performs the narrowing operation between this lattice element and the
+	 * given one. This operation is not commutative. The default implementation
+	 * of this method delegates to {@link #glb(Lattice)}, and is thus safe for
+	 * finite lattices and DCC ones.
+	 * 
+	 * @param other the other lattice element
+	 * 
+	 * @return the narrowing between this and other
+	 * 
+	 * @throws SemanticException if an error occurs during the computation
+	 */
+	default L narrowing(L other) throws SemanticException {
+		return glb(other);
 	}
 }
