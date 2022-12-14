@@ -47,4 +47,13 @@ public class StringAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return s;
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof StringAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		StringAnnotationValue other = (StringAnnotationValue) o;
+		return s.compareTo(other.s);
+	}
 }

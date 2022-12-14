@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 @FallbackImplementation
-public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
+public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap TOP = new MonolithicHeap();
 

@@ -44,4 +44,13 @@ public class CharAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(c);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof CharAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		CharAnnotationValue other = (CharAnnotationValue) o;
+		return Character.compare(c, other.c);
+	}
 }

@@ -45,7 +45,7 @@ import it.unive.lisa.util.numeric.MathNumber;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 @FallbackImplementation
-public class Interval extends BaseNonRelationalValueDomain<Interval> {
+public class Interval implements BaseNonRelationalValueDomain<Interval> {
 
 	/**
 	 * The abstract zero ({@code [0, 0]}) element.

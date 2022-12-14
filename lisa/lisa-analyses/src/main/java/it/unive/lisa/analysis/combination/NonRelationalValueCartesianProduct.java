@@ -30,7 +30,7 @@ import java.util.Map.Entry;
 public abstract class NonRelationalValueCartesianProduct<C extends NonRelationalValueCartesianProduct<C, T1, T2>,
 		T1 extends NonRelationalValueDomain<T1>,
 		T2 extends NonRelationalValueDomain<T2>>
-		extends BaseNonRelationalValueDomain<C> {
+		implements BaseNonRelationalValueDomain<C> {
 
 	/**
 	 * The left-hand side abstract domain.

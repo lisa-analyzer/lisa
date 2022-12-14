@@ -35,7 +35,7 @@ import org.apache.commons.collections4.SetUtils;
  *
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
+public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap TOP = new TypeBasedHeap();
 

@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 @FallbackImplementation
-public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
+public class InferredTypes implements BaseNonRelationalTypeDomain<InferredTypes> {
 
 	private static final InferredTypes BOTTOM = new InferredTypes(null, Collections.emptySet());
 
@@ -114,7 +114,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	public boolean isTop() {
-		return super.isTop() || isTop;
+		return BaseNonRelationalTypeDomain.super.isTop() || isTop;
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 
 	@Override
 	public boolean isBottom() {
-		return super.isBottom() || BOTTOM.elements.equals(elements);
+		return BaseNonRelationalTypeDomain.super.isBottom() || BOTTOM.elements.equals(elements);
 	}
 
 	@Override
@@ -141,7 +141,7 @@ public class InferredTypes extends BaseNonRelationalTypeDomain<InferredTypes> {
 	@Override
 	public InferredTypes evalIdentifier(Identifier id, TypeEnvironment<InferredTypes> environment,
 			ProgramPoint pp) throws SemanticException {
-		InferredTypes eval = super.evalIdentifier(id, environment, pp);
+		InferredTypes eval = BaseNonRelationalTypeDomain.super.evalIdentifier(id, environment, pp);
 		if (!eval.isTop() && !eval.isBottom())
 			return eval;
 		TypeSystem types = pp.getProgram().getTypes();

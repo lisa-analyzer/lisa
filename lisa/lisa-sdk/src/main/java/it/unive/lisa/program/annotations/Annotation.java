@@ -1,5 +1,6 @@
 package it.unive.lisa.program.annotations;
 
+import it.unive.lisa.util.collections.CollectionsDiffBuilder;
 import java.util.Collections;
 import java.util.List;
 
@@ -8,7 +9,7 @@ import java.util.List;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class Annotation {
+public class Annotation implements Comparable<Annotation> {
 
 	private final String annotationName;
 
@@ -128,5 +129,24 @@ public class Annotation {
 			return annotationName;
 
 		return annotationName + annotationMembers.toString();
+	}
+
+	@Override
+	public int compareTo(Annotation o) {
+		int cmp = 0;
+		if ((cmp = annotationName.compareTo(o.annotationName)) != 0)
+			return cmp;
+		if ((cmp = annotationMembers.size() - o.annotationMembers.size()) != 0)
+			return cmp;
+		CollectionsDiffBuilder<
+				AnnotationMember> builder = new CollectionsDiffBuilder<>(AnnotationMember.class, annotationMembers,
+						o.annotationMembers);
+		builder.compute(AnnotationMember::compareTo);
+
+		if (builder.sameContent())
+			// only properties left to check
+			return 0;
+
+		return builder.getOnlyFirst().iterator().next().compareTo(builder.getOnlySecond().iterator().next());
 	}
 }

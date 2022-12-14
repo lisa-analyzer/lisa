@@ -44,7 +44,7 @@ import java.util.function.Predicate;
  * @see <a href=
  *          "https://mitpress.mit.edu/books/introduction-static-analysis">https://mitpress.mit.edu/books/introduction-static-analysis</a>
  */
-public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
+public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 
 	/**
 	 * An heap environment tracking which allocation sites are associated to

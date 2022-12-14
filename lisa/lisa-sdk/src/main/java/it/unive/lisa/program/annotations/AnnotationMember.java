@@ -7,7 +7,7 @@ import it.unive.lisa.program.annotations.values.AnnotationValue;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class AnnotationMember {
+public class AnnotationMember implements Comparable<AnnotationMember> {
 
 	private final String id;
 
@@ -76,5 +76,13 @@ public class AnnotationMember {
 	@Override
 	public String toString() {
 		return id + " = " + value;
+	}
+
+	@Override
+	public int compareTo(AnnotationMember o) {
+		int cmp = 0;
+		if ((cmp = id.compareTo(o.id)) != 0)
+			return cmp;
+		return value.compareTo(o.value);
 	}
 }

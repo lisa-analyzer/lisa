@@ -10,11 +10,25 @@ package it.unive.lisa.analysis;
  * 
  * @param <L> the concrete {@link BaseLattice} instance
  */
-public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L> {
+public interface BaseLattice<L extends BaseLattice<L>> extends Lattice<L> {
+
+	@Override
+	default boolean lessOrEqual(L other) throws SemanticException {
+		if (other == null)
+			return false;
+
+		if (this == other || this.isBottom() || other.isTop() || this.equals(other))
+			return true;
+
+		if (this.isTop() || other.isBottom())
+			return false;
+
+		return lessOrEqualAux(other);
+	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public L lub(L other) throws SemanticException {
+	default L lub(L other) throws SemanticException {
 		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -26,7 +40,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public L glb(L other) throws SemanticException {
+	default L glb(L other) throws SemanticException {
 		if (other == null || this.isBottom() || other.isTop() || this == other || this.equals(other))
 			return (L) this;
 
@@ -34,6 +48,30 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 			return other;
 
 		return glbAux(other);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	default L widening(L other) throws SemanticException {
+		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
+			return (L) this;
+
+		if (this.isBottom() || other.isTop())
+			return other;
+
+		return wideningAux(other);
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	default L narrowing(L other) throws SemanticException {
+		if (other == null || this.isBottom() || this == other || this.equals(other))
+			return (L) this;
+
+		if (this.isTop() || other.isBottom())
+			return other;
+
+		return narrowingAux(other);
 	}
 
 	/**
@@ -74,32 +112,8 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public L glbAux(L other) throws SemanticException {
+	default L glbAux(L other) throws SemanticException {
 		return bottom();
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public L widening(L other) throws SemanticException {
-		if (other == null || other.isBottom() || this.isTop() || this == other || this.equals(other))
-			return (L) this;
-
-		if (this.isBottom() || other.isTop())
-			return other;
-
-		return wideningAux(other);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public L narrowing(L other) throws SemanticException {
-		if (other == null || this.isBottom() || this == other || this.equals(other))
-			return (L) this;
-
-		if (this.isTop() || other.isBottom())
-			return other;
-
-		return narrowingAux(other);
 	}
 
 	/**
@@ -123,7 +137,7 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public L wideningAux(L other) throws SemanticException {
+	default L wideningAux(L other) throws SemanticException {
 		return lubAux(other);
 	}
 
@@ -148,22 +162,8 @@ public abstract class BaseLattice<L extends BaseLattice<L>> implements Lattice<L
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public L narrowingAux(L other) throws SemanticException {
+	default L narrowingAux(L other) throws SemanticException {
 		return glbAux(other);
-	}
-
-	@Override
-	public boolean lessOrEqual(L other) throws SemanticException {
-		if (other == null)
-			return false;
-
-		if (this == other || this.isBottom() || other.isTop() || this.equals(other))
-			return true;
-
-		if (this.isTop() || other.isBottom())
-			return false;
-
-		return lessOrEqualAux(other);
 	}
 
 	/**
