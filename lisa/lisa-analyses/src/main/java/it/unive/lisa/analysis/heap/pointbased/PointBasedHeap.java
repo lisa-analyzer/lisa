@@ -143,7 +143,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
-	protected PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
+	public PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
 			ProgramPoint pp)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must

@@ -1,14 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -19,6 +10,14 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -94,7 +93,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	public FieldSensitivePointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site,
 			PointBasedHeap pb,
 			ProgramPoint pp)
-					throws SemanticException {
+			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
 		StaticAllocationSite clone = new StaticAllocationSite(site.getStaticType(),
@@ -138,9 +137,10 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	public PointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
 		if (expression instanceof AccessChild) {
 			FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) super.smallStepSemantics(expression, pp);
-			
+
 			AccessChild accessChild = (AccessChild) expression;
-			Map<AllocationSite, Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
+			Map<AllocationSite,
+					Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
 
 			ExpressionSet<ValueExpression> exprs = rewrite(accessChild.getContainer(), pp);
 			for (ValueExpression rec : exprs)
@@ -278,7 +278,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		return Objects.equals(fields, other.fields);
 	}
 
-	private void addField(AllocationSite site, SymbolicExpression field, Map<AllocationSite, Set<SymbolicExpression>> mapping) {
+	private void addField(AllocationSite site, SymbolicExpression field,
+			Map<AllocationSite, Set<SymbolicExpression>> mapping) {
 		if (!mapping.containsKey(site))
 			mapping.put(site, new HashSet<>());
 		mapping.get(site).add(field);
