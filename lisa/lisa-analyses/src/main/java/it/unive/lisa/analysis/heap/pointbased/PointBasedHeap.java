@@ -129,14 +129,14 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	/**
-	 * Given the point-based heap instance {@code pb}, perform the assignment
-	 * of {@code site} to the identifier {@code id} when {@code site} is a
-	 * static allocation site, thus handling the heap replacements.
+	 * Given the point-based heap instance {@code pb}, perform the assignment of
+	 * {@code site} to the identifier {@code id} when {@code site} is a static
+	 * allocation site, thus handling the heap replacements.
 	 * 
-	 * @param id     the identifier to be updated
+	 * @param id   the identifier to be updated
 	 * @param site the allocation site to be assigned
-	 * @param pb    the starting point-based heap instance
-	 * @param pp     the program point where this operation occurs
+	 * @param pb   the starting point-based heap instance
+	 * @param pp   the program point where this operation occurs
 	 * 
 	 * @return the point-based heap instace where {@code id} is updated with
 	 *             {@code star_y} and the needed heap replacements
