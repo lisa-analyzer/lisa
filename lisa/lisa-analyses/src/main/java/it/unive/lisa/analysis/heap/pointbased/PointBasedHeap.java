@@ -129,13 +129,13 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	}
 
 	/**
-	 * Given the point-based heap instance {@code sss}, perform the assignment
-	 * of {@code star_y} to the identifier {@code id} when {@code star_y} is a
+	 * Given the point-based heap instance {@code pb}, perform the assignment
+	 * of {@code site} to the identifier {@code id} when {@code site} is a
 	 * static allocation site, thus handling the heap replacements.
 	 * 
 	 * @param id     the identifier to be updated
-	 * @param star_y the allocation site to be assigned
-	 * @param sss    the starting point-based heap instance
+	 * @param site the allocation site to be assigned
+	 * @param pb    the starting point-based heap instance
 	 * @param pp     the program point where this operation occurs
 	 * 
 	 * @return the point-based heap instace where {@code id} is updated with
@@ -143,23 +143,23 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
-	protected PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite star_y, PointBasedHeap sss,
+	protected PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
 			ProgramPoint pp)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
-		StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
-				id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
+		StaticAllocationSite clone = new StaticAllocationSite(site.getStaticType(),
+				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
 		// also runtime types are inherited, if already inferred
-		if (star_y.hasRuntimeTypes())
-			clone.setRuntimeTypes(star_y.getRuntimeTypes(null));
+		if (site.hasRuntimeTypes())
+			clone.setRuntimeTypes(site.getRuntimeTypes(null));
 
-		HeapEnvironment<AllocationSites> tmp = sss.heapEnv.assign(id, clone, pp);
+		HeapEnvironment<AllocationSites> tmp = pb.heapEnv.assign(id, clone, pp);
 
 		HeapReplacement replacement = new HeapReplacement();
-		replacement.addSource(star_y);
+		replacement.addSource(site);
 		replacement.addTarget(clone);
-		replacement.addTarget(star_y);
+		replacement.addTarget(site);
 		return from(new PointBasedHeap(tmp, new ArrayList<>(Collections.singleton(replacement))));
 	}
 

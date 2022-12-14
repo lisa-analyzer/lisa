@@ -89,26 +89,26 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	protected FieldSensitivePointBasedHeap staticAllocation(Identifier id, StaticAllocationSite star_y,
-			PointBasedHeap sss,
+	protected FieldSensitivePointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site,
+			PointBasedHeap pb,
 			ProgramPoint pp)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
-		StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
-				id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
-		HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
+		StaticAllocationSite clone = new StaticAllocationSite(site.getStaticType(),
+				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
+		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
 
 		// all the allocation sites fields of star_y
 		List<HeapReplacement> replacements = new ArrayList<>();
-		if (fields.containsKey(star_y)) {
-			for (SymbolicExpression field : fields.get(star_y)) {
+		if (fields.containsKey(site)) {
+			for (SymbolicExpression field : fields.get(site)) {
 				StaticAllocationSite cloneWithField = new StaticAllocationSite(field.getStaticType(),
-						id.getCodeLocation().toString(), field, star_y.isWeak(), id.getCodeLocation());
+						id.getCodeLocation().toString(), field, site.isWeak(), id.getCodeLocation());
 
 				StaticAllocationSite star_yWithField = new StaticAllocationSite(field.getStaticType(),
-						star_y.getCodeLocation().toString(), field, star_y.isWeak(),
-						star_y.getCodeLocation());
+						site.getCodeLocation().toString(), field, site.isWeak(),
+						site.getCodeLocation());
 				HeapReplacement replacement = new HeapReplacement();
 				replacement.addSource(star_yWithField);
 				replacement.addTarget(cloneWithField);
@@ -118,7 +118,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			}
 		}
 
-		return new FieldSensitivePointBasedHeap(heap, replacements, ((FieldSensitivePointBasedHeap) sss).fields);
+		return new FieldSensitivePointBasedHeap(heap, replacements, ((FieldSensitivePointBasedHeap) pb).fields);
 	}
 
 	@Override
