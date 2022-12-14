@@ -115,7 +115,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
 					if (star_y instanceof StaticAllocationSite)
-						result = result.lub(staticAllocation(id, star_y, sss, pp));
+						result = result.lub(staticAllocation(id, (StaticAllocationSite) star_y, sss, pp));
 					else {
 						// aliasing: id and star_y points to the same object
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
@@ -128,7 +128,23 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 		return result;
 	}
 
-	protected PointBasedHeap staticAllocation(Identifier id, HeapLocation star_y, PointBasedHeap sss, ProgramPoint pp)
+	/**
+	 * Given the point-based heap instance {@code sss}, perform the assignment
+	 * of {@code star_y} to the identifier {@code id} when {@code star_y} is a
+	 * static allocation site, thus handling the heap replacements.
+	 * 
+	 * @param id     the identifier to be updated
+	 * @param star_y the allocation site to be assigned
+	 * @param sss    the starting point-based heap instance
+	 * @param pp     the program point where this operation occurs
+	 * 
+	 * @return the point-based heap instace where {@code id} is updated with
+	 *             {@code star_y} and the needed heap replacements
+	 * 
+	 * @throws SemanticException
+	 */
+	protected PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite star_y, PointBasedHeap sss,
+			ProgramPoint pp)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id

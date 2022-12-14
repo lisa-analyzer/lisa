@@ -7,7 +7,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
 import it.unive.lisa.symbolic.heap.HeapAllocation;
-import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -76,11 +75,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	/**
 	 * Builds a new instance of field-sensitive point-based heap from its heap
-	 * environment.
+	 * environment, its replacements, and its field mapping.
 	 * 
-	 * @param heapEnv the heap environment that this instance tracks
-	 * @param fields  the mapping between allocation sites and their fields that
-	 *                    this instance tracks
+	 * @param heapEnv      the heap environment that this instance tracks
+	 * @param replacements the heap replacements
+	 * @param fields       the mapping between allocation sites and their fields
+	 *                         that this instance tracks
 	 */
 	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements,
 			Map<AllocationSite, Set<SymbolicExpression>> fields) {
@@ -88,9 +88,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		this.fields = fields;
 	}
 
-
 	@Override
-	protected FieldSensitivePointBasedHeap staticAllocation(Identifier id, HeapLocation star_y, PointBasedHeap sss,
+	protected FieldSensitivePointBasedHeap staticAllocation(Identifier id, StaticAllocationSite star_y,
+			PointBasedHeap sss,
 			ProgramPoint pp)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
@@ -219,7 +219,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	@Override
 	public FieldSensitivePointBasedHeap mk(PointBasedHeap reference) {
 		if (reference instanceof FieldSensitivePointBasedHeap)
-			return new FieldSensitivePointBasedHeap(reference.heapEnv, ((FieldSensitivePointBasedHeap) reference).fields);
+			return new FieldSensitivePointBasedHeap(reference.heapEnv,
+					((FieldSensitivePointBasedHeap) reference).fields);
 		else
 			return new FieldSensitivePointBasedHeap(reference.heapEnv, new HashMap<>());
 	}
