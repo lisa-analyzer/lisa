@@ -1,12 +1,5 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
@@ -30,6 +23,13 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * A field-insensitive point-based heap implementation that abstracts heap
@@ -114,25 +114,9 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					if (star_y instanceof StaticAllocationSite) {
-						// no aliasing: star_y must be cloned and the clone must
-						// be assigned to id
-						StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
-								id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
-						// also runtime types are inherited, if already inferred
-						if (star_y.hasRuntimeTypes())
-							clone.setRuntimeTypes(star_y.getRuntimeTypes(null));
-
-						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, clone, pp);
-						result = result.lub(from(new PointBasedHeap(heap)));
-
-						HeapReplacement replacement = new HeapReplacement();
-						replacement.addSource(star_y);
-						replacement.addTarget(clone);
-						replacement.addTarget(star_y);
-
-						result.replacements.add(replacement);
-					} else {
+					if (star_y instanceof StaticAllocationSite)
+						result = result.lub(staticAllocation(id, star_y, sss, pp));
+					else {
 						// aliasing: id and star_y points to the same object
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
 						result = result.lub(from(new PointBasedHeap(heap)));
@@ -142,6 +126,25 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 				result = result.lub(sss);
 
 		return result;
+	}
+
+	protected PointBasedHeap staticAllocation(Identifier id, HeapLocation star_y, PointBasedHeap sss, ProgramPoint pp)
+			throws SemanticException {
+		// no aliasing: star_y must be cloned and the clone must
+		// be assigned to id
+		StaticAllocationSite clone = new StaticAllocationSite(star_y.getStaticType(),
+				id.getCodeLocation().toString(), star_y.isWeak(), id.getCodeLocation());
+		// also runtime types are inherited, if already inferred
+		if (star_y.hasRuntimeTypes())
+			clone.setRuntimeTypes(star_y.getRuntimeTypes(null));
+
+		HeapEnvironment<AllocationSites> tmp = sss.heapEnv.assign(id, clone, pp);
+
+		HeapReplacement replacement = new HeapReplacement();
+		replacement.addSource(star_y);
+		replacement.addTarget(clone);
+		replacement.addTarget(star_y);
+		return from(new PointBasedHeap(tmp, new ArrayList<>(Collections.singleton(replacement))));
 	}
 
 	@Override
