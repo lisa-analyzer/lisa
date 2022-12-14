@@ -141,7 +141,7 @@ public class PointBasedHeap extends BaseHeapDomain<PointBasedHeap> {
 	 * @return the point-based heap instace where {@code id} is updated with
 	 *             {@code star_y} and the needed heap replacements
 	 * 
-	 * @throws SemanticException
+	 * @throws SemanticException if something goes wrong during the analysis
 	 */
 	protected PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite star_y, PointBasedHeap sss,
 			ProgramPoint pp)
