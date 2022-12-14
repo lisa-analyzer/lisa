@@ -27,11 +27,13 @@ import it.unive.lisa.program.language.hierarchytraversal.HierarcyTraversalStrate
 import it.unive.lisa.program.language.resolution.ParameterMatchingStrategy;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.util.datastructures.graph.BaseGraph;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -59,7 +61,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 	private final Map<CodeMember, Collection<Call>> callsites = new HashMap<>();
 
-	private final Map<UnresolvedCall, Call> resolvedCache = new IdentityHashMap<>();
+	private final Map<UnresolvedCall, Map<List<Set<Type>>, Call>> resolvedCache = new IdentityHashMap<>();
 
 	@Override
 	public void init(Application app) throws CallGraphConstructionException {
@@ -91,7 +93,8 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 	@SuppressWarnings("unchecked")
 	public Call resolve(UnresolvedCall call, Set<Type>[] types, SymbolAliasing aliasing)
 			throws CallResolutionException {
-		Call cached = resolvedCache.get(call);
+		List<Set<Type>> typeList = Arrays.asList(types);
+		Call cached = resolvedCache.getOrDefault(call, Map.of()).get(typeList);
 		if (cached != null)
 			return cached;
 
@@ -178,7 +181,7 @@ public abstract class BaseCallGraph extends BaseGraph<BaseCallGraph, CallGraphNo
 
 		resolved.setOffset(call.getOffset());
 		resolved.setSource(call);
-		resolvedCache.put(call, resolved);
+		resolvedCache.computeIfAbsent(call, c -> new HashMap<>()).put(typeList, resolved);
 
 		CallGraphNode source = new CallGraphNode(this, call.getCFG());
 		if (!adjacencyMatrix.containsNode(source))
