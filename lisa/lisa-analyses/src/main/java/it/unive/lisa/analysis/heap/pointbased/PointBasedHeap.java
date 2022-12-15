@@ -11,10 +11,10 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -115,9 +115,9 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					if (star_y instanceof StaticAllocationSite)
+					if (star_y instanceof StackAllocationSite)
 						result = result
-								.lub(nonAliasedAssignment(id, (StaticAllocationSite) star_y, sss, pp, replacements));
+								.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
 					else {
 						// aliasing: id and star_y points to the same object
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
@@ -168,12 +168,12 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
-	public PointBasedHeap nonAliasedAssignment(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
+	public PointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site, PointBasedHeap pb,
 			ProgramPoint pp, List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
-		StaticAllocationSite clone = new StaticAllocationSite(site.getStaticType(),
+		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
 				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
 		// also runtime types are inherited, if already inferred
 		if (site.hasRuntimeTypes())
@@ -330,14 +330,14 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
 					AllocationSite e;
-					if (site instanceof StaticAllocationSite)
-						e = new StaticAllocationSite(
+					if (site instanceof StackAllocationSite)
+						e = new StackAllocationSite(
 								expression.getStaticType(),
 								site.getLocationName(),
 								true,
 								expression.getCodeLocation());
 					else
-						e = new DynamicAllocationSite(
+						e = new HeapAllocationSite(
 								expression.getStaticType(),
 								site.getLocationName(),
 								true,
@@ -353,17 +353,17 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			AllocationSite id;
-			if (expression.isStaticallyAllocated())
-				id = new StaticAllocationSite(
+			if (expression.isStackAllocation())
+				id = new StackAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,
 						expression.getCodeLocation());
 			else
-				id = new DynamicAllocationSite(
+				id = new HeapAllocationSite(
 						expression.getStaticType(),
 						expression.getCodeLocation().getCodeLocation(),
 						true,

@@ -15,8 +15,8 @@ import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import java.util.Objects;
@@ -25,7 +25,7 @@ import java.util.Objects;
  * An expression modeling the array allocation operation
  * ({@code new type[...]}). The type of this expression is the {@link Type} of
  * the array's elements. Note that the dimensions of the array are ignored. This
- * expression corresponds to a {@link HeapAllocation}.
+ * expression corresponds to a {@link MemoryAllocation}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
@@ -63,7 +63,7 @@ public class IMPNewArray extends NaryExpression {
 					ExpressionSet<SymbolicExpression>[] params,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		HeapAllocation alloc = new HeapAllocation(getStaticType(), getLocation(), staticallyAllocated);
+		MemoryAllocation alloc = new MemoryAllocation(getStaticType(), getLocation(), staticallyAllocated);
 		AnalysisState<A, H, V, T> sem = state.smallStepSemantics(alloc, this);
 
 		AnalysisState<A, H, V, T> result = state.bottom();

@@ -6,7 +6,7 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
@@ -97,23 +97,23 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StaticAllocationSite site,
+	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site,
 			PointBasedHeap pb,
 			ProgramPoint pp, List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
-		StaticAllocationSite clone = new StaticAllocationSite(site.getStaticType(),
+		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
 				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
 		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
 
 		// all the allocation sites fields of star_y
 		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
 			for (SymbolicExpression field : ((FieldSensitivePointBasedHeap) pb).fields.get(site)) {
-				StaticAllocationSite cloneWithField = new StaticAllocationSite(field.getStaticType(),
+				StackAllocationSite cloneWithField = new StackAllocationSite(field.getStaticType(),
 						id.getCodeLocation().toString(), field, site.isWeak(), id.getCodeLocation());
 
-				StaticAllocationSite star_yWithField = new StaticAllocationSite(field.getStaticType(),
+				StackAllocationSite star_yWithField = new StackAllocationSite(field.getStaticType(),
 						site.getCodeLocation().toString(), field, site.isWeak(),
 						site.getCodeLocation());
 				HeapReplacement replacement = new HeapReplacement();
@@ -204,15 +204,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			for (SymbolicExpression target : child) {
 				AllocationSite e;
 
-				if (site instanceof StaticAllocationSite)
-					e = new StaticAllocationSite(
+				if (site instanceof StackAllocationSite)
+					e = new StackAllocationSite(
 							expression.getStaticType(),
 							site.getLocationName(),
 							target,
 							site.isWeak(),
 							site.getCodeLocation());
 				else
-					e = new DynamicAllocationSite(
+					e = new HeapAllocationSite(
 							expression.getStaticType(),
 							site.getLocationName(),
 							target,
@@ -226,7 +226,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			String pp = expression.getCodeLocation().getCodeLocation();
 
@@ -237,10 +237,10 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				weak = false;
 
 			AllocationSite e;
-			if (expression.isStaticallyAllocated())
-				e = new StaticAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			if (expression.isStackAllocation())
+				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 			else
-				e = new DynamicAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
 
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));

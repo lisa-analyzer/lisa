@@ -11,12 +11,12 @@ import java.util.Objects;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class HeapAllocation extends HeapExpression {
+public class MemoryAllocation extends HeapExpression {
 
 	/**
-	 * If this allocation is statically or dynamically allocated.
+	 * If this allocation is allocated in the stack.
 	 */
-	private final boolean staticallyAllocated;
+	private final boolean isStackAllocation;
 
 	/**
 	 * Builds the heap allocation.
@@ -25,39 +25,38 @@ public class HeapAllocation extends HeapExpression {
 	 * @param location   the code location of the statement that has generated
 	 *                       this expression
 	 */
-	public HeapAllocation(Type staticType, CodeLocation location) {
+	public MemoryAllocation(Type staticType, CodeLocation location) {
 		this(staticType, location, false);
 	}
 
 	/**
 	 * Builds the heap allocation.
 	 * 
-	 * @param staticType          the static type of this expression
-	 * @param location            the code location of the statement that has
-	 *                                generated this expression
-	 * @param staticallyAllocated if this allocation is statically allocated or
-	 *                                not
+	 * @param staticType        the static type of this expression
+	 * @param location          the code location of the statement that has
+	 *                              generated this expression
+	 * @param isStackAllocation if this allocation is allocated in the stack
 	 */
-	public HeapAllocation(Type staticType, CodeLocation location, boolean staticallyAllocated) {
+	public MemoryAllocation(Type staticType, CodeLocation location, boolean isStackAllocation) {
 		super(staticType, location);
-		this.staticallyAllocated = staticallyAllocated;
+		this.isStackAllocation = isStackAllocation;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + Objects.hash(staticallyAllocated);
+		result = prime * result + Objects.hash(isStackAllocation);
 		return result;
 	}
 
 	/**
-	 * Yields whether this heap allocation is static or not.
+	 * Yields whether this memory allocation is allocated in the stack.
 	 * 
-	 * @return whether this heap allocation is static or not
+	 * @return whether this memory allocation is allocated in the stack
 	 */
-	public boolean isStaticallyAllocated() {
-		return staticallyAllocated;
+	public boolean isStackAllocation() {
+		return isStackAllocation;
 	}
 
 	@Override
@@ -68,13 +67,13 @@ public class HeapAllocation extends HeapExpression {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HeapAllocation other = (HeapAllocation) obj;
-		return staticallyAllocated == other.staticallyAllocated;
+		MemoryAllocation other = (MemoryAllocation) obj;
+		return isStackAllocation == other.isStackAllocation;
 	}
 
 	@Override
 	public String toString() {
-		return (staticallyAllocated ? "" : "new ") + getStaticType();
+		return (isStackAllocation ? "" : "new ") + getStaticType();
 	}
 
 	@Override
