@@ -23,9 +23,9 @@ import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.symbolic.value.Variable;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -102,6 +102,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
 
 		PointBasedHeap result = bottom();
+		List<HeapReplacement> replacements = new LinkedList<>();
 		for (ValueExpression exp : rewrittenExp)
 			if (exp instanceof MemoryPointer) {
 				MemoryPointer pid = (MemoryPointer) exp;
@@ -115,7 +116,8 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
 					if (star_y instanceof StaticAllocationSite)
-						result = result.lub(staticAllocation(id, (StaticAllocationSite) star_y, sss, pp));
+						result = result
+								.lub(nonAliasedAssignment(id, (StaticAllocationSite) star_y, sss, pp, replacements));
 					else {
 						// aliasing: id and star_y points to the same object
 						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
@@ -125,7 +127,29 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			} else
 				result = result.lub(sss);
 
-		return result;
+		return buildHeapAfterAssignment(result.heapEnv, sss, replacements);
+	}
+
+	/**
+	 * Builds an instance of the heap domain after an assignment, from the
+	 * resulting heap environment, the heap instance obtained from the small
+	 * step semantics of the right-hand side of the assignment, and the
+	 * replacements.
+	 * 
+	 * @param heap         the resulting heap environment
+	 * @param sss          the heap instance obtained from the small step
+	 *                         semantics of the right-hand side of the
+	 *                         assignment
+	 * @param replacements
+	 * 
+	 * @return an instance of the heap domain after an assignment, from the
+	 *             resulting heap domain, the heap instance obtained from the
+	 *             small step semantics of the right-hand side of the
+	 *             assignment, and the replacements
+	 */
+	protected PointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap, PointBasedHeap sss,
+			List<HeapReplacement> replacements) {
+		return from(new PointBasedHeap(heap, replacements));
 	}
 
 	/**
@@ -138,13 +162,13 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 * @param pb   the starting point-based heap instance
 	 * @param pp   the program point where this operation occurs
 	 * 
-	 * @return the point-based heap instace where {@code id} is updated with
+	 * @return the point-based heap instance where {@code id} is updated with
 	 *             {@code star_y} and the needed heap replacements
 	 * 
 	 * @throws SemanticException if something goes wrong during the analysis
 	 */
-	public PointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
-			ProgramPoint pp)
+	public PointBasedHeap nonAliasedAssignment(Identifier id, StaticAllocationSite site, PointBasedHeap pb,
+			ProgramPoint pp, List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
@@ -160,7 +184,9 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		replacement.addSource(site);
 		replacement.addTarget(clone);
 		replacement.addTarget(site);
-		return from(new PointBasedHeap(tmp, new ArrayList<>(Collections.singleton(replacement))));
+		replacements.add(replacement);
+
+		return from(new PointBasedHeap(tmp));
 	}
 
 	@Override

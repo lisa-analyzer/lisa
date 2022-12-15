@@ -10,7 +10,6 @@ import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,9 +89,17 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	public FieldSensitivePointBasedHeap staticAllocation(Identifier id, StaticAllocationSite site,
+	protected FieldSensitivePointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap,
+			PointBasedHeap sss,
+			List<HeapReplacement> replacements) {
+		return new FieldSensitivePointBasedHeap(heap, replacements,
+				((FieldSensitivePointBasedHeap) sss).fields);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StaticAllocationSite site,
 			PointBasedHeap pb,
-			ProgramPoint pp)
+			ProgramPoint pp, List<HeapReplacement> replacements)
 			throws SemanticException {
 		// no aliasing: star_y must be cloned and the clone must
 		// be assigned to id
@@ -101,9 +108,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
 
 		// all the allocation sites fields of star_y
-		List<HeapReplacement> replacements = new ArrayList<>();
-		if (fields.containsKey(site)) {
-			for (SymbolicExpression field : fields.get(site)) {
+		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
+			for (SymbolicExpression field : ((FieldSensitivePointBasedHeap) pb).fields.get(site)) {
 				StaticAllocationSite cloneWithField = new StaticAllocationSite(field.getStaticType(),
 						id.getCodeLocation().toString(), field, site.isWeak(), id.getCodeLocation());
 
@@ -119,7 +125,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			}
 		}
 
-		return new FieldSensitivePointBasedHeap(heap, replacements, ((FieldSensitivePointBasedHeap) pb).fields);
+		return new FieldSensitivePointBasedHeap(heap, ((FieldSensitivePointBasedHeap) pb).fields);
 	}
 
 	@Override
@@ -134,7 +140,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	public PointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public FieldSensitivePointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
 		if (expression instanceof AccessChild) {
 			FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) super.smallStepSemantics(expression, pp);
 
@@ -163,7 +170,8 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 		}
 
-		return super.smallStepSemantics(expression, pp);
+		PointBasedHeap sss = super.smallStepSemantics(expression, pp);
+		return new FieldSensitivePointBasedHeap(sss.heapEnv, fields);
 	}
 
 	/**
