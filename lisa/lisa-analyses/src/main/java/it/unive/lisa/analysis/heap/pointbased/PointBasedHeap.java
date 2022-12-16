@@ -417,7 +417,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 							site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
 						else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
 							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
-						else 
+						else
 							throw new SemanticException("The type " + id.getStaticType()
 									+ " cannot be allocated by point-based heap domains");
 						result.add(site);
