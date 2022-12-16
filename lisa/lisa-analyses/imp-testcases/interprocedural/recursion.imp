@@ -1,0 +1,70 @@
+class tests {
+
+	loop(n) {
+		if (n < 0)
+			return 10;
+		else {
+			def x = n - 1;
+			return this.loopAux1(x) * n;
+		}
+	}
+	
+	loopAux1(n) {
+		def x = n - 2;
+		return this.loopAux2(x) * n;
+	}
+	
+	loopAux2(n) {
+		def x = n + 1;
+		return this.loop(x) * n;
+	}
+	
+	directRecursion(n) {
+		if (n <= 1) 
+			return 1;
+		else {
+			def x = n - 1;
+			return this.directRecursion(x) * n;
+		}
+	}
+	
+	fib(n) {
+		if (n == 0)
+			return 1;
+		else if (n == 1)
+			return 1;
+		else {
+			def x = n - 1;
+			def y = n - 2;
+			return this.fib(x) + this.fib(y);
+		}
+	}
+
+	infiniteLoop(n) {
+		def x = n - 1;
+		return this.infiniteLoopAux1(x);
+	}
+	
+	infiniteLoopAux1(n) {
+		def x = n - 2;
+		return this.infiniteLoopAux2(x);
+	}
+	
+	infiniteLoopAux2(n) {
+		def x = n + 1;
+		return this.infiniteLoop(x);
+	}
+	
+	infiniteDirectRecursion(n) {
+		def x = n - 1;
+		return this.infiniteDirectRecursion(x) * n;
+	}
+	
+	main(a) {
+		def x = this.directRecursion(a);
+		def y = this.fib(a);
+		def z = this.loop(a);
+		def w = this.infiniteDirectRecursion(a);
+		def k = this.infiniteLoop(a);
+    }
+}

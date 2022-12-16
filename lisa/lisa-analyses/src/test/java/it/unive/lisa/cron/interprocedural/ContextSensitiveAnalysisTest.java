@@ -2,9 +2,12 @@ package it.unive.lisa.cron.interprocedural;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
+import it.unive.lisa.LiSAConfiguration.GraphType;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.pointbased.PointBasedHeap;
@@ -12,9 +15,11 @@ import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
+import it.unive.lisa.interprocedural.ContextInsensitiveToken;
+import it.unive.lisa.interprocedural.KDepthToken;
+import it.unive.lisa.interprocedural.LastScopeToken;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import org.junit.Test;
 
 public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 
@@ -114,4 +119,59 @@ public class ContextSensitiveAnalysisTest extends AnalysisTestExecutor {
 		perform(conf);
 	}
 
+	@Test
+	public void testRecursionWithRecFreeToken() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		perform("interprocedural", "recRecFreeToken", "recursion.imp", conf);
+	}
+
+	@Test
+	public void testRecursionWithLastToken() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(LastScopeToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		perform("interprocedural", "recLastToken", "recursion.imp", conf);
+	}
+
+	@Test
+	public void testRecursionWithKDepthToken() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(KDepthToken.getSingleton(5));
+		conf.callGraph = new RTACallGraph();
+		perform("interprocedural", "recKDepthToken", "recursion.imp", conf);
+	}
+
+	@Test
+	public void testRecursionWithInsensitiveToken() throws AnalysisSetupException {
+		LiSAConfiguration conf = new LiSAConfiguration();
+		conf.serializeResults = true;
+		conf.analysisGraphs = GraphType.HTML_WITH_SUBNODES;
+		conf.abstractState = getDefaultFor(AbstractState.class,
+				getDefaultFor(HeapDomain.class),
+				new Interval(),
+				getDefaultFor(TypeDomain.class));
+		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(ContextInsensitiveToken.getSingleton());
+		conf.callGraph = new RTACallGraph();
+		perform("interprocedural", "recInsensitiveToken", "recursion.imp", conf);
+	}
 }
