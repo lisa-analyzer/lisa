@@ -469,8 +469,9 @@ public class PointBasedHeapTest {
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 
 		// *(y) rewritten in x -> pp1 -> empty set
+		AllocationSite expectedUnknownAlloc = new StackAllocationSite(untyped, "unknown@y", true, fakeLocation);
 		deref = new HeapDereference(untyped, y, loc1);
-		expectedRewritten = new ExpressionSet<>(new AllocationSite(untyped, "unknown@y", fakeLocation));
+		expectedRewritten = new ExpressionSet<>(expectedUnknownAlloc);
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 	}
 }

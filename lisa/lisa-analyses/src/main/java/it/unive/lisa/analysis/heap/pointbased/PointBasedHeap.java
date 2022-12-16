@@ -412,7 +412,14 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 						// this is a variable from the program that we know
 						// nothing about
 						CodeLocation loc = expression.getCodeLocation();
-						AllocationSite site = new AllocationSite(id.getStaticType(), "unknown@" + id.getName(), loc);
+						AllocationSite site;
+						if (id.getStaticType().isPointerType())
+							site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+						else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
+							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+						else 
+							throw new SemanticException("The type " + id.getStaticType()
+									+ " cannot be allocated by point-based heap domains");
 						result.add(site);
 					}
 				} else
@@ -451,7 +458,13 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
 				CodeLocation loc = expression.getCodeLocation();
-				AllocationSite site = new AllocationSite(inner, "unknown@" + loc.getCodeLocation(), loc);
+				HeapAllocationSite site = new HeapAllocationSite(inner, "unknown@" + loc.getCodeLocation(), false, loc);
+				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
+			} else if (expression.getStaticType().isInMemoryType()) {
+				Type type = expression.getStaticType();
+				CodeLocation loc = expression.getCodeLocation();
+				StackAllocationSite site = new StackAllocationSite(type, "unknown@" + loc.getCodeLocation(), false,
+						loc);
 				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
 			}
 			return new ExpressionSet<>(expression);
