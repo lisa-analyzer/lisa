@@ -6,10 +6,16 @@ import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
+import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -31,10 +37,16 @@ import java.util.Set;
 public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 	/**
+	 * Tracks the fields of each allocation site.
+	 */
+	private final Map<AllocationSite, Set<SymbolicExpression>> fields;
+
+	/**
 	 * Builds a new instance of field-sensitive point-based heap.
 	 */
 	public FieldSensitivePointBasedHeap() {
 		super();
+		this.fields = Collections.emptyMap();
 	}
 
 	/**
@@ -44,7 +56,76 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+		this(heapEnv, Collections.emptyMap());
+	}
+
+	/**
+	 * Builds a new instance of field-sensitive point-based heap from its heap
+	 * environment.
+	 * 
+	 * @param heapEnv the heap environment that this instance tracks
+	 * @param fields  the mapping between allocation sites and their fields that
+	 *                    this instance tracks
+	 */
+	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv,
+			Map<AllocationSite, Set<SymbolicExpression>> fields) {
 		super(heapEnv);
+		this.fields = fields;
+	}
+
+	/**
+	 * Builds a new instance of field-sensitive point-based heap from its heap
+	 * environment, its replacements, and its field mapping.
+	 * 
+	 * @param heapEnv      the heap environment that this instance tracks
+	 * @param replacements the heap replacements
+	 * @param fields       the mapping between allocation sites and their fields
+	 *                         that this instance tracks
+	 */
+	public FieldSensitivePointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements,
+			Map<AllocationSite, Set<SymbolicExpression>> fields) {
+		super(heapEnv, replacements);
+		this.fields = fields;
+	}
+
+	@Override
+	protected FieldSensitivePointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap,
+			PointBasedHeap sss,
+			List<HeapReplacement> replacements) {
+		return new FieldSensitivePointBasedHeap(heap, replacements,
+				((FieldSensitivePointBasedHeap) sss).fields);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site,
+			PointBasedHeap pb,
+			ProgramPoint pp, List<HeapReplacement> replacements)
+			throws SemanticException {
+		// no aliasing: star_y must be cloned and the clone must
+		// be assigned to id
+		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
+				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
+		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
+
+		// all the allocation sites fields of star_y
+		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
+			for (SymbolicExpression field : ((FieldSensitivePointBasedHeap) pb).fields.get(site)) {
+				StackAllocationSite cloneWithField = new StackAllocationSite(field.getStaticType(),
+						id.getCodeLocation().toString(), field, site.isWeak(), id.getCodeLocation());
+
+				StackAllocationSite star_yWithField = new StackAllocationSite(field.getStaticType(),
+						site.getCodeLocation().toString(), field, site.isWeak(),
+						site.getCodeLocation());
+				HeapReplacement replacement = new HeapReplacement();
+				replacement.addSource(star_yWithField);
+				replacement.addTarget(cloneWithField);
+				replacement.addTarget(star_yWithField);
+
+				replacements.add(replacement);
+			}
+		}
+
+		return new FieldSensitivePointBasedHeap(heap, ((FieldSensitivePointBasedHeap) pb).fields);
 	}
 
 	@Override
@@ -56,6 +137,41 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	public ExpressionSet<ValueExpression> rewrite(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return expression.accept(new Rewriter());
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap smallStepSemantics(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		if (expression instanceof AccessChild) {
+			FieldSensitivePointBasedHeap sss = (FieldSensitivePointBasedHeap) super.smallStepSemantics(expression, pp);
+
+			AccessChild accessChild = (AccessChild) expression;
+			Map<AllocationSite,
+					Set<SymbolicExpression>> mapping = new HashMap<AllocationSite, Set<SymbolicExpression>>(sss.fields);
+
+			ExpressionSet<ValueExpression> exprs = rewrite(accessChild.getContainer(), pp);
+			for (ValueExpression rec : exprs)
+				if (rec instanceof MemoryPointer) {
+					AllocationSite site = (AllocationSite) ((MemoryPointer) rec).getReferencedLocation();
+					ExpressionSet<ValueExpression> childs = rewrite(accessChild.getChild(), pp);
+
+					for (ValueExpression child : childs)
+						addField(site, child, mapping);
+
+				} else if (rec instanceof AllocationSite) {
+					AllocationSite site = (AllocationSite) rec;
+					ExpressionSet<ValueExpression> childs = rewrite(accessChild.getChild(), pp);
+
+					for (ValueExpression child : childs)
+						addField(site, child, mapping);
+				}
+
+			return new FieldSensitivePointBasedHeap(heapEnv, heapEnv.getSubstitution(), mapping);
+
+		}
+
+		PointBasedHeap sss = super.smallStepSemantics(expression, pp);
+		return new FieldSensitivePointBasedHeap(sss.heapEnv, fields);
 	}
 
 	/**
@@ -86,12 +202,23 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		private void populate(AccessChild expression, ExpressionSet<ValueExpression> child,
 				Set<ValueExpression> result, AllocationSite site) {
 			for (SymbolicExpression target : child) {
-				AllocationSite e = new AllocationSite(
-						expression.getStaticType(),
-						site.getLocationName(),
-						target,
-						site.isWeak(),
-						site.getCodeLocation());
+				AllocationSite e;
+
+				if (site instanceof StackAllocationSite)
+					e = new StackAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							target,
+							site.isWeak(),
+							site.getCodeLocation());
+				else
+					e = new HeapAllocationSite(
+							expression.getStaticType(),
+							site.getLocationName(),
+							target,
+							site.isWeak(),
+							site.getCodeLocation());
+
 				if (expression.hasRuntimeTypes())
 					e.setRuntimeTypes(expression.getRuntimeTypes(null));
 				result.add(e);
@@ -99,7 +226,7 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			String pp = expression.getCodeLocation().getCodeLocation();
 
@@ -108,7 +235,13 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				weak = true;
 			else
 				weak = false;
-			AllocationSite e = new AllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
+			AllocationSite e;
+			if (expression.isStackAllocation())
+				e = new StackAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+			else
+				e = new HeapAllocationSite(expression.getStaticType(), pp, weak, expression.getCodeLocation());
+
 			if (expression.hasRuntimeTypes())
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(e);
@@ -122,5 +255,41 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 
 			return null;
 		}
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap mk(PointBasedHeap reference) {
+		if (reference instanceof FieldSensitivePointBasedHeap)
+			return new FieldSensitivePointBasedHeap(reference.heapEnv,
+					((FieldSensitivePointBasedHeap) reference).fields);
+		else
+			return new FieldSensitivePointBasedHeap(reference.heapEnv);
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(fields);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		FieldSensitivePointBasedHeap other = (FieldSensitivePointBasedHeap) obj;
+		return Objects.equals(fields, other.fields);
+	}
+
+	private void addField(AllocationSite site, SymbolicExpression field,
+			Map<AllocationSite, Set<SymbolicExpression>> mapping) {
+		if (!mapping.containsKey(site))
+			mapping.put(site, new HashSet<>());
+		mapping.get(site).add(field);
 	}
 }

@@ -87,6 +87,7 @@ expression
    | left = expression (AND | OR) right = expression
    | SUB nested = expression
    | NEW (newBasicArrayExpr | newReferenceType)
+   | BUMP (newBasicArrayExpr | newReferenceType)
    | arrayAccess
    | fieldAccess
    | methodCall

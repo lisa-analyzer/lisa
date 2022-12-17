@@ -538,6 +538,11 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 				return visitNewBasicArrayExpr(ctx.newBasicArrayExpr());
 			else
 				return visitNewReferenceType(ctx.newReferenceType());
+		else if (ctx.BUMP() != null)
+			if (ctx.newBasicArrayExpr() != null)
+				return visitBumpBasicArrayExpr(ctx.newBasicArrayExpr());
+			else
+				return visitBumpReferenceType(ctx.newReferenceType());
 		else if (ctx.arrayAccess() != null)
 			return visitArrayAccess(ctx.arrayAccess());
 		else if (ctx.fieldAccess() != null)
@@ -613,10 +618,15 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		throw new UnsupportedOperationException("Type of string expression not supported: " + ctx);
 	}
 
+	private Expression visitBumpBasicArrayExpr(NewBasicArrayExprContext ctx) {
+		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
+				true, visitArrayCreatorRest(ctx.arrayCreatorRest()));
+	}
+
 	@Override
 	public Expression visitNewBasicArrayExpr(NewBasicArrayExprContext ctx) {
 		return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), visitPrimitiveType(ctx.primitiveType()),
-				visitArrayCreatorRest(ctx.arrayCreatorRest()));
+				false, visitArrayCreatorRest(ctx.arrayCreatorRest()));
 	}
 
 	@Override
@@ -637,16 +647,27 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 			return Float32Type.INSTANCE;
 	}
 
+	private Expression visitBumpReferenceType(NewReferenceTypeContext ctx) {
+		// null since we do not want to create a new one, class types should
+		// have been created during the preprocessing
+		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
+		if (ctx.arrayCreatorRest() != null)
+			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, true,
+					visitArrayCreatorRest(ctx.arrayCreatorRest()));
+		else
+			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, true, visitArguments(ctx.arguments()));
+	}
+
 	@Override
 	public Expression visitNewReferenceType(NewReferenceTypeContext ctx) {
 		// null since we do not want to create a new one, class types should
 		// have been created during the preprocessing
 		Type base = ClassType.lookup(ctx.IDENTIFIER().getText(), null);
 		if (ctx.arrayCreatorRest() != null)
-			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base,
+			return new IMPNewArray(cfg, file, getLine(ctx), getCol(ctx), base, false,
 					visitArrayCreatorRest(ctx.arrayCreatorRest()));
 		else
-			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, visitArguments(ctx.arguments()));
+			return new IMPNewObj(cfg, file, getLine(ctx), getCol(ctx), base, false, visitArguments(ctx.arguments()));
 	}
 
 	@Override

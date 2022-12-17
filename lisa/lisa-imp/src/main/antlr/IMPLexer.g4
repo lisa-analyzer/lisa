@@ -87,6 +87,10 @@ SUPER
    : 'super'
    ;
 
+BUMP
+   : 'bump'
+   ;
+
 NEW
    : 'new'
    ;
