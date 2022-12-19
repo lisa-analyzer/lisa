@@ -84,7 +84,7 @@ public final class ClassType implements InMemoryType, UnitType {
 
 		if (other instanceof InterfaceType)
 			return subclass((InterfaceType) other);
-		
+
 		return false;
 	}
 
