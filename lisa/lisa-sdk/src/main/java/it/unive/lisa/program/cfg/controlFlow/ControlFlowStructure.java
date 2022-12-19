@@ -192,4 +192,16 @@ public abstract class ControlFlowStructure {
 
 	@Override
 	public abstract String toString();
+
+	/**
+	 * Yields all the statements that are <i>targeted</i> by some node in this
+	 * structure. This always comprises destination nodes of conditional
+	 * branches, and join points where more than one branch converge.
+	 * Equivalently, these can be characterized as targets of conditional or
+	 * unconditional branches and followers of conditional or unconditional
+	 * branches.
+	 * 
+	 * @return the targeted statements
+	 */
+	public abstract Collection<Statement> getTargetedStatements();
 }

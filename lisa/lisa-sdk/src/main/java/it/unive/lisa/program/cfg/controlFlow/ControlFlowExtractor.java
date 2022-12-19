@@ -1,5 +1,13 @@
 package it.unive.lisa.program.cfg.controlFlow;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.FalseEdge;
@@ -13,13 +21,6 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * An extractor of {@link ControlFlowStructure}s from {@link CFG}s. It uses
@@ -36,67 +37,52 @@ import java.util.Set;
  */
 public class ControlFlowExtractor {
 
-	private final CFG target;
-
-	private final Collection<ControlFlowStructure> extracted;
-
-	/**
-	 * Builds the extractor.
-	 * 
-	 * @param target the cfg whose control flows structures are to be extracted
-	 */
-	public ControlFlowExtractor(CFG target) {
-		this.target = target;
-		this.extracted = new ArrayList<>();
-	}
-
 	/**
 	 * Runs the algorithms for extracting {@link ControlFlowStructure}s.
 	 * 
+	 * @param target the cfg whose control flows structures are to be extracted
+	 * 
 	 * @return the collection of extracted structures
 	 */
-	public Collection<ControlFlowStructure> extract() {
-		extracted.clear();
-
-		LinkedList<Statement> conditionals = new LinkedList<>();
+	public Collection<ControlFlowStructure> extract(CFG target) {
+		Collection<Statement> conditionals = new LinkedList<>();
 		target.accept(new ConditionalsExtractor(), conditionals);
-
 		if (conditionals.isEmpty())
-			return extracted;
+			return Collections.emptyList();
+		Collection<Statement> remaining = new LinkedList<>(conditionals);
 
 		// first, we find the loops using back-edges:
 		// https://www.cs.utexas.edu/~pingali/CS375/2010Sp/lectures/LoopOptimizations.pdf
 		// http://pages.cs.wisc.edu/~fischer/cs701.f14/finding.loops.html
 		Map<Statement, ControlFlowStructure> result = new HashMap<>();
 		Map<Statement, Set<Statement>> dominators = new Dominators<CFG, Statement, Edge>().build(target);
-		for (Statement conditional : conditionals)
+		outer: for (Statement conditional : conditionals)
 			for (Statement pred : target.predecessorsOf(conditional))
-				if (dominators.get(pred).contains(conditional))
-					new LoopReconstructor(conditional, pred, result).build();
+				if (dominators.get(pred).contains(conditional)) {
+					result.put(conditional, new LoopReconstructor(target, conditional, pred).build());
+					remaining.remove(conditional);
+					continue outer;
+				}
 
 		// now we scan for if statements
-		for (Statement conditional : conditionals)
-			if (!result.containsKey(conditional))
-				new IfReconstructor(conditional, result).build();
+		for (Statement conditional : remaining)
+			result.put(conditional, new IfReconstructor(target, conditional, result).build());
 
-		extracted.addAll(result.values());
-		return extracted;
+		return result.values();
 	}
 
-	private class LoopReconstructor {
+	private static class LoopReconstructor {
+		private final CFG target;
 		private final Statement conditional;
 		private final Statement tail;
 
-		private final Map<Statement, ControlFlowStructure> computed;
-
-		private LoopReconstructor(Statement conditional, Statement tail,
-				Map<Statement, ControlFlowStructure> computed) {
+		private LoopReconstructor(CFG target, Statement conditional, Statement tail) {
+			this.target = target;
 			this.conditional = conditional;
 			this.tail = tail;
-			this.computed = computed;
 		}
 
-		private void build() {
+		private Loop build() {
 			NodeList<CFG, Statement, Edge> body = new NodeList<>(new SequentialEdge(), false);
 
 			// with empty loops, we can skip the whole reasoning
@@ -117,8 +103,7 @@ public class ControlFlowExtractor {
 			}
 
 			Edge exit = findExitEdge(body);
-			computed.put(conditional, new Loop(target.getNodeList(),
-					conditional, exit.getDestination(), body.getNodes()));
+			return new Loop(target.getNodeList(), conditional, exit.getDestination(), body.getNodes());
 		}
 
 		private Edge findExitEdge(NodeList<CFG, Statement, Edge> body) {
@@ -136,7 +121,8 @@ public class ControlFlowExtractor {
 		}
 	}
 
-	private class IfReconstructor {
+	private static class IfReconstructor {
+		protected final CFG target;
 		private final Statement conditional;
 
 		private final Edge trueEdgeStartingEdge;
@@ -147,7 +133,8 @@ public class ControlFlowExtractor {
 
 		private final Map<Statement, ControlFlowStructure> computed;
 
-		private IfReconstructor(Statement conditional, Map<Statement, ControlFlowStructure> computed) {
+		private IfReconstructor(CFG target, Statement conditional, Map<Statement, ControlFlowStructure> computed) {
+			this.target = target;
 			this.conditional = conditional;
 			this.computed = computed;
 
@@ -195,7 +182,7 @@ public class ControlFlowExtractor {
 				if (trueCond) {
 					struct = computed.containsKey(trueNext.getDestination())
 							? computed.get(trueNext.getDestination())
-							: new IfReconstructor(trueNext.getDestination(), computed).build();
+							: new IfReconstructor(target, trueNext.getDestination(), computed).build();
 					NodeList<CFG, Statement, Edge> completeStructure = struct.getCompleteStructure();
 					trueBranch.mergeWith(completeStructure);
 					trueBranch.addEdge(trueNext);
@@ -217,7 +204,7 @@ public class ControlFlowExtractor {
 				} else if (falseCond) {
 					struct = computed.containsKey(falseNext.getDestination())
 							? computed.get(falseNext.getDestination())
-							: new IfReconstructor(falseNext.getDestination(), computed).build();
+							: new IfReconstructor(target, falseNext.getDestination(), computed).build();
 					NodeList<CFG, Statement, Edge> completeStructure = struct.getCompleteStructure();
 					falseBranch.mergeWith(completeStructure);
 					falseBranch.addEdge(falseNext);
