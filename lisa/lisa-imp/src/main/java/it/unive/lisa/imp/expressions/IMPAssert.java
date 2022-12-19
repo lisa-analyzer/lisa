@@ -12,6 +12,7 @@ import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.UnaryStatement;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Skip;
 import it.unive.lisa.type.Type;
 
@@ -32,30 +33,22 @@ public class IMPAssert extends UnaryStatement {
 	 * @param expression the expression being asserted
 	 */
 	public IMPAssert(CFG cfg, String sourceFile, int line, int col, Expression expression) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), expression);
-	}
-
-	@Override
-	public String toString() {
-		return "assert " + getExpression();
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), "assert", expression);
 	}
 
 	@Override
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState, InterproceduralAnalysis<A, H, V, T> interprocedural,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
+					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
+					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V, T> result = getExpression().semantics(entryState, interprocedural, expressions);
-		expressions.put(getExpression(), result);
-		if (!getExpression().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-
-		Type type = result.getDomainInstance(TypeDomain.class).getInferredDynamicType();
+		Type type = state.getDomainInstance(TypeDomain.class).getInferredDynamicType();
 		if (!type.isBooleanType())
-			return result.bottom();
-		return result.smallStepSemantics(new Skip(getLocation()), this);
+			return state.bottom();
+		return state.smallStepSemantics(new Skip(getLocation()), this);
 	}
 }

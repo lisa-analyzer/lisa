@@ -140,7 +140,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 * @param sss          the heap instance obtained from the small step
 	 *                         semantics of the right-hand side of the
 	 *                         assignment
-	 * @param replacements
+	 * @param replacements the list of replacements to be updated
 	 * 
 	 * @return an instance of the heap domain after an assignment, from the
 	 *             resulting heap domain, the heap instance obtained from the
