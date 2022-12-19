@@ -82,12 +82,18 @@ public final class ClassType implements InMemoryType, UnitType {
 		if (other instanceof ClassType)
 			return subclass((ClassType) other);
 
-		// TODO: fix
-		return other instanceof InterfaceType;
+		if (other instanceof InterfaceType)
+			return subclass((InterfaceType) other);
+		
+		return false;
 	}
 
 	private boolean subclass(ClassType other) {
 		return this == other || unit.isInstanceOf(other.unit);
+	}
+
+	private boolean subclass(InterfaceType other) {
+		return unit.isInstanceOf(other.getUnit());
 	}
 
 	@Override
