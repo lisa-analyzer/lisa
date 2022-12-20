@@ -115,7 +115,8 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					if (star_y instanceof StackAllocationSite)
+					if (star_y instanceof StackAllocationSite
+							&& alreadyAllocated(((StackAllocationSite) star_y).getLocationName()) != null)
 						result = result
 								.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
 					else {
@@ -128,6 +129,24 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				result = result.lub(sss);
 
 		return buildHeapAfterAssignment(result.heapEnv, sss, replacements);
+	}
+
+	/**
+	 * Yields an allocation site name {@code id} if it is tracked by this
+	 * domain, {@code null} otherwise.
+	 * 
+	 * @param id allocation site's name to be searched
+	 * 
+	 * @return an allocation site name {@code id} if it is tracked by this
+	 *             domain, {@code null} otherwise
+	 */
+	protected AllocationSite alreadyAllocated(String id) {
+		for (AllocationSites set : heapEnv.getValues())
+			for (AllocationSite site : set)
+				if (site.getLocationName().equals(id))
+					return site;
+
+		return null;
 	}
 
 	/**
