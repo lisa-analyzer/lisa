@@ -246,15 +246,6 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				e.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(e);
 		}
-
-		private AllocationSite alreadyAllocated(String id) {
-			for (AllocationSites set : heapEnv.getValues())
-				for (AllocationSite site : set)
-					if (site.getLocationName().equals(id))
-						return site;
-
-			return null;
-		}
 	}
 
 	@Override
