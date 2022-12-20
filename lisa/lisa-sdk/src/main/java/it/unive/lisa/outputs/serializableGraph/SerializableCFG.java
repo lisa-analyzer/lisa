@@ -4,8 +4,8 @@ import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.program.cfg.statement.UnaryStatement;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import java.util.Arrays;
 import java.util.Collections;
@@ -107,10 +107,8 @@ public class SerializableCFG {
 		@Override
 		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Statement node) {
 			List<Statement> inners = tool.computeIfAbsent(node, st -> new LinkedList<>());
-			if (node instanceof UnaryStatement)
-				// TODO should we have an nary statement? or an interface that
-				// marks statements with sub-statements?
-				inners.add(((UnaryStatement) node).getExpression());
+			if (node instanceof NaryStatement)
+				inners.addAll(Arrays.asList(((NaryStatement) node).getSubExpressions()));
 			else if (node instanceof NaryExpression)
 				inners.addAll(Arrays.asList(((NaryExpression) node).getSubExpressions()));
 			return true;

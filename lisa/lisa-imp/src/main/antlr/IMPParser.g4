@@ -264,11 +264,15 @@ blockOrStatement
    
    
 classMemberDeclarations
-   : (methodDeclaration | fieldDeclaration | constructorDeclaration | signatureDeclaration)*
+   : (methodDeclaration | fieldDeclaration | constantDeclaration | constructorDeclaration | signatureDeclaration)*
    ;
 
 interfaceMemberDeclarations
-   : (methodDeclaration | fieldDeclaration | signatureDeclaration)*
+   : (methodDeclaration | fieldDeclaration | constantDeclaration | signatureDeclaration)*
+   ;
+
+constantDeclaration
+   : annotations? CONSTANT name = IDENTIFIER ASSIGN value = literal SEMI
    ;
 
 fieldDeclaration

@@ -33,12 +33,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	 * @param expression the expression to return
 	 */
 	public Return(CFG cfg, CodeLocation location, Expression expression) {
-		super(cfg, location, expression);
-	}
-
-	@Override
-	public final String toString() {
-		return "return " + getExpression();
+		super(cfg, location, "return", expression);
 	}
 
 	@Override
@@ -48,7 +43,7 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 
 	@Override
 	public final Identifier getMetaVariable() {
-		Expression e = getExpression();
+		Expression e = getSubExpression();
 		String name = "ret_value@" + getCFG().getDescriptor().getName();
 		Variable var = new Variable(e.getStaticType(), name, getLocation());
 		return var;
@@ -58,23 +53,13 @@ public class Return extends UnaryStatement implements MetaVariableCreator {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
+					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V, T> exprResult = getExpression().semantics(entryState, interprocedural, expressions);
-		expressions.put(getExpression(), exprResult);
-
-		AnalysisState<A, H, V, T> result = entryState.bottom();
 		Identifier meta = getMetaVariable();
-		for (SymbolicExpression expr : exprResult.getComputedExpressions()) {
-			AnalysisState<A, H, V, T> tmp = exprResult.assign(meta, expr, this);
-			result = result.lub(tmp);
-		}
-
-		if (!getExpression().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		return result;
+		return state.assign(meta, expr, this);
 	}
 }

@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
+import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Skip;
 
 /**
@@ -30,12 +31,7 @@ public class Throw extends UnaryStatement {
 	 * @param expression the expression to raise as error
 	 */
 	public Throw(CFG cfg, CodeLocation location, Expression expression) {
-		super(cfg, location, expression);
-	}
-
-	@Override
-	public final String toString() {
-		return "throw " + getExpression();
+		super(cfg, location, "throw", expression);
 	}
 
 	@Override
@@ -52,15 +48,13 @@ public class Throw extends UnaryStatement {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(
-					AnalysisState<A, H, V, T> entryState,
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
+					AnalysisState<A, H, V, T> state,
+					SymbolicExpression expr,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
-		AnalysisState<A, H, V, T> result = getExpression().semantics(entryState, interprocedural, expressions);
-		expressions.put(getExpression(), result);
-		if (!getExpression().getMetaVariables().isEmpty())
-			result = result.forgetIdentifiers(getExpression().getMetaVariables());
-		return result.smallStepSemantics(new Skip(getLocation()), this);
+		// only temporary
+		return state.smallStepSemantics(new Skip(getLocation()), this);
 	}
 }

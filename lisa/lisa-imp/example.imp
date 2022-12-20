@@ -28,7 +28,7 @@ interface anInterface {}
 /*
  * imp provides abstract classes
  */
- abstract class forth {
+ abstract class fourth {
  	a();
  	b();
  	c();
@@ -56,6 +56,11 @@ class example {
 	 */
 	[ann1, ann2, ann3(i = 1, j = true, k = [1, 2 ,3])]
 	field;
+	
+	/*
+	 * fields can also have compile-time non-null constant values 
+	 */
+	const field1 = 5;
 	
 	/*
 	 * methods are declared by specifying their name and their parameters.
