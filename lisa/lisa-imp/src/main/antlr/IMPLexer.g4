@@ -58,6 +58,10 @@ IMPLEMENTS
    : 'implements'
    ;
 
+ABSTRACT
+   : 'abstract'
+   ;
+
 EXTENDS
    : 'extends'
    ;
@@ -65,6 +69,10 @@ EXTENDS
    
 DEFINE
    : 'def'
+   ;
+
+CONSTANT
+   : 'const'
    ;
 
 FINAL
@@ -97,10 +105,6 @@ NEW
 
 ASSERT
    : 'assert'
-   ;
-
-ABSTRACT
-   : 'abstract'
    ;
    // =========================== STRING FUNCTIONS =========================== 
    

@@ -43,6 +43,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
@@ -66,6 +67,7 @@ import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -346,9 +348,15 @@ public class EqualityContractVerificationTest {
 						verifier -> verifier
 								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
-			} else
-				verify(st, verifier -> verifier.withIgnoredFields(statementFields.toArray(String[]::new)),
+			} else {
+				List<String> extra = new LinkedList<>();
+				if (NaryStatement.class.isAssignableFrom(st))
+					extra.add("order");
+				verify(st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(statementFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
+			}
 	}
 
 	@Test
@@ -441,6 +449,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testProgramStructure() {
 		verify(Global.class);
+		verify(ConstantGlobal.class);
 		// the default value does not impact the definition of the formal
 		verify(Parameter.class, verifier -> verifier.withIgnoredFields("defaultValue"));
 		// 'overridable' is mutable

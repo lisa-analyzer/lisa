@@ -747,7 +747,14 @@ class IMPCodeMemberVisitor extends IMPParserBaseVisitor<Object> {
 		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
 	}
 
-	private String clean(LiteralContext ctx) {
+	/**
+	 * Strips the string in the given context of its wrapping quotes, if any.
+	 * 
+	 * @param ctx the source context
+	 * 
+	 * @return the cleaned string
+	 */
+	static String clean(LiteralContext ctx) {
 		String text = ctx.LITERAL_STRING().getText();
 		if (text.startsWith("\"") && text.endsWith("\""))
 			return text.substring(1, text.length() - 1);

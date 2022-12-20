@@ -77,7 +77,14 @@ public final class InterfaceType implements UnitType {
 
 	@Override
 	public final boolean canBeAssignedTo(Type other) {
+		if (other instanceof InterfaceType)
+			return subclass((InterfaceType) other);
+
 		return false;
+	}
+
+	private boolean subclass(InterfaceType other) {
+		return this == other || unit.isInstanceOf(other.unit);
 	}
 
 	@Override

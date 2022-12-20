@@ -6,6 +6,7 @@ import it.unive.lisa.program.AbstractClassUnit;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CodeUnit;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
@@ -120,6 +121,17 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 	public static final String MEMBER_MISMATCH = "%s does not match its own signature";
 
 	/**
+	 * Error message format for a {@link Global} not matching its instance flag.
+	 */
+	public static final String GLOBAL_INSTANCE_MISMATCH = "%s has a mismatched instance flag (%s, while being %s)";
+
+	/**
+	 * Error message format for a {@link ConstantGlobal} being an instance
+	 * global.
+	 */
+	public static final String CONST_INSTANCE_GLOBAL = "%s is a constant global and cannot be declared as instance";
+
+	/**
 	 * The set of {@link CompilationUnit}s, represented by their names, that
 	 * have been already processed by
 	 * {@link #validateAndFinalize(CompilationUnit)}. This is used to avoid
@@ -166,6 +178,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		for (CodeMember member : unit.getCodeMembers())
 			validate(member, false);
 
+		for (Global global : unit.getGlobals())
+			validate(global, false);
+
 		if (unit instanceof CodeUnit)
 			validateAndFinalize((CodeUnit) unit);
 		else if (unit instanceof AbstractClassUnit)
@@ -175,6 +190,26 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		else if (unit instanceof InterfaceUnit)
 			validateAndFinalize((InterfaceUnit) unit);
 		// we do nothing on unknown units
+	}
+
+	/**
+	 * Validates the given {@link Global}. This method checks that
+	 * {@link ConstantGlobal}s are not instance ones, and then
+	 * {@link Global#isInstance()} agrees with {@code isInstance}.
+	 * 
+	 * @param global     the global to validate
+	 * @param isInstance whether or not the given global is part of the instance
+	 *                       variables of its container
+	 * 
+	 * @throws ProgramValidationException if the global has an invalid structure
+	 */
+	public void validate(Global global, boolean isInstance) throws ProgramValidationException {
+		if (isInstance != global.isInstance())
+			throw new ProgramValidationException(format(GLOBAL_INSTANCE_MISMATCH, global, global.isInstance(),
+					isInstance ? "instance" : "non-instance"));
+
+		if (isInstance && global instanceof ConstantGlobal)
+			throw new ProgramValidationException(format(CONST_INSTANCE_GLOBAL, global));
 	}
 
 	/**
@@ -279,6 +314,9 @@ public class BaseValidationLogic implements ProgramValidationLogic {
 		// check for duplicate cms
 		for (CodeMember cm : unit.getInstanceCodeMembers(false))
 			validate(cm, true);
+
+		for (Global global : unit.getInstanceGlobals(false))
+			validate(global, true);
 
 		unit.addInstance(unit);
 
