@@ -1,5 +1,13 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -10,13 +18,6 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 
 /**
  * A field-sensitive point-based heap implementation that abstracts heap
@@ -124,7 +125,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				replacements.add(replacement);
 			}
 		}
-
+		
+		// need to be replaced also the allocation site (needed for type analysis)		
+		HeapReplacement replacement = new HeapReplacement();
+		replacement.addSource(site);
+		replacement.addTarget(clone);
+		replacement.addTarget(site);
+		replacements.add(replacement);
+		
 		return new FieldSensitivePointBasedHeap(heap, ((FieldSensitivePointBasedHeap) pb).fields);
 	}
 
