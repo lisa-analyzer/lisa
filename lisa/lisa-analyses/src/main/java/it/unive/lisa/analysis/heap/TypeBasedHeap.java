@@ -8,10 +8,10 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -35,7 +35,7 @@ import org.apache.commons.collections4.SetUtils;
  *
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
+public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 
 	private static final TypeBasedHeap TOP = new TypeBasedHeap();
 
@@ -134,7 +134,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 			return containerState.smallStepSemantics(access.getChild(), pp);
 		}
 
-		if (expression instanceof HeapAllocation) {
+		if (expression instanceof MemoryAllocation) {
 			Set<String> names = new HashSet<>(this.names);
 			for (Type type : expression.getRuntimeTypes(pp.getProgram().getTypes()))
 				if (type.isInMemoryType())
@@ -225,7 +225,7 @@ public class TypeBasedHeap extends BaseHeapDomain<TypeBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
 			ProgramPoint pp = (ProgramPoint) params[0];

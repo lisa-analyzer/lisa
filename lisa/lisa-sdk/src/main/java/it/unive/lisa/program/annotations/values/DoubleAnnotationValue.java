@@ -46,4 +46,13 @@ public class DoubleAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(d);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof DoubleAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		DoubleAnnotationValue other = (DoubleAnnotationValue) o;
+		return Double.compare(d, other.d);
+	}
 }

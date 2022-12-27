@@ -9,10 +9,10 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 @FallbackImplementation
-public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
+public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 
 	private static final MonolithicHeap TOP = new MonolithicHeap();
 
@@ -163,7 +163,7 @@ public class MonolithicHeap extends BaseHeapDomain<MonolithicHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
 			// any expression accessing an area of the heap or instantiating a
 			// new one is modeled through the monolith

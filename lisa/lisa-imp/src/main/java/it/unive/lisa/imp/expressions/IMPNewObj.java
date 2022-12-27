@@ -17,20 +17,21 @@ import it.unive.lisa.program.cfg.statement.VariableRef;
 import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import it.unive.lisa.type.UnitType;
 import java.util.Collections;
+import java.util.Objects;
 import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * An expression modeling the object allocation and initialization operation
  * ({@code new className(...)}). The type of this expression is the
  * {@link UnitType} representing the created class. This expression corresponds
- * to a {@link HeapAllocation} that is used as first parameter (i.e.,
+ * to a {@link MemoryAllocation} that is used as first parameter (i.e.,
  * {@code this}) for the {@link UnresolvedCall} targeting the invoked
  * constructor. All parameters of the constructor call are provided to the
  * {@link UnresolvedCall}.
@@ -39,18 +40,26 @@ import org.apache.commons.lang3.ArrayUtils;
  */
 public class IMPNewObj extends NaryExpression {
 
+	private final boolean staticallyAllocated;
+
 	/**
 	 * Builds the object allocation and initialization.
 	 * 
-	 * @param cfg        the {@link CFG} where this operation lies
-	 * @param sourceFile the source file name where this operation is defined
-	 * @param line       the line number where this operation is defined
-	 * @param col        the column where this operation is defined
-	 * @param type       the type of the object that is being created
-	 * @param parameters the parameters of the constructor call
+	 * @param cfg                 the {@link CFG} where this operation lies
+	 * @param sourceFile          the source file name where this operation is
+	 *                                defined
+	 * @param line                the line number where this operation is
+	 *                                defined
+	 * @param col                 the column where this operation is defined
+	 * @param type                the type of the object that is being created
+	 * @param staticallyAllocated if this allocation is static or not
+	 * @param parameters          the parameters of the constructor call
 	 */
-	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, Expression... parameters) {
-		super(cfg, new SourceCodeLocation(sourceFile, line, col), "new " + type, type, parameters);
+	public IMPNewObj(CFG cfg, String sourceFile, int line, int col, Type type, boolean staticallyAllocated,
+			Expression... parameters) {
+		super(cfg, new SourceCodeLocation(sourceFile, line, col), (staticallyAllocated ? "" : "new ") + type, type,
+				parameters);
+		this.staticallyAllocated = staticallyAllocated;
 	}
 
 	@Override
@@ -65,7 +74,7 @@ public class IMPNewObj extends NaryExpression {
 					throws SemanticException {
 		Type type = getStaticType();
 		ReferenceType reftype = new ReferenceType(type);
-		HeapAllocation created = new HeapAllocation(type, getLocation());
+		MemoryAllocation created = new MemoryAllocation(type, getLocation(), staticallyAllocated);
 		HeapReference ref = new HeapReference(reftype, created, getLocation());
 		created.setRuntimeTypes(Collections.singleton(type));
 		ref.setRuntimeTypes(Collections.singleton(reftype));
@@ -106,4 +115,25 @@ public class IMPNewObj extends NaryExpression {
 
 		return result;
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + Objects.hash(staticallyAllocated);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!super.equals(obj))
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		IMPNewObj other = (IMPNewObj) obj;
+		return staticallyAllocated == other.staticallyAllocated;
+	}
+
 }

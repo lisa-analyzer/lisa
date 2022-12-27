@@ -7,9 +7,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -38,19 +38,32 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  * 
  * @param <T> the concrete type of this domain
  */
-public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDomain<T>> extends BaseLattice<T>
-		implements NonRelationalTypeDomain<T> {
+public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDomain<T>>
+		extends BaseLattice<T>, NonRelationalTypeDomain<T> {
 
 	/**
 	 * A {@link ExpressionVisitor} for {@link BaseNonRelationalTypeDomain}
 	 * instances.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <T> the concrete type of the domain using this visitor
 	 */
 	@SuppressWarnings("unchecked")
-	public class EvaluationVisitor implements ExpressionVisitor<T> {
+	public class EvaluationVisitor<T extends BaseNonRelationalTypeDomain<T>> implements ExpressionVisitor<T> {
 
 		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with a non-relational type domain";
+
+		private final T singleton;
+
+		/**
+		 * Builds the visitor.
+		 * 
+		 * @param singleton an instance of the domain using this visitor
+		 */
+		public EvaluationVisitor(T singleton) {
+			this.singleton = singleton;
+		}
 
 		@Override
 		public T visit(AccessChild expression, T receiver, T child, Object... params) throws SemanticException {
@@ -58,7 +71,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 		}
 
 		@Override
-		public T visit(HeapAllocation expression, Object... params) throws SemanticException {
+		public T visit(MemoryAllocation expression, Object... params) throws SemanticException {
 			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
@@ -77,7 +90,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 			if (arg.isBottom())
 				return arg;
 
-			return evalUnaryExpression(expression.getOperator(), arg, (ProgramPoint) params[1]);
+			return singleton.evalUnaryExpression(expression.getOperator(), arg, (ProgramPoint) params[1]);
 		}
 
 		@Override
@@ -88,12 +101,12 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 				return right;
 
 			if (expression.getOperator() == TypeCast.INSTANCE)
-				return evalTypeCast(expression, left, right, (ProgramPoint) params[1]);
+				return singleton.evalTypeCast(expression, left, right, (ProgramPoint) params[1]);
 
 			if (expression.getOperator() == TypeConv.INSTANCE)
-				return evalTypeConv(expression, left, right, (ProgramPoint) params[1]);
+				return singleton.evalTypeConv(expression, left, right, (ProgramPoint) params[1]);
 
-			return evalBinaryExpression(expression.getOperator(), left, right, (ProgramPoint) params[1]);
+			return singleton.evalBinaryExpression(expression.getOperator(), left, right, (ProgramPoint) params[1]);
 		}
 
 		@Override
@@ -106,35 +119,35 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 			if (right.isBottom())
 				return right;
 
-			return evalTernaryExpression(expression.getOperator(), left, middle, right, (ProgramPoint) params[1]);
+			return singleton.evalTernaryExpression(expression.getOperator(), left, middle, right,
+					(ProgramPoint) params[1]);
 		}
 
 		@Override
 		public T visit(Skip expression, Object... params) throws SemanticException {
-			return bottom();
+			return singleton.bottom();
 		}
 
 		@Override
 		public T visit(PushAny expression, Object... params) throws SemanticException {
-			return evalPushAny(expression, (ProgramPoint) params[1]);
+			return singleton.evalPushAny(expression, (ProgramPoint) params[1]);
 		}
 
 		@Override
 		public T visit(Constant expression, Object... params) throws SemanticException {
 			if (expression instanceof NullConstant)
-				return evalNullConstant((ProgramPoint) params[1]);
-			return evalNonNullConstant(expression, (ProgramPoint) params[1]);
+				return singleton.evalNullConstant((ProgramPoint) params[1]);
+			return singleton.evalNonNullConstant(expression, (ProgramPoint) params[1]);
 		}
 
 		@Override
 		public T visit(Identifier expression, Object... params) throws SemanticException {
-			return evalIdentifier(expression, (TypeEnvironment<T>) params[0], (ProgramPoint) params[1]);
+			return singleton.evalIdentifier(expression, (TypeEnvironment<T>) params[0], (ProgramPoint) params[1]);
 		}
-
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, TypeEnvironment<T> environment,
+	default Satisfiability satisfies(ValueExpression expression, TypeEnvironment<T> environment,
 			ProgramPoint pp) throws SemanticException {
 		if (expression instanceof Identifier)
 			return satisfiesAbstractValue(environment.getState((Identifier) expression), pp);
@@ -203,20 +216,21 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	}
 
 	@Override
-	public T eval(ValueExpression expression, TypeEnvironment<T> environment, ProgramPoint pp)
+	@SuppressWarnings("unchecked")
+	default T eval(ValueExpression expression, TypeEnvironment<T> environment, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new EvaluationVisitor(), environment, pp);
+		return expression.accept(new EvaluationVisitor<>((T) this), environment, pp);
 	}
 
 	@Override
-	public boolean tracksIdentifiers(Identifier id) {
+	default boolean tracksIdentifiers(Identifier id) {
 		// As default, base non relational type domains
 		// tracks only non-pointer identifier
 		return canProcess(id);
 	}
 
 	@Override
-	public boolean canProcess(SymbolicExpression expression) {
+	default boolean canProcess(SymbolicExpression expression) {
 		if (expression.hasRuntimeTypes())
 			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
 		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
@@ -234,7 +248,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalIdentifier(Identifier id, TypeEnvironment<T> environment, ProgramPoint pp)
+	default T evalIdentifier(Identifier id, TypeEnvironment<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return environment.getState(id);
 	}
@@ -250,7 +264,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalPushAny(PushAny pushAny, ProgramPoint pp) throws SemanticException {
+	default T evalPushAny(PushAny pushAny, ProgramPoint pp) throws SemanticException {
 		return top();
 	}
 
@@ -268,7 +282,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalTypeConv(BinaryExpression conv, T left, T right, ProgramPoint pp) throws SemanticException {
+	default T evalTypeConv(BinaryExpression conv, T left, T right, ProgramPoint pp) throws SemanticException {
 		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
 	}
 
@@ -286,7 +300,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalTypeCast(BinaryExpression cast, T left, T right, ProgramPoint pp) throws SemanticException {
+	default T evalTypeCast(BinaryExpression cast, T left, T right, ProgramPoint pp) throws SemanticException {
 		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? bottom() : left;
 	}
 
@@ -299,7 +313,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalNullConstant(ProgramPoint pp) throws SemanticException {
+	default T evalNullConstant(ProgramPoint pp) throws SemanticException {
 		return top();
 	}
 
@@ -314,7 +328,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	default T evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
 		return top();
 	}
 
@@ -333,7 +347,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp) throws SemanticException {
+	default T evalUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp) throws SemanticException {
 		return top();
 	}
 
@@ -356,7 +370,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalBinaryExpression(BinaryOperator operator, T left, T right, ProgramPoint pp)
+	default T evalBinaryExpression(BinaryOperator operator, T left, T right, ProgramPoint pp)
 			throws SemanticException {
 		return top();
 	}
@@ -381,7 +395,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, ProgramPoint pp)
+	default T evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, ProgramPoint pp)
 			throws SemanticException {
 		return top();
 	}
@@ -402,7 +416,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesAbstractValue(T value, ProgramPoint pp) throws SemanticException {
+	default Satisfiability satisfiesAbstractValue(T value, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -421,7 +435,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesNullConstant(ProgramPoint pp) throws SemanticException {
+	default Satisfiability satisfiesNullConstant(ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -442,7 +456,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
+	default Satisfiability satisfiesNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -468,7 +482,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp)
+	default Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -500,7 +514,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right,
+	default Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -533,18 +547,13 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right,
+	default Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public final String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public TypeEnvironment<T> assume(TypeEnvironment<T> environment, ValueExpression expression,
+	default TypeEnvironment<T> assume(TypeEnvironment<T> environment, ValueExpression expression,
 			ProgramPoint pp) throws SemanticException {
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
@@ -605,7 +614,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	public TypeEnvironment<T> assumeTernaryExpression(TypeEnvironment<T> environment,
+	default TypeEnvironment<T> assumeTernaryExpression(TypeEnvironment<T> environment,
 			TernaryOperator operator, ValueExpression left, ValueExpression middle, ValueExpression right,
 			ProgramPoint pp) throws SemanticException {
 		return environment;
@@ -631,7 +640,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	public TypeEnvironment<T> assumeBinaryExpression(TypeEnvironment<T> environment,
+	default TypeEnvironment<T> assumeBinaryExpression(TypeEnvironment<T> environment,
 			BinaryOperator operator, ValueExpression left, ValueExpression right, ProgramPoint pp)
 			throws SemanticException {
 		return environment;
@@ -654,7 +663,7 @@ public abstract class BaseNonRelationalTypeDomain<T extends BaseNonRelationalTyp
 	 * 
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
-	public TypeEnvironment<T> assumeUnaryExpression(TypeEnvironment<T> environment,
+	default TypeEnvironment<T> assumeUnaryExpression(TypeEnvironment<T> environment,
 			UnaryOperator operator, ValueExpression expression, ProgramPoint pp) throws SemanticException {
 		return environment;
 	}

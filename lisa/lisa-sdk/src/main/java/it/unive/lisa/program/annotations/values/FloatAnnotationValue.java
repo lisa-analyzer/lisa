@@ -44,4 +44,13 @@ public class FloatAnnotationValue implements BasicAnnotationValue {
 	public String toString() {
 		return String.valueOf(f);
 	}
+
+	@Override
+	public int compareTo(AnnotationValue o) {
+		if (!(o instanceof FloatAnnotationValue))
+			return getClass().getName().compareTo(o.getClass().getName());
+
+		FloatAnnotationValue other = (FloatAnnotationValue) o;
+		return Float.compare(f, other.f);
+	}
 }

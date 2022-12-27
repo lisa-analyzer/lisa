@@ -5,5 +5,5 @@ package it.unive.lisa.program.annotations.values;
  * 
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
-public interface AnnotationValue {
+public interface AnnotationValue extends Comparable<AnnotationValue> {
 }

@@ -10,8 +10,8 @@ import it.unive.lisa.symbolic.value.Identifier;
 import java.util.function.Predicate;
 
 @SuppressWarnings("unchecked")
-public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression> extends BaseLattice<T>
-		implements SemanticDomain<T, E, Identifier> {
+public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicExpression>
+		implements BaseLattice<T>, SemanticDomain<T, E, Identifier> {
 
 	@Override
 	public T top() {

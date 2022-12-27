@@ -35,7 +35,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends BaseLattice<AnalysisState<A, H, V, T>> implements
+		implements BaseLattice<AnalysisState<A, H, V, T>>,
 		SemanticDomain<AnalysisState<A, H, V, T>, SymbolicExpression, Identifier> {
 
 	/**

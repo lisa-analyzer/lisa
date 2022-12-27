@@ -10,8 +10,6 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
-import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
@@ -23,7 +21,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA extends BaseNonRelationalValueDomain<FSA> {
+public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	/**
 	 * Used to store the string representation
 	 */
@@ -119,25 +117,13 @@ public class FSA extends BaseNonRelationalValueDomain<FSA> {
 		return top();
 	}
 
-	@Override
-	public FSA evalUnaryExpression(UnaryOperator operator, FSA arg, ProgramPoint pp) throws SemanticException {
-		// TODO
-		return super.evalUnaryExpression(operator, arg, pp);
-	}
-
+	// TODO unary and ternary and all other binary
 	@Override
 	public FSA evalBinaryExpression(BinaryOperator operator, FSA left, FSA right, ProgramPoint pp)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE)
 			return new FSA(left.a.concat(right.a));
 		return top();
-	}
-
-	@Override
-	public FSA evalTernaryExpression(TernaryOperator operator, FSA left, FSA middle, FSA right, ProgramPoint pp)
-			throws SemanticException {
-		// TODO
-		return super.evalTernaryExpression(operator, left, middle, right, pp);
 	}
 
 	@Override

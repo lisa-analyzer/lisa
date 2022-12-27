@@ -7,9 +7,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -38,18 +38,30 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  * 
  * @param <T> the concrete type of this domain
  */
-public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends BaseLattice<T>
-		implements InferredValue<T> {
+public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseLattice<T>, InferredValue<T> {
 
 	/**
 	 * A {@link ExpressionVisitor} for {@link BaseInferredValue} instances.
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <T> the concrete type of the domain using this visitor
 	 */
 	@SuppressWarnings("unchecked")
-	public class EvaluationVisitor implements ExpressionVisitor<InferredPair<T>> {
+	public class EvaluationVisitor<T extends BaseInferredValue<T>> implements ExpressionVisitor<InferredPair<T>> {
 
 		private static final String CANNOT_PROCESS_ERROR = "Cannot process a heap expression with an inferred value domain";
+
+		private final T singleton;
+
+		/**
+		 * Builds the visitor.
+		 * 
+		 * @param singleton an instance of the domain using this visitor
+		 */
+		public EvaluationVisitor(T singleton) {
+			this.singleton = singleton;
+		}
 
 		@Override
 		public InferredPair<T> visit(AccessChild expression, InferredPair<T> receiver, InferredPair<T> child,
@@ -58,7 +70,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 		}
 
 		@Override
-		public InferredPair<T> visit(HeapAllocation expression, Object... params) throws SemanticException {
+		public InferredPair<T> visit(MemoryAllocation expression, Object... params) throws SemanticException {
 			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 
@@ -80,7 +92,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			if (arg.getInferred().isBottom())
 				return arg;
 
-			return evalUnaryExpression(expression.getOperator(), arg.getInferred(),
+			return singleton.evalUnaryExpression(expression.getOperator(), arg.getInferred(),
 					((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 		}
 
@@ -93,14 +105,14 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 				return right;
 
 			if (expression.getOperator() == TypeCast.INSTANCE)
-				return evalTypeCast(expression, left.getInferred(), right.getInferred(),
+				return singleton.evalTypeCast(expression, left.getInferred(), right.getInferred(),
 						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 
 			if (expression.getOperator() == TypeConv.INSTANCE)
-				return evalTypeConv(expression, left.getInferred(), right.getInferred(),
+				return singleton.evalTypeConv(expression, left.getInferred(), right.getInferred(),
 						((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 
-			return evalBinaryExpression(expression.getOperator(), left.getInferred(), right.getInferred(),
+			return singleton.evalBinaryExpression(expression.getOperator(), left.getInferred(), right.getInferred(),
 					((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
 		}
 
@@ -115,40 +127,41 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 			if (right.getInferred().isBottom())
 				return right;
 
-			return evalTernaryExpression(expression.getOperator(), left.getInferred(), middle.getInferred(),
+			return singleton.evalTernaryExpression(expression.getOperator(), left.getInferred(), middle.getInferred(),
 					right.getInferred(), ((InferenceSystem<T>) params[0]).getExecutionState(),
 					(ProgramPoint) params[1]);
 		}
 
 		@Override
 		public InferredPair<T> visit(Skip expression, Object... params) throws SemanticException {
-			T bot = bottom();
+			T bot = singleton.bottom();
 			return new InferredPair<>(bot, bot, bot);
 		}
 
 		@Override
 		public InferredPair<T> visit(PushAny expression, Object... params) throws SemanticException {
-			return evalPushAny(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
+			return singleton.evalPushAny(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
 					(ProgramPoint) params[1]);
 		}
 
 		@Override
 		public InferredPair<T> visit(Constant expression, Object... params) throws SemanticException {
 			if (expression instanceof NullConstant)
-				return evalNullConstant(((InferenceSystem<T>) params[0]).getExecutionState(), (ProgramPoint) params[1]);
-			return evalNonNullConstant(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
+				return singleton.evalNullConstant(((InferenceSystem<T>) params[0]).getExecutionState(),
+						(ProgramPoint) params[1]);
+			return singleton.evalNonNullConstant(expression, ((InferenceSystem<T>) params[0]).getExecutionState(),
 					(ProgramPoint) params[1]);
 		}
 
 		@Override
 		public InferredPair<T> visit(Identifier expression, Object... params) throws SemanticException {
-			return evalIdentifier(expression, (InferenceSystem<T>) params[0], (ProgramPoint) params[1]);
+			return singleton.evalIdentifier(expression, (InferenceSystem<T>) params[0], (ProgramPoint) params[1]);
 		}
 
 	}
 
 	@Override
-	public Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	default Satisfiability satisfies(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		if (expression instanceof Identifier) {
 			InferredPair<T> eval = evalIdentifier((Identifier) expression, environment, pp);
@@ -225,9 +238,10 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	}
 
 	@Override
-	public InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
+	@SuppressWarnings("unchecked")
+	default InferredPair<T> eval(ValueExpression expression, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
-		return expression.accept(new EvaluationVisitor(), environment, pp);
+		return expression.accept(new EvaluationVisitor<>((T) this), environment, pp);
 	}
 
 	/**
@@ -243,7 +257,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public InferredPair<T> evalIdentifier(Identifier id, InferenceSystem<T> environment, ProgramPoint pp)
+	default InferredPair<T> evalIdentifier(Identifier id, InferenceSystem<T> environment, ProgramPoint pp)
 			throws SemanticException {
 		return new InferredPair<>((T) this, environment.getState(id), environment.getExecutionState());
 	}
@@ -260,7 +274,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) throws SemanticException {
+	default InferredPair<T> evalPushAny(PushAny pushAny, T state, ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -276,7 +290,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalNullConstant(T state, ProgramPoint pp) throws SemanticException {
+	default InferredPair<T> evalNullConstant(T state, ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
 	}
@@ -293,7 +307,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalNonNullConstant(Constant constant, T state, ProgramPoint pp)
+	default InferredPair<T> evalNonNullConstant(Constant constant, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -315,7 +329,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
+	default InferredPair<T> evalUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -341,7 +355,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalBinaryExpression(BinaryOperator operator, T left, T right, T state, ProgramPoint pp)
+	default InferredPair<T> evalBinaryExpression(BinaryOperator operator, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -363,7 +377,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
+	default InferredPair<T> evalTypeConv(BinaryExpression conv, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
 		return conv.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
@@ -386,7 +400,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	@SuppressWarnings("unchecked")
-	public InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
+	default InferredPair<T> evalTypeCast(BinaryExpression cast, T left, T right, T state, ProgramPoint pp)
 			throws SemanticException {
 		T bot = bottom();
 		return cast.getRuntimeTypes(pp.getProgram().getTypes()).isEmpty() ? new InferredPair<>(bot, bot, bot)
@@ -415,7 +429,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public InferredPair<T> evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
+	default InferredPair<T> evalTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		T top = top();
 		return new InferredPair<>(top, top, top);
@@ -438,7 +452,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) throws SemanticException {
+	default Satisfiability satisfiesAbstractValue(T value, T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -457,7 +471,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesPushAny(PushAny pushAny, T state) throws SemanticException {
+	default Satisfiability satisfiesPushAny(PushAny pushAny, T state) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -478,7 +492,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) throws SemanticException {
+	default Satisfiability satisfiesNullConstant(T state, ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
@@ -500,7 +514,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp)
+	default Satisfiability satisfiesNonNullConstant(Constant constant, T state, ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -528,7 +542,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
+	default Satisfiability satisfiesUnaryExpression(UnaryOperator operator, T arg, T state, ProgramPoint pp)
 			throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -561,7 +575,7 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right, T state,
+	default Satisfiability satisfiesBinaryExpression(BinaryOperator operator, T left, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
@@ -595,31 +609,26 @@ public abstract class BaseInferredValue<T extends BaseInferredValue<T>> extends 
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	public Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
+	default Satisfiability satisfiesTernaryExpression(TernaryOperator operator, T left, T middle, T right, T state,
 			ProgramPoint pp) throws SemanticException {
 		return Satisfiability.UNKNOWN;
 	}
 
 	@Override
-	public final String toString() {
-		return representation().toString();
-	}
-
-	@Override
-	public boolean tracksIdentifiers(Identifier id) {
+	default boolean tracksIdentifiers(Identifier id) {
 		// As default, base inferred values tracks only non-pointer identifier
 		return canProcess(id);
 	}
 
 	@Override
-	public boolean canProcess(SymbolicExpression expression) {
+	default boolean canProcess(SymbolicExpression expression) {
 		if (expression.hasRuntimeTypes())
 			return expression.getRuntimeTypes(null).stream().anyMatch(t -> !t.isPointerType() && !t.isInMemoryType());
 		return !expression.getStaticType().isPointerType() && !expression.getStaticType().isInMemoryType();
 	}
 
 	@Override
-	public InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
+	default InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		return environment;
 	}

@@ -16,11 +16,11 @@ import it.unive.lisa.program.cfg.statement.evaluation.LeftToRightEvaluation;
 import it.unive.lisa.symbolic.SymbolicExpression;
 
 /**
- * An {@link NaryStatement} with a single sub-expression.
+ * An {@link NaryStatement} with exactly two sub-expressions.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public abstract class UnaryStatement extends NaryStatement {
+public abstract class BinaryStatement extends NaryStatement {
 
 	/**
 	 * Builds the statement, happening at the given location in the program. The
@@ -31,10 +31,12 @@ public abstract class UnaryStatement extends NaryStatement {
 	 *                          the program
 	 * @param constructName the name of the construct represented by this
 	 *                          statement
-	 * @param subExpression the sub-expression of this statement
+	 * @param left          the first sub-expression of this statement
+	 * @param right         the second sub-expression of this statement
 	 */
-	protected UnaryStatement(CFG cfg, CodeLocation location, String constructName, Expression subExpression) {
-		super(cfg, location, constructName, subExpression);
+	protected BinaryStatement(CFG cfg, CodeLocation location, String constructName,
+			Expression left, Expression right) {
+		super(cfg, location, constructName, left, right);
 	}
 
 	/**
@@ -46,20 +48,30 @@ public abstract class UnaryStatement extends NaryStatement {
 	 * @param constructName the name of the construct represented by this
 	 *                          statement
 	 * @param order         the evaluation order of the sub-expressions
-	 * @param subExpression the sub-expression of this statement
+	 * @param left          the first sub-expression of this statement
+	 * @param right         the second sub-expression of this statement
 	 */
-	protected UnaryStatement(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
-			Expression subExpression) {
-		super(cfg, location, constructName, order, subExpression);
+	protected BinaryStatement(CFG cfg, CodeLocation location, String constructName,
+			EvaluationOrder order, Expression left, Expression right) {
+		super(cfg, location, constructName, order, left, right);
 	}
 
 	/**
-	 * Yields the only sub-expression of this unary statement.
+	 * Yields the left-most (first) sub-expression of this expression.
 	 * 
-	 * @return the only sub-expression
+	 * @return the left-most sub-expression
 	 */
-	public Expression getSubExpression() {
+	public Expression getLeft() {
 		return getSubExpressions()[0];
+	}
+
+	/**
+	 * Yields the right-most (second) sub-expression of this expression.
+	 * 
+	 * @return the right-most sub-expression
+	 */
+	public Expression getRight() {
+		return getSubExpressions()[1];
 	}
 
 	@Override
@@ -73,15 +85,17 @@ public abstract class UnaryStatement extends NaryStatement {
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
 		AnalysisState<A, H, V, T> result = state.bottom();
-		for (SymbolicExpression expr : params[0])
-			result = result.lub(unarySemantics(interprocedural, state, expr, expressions));
+		for (SymbolicExpression left : params[0])
+			for (SymbolicExpression right : params[1])
+				result = result.lub(binarySemantics(interprocedural, state, left, right, expressions));
+
 		return result;
 	}
 
 	/**
 	 * Computes the semantics of the statement, after the semantics of the
-	 * sub-expression has been computed. Meta variables from the sub-expression
-	 * will be forgotten after this statement returns.
+	 * sub-expressions have been computed. Meta variables from the
+	 * sub-expressions will be forgotten after this statement returns.
 	 * 
 	 * @param <A>             the type of {@link AbstractState}
 	 * @param <H>             the type of the {@link HeapDomain}
@@ -90,8 +104,12 @@ public abstract class UnaryStatement extends NaryStatement {
 	 * @param interprocedural the interprocedural analysis of the program to
 	 *                            analyze
 	 * @param state           the state where the statement is to be evaluated
-	 * @param expr            the symbolic expressions representing the computed
-	 *                            value of the sub-expression of this expression
+	 * @param left            the symbolic expression representing the computed
+	 *                            value of the first sub-expression of this
+	 *                            statement
+	 * @param right           the symbolic expression representing the computed
+	 *                            value of the second sub-expression of this
+	 *                            statement
 	 * @param expressions     the cache where analysis states of intermediate
 	 *                            expressions are stored and that can be
 	 *                            accessed to query for post-states of
@@ -105,10 +123,11 @@ public abstract class UnaryStatement extends NaryStatement {
 	public abstract <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> AnalysisState<A, H, V, T> unarySemantics(
+			T extends TypeDomain<T>> AnalysisState<A, H, V, T> binarySemantics(
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					AnalysisState<A, H, V, T> state,
-					SymbolicExpression expr,
+					SymbolicExpression left,
+					SymbolicExpression right,
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException;
 }
