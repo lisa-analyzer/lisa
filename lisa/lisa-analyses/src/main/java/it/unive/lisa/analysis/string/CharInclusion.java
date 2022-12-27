@@ -83,7 +83,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		if (!other.certainlyContained.containsAll(this.certainlyContained))
 			return false;
 
-		return this.maybeContained.containsAll(other.maybeContained);
+		return other.maybeContained.containsAll(this.maybeContained);
 	}
 
 	@Override
