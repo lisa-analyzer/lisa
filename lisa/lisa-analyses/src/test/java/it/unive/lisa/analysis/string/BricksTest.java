@@ -59,7 +59,7 @@ public class BricksTest {
 
 		List<Brick> resultList = new ArrayList<>();
 
-		resultList.add(new Brick(1,1,strings));
+		resultList.add(new Brick(1, 1, strings));
 
 		assertEquals(bricks, new Bricks(resultList));
 	}

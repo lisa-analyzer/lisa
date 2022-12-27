@@ -265,7 +265,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * normalized form.
 	 */
 	public void normBricks() {
-		if(isTop())
+		if (isTop())
 			return;
 
 		List<Brick> thisBricks = this.bricks;
@@ -330,11 +330,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		List<Brick> longer;
 		boolean thisShorter = false;
 
-		if(this.bricks.size() > other.bricks.size()) {
+		if (this.bricks.size() > other.bricks.size()) {
 			longer = this.bricks;
 			shorter = other.bricks;
-		}
-		else{
+		} else {
 			shorter = this.bricks;
 			longer = other.bricks;
 			thisShorter = true;
@@ -359,7 +358,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			}
 		}
 
-		if(thisShorter)
+		if (thisShorter)
 			this.bricks = newList;
 		else
 			other.bricks = newList;
