@@ -30,8 +30,6 @@ public class BricksTest {
 
 		Bricks bricks = new Bricks(list);
 
-		bricks.normBricks();
-
 		List<Brick> resultList = new ArrayList<>();
 
 		Set<String> resultTreeSet = new TreeSet<>();
@@ -59,9 +57,11 @@ public class BricksTest {
 
 		Bricks bricks = new Bricks(list);
 
-		list.remove(1);
+		List<Brick> resultList = new ArrayList<>();
 
-		assertEquals(bricks, new Bricks(list));
+		resultList.add(new Brick(1,1,strings));
+
+		assertEquals(bricks, new Bricks(resultList));
 	}
 
 	@Test

@@ -23,7 +23,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Brick extends BaseNonRelationalValueDomain<Brick> {
+public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	private final Set<String> strings;
 	private final IntInterval brickInterval;
 

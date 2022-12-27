@@ -26,13 +26,13 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
+public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	private List<Brick> bricks;
 
-	private final static Bricks TOP = new Bricks();
+	private final static Bricks TOP = new Bricks(new ArrayList<>());
 
-	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
+	private final static Bricks BOTTOM = new Bricks();
 
 	private final static int kL = 10;
 
@@ -44,7 +44,8 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	 * Builds the top brick abstract element.
 	 */
 	public Bricks() {
-		this(getTopList());
+		this.bricks = new ArrayList<>();
+		bricks.add(new Brick());
 	}
 
 	/**
@@ -54,6 +55,7 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	 */
 	public Bricks(List<Brick> bricks) {
 		this.bricks = bricks;
+		normBricks();
 	}
 
 	@Override
@@ -90,6 +92,11 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 			return TOP;
 
 		return w(other);
+	}
+
+	@Override
+	public boolean isTop() {
+		return this.equals(TOP);
 	}
 
 	private Bricks w(Bricks other) {
@@ -258,6 +265,9 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 	 * normalized form.
 	 */
 	public void normBricks() {
+		if(isTop())
+			return;
+
 		List<Brick> thisBricks = this.bricks;
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
@@ -283,12 +293,12 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 					lastBrick = i == thisBricks.size() - 1;
 				}
 
-			if (currentBrick.getMin() == currentBrick.getMax())
+			if (currentBrick.getMin() == currentBrick.getMax() &&
+					currentBrick.getMin() != 1 && currentBrick.getMax() != 1)
 				rule3(i);
 
 			if (!lastBrick)
 				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
-
 					rule4(i, i + 1);
 
 			if (currentBrick.getMin() >= 1 &&
@@ -298,13 +308,6 @@ public class Bricks extends BaseNonRelationalValueDomain<Bricks> {
 
 		if (!thisBricks.equals(tempList))
 			normBricks();
-	}
-
-	private static List<Brick> getTopList() {
-		List<Brick> bricks = new ArrayList<>();
-		bricks.add(new Brick());
-
-		return bricks;
 	}
 
 	/**
