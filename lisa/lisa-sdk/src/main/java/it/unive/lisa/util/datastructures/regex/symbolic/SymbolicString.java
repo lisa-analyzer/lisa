@@ -1,15 +1,13 @@
 package it.unive.lisa.util.datastructures.regex.symbolic;
 
+import it.unive.lisa.util.collections.IterableArray;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
-
-import it.unive.lisa.util.collections.IterableArray;
 
 /**
  * An extended string, that is, a string composed of an array of
@@ -131,24 +129,23 @@ public final class SymbolicString implements Comparable<SymbolicString>, Iterabl
 
 	@Override
 	public int hashCode() {
-		return 31 + Arrays.hashCode(value);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(value);
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-
 		if (obj == null)
 			return false;
-
 		if (getClass() != obj.getClass())
 			return false;
-
 		SymbolicString other = (SymbolicString) obj;
 		if (!Arrays.equals(value, other.value))
 			return false;
-
 		return true;
 	}
 

@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -10,13 +11,16 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import it.unive.lisa.util.datastructures.automaton.State;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * A class that represent the Finite State Automaton domain for strings.
+ * A class that represent the Finite State Automaton domain for strings,
+ * exploiting a {@link SimpleAutomaton}.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
@@ -25,13 +29,13 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	/**
 	 * Used to store the string representation
 	 */
-	private final Automaton a;
+	private final SimpleAutomaton a;
 	/**
 	 * Top element of the domain
 	 */
 	private static final FSA TOP = new FSA();
 	/**
-	 * The paramater used for the widening operator.
+	 * The parameter used for the widening operator.
 	 */
 	public static final int WIDENING_TH = 3;
 
@@ -40,15 +44,15 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 */
 	public FSA() {
 		// top
-		this.a = new Automaton(null, null);
+		this.a = null;
 	}
 
 	/**
-	 * Creates a new FSA object using an {@link Automaton}.
+	 * Creates a new FSA object using a {@link SimpleAutomaton}.
 	 * 
-	 * @param a the {@link Automaton} used for object construction.
+	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	FSA(Automaton a) {
+	FSA(SimpleAutomaton a) {
 		this.a = a;
 	}
 
@@ -95,16 +99,16 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	@Override
 	public FSA bottom() {
 		SortedSet<State> states = new TreeSet<>();
-		states.add(new State(true, false));
-		return new FSA(new Automaton(states, new TreeSet<>()));
+		states.add(new State(0, true, false));
+		return new FSA(new SimpleAutomaton(states, new TreeSet<>()));
 	}
 
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
-			return new StringRepresentation("no string");
+			return Lattice.bottomRepresentation();
 		else if (isTop())
-			return new StringRepresentation("any string");
+			return Lattice.topRepresentation();
 
 		return new StringRepresentation(this.a.toRegex());
 	}
@@ -112,7 +116,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	@Override
 	public FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
 		if (constant.getValue() instanceof String) {
-			return new FSA(new Automaton((String) constant.getValue()));
+			return new FSA(new SimpleAutomaton((String) constant.getValue()));
 		}
 		return top();
 	}
@@ -152,7 +156,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 					return SemanticDomain.Satisfiability.NOT_SATISFIED;
 
 				// all the strings accepted by right are substring of at least
-				// one string accpeted by left
+				// one string accepted by left
 				for (String sub : rightLang) {
 					boolean isContained = false;
 					for (String s : leftLang) {

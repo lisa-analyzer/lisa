@@ -22,9 +22,4 @@ public class UnknownSymbolicChar extends SymbolicChar {
 	public boolean is(char ch) {
 		return false;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		return obj instanceof UnknownSymbolicChar;
-	}
 }

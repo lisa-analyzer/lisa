@@ -42,24 +42,23 @@ public class SymbolicChar {
 
 	@Override
 	public int hashCode() {
-		return Character.hashCode(ch);
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ch;
+		return result;
 	}
 
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-
 		if (obj == null)
 			return false;
-
 		if (getClass() != obj.getClass())
 			return false;
-
 		SymbolicChar other = (SymbolicChar) obj;
 		if (ch != other.ch)
 			return false;
-
 		return true;
 	}
 
