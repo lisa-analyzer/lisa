@@ -30,7 +30,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	private List<Brick> bricks;
 
-	private final static Bricks TOP = new Bricks(new ArrayList<>());
+	private final static Bricks TOP = new Bricks();
 
 	private final static Bricks BOTTOM = new Bricks();
 
