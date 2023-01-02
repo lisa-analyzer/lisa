@@ -5,6 +5,7 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
@@ -28,18 +29,25 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 
 	@Override
 	public SimpleAutomaton unknownString() {
-		// not used
-		throw new UnsupportedOperationException();
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition<StringSymbol>> newGamma = new TreeSet<>();
+		State initialState = new State(0, true, true);
+
+		newStates.add(initialState);
+
+		for (char alphabet = '!'; alphabet <= '~'; ++alphabet)
+			newGamma.add(new Transition<>(initialState, initialState, new StringSymbol(alphabet)));
+
+		return new SimpleAutomaton(newStates, newGamma);
 	}
 
 	@Override
 	public SimpleAutomaton emptyLanguage() {
 		SortedSet<State> newStates = new TreeSet<>();
-		SortedSet<Transition<StringSymbol>> newGamma = new TreeSet<>();
 		State initialState = new State(0, true, false);
 		newStates.add(initialState);
 
-		return new SimpleAutomaton(newStates, newGamma);
+		return new SimpleAutomaton(newStates, Collections.emptySortedSet());
 	}
 
 	@Override

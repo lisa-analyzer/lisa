@@ -5,15 +5,21 @@ import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.EmptySet;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.tuple.Pair;
@@ -85,6 +91,24 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	}
 
 	/**
+	 * Yields the set of states of this automaton.
+	 * 
+	 * @return the set of states
+	 */
+	public SortedSet<State> getStates() {
+		return states;
+	}
+
+	/**
+	 * Yields the set of transitions contained in this automaton.
+	 * 
+	 * @return the set of transitions
+	 */
+	public SortedSet<Transition<T>> getTransitions() {
+		return transitions;
+	}
+
+	/**
 	 * Adds a new state to this automaton.
 	 * 
 	 * @param s the state to add
@@ -125,6 +149,29 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	}
 
 	/**
+	 * Removes every transition in the given set from the ones of this
+	 * automaton.
+	 * 
+	 * @param ts the set of transitions to remove
+	 */
+	public void removeTransitions(Set<Transition<T>> ts) {
+		transitions.removeAll(ts);
+		this.deterministic = Optional.empty();
+		this.minimized = Optional.empty();
+	}
+
+	/**
+	 * Removes every state in the given set from the ones of this automaton.
+	 * 
+	 * @param ts the set of states to remove
+	 */
+	public void removeStates(Set<State> ts) {
+		states.removeAll(ts);
+		this.deterministic = Optional.empty();
+		this.minimized = Optional.empty();
+	}
+
+	/**
 	 * Yields a minimal automaton equivalent to this one through Brzozowski's
 	 * minimization algorithm. <br>
 	 * <br>
@@ -159,6 +206,18 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 */
 	public SortedSet<Transition<T>> getOutgoingTransitionsFrom(State s) {
 		return new TreeSet<>(transitions.stream().filter(t -> t.getSource().equals(s)).collect(Collectors.toSet()));
+	}
+
+	/**
+	 * Yields the set of all ingoing transitions to the given state.
+	 * 
+	 * @param s the state
+	 * 
+	 * @return the set of ingoing transitions
+	 */
+	public SortedSet<Transition<T>> getIngoingTransitionsFrom(State s) {
+		return new TreeSet<>(
+				transitions.stream().filter(t -> t.getDestination().equals(s)).collect(Collectors.toSet()));
 	}
 
 	/**
@@ -584,7 +643,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	/**
 	 * Returns the concretized language accepted by {@code this}.
 	 * {@link Transition}s' symbols representing unknown characters or strings
-	 * will be encoded using {@link TransitionSymbol#UNKNOWN_SYMBOL}.
+	 * will be encoded using {@link TransitionSymbol#UNKNOWN_SYMBOL}, while
+	 * empty strings will be concretized (that is, they will not appear as
+	 * {@link TransitionSymbol#EPSILON}).
 	 * 
 	 * @return a set representing the language accepted by {@code this}.
 	 * 
@@ -605,11 +666,13 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 			String currentString = top.getKey();
 			Transition<T> tr = top.getValue();
 
+			T symbol = tr.getSymbol();
+			String sym = symbol.isEpsilon() ? "" : symbol.toString();
 			if (tr.getDestination().isFinal())
-				lang.add(currentString + tr.getSymbol());
+				lang.add(currentString + sym);
 
 			for (Transition<T> t : getOutgoingTransitionsFrom(tr.getDestination()))
-				ws.push(Pair.of(currentString + tr.getSymbol(), t));
+				ws.push(Pair.of(currentString + sym, t));
 		}
 
 		return lang;
@@ -922,6 +985,38 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	}
 
 	/**
+	 * Yields a textual representation of the adjacency matrix of this
+	 * automaton.
+	 * 
+	 * @return a string containing a textual representation of the automaton
+	 */
+	public String prettyPrint() {
+		StringBuilder result = new StringBuilder();
+
+		for (State st : states) {
+			SortedSet<Transition<T>> transitions = getOutgoingTransitionsFrom(st);
+			if (!transitions.isEmpty() || st.isFinal() || st.isInitial()) {
+				result.append(st.getState()).append(" ");
+				if (st.isFinal())
+					result.append("[accept]");
+				else
+					result.append("[reject]");
+
+				if (st.isInitial())
+					result.append("[initial]");
+
+				result.append("\n");
+
+				for (Transition<T> t : transitions)
+					result.append("\t").append(st).append(" [").append(t.getSymbol()).append("] -> ")
+							.append(t.getDestination()).append("\n");
+			}
+		}
+
+		return result.toString();
+	}
+
+	/**
 	 * Create a new automaton representing the concatenation of {@code this} and
 	 * {@code other}.
 	 * 
@@ -1025,6 +1120,9 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	public RegularExpression toRegex() {
 		// this algorithm works only with deterministic automata
 		A a = minimize();
+
+		if (a.getInitialStates().isEmpty())
+			return EmptySet.INSTANCE;
 
 		// automaton that accepts only the empty string
 		if (a.states.size() == 1 && a.transitions.size() == 0)
@@ -1151,13 +1249,443 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return the star automaton
 	 */
 	public A star() {
-		A result = copy();
+		SortedSet<Transition<T>> tr = new TreeSet<>();
+		SortedSet<State> st = new TreeSet<>();
+		Map<State, State> mapping = new HashMap<>();
 
-		for (State f : result.getFinalStates())
-			for (State i : result.getInitialStates())
-				result.transitions.add(new Transition<>(f, i, epsilon()));
+		for (State s : states) {
+			// initial states become also final
+			State q = new State(s.getId(), s.isInitial(), s.isInitial() || s.isFinal());
+			st.add(q);
+			mapping.put(s, q);
+		}
 
-		return result.minimize();
+		// create transitions using the new states of the reverse automaton
+		for (Transition<T> t : transitions)
+			tr.add(new Transition<T>(
+					mapping.get(t.getSource()),
+					mapping.get(t.getDestination()),
+					t.getSymbol()));
+
+		for (State f : getFinalStates())
+			for (State i : getInitialStates())
+				tr.add(new Transition<>(
+						mapping.get(f),
+						mapping.get(i),
+						epsilon()));
+
+		return from(st, tr);
+	}
+
+	/**
+	 * Yields {@code true} if and only if the two given states are mutually
+	 * reachable, that is, if there exist a path going from {@code s1} to
+	 * {@code s2} and one going from {@code s2} to {@code s1}. Paths are
+	 * searched using the Dijkstra algorithm.
+	 * 
+	 * @param s1 the first state
+	 * @param s2 the second state
+	 * 
+	 * @return {@code true} if and only if {@code s1} and {@code s2} are
+	 *             mutually reachable
+	 */
+	public boolean areMutuallyReachable(State s1, State s2) {
+		return !minimumPath(s1, s2).isEmpty() && !minimumPath(s2, s1).isEmpty();
+	}
+
+	/**
+	 * Yields all possible paths going from an initial state to a final state in
+	 * the target automaton. Note that each node of an SCC of the automaton will
+	 * appear at most once in each path.
+	 * 
+	 * @return the set of all possible paths
+	 */
+	public Set<List<State>> getAllPaths() {
+		Set<List<State>> result = new HashSet<>();
+		for (State initial : getInitialStates()) {
+			Set<Transition<T>[]> paths = depthFirst(initial);
+
+			for (Transition<T>[] tt : paths) {
+				List<State> path = new ArrayList<>(tt.length + 1);
+
+				for (Transition<T> t : tt) {
+					path.add(t.getSource());
+
+					if (t.getDestination().isFinal())
+						path.add(t.getDestination());
+				}
+
+				simplify(path);
+				result.add(path);
+			}
+		}
+
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private Set<Transition<T>[]> depthFirst(State src) {
+		Set<Transition<T>[]> paths = new HashSet<>();
+		Stack<Triple<State, Transition<T>[], int[]>> ws = new Stack<>();
+		ws.push(Triple.of(src, new Transition[0], new int[0]));
+
+		do {
+			Triple<State, Transition<T>[], int[]> current = ws.pop();
+			State node = current.getLeft();
+			Transition<T>[] visited = current.getMiddle();
+			int[] hashes = current.getRight();
+			int len = visited.length;
+
+			Set<Transition<T>> tr = getOutgoingTransitionsFrom(node);
+
+			transitions: for (Transition<T> t : tr) {
+				int thash = t.hashCode();
+
+				int count = 0;
+				for (int i = 0; i < len; i++) {
+					// we look at the element's hash before invoking the
+					// actual comparison for fast failure
+					if (visited[i] == t || (hashes[i] == thash && t.equals(visited[i])))
+						count++;
+
+					if (count > 1)
+						continue transitions;
+				}
+
+				Transition<T>[] copy = Arrays.copyOf(visited, len + 1);
+				int[] hashesCopy = Arrays.copyOf(hashes, len + 1);
+				copy[len] = t;
+				hashesCopy[len] = thash;
+
+				if (t.getDestination().isFinal())
+					paths.add(copy);
+				ws.push(Triple.of(t.getDestination(), copy, hashesCopy));
+			}
+		} while (!ws.isEmpty());
+
+		return paths;
+	}
+
+	private static void simplify(List<State> path) {
+		ListIterator<State> it = path.listIterator();
+		while (it.hasNext()) {
+			if (!it.hasPrevious()) {
+				it.next();
+				continue;
+			}
+
+			// we move back one to get the two elements to compare
+			it.previous();
+
+			State previous = it.next();
+			State current = it.next();
+			if (previous.equals(current))
+				it.remove();
+		}
+	}
+
+	/**
+	 * Finds the minimum path between the two given states using the Dijkstra
+	 * algorithm.
+	 * 
+	 * @param src    the source node
+	 * @param target the destination node
+	 * 
+	 * @return the minimum path
+	 */
+	public List<State> minimumPath(State src, State target) {
+		Set<State> unSettledNodes = new HashSet<>();
+		Map<State, Integer> distance = new HashMap<>();
+		Map<State, State> predecessors = new HashMap<>();
+
+		distance.put(src, 0);
+		unSettledNodes.add(src);
+
+		while (unSettledNodes.size() > 0) {
+			State node = getMinimum(unSettledNodes, distance);
+			unSettledNodes.remove(node);
+			findMinimalDistances(node, distance, predecessors, unSettledNodes);
+		}
+
+		return getPath(target, predecessors);
+	}
+
+	private void findMinimalDistances(State node, Map<State, Integer> distance, Map<State, State> predecessors,
+			Set<State> unSettledNodes) {
+		Set<State> adjacentNodes = getNextStates(node);
+		int shortest = getShortestDistance(node, distance);
+		for (State target : adjacentNodes) {
+			int dist = getDistance(node, target);
+			if (getShortestDistance(target, distance) > shortest + dist) {
+				distance.put(target, shortest + dist);
+				predecessors.put(target, node);
+				unSettledNodes.add(target);
+			}
+		}
+	}
+
+	private int getDistance(State node, State target) {
+		if (!getAllTransitionsConnecting(node, target).isEmpty())
+			return 1;
+		// should never happen
+		return -1; // TODO exception?
+	}
+
+	private static State getMinimum(Set<State> vertexes, Map<State, Integer> distance) {
+		State minimum = null;
+		for (State vertex : vertexes)
+			if (minimum == null)
+				minimum = vertex;
+			else if (getShortestDistance(vertex, distance) < getShortestDistance(minimum, distance))
+				minimum = vertex;
+
+		return minimum;
+	}
+
+	private static int getShortestDistance(State destination, Map<State, Integer> distance) {
+		Integer d = distance.get(destination);
+		if (d == null)
+			return Integer.MAX_VALUE;
+		else
+			return d;
+	}
+
+	private static List<State> getPath(State target, Map<State, State> predecessors) {
+		List<State> path = new LinkedList<>();
+		State step = target;
+
+		// check if a path exists
+		if (predecessors.get(step) == null) {
+			path.add(target);
+			return path;
+		}
+
+		path.add(step);
+		while (predecessors.get(step) != null) {
+			step = predecessors.get(step);
+			path.add(step);
+		}
+
+		// Put it into the correct order
+		Collections.reverse(path);
+		return path;
+	}
+
+	/**
+	 * Yields {@code true} if and only if this automaton has only one path. This
+	 * means that, after minimization, if the automaton has only one path then
+	 * the each state is the starting point of a transition at most once, and it
+	 * is the destination node of a transition at most once.
+	 * 
+	 * @return {@code true} if that condition holds
+	 * 
+	 * @throws CyclicAutomatonException if the minimized automaton contain loops
+	 */
+	public boolean hasOnlyOnePath() throws CyclicAutomatonException {
+		A a = minimize();
+		if (a.hasCycle())
+			throw new CyclicAutomatonException();
+
+		Set<State> transFrom = new HashSet<>();
+		Set<State> transTo = new HashSet<>();
+		State from = null;
+		State to = null;
+
+		for (Transition<T> t : a.transitions) {
+			from = t.getSource();
+			if (transFrom.contains(from))
+				return false;
+
+			transFrom.add(from);
+
+			to = t.getDestination();
+			if (transTo.contains(to))
+				return false;
+
+			transTo.add(to);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Yields the sub-automaton contained in this one that recognizes only the
+	 * longest string in the language of {@code this}. Note that this method
+	 * assumes that the given automaton is loop-free and that it is a
+	 * single-path automaton, that is, that all the strings of the language it
+	 * recognizes are prefixes of the longest one.
+	 * 
+	 * @return the sub-automaton
+	 */
+	public A extractLongestString() {
+		State lastFinalState = null;
+
+		for (State finalState : getFinalStates()) {
+			Set<Transition<T>> outgoingTransaction = getOutgoingTransitionsFrom(finalState);
+			if (outgoingTransaction.isEmpty())
+				lastFinalState = finalState;
+		}
+
+		// TODO exception if lastFinalState is still null? or if more than one
+		// init state?
+
+		State nextState = getInitialState();
+		List<T> symbols = new LinkedList<>();
+		while (!nextState.equals(lastFinalState))
+			for (Transition<T> t : transitions)
+				if (t.getSource().equals(nextState)) {
+					nextState = t.getDestination();
+					symbols.add(t.getSymbol());
+				}
+
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition<T>> newTransitions = new TreeSet<>();
+		int counter = 0;
+		State last = new State(counter++, true, symbols.isEmpty());
+		newStates.add(last);
+
+		for (T symbol : symbols) {
+			State tail = new State(counter++, false, counter - 1 == symbols.size());
+			newStates.add(tail);
+			newTransitions.add(new Transition<>(last, tail, symbol));
+			last = tail;
+		}
+		return from(newStates, newTransitions);
+	}
+
+	public A makeAcyclic() {
+		Set<List<State>> paths = getAllPaths();
+		paths = paths.stream()
+				.filter(p -> p.stream().distinct().collect(Collectors.toList()).equals(p))
+				.collect(Collectors.toSet());
+
+		SortedSet<State> states = new TreeSet<>();
+		SortedSet<Transition<T>> delta = new TreeSet<>();
+		for (List<State> p : paths)
+			for (State s : p) {
+				states.add(s);
+				for (Transition<T> t : getOutgoingTransitionsFrom(s))
+					if (p.contains(t.getDestination()) && !states.contains(t.getDestination()))
+						// we consider only forward transitions
+						// this condition eliminates also self loops
+						delta.add(t);
+			}
+
+		return from(states, delta);
+	}
+
+	/**
+	 * Yields the automaton that recognizes all possible substrings of the
+	 * strings recognized by this automaton.
+	 * 
+	 * @return the factors automaton
+	 */
+	public A factors() {
+		return prefix().suffix();
+	}
+
+	/**
+	 * Yields the automaton that recognizes all possible prefixes of the strings
+	 * recognized by this automaton.
+	 * 
+	 * @return the prefix automaton
+	 */
+	public A prefix() {
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<>();
+
+		for (State s : states) {
+			State mock = new State(s.getId(), s.isInitial(), true);
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition<T> t : transitions)
+			newDelta.add(new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
+
+		return from(newStates, newDelta).minimize();
+	}
+
+	/**
+	 * Yields the automaton that recognizes all possible suffixes of the strings
+	 * recognized by this automaton.
+	 * 
+	 * @return the suffix automaton
+	 */
+	public A suffix() {
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<>();
+
+		for (State s : states) {
+			State mock = new State(s.getId(), true, s.isFinal());
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition<T> t : transitions)
+			newDelta.add(new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
+
+		return from(newStates, newDelta).minimize();
+	}
+
+	/**
+	 * Yields the length of the longest string recognized by this automaton,
+	 * with {@link Integer#MAX_VALUE} representing infinity.
+	 * 
+	 * @return the length of the longest string
+	 */
+	public int lenghtOfLongestString() {
+		Set<List<State>> paths = getAllPaths();
+		if (paths.size() == 0)
+			return 0;
+
+		int max = Integer.MIN_VALUE, tmp;
+		for (List<State> v : paths)
+			if ((tmp = maxStringLengthTraversing(v)) > max)
+				max = tmp;
+
+		return max;
+	}
+
+	private int maxStringLengthTraversing(List<State> path) {
+		if (path.size() == 0)
+			return 0;
+
+		if (path.size() == 1)
+			// length of self loops
+			return maxStringLength(path.get(0), path.get(0));
+
+		int len = 0;
+		for (int i = 0; i < path.size() - 1; i++)
+			len += maxStringLength(path.get(i), path.get(i + 1));
+
+		return len;
+	}
+
+	private int maxStringLength(State from, State to) {
+		Set<Transition<T>> transitions = getAllTransitionsConnecting(from, to);
+		if (transitions.isEmpty())
+			return 0;
+
+		if (transitions.size() == 1)
+			return transitions.iterator().next().getSymbol().maxLength();
+
+		int len = -1;
+		for (Transition<T> t : transitions)
+			if (len == -1)
+				len = t.getSymbol().maxLength();
+			else
+				len = Math.max(len, t.getSymbol().maxLength());
+
+		return len;
 	}
 
 	@Override

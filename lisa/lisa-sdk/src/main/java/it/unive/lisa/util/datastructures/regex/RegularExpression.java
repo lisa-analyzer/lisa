@@ -329,20 +329,6 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	public abstract boolean is(String str);
 
 	/**
-	 * Yields the maximum length of this regular expression.
-	 * 
-	 * @return the maximum length
-	 */
-	public abstract int maxLength();
-
-	/**
-	 * Yields the minimum length of this regular expression.
-	 * 
-	 * @return the minimum length
-	 */
-	public abstract int minLength();
-
-	/**
 	 * Yields {@code true} if and only if this regular expression <b>may</b>
 	 * contain the given string.
 	 * 

@@ -47,7 +47,7 @@ public class ContainsTest {
 		FSA fsa1 = new FSA(a2);
 
 		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.SATISFIED);
+				SemanticDomain.Satisfiability.UNKNOWN);
 	}
 
 	@Test

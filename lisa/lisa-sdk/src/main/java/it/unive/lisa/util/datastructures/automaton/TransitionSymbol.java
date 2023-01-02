@@ -35,4 +35,18 @@ public interface TransitionSymbol<T> extends Comparable<T> {
 	 * @return the reversed symbol
 	 */
 	T reverse();
+
+	/**
+	 * Yields the maximum length of this symbol.
+	 * 
+	 * @return the maximum length
+	 */
+	int maxLength();
+
+	/**
+	 * Yields the minimum length of this symbol.
+	 * 
+	 * @return the minimum length
+	 */
+	int minLength();
 }

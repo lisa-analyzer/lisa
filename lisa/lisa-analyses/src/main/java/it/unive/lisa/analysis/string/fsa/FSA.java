@@ -2,6 +2,7 @@ package it.unive.lisa.analysis.string.fsa;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -26,25 +27,28 @@ import java.util.TreeSet;
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class FSA implements BaseNonRelationalValueDomain<FSA> {
-	/**
-	 * Used to store the string representation
-	 */
-	private final SimpleAutomaton a;
+
 	/**
 	 * Top element of the domain
 	 */
-	private static final FSA TOP = new FSA();
+	private static final FSA TOP = new FSA(new SimpleAutomaton("").unknownString());
+
 	/**
 	 * The parameter used for the widening operator.
 	 */
 	public static final int WIDENING_TH = 3;
 
 	/**
+	 * Used to store the string representation
+	 */
+	private final SimpleAutomaton a;
+
+	/**
 	 * Creates a new FSA object representing the TOP element.
 	 */
 	public FSA() {
-		// top
-		this.a = null;
+		// we use the empty language as it is memory-efficient
+		this.a = new SimpleAutomaton("").emptyLanguage();
 	}
 
 	/**
@@ -141,34 +145,20 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 				if (rightLang.size() == 1 && rightLang.contains(""))
 					return SemanticDomain.Satisfiability.SATISFIED;
 
-				boolean noneContained = true;
-				for (String sub : rightLang) {
-					for (String s : leftLang) {
-						if (s.contains(sub)) {
-							noneContained = false;
-							break;
-						}
-						if (!noneContained)
-							break;
+				// we can compare languages
+				boolean atLeastOne = false, all = true;
+				for (String a : leftLang)
+					for (String b : rightLang) {
+						boolean cont = a.contains(b);
+						atLeastOne = atLeastOne || cont;
+						all = all && cont;
 					}
-				}
-				if (noneContained)
-					return SemanticDomain.Satisfiability.NOT_SATISFIED;
 
-				// all the strings accepted by right are substring of at least
-				// one string accepted by left
-				for (String sub : rightLang) {
-					boolean isContained = false;
-					for (String s : leftLang) {
-						if (s.contains(sub)) {
-							isContained = true;
-							break;
-						}
-					}
-					if (!isContained)
-						return SemanticDomain.Satisfiability.UNKNOWN;
-				}
-				return SemanticDomain.Satisfiability.SATISFIED;
+				if (all)
+					return Satisfiability.SATISFIED;
+				if (atLeastOne)
+					return Satisfiability.UNKNOWN;
+				return Satisfiability.NOT_SATISFIED;
 			} catch (CyclicAutomatonException e) {
 				return SemanticDomain.Satisfiability.UNKNOWN;
 			}

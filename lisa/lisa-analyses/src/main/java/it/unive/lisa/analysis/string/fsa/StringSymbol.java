@@ -105,4 +105,14 @@ public class StringSymbol implements TransitionSymbol<StringSymbol> {
 			return this;
 		return new StringSymbol(symbol + other.symbol);
 	}
+
+	@Override
+	public int maxLength() {
+		return symbol.length();
+	}
+
+	@Override
+	public int minLength() {
+		return symbol.length();
+	}
 }

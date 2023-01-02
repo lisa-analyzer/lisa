@@ -64,4 +64,14 @@ public class TestSymbol implements TransitionSymbol<TestSymbol> {
 			return this;
 		return new TestSymbol(symbol + other.symbol);
 	}
+
+	@Override
+	public int maxLength() {
+		return symbol.length();
+	}
+
+	@Override
+	public int minLength() {
+		return symbol.length();
+	}
 }
