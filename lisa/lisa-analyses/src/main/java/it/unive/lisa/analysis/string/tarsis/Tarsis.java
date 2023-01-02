@@ -163,6 +163,14 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		return SemanticDomain.Satisfiability.UNKNOWN;
 	}
 
+	/**
+	 * Semantics of {@link StringContains} between {@code this} and
+	 * {@code other}.
+	 * 
+	 * @param other the other domain instance
+	 * 
+	 * @return the satisfiability result
+	 */
 	public Satisfiability contains(Tarsis other) {
 		try {
 			if (!a.hasCycle()
@@ -185,7 +193,8 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 				return Satisfiability.NOT_SATISFIED;
 			}
 
-			if (!other.a.hasCycle() && other.a.getLanguage().isEmpty())
+			if (!other.a.hasCycle() && other.a.getLanguage().size() == 1
+					&& other.a.getLanguage().iterator().next().isEmpty())
 				// the empty string is always contained
 				return Satisfiability.SATISFIED;
 

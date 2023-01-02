@@ -18,6 +18,7 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
+import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.imp.IMPFeatures;
@@ -301,6 +302,7 @@ public class EqualityContractVerificationTest {
 		verify(SymbolicChar.class);
 		verify(UnknownSymbolicChar.class);
 
+		verify(RegexAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		verify(SimpleAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		verify(StringSymbol.class);
 	}

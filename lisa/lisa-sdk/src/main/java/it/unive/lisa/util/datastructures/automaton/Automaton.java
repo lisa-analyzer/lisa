@@ -1553,6 +1553,12 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return from(newStates, newTransitions);
 	}
 
+	/**
+	 * Yields an acyclic version of this automaton, where all SCCs have been
+	 * removed.
+	 * 
+	 * @return the acyclic automaton
+	 */
 	public A makeAcyclic() {
 		Set<List<State>> paths = getAllPaths();
 		paths = paths.stream()

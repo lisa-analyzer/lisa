@@ -20,8 +20,21 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
+/**
+ * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using an
+ * alphabet of strings, extended with a special symbol for statically unknown
+ * ones. Transition symbols are {@link RegularExpression}s.
+ *
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
 public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression> {
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the top string, that is, with
+	 * a single transition recognizing {@link TopAtom}.
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton topString() {
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
@@ -39,6 +52,11 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the empty language.
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton emptyLang() {
 		SortedSet<State> newStates = new TreeSet<>();
 		State initialState = new State(0, true, false);
@@ -50,6 +68,13 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the given string.
+	 * 
+	 * @param string the string to recognize
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton string(String string) {
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
@@ -67,6 +92,11 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the empty string.
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton emptyStr() {
 		State q0 = new State(0, true, false);
 		State q1 = new State(1, false, true);
@@ -84,6 +114,13 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the given strings.
+	 * 
+	 * @param strings the strings to recognize
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton strings(String... strings) {
 		RegexAutomaton a = emptyLang();
 
