@@ -207,6 +207,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public Bricks bottom() {
 		return BOTTOM;
 	}
@@ -270,6 +275,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		List<Brick> thisBricks = this.bricks;
 
+		for(Brick brick: thisBricks)
+			if(brick.getMin() == -1 || brick.getMax() == -1)
+				return;
+
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
 		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
@@ -301,7 +310,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
 					rule4(i, i + 1);
 
-			if (currentBrick.getMin() >= 1 &&
+			if (currentBrick.getMin() > 1 &&
 					currentBrick.getMin() != currentBrick.getMax())
 				rule5(i);
 		}

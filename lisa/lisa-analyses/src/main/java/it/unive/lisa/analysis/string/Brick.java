@@ -114,6 +114,9 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @return the min of this abstract value
 	 */
 	public int getMin() {
+		if(this.brickInterval.getLow().isInfinite())
+			return -1;
+
 		return this.brickInterval.getLow().getNumber().intValue();
 	}
 
@@ -123,6 +126,9 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @return the max of this abstract value
 	 */
 	public int getMax() {
+		if(this.brickInterval.getHigh().isInfinite())
+			return -1;
+
 		return this.brickInterval.getHigh().getNumber().intValue();
 	}
 
@@ -179,6 +185,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 				recGetReps(reps, min + 1, numberOfReps + 1, currentStr + string);
 			}
 		}
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 
 	private String formatRepresentation() {
