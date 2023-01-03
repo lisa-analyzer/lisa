@@ -190,7 +190,7 @@ public class BricksTest {
 		Set<String> strings0 = new TreeSet<>();
 		strings0.add("a");
 
-		Brick b0 = new Brick(2, 5, strings0);
+		Brick b0 = new Brick(1, 5, strings0);
 
 		Set<String> strings1 = new TreeSet<>();
 		strings1.add("b");
@@ -266,7 +266,7 @@ public class BricksTest {
 		treeSet2.add("ge");
 		treeSet2.add("ze");
 
-		Brick brick2 = new Brick(2, 3, treeSet2);
+		Brick brick2 = new Brick(1, 3, treeSet2);
 
 		Set<String> treeSet3 = new TreeSet<>();
 		treeSet3.add("ge");
@@ -285,7 +285,6 @@ public class BricksTest {
 		Bricks bricks1 = new Bricks(bricksList1);
 
 		assertTrue(bricks.lessOrEqualAux(bricks1));
-
 	}
 
 	@Test
@@ -345,7 +344,7 @@ public class BricksTest {
 		treeSet2.add("ge");
 		treeSet2.add("ze");
 
-		Brick brick2 = new Brick(2, 3, treeSet2);
+		Brick brick2 = new Brick(1, 3, treeSet2);
 
 		Set<String> treeSet3 = new TreeSet<>();
 		treeSet3.add("ge");
@@ -429,7 +428,7 @@ public class BricksTest {
 
 		bricksList.add(new Brick(1, 13, treeSet));
 
-		bricksList1.add(new Brick(2, 12, treeSet1));
+		bricksList1.add(new Brick(1, 12, treeSet1));
 
 		Bricks bricks = new Bricks(bricksList);
 
@@ -443,6 +442,7 @@ public class BricksTest {
 		List<Brick> resultList = new ArrayList<>();
 
 		IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+		resultSet.add("a");
 		resultList.add(new Brick(interval, resultSet));
 
 		assertEquals(bricks.wideningAux(bricks1), new Bricks(resultList));
@@ -461,7 +461,7 @@ public class BricksTest {
 
 		bricksList.add(new Brick(1, 6, treeSet));
 
-		bricksList1.add(new Brick(2, 5, treeSet1));
+		bricksList1.add(new Brick(1, 5, treeSet1));
 
 		Bricks bricks = new Bricks(bricksList);
 
