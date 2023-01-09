@@ -1,6 +1,8 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -10,45 +12,51 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import it.unive.lisa.util.datastructures.automaton.State;
 import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
- * A class that represent the Finite State Automaton domain for strings.
+ * A class that represent the Finite State Automaton domain for strings,
+ * exploiting a {@link SimpleAutomaton}.
  *
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
 public class FSA implements BaseNonRelationalValueDomain<FSA> {
-	/**
-	 * Used to store the string representation
-	 */
-	private final Automaton a;
+
 	/**
 	 * Top element of the domain
 	 */
-	private static final FSA TOP = new FSA();
+	private static final FSA TOP = new FSA(new SimpleAutomaton("").unknownString());
+
 	/**
-	 * The paramater used for the widening operator.
+	 * The parameter used for the widening operator.
 	 */
 	public static final int WIDENING_TH = 3;
+
+	/**
+	 * Used to store the string representation
+	 */
+	private final SimpleAutomaton a;
 
 	/**
 	 * Creates a new FSA object representing the TOP element.
 	 */
 	public FSA() {
-		// top
-		this.a = new Automaton(null, null);
+		// we use the empty language as it is memory-efficient
+		this.a = new SimpleAutomaton("").emptyLanguage();
 	}
 
 	/**
-	 * Creates a new FSA object using an {@link Automaton}.
+	 * Creates a new FSA object using a {@link SimpleAutomaton}.
 	 * 
-	 * @param a the {@link Automaton} used for object construction.
+	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	FSA(Automaton a) {
+	FSA(SimpleAutomaton a) {
 		this.a = a;
 	}
 
@@ -95,16 +103,16 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	@Override
 	public FSA bottom() {
 		SortedSet<State> states = new TreeSet<>();
-		states.add(new State(true, false));
-		return new FSA(new Automaton(states, new TreeSet<>()));
+		states.add(new State(0, true, false));
+		return new FSA(new SimpleAutomaton(states, new TreeSet<>()));
 	}
 
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
-			return new StringRepresentation("no string");
+			return Lattice.bottomRepresentation();
 		else if (isTop())
-			return new StringRepresentation("any string");
+			return Lattice.topRepresentation();
 
 		return new StringRepresentation(this.a.toRegex());
 	}
@@ -112,7 +120,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	@Override
 	public FSA evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
 		if (constant.getValue() instanceof String) {
-			return new FSA(new Automaton((String) constant.getValue()));
+			return new FSA(new SimpleAutomaton((String) constant.getValue()));
 		}
 		return top();
 	}
@@ -137,34 +145,20 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 				if (rightLang.size() == 1 && rightLang.contains(""))
 					return SemanticDomain.Satisfiability.SATISFIED;
 
-				boolean noneContained = true;
-				for (String sub : rightLang) {
-					for (String s : leftLang) {
-						if (s.contains(sub)) {
-							noneContained = false;
-							break;
-						}
-						if (!noneContained)
-							break;
+				// we can compare languages
+				boolean atLeastOne = false, all = true;
+				for (String a : leftLang)
+					for (String b : rightLang) {
+						boolean cont = a.contains(b);
+						atLeastOne = atLeastOne || cont;
+						all = all && cont;
 					}
-				}
-				if (noneContained)
-					return SemanticDomain.Satisfiability.NOT_SATISFIED;
 
-				// all the strings accepted by right are substring of at least
-				// one string accpeted by left
-				for (String sub : rightLang) {
-					boolean isContained = false;
-					for (String s : leftLang) {
-						if (s.contains(sub)) {
-							isContained = true;
-							break;
-						}
-					}
-					if (!isContained)
-						return SemanticDomain.Satisfiability.UNKNOWN;
-				}
-				return SemanticDomain.Satisfiability.SATISFIED;
+				if (all)
+					return Satisfiability.SATISFIED;
+				if (atLeastOne)
+					return Satisfiability.UNKNOWN;
+				return Satisfiability.NOT_SATISFIED;
 			} catch (CyclicAutomatonException e) {
 				return SemanticDomain.Satisfiability.UNKNOWN;
 			}

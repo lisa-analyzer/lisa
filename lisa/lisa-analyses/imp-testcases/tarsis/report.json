@@ -1,16 +1,16 @@
 {
   "warnings" : [ ],
-  "files" : [ "report.json", "untyped_fsa.branching(fsa__this,_untyped_x).json", "untyped_fsa.constants(fsa__this).json", "untyped_fsa.loops(fsa__this,_untyped_x).json" ],
+  "files" : [ "report.json", "untyped_tarsis.branching(tarsis__this,_untyped_x).json", "untyped_tarsis.constants(tarsis__this).json", "untyped_tarsis.loops(tarsis__this,_untyped_x).json" ],
   "info" : {
     "cfgs" : "3",
-    "duration" : "1s 836ms",
-    "end" : "2023-01-02T15:07:15.239+01:00",
+    "duration" : "852ms",
+    "end" : "2023-01-02T22:58:49.967+01:00",
     "expressions" : "20",
     "files" : "3",
     "globals" : "0",
     "members" : "3",
     "programs" : "1",
-    "start" : "2023-01-02T15:07:13.403+01:00",
+    "start" : "2023-01-02T22:58:49.115+01:00",
     "statements" : "12",
     "units" : "1",
     "version" : "0.1b7",
@@ -28,6 +28,6 @@
     "serializeResults" : "true",
     "syntacticChecks" : "",
     "wideningThreshold" : "5",
-    "workdir" : "test-outputs/fsa"
+    "workdir" : "test-outputs/tarsis"
   }
 }

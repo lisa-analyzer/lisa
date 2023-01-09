@@ -26,7 +26,7 @@ public abstract class Identifier extends ValueExpression {
 	 */
 	private final boolean weak;
 
-	private Annotations annotations;
+	private final Annotations annotations;
 
 	/**
 	 * Builds the identifier.
