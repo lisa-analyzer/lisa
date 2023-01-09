@@ -363,7 +363,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 								expression.getCodeLocation());
 
 					Set<Type> types = new HashSet<>();
-					if (expression.hasRuntimeTypes()) 
+					if (expression.hasRuntimeTypes())
 						types.addAll(expression.getRuntimeTypes(null));
 
 					if (rec.hasRuntimeTypes())
@@ -371,7 +371,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 
 					if (!types.isEmpty())
 						e.setRuntimeTypes(types);
-					
+
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);

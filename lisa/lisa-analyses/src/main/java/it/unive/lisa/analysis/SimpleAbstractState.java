@@ -3,8 +3,8 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.DefaultParameters;
 import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.heap.HeapDomain;
-import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.heap.HeapSemanticOperation.HeapReplacement;
+import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -38,9 +37,9 @@ import java.util.function.Predicate;
 @FallbackImplementation
 @DefaultParameters({ MonolithicHeap.class, Interval.class, InferredTypes.class })
 public class SimpleAbstractState<H extends HeapDomain<H>,
-V extends ValueDomain<V>,
-T extends TypeDomain<T>>
-implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
 
 	/**
 	 * The domain containing information regarding heap structures
@@ -186,11 +185,12 @@ implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstra
 
 			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
-			
-			// if the expression is a memory allocation, its type is registered in the type domain
+
+			// if the expression is a memory allocation, its type is registered
+			// in the type domain
 			if (expression instanceof MemoryAllocation && expr instanceof Identifier)
 				tmp = tmp.assign((Identifier) expr, expr, pp);
-			
+
 			typeRes = typeRes.lub(tmp);
 			valueRes = valueRes.lub(value.smallStepSemantics(expr, pp));
 		}

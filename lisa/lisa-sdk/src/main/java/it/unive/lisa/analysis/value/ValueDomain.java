@@ -21,7 +21,7 @@ import it.unive.lisa.symbolic.value.Variable;
  * @param <D> the concrete type of the {@link ValueDomain}
  */
 public interface ValueDomain<D extends ValueDomain<D>>
-extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
+		extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
 
 	/**
 	 * Applies a substitution of identifiers that is caused by a modification of
@@ -29,9 +29,8 @@ extends SemanticDomain<D, ValueExpression, Identifier>, Lattice<D> {
 	 * substitution is composed by a list of {@link HeapReplacement} instances,
 	 * that <b>must be applied in order</b>.
 	 * 
-	 * @param substitution the substitution to apply
-	 * @param pp           the program point that where this operation is being
-	 *                         evaluated
+	 * @param r  the replacement to apply
+	 * @param pp the program point that where this operation is being evaluated
 	 * 
 	 * @return the value domain instance modified by the substitution
 	 * 
