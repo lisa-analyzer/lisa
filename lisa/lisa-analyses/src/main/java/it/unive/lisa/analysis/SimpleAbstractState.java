@@ -37,9 +37,9 @@ import java.util.function.Predicate;
 @FallbackImplementation
 @DefaultParameters({ MonolithicHeap.class, Interval.class, InferredTypes.class })
 public class SimpleAbstractState<H extends HeapDomain<H>,
-V extends ValueDomain<V>,
-T extends TypeDomain<T>>
-implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+		V extends ValueDomain<V>,
+		T extends TypeDomain<T>>
+		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
 
 	/**
 	 * The domain containing information regarding heap structures
@@ -99,7 +99,7 @@ implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstra
 		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
-		
+
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
@@ -146,7 +146,8 @@ implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstra
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
-	private SimpleAbstractState<H, V, T> applySubstitiontion(H heap, V value, T type, ProgramPoint pp) throws SemanticException {
+	private SimpleAbstractState<H, V, T> applySubstitiontion(H heap, V value, T type, ProgramPoint pp)
+			throws SemanticException {
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
 			for (HeapReplacement repl : heap.getSubstitution()) {
 				Set<Type> runtimeTypes;
@@ -173,9 +174,10 @@ implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstra
 				value = value.applyReplacement(repl, pp);
 			}
 		}
-		
+
 		return new SimpleAbstractState<>(heap, value, type);
 	}
+
 	@Override
 	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
