@@ -37,9 +37,9 @@ import java.util.function.Predicate;
 @FallbackImplementation
 @DefaultParameters({ MonolithicHeap.class, Interval.class, InferredTypes.class })
 public class SimpleAbstractState<H extends HeapDomain<H>,
-		V extends ValueDomain<V>,
-		T extends TypeDomain<T>>
-		implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
+V extends ValueDomain<V>,
+T extends TypeDomain<T>>
+implements BaseLattice<SimpleAbstractState<H, V, T>>, AbstractState<SimpleAbstractState<H, V, T>, H, V, T> {
 
 	/**
 	 * The domain containing information regarding heap structures
@@ -96,36 +96,10 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.assign(id, expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		T type = typeState;
-		V value = valueState;
-		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
-
-			for (HeapReplacement repl : heap.getSubstitution()) {
-				Set<Type> runtimeTypes;
-				Set<Type> allTypes = new HashSet<Type>();
-				for (Identifier source : repl.getSources()) {
-					runtimeTypes = type.smallStepSemantics(source, pp).getInferredRuntimeTypes();
-					source.setRuntimeTypes(runtimeTypes);
-					allTypes.addAll(runtimeTypes);
-				}
-
-				for (Identifier target : repl.getTargets())
-					target.setRuntimeTypes(allTypes);
-
-				if (repl.getSources().isEmpty())
-					continue;
-				T lub = type.bottom();
-				for (Identifier source : repl.getSources()) {
-					T partial = type;
-					for (Identifier target : repl.getTargets())
-						partial = partial.assign(target, source, pp);
-					lub = lub.lub(partial);
-				}
-				type = lub.forgetIdentifiers(repl.getIdsToForget());
-				value = value.applyReplacement(repl, pp);
-			}
-		}
-
+		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		T type = as.getTypeState();
+		V value = as.getValueState();
+		
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
@@ -148,35 +122,9 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.smallStepSemantics(expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		T type = typeState;
-		V value = valueState;
-		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
-
-			for (HeapReplacement repl : heap.getSubstitution()) {
-				Set<Type> runtimeTypes;
-				Set<Type> allTypes = new HashSet<Type>();
-				for (Identifier source : repl.getSources()) {
-					runtimeTypes = type.smallStepSemantics(source, pp).getInferredRuntimeTypes();
-					source.setRuntimeTypes(runtimeTypes);
-					allTypes.addAll(runtimeTypes);
-				}
-
-				for (Identifier target : repl.getTargets())
-					target.setRuntimeTypes(allTypes);
-
-				if (repl.getSources().isEmpty())
-					continue;
-				T lub = type.bottom();
-				for (Identifier source : repl.getSources()) {
-					T partial = type;
-					for (Identifier target : repl.getTargets())
-						partial = partial.assign(target, source, pp);
-					lub = lub.lub(partial);
-				}
-				type = lub.forgetIdentifiers(repl.getIdsToForget());
-				value = value.applyReplacement(repl, pp);
-			}
-		}
+		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		T type = as.getTypeState();
+		V value = as.getValueState();
 
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
@@ -198,14 +146,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
-	@Override
-	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
-			throws SemanticException {
-		H heap = heapState.assume(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
-
-		T type = typeState;
-		V value = valueState;
+	private SimpleAbstractState<H, V, T> applySubstitiontion(H heap, V value, T type, ProgramPoint pp) throws SemanticException {
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
 			for (HeapReplacement repl : heap.getSubstitution()) {
 				Set<Type> runtimeTypes;
@@ -232,6 +173,18 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				value = value.applyReplacement(repl, pp);
 			}
 		}
+		
+		return new SimpleAbstractState<>(heap, value, type);
+	}
+	@Override
+	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
+			throws SemanticException {
+		H heap = heapState.assume(expression, pp);
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
+
+		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		T type = as.getTypeState();
+		V value = as.getValueState();
 
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
