@@ -1,0 +1,97 @@
+{
+  "warnings" : [ {
+    "message" : "['imp-testcases/taint/taint.imp':15:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':22:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':27:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':29:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':35:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':37:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':39:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':41:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':43:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':47:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':49:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':51:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':55:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':57:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':59:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':61:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':63:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':65:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':67:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':69:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':71:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':73:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':75:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':77:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':79:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':81:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is possibly tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':85:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':87:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':89:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':91:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':93:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  }, {
+    "message" : "['imp-testcases/taint/taint.imp':95:13] on 'untyped main::main(main* this)': [EXPRESSION] Parameter 1 is always tainted"
+  } ],
+  "files" : [ "report.json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "37ms",
+    "end" : "2022-12-19T22:34:44.506+01:00",
+    "expressions" : "237",
+    "files" : "0",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2022-12-19T22:34:44.469+01:00",
+    "statements" : "79",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "32"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "ReturnTopPolicy",
+    "semanticChecks" : "TaintCheck",
+    "serializeInputs" : "false",
+    "serializeResults" : "false",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/taint/3val"
+  }
+}
