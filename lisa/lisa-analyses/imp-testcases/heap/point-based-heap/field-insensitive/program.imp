@@ -80,4 +80,9 @@ class A {
 		y.a = 3;
 		y.b = 4;
 	}
+	
+	f10() {
+		def x = new A(1,2);
+		x.a = 1;
+	}
 }
