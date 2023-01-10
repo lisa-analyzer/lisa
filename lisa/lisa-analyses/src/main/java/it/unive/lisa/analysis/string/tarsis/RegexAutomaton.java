@@ -10,7 +10,6 @@ import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
 import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -95,7 +94,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		result.minimized = Optional.of(true);
 		return result;
 	}
-	
+
 	public static RegexAutomaton string(SymbolicString s) {
 		List<RegexAutomaton> result = new ArrayList<>();
 		String collector = "";
@@ -119,11 +118,10 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		if (result.size() == 1)
 			return result.get(0);
 
-		
 		RegexAutomaton r = result.get(0);
 		for (int i = 1; i < result.size(); i++)
 			r = r.concat(result.get(i));
-		
+
 		return r;
 	}
 

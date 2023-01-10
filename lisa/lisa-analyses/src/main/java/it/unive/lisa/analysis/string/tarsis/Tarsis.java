@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import java.util.Objects;
-import java.util.SortedSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -17,6 +14,8 @@ import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import java.util.Objects;
+import java.util.SortedSet;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -226,10 +225,14 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	/**
-	 * Yields the Tarsis automaton corresponding to the substring of this Tarsis automaton abstract value between two indexes.
+	 * Yields the Tarsis automaton corresponding to the substring of this Tarsis
+	 * automaton abstract value between two indexes.
+	 * 
 	 * @param begin where the substring starts
-	 * @param end where the substring ends
-	 * @return the Tarsis automaton corresponding to the substring of this Tarsis automaton between two indexes
+	 * @param end   where the substring ends
+	 * 
+	 * @return the Tarsis automaton corresponding to the substring of this
+	 *             Tarsis automaton between two indexes
 	 */
 	public Tarsis substring(long begin, long end) {
 		if (isTop() || isBottom())

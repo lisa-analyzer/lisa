@@ -1,7 +1,5 @@
 package it.unive.lisa.analysis.string;
 
-import java.util.Objects;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -16,6 +14,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import java.util.Objects;
 
 /**
  * The suffix string abstract domain.
@@ -151,12 +150,16 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	public String getSuffix() {
 		return this.suffix;
 	}
-	
+
 	/**
-	 * Yields the suffix corresponding to the substring of this suffix between two indexes.
+	 * Yields the suffix corresponding to the substring of this suffix between
+	 * two indexes.
+	 * 
 	 * @param begin where the substring starts
-	 * @param end where the substring ends
-	 * @return the suffix corresponding to the substring of this suffix between two indexes
+	 * @param end   where the substring ends
+	 * 
+	 * @return the suffix corresponding to the substring of this suffix between
+	 *             two indexes
 	 */
 	public Suffix substring(long begin, long end) {
 		return new Suffix("");
