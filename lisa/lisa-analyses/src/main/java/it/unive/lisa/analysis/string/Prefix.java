@@ -1,5 +1,7 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -7,8 +9,13 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.*;
-import java.util.Objects;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 
 /**
  * The prefix string abstract domain.
@@ -142,5 +149,23 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 	 */
 	public String getPrefix() {
 		return this.prefix;
+	}
+	
+	/**
+	 * Yields the prefix corresponding to the substring of this prefix between two indexes.
+	 * @param begin where the substring starts
+	 * @param end where the substring ends
+	 * @return the prefix corresponding to the substring of this prefix between two indexes
+	 */
+	public Prefix substring(long begin, long end) {
+		if (isTop() || isBottom())
+			return this;
+
+		if (end <= getPrefix().length())
+			return new Prefix(getPrefix().substring((int) begin, (int)end));
+		else if (begin < getPrefix().length())
+			return new Prefix(getPrefix().substring((int) begin));
+
+		return new Prefix("");
 	}
 }

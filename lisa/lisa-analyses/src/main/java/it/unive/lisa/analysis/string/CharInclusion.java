@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -15,11 +22,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The suffix string abstract domain.
@@ -219,5 +221,17 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		}
 
 		return alphabet;
+	}
+	
+	/**
+	 * Yields the char inclusion abstract value corresponding to the substring of this char inclusion abstract value between two indexes.
+	 * @param begin where the substring starts
+	 * @param end where the substring ends
+	 * @return the char inclusion abstract value corresponding to the substring of this char inclusion abstract value between two indexes
+	 */
+	public CharInclusion substring(long begin, long end) {
+		if (isTop() || isBottom())
+			return this;
+		return new CharInclusion(new TreeSet<>(), getMaybeContained());
 	}
 }

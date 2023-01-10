@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -14,10 +19,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -164,5 +165,18 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			}
 		}
 		return SemanticDomain.Satisfiability.UNKNOWN;
+	}
+	
+	/**
+	 * Yields the FSA automaton corresponding to the substring of this FSA automaton abstract value between two indexes.
+	 * @param begin where the substring starts
+	 * @param end where the substring ends
+	 * @return the FSA automaton corresponding to the substring of this FSA automaton between two indexes
+	 */
+	public FSA substring(long begin, long end) {
+		if (isTop() || isBottom())
+			return this;
+		
+		return this;
 	}
 }

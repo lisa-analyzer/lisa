@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.string.tarsis;
 
+import java.util.Objects;
+import java.util.SortedSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -14,8 +17,6 @@ import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
-import java.util.Objects;
-import java.util.SortedSet;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -222,5 +223,26 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 			// can safely ignore
 		}
 		return Satisfiability.UNKNOWN;
+	}
+
+	/**
+	 * Yields the Tarsis automaton corresponding to the substring of this Tarsis automaton abstract value between two indexes.
+	 * @param begin where the substring starts
+	 * @param end where the substring ends
+	 * @return the Tarsis automaton corresponding to the substring of this Tarsis automaton between two indexes
+	 */
+	public Tarsis substring(long begin, long end) {
+		if (isTop() || isBottom())
+			return this;
+
+		RegexAutomaton[] array = this.a.toRegex().substring((int) begin, (int) end)
+				.parallelStream()
+				.map(s -> RegexAutomaton.string(s)).toArray(RegexAutomaton[]::new);
+
+		RegexAutomaton result = RegexAutomaton.emptyLang();
+
+		for (int i = 0; i < array.length; i++)
+			result = result.union(array[i]);
+		return new Tarsis(result);
 	}
 }

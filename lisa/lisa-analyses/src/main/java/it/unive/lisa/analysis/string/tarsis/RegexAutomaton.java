@@ -7,6 +7,10 @@ import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.datastructures.regex.TopAtom;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -90,6 +94,37 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		result.deterministic = Optional.of(true);
 		result.minimized = Optional.of(true);
 		return result;
+	}
+	
+	public static RegexAutomaton string(SymbolicString s) {
+		List<RegexAutomaton> result = new ArrayList<>();
+		String collector = "";
+		for (SymbolicChar ch : s.collapseTopChars()) {
+			if (ch instanceof UnknownSymbolicChar) {
+				if (!collector.isEmpty())
+					result.add(string(collector));
+
+				collector = "";
+				result.add(topString());
+			} else
+				collector += ch.asChar();
+		}
+
+		if (!collector.isEmpty())
+			result.add(string(collector));
+
+		if (result.isEmpty())
+			return emptyStr();
+
+		if (result.size() == 1)
+			return result.get(0);
+
+		
+		RegexAutomaton r = result.get(0);
+		for (int i = 1; i < result.size(); i++)
+			r = r.concat(result.get(i));
+		
+		return r;
 	}
 
 	/**
