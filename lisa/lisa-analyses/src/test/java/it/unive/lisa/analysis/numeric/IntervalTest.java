@@ -27,10 +27,7 @@ import it.unive.lisa.symbolic.value.operator.binary.NumericNonOverflowingSub;
 import it.unive.lisa.symbolic.value.operator.unary.NumericNegation;
 import it.unive.lisa.util.numeric.InfiniteIterationException;
 import it.unive.lisa.util.numeric.IntInterval;
-import it.unive.lisa.util.numeric.MathNumberConversionException;
-
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import org.junit.Test;
@@ -654,28 +651,28 @@ public class IntervalTest {
 			assertEquals("assume(" + variable + " <= " + bound + ") did not return " + exp, exp, act);
 		}
 	}
-	
+
 	@Test(expected = InfiniteIterationException.class)
 	public void testIteratorOnTopInterval() {
 		Interval top = new Interval();
-		
+
 		for (Long l : top.interval)
 			System.out.println(l);
 	}
-	
+
 	@Test
 	public void testIterator() throws SemanticException {
 		Interval top = mk(-1, 2);
 		List<Long> values = new ArrayList<>();
 		for (Long l : top.interval)
 			values.add(l);
-		
+
 		List<Long> expected = new ArrayList<>();
 		expected.add((long) -1);
 		expected.add((long) 0);
 		expected.add((long) 1);
 		expected.add((long) 2);
 		assertEquals(values, expected);
-			
+
 	}
 }
