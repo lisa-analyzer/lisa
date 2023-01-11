@@ -23,6 +23,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * The suffix string abstract domain.
@@ -271,11 +272,11 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		return new CharInclusion(new TreeSet<>(), getMaybeContained());
 	}
 
-	public int minLength() {
-		return getCertainlyContained().size();
+	public Pair<Integer, Integer> length() {
+		return Pair.of(getCertainlyContained().size(), Integer.MAX_VALUE);
 	}
-
-	public int maxLength() {
-		return Integer.MAX_VALUE;
+	
+	public Pair<Integer, Integer> indexOf(CharInclusion s) {
+		return Pair.of(-1, Integer.MAX_VALUE);
 	}
 }

@@ -19,6 +19,8 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 /**
  * The suffix string abstract domain.
  *
@@ -186,11 +188,11 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 		return new Suffix("");
 	}
 	
-	public int minLength() {
-		return suffix.length();
+	public Pair<Integer, Integer> length() {
+		return Pair.of(suffix.length(), Integer.MAX_VALUE);
 	}
 	
-	public int maxLength() {
-		return Integer.MAX_VALUE;
+	public Pair<Integer, Integer> indexOf(Suffix s) {
+		return Pair.of(-1, Integer.MAX_VALUE);
 	}
 }

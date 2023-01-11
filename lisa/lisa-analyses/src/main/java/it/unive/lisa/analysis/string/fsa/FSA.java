@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -202,11 +204,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		return new FSA(result);
 	}
 	
-	public int minLength() {
-		return a.toRegex().minLength();
-	}
-	
-	public int maxLength() {
-		return a.lenghtOfLongestString();
+	public Pair<Integer, Integer> length() {
+		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
 	}
 }
