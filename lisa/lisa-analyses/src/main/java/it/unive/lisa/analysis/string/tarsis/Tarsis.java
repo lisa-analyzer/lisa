@@ -13,6 +13,8 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import java.util.Objects;
 import java.util.SortedSet;
@@ -156,6 +158,18 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	@Override
+	public Tarsis evalTernaryExpression(TernaryOperator operator, Tarsis left, Tarsis middle, Tarsis right,
+			ProgramPoint pp) throws SemanticException {
+		if (operator == StringReplace.INSTANCE)
+			try {
+				return new Tarsis(left.a.replace(middle.a, right.a));
+			} catch (CyclicAutomatonException e) {
+				return TOP;
+			}
+		return TOP;
+	}
+
+	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, Tarsis left, Tarsis right,
 			ProgramPoint pp) throws SemanticException {
 		if (operator == StringContains.INSTANCE)
@@ -247,5 +261,13 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		for (int i = 0; i < array.length; i++)
 			result = result.union(array[i]);
 		return new Tarsis(result);
+	}
+
+	public int minLength() {
+		return a.toRegex().minLength();
+	}
+
+	public int maxLength() {
+		return a.lenghtOfLongestString();
 	}
 }

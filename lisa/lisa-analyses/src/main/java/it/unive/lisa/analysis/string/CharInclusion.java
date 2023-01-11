@@ -15,6 +15,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -187,6 +190,37 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	@Override
+	public CharInclusion evalTernaryExpression(TernaryOperator operator, CharInclusion left, CharInclusion middle,
+			CharInclusion right, ProgramPoint pp) throws SemanticException {
+		if (operator == StringReplace.INSTANCE) {
+			
+			if (!left.getCertainlyContained().containsAll(middle.getCertainlyContained()))
+				// no replace for sure
+				return this;
+			
+			Set<Character> included = new TreeSet<>(left.getCertainlyContained());
+			Set<Character> possibly = new TreeSet<>(left.getMaybeContained());
+			// since we do not know if the replace will happen, we move everything to the
+			// possibly included characters
+			included.removeAll(middle.getCertainlyContained());
+			possibly.addAll(middle.getCertainlyContained());
+
+			included.removeAll(middle.getMaybeContained());
+			Set<Character> tmp = new TreeSet<>(middle.getMaybeContained());
+			tmp.retainAll(left.getCertainlyContained()); // just the ones that we removed before
+			possibly.addAll(tmp);
+
+			// add the second string
+			possibly.addAll(right.getCertainlyContained());
+			possibly.addAll(right.getMaybeContained());
+
+			return new CharInclusion(included, possibly);
+		}
+
+		return TOP;
+	}
+
+	@Override
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, CharInclusion left, CharInclusion right,
 			ProgramPoint pp) {
 		if (left.isTop() || right.isBottom())
@@ -235,5 +269,13 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 		if (isTop() || isBottom())
 			return this;
 		return new CharInclusion(new TreeSet<>(), getMaybeContained());
+	}
+
+	public int minLength() {
+		return getCertainlyContained().size();
+	}
+
+	public int maxLength() {
+		return Integer.MAX_VALUE;
 	}
 }

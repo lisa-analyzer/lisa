@@ -14,6 +14,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+
 import java.util.Objects;
 
 /**
@@ -141,6 +144,24 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 
 		return TOP;
 	}
+	
+	@Override
+	public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
+			ProgramPoint pp) throws SemanticException {
+
+		if (operator == StringReplace.INSTANCE) {
+			String replace = right.getSuffix();
+			String string = middle.getSuffix();
+			String target = left.getSuffix();
+
+			if (!target.contains(replace))
+				return this;
+
+			return new Suffix(target.replace(replace, string));
+		}
+		
+		return TOP;
+	}
 
 	/**
 	 * Yields the suffix of this abstract value.
@@ -163,6 +184,13 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	 */
 	public Suffix substring(long begin, long end) {
 		return new Suffix("");
-
+	}
+	
+	public int minLength() {
+		return suffix.length();
+	}
+	
+	public int maxLength() {
+		return Integer.MAX_VALUE;
 	}
 }

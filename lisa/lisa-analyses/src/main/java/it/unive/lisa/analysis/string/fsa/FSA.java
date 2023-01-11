@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -14,10 +19,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -175,11 +176,37 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 * 
 	 * @return the FSA automaton corresponding to the substring of this FSA
 	 *             automaton between two indexes
+	 * @throws CyclicAutomatonException 
 	 */
-	public FSA substring(long begin, long end) {
+	public FSA substring(long begin, long end) throws CyclicAutomatonException {
 		if (isTop() || isBottom())
 			return this;
 
-		return this;
+		if (!a.hasCycle()) {
+			SimpleAutomaton result = this.a.emptyLanguage();
+			for (String s : a.getLanguage()) {
+				result = result.union(new SimpleAutomaton(s.substring((int) begin, (int)end)));
+
+				return new FSA(result);
+			}
+		}
+
+		SimpleAutomaton[] array = this.a.toRegex().substring((int) begin, (int) end)
+				.parallelStream()
+				.map(s -> new SimpleAutomaton(s.toString())).toArray(SimpleAutomaton[]::new);
+
+		SimpleAutomaton result = this.a.emptyLanguage();
+
+		for (int i = 0; i < array.length; i++)
+			result = result.union(array[i]);
+		return new FSA(result);
+	}
+	
+	public int minLength() {
+		return a.toRegex().minLength();
+	}
+	
+	public int maxLength() {
+		return a.lenghtOfLongestString();
 	}
 }

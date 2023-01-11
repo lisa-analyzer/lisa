@@ -14,6 +14,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
 import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
 import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+
 import java.util.Objects;
 
 /**
@@ -141,6 +144,24 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 		return TOP;
 	}
 
+	@Override
+	public Prefix evalTernaryExpression(TernaryOperator operator, Prefix left, Prefix middle, Prefix right,
+			ProgramPoint pp) throws SemanticException {
+
+		if (operator == StringReplace.INSTANCE) {
+			String replace = right.getPrefix();
+			String string = middle.getPrefix();
+			String target = left.getPrefix();
+
+			if (!target.contains(replace))
+				return this;
+
+			return new Prefix(target.replace(replace, string));
+		}
+		
+		return TOP;
+	}
+	
 	/**
 	 * Yields the prefix of this abstract value.
 	 * 
@@ -170,5 +191,13 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 			return new Prefix(getPrefix().substring((int) begin));
 
 		return new Prefix("");
+	}
+	
+	public int minLength() {
+		return prefix.length();
+	}
+	
+	public int maxLength() {
+		return Integer.MAX_VALUE;
 	}
 }
