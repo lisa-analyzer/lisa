@@ -125,6 +125,14 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 			}
 		}
 
+		// need to be replaced also the allocation site (needed for type
+		// analysis)
+		HeapReplacement replacement = new HeapReplacement();
+		replacement.addSource(site);
+		replacement.addTarget(clone);
+		replacement.addTarget(site);
+		replacements.add(replacement);
+
 		return new FieldSensitivePointBasedHeap(heap, ((FieldSensitivePointBasedHeap) pb).fields);
 	}
 

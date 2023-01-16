@@ -66,7 +66,7 @@ public class LiSARunInfo {
 	 * A {@link PeriodFormatter}, producing timestamps as (where italics words
 	 * represent portions of the timestamp): <i>year</i>Y <i>month</i>M
 	 * <i>day</i>D <i>hours</i>h <i>minutes</i>m <i>seconds</i>s
-	 * <i>milliseconds</i>ms <i></i>. Note that zeros are omitted.
+	 * <i>milliseconds</i>ms. Note that zeros are omitted.
 	 */
 	public static final PeriodFormatter PERIOD_FORMAT = new PeriodFormatterBuilder()
 			.appendYears().appendSuffix("Y ")
