@@ -1,0 +1,97 @@
+class main {
+	[lisa.taint.Tainted]
+	source() {
+		return "asd";
+	}
+
+	sink([lisa.taint.Clean] v) {
+		return; 
+	}
+
+	main() {
+		def k = "a";
+		def j = "b";
+		def v = this.source();
+		this.sink(v);
+		this.sink(k);
+		this.sink(j);
+
+		if (v)
+			k = this.source();
+		// lub
+		this.sink(k);
+		this.sink(j);
+
+		// unary
+		def r = strlen(v);
+		this.sink(r);
+		r = strlen(k);
+		this.sink(r);
+		r = strlen(j);
+		this.sink(r);
+
+		// binary
+		r = strcat(k, k);
+		this.sink(r);
+		r = strcat(k, v);
+		this.sink(r);
+		r = strcat(k, j);
+		this.sink(r);
+		r = strcat(v, v);
+		this.sink(r);
+		r = strcat(v, j);
+		this.sink(r);
+		r = strcat(j, j);
+		this.sink(r);
+		r = strcat(v, k);
+		this.sink(r);
+		r = strcat(j, k);
+		this.sink(r);
+		r = strcat(j, v);
+		this.sink(r);
+
+		// ternary
+		r = strrep(k, k, k);
+		this.sink(r);
+		r = strrep(k, k, v);
+		this.sink(r);
+		r = strrep(k, v, k);
+		this.sink(r);
+		r = strrep(k, v, v);
+		this.sink(r);
+		r = strrep(v, k, k);
+		this.sink(r);
+		r = strrep(v, k, v);
+		this.sink(r);
+		r = strrep(v, v, k);
+		this.sink(r);
+		r = strrep(v, v, v);
+		this.sink(r);
+		r = strrep(k, k, j);
+		this.sink(r);
+		r = strrep(k, j, k);
+		this.sink(r);
+		r = strrep(k, j, j);
+		this.sink(r);
+		r = strrep(j, k, k);
+		this.sink(r);
+		r = strrep(j, k, j);
+		this.sink(r);
+		r = strrep(j, j, k);
+		this.sink(r);
+		r = strrep(j, j, j);
+		this.sink(r);
+		r = strrep(v, v, j);
+		this.sink(r);
+		r = strrep(v, j, v);
+		this.sink(r);
+		r = strrep(v, j, j);
+		this.sink(r);
+		r = strrep(j, v, v);
+		this.sink(r);
+		r = strrep(j, v, j);
+		this.sink(r);
+		r = strrep(j, j, v);
+		this.sink(r);
+	}
+}

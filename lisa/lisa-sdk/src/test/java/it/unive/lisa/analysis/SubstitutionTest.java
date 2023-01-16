@@ -138,7 +138,10 @@ public class SubstitutionTest {
 			Collection<Identifier> addexpected,
 			Collection<Identifier> remexpected)
 			throws SemanticException {
-		Collector c = new Collector().applySubstitution(sub, fake);
+		Collector c = new Collector();
+		if (sub != null)
+			for (HeapReplacement repl : sub)
+				c = c.lub(c.applyReplacement(repl, fake));
 
 		CollectionsDiffBuilder<
 				Identifier> add = new CollectionsDiffBuilder<>(Identifier.class, addexpected, c.assigned.elements());

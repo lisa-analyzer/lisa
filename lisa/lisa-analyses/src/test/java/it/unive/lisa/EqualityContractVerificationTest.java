@@ -16,15 +16,9 @@ import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.analysis.string.fsa.Automaton;
-import it.unive.lisa.analysis.string.fsa.State;
-import it.unive.lisa.analysis.string.fsa.Transition;
-import it.unive.lisa.analysis.string.fsa.regex.Atom;
-import it.unive.lisa.analysis.string.fsa.regex.Comp;
-import it.unive.lisa.analysis.string.fsa.regex.EmptySet;
-import it.unive.lisa.analysis.string.fsa.regex.Or;
-import it.unive.lisa.analysis.string.fsa.regex.RegularExpression;
-import it.unive.lisa.analysis.string.fsa.regex.Star;
+import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
+import it.unive.lisa.analysis.string.fsa.StringSymbol;
+import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.imp.IMPFeatures;
@@ -90,9 +84,23 @@ import it.unive.lisa.util.collections.workset.ConcurrentLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.datastructures.automaton.Automaton;
+import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import it.unive.lisa.util.datastructures.regex.Atom;
+import it.unive.lisa.util.datastructures.regex.Comp;
+import it.unive.lisa.util.datastructures.regex.EmptySet;
+import it.unive.lisa.util.datastructures.regex.Or;
+import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import it.unive.lisa.util.datastructures.regex.RegularExpression.PartialSubstring;
+import it.unive.lisa.util.datastructures.regex.Star;
+import it.unive.lisa.util.datastructures.regex.TopAtom;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.lang.reflect.Modifier;
@@ -278,18 +286,25 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testAutomatonClasses() {
-		verify(State.class, Warning.IDENTICAL_COPY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
-		verify(Transition.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
-		verify(Automaton.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(State.class);
+		verify(Transition.class);
+		verify(Automaton.class);
 
-		verify(EmptySet.class);
+		verify(EmptySet.class, false);
 		verify(Atom.class);
+		verify(TopAtom.class);
 		verify(Comp.class);
 		verify(Or.class);
 		verify(Star.class);
+		verify(PartialSubstring.class);
+
+		verify(SymbolicString.class);
+		verify(SymbolicChar.class);
+		verify(UnknownSymbolicChar.class);
+
+		verify(RegexAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(SimpleAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(StringSymbol.class);
 	}
 
 	@Test

@@ -396,6 +396,90 @@ public class MathNumber implements Comparable<MathNumber> {
 		return cached(new MathNumber(number.setScale(0, RoundingMode.FLOOR)));
 	}
 
+	/**
+	 * Yields the integer value of this math number.
+	 * 
+	 * @return the integer value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public int toInt() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.intValue();
+	}
+
+	/**
+	 * Yields the double value of this math number.
+	 * 
+	 * @return the double value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public double toDouble() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.doubleValue();
+	}
+
+	/**
+	 * Yields the byte value of this math number.
+	 * 
+	 * @return the byte value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public byte toByte() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.byteValue();
+	}
+
+	/**
+	 * Yields the short value of this math number.
+	 * 
+	 * @return the short value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public short toShort() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.shortValue();
+	}
+
+	/**
+	 * Yields the float value of this math number.
+	 * 
+	 * @return the float value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public float toFloat() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.floatValue();
+	}
+
+	/**
+	 * Yields the long value of this math number.
+	 * 
+	 * @return the long value of this math number
+	 * 
+	 * @throws MathNumberConversionException when this math number is NaN or
+	 *                                           infinite
+	 */
+	public long toLong() throws MathNumberConversionException {
+		if (isNaN() || isInfinite())
+			throw new MathNumberConversionException(this);
+		return number.longValue();
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

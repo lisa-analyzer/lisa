@@ -1,11 +1,13 @@
 package it.unive.lisa.util.numeric;
 
+import java.util.Iterator;
+
 /**
  * An interval with integer bounds.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IntInterval {
+public class IntInterval implements Iterable<Long> {
 
 	/**
 	 * The interval {@code [-Inf, +Inf]}.
@@ -354,5 +356,16 @@ public class IntInterval {
 	@Override
 	public String toString() {
 		return "[" + low + ", " + high + "]";
+	}
+
+	@Override
+	public Iterator<Long> iterator() {
+		if (!low.isFinite() || !high.isFinite() || low.isNaN() || high.isNaN())
+			throw new InfiniteIterationException(this);
+		try {
+			return new IntIntervalIterator(low.toLong(), high.toLong());
+		} catch (MathNumberConversionException e) {
+			throw new InfiniteIterationException(this);
+		}
 	}
 }
