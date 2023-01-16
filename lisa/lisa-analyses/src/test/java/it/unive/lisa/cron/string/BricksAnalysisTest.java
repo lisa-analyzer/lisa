@@ -20,7 +20,6 @@ public class BricksAnalysisTest extends AnalysisTestExecutor {
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Bricks(),
 				new TypeEnvironment<>(new InferredTypes()));
-		conf.analysisGraphs = LiSAConfiguration.GraphType.HTML;
 
 		perform("bricks", "program.imp", conf);
 	}

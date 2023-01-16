@@ -28,11 +28,11 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
-	private List<Brick> bricks;
+	private final List<Brick> bricks;
 
 	private final static Bricks TOP = new Bricks();
 
-	private final static Bricks BOTTOM = new Bricks();
+	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
 
 	private final static int kL = 10;
 
@@ -60,22 +60,38 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks lubAux(Bricks other) throws SemanticException {
-		this.padList(other);
+		List<Brick> thisPaddedList = this.bricks;
+		List<Brick> otherPaddedList = other.bricks;
+
+		if(this.bricks.size() < other.bricks.size())
+			thisPaddedList = this.padList(other);
+
+		else if(other.bricks.size() < this.bricks.size())
+			otherPaddedList = other.padList(this);
+
 
 		List<Brick> bricks = new ArrayList<>();
 
-		for (int i = 0; i < this.bricks.size(); ++i)
-			bricks.add(this.bricks.get(i).lubAux(other.bricks.get(i)));
+		for (int i = 0; i < thisPaddedList.size(); ++i)
+			bricks.add(thisPaddedList.get(i).lubAux(otherPaddedList.get(i)));
 
 		return new Bricks(bricks);
 	}
 
 	@Override
 	public boolean lessOrEqualAux(Bricks other) throws SemanticException {
-		this.padList(other);
+		List<Brick> thisPaddedList = this.bricks;
+		List<Brick> otherPaddedList = other.bricks;
 
-		for (int i = 0; i < this.bricks.size(); ++i)
-			if (!this.bricks.get(i).lessOrEqualAux(other.bricks.get(i)))
+		if(this.bricks.size() < other.bricks.size())
+			thisPaddedList = this.padList(other);
+
+		else if(other.bricks.size() < this.bricks.size())
+				otherPaddedList = other.padList(this);
+
+
+		for (int i = 0; i < thisPaddedList.size(); ++i)
+			if (!thisPaddedList.get(i).lessOrEqualAux(otherPaddedList.get(i)))
 				return false;
 
 		return true;
@@ -94,19 +110,22 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return w(other);
 	}
 
-	@Override
-	public boolean isTop() {
-		return this.equals(TOP);
-	}
-
 	private Bricks w(Bricks other) {
-		this.padList(other);
+		List<Brick> thisPaddedList = this.bricks;
+		List<Brick> otherPaddedList = other.bricks;
+
+		if(this.bricks.size() < other.bricks.size())
+			thisPaddedList = this.padList(other);
+
+		else if(other.bricks.size() < this.bricks.size()) 
+			otherPaddedList = other.padList(this);
+
 
 		List<Brick> resultList = new ArrayList<>();
 
-		for (int i = 0; i < this.bricks.size(); ++i) {
-			Brick thisCurrent = this.bricks.get(i);
-			Brick otherCurrent = other.bricks.get(i);
+		for (int i = 0; i < thisPaddedList.size(); ++i) {
+			Brick thisCurrent = thisPaddedList.get(i);
+			Brick otherCurrent = otherPaddedList.get(i);
 
 			if (thisCurrent.isTop() || otherCurrent.isTop()) {
 				resultList.add(new Brick());
@@ -180,7 +199,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			return SemanticDomain.Satisfiability.UNKNOWN;
 
 		if (operator == StringContains.INSTANCE)
-			if (left.bricks.stream().anyMatch(brick -> right.bricks.contains(brick)))
+			if (left.bricks.stream().anyMatch(right.bricks::contains))
 				return Satisfiability.SATISFIED;
 
 		return Satisfiability.UNKNOWN;
@@ -332,45 +351,30 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 *                                      the caller bricks object
 	 */
 	public List<Brick> padList(Bricks other) {
+		if(this.bricks.size() > other.bricks.size())
+			throw new IllegalArgumentException("Other bricks list is longer");
+
 		if (this.bricks.size() == other.bricks.size())
 			return null;
 
-		List<Brick> shorter;
-		List<Brick> longer;
-		boolean thisShorter = false;
-
-		if (this.bricks.size() > other.bricks.size()) {
-			longer = this.bricks;
-			shorter = other.bricks;
-		} else {
-			shorter = this.bricks;
-			longer = other.bricks;
-			thisShorter = true;
-		}
-
-		int diff = longer.size() - shorter.size();
+		int diff = other.bricks.size() - this.bricks.size();
 		int emptyAdded = 0;
 
 		List<Brick> newList = new ArrayList<>();
 
-		for (Brick brick : longer) {
+		for (Brick brick : other.bricks) {
 			if (emptyAdded >= diff) {
-				newList.addAll(shorter);
+				newList.addAll(this.bricks);
 				break;
 
-			} else if (shorter.isEmpty() || shorter.get(0) != brick) {
+			} else if (this.bricks.isEmpty() || this.bricks.get(0) != brick) {
 				newList.add(new Brick(0, 0, new TreeSet<>()));
 				emptyAdded++;
 			} else {
-				newList.add(shorter.get(0));
-				shorter.remove(0);
+				newList.add(this.bricks.get(0));
+				this.bricks.remove(0);
 			}
 		}
-
-		if (thisShorter)
-			this.bricks = newList;
-		else
-			other.bricks = newList;
 
 		return newList;
 	}
