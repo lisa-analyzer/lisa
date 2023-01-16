@@ -117,7 +117,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if(this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
 
-		else if(other.bricks.size() < this.bricks.size()) 
+		else if(other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
 
 
