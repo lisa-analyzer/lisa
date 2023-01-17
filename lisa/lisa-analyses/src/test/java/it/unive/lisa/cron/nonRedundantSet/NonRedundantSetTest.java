@@ -24,6 +24,6 @@ public class NonRedundantSetTest extends AnalysisTestExecutor {
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.descendingGlbThreshold = 5;
-		perform("descending-maxglb", "program.imp", conf);
+		perform("non-redundant-set-interval", "program.imp", conf);
 	}
 }
