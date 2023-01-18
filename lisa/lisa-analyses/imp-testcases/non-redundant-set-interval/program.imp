@@ -2,11 +2,64 @@ class tutorial {
 
 	sat(){
 		def x = 0;
-		while (x > 100){
+		while (x < 100){
 			if (x > 50)
 				x = x + 10;
 			else
 				x = x + 2;
 		}
+		return x;
+	}
+	
+	div(i,j) {
+		if (j != 0)
+			i = i / j;
+		else
+			i = j / i;
+		return i;
+	}
+	
+	intv_dec() {
+		def i = 1000;
+		while (i > 0) 
+			i = i - 1;
+		return i;
+	}
+	
+	glb(x,y) { 
+		if (x == 5)
+			x = x + 1;
+		else
+			x = 6;
+		
+		return x;
+	}
+	
+	gcd(a, b) {
+   		while (a != b) 
+        	if (a > b) 
+            	a = a - b;
+        	else
+            	b = b - a;
+   		return a;
+    }
+	
+	doublewhile(t) {
+		while(t < 200)
+			t = t + 10;
+		while(t > 1000)
+			t = t - 10;
+		return t;
+	}
+
+	sat2() {
+		def x = 0;
+		while (x < 51) {
+			if (x < 50)
+				x = x + 2;
+			else
+				x = x - 11;
+		}
+		return x;
 	}
 }

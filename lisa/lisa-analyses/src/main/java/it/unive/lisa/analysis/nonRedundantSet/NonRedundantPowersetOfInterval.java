@@ -15,6 +15,7 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
+import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.util.numeric.MathNumber;
 
 /**
@@ -157,6 +158,10 @@ public class NonRedundantPowersetOfInterval extends NonRedundantPowersetOfBaseNo
 				
 				if (operator == ComparisonEq.INSTANCE) {
 					newSet.add(interval);
+				}
+				else if (operator == ComparisonNe.INSTANCE) {
+					newSet.add(lowp1_inf);
+					newSet.add(inf_highm1);
 				}
 				else if (operator == ComparisonGe.INSTANCE) {
 					if (rightIsExpr) { 
