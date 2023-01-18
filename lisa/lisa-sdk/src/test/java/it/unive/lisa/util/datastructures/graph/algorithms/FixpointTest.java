@@ -54,7 +54,7 @@ public class FixpointTest {
 	public void testEmptyGraph() {
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph()).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(new TestGraph(), false).fixpoint(
 					Map.of(),
 					FIFOWorkingSet.mk(),
 					new FixpointTester());
@@ -81,7 +81,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new FixpointTester());
@@ -119,7 +119,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new FixpointTester());
@@ -159,7 +159,7 @@ public class FixpointTest {
 
 		Map<TestNode, Set<TestNode>> res = null;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new FixpointTester());
@@ -244,7 +244,7 @@ public class FixpointTest {
 		Map<TestNode, Set<TestNode>> res = null;
 		boolean fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new ExceptionalTester(0));
@@ -259,7 +259,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new ExceptionalTester(1));
@@ -274,7 +274,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new ExceptionalTester(2));
@@ -290,7 +290,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new ExceptionalTester(3));
@@ -305,7 +305,7 @@ public class FixpointTest {
 
 		fail = false;
 		try {
-			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph).fixpoint(
+			res = new Fixpoint<TestGraph, TestNode, TestEdge, Set<TestNode>>(graph, false).fixpoint(
 					Map.of(source, Set.of()),
 					FIFOWorkingSet.mk(),
 					new ExceptionalTester(4));

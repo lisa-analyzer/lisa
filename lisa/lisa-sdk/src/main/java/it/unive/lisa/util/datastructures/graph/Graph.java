@@ -3,7 +3,12 @@ package it.unive.lisa.util.datastructures.graph;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
+
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -233,5 +238,28 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 		for (E edge : getEdges())
 			if (!edge.accept(visitor, tool))
 				return;
+	}
+
+	public default Collection<N> getCycleEntries() {
+		Collection<N> result = new HashSet<>();
+
+		@SuppressWarnings("unchecked")
+		Map<N, Set<N>> dominators = new Dominators<G, N, E>().build((G) this);
+		Collection<N> entries = getEntrypoints();
+		for (N node : getNodes()) {
+			// a loop entry node will have at least two predecessors: a normal
+			// one and a back-edge predecessor
+			Collection<N> preds = predecessorsOf(node);
+			boolean normal = entries.contains(node), back = false;
+			for (N pred : preds)
+				if (dominators.get(pred).contains(node))
+					back = true;
+				else
+					normal = true;
+			if (normal && back)
+				result.add(node);
+		}
+
+		return result;
 	}
 }

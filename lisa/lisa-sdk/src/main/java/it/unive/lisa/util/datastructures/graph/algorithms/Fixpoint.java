@@ -27,18 +27,18 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 
 	private static final String ERROR = "Exception while %s of '%s' in '%s'";
 
-	private final Graph<G, N, E> graph;
+	private final G graph;
 
-	private Map<N, T> result;
+	private final boolean forceFullEvaluation;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
 	 * 
 	 * @param graph the source graph
 	 */
-	public Fixpoint(Graph<G, N, E> graph) {
+	public Fixpoint(G graph, boolean forceFullEvaluation) {
 		this.graph = graph;
-		result = new HashMap<>(graph.getNodesCount());
+		this.forceFullEvaluation = forceFullEvaluation;
 	}
 
 	/**
@@ -194,9 +194,12 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation, Map<N, T> initialResult)
 			throws FixpointException {
+		Map<N, T> result = initialResult;
 
-		result = initialResult;
-		startingPoints.keySet().forEach(ws::push);
+		if (forceFullEvaluation)
+			graph.getNodes().forEach(ws::push);
+		else
+			startingPoints.keySet().forEach(ws::push);
 
 		T newApprox;
 		while (!ws.isEmpty()) {
@@ -207,7 +210,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 			if (!graph.containsNode(current))
 				throw new FixpointException("'" + current + "' is not part of '" + graph + "'");
 
-			T entrystate = getEntryState(current, startingPoints.get(current), implementation);
+			T entrystate = getEntryState(current, startingPoints.get(current), implementation, result);
 			if (entrystate == null)
 				throw new FixpointException("'" + current + "' does not have an entry state");
 
@@ -238,7 +241,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		return result;
 	}
 
-	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation)
+	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation, Map<N, T> result)
 			throws FixpointException {
 		Collection<N> preds = graph.predecessorsOf(current);
 		List<T> states = new ArrayList<>(preds.size());

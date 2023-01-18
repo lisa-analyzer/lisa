@@ -64,6 +64,7 @@ import it.unive.lisa.program.cfg.VariableTableEntry;
 import it.unive.lisa.program.cfg.controlFlow.ControlFlowStructure;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.edge.SequentialEdge;
+import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
@@ -407,6 +408,7 @@ public class EqualityContractVerificationTest {
 	public void testAnalysisObjects() {
 		verify(HeapReplacement.class);
 		verify(ScopeToken.class);
+		verify(CompoundState.class);
 		// we consider only fields that compose the results
 		// id is mutable
 		verify(CFGWithAnalysisResults.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
