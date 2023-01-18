@@ -1,82 +1,12 @@
 class tutorial {
 
-	constants() {
-		def c = 1;
-		def b = 0;
-   		while (b < 10) 
-        	b = b + c;
-   		return b;
-    }
-    
-	sign_parity_example() {
-		def i = 2;
-		def max = 10;
-		while (i < max) 
-			i = i + 1;
-		return i;
-	}
-	
-	intv_dec() {
-		def i = 1000;
-		while (i > 0) 
-			i = i - 1;
-		return i;
-	}
-	
-	gcd(a, b) {
-   		while (a != b) 
-        	if (a > b) 
-            	a = a - b;
-        	else
-            	b = b - a;
-   		return a;
-    }
-	
-	div(i,j) {
-		if (j != 0)
-			i = i / j;
-		else
-			i = j / i;
-		return i;
-	}
-
-	ub_example(y,z) {
+	sat(){
 		def x = 0;
-		if (y < z) 
-			x = y - 1;
-		else
-			x = z - 1;
-			
-		return x;
-	}
-	
-	glb(x,y) { 
-		if (x == 5)
-			x = x + 1;
-		else
-			x = 6;
-		
-		return x;
-	}
-	
-	sat(x,y) { 
-		def i = -1;
-		def j = 0;
-		
-		while (x == y) {
-			i = i - 1;
-			j = j + 1;
+		while (x > 100){
+			if (x > 50)
+				x = x + 10;
+			else
+				x = x + 2;
 		}
-		x = 0;
-		if (i < j) // sat
-			x = 1;
-			
-		if (i <= -1) // sat
-			x = x + 1;
-			
-		if (j >= 5) // unknown
-			x = x + 1;
-			
-		return x; // expected x = [2,3]
-	}	
+	}
 }

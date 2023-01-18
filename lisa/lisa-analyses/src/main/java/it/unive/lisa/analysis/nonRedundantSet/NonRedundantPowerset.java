@@ -8,8 +8,10 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
+import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -296,8 +298,24 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public DomainRepresentation representation() {
-		// TODO Auto-generated method stub
-		return null;
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+
+		String representation = "[";
+		boolean first = true;
+		
+		for(T element : this.elements) {
+			if(!first)
+				representation += ", ";
+			else
+				first = false;
+			
+			representation += element.representation();
+		}
+		
+		representation += "]";
+		
+		return new StringRepresentation(representation);
 	}
 
 	@Override
@@ -315,7 +333,37 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 
 	@Override
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
-		// TODO Auto-generated method stub
-		return null;
+		
+		Set<Satisfiability> setSatisf = new HashSet<Satisfiability>();
+		
+		for(T element : this.elements) {
+			setSatisf.add(element.satisfies(expression, pp));
+		}
+		
+		if((setSatisf.contains(Satisfiability.SATISFIED) && setSatisf.contains(Satisfiability.NOT_SATISFIED)) ||
+				setSatisf.contains(Satisfiability.UNKNOWN))
+			return Satisfiability.UNKNOWN;
+		else if(setSatisf.contains(Satisfiability.SATISFIED))
+			return Satisfiability.SATISFIED;
+		else if (setSatisf.contains(Satisfiability.NOT_SATISFIED))
+			return Satisfiability.NOT_SATISFIED;
+		
+		return Satisfiability.UNKNOWN;
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

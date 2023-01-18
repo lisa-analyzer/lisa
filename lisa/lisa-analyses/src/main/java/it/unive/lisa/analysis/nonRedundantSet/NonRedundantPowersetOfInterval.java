@@ -145,53 +145,56 @@ public class NonRedundantPowersetOfInterval extends NonRedundantPowersetOfBaseNo
 			return environment.bottom();
 		
 		NonRedundantPowersetOfInterval newSet = bottom();
+		NonRedundantPowersetOfInterval starting = environment.getState(id);
 		
-		for(Interval interval : eval.elementsSet) {
-			boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
-			Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
-			Interval lowp1_inf = new Interval(interval.interval.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
-			Interval inf_high = new Interval(MathNumber.MINUS_INFINITY, interval.interval.getHigh());
-			Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, interval.interval.getHigh().subtract(MathNumber.ONE));
-			
-			if (operator == ComparisonEq.INSTANCE) {
-				newSet.add(interval);
-			}
-			else if (operator == ComparisonGe.INSTANCE) {
-				if (rightIsExpr) { 
-					if(lowIsMinusInfinity)
-						return environment;
+		for(Interval startingInterval : starting.elementsSet) {
+			for(Interval interval : eval.elementsSet) {
+				boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
+				Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
+				Interval lowp1_inf = new Interval(interval.interval.getLow().add(MathNumber.ONE), MathNumber.PLUS_INFINITY);
+				Interval inf_high = new Interval(MathNumber.MINUS_INFINITY, interval.interval.getHigh());
+				Interval inf_highm1 = new Interval(MathNumber.MINUS_INFINITY, interval.interval.getHigh().subtract(MathNumber.ONE));
+				
+				if (operator == ComparisonEq.INSTANCE) {
+					newSet.add(interval);
+				}
+				else if (operator == ComparisonGe.INSTANCE) {
+					if (rightIsExpr) { 
+						if(lowIsMinusInfinity)
+							continue;
+						else
+							newSet.add(startingInterval.glb(low_inf));
+					}
 					else
-						newSet.add(low_inf);
+						newSet.add(startingInterval.glb(inf_high));
+				}
+				else if (operator == ComparisonGt.INSTANCE) {                              
+					if (rightIsExpr)
+						newSet.add(startingInterval.glb(lowp1_inf));
+					else
+						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
+				}
+				else if (operator == ComparisonLe.INSTANCE) {
+					if (rightIsExpr)
+						newSet.add(startingInterval.glb(inf_high));
+					else
+						if(lowIsMinusInfinity)
+							continue;
+						else
+							newSet.add(startingInterval.glb(low_inf));
+				}
+				else if (operator == ComparisonLt.INSTANCE) {
+					if (rightIsExpr)
+						newSet.add(lowIsMinusInfinity ? interval : startingInterval.glb(inf_highm1));
+					else
+						if(lowIsMinusInfinity)
+							continue;
+						else
+							newSet.add(startingInterval.glb(lowp1_inf));
 				}
 				else
-					newSet.add(inf_high);
+					continue;
 			}
-			else if (operator == ComparisonGt.INSTANCE) {                              
-				if (rightIsExpr)
-					newSet.add(lowp1_inf);
-				else
-					newSet.add(lowIsMinusInfinity ? interval : inf_highm1);
-			}
-			else if (operator == ComparisonLe.INSTANCE) {
-				if (rightIsExpr)
-					newSet.add(inf_high);
-				else
-					if(lowIsMinusInfinity)
-						return environment;
-					else
-						newSet.add(low_inf);
-			}
-			else if (operator == ComparisonLt.INSTANCE) {
-				if (rightIsExpr)
-					newSet.add(lowIsMinusInfinity ? interval : inf_highm1);
-				else
-					if(lowIsMinusInfinity)
-						return environment;
-					else
-						newSet.add(lowp1_inf);
-			}
-			else
-				return environment;
 		}
 		newSet = newSet.removeRedundancy().removeOverlapping();
 		environment = environment.putState(id, newSet);

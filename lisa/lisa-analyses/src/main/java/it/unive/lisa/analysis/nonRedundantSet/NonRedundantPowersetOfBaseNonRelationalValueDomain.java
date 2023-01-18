@@ -176,7 +176,21 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
-		return new StringRepresentation(elementsSet.toString());
+		String representation = "[";
+		boolean first = true;
+		
+		for(E element : this.elementsSet) {
+			if(!first)
+				representation += ", ";
+			else
+				first = false;
+			
+			representation += element.representation();
+		}
+		
+		representation += "]";
+		
+		return new StringRepresentation(representation);
 	}
 
 	/**
@@ -381,7 +395,6 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 		
 		return Satisfiability.UNKNOWN;
 	}
-
 
 	@Override
 	public boolean isBottom() {
