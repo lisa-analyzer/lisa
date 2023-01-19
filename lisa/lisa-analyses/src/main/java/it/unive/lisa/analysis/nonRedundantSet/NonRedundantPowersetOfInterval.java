@@ -170,11 +170,6 @@ public class NonRedundantPowersetOfInterval
 
 				if (operator == ComparisonEq.INSTANCE) {
 					newSet.add(interval);
-				} else if (operator == ComparisonNe.INSTANCE) {
-					if(!highIsPlusInfinity)
-						newSet.add(lowp1_inf);
-					if(!lowIsMinusInfinity)
-						newSet.add(inf_highm1);
 				} else if (operator == ComparisonGe.INSTANCE) {
 					if (rightIsExpr) {
 						if (lowIsMinusInfinity)
@@ -203,7 +198,7 @@ public class NonRedundantPowersetOfInterval
 					else
 						newSet.add(startingInterval.glb(lowp1_inf));
 				} else
-					continue;
+					newSet.add(startingInterval);
 			}
 		}
 		newSet = newSet.removeRedundancy().removeOverlapping();
