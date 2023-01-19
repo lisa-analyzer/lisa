@@ -131,8 +131,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * An Egli-Milner connector is an upper bound operator for the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation
 	 * &le;<sub>EM</sub>}. An Egli-Milner connector is represented as
-	 * &plusb;<sub>EM</sub>. Given two subsets S<sub>1</sub> and S<sub>2</sub>
-	 * of a domain of a lattice S<sub>1</sub> &plusb;<sub>EM</sub>
+	 * &#x229E;<sub>EM</sub>. Given two subsets S<sub>1</sub> and S<sub>2</sub>
+	 * of a domain of a lattice S<sub>1</sub> &#x229E;<sub>EM</sub>
 	 * S<sub>2</sub> = S<sub>3</sub> such that ( S<sub>1</sub> &le;<sub>EM</sub>
 	 * S<sub>3</sub> ) AND ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub>
 	 * ). The default implementation just performs the lub on the union of the
@@ -214,12 +214,12 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &plusb;<sub>EM</sub> S<sub>2</sub> &ensp;
+	 * <li>S<sub>1</sub> &#x229E;<sub>EM</sub> S<sub>2</sub> &ensp;
 	 * otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation}
-	 * and &plusb;<sub>EM</sub> is an
+	 * and &#x229E;<sub>EM</sub> is an
 	 * {@link #EgliMilnerConnector(NonRedundantPowerset) Egli-Milner connector}.
 	 */
 	@Override
