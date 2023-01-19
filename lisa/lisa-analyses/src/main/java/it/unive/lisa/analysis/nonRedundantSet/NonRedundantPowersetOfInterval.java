@@ -51,11 +51,11 @@ public class NonRedundantPowersetOfInterval
 	 * given two subsets S<sub>1</sub> and S<sub>2</sub> of a domain of a
 	 * lattice:
 	 * <p>
-	 * S<sub>1</sub> &boxplus;<sub>EM</sub> S<sub>2</sub> = {s<sub>2</sub> &ni;
+	 * S<sub>1</sub> &plusb;<sub>EM</sub> S<sub>2</sub> = {s<sub>2</sub> &ni;
 	 * S<sub>2</sub> | &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub>
 	 * &le; s<sub>2</sub>} &cup; {lub(s'<sub>1</sub>, s<sub>2</sub>) |
 	 * s'<sub>1</sub> &ni; S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>,
-	 * &nexist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub> &le;
+	 * NOT &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub> &le;
 	 * s<sub>2</sub>}
 	 * </p>
 	 * s'<sub>1</sub> can be chosen randomly but in this case is chosen to be
