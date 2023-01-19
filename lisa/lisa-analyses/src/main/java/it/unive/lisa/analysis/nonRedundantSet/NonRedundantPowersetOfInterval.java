@@ -20,9 +20,9 @@ import it.unive.lisa.util.numeric.MathNumber;
 
 /**
  * The finite non redundant powerset of {@link Interval} abstract domain approximating 
- * integer values as a non redundant set of interval. It is implemented as a {@link FiniteNonRedundantPowersetOf}, 
- * which handles most of the basic operation (such as {@link  FiniteNonRedundantPowersetOf#lubAux lub},
- * {@link FiniteNonRedundantPowersetOf#glbAux glb}, {@link  FiniteNonRedundantPowersetOf#wideningAux widening} and others
+ * integer values as a non redundant set of interval. It is implemented as a {@link NonRedundantPowersetOfBaseNonRelationalValueDomain}, 
+ * which handles most of the basic operation (such as {@link  NonRedundantPowersetOfBaseNonRelationalValueDomain#lubAux lub},
+ * {@link NonRedundantPowersetOfBaseNonRelationalValueDomain#glbAux glb}, {@link  NonRedundantPowersetOfBaseNonRelationalValueDomain#wideningAux widening} and others
  * operations needed to calculate the previous ones).
  * 
  */

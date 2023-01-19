@@ -55,7 +55,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 	}
 	
 	/**
-	 * Utility for creating a concrete instance of {@link NonRedundantPowerset} given a
+	 * Utility for creating a concrete instance of {@link NonRedundantPowersetOfBaseNonRelationalValueDomain} given a
 	 * set.
 	 * 
 	 * @param elements the set containing the elements that must be included in the
@@ -144,7 +144,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 	}
 
 	/**
-	 * An Egli-Milner connector is an upper bound operator for the {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation &le;<sub>EM</sub>}. 
+	 * An Egli-Milner connector is an upper bound operator for the {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain) Egli-Milner relation &le;<sub>EM</sub>}. 
 	 * An Egli-Milner connector is represented as &boxplus;<sub>EM</sub>.
 	 * Given two subsets S<sub>1</sub> and S<sub>2</sub> of a domain of a lattice S<sub>1</sub> &boxplus;<sub>EM</sub> S<sub>2</sub> = S<sub>3</sub>
 	 * such that ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ) &wedge; ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ).
@@ -238,7 +238,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 	 * <li>&#937; is the {@link #removeRedundancy() omega reduction} operator that removes redundancy from a set,</li>
 	 * <li>&nabla; is the widening operator of the underlying lattice,</li>
 	 * <li>&lt; is the strict partial order relation of the underlying lattice,</li>
-	 * <li>&sqcup; is the {@link #lubAux(NonRedundantPowerset) least upper bound} operator between 
+	 * <li>&sqcup; is the {@link #lubAux(NonRedundantPowersetOfBaseNonRelationalValueDomain) least upper bound} operator between 
 	 * non redundant subsets of the domain of the underlying lattice.</li>
 	 * </ul>  
 	 * 
@@ -264,14 +264,14 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 	 * the Egli-Milner widening implementation shown in this <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>.
 	 * Given two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a lattice 
 	 * widening(S<sub>1</sub>, S<sub>2</sub>) = h<sup>&nabla;</sup>(S<sub>1</sub>, T<sub>2</sub>), where h<sup>&nabla;</sup> is a
-	 * {@link #extrapolationHeuristic(NonRedundantPowerset) widenining-connected extrapolation heuristic} and 
+	 * {@link #extrapolationHeuristic(NonRedundantPowersetOfBaseNonRelationalValueDomain) widenining-connected extrapolation heuristic} and 
 	 * T<sub>2</sub> is equal to:
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
 	 * <li>S<sub>1</sub> &boxplus;<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
 	 * </ul>
-	 * where &le;<sub>EM</sub> is the {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation} and
-	 * &boxplus;<sub>EM</sub> is an {@link #EgliMilnerConnector(NonRedundantPowerset) Egli-Milner connector}.
+	 * where &le;<sub>EM</sub> is the {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain) Egli-Milner relation} and
+	 * &boxplus;<sub>EM</sub> is an {@link #EgliMilnerConnector(NonRedundantPowersetOfBaseNonRelationalValueDomain) Egli-Milner connector}.
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {
@@ -289,7 +289,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub> iff: 
 	 * ( S<sub>1</sub> &le;<sub>S</sub> S<sub>2</sub> ) &wedge; 
 	 * ( &forall; s<sub>2</sub> &ni; S<sub>2</sub>, &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub> &le; s<sub>2</sub> ). 
-	 * Where {@link #lessOrEqualAux(NonRedundantPowerset) &le;<sub>S</sub>} is the less or equal relation between sets.
+	 * Where {@link #lessOrEqualAux(NonRedundantPowersetOfBaseNonRelationalValueDomain) &le;<sub>S</sub>} is the less or equal relation between sets.
 	 * This operation is not commutative.
 	 * 
 	 * @param other the other concrete element

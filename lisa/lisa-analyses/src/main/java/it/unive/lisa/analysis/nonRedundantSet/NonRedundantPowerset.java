@@ -16,13 +16,35 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 
+/**
+ * This abstract class generalize the abstract domain lattice whose domain is the set of all the non redundant set in the 
+ * power set of the domain of another lattice (in this case the other lattice is {@code <T>}). It also defines the basic lattice operation
+ * for this domain (such as lub, glb, widening, lessOrEqual and other operations needed for the calculations of the previous ones). This
+ * implementations follows the guidelines of this <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>. 
+ * 
+ * @param <C> the concrete type of NonRedundantPowerset
+ * @param <T> the concrete type of the elements in the sets
+ * @param <E> the type of {@link SymbolicExpression} that {@code <T>} and in turn this domain, can process
+ * @param <I> the type of {@link Identifier} that {@code <T>} and in turn this domain, handle
+ */
 public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, E, I>,
 	T extends SemanticDomain<T, E, I> & Lattice<T>,
 	E extends SymbolicExpression,
 	I extends Identifier> extends SetLattice<C, T> implements SemanticDomain<C, E, I> {
 
-	T valueDomain;
+	/**
+	 * An instance of the underlying lattice from which top and bottom can be retrieved.
+	 * It is necessary in certain basic lattice operation.
+	 */
+	protected T valueDomain;
 	
+	/**
+	 * Create an instance of non redundant set of elements of the type of valueDomain with the elements contained in elements.
+	 * 
+	 * @param elements the elements to include in the lattice element
+	 * @param isTop whether or not this element should be the top element or not
+	 * @param valueDomain an instance of the underlying lattice
+	 */
 	public NonRedundantPowerset(Set<T> elements, boolean isTop, T valueDomain) {
 		super(elements, isTop);
 		this.valueDomain = valueDomain;
@@ -329,6 +351,16 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 		return mk(set, false, this.valueDomain);
 	}
 	
+	/**
+	 * 
+	 * Utility used for creating a concrete instance of {@link NonRedundantPowerset} given a set, 
+	 * whether or not the element is the top element and an instance of the the underlying lattice
+	 * 
+	 * @param set the set containing the elements that must be included in the lattice instance
+	 * @param isTop wheter or not the element is top
+	 * @param valueDomain an instance of the underlying lattice
+	 * @return a new concrete instance of {@link NonRedundantPowerset} with the given configuration passed
+	 */
 	public abstract C mk(Set<T> set, boolean isTop, T valueDomain);
 
 	@Override
