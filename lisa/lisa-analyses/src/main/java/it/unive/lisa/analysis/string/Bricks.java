@@ -63,12 +63,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
-		if(this.bricks.size() < other.bricks.size())
+		if (this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
 
-		else if(other.bricks.size() < this.bricks.size())
+		else if (other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
-
 
 		List<Brick> bricks = new ArrayList<>();
 
@@ -83,12 +82,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
-		if(this.bricks.size() < other.bricks.size())
+		if (this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
 
-		else if(other.bricks.size() < this.bricks.size())
-				otherPaddedList = other.padList(this);
-
+		else if (other.bricks.size() < this.bricks.size())
+			otherPaddedList = other.padList(this);
 
 		for (int i = 0; i < thisPaddedList.size(); ++i)
 			if (!thisPaddedList.get(i).lessOrEqualAux(otherPaddedList.get(i)))
@@ -108,18 +106,18 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			return TOP;
 
 		return w(other);
+
 	}
 
 	private Bricks w(Bricks other) {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
-		if(this.bricks.size() < other.bricks.size())
+		if (this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
 
-		else if(other.bricks.size() < this.bricks.size())
+		else if (other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
-
 
 		List<Brick> resultList = new ArrayList<>();
 
@@ -178,16 +176,14 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if (constant.getValue() instanceof String) {
 			String str = (String) constant.getValue();
 
-			if (!str.isEmpty()) {
-				Set<String> strings = new TreeSet<>();
-				strings.add(str);
+			Set<String> strings = new TreeSet<>();
+			strings.add(str);
 
-				List<Brick> bricks = new ArrayList<>();
+			List<Brick> bricks = new ArrayList<>();
 
-				bricks.add(new Brick(1, 1, strings));
+			bricks.add(new Brick(1, 1, strings));
 
-				return new Bricks(bricks);
-			}
+			return new Bricks(bricks);
 		}
 		return TOP;
 	}
@@ -223,11 +219,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	@Override
 	public Bricks top() {
 		return TOP;
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
 	}
 
 	@Override
@@ -294,8 +285,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		List<Brick> thisBricks = this.bricks;
 
-		for(Brick brick: thisBricks)
-			if(brick.getMin() == -1 || brick.getMax() == -1)
+		for (Brick brick : thisBricks)
+			if (brick.getMin() == -1 || brick.getMax() == -1)
 				return;
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
@@ -351,8 +342,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 *                                      the caller bricks object
 	 */
 	public List<Brick> padList(Bricks other) {
-		if(this.bricks.size() > other.bricks.size())
-			throw new IllegalArgumentException("Other bricks list is longer");
+		if (this.bricks.size() > other.bricks.size())
+			throw new IllegalArgumentException("Other bricks' list is longer");
 
 		if (this.bricks.size() == other.bricks.size())
 			return null;
