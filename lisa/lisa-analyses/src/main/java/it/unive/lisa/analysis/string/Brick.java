@@ -193,13 +193,13 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	}
 
 	private String formatRepresentation() {
-		return "[ {min: " +
+		return "[ (min: " +
 				this.brickInterval.getLow().toString() +
-				"}, {max: " +
+				", max: " +
 				this.brickInterval.getHigh().toString() +
-				"}, {strings: " +
+				"), strings: (" +
 				StringUtils.join(this.strings, ", ") +
-				"} ]";
+				") ]";
 	}
 
 	private static Set<String> getAlphabet() {

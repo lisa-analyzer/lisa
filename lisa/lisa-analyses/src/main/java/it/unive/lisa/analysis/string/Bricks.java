@@ -227,13 +227,18 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(StringUtils.join(this.bricks, ",\n"));
+		return new StringRepresentation("{" + StringUtils.join(this.bricks, ",\n") + "}");
 	}
 
 	private void rule2(int first, int second) {
