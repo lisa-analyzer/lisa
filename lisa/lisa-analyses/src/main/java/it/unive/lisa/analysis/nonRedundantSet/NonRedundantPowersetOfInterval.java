@@ -160,6 +160,7 @@ public class NonRedundantPowersetOfInterval
 		for (Interval startingInterval : starting.elementsSet) {
 			for (Interval interval : eval.elementsSet) {
 				boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
+				boolean highIsPlusInfinity = interval.interval.highIsPlusInfinity();
 				Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
 				Interval lowp1_inf = new Interval(interval.interval.getLow().add(MathNumber.ONE),
 						MathNumber.PLUS_INFINITY);
@@ -170,8 +171,10 @@ public class NonRedundantPowersetOfInterval
 				if (operator == ComparisonEq.INSTANCE) {
 					newSet.add(interval);
 				} else if (operator == ComparisonNe.INSTANCE) {
-					newSet.add(lowp1_inf);
-					newSet.add(inf_highm1);
+					if(!highIsPlusInfinity)
+						newSet.add(lowp1_inf);
+					if(!lowIsMinusInfinity)
+						newSet.add(inf_highm1);
 				} else if (operator == ComparisonGe.INSTANCE) {
 					if (rightIsExpr) {
 						if (lowIsMinusInfinity)
