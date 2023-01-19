@@ -5,10 +5,7 @@ import static org.junit.Assert.*;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import org.junit.Test;
 
 public class BricksTest {
@@ -381,6 +378,30 @@ public class BricksTest {
 
 		assertEquals(bricks.lubAux(bricks1), new Bricks(resultList));
 
+	}
+
+	@Test
+	public void testLubAux1() throws SemanticException {
+		List<Brick> bricks1 = new ArrayList<>();
+		bricks1.add(new Brick(0, 1, new TreeSet<>(Arrays.asList("hello", "world"))));
+		bricks1.add(new Brick(1, 2, new TreeSet<>(Arrays.asList("foo", "bar"))));
+		Bricks bricksA = new Bricks(bricks1);
+
+		List<Brick> bricks2 = new ArrayList<>();
+		bricks2.add(new Brick(1, 2, new TreeSet<>(Arrays.asList("hello", "world", "!"))));
+		bricks2.add(new Brick(2, 3, new TreeSet<>(Arrays.asList("foo", "bar", "baz"))));
+		Bricks bricksB = new Bricks(bricks2);
+
+		List<Brick> expectedBricks = new ArrayList<>();
+		expectedBricks.add(new Brick(0, 2, new TreeSet<>(Arrays.asList("hello", "world", "!"))));
+		expectedBricks.add(
+				new Brick(0, 1, new TreeSet<>(Arrays.asList("hello", "world", "barbar", "barbaz", "barfoo", "bazbar",
+						"bazbaz", "bazfoo", "foobar", "foobaz", "foofoo"))));
+		expectedBricks.add(new Brick(0, 2, new TreeSet<>(Arrays.asList("bar", "baz", "foo"))));
+
+		Bricks expected = new Bricks(expectedBricks);
+
+		assertEquals(expected, bricksA.lubAux(bricksB));
 	}
 
 	@Test
