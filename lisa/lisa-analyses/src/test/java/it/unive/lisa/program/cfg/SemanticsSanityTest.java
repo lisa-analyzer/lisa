@@ -359,11 +359,11 @@ public class SemanticsSanityTest {
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == ValueNonRedundantSet.class)
-			if(param == Set.class)
+			if (param == Set.class)
 				return new HashSet<ValueEnvironment<Sign>>();
 			else if (param == boolean.class)
 				return true;
-			else if(param == ValueDomain.class)
+			else if (param == ValueDomain.class)
 				return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
 			return as;

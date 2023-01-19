@@ -150,7 +150,7 @@ public class EqualityContractVerificationTest {
 
 	private static final RegularExpression re1 = new Atom("a");
 	private static final RegularExpression re2 = new Atom("b");
-	
+
 	private static final Interval int1 = Interval.TOP;
 	private static final Interval int2 = Interval.BOTTOM;
 
