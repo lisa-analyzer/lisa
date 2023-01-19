@@ -20,6 +20,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
+import it.unive.lisa.analysis.nonRedundantSet.ValueNonRedundantSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
 import it.unive.lisa.analysis.nonrelational.heap.NonRelationalHeapDomain;
 import it.unive.lisa.analysis.nonrelational.inference.InferenceSystem;
@@ -357,6 +358,13 @@ public class SemanticsSanityTest {
 				return new TypeEnvironment<>(new InferredTypes());
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
+		if (root == ValueNonRedundantSet.class)
+			if(param == Set.class)
+				return new HashSet<ValueEnvironment<Sign>>();
+			else if (param == boolean.class)
+				return true;
+			else if(param == ValueDomain.class)
+				return new ValueEnvironment<>(new Sign());
 		if (root == StatementStore.class)
 			return as;
 		if (root == InferredPair.class)

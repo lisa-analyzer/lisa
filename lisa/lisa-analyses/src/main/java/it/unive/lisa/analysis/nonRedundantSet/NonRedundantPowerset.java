@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
@@ -86,6 +85,16 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	@Override
 	public C bottom() {
 		return mk(new HashSet<T>(), false, this.valueDomain);
+	}
+	
+	@Override
+	public boolean isBottom() {
+		return !this.isTop && this.elements.isEmpty();
+	}
+	
+	@Override
+	public boolean isTop() {
+		return this.isTop && this.elements.isEmpty();
 	}
 	
 	/**
@@ -362,7 +371,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * @return a new concrete instance of {@link NonRedundantPowerset} with the given configuration passed
 	 */
 	public abstract C mk(Set<T> set, boolean isTop, T valueDomain);
-
+	
 	@Override
 	public Satisfiability satisfies(E expression, ProgramPoint pp) throws SemanticException {
 		
@@ -382,20 +391,35 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 		
 		return Satisfiability.UNKNOWN;
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((this.elements == null) ? 0 : this.elements.hashCode());
+		result = prime * result + ((valueDomain == null) ? 0 : valueDomain.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		NonRedundantPowerset<?, ?, ?, ?> other = (NonRedundantPowerset<?, ?, ?, ?>) obj;
+		if (this.elements == null) {
+			if (other.elements != null)
+				return false;
+		} else if(!this.elements.equals(other.elements))
+			return false;
+		if (valueDomain == null) {
+			if (other.valueDomain != null)
+				return false;
+		} else if (!valueDomain.equals(other.valueDomain))
+			return false;
+		return true;
+	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
