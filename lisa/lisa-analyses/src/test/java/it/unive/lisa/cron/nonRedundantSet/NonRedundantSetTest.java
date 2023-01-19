@@ -18,14 +18,13 @@ import org.junit.Test;
 public class NonRedundantSetTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testNonRedundantSetOfInerval() throws AnalysisSetupException {
+	public void testNonRedundantSetOfInterval() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new NonRedundantPowersetOfInterval(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
 		conf.descendingGlbThreshold = 5;
-		conf.analysisGraphs = GraphType.DOT;
 		perform("non-redundant-set-interval", "program.imp", conf);
 	}
 }
