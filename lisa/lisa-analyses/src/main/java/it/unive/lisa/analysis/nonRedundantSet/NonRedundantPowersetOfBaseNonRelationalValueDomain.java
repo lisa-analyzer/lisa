@@ -76,8 +76,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * redundant set is always possible to construct an equivalent set that is
 	 * not redundant. This operator is usually called omega reduction
 	 * (represented as &#937;). Given a subset S of a domain of a lattice:
-	 * &#937;(S) = S \ {s &ni; S | ( s = bottom ) OR ( &exist; s' &ni; S. s
-	 * &le; s' )}
+	 * &#937;(S) = S \ {s &ni; S | ( s = bottom ) OR ( &exist; s' &ni; S. s &le;
+	 * s' )}
 	 *
 	 * @return an equivalent element that is not redundant.
 	 * 
@@ -155,12 +155,12 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * An Egli-Milner connector is an upper bound operator for the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain)
 	 * Egli-Milner relation &le;<sub>EM</sub>}. An Egli-Milner connector is
-	 * represented as &compfn;<sub>EM</sub>. Given two subsets S<sub>1</sub>
-	 * and S<sub>2</sub> of a domain of a lattice S<sub>1</sub>
-	 * &compfn;<sub>EM</sub> S<sub>2</sub> = S<sub>3</sub> such that (
-	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ) AND ( S<sub>1</sub>
-	 * &le;<sub>EM</sub> S<sub>3</sub> ). The default implementation just
-	 * performs the lub on the union of the two sets.
+	 * represented as +<sub>EM</sub>. Given two subsets S<sub>1</sub> and
+	 * S<sub>2</sub> of a domain of a lattice S<sub>1</sub> +<sub>EM</sub>
+	 * S<sub>2</sub> = S<sub>3</sub> such that ( S<sub>1</sub> &le;<sub>EM</sub>
+	 * S<sub>3</sub> ) AND ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ).
+	 * The default implementation just performs the lub on the union of the two
+	 * sets.
 	 * 
 	 * @param other the other concrete element
 	 * 
@@ -244,8 +244,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * (represented as h<sup>&nabla;</sup>). Given two subsets S<sub>1</sub> and
 	 * S<sub>2</sub> of a domain of a lattice:
 	 * <p>
-	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = 
-	 * LUB (S<sub>2</sub>, &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
+	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = LUB (S<sub>2</sub>,
+	 * &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
 	 * S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>, s<sub>1</sub> &lt;
 	 * s<sub>2</sub>}))
 	 * </p>
@@ -294,12 +294,11 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &compfn;<sub>EM</sub> S<sub>2</sub> &ensp;
-	 * otherwise</li>
+	 * <li>S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain)
-	 * Egli-Milner relation} and &compfn;<sub>EM</sub> is an
+	 * Egli-Milner relation} and +<sub>EM</sub> is an
 	 * {@link #EgliMilnerConnector(NonRedundantPowersetOfBaseNonRelationalValueDomain)
 	 * Egli-Milner connector}.
 	 */

@@ -12,7 +12,6 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
-import it.unive.lisa.symbolic.value.operator.binary.ComparisonNe;
 import it.unive.lisa.util.numeric.MathNumber;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,11 +50,11 @@ public class NonRedundantPowersetOfInterval
 	 * given two subsets S<sub>1</sub> and S<sub>2</sub> of a domain of a
 	 * lattice:
 	 * <p>
-	 * S<sub>1</sub> &#x229E; <sub>EM</sub> S<sub>2</sub> = {s<sub>2</sub> &ni;
+	 * S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> = {s<sub>2</sub> &ni;
 	 * S<sub>2</sub> | &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub>
 	 * &le; s<sub>2</sub>} &cup; {lub(s'<sub>1</sub>, s<sub>2</sub>) |
-	 * s'<sub>1</sub> &ni; S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>,
-	 * NOT &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub> &le;
+	 * s'<sub>1</sub> &ni; S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>, NOT
+	 * &exist; s<sub>1</sub> &ni; S<sub>1</sub> : s<sub>1</sub> &le;
 	 * s<sub>2</sub>}
 	 * </p>
 	 * s'<sub>1</sub> can be chosen randomly but in this case is chosen to be
@@ -160,7 +159,6 @@ public class NonRedundantPowersetOfInterval
 		for (Interval startingInterval : starting.elementsSet) {
 			for (Interval interval : eval.elementsSet) {
 				boolean lowIsMinusInfinity = interval.interval.lowIsMinusInfinity();
-				boolean highIsPlusInfinity = interval.interval.highIsPlusInfinity();
 				Interval low_inf = new Interval(interval.interval.getLow(), MathNumber.PLUS_INFINITY);
 				Interval lowp1_inf = new Interval(interval.interval.getLow().add(MathNumber.ONE),
 						MathNumber.PLUS_INFINITY);

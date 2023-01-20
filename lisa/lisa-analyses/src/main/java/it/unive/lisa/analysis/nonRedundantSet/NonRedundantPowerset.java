@@ -62,8 +62,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * redundant set is always possible to construct an equivalent set that is
 	 * not redundant. This operator is usually called omega reduction
 	 * (represented as &#937;). Given a subset S of a domain of a lattice
-	 * &#937;(S) = S \ {s &ni; S | ( s = bottom ) OR ( &exist; s' &ni; S. s
-	 * &le; s' )}
+	 * &#937;(S) = S \ {s &ni; S | ( s = bottom ) OR ( &exist; s' &ni; S. s &le;
+	 * s' )}
 	 *
 	 * @return an equivalent element that is not redundant.
 	 * 
@@ -131,12 +131,11 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * An Egli-Milner connector is an upper bound operator for the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation
 	 * &le;<sub>EM</sub>}. An Egli-Milner connector is represented as
-	 * &compfn;<sub>EM</sub>. Given two subsets S<sub>1</sub> and S<sub>2</sub>
-	 * of a domain of a lattice S<sub>1</sub> &compfn;<sub>EM</sub>
-	 * S<sub>2</sub> = S<sub>3</sub> such that ( S<sub>1</sub> &le;<sub>EM</sub>
-	 * S<sub>3</sub> ) AND ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub>
-	 * ). The default implementation just performs the lub on the union of the
-	 * two sets.
+	 * +<sub>EM</sub>. Given two subsets S<sub>1</sub> and S<sub>2</sub> of a
+	 * domain of a lattice S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> =
+	 * S<sub>3</sub> such that ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> )
+	 * AND ( S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ). The default
+	 * implementation just performs the lub on the union of the two sets.
 	 * 
 	 * @param other the other concrete element
 	 * 
@@ -166,8 +165,8 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * (represented as h<sup>&nabla;</sup>). Given two subsets S<sub>1</sub> and
 	 * S<sub>2</sub> of a domain of a lattice:
 	 * <p>
-	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = 
-	 * LUB (S<sub>2</sub>, &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
+	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = LUB (S<sub>2</sub>,
+	 * &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
 	 * S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>, s<sub>1</sub> &lt;
 	 * s<sub>2</sub>}))
 	 * </p>
@@ -178,9 +177,9 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * <li>&nabla; is the widening operator of the underlying lattice,</li>
 	 * <li>&lt; is the strict partial order relation of the underlying
 	 * lattice,</li>
-	 * <li>LUB is the {@link #lubAux(NonRedundantPowerset) least upper
-	 * bound} operator between non redundant subsets of the domain of the
-	 * underlying lattice.</li>
+	 * <li>LUB is the {@link #lubAux(NonRedundantPowerset) least upper bound}
+	 * operator between non redundant subsets of the domain of the underlying
+	 * lattice.</li>
 	 * </ul>
 	 * 
 	 * @param other the other set to perform the extrapolation with
@@ -201,24 +200,25 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	/**
-	 * Perform the wideninig operation between two finite non redundant subsets of
-	 * the domain of a lattice following the Egli-Milner widening implementation
-	 * shown in this
-	 * <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>. Given
-	 * two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a lattice
-	 * widening(S<sub>1</sub>, S<sub>2</sub>) = h<sup>&nabla;</sup>(S<sub>1</sub>,
-	 * T<sub>2</sub>), where h<sup>&nabla;</sup> is a
+	 * Perform the wideninig operation between two finite non redundant subsets
+	 * of the domain of a lattice following the Egli-Milner widening
+	 * implementation shown in this
+	 * <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>.
+	 * Given two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a
+	 * lattice widening(S<sub>1</sub>, S<sub>2</sub>) =
+	 * h<sup>&nabla;</sup>(S<sub>1</sub>, T<sub>2</sub>), where
+	 * h<sup>&nabla;</sup> is a
 	 * {@link #extrapolationHeuristic(NonRedundantPowerset) widenining-connected
 	 * extrapolation heuristic} and T<sub>2</sub> is equal to:
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &compfn;<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
+	 * <li>S<sub>1</sub> +<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
-	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation} and
-	 * &compfn;<sub>EM</sub> is an {@link #EgliMilnerConnector(NonRedundantPowerset)
-	 * Egli-Milner connector}.
+	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation}
+	 * and +<sub>EM</sub> is an
+	 * {@link #EgliMilnerConnector(NonRedundantPowerset) Egli-Milner connector}.
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {
