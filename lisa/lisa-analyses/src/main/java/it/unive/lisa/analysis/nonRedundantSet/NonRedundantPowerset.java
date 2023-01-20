@@ -166,10 +166,10 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * (represented as h<sup>&nabla;</sup>). Given two subsets S<sub>1</sub> and
 	 * S<sub>2</sub> of a domain of a lattice:
 	 * <p>
-	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = S<sub>2</sub>
-	 * &sqcup; &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
+	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = 
+	 * LUB (S<sub>2</sub>, &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
 	 * S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>, s<sub>1</sub> &lt;
-	 * s<sub>2</sub>})
+	 * s<sub>2</sub>}))
 	 * </p>
 	 * where
 	 * <ul>
@@ -178,7 +178,7 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	 * <li>&nabla; is the widening operator of the underlying lattice,</li>
 	 * <li>&lt; is the strict partial order relation of the underlying
 	 * lattice,</li>
-	 * <li>&sqcup; is the {@link #lubAux(NonRedundantPowerset) least upper
+	 * <li>LUB is the {@link #lubAux(NonRedundantPowerset) least upper
 	 * bound} operator between non redundant subsets of the domain of the
 	 * underlying lattice.</li>
 	 * </ul>
@@ -201,26 +201,24 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	/**
-	 * Perform the wideninig operation between two finite non redundant subsets
-	 * of the domain of a lattice following the Egli-Milner widening
-	 * implementation shown in this
-	 * <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>.
-	 * Given two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a
-	 * lattice widening(S<sub>1</sub>, S<sub>2</sub>) =
-	 * h<sup>&nabla;</sup>(S<sub>1</sub>, T<sub>2</sub>), where
-	 * h<sup>&nabla;</sup> is a
+	 * Perform the wideninig operation between two finite non redundant subsets of
+	 * the domain of a lattice following the Egli-Milner widening implementation
+	 * shown in this
+	 * <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>. Given
+	 * two subset S<sub>1</sub> and S<sub>2</sub> of the domain of a lattice
+	 * widening(S<sub>1</sub>, S<sub>2</sub>) = h<sup>&nabla;</sup>(S<sub>1</sub>,
+	 * T<sub>2</sub>), where h<sup>&nabla;</sup> is a
 	 * {@link #extrapolationHeuristic(NonRedundantPowerset) widenining-connected
 	 * extrapolation heuristic} and T<sub>2</sub> is equal to:
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &#x229E;<sub>EM</sub> S<sub>2</sub> &ensp;
-	 * otherwise</li>
+	 * <li>S<sub>1</sub> &#x229E;<sub>EM</sub> S<sub>2</sub> &ensp; otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
-	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation}
-	 * and &#x229E;<sub>EM</sub> is an
-	 * {@link #EgliMilnerConnector(NonRedundantPowerset) Egli-Milner connector}.
+	 * {@link #lessOrEqualEgliMilner(NonRedundantPowerset) Egli-Milner relation} and
+	 * &#x229E;<sub>EM</sub> is an {@link #EgliMilnerConnector(NonRedundantPowerset)
+	 * Egli-Milner connector}.
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {

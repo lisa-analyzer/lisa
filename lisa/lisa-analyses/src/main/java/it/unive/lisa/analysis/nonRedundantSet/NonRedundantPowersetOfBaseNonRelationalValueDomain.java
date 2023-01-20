@@ -244,10 +244,10 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * (represented as h<sup>&nabla;</sup>). Given two subsets S<sub>1</sub> and
 	 * S<sub>2</sub> of a domain of a lattice:
 	 * <p>
-	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = S<sub>2</sub>
-	 * &sqcup; &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
+	 * h<sup>&nabla;</sup>( S<sub>1</sub>, S<sub>2</sub>) = 
+	 * LUB (S<sub>2</sub>, &#937;({ s<sub>1</sub> &nabla; s<sub>2</sub> | s<sub>1</sub> &ni;
 	 * S<sub>1</sub>, s<sub>2</sub> &ni; S<sub>2</sub>, s<sub>1</sub> &lt;
-	 * s<sub>2</sub>})
+	 * s<sub>2</sub>}))
 	 * </p>
 	 * where
 	 * <ul>
@@ -256,7 +256,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * <li>&nabla; is the widening operator of the underlying lattice,</li>
 	 * <li>&lt; is the strict partial order relation of the underlying
 	 * lattice,</li>
-	 * <li>&sqcup; is the
+	 * <li>LUB is the
 	 * {@link #lubAux(NonRedundantPowersetOfBaseNonRelationalValueDomain) least
 	 * upper bound} operator between non redundant subsets of the domain of the
 	 * underlying lattice.</li>
