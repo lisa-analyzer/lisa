@@ -202,6 +202,12 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		return new FSA(result);
 	}
 
+	/**
+	 * Yields the minimum and maximum length of this abstract value. Yields
+	 * {@link Integer#MAX_VALUE} if the maximum length is unknown.
+	 * 
+	 * @return the minimum and maximum length of this abstract value
+	 */
 	public Pair<Integer, Integer> length() {
 		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
 	}

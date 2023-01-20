@@ -186,10 +186,24 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 		return new Suffix("");
 	}
 
+	/**
+	 * Yields the minimum and maximum length of this abstract value. Yields
+	 * {@link Integer#MAX_VALUE} if the maximum length is unknown.
+	 * 
+	 * @return the minimum and maximum length of this abstract value
+	 */
 	public Pair<Integer, Integer> length() {
 		return Pair.of(suffix.length(), Integer.MAX_VALUE);
 	}
 
+	/**
+	 * Yields the minimum and maximum index of {@code s} in {@code this}. Yields
+	 * {@link Integer#MAX_VALUE} if the maximum index of is unknown.
+	 *
+	 * @param s the string to be searched
+	 * 
+	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 */
 	public Pair<Integer, Integer> indexOf(Suffix s) {
 		return Pair.of(-1, Integer.MAX_VALUE);
 	}
