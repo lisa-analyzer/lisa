@@ -155,9 +155,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * An Egli-Milner connector is an upper bound operator for the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain)
 	 * Egli-Milner relation &le;<sub>EM</sub>}. An Egli-Milner connector is
-	 * represented as &#x229E;<sub>EM</sub>. Given two subsets S<sub>1</sub>
+	 * represented as &compfn;<sub>EM</sub>. Given two subsets S<sub>1</sub>
 	 * and S<sub>2</sub> of a domain of a lattice S<sub>1</sub>
-	 * &#x229E;<sub>EM</sub> S<sub>2</sub> = S<sub>3</sub> such that (
+	 * &compfn;<sub>EM</sub> S<sub>2</sub> = S<sub>3</sub> such that (
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>3</sub> ) AND ( S<sub>1</sub>
 	 * &le;<sub>EM</sub> S<sub>3</sub> ). The default implementation just
 	 * performs the lub on the union of the two sets.
@@ -292,14 +292,14 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * widenining-connected extrapolation heuristic} and T<sub>2</sub> is equal
 	 * to:
 	 * <ul>
-	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
+	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &#9744;<sub>EM</sub> S<sub>2</sub> &ensp;
+	 * <li>S<sub>1</sub> &compfn;<sub>EM</sub> S<sub>2</sub> &ensp;
 	 * otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
 	 * {@link #lessOrEqualEgliMilner(NonRedundantPowersetOfBaseNonRelationalValueDomain)
-	 * Egli-Milner relation} and &#x229E;<sub>EM</sub> is an
+	 * Egli-Milner relation} and &compfn;<sub>EM</sub> is an
 	 * {@link #EgliMilnerConnector(NonRedundantPowersetOfBaseNonRelationalValueDomain)
 	 * Egli-Milner connector}.
 	 */
