@@ -55,7 +55,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 */
 	public Bricks(List<Brick> bricks) {
 		this.bricks = bricks;
-		normBricks();
 	}
 
 	@Override
@@ -74,7 +73,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		for (int i = 0; i < thisPaddedList.size(); ++i)
 			resultBricks.add(thisPaddedList.get(i).lubAux(otherPaddedList.get(i)));
 
-		return new Bricks(resultBricks);
+		Bricks result = new Bricks(resultBricks);
+
+		result.normBricks();
+
+		return result;
 	}
 
 	@Override
@@ -150,18 +153,21 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				resultList.add(new Brick(minOfMins, maxOfMaxs, resultSet));
 		}
 
-		return new Bricks(resultList);
+		Bricks result = new Bricks(resultList);
+
+		result.normBricks();
+
+		return result;
 	}
 
 	@Override
 	public Bricks evalBinaryExpression(BinaryOperator operator, Bricks left, Bricks right, ProgramPoint pp)
 			throws SemanticException {
 		if (operator == StringConcat.INSTANCE) {
-			List<Brick> list = new ArrayList<>();
-			list.addAll(left.bricks);
-			list.addAll(right.bricks);
+			List<Brick> resultList = new ArrayList<>(left.bricks);
+			resultList.addAll(right.bricks);
 
-			return new Bricks(list);
+			return new Bricks(resultList);
 		} else if (operator == StringContains.INSTANCE ||
 				operator == StringEndsWith.INSTANCE ||
 				operator == StringEquals.INSTANCE ||
@@ -180,11 +186,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			Set<String> strings = new TreeSet<>();
 			strings.add(str);
 
-			List<Brick> bricks = new ArrayList<>();
+			List<Brick> resultList = new ArrayList<>();
 
-			bricks.add(new Brick(1, 1, strings));
+			resultList.add(new Brick(1, 1, strings));
 
-			return new Bricks(bricks);
+			return new Bricks(resultList);
 		}
 		return TOP;
 	}
@@ -290,10 +296,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			return;
 
 		List<Brick> thisBricks = this.bricks;
-
-		for (Brick brick : thisBricks)
-			if (brick.getMin() == -1 || brick.getMax() == -1)
-				return;
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
