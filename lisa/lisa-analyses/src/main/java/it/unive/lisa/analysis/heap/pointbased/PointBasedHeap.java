@@ -150,20 +150,18 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	}
 
 	/**
-	 * Builds an instance of the heap domain after an assignment, from the
-	 * resulting heap environment, the heap instance obtained from the small
-	 * step semantics of the right-hand side of the assignment, and the
-	 * replacements.
+	 * Builds an instance of the heap domain after an assignment, from the heap
+	 * instance obtained from the small step semantics of the right-hand side of
+	 * the assignment and the replacements.
 	 * 
-	 * @param heap         the resulting heap environment
-	 * @param sss          the heap instance obtained from the small step
-	 *                         semantics of the right-hand side of the
+	 * @param sss          the point-based heap instance obtained from the small
+	 *                         step semantics of the right-hand side of the
 	 *                         assignment
 	 * @param replacements the list of replacements to be updated
 	 * 
-	 * @return an instance of the heap domain after an assignment, from the
-	 *             resulting heap domain, the heap instance obtained from the
-	 *             small step semantics of the right-hand side of the
+	 * @return an instance of the point-based heap domain after an assignment,
+	 *             from the resulting heap domain, the heap instance obtained
+	 *             from the small step semantics of the right-hand side of the
 	 *             assignment, and the replacements
 	 */
 	protected PointBasedHeap buildHeapAfterAssignment(PointBasedHeap sss,
