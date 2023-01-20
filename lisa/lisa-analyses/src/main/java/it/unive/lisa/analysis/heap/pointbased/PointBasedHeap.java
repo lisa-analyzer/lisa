@@ -128,7 +128,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			} else
 				result = result.lub(sss);
 
-		return buildHeapAfterAssignment(result.heapEnv, sss, replacements);
+		return buildHeapAfterAssignment(result, replacements);
 	}
 
 	/**
@@ -166,9 +166,9 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 *             small step semantics of the right-hand side of the
 	 *             assignment, and the replacements
 	 */
-	protected PointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap, PointBasedHeap sss,
+	protected PointBasedHeap buildHeapAfterAssignment(PointBasedHeap sss,
 			List<HeapReplacement> replacements) {
-		return from(new PointBasedHeap(heap, replacements));
+		return from(new PointBasedHeap(sss.heapEnv, replacements));
 	}
 
 	/**
@@ -343,7 +343,6 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
-
 			for (ValueExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;

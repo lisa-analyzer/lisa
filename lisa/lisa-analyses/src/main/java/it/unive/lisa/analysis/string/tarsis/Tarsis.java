@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import java.util.Objects;
-import java.util.SortedSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -21,6 +16,9 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import java.util.Objects;
+import java.util.SortedSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -269,7 +267,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	public Pair<Integer, Integer> length() {
 		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
 	}
-	
+
 	public Pair<Integer, Integer> indexOf(Tarsis s) throws CyclicAutomatonException {
 		if (contains(s) == Satisfiability.SATISFIED)
 			return Pair.of(-1, -1);

@@ -17,7 +17,6 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -194,21 +193,23 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public CharInclusion evalTernaryExpression(TernaryOperator operator, CharInclusion left, CharInclusion middle,
 			CharInclusion right, ProgramPoint pp) throws SemanticException {
 		if (operator == StringReplace.INSTANCE) {
-			
+
 			if (!left.getCertainlyContained().containsAll(middle.getCertainlyContained()))
 				// no replace for sure
 				return this;
-			
+
 			Set<Character> included = new TreeSet<>(left.getCertainlyContained());
 			Set<Character> possibly = new TreeSet<>(left.getMaybeContained());
-			// since we do not know if the replace will happen, we move everything to the
+			// since we do not know if the replace will happen, we move
+			// everything to the
 			// possibly included characters
 			included.removeAll(middle.getCertainlyContained());
 			possibly.addAll(middle.getCertainlyContained());
 
 			included.removeAll(middle.getMaybeContained());
 			Set<Character> tmp = new TreeSet<>(middle.getMaybeContained());
-			tmp.retainAll(left.getCertainlyContained()); // just the ones that we removed before
+			tmp.retainAll(left.getCertainlyContained()); // just the ones that
+															// we removed before
 			possibly.addAll(tmp);
 
 			// add the second string
@@ -275,7 +276,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public Pair<Integer, Integer> length() {
 		return Pair.of(getCertainlyContained().size(), Integer.MAX_VALUE);
 	}
-	
+
 	public Pair<Integer, Integer> indexOf(CharInclusion s) {
 		return Pair.of(-1, Integer.MAX_VALUE);
 	}

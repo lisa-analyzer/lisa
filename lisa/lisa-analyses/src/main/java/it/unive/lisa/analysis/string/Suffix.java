@@ -16,9 +16,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-
 import java.util.Objects;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -146,7 +144,7 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 
 		return TOP;
 	}
-	
+
 	@Override
 	public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
 			ProgramPoint pp) throws SemanticException {
@@ -161,7 +159,7 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 
 			return new Suffix(target.replace(replace, string));
 		}
-		
+
 		return TOP;
 	}
 
@@ -187,11 +185,11 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	public Suffix substring(long begin, long end) {
 		return new Suffix("");
 	}
-	
+
 	public Pair<Integer, Integer> length() {
 		return Pair.of(suffix.length(), Integer.MAX_VALUE);
 	}
-	
+
 	public Pair<Integer, Integer> indexOf(Suffix s) {
 		return Pair.of(-1, Integer.MAX_VALUE);
 	}

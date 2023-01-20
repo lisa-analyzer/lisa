@@ -16,9 +16,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-
 import java.util.Objects;
-
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
@@ -160,10 +158,10 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 
 			return new Prefix(target.replace(replace, string));
 		}
-		
+
 		return TOP;
 	}
-	
+
 	/**
 	 * Yields the prefix of this abstract value.
 	 * 
@@ -194,12 +192,12 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 
 		return new Prefix("");
 	}
-	
+
 	public Pair<Integer, Integer> length() {
 		return Pair.of(prefix.length(), Integer.MAX_VALUE);
 	}
-		
+
 	public Pair<Integer, Integer> indexOf(Prefix s) {
-		return Pair.of(-1,  Integer.MAX_VALUE);
+		return Pair.of(-1, Integer.MAX_VALUE);
 	}
 }

@@ -1,14 +1,6 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
@@ -21,6 +13,11 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -138,7 +135,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
-	public SemanticDomain.Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
+	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
 			ProgramPoint pp) throws SemanticException {
 		if (operator == StringContains.INSTANCE) {
 			try {
@@ -146,7 +143,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 				Set<String> leftLang = left.a.getLanguage();
 				// right accepts only the empty string
 				if (rightLang.size() == 1 && rightLang.contains(""))
-					return SemanticDomain.Satisfiability.SATISFIED;
+					return Satisfiability.SATISFIED;
 
 				// we can compare languages
 				boolean atLeastOne = false, all = true;
@@ -163,10 +160,10 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 					return Satisfiability.UNKNOWN;
 				return Satisfiability.NOT_SATISFIED;
 			} catch (CyclicAutomatonException e) {
-				return SemanticDomain.Satisfiability.UNKNOWN;
+				return Satisfiability.UNKNOWN;
 			}
 		}
-		return SemanticDomain.Satisfiability.UNKNOWN;
+		return Satisfiability.UNKNOWN;
 	}
 
 	/**
@@ -178,7 +175,8 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 * 
 	 * @return the FSA automaton corresponding to the substring of this FSA
 	 *             automaton between two indexes
-	 * @throws CyclicAutomatonException 
+	 * 
+	 * @throws CyclicAutomatonException
 	 */
 	public FSA substring(long begin, long end) throws CyclicAutomatonException {
 		if (isTop() || isBottom())
@@ -187,7 +185,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		if (!a.hasCycle()) {
 			SimpleAutomaton result = this.a.emptyLanguage();
 			for (String s : a.getLanguage()) {
-				result = result.union(new SimpleAutomaton(s.substring((int) begin, (int)end)));
+				result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
 
 				return new FSA(result);
 			}
@@ -203,7 +201,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			result = result.union(array[i]);
 		return new FSA(result);
 	}
-	
+
 	public Pair<Integer, Integer> length() {
 		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
 	}
