@@ -95,6 +95,13 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	/**
+	 * Builds a {@link RegexAutomaton} recognizing the given string.
+	 * 
+	 * @param s the string to recognize
+	 * 
+	 * @return the automaton
+	 */
 	public static RegexAutomaton string(SymbolicString s) {
 		List<RegexAutomaton> result = new ArrayList<>();
 		String collector = "";

@@ -176,7 +176,8 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 * @return the FSA automaton corresponding to the substring of this FSA
 	 *             automaton between two indexes
 	 * 
-	 * @throws CyclicAutomatonException
+	 * @throws CyclicAutomatonException when the automaton is cyclic and its
+	 *                                      language is accessed
 	 */
 	public FSA substring(long begin, long end) throws CyclicAutomatonException {
 		if (isTop() || isBottom())

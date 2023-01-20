@@ -281,6 +281,9 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	 * @param s the string to be searched
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 * 
+	 * @throws CyclicAutomatonException when the automaton is cyclic and its
+	 *                                      language is accessed
 	 */
 	public Pair<Integer, Integer> indexOf(Tarsis s) throws CyclicAutomatonException {
 		if (contains(s) == Satisfiability.SATISFIED)
