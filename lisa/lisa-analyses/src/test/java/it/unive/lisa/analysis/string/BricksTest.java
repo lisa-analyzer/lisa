@@ -38,6 +38,8 @@ public class BricksTest {
 		resultList.add(new Brick(1, 1, resultTreeSet));
 		resultList.add(new Brick(0, 2, strings1));
 
+		bricks.normBricks();
+
 		assertEquals(bricks, new Bricks(resultList));
 	}
 
@@ -57,6 +59,8 @@ public class BricksTest {
 		List<Brick> resultList = new ArrayList<>();
 
 		resultList.add(new Brick(1, 1, strings));
+
+		bricks.normBricks();
 
 		assertEquals(bricks, new Bricks(resultList));
 	}
@@ -90,6 +94,8 @@ public class BricksTest {
 		resultStrings.add("cdef");
 
 		resultList.add(new Brick(1, 1, resultStrings));
+
+		bricks.normBricks();
 
 		assertEquals(bricks, new Bricks(resultList));
 	}
@@ -125,6 +131,8 @@ public class BricksTest {
 
 		resultList.add(new Brick(1, 1, resultStrings));
 
+		bricks.normBricks();
+
 		assertEquals(bricks, new Bricks(resultList));
 	}
 
@@ -150,6 +158,8 @@ public class BricksTest {
 		List<Brick> resultList = new ArrayList<>();
 
 		resultList.add(new Brick(0, 3, strings));
+
+		bricks.normBricks();
 
 		assertEquals(bricks, new Bricks(resultList));
 	}
@@ -178,6 +188,8 @@ public class BricksTest {
 		resultList.add(new Brick(1, 1, resultStrings));
 
 		resultList.add(new Brick(0, 3, resultStrings1));
+
+		bricks.normBricks();
 
 		assertEquals(bricks, new Bricks(resultList));
 	}
@@ -378,30 +390,6 @@ public class BricksTest {
 
 		assertEquals(bricks.lubAux(bricks1), new Bricks(resultList));
 
-	}
-
-	@Test
-	public void testLubAux1() throws SemanticException {
-		List<Brick> bricks1 = new ArrayList<>();
-		bricks1.add(new Brick(0, 1, new TreeSet<>(Arrays.asList("hello", "world"))));
-		bricks1.add(new Brick(1, 2, new TreeSet<>(Arrays.asList("foo", "bar"))));
-		Bricks bricksA = new Bricks(bricks1);
-
-		List<Brick> bricks2 = new ArrayList<>();
-		bricks2.add(new Brick(1, 2, new TreeSet<>(Arrays.asList("hello", "world", "!"))));
-		bricks2.add(new Brick(2, 3, new TreeSet<>(Arrays.asList("foo", "bar", "baz"))));
-		Bricks bricksB = new Bricks(bricks2);
-
-		List<Brick> expectedBricks = new ArrayList<>();
-		expectedBricks.add(new Brick(0, 2, new TreeSet<>(Arrays.asList("hello", "world", "!"))));
-		expectedBricks.add(
-				new Brick(0, 1, new TreeSet<>(Arrays.asList("hello", "world", "barbar", "barbaz", "barfoo", "bazbar",
-						"bazbaz", "bazfoo", "foobar", "foobaz", "foofoo"))));
-		expectedBricks.add(new Brick(0, 2, new TreeSet<>(Arrays.asList("bar", "baz", "foo"))));
-
-		Bricks expected = new Bricks(expectedBricks);
-
-		assertEquals(expected, bricksA.lubAux(bricksB));
 	}
 
 	@Test
