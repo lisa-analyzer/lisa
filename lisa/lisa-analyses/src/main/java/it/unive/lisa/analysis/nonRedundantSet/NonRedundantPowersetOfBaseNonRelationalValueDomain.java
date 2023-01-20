@@ -294,7 +294,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * <ul>
 	 * <li>S<sub>2</sub> &ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; if
 	 * S<sub>1</sub> &le;<sub>EM</sub> S<sub>2</sub></li>
-	 * <li>S<sub>1</sub> &#x229E;<sub>EM</sub> S<sub>2</sub> &ensp;
+	 * <li>S<sub>1</sub> &#9744;<sub>EM</sub> S<sub>2</sub> &ensp;
 	 * otherwise</li>
 	 * </ul>
 	 * where &le;<sub>EM</sub> is the
