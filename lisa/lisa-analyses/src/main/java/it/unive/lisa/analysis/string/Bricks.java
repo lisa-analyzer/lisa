@@ -105,13 +105,13 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				other.bricks.size() > kL)
 			return TOP;
 
-		if(this.lessOrEqualAux(other))
+		if (this.lessOrEqualAux(other))
 			return w(other);
 		else
 			return other.w(this);
 	}
 
-	private Bricks w(Bricks other){
+	private Bricks w(Bricks other) {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
