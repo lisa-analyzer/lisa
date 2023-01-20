@@ -69,12 +69,12 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		else if (other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
 
-		List<Brick> bricks = new ArrayList<>();
+		List<Brick> resultBricks = new ArrayList<>();
 
 		for (int i = 0; i < thisPaddedList.size(); ++i)
-			bricks.add(thisPaddedList.get(i).lubAux(otherPaddedList.get(i)));
+			resultBricks.add(thisPaddedList.get(i).lubAux(otherPaddedList.get(i)));
 
-		return new Bricks(bricks);
+		return new Bricks(resultBricks);
 	}
 
 	@Override
