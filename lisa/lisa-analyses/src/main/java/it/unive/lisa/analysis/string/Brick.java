@@ -70,9 +70,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	@Override
 	public Brick lubAux(Brick other) throws SemanticException {
-		Set<String> resultStrings = new TreeSet<>();
-
-		resultStrings.addAll(this.strings);
+		Set<String> resultStrings = new TreeSet<>(this.strings);
 		resultStrings.addAll(other.strings);
 
 		return new Brick(Math.min(this.getMin(), other.getMin()),

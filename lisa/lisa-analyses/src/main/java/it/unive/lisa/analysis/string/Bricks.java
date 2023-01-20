@@ -105,11 +105,13 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				other.bricks.size() > kL)
 			return TOP;
 
-		return w(other);
-
+		if(this.lessOrEqualAux(other))
+			return w(other);
+		else
+			return other.w(this);
 	}
 
-	private Bricks w(Bricks other) {
+	private Bricks w(Bricks other){
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
@@ -130,9 +132,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				break;
 			}
 
-			Set<String> resultSet = new TreeSet<>();
+			Set<String> resultSet = new TreeSet<>(thisCurrent.getStrings());
 
-			resultSet.addAll(thisCurrent.getStrings());
 			resultSet.addAll(otherCurrent.getStrings());
 
 			int minOfMins = Math.min(thisCurrent.getMin(), otherCurrent.getMin());
