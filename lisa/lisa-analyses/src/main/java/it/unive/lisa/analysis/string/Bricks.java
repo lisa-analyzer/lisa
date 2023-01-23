@@ -346,7 +346,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * 
 	 * @return the shorter list with empty brick in it
 	 * 
-	 * @throws IllegalArgumentException if the other brick list is longer than
+	 * @throws IllegalArgumentException if the other brick list is longer or equal than
 	 *                                      the caller bricks object
 	 */
 	public List<Brick> padList(final Bricks other) {
