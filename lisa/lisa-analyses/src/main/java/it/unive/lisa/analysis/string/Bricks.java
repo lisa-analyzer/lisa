@@ -349,32 +349,27 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * @throws IllegalArgumentException if the other brick list is longer than
 	 *                                      the caller bricks object
 	 */
-	public List<Brick> padList(Bricks other) {
-		if (this.bricks.size() > other.bricks.size())
-			throw new IllegalArgumentException("Other bricks' list is longer");
+	public List<Brick> padList(final Bricks other) {
+		if (this.bricks.size() >= other.bricks.size())
+			throw new IllegalArgumentException("Other bricks’ list is longer or equal");
+		List<Brick> thisList = new ArrayList<>(this.bricks);
+		List<Brick> otherList = new ArrayList<>(other.bricks);
 
-		if (this.bricks.size() == other.bricks.size())
-			return null;
-
-		int diff = other.bricks.size() - this.bricks.size();
+		int diff = otherList.size() - thisList.size();
 		int emptyAdded = 0;
-
 		List<Brick> newList = new ArrayList<>();
-
-		for (Brick brick : other.bricks) {
+		for (Brick brick : otherList) {
 			if (emptyAdded >= diff) {
-				newList.addAll(this.bricks);
+				newList.addAll(thisList);
 				break;
-
-			} else if (this.bricks.isEmpty() || this.bricks.get(0) != brick) {
+			} else if (thisList.isEmpty() || thisList.get(0) != brick) {
 				newList.add(new Brick(0, 0, new TreeSet<>()));
 				emptyAdded++;
 			} else {
-				newList.add(this.bricks.get(0));
-				this.bricks.remove(0);
+				newList.add(thisList.get(0));
+				thisList.remove(0);
 			}
 		}
-
 		return newList;
 	}
 }
