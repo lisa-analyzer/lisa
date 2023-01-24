@@ -412,6 +412,15 @@ public class BricksTest {
 		treeSet1.add("l");
 		treeSet1.add("m");
 		treeSet1.add("n");
+		treeSet1.add("o");
+		treeSet1.add("p");
+		treeSet1.add("q");
+		treeSet1.add("r");
+		treeSet1.add("s");
+		treeSet1.add("t");
+		treeSet1.add("u");
+		treeSet1.add("v");
+		treeSet1.add("z");
 
 		bricksList.add(new Brick(1, 1, treeSet));
 
