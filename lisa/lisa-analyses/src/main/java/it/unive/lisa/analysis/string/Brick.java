@@ -8,7 +8,6 @@ import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import it.unive.lisa.util.numeric.MathNumberConversionException;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -156,7 +155,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max
-	 * @throws MathNumberConversionException 
+	 * 
+	 * @throws MathNumberConversionException
 	 */
 	public Set<String> getReps() {
 		if (getMin().isInfinite() || getMax().isInfinite())
@@ -183,7 +183,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr) throws MathNumberConversionException {
+	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr)
+			throws MathNumberConversionException {
 		if (min > this.getMax().toInt() && numberOfReps >= this.getMin().toInt())
 			reps.add(currentStr);
 		else {

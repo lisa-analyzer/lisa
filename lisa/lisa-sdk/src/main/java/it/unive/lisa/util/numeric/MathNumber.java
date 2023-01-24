@@ -348,16 +348,15 @@ public class MathNumber implements Comparable<MathNumber> {
 
 		return cached(new MathNumber(number.max(other.number)));
 	}
-	
-	
+
 	public boolean leq(MathNumber other) {
 		return this.max(other).equals(other);
 	}
-	
+
 	public boolean le(MathNumber other) {
 		return leq(other) && !equals(other);
 	}
-	
+
 	public boolean geq(MathNumber other) {
 		return this.max(other).equals(this);
 	}
