@@ -7,6 +7,8 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import it.unive.lisa.util.numeric.MathNumberConversionException;
+
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
@@ -56,6 +58,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		this.strings = strings;
 	}
 
+	public Brick(MathNumber min, MathNumber max, Set<String> strings) {
+		this.brickInterval = new IntInterval(min, max);
+		this.strings = strings;
+	}
+
 	/**
 	 * Builds a brick abstract element.
 	 *
@@ -73,8 +80,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		Set<String> resultStrings = new TreeSet<>(this.strings);
 		resultStrings.addAll(other.strings);
 
-		return new Brick(Math.min(this.getMin(), other.getMin()),
-				Math.max(this.getMax(), other.getMax()),
+		return new Brick(this.getMin().min(other.getMin()),
+				this.getMax().max(other.getMax()),
 				resultStrings);
 
 	}
@@ -85,8 +92,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 			return false;
 
 		if (other.strings.containsAll(this.strings))
-			if (this.getMin() >= other.getMin())
-				return this.getMax() <= other.getMax();
+			if (this.getMin().geq(other.getMin()))
+				return this.getMax().leq(other.getMax());
 
 		return false;
 	}
@@ -111,11 +118,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the min of this abstract value
 	 */
-	public int getMin() {
-		if (this.brickInterval.getLow().isInfinite())
-			return -1;
-
-		return this.brickInterval.getLow().getNumber().intValue();
+	public MathNumber getMin() {
+		return this.brickInterval.getLow();
 	}
 
 	/**
@@ -123,11 +127,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the max of this abstract value
 	 */
-	public int getMax() {
-		if (this.brickInterval.getHigh().isInfinite())
-			return -1;
-
-		return this.brickInterval.getHigh().getNumber().intValue();
+	public MathNumber getMax() {
+		return this.brickInterval.getHigh();
 	}
 
 	/**
@@ -155,29 +156,39 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max
+	 * @throws MathNumberConversionException 
 	 */
 	public Set<String> getReps() {
+		if (getMin().isInfinite() || getMax().isInfinite())
+			// TODO: what to do in this case;
+			return this.getStrings();
 		Set<String> reps = new TreeSet<>();
 
-		if (this.strings.size() == 1) {
-			String element = this.strings.iterator().next();
-			reps.add(element.repeat(this.getMin()));
-			reps.add(element.repeat(this.getMax()));
-			return reps;
+		try {
+			if (this.strings.size() == 1) {
+				String element = this.strings.iterator().next();
+				reps.add(element.repeat(this.getMin().toInt()));
+				reps.add(element.repeat(this.getMax().toInt()));
+				return reps;
+			}
+
+			this.recGetReps(reps, this.getMin().toInt(), 0, "");
+		} catch (MathNumberConversionException e) {
+			// TODO: what to do in this case;
+			return this.getStrings();
 		}
-		this.recGetReps(reps, this.getMin(), 0, "");
 
 		return reps;
 	}
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr) {
-		if (min > this.getMax() && numberOfReps >= this.getMin())
+	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr) throws MathNumberConversionException {
+		if (min > this.getMax().toInt() && numberOfReps >= this.getMin().toInt())
 			reps.add(currentStr);
 		else {
 			for (String string : this.strings) {
-				if ((!currentStr.equals("") || this.getMin() == 0) && numberOfReps >= this.getMin())
+				if ((!currentStr.equals("") || this.getMin().toInt() == 0) && numberOfReps >= this.getMin().toInt())
 					reps.add(currentStr);
 
 				recGetReps(reps, min + 1, numberOfReps + 1, currentStr + string);

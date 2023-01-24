@@ -100,9 +100,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks wideningAux(Bricks other) throws SemanticException {
-		if (!this.lessOrEqualAux(other) &&
-				!other.lessOrEqualAux(this))
-			return TOP;
+//		if (!this.lessOrEqualAux(other) &&
+//				!other.lessOrEqualAux(this))
+//			return TOP;
 
 		if (this.bricks.size() > kL ||
 				other.bricks.size() > kL)
@@ -139,13 +139,14 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 			resultSet.addAll(otherCurrent.getStrings());
 
-			int minOfMins = Math.min(thisCurrent.getMin(), otherCurrent.getMin());
-			int maxOfMaxs = Math.max(thisCurrent.getMax(), otherCurrent.getMax());
+			MathNumber minOfMins = thisCurrent.getMin().min(otherCurrent.getMin());
+			MathNumber maxOfMaxs = thisCurrent.getMax().max(otherCurrent.getMax());
 
 			if (resultSet.size() > kS)
 				resultList.add(new Brick());
 
-			else if (maxOfMaxs - minOfMins > kI) {
+			
+			else if (new MathNumber(kI).leq(maxOfMaxs.subtract(minOfMins))) {
 				IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 				Brick resultBrick = new Brick(interval, resultSet);
 				resultList.add(resultBrick);
@@ -271,8 +272,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
-		this.bricks.set(first, new Brick(firstBrick.getMin() + secondBrick.getMin(),
-				firstBrick.getMax() + secondBrick.getMax(),
+		this.bricks.set(first, new Brick(firstBrick.getMin().add(secondBrick.getMin()),
+				firstBrick.getMax().add(secondBrick.getMax()),
 				firstBrick.getStrings()));
 
 		this.bricks.remove(second);
@@ -284,7 +285,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
 
 		this.bricks.set(index, new Brick(1, 1, br.getReps()));
-		this.bricks.add(index + 1, new Brick(0, brick.getMax() - brick.getMin(), brick.getStrings()));
+		this.bricks.add(index + 1, new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
 	}
 
 	/**
@@ -299,8 +300,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
-		thisBricks.removeIf(brick -> brick.getMin() == 0 &&
-				brick.getMax() == 0 &&
+		thisBricks.removeIf(brick -> brick.getMin().equals(MathNumber.ZERO) &&
+				brick.getMax().equals(MathNumber.ZERO) &&
 				brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
@@ -312,8 +313,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				nextBrick = thisBricks.get(i + 1);
 
 			if (!lastBrick)
-				if (currentBrick.getMin() == 1 && currentBrick.getMax() == 1 &&
-						nextBrick.getMin() == 1 && nextBrick.getMax() == 1) {
+				if (currentBrick.getMin().equals(MathNumber.ONE) && currentBrick.getMax().equals(MathNumber.ONE) &&
+						nextBrick.getMin().equals(MathNumber.ONE) && nextBrick.getMax().equals(MathNumber.ONE)) {
 
 					rule2(i, i + 1);
 
@@ -321,14 +322,14 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				}
 
 			if (currentBrick.getMin() == currentBrick.getMax() &&
-					currentBrick.getMin() != 1 && currentBrick.getMax() != 1)
+					!currentBrick.getMin().equals(MathNumber.ONE) && !currentBrick.getMax().equals(MathNumber.ONE))
 				rule3(i);
 
 			if (!lastBrick)
 				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
 					rule4(i, i + 1);
 
-			if (currentBrick.getMin() > 1 &&
+			if ( MathNumber.ONE.leq(currentBrick.getMin()) &&
 					currentBrick.getMin() != currentBrick.getMax())
 				rule5(i);
 		}
