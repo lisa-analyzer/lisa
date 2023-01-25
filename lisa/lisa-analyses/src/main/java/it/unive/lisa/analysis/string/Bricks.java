@@ -100,9 +100,12 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public Bricks wideningAux(Bricks other) throws SemanticException {
-//		if (!this.lessOrEqualAux(other) &&
-//				!other.lessOrEqualAux(this))
-//			return TOP;
+		this.normBricks();
+		other.normBricks();
+		
+		if (!this.lessOrEqualAux(other) &&
+				!other.lessOrEqualAux(this))
+			return TOP;
 
 		if (this.bricks.size() > kL ||
 				other.bricks.size() > kL)
@@ -145,7 +148,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			if (resultSet.size() > kS)
 				resultList.add(new Brick());
 
-			
 			else if (new MathNumber(kI).leq(maxOfMaxs.subtract(minOfMins))) {
 				IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 				Brick resultBrick = new Brick(interval, resultSet);
@@ -363,7 +365,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			if (emptyAdded >= diff) {
 				newList.addAll(thisList);
 				break;
-			} else if (thisList.isEmpty() || thisList.get(0) != brick) {
+			} else if (thisList.isEmpty() || !thisList.get(0).equals(brick)) {
 				newList.add(new Brick(0, 0, new TreeSet<>()));
 				emptyAdded++;
 			} else {
