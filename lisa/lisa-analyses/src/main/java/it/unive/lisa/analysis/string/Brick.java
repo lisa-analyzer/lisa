@@ -155,7 +155,6 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max
-	 * 
 	 */
 	public Set<String> getReps() {
 		if (getMin().isInfinite() || getMax().isInfinite())

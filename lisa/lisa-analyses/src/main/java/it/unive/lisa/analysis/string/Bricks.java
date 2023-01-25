@@ -102,7 +102,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	public Bricks wideningAux(Bricks other) throws SemanticException {
 		this.normBricks();
 		other.normBricks();
-		
+
 		if (!this.lessOrEqualAux(other) &&
 				!other.lessOrEqualAux(this))
 			return TOP;
@@ -287,7 +287,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
 
 		this.bricks.set(index, new Brick(1, 1, br.getReps()));
-		this.bricks.add(index + 1, new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
+		this.bricks.add(index + 1,
+				new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
 	}
 
 	/**
@@ -349,8 +350,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * 
 	 * @return the shorter list with empty brick in it
 	 * 
-	 * @throws IllegalArgumentException if the other brick list is longer or equal than
-	 *                                      the caller bricks object
+	 * @throws IllegalArgumentException if the other brick list is longer or
+	 *                                      equal than the caller bricks object
 	 */
 	public List<Brick> padList(final Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
