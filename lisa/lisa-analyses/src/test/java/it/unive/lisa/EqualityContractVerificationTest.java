@@ -14,6 +14,8 @@ import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
@@ -149,6 +151,9 @@ public class EqualityContractVerificationTest {
 	private static final RegularExpression re1 = new Atom("a");
 	private static final RegularExpression re2 = new Atom("b");
 
+	private static final Interval int1 = Interval.TOP;
+	private static final Interval int2 = Interval.BOTTOM;
+
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
 	private static final SingleGraph g1 = new SingleGraph("a");
@@ -239,7 +244,8 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(Set.class, s1, s2)
-				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
+				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
+				.withPrefabValues(BaseNonRelationalValueDomain.class, int1, int2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
