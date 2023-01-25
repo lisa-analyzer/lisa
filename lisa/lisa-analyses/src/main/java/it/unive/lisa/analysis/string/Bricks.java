@@ -340,6 +340,38 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if (!thisBricks.equals(tempList))
 			normBricks();
 	}
+	/**
+	 * The substring method of the bricks domain.
+	 * @return A new Bricks with all possible substrings if the conditions are met or TOP.
+	 */
+	public Bricks substring(int e, int b) {
+		this.normBricks();
+
+		Brick first = this.bricks.get(0);
+
+		TreeSet<String> result = new TreeSet<>();
+
+		if(first.getMin().equals(MathNumber.ONE) &&
+				first.getMax().equals(MathNumber.ONE) &&
+				!first.getStrings().isEmpty()) {
+			first.getStrings().forEach(s -> {
+				boolean allGreater = s.length() >= e;
+
+				if (allGreater)
+					result.add(s.substring(e, b));
+			});
+		}
+
+		if(result.size() == first.getStrings().size()) {
+			List<Brick> resultList = new ArrayList<>();
+
+			resultList.add(new Brick(new IntInterval(1,1), result));
+
+			return new Bricks(resultList);
+		}
+
+		return TOP;
+	}
 
 	/**
 	 * Pads the shortest brick list and adds empty brick elements to it, in
