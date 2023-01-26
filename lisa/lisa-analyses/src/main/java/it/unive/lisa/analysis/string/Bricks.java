@@ -346,6 +346,9 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * 
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
+	 * 
+	 * @param e The beginning index of the substring
+	 * @param b The ending index of the substring
 	 */
 	public Bricks substring(int e, int b) {
 		this.normBricks();
