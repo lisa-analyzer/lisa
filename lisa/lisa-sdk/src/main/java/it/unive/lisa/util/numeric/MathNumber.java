@@ -349,6 +349,18 @@ public class MathNumber implements Comparable<MathNumber> {
 		return cached(new MathNumber(number.max(other.number)));
 	}
 
+	public boolean leq(MathNumber other) {
+		return this.max(other).equals(other);
+	}
+
+	public boolean le(MathNumber other) {
+		return leq(other) && !equals(other);
+	}
+
+	public boolean geq(MathNumber other) {
+		return this.max(other).equals(this);
+	}
+
 	/**
 	 * Yields the absolute value of this number. If it is not a number
 	 * (according to {@link #isNaN()}), then {@link #NaN} is returned.
@@ -511,5 +523,30 @@ public class MathNumber implements Comparable<MathNumber> {
 	@Override
 	public String toString() {
 		return isNaN() ? "NaN" : isMinusInfinity() ? "-Inf" : isPlusInfinity() ? "+Inf" : number.toString();
+	}
+
+	/**
+	 * Yields the BigDecimal of this abstract value.
+	 * 
+	 * @return the BigDecimal of this abstract value
+	 * 
+	 * @throws IllegalStateException If this number is not a number or is plus
+	 *                                   infinite or is minus infinite
+	 *                                   (according to {@link #isNaN()},
+	 *                                   {@link #isPlusInfinity()} and
+	 *                                   {@link #isMinusInfinity()}
+	 *                                   respectively).
+	 */
+	public BigDecimal getNumber() {
+		if (isNaN())
+			throw new IllegalStateException();
+
+		if (isPlusInfinity())
+			throw new IllegalStateException();
+
+		if (isMinusInfinity())
+			throw new IllegalStateException();
+
+		return number;
 	}
 }
