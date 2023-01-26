@@ -57,6 +57,15 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		this.strings = strings;
 	}
 
+	/**
+	 * Builds a brick abstract element.
+	 *
+	 * @param min     a MathNumber that represents the minimum concatenations of
+	 *                    the strings set
+	 * @param max     a MathNumber that represents the maximum concatenations of
+	 *                    the strings set
+	 * @param strings the set of strings
+	 */
 	public Brick(MathNumber min, MathNumber max, Set<String> strings) {
 		this.brickInterval = new IntInterval(min, max);
 		this.strings = strings;
