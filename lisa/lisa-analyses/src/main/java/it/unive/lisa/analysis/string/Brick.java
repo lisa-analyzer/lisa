@@ -158,6 +158,10 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		return BOTTOM;
 	}
 
+	public boolean isFinite(){
+		return getMax().isFinite();
+	}
+
 	/**
 	 * Yields all the possible concatenations between min and max of the
 	 * strings. set
@@ -166,7 +170,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 *             and max
 	 */
 	public Set<String> getReps() {
-		if (getMin().isInfinite() || getMax().isInfinite())
+		if (!isFinite())
 			// TODO: what to do in this case;
 			return this.getStrings();
 		Set<String> reps = new TreeSet<>();
