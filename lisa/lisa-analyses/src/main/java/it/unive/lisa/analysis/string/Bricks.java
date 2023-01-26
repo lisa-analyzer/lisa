@@ -34,11 +34,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
 
-	private final static int kL = 10;
+	public int kL = 10;
 
-	private final static int kI = 10;
+	public int kI = 10;
 
-	private final static int kS = 20;
+	public int kS = 20;
 
 	/**
 	 * Builds the top brick abstract element.
@@ -343,12 +343,12 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	/**
 	 * The substring method of the bricks domain.
+	 *
+	 * @param e The beginning index of the substring
+	 * @param b The ending index of the substring
 	 * 
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
-	 * 
-	 * @param e The beginning index of the substring
-	 * @param b The ending index of the substring
 	 */
 	public Bricks substring(int e, int b) {
 		this.normBricks();
