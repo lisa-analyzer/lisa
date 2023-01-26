@@ -340,9 +340,12 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if (!thisBricks.equals(tempList))
 			normBricks();
 	}
+
 	/**
 	 * The substring method of the bricks domain.
-	 * @return A new Bricks with all possible substrings if the conditions are met or TOP.
+	 * 
+	 * @return A new Bricks with all possible substrings if the conditions are
+	 *             met or TOP.
 	 */
 	public Bricks substring(int e, int b) {
 		this.normBricks();
@@ -351,7 +354,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		TreeSet<String> result = new TreeSet<>();
 
-		if(first.getMin().equals(MathNumber.ONE) &&
+		if (first.getMin().equals(MathNumber.ONE) &&
 				first.getMax().equals(MathNumber.ONE) &&
 				!first.getStrings().isEmpty()) {
 			first.getStrings().forEach(s -> {
@@ -362,10 +365,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			});
 		}
 
-		if(result.size() == first.getStrings().size()) {
+		if (result.size() == first.getStrings().size()) {
 			List<Brick> resultList = new ArrayList<>();
 
-			resultList.add(new Brick(new IntInterval(1,1), result));
+			resultList.add(new Brick(new IntInterval(1, 1), result));
 
 			return new Bricks(resultList);
 		}
