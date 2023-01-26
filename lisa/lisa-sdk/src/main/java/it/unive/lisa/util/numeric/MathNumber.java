@@ -353,6 +353,10 @@ public class MathNumber implements Comparable<MathNumber> {
 		return this.max(other).equals(other);
 	}
 
+	public boolean ge(MathNumber other) {
+		return geq(other) && !equals(other);
+	}
+
 	public boolean le(MathNumber other) {
 		return leq(other) && !equals(other);
 	}
