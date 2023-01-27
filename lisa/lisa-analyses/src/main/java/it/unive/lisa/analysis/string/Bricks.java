@@ -33,11 +33,17 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	private final static Bricks TOP = new Bricks();
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
-
+	/**
+	 * The length of the bricks list used in the widening.
+	 */
 	public static int kL = 10;
-
+	/**
+	 * The indices range of a brick used in the widening.
+	 */
 	public static int kI = 10;
-
+	/**
+	 * The number of strings in the set of a brick used in the widening.
+	 */
 	public static int kS = 20;
 
 	/**
@@ -50,7 +56,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	/**
 	 * Builds a bricks abstract element.
-	 * 
+	 *
 	 * @param bricks the list of brick
 	 */
 	public Bricks(List<Brick> bricks) {
@@ -346,7 +352,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 *
 	 * @param e The beginning index of the substring
 	 * @param b The ending index of the substring
-	 * 
+	 *
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
 	 */
@@ -383,11 +389,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * Pads the shortest brick list and adds empty brick elements to it, in
 	 * order to make it the same size of the longer brick list, while
 	 * maintaining the same position of equals elements between the two lists.
-	 * 
+	 *
 	 * @param other the other bricks object, which has to yield the longer list
-	 * 
+	 *
 	 * @return the shorter list with empty brick in it
-	 * 
+	 *
 	 * @throws IllegalArgumentException if the other brick list is longer or
 	 *                                      equal than the caller bricks object
 	 */

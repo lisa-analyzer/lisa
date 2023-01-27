@@ -158,6 +158,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		return BOTTOM;
 	}
 
+	/**
+	 * Helper method to determine if the maximum of the Brick is Finite or not.
+	 *
+	 * @return true if the maximum of the Brick is Finite, false otherwise.
+	 */
 	public boolean isFinite() {
 		return getMax().isFinite();
 	}
