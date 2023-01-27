@@ -349,18 +349,46 @@ public class MathNumber implements Comparable<MathNumber> {
 		return cached(new MathNumber(number.max(other.number)));
 	}
 
+	/**
+	 * Yields {@code true} if this number is less than or equals to other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if @code{this} is less or equals than @code{other}.
+	 */
 	public boolean leq(MathNumber other) {
 		return this.max(other).equals(other);
 	}
 
+	/**
+	 * Yields {@code true} if this number is greater than other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
 	public boolean ge(MathNumber other) {
 		return geq(other) && !equals(other);
 	}
 
+	/**
+	 * Yields {@code true} if this number is less than other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
 	public boolean le(MathNumber other) {
 		return leq(other) && !equals(other);
 	}
 
+	/**
+	 * Yields {@code true} if this number is greater than or equal to other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
 	public boolean geq(MathNumber other) {
 		return this.max(other).equals(this);
 	}
