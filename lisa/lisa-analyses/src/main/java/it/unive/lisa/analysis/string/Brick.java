@@ -169,10 +169,10 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	/**
 	 * Yields all the possible concatenations between min and max of the strings
-	 * set
+	 * set.
 	 * 
 	 * @return the set of strings with all possible concatenations between min
-	 *             and max
+	 *             and max.
 	 * 
 	 * @throws IllegalStateException if the brick is not finite.
 	 */
