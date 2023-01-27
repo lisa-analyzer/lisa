@@ -168,16 +168,18 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	}
 
 	/**
-	 * Yields all the possible concatenations between min and max of the
-	 * strings. set
+	 * Yields all the possible concatenations between min and max of the strings
+	 * set
 	 * 
 	 * @return the set of strings with all possible concatenations between min
 	 *             and max
+	 * 
+	 * @throws IllegalStateException if the brick is not finite.
 	 */
 	public Set<String> getReps() {
 		if (!isFinite())
-			// TODO: what to do in this case;
-			return this.getStrings();
+			throw new IllegalStateException("Brick must be finite.");
+
 		Set<String> reps = new TreeSet<>();
 
 		try {
