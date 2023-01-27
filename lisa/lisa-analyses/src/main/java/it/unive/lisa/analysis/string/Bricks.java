@@ -34,11 +34,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	private final static Bricks BOTTOM = new Bricks(new ArrayList<>());
 
-	public int kL = 10;
+	public static int kL = 10;
 
-	public int kI = 10;
+	public static int kI = 10;
 
-	public int kS = 20;
+	public static int kS = 20;
 
 	/**
 	 * Builds the top brick abstract element.
@@ -211,12 +211,14 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return Satisfiability.UNKNOWN;
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Bricks bricks1 = (Bricks) o;
-		return kL == bricks1.kL && kI == bricks1.kI && kS == bricks1.kS && Objects.equals(bricks, bricks1.bricks);
+	@java.lang.Override
+	public boolean equals(Object object) {
+		if (this == object)
+			return true;
+		if (object == null || getClass() != object.getClass())
+			return false;
+		Bricks bricks1 = (Bricks) object;
+		return java.util.Objects.equals(bricks, bricks1.bricks);
 	}
 
 	@Override

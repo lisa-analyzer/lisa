@@ -158,7 +158,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		return BOTTOM;
 	}
 
-	public boolean isFinite(){
+	public boolean isFinite() {
 		return getMax().isFinite();
 	}
 
