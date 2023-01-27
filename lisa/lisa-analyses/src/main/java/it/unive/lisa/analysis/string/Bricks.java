@@ -213,12 +213,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o)
-			return true;
-		if (o == null || getClass() != o.getClass())
-			return false;
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
 		Bricks bricks1 = (Bricks) o;
-		return Objects.equals(bricks, bricks1.bricks);
+		return kL == bricks1.kL && kI == bricks1.kI && kS == bricks1.kS && Objects.equals(bricks, bricks1.bricks);
 	}
 
 	@Override
