@@ -1,0 +1,33 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_bricks.m1(bricks__this).json", "untyped_bricks.m2(bricks__this,_untyped_x).json", "untyped_bricks.m3(bricks__this,_untyped_x).json" ],
+  "info" : {
+    "cfgs" : "3",
+    "duration" : "828ms",
+    "end" : "2023-01-25T14:49:48.534+01:00",
+    "expressions" : "24",
+    "files" : "3",
+    "globals" : "0",
+    "members" : "3",
+    "programs" : "1",
+    "start" : "2023-01-25T14:49:47.706+01:00",
+    "statements" : "13",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingGlbThreshold" : "5",
+    "descendingPhaseType" : "NONE",
+    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/bricks"
+  }
+}
