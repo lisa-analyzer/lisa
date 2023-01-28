@@ -350,6 +350,50 @@ public class MathNumber implements Comparable<MathNumber> {
 	}
 
 	/**
+	 * Yields {@code true} if this number is less than or equals to other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if @code{this} is less or equals than @code{other}.
+	 */
+	public boolean leq(MathNumber other) {
+		return this.max(other).equals(other);
+	}
+
+	/**
+	 * Yields {@code true} if this number is greater than other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
+	public boolean ge(MathNumber other) {
+		return geq(other) && !equals(other);
+	}
+
+	/**
+	 * Yields {@code true} if this number is less than other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
+	public boolean le(MathNumber other) {
+		return leq(other) && !equals(other);
+	}
+
+	/**
+	 * Yields {@code true} if this number is greater than or equal to other.
+	 * 
+	 * @param other the other number
+	 * 
+	 * @return true if
+	 */
+	public boolean geq(MathNumber other) {
+		return this.max(other).equals(this);
+	}
+
+	/**
 	 * Yields the absolute value of this number. If it is not a number
 	 * (according to {@link #isNaN()}), then {@link #NaN} is returned.
 	 * 
@@ -511,5 +555,30 @@ public class MathNumber implements Comparable<MathNumber> {
 	@Override
 	public String toString() {
 		return isNaN() ? "NaN" : isMinusInfinity() ? "-Inf" : isPlusInfinity() ? "+Inf" : number.toString();
+	}
+
+	/**
+	 * Yields the BigDecimal of this abstract value.
+	 * 
+	 * @return the BigDecimal of this abstract value
+	 * 
+	 * @throws IllegalStateException If this number is not a number or is plus
+	 *                                   infinite or is minus infinite
+	 *                                   (according to {@link #isNaN()},
+	 *                                   {@link #isPlusInfinity()} and
+	 *                                   {@link #isMinusInfinity()}
+	 *                                   respectively).
+	 */
+	public BigDecimal getNumber() {
+		if (isNaN())
+			throw new IllegalStateException();
+
+		if (isPlusInfinity())
+			throw new IllegalStateException();
+
+		if (isMinusInfinity())
+			throw new IllegalStateException();
+
+		return number;
 	}
 }
