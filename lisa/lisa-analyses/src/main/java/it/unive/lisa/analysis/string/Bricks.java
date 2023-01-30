@@ -356,7 +356,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
 	 */
-	public Bricks substring(int e, int b) {
+	public Bricks substring(long e, long b) {
 		this.normBricks();
 
 		Brick first = this.bricks.get(0);
@@ -370,7 +370,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				boolean allGreater = s.length() >= e;
 
 				if (allGreater)
-					result.add(s.substring(e, b));
+					result.add(s.substring((int) e, (int) b));
 			});
 		}
 
