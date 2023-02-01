@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
+import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -77,14 +78,13 @@ public abstract class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 	public CompoundState<A, H, V, T> union(Statement node,
 			CompoundState<A, H, V, T> left,
 			CompoundState<A, H, V, T> right) throws SemanticException {
-		return CompoundState.of(left.postState.lub(right.postState),
-				left.intermediateStates.lub(right.intermediateStates));
+		return left.lub(right);
 	}
 
 	public static final class CompoundState<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> {
+			T extends TypeDomain<T>> implements Lattice<CompoundState<A, H, V, T>> {
 
 		public static <A extends AbstractState<A, H, V, T>,
 				H extends HeapDomain<H>,
@@ -136,6 +136,53 @@ public abstract class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 		@Override
 		public String toString() {
 			return postState + " [" + StringUtils.join(intermediateStates, "\n") + "]";
+		}
+
+		@Override
+		public boolean lessOrEqual(CompoundState<A, H, V, T> other) throws SemanticException {
+			return postState.lessOrEqual(other.postState) && intermediateStates.lessOrEqual(other.intermediateStates);
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> lub(CompoundState<A, H, V, T> other) throws SemanticException {
+			return CompoundState.of(postState.lub(other.postState), intermediateStates.lub(other.intermediateStates));
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> top() {
+			return CompoundState.of(postState.top(), intermediateStates.top());
+		}
+
+		@Override
+		public boolean isTop() {
+			return postState.isTop() && intermediateStates.isTop();
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> bottom() {
+			return CompoundState.of(postState.bottom(), intermediateStates.bottom());
+		}
+
+		@Override
+		public boolean isBottom() {
+			return postState.isBottom() && intermediateStates.isBottom();
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> glb(CompoundState<A, H, V, T> other) throws SemanticException {
+			return CompoundState.of(postState.glb(other.postState), intermediateStates.glb(other.intermediateStates));
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> narrowing(CompoundState<A, H, V, T> other) throws SemanticException {
+			return CompoundState.of(postState.narrowing(other.postState),
+					intermediateStates.narrowing(other.intermediateStates));
+		}
+
+		@Override
+		public CompoundState<A, H, V, T> widening(CompoundState<A, H, V, T> other) throws SemanticException {
+			return CompoundState.of(postState.widening(other.postState),
+					intermediateStates.widening(other.intermediateStates));
 		}
 	}
 }

@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -34,35 +32,28 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		AnalysisState<A, H, V, T> newApprox = approx.postState, oldApprox = old.postState;
-		StatementStore<A, H, V, T> newIntermediate = approx.intermediateStates,
-				oldIntermediate = old.intermediateStates;
-
-		if (widenAfter == 0) {
-			newApprox = newApprox.lub(oldApprox);
-			newIntermediate = newIntermediate.lub(oldIntermediate);
-		} else {
+		CompoundState<A, H, V, T> result;
+		
+		if (widenAfter == 0)
+			result = approx.lub(old);
+		else {
 			// we multiply by the number of predecessors since
 			// if we have more than one
 			// the threshold will be reached faster
 			int lub = lubs.computeIfAbsent(node, st -> widenAfter * graph.predecessorsOf(st).size());
-			if (lub > 0) {
-				newApprox = newApprox.lub(oldApprox);
-				newIntermediate = newIntermediate.lub(oldIntermediate);
-			} else {
-				newApprox = oldApprox.widening(newApprox);
-				newIntermediate = oldIntermediate.widening(newIntermediate);
-			}
+			if (lub > 0) 
+				result = approx.lub(old);
+			else 
+				result = approx.widening(old);
 			lubs.put(node, --lub);
 		}
 
-		return CompoundState.of(newApprox, newIntermediate);
+		return result;
 	}
 
 	@Override
 	public boolean equality(Statement node, CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		return approx.postState.lessOrEqual(old.postState)
-				&& approx.intermediateStates.lessOrEqual(old.intermediateStates);
+		return approx.lessOrEqual(old);
 	}
 }

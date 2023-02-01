@@ -1,9 +1,7 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.SemanticException;
-import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -26,20 +24,12 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		AnalysisState<A, H, V, T> newApprox = approx.postState, oldApprox = old.postState;
-		StatementStore<A, H, V, T> newIntermediate = approx.intermediateStates,
-				oldIntermediate = old.intermediateStates;
-
-		newApprox = oldApprox.narrowing(newApprox);
-		newIntermediate = oldIntermediate.narrowing(newIntermediate);
-
-		return CompoundState.of(newApprox, newIntermediate);
+		return old.narrowing(approx);
 	}
 
 	@Override
 	public boolean equality(Statement node, CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		return old.postState.lessOrEqual(approx.postState)
-				&& old.intermediateStates.lessOrEqual(approx.intermediateStates);
+		return old.lessOrEqual(approx);
 	}
 }
