@@ -100,11 +100,6 @@ public class SerializableCFG {
 			implements GraphVisitor<CFG, Statement, Edge, Map<Statement, List<Statement>>> {
 
 		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph) {
-			return false;
-		}
-
-		@Override
 		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Statement node) {
 			List<Statement> inners = tool.computeIfAbsent(node, st -> new LinkedList<>());
 			if (node instanceof NaryStatement)
@@ -112,11 +107,6 @@ public class SerializableCFG {
 			else if (node instanceof NaryExpression)
 				inners.addAll(Arrays.asList(((NaryExpression) node).getSubExpressions()));
 			return true;
-		}
-
-		@Override
-		public boolean visit(Map<Statement, List<Statement>> tool, CFG graph, Edge edge) {
-			return false;
 		}
 	}
 }

@@ -22,7 +22,8 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 
 	/**
 	 * Visits a graph, inspecting its structure and signature, but
-	 * <b>without</b> accessing its contents.
+	 * <b>without</b> accessing its contents. The default implementation does
+	 * nothing and returns {@code true}.
 	 * 
 	 * @param tool  the auxiliary tool that this visitor can use
 	 * @param graph the graph being visited
@@ -31,10 +32,13 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	boolean visit(V tool, G graph);
+	default boolean visit(V tool, G graph) {
+		return true;
+	}
 
 	/**
-	 * Visits a node of the given graph.
+	 * Visits a node of the given graph. The default implementation does nothing
+	 * and returns {@code true}.
 	 * 
 	 * @param tool  the auxiliary tool that this visitor can use
 	 * @param graph the graph where the visited node belongs
@@ -44,10 +48,13 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	boolean visit(V tool, G graph, N node);
+	default boolean visit(V tool, G graph, N node) {
+		return true;
+	}
 
 	/**
-	 * Visits an edge of the given graph.
+	 * Visits an edge of the given graph. The default implementation does
+	 * nothing and returns {@code true}.
 	 * 
 	 * @param tool  the auxiliary tool that this visitor can use
 	 * @param graph the graph where the visited edge belongs
@@ -57,5 +64,7 @@ public interface GraphVisitor<G extends Graph<G, N, E>, N extends Node<G, N, E>,
 	 *             returns. If this method returns {@code false}, the visiting
 	 *             will be interrupted
 	 */
-	boolean visit(V tool, G graph, E edge);
+	default boolean visit(V tool, G graph, E edge) {
+		return true;
+	}
 }

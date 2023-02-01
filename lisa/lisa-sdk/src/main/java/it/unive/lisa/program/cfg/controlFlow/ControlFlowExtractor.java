@@ -320,11 +320,6 @@ public class ControlFlowExtractor {
 	private static class ConditionalsExtractor implements GraphVisitor<CFG, Statement, Edge, Collection<Statement>> {
 
 		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph) {
-			return true;
-		}
-
-		@Override
 		public boolean visit(Collection<Statement> tool, CFG graph, Statement node) {
 			if (node instanceof Expression && ((Expression) node).getRootStatement() != node)
 				// we only consider root statements
@@ -333,11 +328,6 @@ public class ControlFlowExtractor {
 			if (isConditional(graph, node))
 				tool.add(node);
 
-			return true;
-		}
-
-		@Override
-		public boolean visit(Collection<Statement> tool, CFG graph, Edge edge) {
 			return true;
 		}
 	}

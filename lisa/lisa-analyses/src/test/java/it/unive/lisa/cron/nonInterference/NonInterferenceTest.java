@@ -19,10 +19,7 @@ import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.Global;
-import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
-import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
 
@@ -77,47 +74,6 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 					TypeEnvironment<InferredTypes>> {
 
 		@Override
-		public void beforeExecution(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap, InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public void afterExecution(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public void visitGlobal(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				Unit unit, Global global,
-				boolean instance) {
-		}
-
-		@Override
-		public boolean visit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				CFG graph) {
-			return true;
-		}
-
-		@Override
 		@SuppressWarnings({ "unchecked" })
 		public boolean visit(
 				CheckToolWithAnalysisResults<
@@ -158,30 +114,6 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 					tool.warnOn(assign,
 							"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 			}
-			return true;
-		}
-
-		@Override
-		public boolean visit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				CFG graph, Edge edge) {
-			return true;
-		}
-
-		@Override
-		public boolean visitUnit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, InferenceSystem<NonInterference>,
-								TypeEnvironment<InferredTypes>>,
-						MonolithicHeap,
-						InferenceSystem<NonInterference>,
-						TypeEnvironment<InferredTypes>> tool,
-				Unit unit) {
 			return true;
 		}
 	}

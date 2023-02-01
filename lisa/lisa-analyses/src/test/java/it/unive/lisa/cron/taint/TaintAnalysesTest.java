@@ -23,12 +23,9 @@ import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
-import it.unive.lisa.program.Global;
-import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.Parameter;
-import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -71,40 +68,6 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 					MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> {
 
 		@Override
-		public void beforeExecution(CheckToolWithAnalysisResults<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public void afterExecution(CheckToolWithAnalysisResults<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool) {
-		}
-
-		@Override
-		public boolean visitUnit(CheckToolWithAnalysisResults<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool, Unit unit) {
-			return true;
-		}
-
-		@Override
-		public void visitGlobal(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-						MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool,
-				Unit unit, Global global, boolean instance) {
-		}
-
-		@Override
-		public boolean visit(CheckToolWithAnalysisResults<
-				SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-				MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool, CFG graph) {
-			return true;
-		}
-
-		@Override
 		public boolean visit(
 				CheckToolWithAnalysisResults<
 						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
@@ -144,15 +107,5 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 
 			return true;
 		}
-
-		@Override
-		public boolean visit(
-				CheckToolWithAnalysisResults<
-						SimpleAbstractState<MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>>,
-						MonolithicHeap, ValueEnvironment<T>, TypeEnvironment<InferredTypes>> tool,
-				CFG graph, Edge edge) {
-			return true;
-		}
-
 	}
 }

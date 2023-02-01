@@ -27,24 +27,29 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 
 	/**
 	 * Callback invoked only once before the beginning of the inspection of the
-	 * program. Can be used to setup common data structures.
+	 * program. Can be used to setup common data structures. The default
+	 * implementation does nothing.
 	 * 
 	 * @param tool the auxiliary tool that this check can use during the
 	 *                 execution
 	 */
-	void beforeExecution(T tool);
+	default void beforeExecution(T tool) {
+	}
 
 	/**
 	 * Callback invoked only once after the end of the inspection of the
 	 * program. Can be used to perform cleanups or to report summary warnings.
+	 * The default implementation does nothing.
 	 * 
 	 * @param tool the auxiliary tool that this check can use during the
 	 *                 execution
 	 */
-	void afterExecution(T tool);
+	default void afterExecution(T tool) {
+	}
 
 	/**
-	 * Visits the given unit.
+	 * Visits the given unit. The default implementation does nothing and
+	 * returns {@code true}.
 	 * 
 	 * @param tool the auxiliary tool that this visitor can use
 	 * @param unit the unit being visited
@@ -53,10 +58,12 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 *             returns. If this method returns {@code false}, all members of
 	 *             the unit will not be visited.
 	 */
-	boolean visitUnit(T tool, Unit unit);
+	default boolean visitUnit(T tool, Unit unit) {
+		return true;
+	}
 
 	/**
-	 * Visits the given global.
+	 * Visits the given global. The default implementation does nothing.
 	 * 
 	 * @param tool     the auxiliary tool that this visitor can use
 	 * @param unit     the unit where the global belongs
@@ -64,5 +71,6 @@ public interface Check<T> extends GraphVisitor<CFG, Statement, Edge, T> {
 	 * @param instance whether or not the global is an instance member of the
 	 *                     unit
 	 */
-	void visitGlobal(T tool, Unit unit, Global global, boolean instance);
+	default void visitGlobal(T tool, Unit unit, Global global, boolean instance) {
+	}
 }
