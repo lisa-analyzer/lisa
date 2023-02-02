@@ -109,7 +109,7 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @return the middle point of the interval
 	 */
-	private MathNumber middlePoint(Interval interval) {
+	public MathNumber middlePoint(Interval interval) {
 		if (interval.interval.isFinite())
 			return interval.interval.getLow().add(interval.interval.getHigh()).divide(new MathNumber(2));
 		else if (interval.interval.getHigh().isFinite() && !interval.interval.getLow().isFinite())
