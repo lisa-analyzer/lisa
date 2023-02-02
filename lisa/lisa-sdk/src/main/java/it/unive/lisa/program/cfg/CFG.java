@@ -1068,4 +1068,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public Statement getMostRecentIfThenElseGuard(ProgramPoint pp) {
 		return getRecent(pp, IfThenElse.class::isInstance);
 	}
+
+	public ControlFlowStructure getControlFlowStructureOf(ProgramPoint guard) {
+		for (ControlFlowStructure struct : getControlFlowStructures())
+			if (struct.getCondition().equals(guard))
+				return struct;
+		return null;
+	}
 }
