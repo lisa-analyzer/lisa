@@ -1,13 +1,5 @@
 package it.unive.lisa.analysis.string.bricks;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -26,6 +18,12 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The bricks string abstract domain.
@@ -222,38 +220,38 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if (left.isTop() || right.isBottom())
 			return SemanticDomain.Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE) {		
+		if (operator == StringContains.INSTANCE) {
 			return contains(right);
 		}
-		
+
 		return Satisfiability.UNKNOWN;
 	}
 
 	private Satisfiability contains(Bricks right) {
 		if (right.bricks.size() != 1)
 			return Satisfiability.UNKNOWN;
-		
+
 		if (right.bricks.get(0).getStrings().size() != 1)
 			return Satisfiability.UNKNOWN;
-		
+
 		if (right.bricks.get(0).getStrings().iterator().next().length() != 1)
 			return Satisfiability.UNKNOWN;
-		
+
 		String c = right.bricks.get(0).getStrings().iterator().next();
-		
+
 		boolean res = bricks.stream()
 				.filter(b -> b.getMin().gt(MathNumber.ZERO))
 				.map(b -> b.getStrings())
 				.anyMatch(set -> set.stream().allMatch(s -> s.contains(c)));
 		if (res)
 			return Satisfiability.SATISFIED;
-		
+
 		res = bricks.stream()
 				.map(b -> b.getStrings())
 				.allMatch(set -> set.stream().allMatch(s -> !s.contains(c)));
 		if (res)
 			return Satisfiability.NOT_SATISFIED;
-		
+
 		return Satisfiability.UNKNOWN;
 	}
 

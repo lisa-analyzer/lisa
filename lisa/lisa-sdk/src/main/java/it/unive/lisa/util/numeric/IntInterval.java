@@ -52,7 +52,7 @@ public class IntInterval implements Iterable<Long> {
 	/**
 	 * Builds a new interval.
 	 * 
-	 * @param low  the lower bound (if {@code null}, -inf will be used) 
+	 * @param low  the lower bound (if {@code null}, -inf will be used)
 	 * @param high the upper bound (if {@code null}, +inf will be used)
 	 * 
 	 * @throws IllegalArgumentException if {@code low > high}

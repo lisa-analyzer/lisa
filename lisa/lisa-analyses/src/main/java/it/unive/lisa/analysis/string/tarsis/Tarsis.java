@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-
 import java.util.Objects;
 import java.util.SortedSet;
 import org.apache.commons.lang3.tuple.Pair;

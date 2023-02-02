@@ -1770,7 +1770,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 
 		return true;
 	}
-	
+
 	public A factorsChangingInitialState(State s) {
 		SortedSet<State> newStates = new TreeSet<>();
 		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
