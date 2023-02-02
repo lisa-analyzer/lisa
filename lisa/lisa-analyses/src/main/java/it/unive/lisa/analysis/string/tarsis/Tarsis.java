@@ -16,6 +16,8 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import it.unive.lisa.util.numeric.IntInterval;
+
 import java.util.Objects;
 import java.util.SortedSet;
 import org.apache.commons.lang3.tuple.Pair;
@@ -265,18 +267,20 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	/**
-	 * Yields the minimum and maximum length of this abstract value. Yields
-	 * {@link Integer#MAX_VALUE} if the maximum length is unknown.
+	 * Yields the {@link IntInterval} containing the minimum and maximum length
+	 * of this abstract value.
 	 * 
 	 * @return the minimum and maximum length of this abstract value
 	 */
-	public Pair<Integer, Integer> length() {
-		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
+	public IntInterval length() {
+		int max = a.lenghtOfLongestString();
+		int min = a.toRegex().minLength();
+		return new IntInterval(Integer.valueOf(min), max == Integer.MAX_VALUE ? null : max);
 	}
 
 	/**
-	 * Yields the minimum and maximum index of {@code s} in {@code this}. Yields
-	 * {@link Integer#MAX_VALUE} if the maximum index of is unknown.
+	 * Yields the {@link IntInterval} containing the minimum and maximum index
+	 * of {@code s} in {@code this}.
 	 *
 	 * @param s the string to be searched
 	 * 
@@ -285,12 +289,12 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	 * @throws CyclicAutomatonException when the automaton is cyclic and its
 	 *                                      language is accessed
 	 */
-	public Pair<Integer, Integer> indexOf(Tarsis s) throws CyclicAutomatonException {
+	public IntInterval indexOf(Tarsis s) throws CyclicAutomatonException {
 		if (contains(s) == Satisfiability.SATISFIED)
-			return Pair.of(-1, -1);
+			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())
-			return Pair.of(-1, Integer.MAX_VALUE);
+			return new IntInterval(-1, Integer.MAX_VALUE);
 		Pair<Integer, Integer> interval = IndexFinder.findIndexesOf(a, s.a);
-		return Pair.of(interval.getLeft(), interval.getRight() == null ? Integer.MAX_VALUE : interval.getRight());
+		return new IntInterval(interval.getLeft(), interval.getRight());
 	}
 }

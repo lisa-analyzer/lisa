@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -13,11 +19,8 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import org.apache.commons.lang3.tuple.Pair;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -204,12 +207,76 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	}
 
 	/**
-	 * Yields the minimum and maximum length of this abstract value. Yields
-	 * {@link Integer#MAX_VALUE} if the maximum length is unknown.
+	 * Yields the {@link IntInterval} containing the minimum and maximum length
+	 * of this abstract value.
 	 * 
 	 * @return the minimum and maximum length of this abstract value
 	 */
-	public Pair<Integer, Integer> length() {
-		return Pair.of(a.toRegex().minLength(), a.lenghtOfLongestString());
+	public IntInterval length() {
+		return new IntInterval(a.toRegex().minLength(), a.lenghtOfLongestString());
+	}
+
+	/**
+	 * Yields the {@link IntInterval} containing the minimum and maximum index
+	 * of {@code s} in {@code this}.
+	 *
+	 * @param s the string to be searched
+	 * 
+	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 * 
+	 * @throws CyclicAutomatonException when the automaton is cyclic and its
+	 *                                      language is accessed
+	 */
+	public IntInterval indexOf(FSA s) throws CyclicAutomatonException {
+		if (a.hasCycle())
+			return mkInterval(-1, null);
+
+		if (!a.hasCycle() && !s.a.hasCycle()) {
+			Set<String> first = a.getLanguage();
+			Set<String> second = s.a.getLanguage();
+
+			IntInterval result = null;
+			for (String f1 : first) {
+				for (String f2 : second) {
+					IntInterval partial;
+
+					if (f1.contains(f2)) {
+						int i = f1.indexOf(f2);
+						partial = mkInterval(i, i);
+					} else {
+						partial = mkInterval(-1, -1);
+					}
+					result = result == null ? partial : mkInterval(partial, result);
+				}
+			}
+
+			return result;
+		}
+
+		HashSet<Integer> indexesOf = new HashSet<>();
+		for (State q : a.getStates()) {
+			SimpleAutomaton build = a.factorsChangingInitialState(q);
+			if (!build.intersection(s.a).acceptsEmptyLanguage())
+				indexesOf.add(a.maximumPath(q, q).size() - 1);
+		}
+
+		// No state in the automaton can read search
+		if (indexesOf.isEmpty())
+			return mkInterval(-1, -1);
+		else if (s.a.recognizesExactlyOneString() && a.recognizesExactlyOneString())
+			return mkInterval(indexesOf.stream().mapToInt(i -> i).min().getAsInt(),
+					indexesOf.stream().mapToInt(i -> i).max().getAsInt());
+		else
+			return mkInterval(-1, indexesOf.stream().mapToInt(i -> i).max().getAsInt());
+	}
+
+	private IntInterval mkInterval(Integer min, Integer max) {
+		return new IntInterval(min, max);
+	}
+
+	private IntInterval mkInterval(IntInterval first, IntInterval second) {
+		MathNumber newLow = first.getLow().min(second.getLow());
+		MathNumber newHigh = first.getHigh().max(second.getHigh());
+		return new IntInterval(newLow, newHigh);
 	}
 }

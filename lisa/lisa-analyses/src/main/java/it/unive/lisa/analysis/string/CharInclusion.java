@@ -1,5 +1,12 @@
 package it.unive.lisa.analysis.string;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -17,12 +24,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
 import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import it.unive.lisa.util.numeric.IntInterval;
 
 /**
  * The suffix string abstract domain.
@@ -274,24 +276,24 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	}
 
 	/**
-	 * Yields the minimum and maximum length of this abstract value. Yields
-	 * {@link Integer#MAX_VALUE} if the maximum length is unknown.
+	 * Yields the {@link IntInterval} containing the minimum and maximum length
+	 * of this abstract value.
 	 * 
 	 * @return the minimum and maximum length of this abstract value
 	 */
-	public Pair<Integer, Integer> length() {
-		return Pair.of(getCertainlyContained().size(), Integer.MAX_VALUE);
+	public IntInterval length() {
+		return new IntInterval(getCertainlyContained().size(), Integer.MAX_VALUE);
 	}
 
 	/**
-	 * Yields the minimum and maximum index of {@code s} in {@code this}. Yields
-	 * {@link Integer#MAX_VALUE} if the maximum index of is unknown.
+	 * Yields the {@link IntInterval} containing the minimum and maximum index
+	 * of {@code s} in {@code this}.
 	 *
 	 * @param s the string to be searched
 	 * 
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
-	public Pair<Integer, Integer> indexOf(CharInclusion s) {
-		return Pair.of(-1, Integer.MAX_VALUE);
+	public IntInterval indexOf(CharInclusion s) {
+		return new IntInterval(-1, Integer.MAX_VALUE);
 	}
 }

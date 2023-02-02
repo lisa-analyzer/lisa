@@ -1472,6 +1472,65 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	}
 
 	/**
+	 * Finds the maximum path between the two given states using the Dijkstra
+	 * algorithm.
+	 * 
+	 * @param src    the source node
+	 * @param target the destination node
+	 * 
+	 * @return the maximum path
+	 */
+	public List<State> maximumPath(State src, State target) {
+		Set<State> unSettledNodes = new HashSet<>();
+		Map<State, Integer> distance = new HashMap<>();
+		Map<State, State> predecessors = new HashMap<>();
+
+		distance.put(src, 0);
+		unSettledNodes.add(src);
+
+		while (unSettledNodes.size() > 0) {
+			State node = getMaximum(unSettledNodes, distance);
+			unSettledNodes.remove(node);
+			findMaximumDistances(node, distance, predecessors, unSettledNodes);
+		}
+
+		return getPath(target, predecessors);
+	}
+
+	private void findMaximumDistances(State node, Map<State, Integer> distance, Map<State, State> predecessors,
+			Set<State> unSettledNodes) {
+		Set<State> adjacentNodes = getNextStates(node);
+		int longest = getLongestDistance(node, distance);
+		for (State target : adjacentNodes) {
+			int dist = getDistance(node, target);
+			if (getLongestDistance(target, distance) < longest + dist) {
+				distance.put(target, longest + dist);
+				predecessors.put(target, node);
+				unSettledNodes.add(target);
+			}
+		}
+	}
+
+	private static State getMaximum(Set<State> vertexes, Map<State, Integer> distance) {
+		State maximum = null;
+		for (State vertex : vertexes)
+			if (maximum == null)
+				maximum = vertex;
+			else if (getLongestDistance(vertex, distance) > getLongestDistance(maximum, distance))
+				maximum = vertex;
+
+		return maximum;
+	}
+
+	private static int getLongestDistance(State destination, Map<State, Integer> distance) {
+		Integer d = distance.get(destination);
+		if (d == null)
+			return Integer.MIN_VALUE;
+		else
+			return d;
+	}
+
+	/**
 	 * Yields {@code true} if and only if this automaton has only one path. This
 	 * means that, after minimization, if the automaton has only one path then
 	 * the each state is the starting point of a transition at most once, and it
@@ -1692,6 +1751,44 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 				len = Math.max(len, t.getSymbol().maxLength());
 
 		return len;
+	}
+
+	/**
+	 * Yields {@code true} if this automaton recognizes exactly one string, that
+	 * is, if it has no loops and all states have at most one outgoing
+	 * transition.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	public boolean recognizesExactlyOneString() {
+		if (hasCycle())
+			return false;
+
+		for (State s : getStates())
+			if (getOutgoingTransitionsFrom(s).size() > 1)
+				return false;
+
+		return true;
+	}
+	
+	public A factorsChangingInitialState(State s) {
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<>();
+
+		for (State q : states) {
+			State mock = new State(q.getId(), q == s ? true : false, true);
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition<T> t : transitions)
+			newDelta.add(new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
+
+		return from(newStates, newDelta).minimize();
 	}
 
 	@Override
