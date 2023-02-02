@@ -116,7 +116,7 @@ public abstract class DataflowDomain<D extends DataflowDomain<D, E>, E extends D
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public D assume(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public D assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		// TODO could be refined
 		return (D) this;
 	}

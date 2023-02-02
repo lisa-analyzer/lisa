@@ -57,14 +57,17 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * always return {@code this}.
 	 * 
 	 * @param expression the expression to assume to hold.
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
+	 * @param src        the program point that where this operation is being
+	 *                       evaluated, corresponding to the one that generated
+	 *                       the given expression
+	 * @param dest       the program point where the execution will move after
+	 *                       the expression has been assumed
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assume(E expression, ProgramPoint pp) throws SemanticException;
+	D assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
 
 	/**
 	 * Forgets an {@link Identifier}. This means that all information regarding
@@ -427,7 +430,7 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * @return the instance of that domain, or {@code null}
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> T getDomainInstance(Class<T> domain) {
+	default <T extends SemanticDomain<?, ?, ?>> T getDomainInstance(Class<T> domain) {
 		if (domain.isAssignableFrom(getClass()))
 			return (T) this;
 

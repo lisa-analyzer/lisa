@@ -307,10 +307,10 @@ public abstract class NonRedundantPowerset<C extends NonRedundantPowerset<C, T, 
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint pp) throws SemanticException {
+	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		Set<T> newElements = new HashSet<T>();
 		for (T elem : this.elements) {
-			newElements.add(elem.assume(expression, pp));
+			newElements.add(elem.assume(expression, src, dest));
 		}
 		return mk(newElements).removeRedundancy();
 	}

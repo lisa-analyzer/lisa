@@ -628,8 +628,8 @@ public interface BaseInferredValue<T extends BaseInferredValue<T>> extends BaseL
 	}
 
 	@Override
-	default InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint pp)
-			throws SemanticException {
+	default InferenceSystem<T> assume(InferenceSystem<T> environment, ValueExpression expression, ProgramPoint src,
+			ProgramPoint dest) throws SemanticException {
 		return environment;
 	}
 }

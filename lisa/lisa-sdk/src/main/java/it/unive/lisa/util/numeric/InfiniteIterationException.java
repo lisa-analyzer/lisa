@@ -8,6 +8,8 @@ package it.unive.lisa.util.numeric;
  */
 public class InfiniteIterationException extends RuntimeException {
 
+	private static final long serialVersionUID = -8505901233292219893L;
+
 	/**
 	 * Builds the exception.
 	 * 

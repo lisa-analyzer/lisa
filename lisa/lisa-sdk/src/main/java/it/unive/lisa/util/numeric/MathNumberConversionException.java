@@ -8,6 +8,8 @@ package it.unive.lisa.util.numeric;
  */
 public class MathNumberConversionException extends Exception {
 
+	private static final long serialVersionUID = 8946152199095876219L;
+
 	/**
 	 * Builds the exception.
 	 * 

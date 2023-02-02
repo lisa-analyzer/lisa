@@ -179,24 +179,24 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
+	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
-		H heap = heapState.assume(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
+		H heap = heapState.assume(expression, src, dest);
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, src);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, src);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
-			T tmp = type.smallStepSemantics(expr, pp);
+			T tmp = type.smallStepSemantics(expr, src);
 			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			typeRes = typeRes.lub(type.assume(expr, pp));
-			valueRes = valueRes.lub(value.assume(expr, pp));
+			typeRes = typeRes.lub(type.assume(expr, src, dest));
+			valueRes = valueRes.lub(value.assume(expr, src, dest));
 		}
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
@@ -364,7 +364,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <D> D getDomainInstance(Class<D> domain) {
+	public <D extends SemanticDomain<?, ?, ?>> D getDomainInstance(Class<D> domain) {
 		if (domain.isAssignableFrom(getClass()))
 			return (D) this;
 

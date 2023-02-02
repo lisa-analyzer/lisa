@@ -274,7 +274,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " == " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonEq.INSTANCE,
-							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp));
+							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, pp));
 		}
 	}
 
@@ -290,7 +290,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " > " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonGt.INSTANCE,
-							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp));
+							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, pp));
 		}
 	}
 
@@ -305,7 +305,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " >= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonGe.INSTANCE,
-							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp));
+							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, pp));
 		}
 	}
 
@@ -321,7 +321,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " < " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonLt.INSTANCE,
-							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp));
+							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, pp));
 		}
 	}
 
@@ -336,7 +336,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = env.putState(variable, aval);
 			assertEquals("assume(" + variable + " <= " + val + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(env, ComparisonLe.INSTANCE,
-							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp));
+							variable, new Constant(Int32Type.INSTANCE, val, pp.getLocation()), pp, pp));
 		}
 	}
 
@@ -582,7 +582,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> exp = start.putState(variable, aval);
 			assertEquals("assume(" + variable + " == " + aval + ") did not return " + exp, exp,
 					singleton.assumeBinaryExpression(start, ComparisonEq.INSTANCE,
-							variable, varAux, pp));
+							variable, varAux, pp, pp));
 		}
 	}
 
@@ -598,7 +598,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> start = env.putState(varAux, bound);
 			ValueEnvironment<Interval> exp = start.putState(variable, aval);
 			ValueEnvironment<Interval> act = singleton.assumeBinaryExpression(start, ComparisonGt.INSTANCE,
-					variable, varAux, pp);
+					variable, varAux, pp, pp);
 			assertEquals("assume(" + variable + " > " + bound + ") did not return " + exp, exp, act);
 		}
 	}
@@ -614,7 +614,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> start = env.putState(varAux, bound);
 			ValueEnvironment<Interval> exp = start.putState(variable, aval);
 			ValueEnvironment<Interval> act = singleton.assumeBinaryExpression(start, ComparisonGe.INSTANCE,
-					variable, varAux, pp);
+					variable, varAux, pp, pp);
 			assertEquals("assume(" + variable + " >= " + bound + ") did not return " + exp, exp, act);
 		}
 	}
@@ -631,7 +631,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> start = env.putState(varAux, bound);
 			ValueEnvironment<Interval> exp = start.putState(variable, aval);
 			ValueEnvironment<Interval> act = singleton.assumeBinaryExpression(start, ComparisonLt.INSTANCE,
-					variable, varAux, pp);
+					variable, varAux, pp, pp);
 			assertEquals("assume(" + variable + " < " + bound + ") did not return " + exp, exp, act);
 		}
 	}
@@ -647,7 +647,7 @@ public class IntervalTest {
 			ValueEnvironment<Interval> start = env.putState(varAux, bound);
 			ValueEnvironment<Interval> exp = start.putState(variable, aval);
 			ValueEnvironment<Interval> act = singleton.assumeBinaryExpression(start, ComparisonLe.INSTANCE,
-					variable, varAux, pp);
+					variable, varAux, pp, pp);
 			assertEquals("assume(" + variable + " <= " + bound + ") did not return " + exp, exp, act);
 		}
 	}

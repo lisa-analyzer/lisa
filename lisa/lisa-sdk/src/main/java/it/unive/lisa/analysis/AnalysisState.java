@@ -186,8 +186,9 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		return new AnalysisState<>(state.assume(expression, pp), computedExpressions, aliasing);
+	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
+		return new AnalysisState<>(state.assume(expression, src, dest), computedExpressions, aliasing);
 	}
 
 	@Override
@@ -340,7 +341,7 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <D> D getDomainInstance(Class<D> domain) {
+	public <D extends SemanticDomain<?, ?, ?>> D getDomainInstance(Class<D> domain) {
 		if (domain.isAssignableFrom(getClass()))
 			return (D) this;
 

@@ -269,7 +269,7 @@ public class SemanticsSanityTest {
 
 		@Override
 		public HeapEnvironment<NRHeap> assume(HeapEnvironment<NRHeap> environment, SymbolicExpression expression,
-				ProgramPoint pp) throws SemanticException {
+				ProgramPoint src, ProgramPoint dest) throws SemanticException {
 			return environment;
 		}
 

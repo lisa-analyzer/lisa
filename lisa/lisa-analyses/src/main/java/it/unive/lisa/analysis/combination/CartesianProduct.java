@@ -149,9 +149,9 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.assume(expression, pp);
-		T2 newRight = right.assume(expression, pp);
+	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		T1 newLeft = left.assume(expression, src, dest);
+		T2 newRight = right.assume(expression, src, dest);
 		return mk(newLeft, newRight);
 	}
 
@@ -226,7 +226,7 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> T getDomainInstance(Class<T> domain) {
+	public <T extends SemanticDomain<?, ?, ?>> T getDomainInstance(Class<T> domain) {
 		if (domain.isAssignableFrom(getClass()))
 			return (T) this;
 

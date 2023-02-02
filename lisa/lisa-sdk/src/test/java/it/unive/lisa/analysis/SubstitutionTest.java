@@ -54,7 +54,7 @@ public class SubstitutionTest {
 		}
 
 		@Override
-		public Collector assume(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+		public Collector assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 			return null; // not used
 		}
 

@@ -208,9 +208,10 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public PointBasedHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public PointBasedHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		// we just rewrite the expression if needed
-		return smallStepSemantics(expression, pp);
+		return smallStepSemantics(expression, src);
 	}
 
 	@Override
