@@ -17,6 +17,7 @@ import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 
 import java.util.Objects;
 import java.util.SortedSet;
@@ -293,7 +294,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		if (contains(s) == Satisfiability.SATISFIED)
 			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())
-			return new IntInterval(-1, Integer.MAX_VALUE);
+			return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 		Pair<Integer, Integer> interval = IndexFinder.findIndexesOf(a, s.a);
 		return new IntInterval(interval.getLeft(), interval.getRight());
 	}

@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 
 /**
  * The prefix string abstract domain.
@@ -201,7 +202,7 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 	 * @return the minimum and maximum length of this abstract value
 	 */
 	public IntInterval length() {
-		return new IntInterval(prefix.length(), Integer.MAX_VALUE);
+		return new IntInterval(new MathNumber(prefix.length()), MathNumber.PLUS_INFINITY);
 	}
 
 	/**
@@ -213,6 +214,6 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
 	public IntInterval indexOf(Prefix s) {
-		return new IntInterval(-1, Integer.MAX_VALUE);
+		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 }

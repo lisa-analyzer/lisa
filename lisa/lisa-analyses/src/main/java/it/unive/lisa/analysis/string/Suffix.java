@@ -19,6 +19,7 @@ import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 
 /**
  * The suffix string abstract domain.
@@ -194,7 +195,7 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	 * @return the minimum and maximum length of this abstract value
 	 */
 	public IntInterval length() {
-		return new IntInterval(suffix.length(), Integer.MAX_VALUE);
+		return new IntInterval(new MathNumber(suffix.length()), MathNumber.PLUS_INFINITY);
 	}
 
 	/**
@@ -206,6 +207,6 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
 	public IntInterval indexOf(Suffix s) {
-		return new IntInterval(-1, Integer.MAX_VALUE);
+		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 }
