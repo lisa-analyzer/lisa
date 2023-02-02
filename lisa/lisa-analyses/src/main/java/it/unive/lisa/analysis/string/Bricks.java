@@ -242,10 +242,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return BOTTOM;
 	}
 
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
+//	@Override
+//	public String toString() {
+//		return representation().toString();
+//	}
 
 	@Override
 	public DomainRepresentation representation() {

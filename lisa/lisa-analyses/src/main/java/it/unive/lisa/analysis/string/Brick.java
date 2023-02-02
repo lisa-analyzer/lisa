@@ -158,6 +158,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		return BOTTOM;
 	}
 
+	@Override
+	public boolean isTop() {
+		return equals(new Brick());
+	}
+
 	/**
 	 * Helper method to determine if the maximum of the Brick is Finite or not.
 	 *
@@ -233,7 +238,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	private static Set<String> getAlphabet() {
 		Set<String> alphabet = new TreeSet<>();
 
-		for (char c = 'a'; c <= 'z'; c++) {
+		for (char c = 32; c <= 123; c++) {
 			alphabet.add(String.valueOf(c));
 		}
 
