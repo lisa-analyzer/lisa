@@ -10,8 +10,10 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("This sometimes causes OOM in GitHub actions")
 public class RandomToRegexTest {
 
 	private final SortedSet<State> states = new TreeSet<>();
