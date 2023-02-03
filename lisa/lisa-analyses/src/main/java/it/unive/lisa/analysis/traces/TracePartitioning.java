@@ -44,8 +44,7 @@ import java.util.function.Predicate;
  * {@link #getMap()} or by iterating over the instance itself. Approximations of
  * different traces can instead be collapsed and accessed by querying
  * {@link #getHeapState()}, {@link #getValueState()}, and
- * {@link #getTypeState()}, or by manually manipulating the values returned by
- * {@link #getDomainInstance(Class)}.
+ * {@link #getTypeState()}, or {@link #collapse()}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -95,18 +94,13 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 		if (domain.isAssignableFrom(getClass()))
 			return (D) this;
 
-		D result = null;
-
 		for (A dom : getValues()) {
 			D tmp = dom.getDomainInstance(domain);
 			if (tmp != null)
-				if (result == null)
-					result = tmp;
-				else
-					result = null; // TODO
+				return tmp;
 		}
 
-		return result;
+		return null;
 	}
 
 	@Override
@@ -404,4 +398,26 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 		return new TracePartitioning<>(lattice, function);
 	}
 
+	/**
+	 * Collapses all of the traces contained in this domain, returning a unique
+	 * abstract state that over-approximates all of them.
+	 * 
+	 * @return the collapsed state
+	 */
+	public A collapse() {
+		if (isTop())
+			return lattice.top();
+
+		A result = lattice.bottom();
+		if (isBottom() || function == null)
+			return result;
+
+		try {
+			for (Entry<ExecutionTrace, A> trace : this)
+				result = result.lub(trace.getValue());
+		} catch (SemanticException e) {
+			return result.bottom();
+		}
+		return result;
+	}
 }

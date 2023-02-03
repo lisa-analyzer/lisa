@@ -422,7 +422,10 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * <br>
 	 * The default implementation of this method returns {@code this} if
 	 * {@code domain.isAssignableFrom(getClass()) == true}, otherwise it returns
-	 * {@code null}.
+	 * {@code null}.<br>
+	 * <br>
+	 * Note that if this domain contains more instances of the specified class,
+	 * then an arbitrary one is returned.
 	 * 
 	 * @param <T>    the type of domain to retrieve
 	 * @param domain the class of the domain instance to retrieve
