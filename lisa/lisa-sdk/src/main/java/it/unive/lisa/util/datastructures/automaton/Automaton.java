@@ -1771,6 +1771,14 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return true;
 	}
 
+	/**
+	 * Yields a copy of this automaton, but where all states are final and only
+	 * the given state is initial.
+	 * 
+	 * @param s the state to make the initial state
+	 * 
+	 * @return the modified copy of this automaton
+	 */
 	public A factorsChangingInitialState(State s) {
 		SortedSet<State> newStates = new TreeSet<>();
 		Map<Integer, State> nameToStates = new HashMap<Integer, State>();

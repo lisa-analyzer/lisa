@@ -1069,6 +1069,14 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return getRecent(pp, IfThenElse.class::isInstance);
 	}
 
+	/**
+	 * Yields the {@link ControlFlowStructure} that uses {@code guard} as
+	 * condition, if any.
+	 * 
+	 * @param guard the condition
+	 * 
+	 * @return the control flow structure, or {@code null}
+	 */
 	public ControlFlowStructure getControlFlowStructureOf(ProgramPoint guard) {
 		for (ControlFlowStructure struct : getControlFlowStructures())
 			if (struct.getCondition().equals(guard))
