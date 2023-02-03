@@ -57,6 +57,6 @@ public abstract class TraceToken {
 
 	@Override
 	public String toString() {
-		return pp.getLocation().toString();
+		return pp.toString();
 	}
 }
