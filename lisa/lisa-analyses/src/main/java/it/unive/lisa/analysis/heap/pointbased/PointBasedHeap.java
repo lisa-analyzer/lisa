@@ -426,9 +426,12 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			Set<ValueExpression> result = new HashSet<>();
 
 			for (ValueExpression ref : arg)
-				if (ref instanceof MemoryPointer)
-					result.add(((MemoryPointer) ref).getReferencedLocation());
-				else if (ref instanceof Identifier) {
+				if (ref instanceof MemoryPointer) {
+					HeapLocation location = ((MemoryPointer) ref).getReferencedLocation();
+					if (location instanceof VariableAllocationSite)
+						result.add(((VariableAllocationSite) location).getIdentifier());
+					else result.add(location);
+				} else if (ref instanceof Identifier) {
 					// this could be aliasing!
 					Identifier id = (Identifier) ref;
 					if (heapEnv.getKeys().contains(id))
@@ -458,10 +461,16 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				throws SemanticException {
 			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
 				return new ExpressionSet<>(resolveIdentifier(expression));
-
+			else if (!(expression instanceof MemoryPointer)) {
+				VariableAllocationSite site = new VariableAllocationSite(expression.getStaticType(), expression, expression.getCodeLocation());
+				if (expression.hasRuntimeTypes())
+					site.setRuntimeTypes(expression.getRuntimeTypes(null));
+				return new ExpressionSet<>(site);
+			}
+			
 			return new ExpressionSet<>(expression);
 		}
-
+		
 		private Set<ValueExpression> resolveIdentifier(Identifier v) {
 			Set<ValueExpression> result = new HashSet<>();
 			for (AllocationSite site : heapEnv.getState(v)) {
