@@ -100,7 +100,10 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 				return tmp;
 		}
 
-		return null;
+		// in this way we can return top/bottom/null
+		// TODO this is also used to get typing information. Returning the first
+		// instance might lead to errors
+		return lattice.getDomainInstance(domain);
 	}
 
 	@Override
@@ -159,8 +162,9 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 					return this;
 				else
 					for (Entry<ExecutionTrace, A> trace : this) {
+						Satisfiability sat = trace.getValue().satisfies(expression, src);
 						A assume = trace.getValue().assume(expression, src, dest);
-						if (!assume.isBottom())
+						if (sat.mightBeTrue() && !assume.isBottom())
 							// we only keep traces that can escape the loop
 							result.put(trace.getKey(), assume);
 					}
@@ -174,8 +178,9 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 					result.put(new ExecutionTrace().push(token), lattice.top());
 				} else
 					for (Entry<ExecutionTrace, A> trace : this) {
+						Satisfiability sat = trace.getValue().satisfies(expression, src);
 						A assume = trace.getValue().assume(expression, src, dest);
-						if (assume.isBottom())
+						if (!sat.mightBeTrue() && assume.isBottom())
 							// the trace will not appear
 							continue;
 
@@ -211,8 +216,9 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 				result.put(new ExecutionTrace().push(token), lattice.top());
 			} else
 				for (Entry<ExecutionTrace, A> trace : this) {
+					Satisfiability sat = trace.getValue().satisfies(expression, src);
 					A assume = trace.getValue().assume(expression, src, dest);
-					if (!assume.isBottom())
+					if (sat.mightBeTrue() && !assume.isBottom())
 						result.put(trace.getKey().numberOfBranches() < MAX_CONDITIONS
 								? trace.getKey().push(token)
 								: trace.getKey(),

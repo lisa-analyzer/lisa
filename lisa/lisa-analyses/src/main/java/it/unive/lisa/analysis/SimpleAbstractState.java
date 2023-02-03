@@ -204,18 +204,29 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		Satisfiability heapsat = heapState.satisfies(expression, pp);
+		if (heapsat == Satisfiability.BOTTOM)
+			return Satisfiability.BOTTOM;
+
 		ExpressionSet<ValueExpression> rewritten = heapState.rewrite(expression, pp);
-		Satisfiability typeResult = Satisfiability.BOTTOM;
-		Satisfiability valueResult = Satisfiability.BOTTOM;
+		Satisfiability typesat = Satisfiability.BOTTOM;
+		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten) {
 			T tmp = typeState.smallStepSemantics(expr, pp);
 			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			typeResult = typeResult.lub(typeState.satisfies(expr, pp));
-			valueResult = valueResult.lub(valueState.satisfies(expr, pp));
+			Satisfiability sat = typeState.satisfies(expr, pp);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			typesat = typesat.lub(sat);
+
+			sat = valueState.satisfies(expr, pp);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			valuesat = valuesat.lub(sat);
 		}
-		return heapState.satisfies(expression, pp).glb(typeResult).glb(valueResult);
+		return heapsat.glb(typesat).glb(valuesat);
 	}
 
 	@Override

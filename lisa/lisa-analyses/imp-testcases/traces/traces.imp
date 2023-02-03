@@ -1,0 +1,58 @@
+class tutorial {
+
+	sequential() {
+		def x = 0;
+		x = x + 10; 
+		return x;
+	}
+	
+	branching1(b) {
+		def x = 0;
+		if (b)
+			x = x + 10;
+		else
+			x = x + 5;
+		return x;
+	}
+	
+	branching2(b) {
+		def x = 0;
+		if (b)
+			x = x + 10;
+		return x;
+	}
+	
+	loop0() {
+		def x = 0;
+		while (x > 10)
+			x = x + 1;
+		return x;
+	}
+	
+	loop2() {
+		def x = 0;
+		while (x < 2)
+			x = x + 1;
+		return x;
+	}
+	
+	loopN(b) {
+		def x = 0;
+		while (b)
+			x = x + 1;
+		return x;
+	}
+	
+	nesting(b) {
+		def x = 0;
+		while (b) {
+			x = x + 1;
+			if (b)
+				x = x + 10;
+			else
+				x = x + 5;
+			x = x - 2;
+		}
+		return x;
+	}
+}
