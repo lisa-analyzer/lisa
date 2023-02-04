@@ -1,8 +1,7 @@
 package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Arrays;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -13,17 +12,19 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ExecutionTrace {
 
-	private final Deque<TraceToken> tokens;
+	private static final TraceToken[] EMPTY_TRACE = new TraceToken[0];
+
+	private final TraceToken[] tokens;
 
 	/**
 	 * Builds a new empty execution trace.
 	 */
 	public ExecutionTrace() {
-		tokens = new LinkedList<>();
+		tokens = EMPTY_TRACE;
 	}
 
-	private ExecutionTrace(ExecutionTrace other) {
-		tokens = new LinkedList<>(other.tokens);
+	private ExecutionTrace(TraceToken[] tokens) {
+		this.tokens = tokens;
 	}
 
 	/**
@@ -34,9 +35,11 @@ public class ExecutionTrace {
 	 * @return the updated trace
 	 */
 	public ExecutionTrace push(TraceToken token) {
-		ExecutionTrace res = new ExecutionTrace(this);
-		res.tokens.addFirst(token);
-		return res;
+		int len = this.tokens.length;
+		TraceToken[] tokens = new TraceToken[len + 1];
+		System.arraycopy(this.tokens, 0, tokens, 0, len);
+		tokens[len] = token;
+		return new ExecutionTrace(tokens);
 	}
 
 	/**
@@ -45,21 +48,13 @@ public class ExecutionTrace {
 	 * @return the updated trace
 	 */
 	public ExecutionTrace pop() {
-		if (tokens.isEmpty())
+		if (tokens.length == 0)
 			return this;
 
-		ExecutionTrace res = new ExecutionTrace(this);
-		res.tokens.removeFirst();
-		return res;
-	}
-
-	/**
-	 * Yields the head (top-most) {@link TraceToken} in this trace.
-	 * 
-	 * @return the head of the trace
-	 */
-	public TraceToken getHead() {
-		return tokens.getFirst();
+		int len = this.tokens.length;
+		TraceToken[] tokens = new TraceToken[len - 1];
+		System.arraycopy(this.tokens, 0, tokens, 0, len - 1);
+		return new ExecutionTrace(tokens);
 	}
 
 	/**
@@ -68,7 +63,11 @@ public class ExecutionTrace {
 	 * @return the number of branches
 	 */
 	public int numberOfBranches() {
-		return (int) tokens.stream().filter(t -> t instanceof Branching).count();
+		int count = 0;
+		for (TraceToken token : tokens)
+			if (token instanceof Branching)
+				count++;
+		return count;
 	}
 
 	/**
@@ -81,9 +80,11 @@ public class ExecutionTrace {
 	 *             {@code null} if no such token exist
 	 */
 	public TraceToken lastLoopTokenFor(ProgramPoint guard) {
-		for (TraceToken tok : tokens)
+		for (int i = tokens.length - 1; i >= 0; i--) {
+			TraceToken tok = tokens[i];
 			if ((tok instanceof LoopSummary || tok instanceof LoopIteration) && tok.getProgramPoint() == guard)
 				return tok;
+		}
 
 		return null;
 	}
@@ -92,7 +93,7 @@ public class ExecutionTrace {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((tokens == null) ? 0 : tokens.hashCode());
+		result = prime * result + Arrays.hashCode(tokens);
 		return result;
 	}
 
@@ -105,10 +106,7 @@ public class ExecutionTrace {
 		if (getClass() != obj.getClass())
 			return false;
 		ExecutionTrace other = (ExecutionTrace) obj;
-		if (tokens == null) {
-			if (other.tokens != null)
-				return false;
-		} else if (!tokens.equals(other.tokens))
+		if (!Arrays.equals(tokens, other.tokens))
 			return false;
 		return true;
 	}
