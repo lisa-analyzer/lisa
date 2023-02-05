@@ -414,6 +414,16 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
+				} else if (loc instanceof Identifier && !(loc instanceof MemoryPointer)) {
+					VariableAllocationSite site = new VariableAllocationSite(loc.getStaticType(), (Identifier) loc,
+							loc.getCodeLocation());
+					MemoryPointer e = new MemoryPointer(
+							new ReferenceType(site.getStaticType()),
+							site,
+							site.getCodeLocation());
+					if (expression.hasRuntimeTypes())
+						e.setRuntimeTypes(expression.getRuntimeTypes(null));
+					result.add(e);
 				} else
 					result.add(loc);
 			return new ExpressionSet<>(result);
@@ -429,8 +439,11 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				if (ref instanceof MemoryPointer) {
 					HeapLocation location = ((MemoryPointer) ref).getReferencedLocation();
 					if (location instanceof VariableAllocationSite)
+						// if location is a variable allocation site, it
+						// rewrites to the pointed variable
 						result.add(((VariableAllocationSite) location).getIdentifier());
-					else result.add(location);
+					else
+						result.add(location);
 				} else if (ref instanceof Identifier) {
 					// this could be aliasing!
 					Identifier id = (Identifier) ref;
@@ -459,18 +472,14 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		@Override
 		public ExpressionSet<ValueExpression> visit(Identifier expression, Object... params)
 				throws SemanticException {
-			if (!(expression instanceof MemoryPointer) && heapEnv.getKeys().contains(expression))
-				return new ExpressionSet<>(resolveIdentifier(expression));
-			else if (!(expression instanceof MemoryPointer)) {
-				VariableAllocationSite site = new VariableAllocationSite(expression.getStaticType(), expression, expression.getCodeLocation());
-				if (expression.hasRuntimeTypes())
-					site.setRuntimeTypes(expression.getRuntimeTypes(null));
-				return new ExpressionSet<>(site);
+			if (!(expression instanceof MemoryPointer)) {
+				if (heapEnv.getKeys().contains(expression))
+					return new ExpressionSet<>(resolveIdentifier(expression));
 			}
-			
+
 			return new ExpressionSet<>(expression);
 		}
-		
+
 		private Set<ValueExpression> resolveIdentifier(Identifier v) {
 			Set<ValueExpression> result = new HashSet<>();
 			for (AllocationSite site : heapEnv.getState(v)) {
