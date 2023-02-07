@@ -404,7 +404,8 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				Object... params)
 				throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
-
+			SymbolicExpression referred = expression.getExpression();
+			
 			for (ValueExpression loc : arg)
 				if (loc instanceof AllocationSite) {
 					MemoryPointer e = new MemoryPointer(
@@ -414,16 +415,20 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					if (expression.hasRuntimeTypes())
 						e.setRuntimeTypes(expression.getRuntimeTypes(null));
 					result.add(e);
-				} else if (loc instanceof Identifier && !(loc instanceof MemoryPointer)) {
-					VariableAllocationSite site = new VariableAllocationSite(loc.getStaticType(), (Identifier) loc,
-							loc.getCodeLocation());
-					MemoryPointer e = new MemoryPointer(
-							new ReferenceType(site.getStaticType()),
-							site,
-							site.getCodeLocation());
-					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
-					result.add(e);
+				} else if (referred.hasRuntimeTypes() && referred.getRuntimeTypes(null).stream().anyMatch(t -> !t.isInMemoryType())) {
+//					if (loc.hasRuntimeTypes() && loc.getRuntimeTypes(null).stream().anyMatch(t -> !t.isInMemoryType())) {						
+						for (Type type : referred.getRuntimeTypes(null)) {
+							VariableAllocationSite site = new VariableAllocationSite(type, (Identifier) referred,
+									loc.getCodeLocation());
+							MemoryPointer e = new MemoryPointer(
+									new ReferenceType(type),
+									site,
+									site.getCodeLocation());
+							e.setRuntimeTypes(Collections.singleton(new ReferenceType(type)));
+							result.add(e);
+						}
+//					} else
+//						result.add(loc);
 				} else
 					result.add(loc);
 			return new ExpressionSet<>(result);
