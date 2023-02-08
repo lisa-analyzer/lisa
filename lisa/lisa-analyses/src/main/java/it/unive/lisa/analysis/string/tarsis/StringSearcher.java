@@ -32,14 +32,13 @@ public class StringSearcher {
 	private boolean matching;
 
 	/**
-	 * Builds the searcher. For this algorithm to work correctly, the target
-	 * automaton is first exploded with a call to
+	 * Builds the searcher. For this algorithm to work correctly, the automaton passed as parameter must be first exploded with a call to
 	 * {@link RegexAutomaton#explode()}.
 	 * 
 	 * @param origin the target automaton
 	 */
 	public StringSearcher(RegexAutomaton origin) {
-		automaton = origin.explode();
+		automaton = origin;
 		searchString = null;
 		matching = false;
 	}

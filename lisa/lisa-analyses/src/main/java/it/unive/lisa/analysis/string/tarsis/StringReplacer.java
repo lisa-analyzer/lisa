@@ -33,14 +33,13 @@ public class StringReplacer {
 	private final StringSearcher searcher;
 
 	/**
-	 * Builds the replacer. For this algorithm to work correctly, the target
-	 * automaton is first exploded with a call to
+	 * Builds the replacer. For this algorithm to work correctly, the automaton passed as parameter be first exploded with a call to
 	 * {@link RegexAutomaton#explode()}.
 	 * 
 	 * @param origin the target automaton
 	 */
 	public StringReplacer(RegexAutomaton origin) {
-		this.origin = origin.explode();
+		this.origin = origin;
 		searcher = new StringSearcher(origin);
 	}
 
