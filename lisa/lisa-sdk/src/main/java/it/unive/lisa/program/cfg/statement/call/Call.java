@@ -1,6 +1,7 @@
 package it.unive.lisa.program.cfg.statement.call;
 
 import it.unive.lisa.analysis.AbstractState;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -242,12 +243,16 @@ public abstract class Call extends NaryExpression {
 	 *                        parameters
 	 * 
 	 * @return the array of parameter types
+	 * 
+	 * @throws SemanticException if an exception happens while retrieving the
+	 *                               types
 	 */
 	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> Set<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions) {
+			T extends TypeDomain<T>> Set<Type>[] parameterTypes(StatementStore<A, H, V, T> expressions)
+					throws SemanticException {
 		Expression[] actuals = getParameters();
 		Set<Type>[] types = new Set[actuals.length];
 		for (int i = 0; i < actuals.length; i++)

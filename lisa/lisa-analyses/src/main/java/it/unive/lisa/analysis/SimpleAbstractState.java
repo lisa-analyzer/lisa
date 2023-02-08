@@ -18,6 +18,8 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -374,20 +376,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <D extends SemanticDomain<?, ?, ?>> D getDomainInstance(Class<D> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (D) this;
-
-		D di = heapState.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		di = typeState.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		return valueState.getDomainInstance(domain);
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
+		result.addAll(heapState.getAllDomainInstances(domain));
+		result.addAll(typeState.getAllDomainInstances(domain));
+		result.addAll(valueState.getAllDomainInstances(domain));
+		return result;
 	}
 
 	@Override

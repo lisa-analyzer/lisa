@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.combination;
 
+import java.util.Collection;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -10,7 +13,6 @@ import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.function.Predicate;
 
 /**
  * A generic Cartesian product abstract domain between two non-communicating
@@ -225,15 +227,10 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T extends SemanticDomain<?, ?, ?>> T getDomainInstance(Class<T> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (T) this;
-
-		T di = left.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		return right.getDomainInstance(domain);
+	public <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(Class<T> domain) {
+		Collection<T> result = SemanticDomain.super.getAllDomainInstances(domain);
+		result.addAll(left.getAllDomainInstances(domain));
+		result.addAll(right.getAllDomainInstances(domain));
+		return result;
 	}
 }

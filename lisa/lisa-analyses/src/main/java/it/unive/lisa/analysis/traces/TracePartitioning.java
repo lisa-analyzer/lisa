@@ -1,5 +1,10 @@
 package it.unive.lisa.analysis.traces;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -18,9 +23,6 @@ import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to
@@ -89,21 +91,11 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <D extends SemanticDomain<?, ?, ?>> D getDomainInstance(Class<D> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (D) this;
-
-		for (A dom : getValues()) {
-			D tmp = dom.getDomainInstance(domain);
-			if (tmp != null)
-				return tmp;
-		}
-
-		// in this way we can return top/bottom/null
-		// TODO this is also used to get typing information. Returning the first
-		// instance might lead to errors
-		return lattice.getDomainInstance(domain);
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
+		for (A dom : getValues())
+			result.addAll(dom.getAllDomainInstances(domain));
+		return result;
 	}
 
 	@Override

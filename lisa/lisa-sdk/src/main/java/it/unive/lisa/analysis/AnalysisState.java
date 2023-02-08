@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -12,10 +18,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * The abstract analysis state at a given program point. An analysis state is
@@ -340,12 +342,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <D extends SemanticDomain<?, ?, ?>> D getDomainInstance(Class<D> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (D) this;
-
-		return state.getDomainInstance(domain);
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+		Collection<D> result = SemanticDomain.super.getAllDomainInstances(domain);
+		result.addAll(state.getAllDomainInstances(domain));
+		return result;
 	}
 
 	/**
