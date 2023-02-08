@@ -180,7 +180,7 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 					for (Entry<ExecutionTrace, A> trace : this) {
 						Satisfiability sat = trace.getValue().satisfies(expression, src);
 						A assume = trace.getValue().assume(expression, src, dest);
-						if (!sat.mightBeTrue() && assume.isBottom())
+						if (!sat.mightBeTrue() || assume.isBottom())
 							// the trace will not appear
 							continue;
 

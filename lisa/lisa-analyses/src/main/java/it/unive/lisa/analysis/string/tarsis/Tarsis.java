@@ -290,7 +290,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	 *                                      language is accessed
 	 */
 	public IntInterval indexOf(Tarsis s) throws CyclicAutomatonException {
-		if (contains(s) == Satisfiability.SATISFIED)
+		if (contains(s) == Satisfiability.NOT_SATISFIED)
 			return new IntInterval(-1, -1);
 		else if (a.hasCycle() || s.a.hasCycle() || s.a.acceptsTopEventually())
 			return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
