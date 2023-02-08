@@ -15,7 +15,7 @@ import org.junit.Test;
 public class TracePartitioningTest extends AnalysisTestExecutor {
 
 	@Test
-	public void testTaint() throws AnalysisSetupException {
+	public void testTracePartitioning() throws AnalysisSetupException {
 		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.abstractState = new TracePartitioning<>(
 				new SimpleAbstractState<>(
