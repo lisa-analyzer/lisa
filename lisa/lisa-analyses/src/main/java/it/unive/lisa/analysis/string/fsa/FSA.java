@@ -155,30 +155,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	public Satisfiability satisfiesBinaryExpression(BinaryOperator operator, FSA left, FSA right,
 			ProgramPoint pp) throws SemanticException {
 		if (operator == StringContains.INSTANCE) {
-			try {
-				Set<String> rightLang = right.a.getLanguage();
-				Set<String> leftLang = left.a.getLanguage();
-				// right accepts only the empty string
-				if (rightLang.size() == 1 && rightLang.contains(""))
-					return Satisfiability.SATISFIED;
-
-				// we can compare languages
-				boolean atLeastOne = false, all = true;
-				for (String a : leftLang)
-					for (String b : rightLang) {
-						boolean cont = a.contains(b);
-						atLeastOne = atLeastOne || cont;
-						all = all && cont;
-					}
-
-				if (all)
-					return Satisfiability.SATISFIED;
-				if (atLeastOne)
-					return Satisfiability.UNKNOWN;
-				return Satisfiability.NOT_SATISFIED;
-			} catch (CyclicAutomatonException e) {
-				return Satisfiability.UNKNOWN;
-			}
+			return left.contains(right);
 		}
 		return Satisfiability.UNKNOWN;
 	}
@@ -301,5 +278,45 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		MathNumber newLow = first.getLow().min(second.getLow());
 		MathNumber newHigh = first.getHigh().max(second.getHigh());
 		return new IntInterval(newLow, newHigh);
+	}
+	
+	/**
+	 * Yields if this automaton recognizes strings recognized by the other automaton.
+	 * @param other the other automaton
+	 * @return if this automaton recognizes strings recognized by the other automaton
+	 */
+	public Satisfiability contains(FSA other) {
+		try {
+			Set<String> rightLang = a.getLanguage();
+			Set<String> leftLang = other.a.getLanguage();
+			// right accepts only the empty string
+			if (rightLang.size() == 1 && rightLang.contains(""))
+				return Satisfiability.SATISFIED;
+
+			// we can compare languages
+			boolean atLeastOne = false, all = true;
+			for (String a : leftLang)
+				for (String b : rightLang) {
+					boolean cont = a.contains(b);
+					atLeastOne = atLeastOne || cont;
+					all = all && cont;
+				}
+
+			if (all)
+				return Satisfiability.SATISFIED;
+			if (atLeastOne)
+				return Satisfiability.UNKNOWN;
+			return Satisfiability.NOT_SATISFIED;
+		} catch (CyclicAutomatonException e) {
+			return Satisfiability.UNKNOWN;
+		}		
+	}
+	
+	public FSA replace(FSA search, FSA repl) {
+		try {
+			return new FSA(this.a.replace(search.a, repl.a));
+		} catch (CyclicAutomatonException e) {
+			return TOP;
+		}
 	}
 }

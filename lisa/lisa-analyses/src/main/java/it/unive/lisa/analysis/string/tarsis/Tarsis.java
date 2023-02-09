@@ -178,11 +178,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	public Tarsis evalTernaryExpression(TernaryOperator operator, Tarsis left, Tarsis middle, Tarsis right,
 			ProgramPoint pp) throws SemanticException {
 		if (operator == StringReplace.INSTANCE)
-			try {
-				return new Tarsis(left.a.replace(middle.a, right.a));
-			} catch (CyclicAutomatonException e) {
-				return TOP;
-			}
+			return left.replace(middle, right);
 		return TOP;
 	}
 
@@ -320,6 +316,14 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	public Tarsis concat(Tarsis other) {
 		return new Tarsis(this.a.concat(other.a));
 	}
+	
+	public Tarsis replace(Tarsis search, Tarsis repl) {
+		try {
+			return new Tarsis(this.a.replace(search.a, repl.a));
+		} catch (CyclicAutomatonException e) {
+			return TOP;
+		}
+	}
 
 	public FSA toFSA() {
 		RegexAutomaton exploded = this.a.explode();
@@ -341,7 +345,6 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		}
 
 		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta);
-		fsa = fsa.minimize();
 		return new FSA(fsa);
 
 	}
