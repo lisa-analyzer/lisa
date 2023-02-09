@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -11,15 +17,12 @@ import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -58,7 +61,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 * 
 	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	FSA(SimpleAutomaton a) {
+	public FSA(SimpleAutomaton a) {
 		this.a = a;
 	}
 
@@ -134,6 +137,18 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		if (operator == StringConcat.INSTANCE)
 			return new FSA(left.a.concat(right.a));
 		return top();
+	}
+
+	@Override
+	public FSA evalTernaryExpression(TernaryOperator operator, FSA left, FSA middle, FSA right, ProgramPoint pp)
+			throws SemanticException {
+		if (operator == StringReplace.INSTANCE)
+			try {
+				return new FSA(left.a.replace(middle.a, right.a));
+			} catch (CyclicAutomatonException e) {
+				return TOP;
+			}
+		return TOP;
 	}
 
 	@Override
@@ -267,6 +282,15 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 					indexesOf.stream().mapToInt(i -> i).max().getAsInt());
 		else
 			return mkInterval(-1, indexesOf.stream().mapToInt(i -> i).max().getAsInt());
+	}
+
+	/**
+	 * Yields the concatenation between two automata
+	 * @param other the other automaton
+	 * @return the concatenation between two automata
+	 */
+	public FSA concat(FSA other) {
+		return new FSA(this.a.concat(other.a));
 	}
 
 	private IntInterval mkInterval(Integer min, Integer max) {

@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.tarsis;
 
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -7,7 +13,9 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
+import it.unive.lisa.analysis.string.fsa.StringSymbol;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -16,11 +24,12 @@ import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
+import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
+import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.Objects;
-import java.util.SortedSet;
-import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -64,7 +73,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	 * 
 	 * @param a the {@link SimpleAutomaton} used for object construction.
 	 */
-	Tarsis(RegexAutomaton a) {
+	public Tarsis(RegexAutomaton a) {
 		this.a = a;
 	}
 
@@ -132,6 +141,11 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	@Override
 	public Tarsis bottom() {
 		return BOTTOM;
+	}
+	
+	@Override
+	public boolean isBottom() {
+		return !isTop() && this.a.acceptsEmptyLanguage();
 	}
 
 	@Override
@@ -296,5 +310,39 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 			return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 		Pair<Integer, Integer> interval = IndexFinder.findIndexesOf(a, s.a);
 		return new IntInterval(interval.getLeft(), interval.getRight());
+	}
+	
+	/**
+	 * Yields the concatenation between two automata
+	 * @param other the other automaton
+	 * @return the concatenation between two automata
+	 */
+	public Tarsis concat(Tarsis other) {
+		return new Tarsis(this.a.concat(other.a));
+	}
+
+	public FSA toFSA() {
+		RegexAutomaton exploded = this.a.explode();
+		SortedSet<State> fsaStates = new TreeSet<>();
+		SortedSet<Transition<StringSymbol>> fsaDelta = new TreeSet<>();
+		for (State s : exploded.getStates())
+			fsaStates.add(s);
+
+		for (Transition<RegularExpression> t : exploded.getTransitions()) {
+			if (t.getSymbol() != TopAtom.INSTANCE)
+				fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(), new StringSymbol(t.getSymbol().toString())));
+			else {
+				for (char c = 32; c <= 123; c++) 
+					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getSource(), new StringSymbol(c)));
+
+				for (Transition<RegularExpression> to : exploded.getOutgoingTransitionsFrom(t.getDestination()))
+					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), to.getDestination(), new StringSymbol(to.getSymbol().toString())));
+			}	
+		}
+
+		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta);
+		fsa = fsa.minimize();
+		return new FSA(fsa);
+
 	}
 }
