@@ -18,7 +18,6 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;

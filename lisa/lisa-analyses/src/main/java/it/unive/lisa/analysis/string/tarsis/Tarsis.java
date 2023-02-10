@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.string.tarsis;
 
-import java.util.Objects;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -30,6 +24,10 @@ import it.unive.lisa.util.datastructures.regex.RegularExpression;
 import it.unive.lisa.util.datastructures.regex.TopAtom;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.Objects;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that represent the Tarsis domain for strings, exploiting a
@@ -142,7 +140,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	public Tarsis bottom() {
 		return BOTTOM;
 	}
-	
+
 	@Override
 	public boolean isBottom() {
 		return !isTop() && this.a.acceptsEmptyLanguage();
@@ -307,16 +305,18 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		Pair<Integer, Integer> interval = IndexFinder.findIndexesOf(a, s.a);
 		return new IntInterval(interval.getLeft(), interval.getRight());
 	}
-	
+
 	/**
 	 * Yields the concatenation between two automata
+	 * 
 	 * @param other the other automaton
+	 * 
 	 * @return the concatenation between two automata
 	 */
 	public Tarsis concat(Tarsis other) {
 		return new Tarsis(this.a.concat(other.a));
 	}
-	
+
 	public Tarsis replace(Tarsis search, Tarsis repl) {
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
@@ -334,14 +334,16 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 
 		for (Transition<RegularExpression> t : exploded.getTransitions()) {
 			if (t.getSymbol() != TopAtom.INSTANCE)
-				fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(), new StringSymbol(t.getSymbol().toString())));
+				fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(),
+						new StringSymbol(t.getSymbol().toString())));
 			else {
-				for (char c = 32; c <= 123; c++) 
+				for (char c = 32; c <= 123; c++)
 					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getSource(), new StringSymbol(c)));
 
 				for (Transition<RegularExpression> to : exploded.getOutgoingTransitionsFrom(t.getDestination()))
-					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), to.getDestination(), new StringSymbol(to.getSymbol().toString())));
-			}	
+					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), to.getDestination(),
+							new StringSymbol(to.getSymbol().toString())));
+			}
 		}
 
 		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta);

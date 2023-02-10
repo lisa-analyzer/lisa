@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -23,6 +17,11 @@ import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -263,7 +262,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 
 	/**
 	 * Yields the concatenation between two automata
+	 * 
 	 * @param other the other automaton
+	 * 
 	 * @return the concatenation between two automata
 	 */
 	public FSA concat(FSA other) {
@@ -279,11 +280,15 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		MathNumber newHigh = first.getHigh().max(second.getHigh());
 		return new IntInterval(newLow, newHigh);
 	}
-	
+
 	/**
-	 * Yields if this automaton recognizes strings recognized by the other automaton.
+	 * Yields if this automaton recognizes strings recognized by the other
+	 * automaton.
+	 * 
 	 * @param other the other automaton
-	 * @return if this automaton recognizes strings recognized by the other automaton
+	 * 
+	 * @return if this automaton recognizes strings recognized by the other
+	 *             automaton
 	 */
 	public Satisfiability contains(FSA other) {
 		try {
@@ -309,9 +314,9 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			return Satisfiability.NOT_SATISFIED;
 		} catch (CyclicAutomatonException e) {
 			return Satisfiability.UNKNOWN;
-		}		
+		}
 	}
-	
+
 	public FSA replace(FSA search, FSA repl) {
 		try {
 			return new FSA(this.a.replace(search.a, repl.a));

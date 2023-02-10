@@ -1,18 +1,17 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
 import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using a
@@ -153,7 +152,7 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		// checks if there is at least one final state in the set of possible
 		// reached states at the end of the validation process
 		return currentStates.stream().anyMatch(State::isFinal);
-	}	
+	}
 
 	/**
 	 * Yields a new automaton where all occurrences of strings recognized by
@@ -170,15 +169,15 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 	 * @throws CyclicAutomatonException if {@code toReplace} contains loops
 	 */
 	public SimpleAutomaton replace(SimpleAutomaton toReplace, SimpleAutomaton str) throws CyclicAutomatonException {
-		if (this.hasCycle() || toReplace.hasCycle() || str.hasCycle()) 
+		if (this.hasCycle() || toReplace.hasCycle() || str.hasCycle())
 			return unknownString();
-		
+
 		SimpleAutomaton result = emptyLanguage();
 		for (String a : getLanguage())
 			for (String b : toReplace.getLanguage())
-				for (String c : str.getLanguage()) 
+				for (String c : str.getLanguage())
 					if (a.contains(b))
-						result = result.union(new SimpleAutomaton(a.replace(b, c)));		
+						result = result.union(new SimpleAutomaton(a.replace(b, c)));
 		return result;
 	}
 }
