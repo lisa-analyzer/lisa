@@ -93,6 +93,11 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 	@Override
 	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
 		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
+		if (isTop())
+			return lattice.top().getAllDomainInstances(domain);
+		else if (isBottom() || function == null)
+			return lattice.bottom().getAllDomainInstances(domain);
+		
 		for (A dom : getValues())
 			result.addAll(dom.getAllDomainInstances(domain));
 		return result;
