@@ -118,7 +118,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		else if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(this.a.toRegex());
+		return new StringRepresentation(this.a.toRegex().simplify());
 	}
 
 	@Override

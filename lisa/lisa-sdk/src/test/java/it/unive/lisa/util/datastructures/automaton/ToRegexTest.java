@@ -24,7 +24,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// a*
 		RegularExpression exp = new Atom("a").star();
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -47,7 +47,7 @@ public class ToRegexTest {
 				new Atom("a").comp(new Atom("d").star().comp(new Atom("b"))))
 				.star()
 				.comp(new Atom("a").comp(new Atom("d").star()));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -67,7 +67,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// a + c
 		RegularExpression exp = new Atom("a").or(new Atom("c"));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -86,7 +86,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// ab
 		RegularExpression exp = new Atom("a").comp(new Atom("b"));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// ab + cc
 		RegularExpression exp = new Atom("a").comp(new Atom("b")).or(new Atom("c").comp(new Atom("c")));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// ac* + bc*
 		RegularExpression exp = new Atom("a").comp(new Atom("c").star()).or(new Atom("b").comp(new Atom("c").star()));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// ab + ac
 		RegularExpression exp = new Atom("a").comp(new Atom("b")).or(new Atom("a").comp(new Atom("c")));
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// a
 		RegularExpression exp = new Atom("a");
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// epsilon
 		RegularExpression exp = Atom.EPSILON;
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 
 	@Test
@@ -208,6 +208,6 @@ public class ToRegexTest {
 		TestAutomaton a = new TestAutomaton(states, delta);
 		// a(a+b)*
 		RegularExpression exp = new Atom("a").comp(new Atom("a").or(new Atom("b")).star());
-		assertEquals(exp, a.toRegex());
+		assertEquals(exp, a.toRegex().simplify());
 	}
 }

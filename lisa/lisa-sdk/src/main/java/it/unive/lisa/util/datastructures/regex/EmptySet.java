@@ -1,11 +1,11 @@
 package it.unive.lisa.util.datastructures.regex;
 
+import java.util.Collections;
+import java.util.Set;
+
 import it.unive.lisa.util.datastructures.automaton.AutomataFactory;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.TransitionSymbol;
-import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * A {@link RegularExpression} representing the empty set of strings.
@@ -50,9 +50,7 @@ public final class EmptySet extends RegularExpression {
 
 	@Override
 	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
-		Set<PartialSubstring> result = new HashSet<>();
-		result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip, missingChars - charsToSkip));
-		return result;
+		return Collections.emptySet();
 	}
 
 	@Override

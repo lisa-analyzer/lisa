@@ -36,13 +36,13 @@ public final class TopAtom extends Atom {
 	}
 
 	@Override
-	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
-		result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip, missingChars - charsToSkip));
-		for (int i = 1; i <= missingChars - charsToSkip; i++)
-			result.add(new PartialSubstring(SymbolicString.mkTopString(i), i > charsToSkip ? 0 : charsToSkip - i,
-					missingChars - charsToSkip - i));
+		for (int i = 0; i <= charsToSkip; i++)
+			result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip - i, missingChars));
+		for (int i = 1; i <= missingChars; i++)
+			result.add(new PartialSubstring(SymbolicString.mkTopString(i), 0, missingChars - i));
 
 		return result;
 	}

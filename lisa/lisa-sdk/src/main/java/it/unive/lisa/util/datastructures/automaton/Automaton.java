@@ -981,7 +981,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 
 	@Override
 	public String toString() {
-		return toRegex().toString();
+		return toRegex().simplify().toString();
 	}
 
 	/**
@@ -1113,6 +1113,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * Creates and return the regex that represent the accepted language by the
 	 * automaton {@code this}, using Brzozowski algebraic method (see <a href=
 	 * "https://cs.stackexchange.com/questions/2016/how-to-convert-finite-automata-to-regular-expressions">here</a>).
+	 * Note that the returned regular expression is not simplified.
 	 * 
 	 * @return a String representing that is the regex that represent the
 	 *             accepted language.
@@ -1212,7 +1213,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 			}
 		}
 
-		return B[0].simplify();
+		return B[0];
 	}
 
 	private static State nextNonInitialState(Iterator<State> it) {

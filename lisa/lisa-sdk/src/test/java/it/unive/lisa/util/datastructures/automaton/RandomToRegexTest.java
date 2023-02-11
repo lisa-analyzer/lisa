@@ -43,7 +43,7 @@ public class RandomToRegexTest {
 	}
 
 	private static void check(TestAutomaton a) {
-		RegularExpression fromRegex = a.toRegex();
+		RegularExpression fromRegex = a.toRegex().simplify();
 		TestAutomaton revert = fromRegex.toAutomaton(a);
 		assertTrue(a + " is different from " + revert, a.isEqualTo(revert));
 	}

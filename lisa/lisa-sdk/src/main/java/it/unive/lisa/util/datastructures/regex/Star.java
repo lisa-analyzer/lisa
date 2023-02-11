@@ -71,7 +71,6 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public RegularExpression simplify() {
-
 		RegularExpression op = this.op.simplify();
 		RegularExpression result = op.star();
 
@@ -98,30 +97,22 @@ public final class Star extends RegularExpression {
 
 	@Override
 	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
-		Set<PartialSubstring> result = new HashSet<>(), toAdd = new HashSet<>();
+		Set<PartialSubstring> result = new HashSet<>(), partial = new HashSet<>();
 
-		// construction by fixpoint:
-		// substring(a*) =
-		// fixpoint(substring(emptyset) U substring(a) U substring(aa) U
-		// substring(aaa)
-		// U ...)
-
-		result.addAll(EmptySet.INSTANCE.substringAux(charsToSkip, missingChars));
+		result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip, missingChars));
 
 		do {
-			if (!toAdd.isEmpty()) {
-				result.addAll(toAdd);
-				toAdd.clear();
+			if (!partial.isEmpty()) {
+				result.addAll(partial);
+				partial.clear();
 			}
 
 			PartialSubstring tmp;
 			for (PartialSubstring base : result)
-				for (PartialSubstring suffix : op.substringAux(base.getCharsToStart(),
-						base.getCharsToStart() + base.getMissingChars())) {
+				for (PartialSubstring suffix : op.substringAux(base.getCharsToStart(), base.getMissingChars())) 
 					if (!result.contains(tmp = base.concat(suffix)))
-						toAdd.add(tmp);
-				}
-		} while (!toAdd.isEmpty());
+						partial.add(tmp);
+		} while (!partial.isEmpty());
 
 		return result;
 	}

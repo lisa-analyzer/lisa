@@ -172,7 +172,7 @@ public abstract class RegularExpression implements TransitionSymbol<RegularExpre
 	 * @return the set of all substrings
 	 */
 	public final Set<SymbolicString> substring(int start, int end) {
-		return substringAux(start, end).stream().filter(ps -> ps.missingChars == 0).map(t -> t.getSubstring())
+		return substringAux(start, end - start).stream().filter(ps -> ps.missingChars == 0).map(t -> t.getSubstring())
 				.collect(Collectors.toSet());
 	}
 
