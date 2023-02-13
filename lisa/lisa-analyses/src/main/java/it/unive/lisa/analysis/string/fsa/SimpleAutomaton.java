@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string.fsa;
 
 import it.unive.lisa.util.datastructures.automaton.Automaton;
+import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.regex.Atom;
@@ -151,5 +152,32 @@ public final class SimpleAutomaton extends Automaton<SimpleAutomaton, StringSymb
 		// checks if there is at least one final state in the set of possible
 		// reached states at the end of the validation process
 		return currentStates.stream().anyMatch(State::isFinal);
+	}
+
+	/**
+	 * Yields a new automaton where all occurrences of strings recognized by
+	 * {@code toReplace} are replaced with the automaton {@code str}, assuming
+	 * that {@code toReplace} is finite (i.e., no loops nor top-transitions).
+	 * The resulting automaton is then collapsed.<br>
+	 * <br>
+	 * 
+	 * @param toReplace the automaton recognizing the strings to replace
+	 * @param str       the automaton that must be used as replacement
+	 * 
+	 * @return the replaced automaton
+	 * 
+	 * @throws CyclicAutomatonException if {@code toReplace} contains loops
+	 */
+	public SimpleAutomaton replace(SimpleAutomaton toReplace, SimpleAutomaton str) throws CyclicAutomatonException {
+		if (this.hasCycle() || toReplace.hasCycle() || str.hasCycle())
+			return unknownString();
+
+		SimpleAutomaton result = emptyLanguage();
+		for (String a : getLanguage())
+			for (String b : toReplace.getLanguage())
+				for (String c : str.getLanguage())
+					if (a.contains(b))
+						result = result.union(new SimpleAutomaton(a.replace(b, c)));
+		return result;
 	}
 }

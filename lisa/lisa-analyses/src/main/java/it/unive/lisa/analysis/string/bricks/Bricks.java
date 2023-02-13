@@ -466,7 +466,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * @return the minimum and maximum length of this abstract value
 	 */
 	public IntInterval length() {
-		return new IntInterval(0, Integer.MAX_VALUE);
+		return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
 	}
 
 	/**
@@ -478,6 +478,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * @return the minimum and maximum index of {@code s} in {@code this}
 	 */
 	public IntInterval indexOf(Bricks s) {
-		return new IntInterval(-1, Integer.MAX_VALUE);
+		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 }

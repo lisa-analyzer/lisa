@@ -2,10 +2,21 @@ package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
 
-public class LoopSummaryToken extends Token {
+/**
+ * A {@link TraceToken} representing the traversal of a loop condition,
+ * summarizing all possible iterations.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class LoopSummary extends TraceToken {
 
-	public LoopSummaryToken(ProgramPoint st) {
-		super(st);
+	/**
+	 * Builds the summary.
+	 * 
+	 * @param pp the program point associated with the summary
+	 */
+	public LoopSummary(ProgramPoint pp) {
+		super(pp);
 	}
 
 	@Override

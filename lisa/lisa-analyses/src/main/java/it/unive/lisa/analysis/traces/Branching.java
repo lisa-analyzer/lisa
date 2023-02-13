@@ -2,14 +2,34 @@ package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
 
-public class ConditionalToken extends Token {
+/**
+ * A {@link TraceToken} representing the traversal of a if-then-else condition,
+ * associated with the branch taken.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class Branching extends TraceToken {
+
 	private final boolean trueBranch;
 
-	public ConditionalToken(ProgramPoint st, boolean trueBranch) {
-		super(st);
+	/**
+	 * Builds the branching.
+	 * 
+	 * @param pp         the program point associated with the branching
+	 * @param trueBranch whether the condition is traversed to reach the
+	 *                       {@code true} branch or not
+	 */
+	public Branching(ProgramPoint pp, boolean trueBranch) {
+		super(pp);
 		this.trueBranch = trueBranch;
 	}
 
+	/**
+	 * Yields whether the condition is traversed to reach the {@code true}
+	 * branch or not.
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
 	public boolean isTrueBranch() {
 		return trueBranch;
 	}
@@ -30,7 +50,7 @@ public class ConditionalToken extends Token {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ConditionalToken other = (ConditionalToken) obj;
+		Branching other = (Branching) obj;
 		if (trueBranch != other.trueBranch)
 			return false;
 		return true;

@@ -2,14 +2,32 @@ package it.unive.lisa.analysis.traces;
 
 import it.unive.lisa.program.cfg.ProgramPoint;
 
-public class LoopIterationToken extends Token {
+/**
+ * A {@link TraceToken} representing the traversal of a loop condition at the
+ * beginning of a specific iteration.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ */
+public class LoopIteration extends TraceToken {
+
 	private final int iteration;
 
-	public LoopIterationToken(ProgramPoint st, int iteration) {
-		super(st);
+	/**
+	 * Builds the iteration.
+	 * 
+	 * @param pp        the program point associated with the iteration
+	 * @param iteration the iteration number
+	 */
+	public LoopIteration(ProgramPoint pp, int iteration) {
+		super(pp);
 		this.iteration = iteration;
 	}
 
+	/**
+	 * Yields the iteration number.
+	 * 
+	 * @return the number
+	 */
 	public int getIteration() {
 		return iteration;
 	}
@@ -30,7 +48,7 @@ public class LoopIterationToken extends Token {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LoopIterationToken other = (LoopIterationToken) obj;
+		LoopIteration other = (LoopIteration) obj;
 		if (iteration != other.iteration)
 			return false;
 		return true;

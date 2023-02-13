@@ -37,6 +37,7 @@ public class IMPAssert extends UnaryStatement {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
