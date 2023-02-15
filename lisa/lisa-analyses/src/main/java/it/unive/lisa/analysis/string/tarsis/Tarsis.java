@@ -75,6 +75,15 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		this.a = a;
 	}
 
+	/**
+	 * Yields the {@link RegexAutomaton} backing this domain element.
+	 * 
+	 * @return the automaton
+	 */
+	public RegexAutomaton getAutomaton() {
+		return a;
+	}
+
 	@Override
 	public Tarsis lubAux(Tarsis other) throws SemanticException {
 		return new Tarsis(this.a.union(other.a).minimize());
@@ -326,28 +335,31 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	public FSA toFSA() {
-		RegexAutomaton exploded = this.a.explode();
-		SortedSet<State> fsaStates = new TreeSet<>();
+		RegexAutomaton exploded = this.a.minimize().explode();
 		SortedSet<Transition<StringSymbol>> fsaDelta = new TreeSet<>();
-		for (State s : exploded.getStates())
-			fsaStates.add(s);
+
+		if (!this.a.acceptsTopEventually()) {
+			for (Transition<RegularExpression> t : exploded.getTransitions())
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(),
+						new StringSymbol(t.getSymbol().toString())));
+
+			return new FSA(new SimpleAutomaton(exploded.getStates(), fsaDelta));
+		}
+
+		SortedSet<State> fsaStates = new TreeSet<>(exploded.getStates());
 
 		for (Transition<RegularExpression> t : exploded.getTransitions()) {
 			if (t.getSymbol() != TopAtom.INSTANCE)
-				fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(),
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(),
 						new StringSymbol(t.getSymbol().toString())));
 			else {
 				for (char c = 32; c <= 123; c++)
-					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getSource(), new StringSymbol(c)));
-
-				for (Transition<RegularExpression> to : exploded.getOutgoingTransitionsFrom(t.getDestination()))
-					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), to.getDestination(),
-							new StringSymbol(to.getSymbol().toString())));
+					fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), new StringSymbol(c)));
+				fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), StringSymbol.EPSILON));
 			}
 		}
 
-		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta);
+		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta).minimize();
 		return new FSA(fsa);
-
 	}
 }

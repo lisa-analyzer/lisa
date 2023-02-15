@@ -109,7 +109,7 @@ public final class Star extends RegularExpression {
 
 			PartialSubstring tmp;
 			for (PartialSubstring base : result)
-				for (PartialSubstring suffix : op.substringAux(base.getCharsToStart(), base.getMissingChars())) 
+				for (PartialSubstring suffix : op.substringAux(base.getCharsToStart(), base.getMissingChars()))
 					if (!result.contains(tmp = base.concat(suffix)))
 						partial.add(tmp);
 		} while (!partial.isEmpty());
