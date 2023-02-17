@@ -220,9 +220,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		if (left.isTop() || right.isBottom())
 			return SemanticDomain.Satisfiability.UNKNOWN;
 
-		if (operator == StringContains.INSTANCE) {
-			return contains(right);
-		}
+		if (operator == StringContains.INSTANCE)
+			return left.contains(right);
 
 		return Satisfiability.UNKNOWN;
 	}

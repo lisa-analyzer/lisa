@@ -49,7 +49,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 * Builds the top char inclusion abstract element.
 	 */
 	public CharInclusion() {
-		this(new TreeSet<>(), getAlphabet());
+		this(new TreeSet<>(), null);
 	}
 
 	/**
@@ -68,8 +68,14 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public CharInclusion lubAux(CharInclusion other) throws SemanticException {
 		Set<Character> lubAuxCertainly = new TreeSet<>();
 
-		Set<Character> lubAuxMaybe = new TreeSet<>(this.maybeContained);
-		lubAuxMaybe.addAll(other.maybeContained);
+		Set<Character> lubAuxMaybe;
+		if (maybeContained == null || other.maybeContained == null)
+			lubAuxMaybe = null;
+		else {
+			lubAuxMaybe = new TreeSet<>();
+			lubAuxMaybe.addAll(maybeContained);
+			lubAuxMaybe.addAll(other.maybeContained);
+		}
 
 		for (Character certainlyContainedChar : this.certainlyContained)
 			if (other.certainlyContained.contains(certainlyContainedChar))
@@ -80,13 +86,18 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 
 	@Override
 	public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
-		if (this.certainlyContained.size() > other.certainlyContained.size() ||
-				this.maybeContained.size() > other.maybeContained.size())
+		if (this.certainlyContained.size() > other.certainlyContained.size()
+				|| (other.maybeContained == null
+						|| (this.maybeContained != null && this.maybeContained.size() > other.maybeContained.size())))
 			return false;
 
 		if (!other.certainlyContained.containsAll(this.certainlyContained))
 			return false;
 
+		if (other.maybeContained == null)
+			return true;
+		if (maybeContained == null)
+			return false;
 		return other.maybeContained.containsAll(this.maybeContained);
 	}
 
@@ -138,7 +149,9 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	/**
 	 * Yields the set of maybe contained characters of this abstract value.
 	 *
-	 * @return the set of maybe contained characters of this abstract value.
+	 * @return the set of maybe contained characters of this abstract value, or
+	 *             {@code null} if the whole alphabet might be part of the
+	 *             string
 	 */
 	public Set<Character> getMaybeContained() {
 		return this.maybeContained;
@@ -146,8 +159,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 
 	private String formatRepresentation() {
 		return "CertainlyContained: {" + StringUtils.join(this.certainlyContained, ", ") +
-				"}, MaybeContained: {" +
-				StringUtils.join(this.maybeContained, ", ") +
+				"}, MaybeContained: {" + (maybeContained == null ? "Σ" : StringUtils.join(this.maybeContained, ", ")) +
 				"}";
 	}
 
@@ -168,13 +180,17 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 			ProgramPoint pp) {
 		if (operator == StringConcat.INSTANCE) {
 			Set<Character> resultCertainlyContained = new TreeSet<>();
-			Set<Character> resultMaybeContained = new TreeSet<>();
-
 			resultCertainlyContained.addAll(left.certainlyContained);
 			resultCertainlyContained.addAll(right.certainlyContained);
 
-			resultMaybeContained.addAll(left.maybeContained);
-			resultMaybeContained.addAll(right.maybeContained);
+			Set<Character> resultMaybeContained;
+			if (left.maybeContained == null || right.maybeContained == null)
+				resultMaybeContained = null;
+			else {
+				resultMaybeContained = new TreeSet<>();
+				resultMaybeContained.addAll(left.maybeContained);
+				resultMaybeContained.addAll(right.maybeContained);
+			}
 
 			return new CharInclusion(resultCertainlyContained, resultMaybeContained);
 		}
@@ -195,27 +211,27 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 			CharInclusion right, ProgramPoint pp) throws SemanticException {
 		if (operator == StringReplace.INSTANCE) {
 
-			if (!left.getCertainlyContained().containsAll(middle.getCertainlyContained()))
+			if (!left.certainlyContained.containsAll(middle.certainlyContained))
 				// no replace for sure
 				return this;
 
-			Set<Character> included = new TreeSet<>(left.getCertainlyContained());
-			Set<Character> possibly = new TreeSet<>(left.getMaybeContained());
+			Set<Character> included = new TreeSet<>(left.certainlyContained);
+			Set<Character> possibly = new TreeSet<>(left.maybeContained);
 			// since we do not know if the replace will happen, we move
 			// everything to the
 			// possibly included characters
-			included.removeAll(middle.getCertainlyContained());
-			possibly.addAll(middle.getCertainlyContained());
+			included.removeAll(middle.certainlyContained);
+			possibly.addAll(middle.certainlyContained);
 
-			included.removeAll(middle.getMaybeContained());
-			Set<Character> tmp = new TreeSet<>(middle.getMaybeContained());
-			tmp.retainAll(left.getCertainlyContained()); // just the ones that
-															// we removed before
+			included.removeAll(middle.maybeContained);
+			Set<Character> tmp = new TreeSet<>(middle.maybeContained);
+			tmp.retainAll(left.certainlyContained); // just the ones that
+													// we removed before
 			possibly.addAll(tmp);
 
 			// add the second string
-			possibly.addAll(right.getCertainlyContained());
-			possibly.addAll(right.getMaybeContained());
+			possibly.addAll(right.certainlyContained);
+			possibly.addAll(right.maybeContained);
 
 			return new CharInclusion(included, possibly);
 		}
@@ -245,17 +261,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 *             string
 	 */
 	private boolean isEmptyString() {
-		return maybeContained.isEmpty() && certainlyContained.isEmpty();
-	}
-
-	private static Set<Character> getAlphabet() {
-		Set<Character> alphabet = new TreeSet<>();
-
-		for (char character = 'a'; character <= 'z'; character++) {
-			alphabet.add(character);
-		}
-
-		return alphabet;
+		return (maybeContained != null && maybeContained.isEmpty()) && certainlyContained.isEmpty();
 	}
 
 	/**
@@ -271,7 +277,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public CharInclusion substring(long begin, long end) {
 		if (isTop() || isBottom())
 			return this;
-		return new CharInclusion(new TreeSet<>(), getMaybeContained());
+		return new CharInclusion(new TreeSet<>(), maybeContained);
 	}
 
 	/**
@@ -281,7 +287,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	 * @return the minimum and maximum length of this abstract value
 	 */
 	public IntInterval length() {
-		return new IntInterval(new MathNumber(getCertainlyContained().size()), MathNumber.PLUS_INFINITY);
+		return new IntInterval(new MathNumber(certainlyContained.size()), MathNumber.PLUS_INFINITY);
 	}
 
 	/**
