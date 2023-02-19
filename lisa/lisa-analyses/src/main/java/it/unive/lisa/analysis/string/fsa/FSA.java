@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -13,15 +19,13 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -291,30 +295,36 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 *             automaton
 	 */
 	public Satisfiability contains(FSA other) {
-		try {
-			Set<String> rightLang = a.getLanguage();
-			Set<String> leftLang = other.a.getLanguage();
-			// right accepts only the empty string
-			if (rightLang.size() == 1 && rightLang.contains(""))
-				return Satisfiability.SATISFIED;
 
-			// we can compare languages
-			boolean atLeastOne = false, all = true;
-			for (String a : leftLang)
-				for (String b : rightLang) {
-					boolean cont = a.contains(b);
-					atLeastOne = atLeastOne || cont;
-					all = all && cont;
-				}
-
-			if (all)
-				return Satisfiability.SATISFIED;
-			if (atLeastOne)
-				return Satisfiability.UNKNOWN;
+		if (this.a.intersection(other.a.factors()).acceptsEmptyLanguage())
 			return Satisfiability.NOT_SATISFIED;
-		} catch (CyclicAutomatonException e) {
-			return Satisfiability.UNKNOWN;
-		}
+		else if (other.a.isEqualTo(a.emptyString()))
+			return Satisfiability.SATISFIED;
+		else 
+			try {
+				Set<String> rightLang = a.getLanguage();
+				Set<String> leftLang = other.a.getLanguage();
+				// right accepts only the empty string
+				if (rightLang.size() == 1 && rightLang.contains(""))
+					return Satisfiability.SATISFIED;
+
+				// we can compare languages
+				boolean atLeastOne = false, all = true;
+				for (String a : leftLang)
+					for (String b : rightLang) {
+						boolean cont = a.contains(b);
+						atLeastOne = atLeastOne || cont;
+						all = all && cont;
+					}
+
+				if (all)
+					return Satisfiability.SATISFIED;
+				if (atLeastOne)
+					return Satisfiability.UNKNOWN;
+				return Satisfiability.NOT_SATISFIED;
+			} catch (CyclicAutomatonException e) {
+				return Satisfiability.UNKNOWN;
+			}
 	}
 
 	public FSA replace(FSA search, FSA repl) {
@@ -323,5 +333,46 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		} catch (CyclicAutomatonException e) {
 			return TOP;
 		}
+	}
+
+	public Satisfiability containsChar(char c) throws SemanticException, CyclicAutomatonException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		if (!a.hasCycle()) {
+			Satisfiability sat = Satisfiability.BOTTOM;
+			for (String s : a.getLanguage())
+				if (s.contains(String.valueOf(c)))
+					sat = sat.lub(Satisfiability.SATISFIED);
+				else
+					sat = sat.lub(Satisfiability.NOT_SATISFIED);
+			return sat;
+		}
+
+
+		WorkingSet<State> ws = FIFOWorkingSet.mk();
+		Set<State> visited = new TreeSet<>();
+
+		for (State q : a.getInitialStates()) 
+			ws.push(q);
+
+
+		while (!ws.isEmpty()) {
+			State top = ws.pop();
+			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) {
+				if (tr.getSymbol().getSymbol().equals(String.valueOf(c)))
+					return Satisfiability.SATISFIED;
+			}
+			visited.add(top);
+			
+			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) 
+				if (visited.contains(tr.getDestination()))
+					return Satisfiability.UNKNOWN;
+				else
+					ws.push(tr.getDestination());
+		}
+		
+		return Satisfiability.NOT_SATISFIED;
 	}
 }

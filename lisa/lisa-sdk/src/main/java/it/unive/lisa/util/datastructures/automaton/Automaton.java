@@ -36,7 +36,7 @@ import org.apache.commons.lang3.tuple.Triple;
  *                this class have on their transitions
  */
 public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionSymbol<T>>
-		implements AutomataFactory<A, T> {
+implements AutomataFactory<A, T> {
 
 	/**
 	 * The states of this automaton.
@@ -606,7 +606,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	public boolean hasCycle() {
-		// BFS: move one step each time starting rom the initial states
+		// BFS: move one step each time starting from the initial states
 		Set<State> currentStates = getInitialStates();
 		Set<State> visited = new TreeSet<>();
 		while (!visited.containsAll(states)) {
@@ -655,6 +655,12 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		SortedSet<String> lang = new TreeSet<>();
 		if (hasCycle())
 			throw new CyclicAutomatonException();
+
+		// is the minimum automaton recognizing empty string 
+		if (states.size() == 1 && states.iterator().next().isFinal() && states.iterator().next().isInitial() && transitions.isEmpty()) {
+			lang.add("");
+			return lang;
+		}
 
 		WorkingSet<Pair<String, Transition<T>>> ws = FIFOWorkingSet.mk();
 		for (State q : getInitialStates())
@@ -1009,7 +1015,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 
 				for (Transition<T> t : transitions)
 					result.append("\t").append(st).append(" [").append(t.getSymbol()).append("] -> ")
-							.append(t.getDestination()).append("\n");
+					.append(t.getDestination()).append("\n");
 			}
 		}
 
