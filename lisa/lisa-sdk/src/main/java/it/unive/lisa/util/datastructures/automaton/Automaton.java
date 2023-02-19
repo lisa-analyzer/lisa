@@ -1720,10 +1720,14 @@ implements AutomataFactory<A, T> {
 			return 0;
 
 		int max = Integer.MIN_VALUE, tmp;
-		for (List<State> v : paths)
-			if ((tmp = maxStringLengthTraversing(v)) > max)
+		for (List<State> v : paths) {
+			tmp = maxStringLengthTraversing(v);
+			if (tmp == Integer.MAX_VALUE)
+				return tmp;
+			else if (tmp > max)
 				max = tmp;
-
+		}
+		
 		return max;
 	}
 
@@ -1736,8 +1740,12 @@ implements AutomataFactory<A, T> {
 			return maxStringLength(path.get(0), path.get(0));
 
 		int len = 0;
-		for (int i = 0; i < path.size() - 1; i++)
-			len += maxStringLength(path.get(i), path.get(i + 1));
+		for (int i = 0; i < path.size() - 1; i++) {
+			int l = maxStringLength(path.get(i), path.get(i + 1));
+			if (l == Integer.MAX_VALUE)
+				return l;
+			len += l;
+		}
 
 		return len;
 	}
