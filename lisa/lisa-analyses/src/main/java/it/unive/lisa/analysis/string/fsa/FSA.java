@@ -183,7 +183,10 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		if (!a.hasCycle()) {
 			SimpleAutomaton result = this.a.emptyLanguage();
 			for (String s : a.getLanguage()) {
-				result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
+				if (begin < s.length() && end < s.length())
+					result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
+				else
+					result = result.union(new SimpleAutomaton(""));
 
 				return new FSA(result);
 			}
@@ -365,14 +368,14 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 					return Satisfiability.SATISFIED;
 			}
 			visited.add(top);
-			
+
 			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) 
 				if (visited.contains(tr.getDestination()))
 					return Satisfiability.UNKNOWN;
 				else
 					ws.push(tr.getDestination());
 		}
-		
+
 		return Satisfiability.NOT_SATISFIED;
 	}
 }
