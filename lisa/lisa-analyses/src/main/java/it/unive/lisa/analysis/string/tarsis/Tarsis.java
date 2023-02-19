@@ -362,4 +362,13 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta).minimize();
 		return new FSA(fsa);
 	}
+	
+	public Satisfiability containsChar(char c) throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		
+		return satisfiesBinaryExpression(StringContains.INSTANCE, this, new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
+	}
 }

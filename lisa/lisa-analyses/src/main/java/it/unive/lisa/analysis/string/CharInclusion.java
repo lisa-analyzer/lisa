@@ -301,4 +301,17 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public IntInterval indexOf(CharInclusion s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
+	
+	public Satisfiability containsChar(char c) {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		if (this.certainlyContained.contains(c))
+			return Satisfiability.SATISFIED;
+		else if (this.maybeContained.contains(c))
+			return Satisfiability.UNKNOWN;
+		else 
+			return Satisfiability.NOT_SATISFIED;
+	}
 }

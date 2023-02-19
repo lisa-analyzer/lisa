@@ -279,10 +279,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return BOTTOM;
 	}
 
-//	@Override
-//	public String toString() {
-//		return representation().toString();
-//	}
+	//	@Override
+	//	public String toString() {
+	//		return representation().toString();
+	//	}
 
 	@Override
 	public DomainRepresentation representation() {
@@ -301,7 +301,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Set<String> resultSet = new TreeSet<>();
 
 		firstBrick.getStrings()
-				.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
+		.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
 
 		this.bricks.set(first, new Brick(1, 1, resultSet));
 		this.bricks.remove(second);
@@ -478,5 +478,41 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 */
 	public IntInterval indexOf(Bricks s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
+	}
+
+	public Satisfiability containsChar(char c) throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		Satisfiability sat = Satisfiability.BOTTOM;
+
+		for (Brick b : this.bricks) {
+
+			// surely a string of the brick is contained
+			if (b.getMin().geq(MathNumber.ONE)) {
+				Satisfiability bricksat = Satisfiability.BOTTOM;
+				for (String s : b.getStrings())
+					if (!s.contains(String.valueOf(c))) 
+						bricksat = bricksat.lub(Satisfiability.NOT_SATISFIED);
+					else
+						bricksat = bricksat.lub(Satisfiability.SATISFIED);
+
+				if (bricksat == Satisfiability.SATISFIED)
+					return bricksat;
+				else
+					sat = sat.lub(bricksat);
+			} else {
+				// the brick can be missing
+				for (String s : b.getStrings())
+					if (s.contains(String.valueOf(c)))
+						sat = sat.lub(Satisfiability.UNKNOWN);
+					else
+						sat = sat.lub(Satisfiability.NOT_SATISFIED);
+			}
+		}
+		
+		return sat;
 	}
 }
