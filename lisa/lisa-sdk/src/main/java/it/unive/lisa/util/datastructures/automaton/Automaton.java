@@ -1727,7 +1727,7 @@ implements AutomataFactory<A, T> {
 			else if (tmp > max)
 				max = tmp;
 		}
-		
+
 		return max;
 	}
 
@@ -1802,7 +1802,7 @@ implements AutomataFactory<A, T> {
 		for (State q : states) {
 			State mock = new State(q.getId(), q == s ? true : false, true);
 			newStates.add(mock);
-			nameToStates.put(s.getId(), mock);
+			nameToStates.put(q.getId(), mock);
 		}
 
 		for (Transition<T> t : transitions)
@@ -1810,7 +1810,6 @@ implements AutomataFactory<A, T> {
 					nameToStates.get(t.getSource().getId()),
 					nameToStates.get(t.getDestination().getId()),
 					t.getSymbol()));
-
 		return from(newStates, newDelta).minimize();
 	}
 
