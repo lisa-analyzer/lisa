@@ -155,8 +155,15 @@ public final class CollectionUtilities {
 		return res;
 	}
 
+	/**
+	 * A {@link Collector} that yields a {@link SortedSet}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <E> the type of the elements to be sorted
+	 */
 	public static class SortedSetCollector<E> implements Collector<E, SortedSet<E>, SortedSet<E>> {
-		
+
 		@Override
 		public Supplier<SortedSet<E>> supplier() {
 			return () -> new TreeSet<>();

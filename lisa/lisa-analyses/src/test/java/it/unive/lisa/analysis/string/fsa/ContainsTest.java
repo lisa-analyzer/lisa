@@ -46,8 +46,8 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.UNKNOWN);
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null));
 	}
 
 	@Test
@@ -82,8 +82,8 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.NOT_SATISFIED);
+		assertEquals(SemanticDomain.Satisfiability.NOT_SATISFIED,
+				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null));
 	}
 
 	@Test
@@ -118,8 +118,8 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.SATISFIED);
+		assertEquals(SemanticDomain.Satisfiability.SATISFIED,
+				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null));
 	}
 
 	@Test
@@ -156,8 +156,8 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.UNKNOWN);
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null));
 	}
 
 	@Test
@@ -191,8 +191,8 @@ public class ContainsTest {
 		FSA fsa = new FSA(a);
 		FSA fsa1 = new FSA(a2);
 
-		assertEquals(fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null),
-				SemanticDomain.Satisfiability.UNKNOWN);
+		assertEquals(SemanticDomain.Satisfiability.UNKNOWN,
+				fsa.satisfiesBinaryExpression(StringContains.INSTANCE, fsa, fsa1, null));
 	}
 
 }

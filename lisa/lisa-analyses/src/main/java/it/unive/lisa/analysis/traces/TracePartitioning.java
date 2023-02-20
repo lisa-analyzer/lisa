@@ -1,10 +1,5 @@
 package it.unive.lisa.analysis.traces;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Predicate;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
@@ -23,6 +18,10 @@ import it.unive.lisa.program.cfg.controlFlow.IfThenElse;
 import it.unive.lisa.program.cfg.controlFlow.Loop;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Predicate;
 
 /**
  * The trace partitioning abstract domain that splits execution traces to

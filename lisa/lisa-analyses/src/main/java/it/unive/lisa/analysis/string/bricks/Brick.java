@@ -25,7 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class Brick implements BaseNonRelationalValueDomain<Brick> {
-	
+
 	private final Set<String> strings;
 	private final IntInterval brickInterval;
 
@@ -116,7 +116,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 			return false;
 		return other.strings.containsAll(this.strings);
 	}
-	
+
 	@Override
 	public Brick wideningAux(Brick other) throws SemanticException {
 		MathNumber minOfMins = getMin().min(other.getMin());

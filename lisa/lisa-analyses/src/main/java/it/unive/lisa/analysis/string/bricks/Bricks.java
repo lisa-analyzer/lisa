@@ -124,7 +124,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		if (rel)
 			return w(other);
-		else 
+		else
 			return other.w(this);
 	}
 
@@ -255,10 +255,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return BOTTOM;
 	}
 
-	//	@Override
-	//	public String toString() {
-	//		return representation().toString();
-	//	}
+	// @Override
+	// public String toString() {
+	// return representation().toString();
+	// }
 
 	@Override
 	public DomainRepresentation representation() {
@@ -422,7 +422,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	public List<Brick> padList(final Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
 			throw new IllegalArgumentException("Other bricks list is longer or equal");
-		
+
 		List<Brick> l1 = new ArrayList<>(this.bricks), l2 = new ArrayList<>(other.bricks);
 		Brick e = new Brick(0, 0, new TreeSet<>());
 		int n1 = l1.size();
@@ -430,8 +430,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		int n = n2 - n1;
 		List<Brick> lnew = new ArrayList<>();
 		int emptyBricksAdded = 0;
-		
-		for (int i = 0; i < n2; i++) 
+
+		for (int i = 0; i < n2; i++)
 			if (emptyBricksAdded >= n) {
 				lnew.add(l1.get(0));
 				l1.remove(0);
@@ -468,6 +468,16 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public Satisfiability containsChar(char c) throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
@@ -477,12 +487,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Satisfiability sat = Satisfiability.BOTTOM;
 
 		for (Brick b : this.bricks) {
-
 			// surely a string of the brick is contained
 			if (b.getMin().geq(MathNumber.ONE)) {
 				Satisfiability bricksat = Satisfiability.BOTTOM;
 				for (String s : b.getStrings())
-					if (!s.contains(String.valueOf(c))) 
+					if (!s.contains(String.valueOf(c)))
 						bricksat = bricksat.lub(Satisfiability.NOT_SATISFIED);
 					else
 						bricksat = bricksat.lub(Satisfiability.SATISFIED);
@@ -500,10 +509,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 						sat = sat.lub(Satisfiability.NOT_SATISFIED);
 			}
 		}
-		
+
 		return sat;
 	}
-	
+
 	@Override
 	public String toString() {
 		return representation().toString();

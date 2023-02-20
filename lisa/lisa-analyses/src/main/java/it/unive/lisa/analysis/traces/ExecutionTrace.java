@@ -1,10 +1,8 @@
 package it.unive.lisa.analysis.traces;
 
-import java.util.Arrays;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.program.cfg.ProgramPoint;
+import java.util.Arrays;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An execution trace, made of {@link TraceToken}s representing the

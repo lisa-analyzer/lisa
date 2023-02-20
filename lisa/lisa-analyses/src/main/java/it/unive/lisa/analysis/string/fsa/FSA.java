@@ -1,11 +1,5 @@
 package it.unive.lisa.analysis.string.fsa;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -26,6 +20,11 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -268,7 +267,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	}
 
 	/**
-	 * Yields the concatenation between two automata
+	 * Yields the concatenation between two automata.
 	 * 
 	 * @param other the other automaton
 	 * 
@@ -299,11 +298,11 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 */
 	public Satisfiability contains(FSA other) {
 
-		if (this.a.intersection(other.a.factors()).acceptsEmptyLanguage())
-			return Satisfiability.NOT_SATISFIED;
-		else if (other.a.isEqualTo(a.emptyString()))
+		if (other.a.isEqualTo(a.emptyString()))
 			return Satisfiability.SATISFIED;
-		else 
+		else if (this.a.intersection(other.a.factors()).acceptsEmptyLanguage())
+			return Satisfiability.NOT_SATISFIED;
+		else
 			try {
 				Set<String> rightLang = a.getLanguage();
 				Set<String> leftLang = other.a.getLanguage();
@@ -330,6 +329,16 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			}
 	}
 
+	/**
+	 * Yields the replacement of occurrences of {@code search} inside
+	 * {@code this} with {@code repl}.
+	 * 
+	 * @param search the domain instance containing the automaton to search
+	 * @param repl   the domain instance containing the automaton to use as
+	 *                   replacement
+	 * 
+	 * @return the domain instance containing the replaced automaton
+	 */
 	public FSA replace(FSA search, FSA repl) {
 		try {
 			return new FSA(this.a.replace(search.a, repl.a));
@@ -338,6 +347,19 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		}
 	}
 
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 * 
+	 * @throws SemanticException        if something goes wrong during the
+	 *                                      computation
+	 * @throws CyclicAutomatonException if the automaton contained in this
+	 *                                      domain instance is cyclic
+	 */
 	public Satisfiability containsChar(char c) throws SemanticException, CyclicAutomatonException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
@@ -353,13 +375,11 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			return sat;
 		}
 
-
 		WorkingSet<State> ws = FIFOWorkingSet.mk();
 		Set<State> visited = new TreeSet<>();
 
-		for (State q : a.getInitialStates()) 
+		for (State q : a.getInitialStates())
 			ws.push(q);
-
 
 		while (!ws.isEmpty()) {
 			State top = ws.pop();
@@ -369,7 +389,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 			}
 			visited.add(top);
 
-			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) 
+			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top))
 				if (visited.contains(tr.getDestination()))
 					return Satisfiability.UNKNOWN;
 				else

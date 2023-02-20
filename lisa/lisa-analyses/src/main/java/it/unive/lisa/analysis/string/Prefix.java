@@ -216,8 +216,15 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 	public IntInterval indexOf(Prefix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
-	
-	
+
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 */
 	public Satisfiability containsChar(char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;

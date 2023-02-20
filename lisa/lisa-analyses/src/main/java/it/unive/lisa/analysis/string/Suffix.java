@@ -1,8 +1,8 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
-import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
+import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
@@ -209,7 +209,15 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	public IntInterval indexOf(Suffix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
-	
+
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 */
 	public Satisfiability containsChar(char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;

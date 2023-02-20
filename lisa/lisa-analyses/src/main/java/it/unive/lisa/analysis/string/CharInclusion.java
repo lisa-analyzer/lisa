@@ -299,7 +299,15 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 	public IntInterval indexOf(CharInclusion s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
-	
+
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 */
 	public Satisfiability containsChar(char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
@@ -309,7 +317,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 			return Satisfiability.SATISFIED;
 		else if (this.maybeContained.contains(c))
 			return Satisfiability.UNKNOWN;
-		else 
+		else
 			return Satisfiability.NOT_SATISFIED;
 	}
 }

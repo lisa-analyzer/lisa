@@ -316,7 +316,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	/**
-	 * Yields the concatenation between two automata
+	 * Yields the concatenation between two automata.
 	 * 
 	 * @param other the other automaton
 	 * 
@@ -326,6 +326,16 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		return new Tarsis(this.a.concat(other.a));
 	}
 
+	/**
+	 * Yields the replacement of occurrences of {@code search} inside
+	 * {@code this} with {@code repl}.
+	 * 
+	 * @param search the domain instance containing the automaton to search
+	 * @param repl   the domain instance containing the automaton to use as
+	 *                   replacement
+	 * 
+	 * @return the domain instance containing the replaced automaton
+	 */
 	public Tarsis replace(Tarsis search, Tarsis repl) {
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
@@ -334,6 +344,12 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		}
 	}
 
+	/**
+	 * Converts this domain instance to one of {@link FSA}, that uses single
+	 * characters as transition symbols.
+	 * 
+	 * @return the converted domain instance
+	 */
 	public FSA toFSA() {
 		RegexAutomaton exploded = this.a.minimize().explode();
 		SortedSet<Transition<StringSymbol>> fsaDelta = new TreeSet<>();
@@ -362,13 +378,24 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta).minimize();
 		return new FSA(fsa);
 	}
-	
+
+	/**
+	 * Simplified semantics of the string contains operator, checking a single
+	 * character is part of the string.
+	 * 
+	 * @param c the character to check
+	 * 
+	 * @return whether or not the character is part of the string
+	 * 
+	 * @throws SemanticException if something goes wrong during the computation
+	 */
 	public Satisfiability containsChar(char c) throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())
 			return Satisfiability.BOTTOM;
-		
-		return satisfiesBinaryExpression(StringContains.INSTANCE, this, new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
+
+		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
+				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
 	}
 }
