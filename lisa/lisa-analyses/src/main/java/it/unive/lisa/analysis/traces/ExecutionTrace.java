@@ -1,8 +1,10 @@
 package it.unive.lisa.analysis.traces;
 
-import it.unive.lisa.program.cfg.ProgramPoint;
 import java.util.Arrays;
+
 import org.apache.commons.lang3.StringUtils;
+
+import it.unive.lisa.program.cfg.ProgramPoint;
 
 /**
  * An execution trace, made of {@link TraceToken}s representing the
@@ -55,6 +57,15 @@ public class ExecutionTrace {
 		TraceToken[] tokens = new TraceToken[len - 1];
 		System.arraycopy(this.tokens, 0, tokens, 0, len - 1);
 		return new ExecutionTrace(tokens);
+	}
+
+	/**
+	 * Yields the head of the execution trace.
+	 * 
+	 * @return the head
+	 */
+	public TraceToken getHead() {
+		return tokens[tokens.length - 1];
 	}
 
 	/**

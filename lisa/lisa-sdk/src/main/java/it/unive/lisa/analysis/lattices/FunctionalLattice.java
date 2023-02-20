@@ -257,9 +257,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	@Override
 	public boolean lessOrEqualAux(F other) throws SemanticException {
-		for (K key : function.keySet())
-			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
-				return false;
+		if (function != null)
+			for (K key : function.keySet())
+				if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
+					return false;
 
 		return true;
 	}
