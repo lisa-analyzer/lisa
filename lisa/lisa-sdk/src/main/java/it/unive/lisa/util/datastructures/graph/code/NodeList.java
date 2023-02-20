@@ -1,6 +1,7 @@
 package it.unive.lisa.util.datastructures.graph.code;
 
 import it.unive.lisa.program.ProgramValidationException;
+import it.unive.lisa.util.collections.CollectionUtilities.SortedSetCollector;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Node;
 import java.util.Collection;
@@ -209,7 +210,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the collection of nodes
 	 */
 	public final Collection<N> getNodes() {
-		return nodes;
+		return new TreeSet<>(nodes);
 	}
 
 	/**
@@ -381,10 +382,10 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the collection of edges
 	 */
 	public final Collection<E> getEdges() {
-		Set<E> result = extraEdges.values().stream()
+		SortedSet<E> result = extraEdges.values().stream()
 				.flatMap(c -> Stream.concat(c.ingoing.stream(), c.outgoing.stream()))
 				.distinct()
-				.collect(Collectors.toSet());
+				.collect(new SortedSetCollector<>());
 		for (int i = 0; i < nodes.size() - 1; i++)
 			if (!cutoff.contains(i))
 				result.add(sequentialSingleton.newInstance(nodes.get(i), nodes.get(i + 1)));
@@ -567,7 +568,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 
 	@Override
 	public Iterator<N> iterator() {
-		return nodes.iterator();
+		return getNodes().iterator();
 	}
 
 	@Override
@@ -689,7 +690,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the entries nodes
 	 */
 	public Collection<N> getEntries() {
-		return nodes.stream().filter(nodes -> predecessorsOf(nodes).isEmpty()).collect(Collectors.toSet());
+		return nodes.stream().filter(nodes -> predecessorsOf(nodes).isEmpty()).collect(new SortedSetCollector<>());
 	}
 
 	/**
@@ -699,7 +700,7 @@ public class NodeList<G extends CodeGraph<G, N, E>, N extends CodeNode<G, N, E>,
 	 * @return the exit nodes
 	 */
 	public Collection<N> getExits() {
-		return nodes.stream().filter(nodes -> followersOf(nodes).isEmpty()).collect(Collectors.toSet());
+		return nodes.stream().filter(nodes -> followersOf(nodes).isEmpty()).collect(new SortedSetCollector<>());
 	}
 
 	/**

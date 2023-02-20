@@ -4,8 +4,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 /**
  * Utility methods for operations on {@link Collection}s.
@@ -146,5 +153,36 @@ public final class CollectionUtilities {
 		for (T o : objs)
 			res.add(o);
 		return res;
+	}
+
+	public static class SortedSetCollector<E> implements Collector<E, SortedSet<E>, SortedSet<E>> {
+		
+		@Override
+		public Supplier<SortedSet<E>> supplier() {
+			return () -> new TreeSet<>();
+		}
+
+		@Override
+		public BiConsumer<SortedSet<E>, E> accumulator() {
+			return (set, e) -> set.add(e);
+		}
+
+		@Override
+		public BinaryOperator<SortedSet<E>> combiner() {
+			return (result, partial) -> {
+				result.addAll(partial);
+				return result;
+			};
+		}
+
+		@Override
+		public Function<SortedSet<E>, SortedSet<E>> finisher() {
+			return Function.identity();
+		}
+
+		@Override
+		public Set<Characteristics> characteristics() {
+			return Set.of(Characteristics.IDENTITY_FINISH);
+		}
 	}
 }
