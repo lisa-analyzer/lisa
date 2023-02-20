@@ -25,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
 public class Brick implements BaseNonRelationalValueDomain<Brick> {
+	
 	private final Set<String> strings;
 	private final IntInterval brickInterval;
 
@@ -36,7 +37,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * Builds the top brick abstract element.
 	 */
 	public Brick() {
-		this(new IntInterval(new MathNumber(0), MathNumber.PLUS_INFINITY), getAlphabet());
+		this(new IntInterval(new MathNumber(0), MathNumber.PLUS_INFINITY), null);
 	}
 
 	/**
@@ -85,8 +86,14 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	@Override
 	public Brick lubAux(Brick other) throws SemanticException {
-		Set<String> resultStrings = new TreeSet<>(this.strings);
-		resultStrings.addAll(other.strings);
+		Set<String> resultStrings;
+		if (strings == null || other.strings == null)
+			resultStrings = null;
+		else {
+			resultStrings = new TreeSet<>();
+			resultStrings.addAll(strings);
+			resultStrings.addAll(other.strings);
+		}
 
 		return new Brick(this.getMin().min(other.getMin()),
 				this.getMax().max(other.getMax()),
@@ -96,14 +103,34 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	@Override
 	public boolean lessOrEqualAux(Brick other) throws SemanticException {
-		if (this.strings.size() > other.strings.size())
+		if (this.getMin().lt(other.getMin()))
+			return false;
+		if (this.getMax().gt(other.getMax()))
 			return false;
 
-		if (other.strings.containsAll(this.strings))
-			if (this.getMin().geq(other.getMin()))
-				return this.getMax().leq(other.getMax());
+		if (other.strings == null)
+			return true;
+		if (strings == null)
+			return false;
+		if (this.strings.size() > other.strings.size())
+			return false;
+		return other.strings.containsAll(this.strings);
+	}
+	
+	@Override
+	public Brick wideningAux(Brick other) throws SemanticException {
+		MathNumber minOfMins = getMin().min(other.getMin());
+		MathNumber maxOfMaxs = getMax().max(other.getMax());
 
-		return false;
+		Set<String> resultSet = new TreeSet<>(getStrings());
+		resultSet.addAll(other.getStrings());
+		if (resultSet.size() > Bricks.kS)
+			return TOP;
+		else if (maxOfMaxs.subtract(minOfMins).geq(new MathNumber(Bricks.kI))) {
+			IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+			return new Brick(interval, resultSet);
+		} else
+			return new Brick(minOfMins, maxOfMaxs, resultSet);
 	}
 
 	@Override
@@ -160,7 +187,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	@Override
 	public boolean isTop() {
-		return equals(new Brick());
+		return this == TOP || equals(TOP);
 	}
 
 	/**
@@ -169,7 +196,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @return true if the maximum of the Brick is Finite, false otherwise.
 	 */
 	public boolean isFinite() {
-		return getMax().isFinite();
+		return getMax().isFinite() && strings != null;
 	}
 
 	/**
@@ -197,8 +224,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 			this.recGetReps(reps, this.getMin().toInt(), 0, "");
 		} catch (MathNumberConversionException e) {
-			// TODO: what to do in this case;
-			return this.getStrings();
+			throw new IllegalStateException("Brick must be finite.");
 		}
 
 		return reps;
@@ -208,6 +234,9 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	// between min and max
 	private void recGetReps(Set<String> reps, int min, int numberOfReps, String currentStr)
 			throws MathNumberConversionException {
+		if (!isFinite())
+			throw new IllegalStateException("Brick must be finite.");
+
 		if (min > this.getMax().toInt() && numberOfReps >= this.getMin().toInt())
 			reps.add(currentStr);
 		else {
@@ -231,18 +260,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 				", max: " +
 				this.brickInterval.getHigh().toString() +
 				"), strings: (" +
-				StringUtils.join(this.strings, ", ") +
+				(strings == null ? Lattice.TOP_STRING : StringUtils.join(this.strings, ", ")) +
 				") ]";
-	}
-
-	private static Set<String> getAlphabet() {
-		Set<String> alphabet = new TreeSet<>();
-
-		for (char c = 32; c <= 123; c++) {
-			alphabet.add(String.valueOf(c));
-		}
-
-		return alphabet;
 	}
 
 	@Override
