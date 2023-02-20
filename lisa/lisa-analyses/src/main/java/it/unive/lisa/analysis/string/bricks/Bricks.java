@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -36,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
+public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCharProvider {
 
 	private final List<Brick> bricks;
 
@@ -468,16 +469,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Simplified semantics of the string contains operator, checking a single
-	 * character is part of the string.
-	 * 
-	 * @param c the character to check
-	 * 
-	 * @return whether or not the character is part of the string
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
+	@Override
 	public Satisfiability containsChar(char c) throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;

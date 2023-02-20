@@ -6,6 +6,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -33,7 +34,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA implements BaseNonRelationalValueDomain<FSA> {
+public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvider {
 
 	/**
 	 * Top element of the domain
@@ -347,31 +348,23 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		}
 	}
 
-	/**
-	 * Simplified semantics of the string contains operator, checking a single
-	 * character is part of the string.
-	 * 
-	 * @param c the character to check
-	 * 
-	 * @return whether or not the character is part of the string
-	 * 
-	 * @throws SemanticException        if something goes wrong during the
-	 *                                      computation
-	 * @throws CyclicAutomatonException if the automaton contained in this
-	 *                                      domain instance is cyclic
-	 */
-	public Satisfiability containsChar(char c) throws SemanticException, CyclicAutomatonException {
+	@Override
+	public Satisfiability containsChar(char c) throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
 		if (isBottom())
 			return Satisfiability.BOTTOM;
 		if (!a.hasCycle()) {
 			Satisfiability sat = Satisfiability.BOTTOM;
-			for (String s : a.getLanguage())
-				if (s.contains(String.valueOf(c)))
-					sat = sat.lub(Satisfiability.SATISFIED);
-				else
-					sat = sat.lub(Satisfiability.NOT_SATISFIED);
+			try {
+				for (String s : a.getLanguage())
+					if (s.contains(String.valueOf(c)))
+						sat = sat.lub(Satisfiability.SATISFIED);
+					else
+						sat = sat.lub(Satisfiability.NOT_SATISFIED);
+			} catch (CyclicAutomatonException e) {
+				// can ignore thanks to the guard
+			}
 			return sat;
 		}
 

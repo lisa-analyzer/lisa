@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
@@ -35,7 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
+public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCharProvider {
 
 	/**
 	 * Top element of the domain
@@ -379,16 +380,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		return new FSA(fsa);
 	}
 
-	/**
-	 * Simplified semantics of the string contains operator, checking a single
-	 * character is part of the string.
-	 * 
-	 * @param c the character to check
-	 * 
-	 * @return whether or not the character is part of the string
-	 * 
-	 * @throws SemanticException if something goes wrong during the computation
-	 */
+	@Override
 	public Satisfiability containsChar(char c) throws SemanticException {
 		if (isTop())
 			return Satisfiability.UNKNOWN;

@@ -32,7 +32,7 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
+public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCharProvider {
 
 	private final static Suffix TOP = new Suffix();
 	private final static Suffix BOTTOM = new Suffix(null);
@@ -210,14 +210,7 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
 	}
 
-	/**
-	 * Simplified semantics of the string contains operator, checking a single
-	 * character is part of the string.
-	 * 
-	 * @param c the character to check
-	 * 
-	 * @return whether or not the character is part of the string
-	 */
+	@Override
 	public Satisfiability containsChar(char c) {
 		if (isTop())
 			return Satisfiability.UNKNOWN;
