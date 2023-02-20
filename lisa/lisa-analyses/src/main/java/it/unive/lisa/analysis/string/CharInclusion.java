@@ -308,7 +308,7 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 			return Satisfiability.BOTTOM;
 		if (this.certainlyContained.contains(c))
 			return Satisfiability.SATISFIED;
-		else if (this.maybeContained.contains(c))
+		else if (this.maybeContained == null || this.maybeContained.contains(c))
 			return Satisfiability.UNKNOWN;
 		else
 			return Satisfiability.NOT_SATISFIED;
