@@ -45,7 +45,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	/**
 	 * The parameter used for the widening operator.
 	 */
-	public static final int WIDENING_TH = 3;
+	public static final int WIDENING_TH = 5;
 
 	/**
 	 * Used to store the string representation
@@ -81,7 +81,22 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 
 	@Override
 	public FSA wideningAux(FSA other) throws SemanticException {
-		return new FSA(this.a.union(other.a).widening(WIDENING_TH));
+		return new FSA(this.a.union(other.a).widening(getSizeDiffCapped(other)));
+	}
+
+	public int size() {
+		return a.getStates().size();
+	}
+	
+	private int getSizeDiffCapped(FSA other) {
+		int size = size();
+		int otherSize = other.size();
+		if (size > otherSize)
+			return Math.min(size - otherSize, WIDENING_TH);
+		else if (size < otherSize)
+			return Math.min(otherSize - size, WIDENING_TH);
+		else
+			return WIDENING_TH;
 	}
 
 	@Override
