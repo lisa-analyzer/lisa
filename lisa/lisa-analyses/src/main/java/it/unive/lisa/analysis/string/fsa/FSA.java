@@ -301,12 +301,12 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 
 		if (other.a.isEqualTo(a.emptyString()))
 			return Satisfiability.SATISFIED;
-		else if (this.a.intersection(other.a.factors()).acceptsEmptyLanguage())
+		else if (this.a.factors().intersection(other.a).acceptsEmptyLanguage())
 			return Satisfiability.NOT_SATISFIED;
 		else
 			try {
-				Set<String> rightLang = a.getLanguage();
-				Set<String> leftLang = other.a.getLanguage();
+				Set<String> rightLang = other.a.getLanguage();
+				Set<String> leftLang = a.getLanguage();
 				// right accepts only the empty string
 				if (rightLang.size() == 1 && rightLang.contains(""))
 					return Satisfiability.SATISFIED;

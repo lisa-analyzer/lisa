@@ -464,6 +464,11 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		if (deterministic.isPresent())
 			return deterministic.get();
 
+		if (states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()).size() > 1) {
+			deterministic = Optional.of(false);
+			return false;
+		}
+
 		deterministic = Optional.of(false);
 		for (State s : states) {
 			Set<Transition<T>> outgoingTranisitions = getOutgoingTransitionsFrom(s);
