@@ -1,5 +1,11 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
@@ -21,11 +27,6 @@ import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -71,6 +72,11 @@ public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvi
 	@Override
 	public FSA lubAux(FSA other) throws SemanticException {
 		return new FSA(this.a.union(other.a).minimize());
+	}
+
+	@Override
+	public FSA glbAux(FSA other) throws SemanticException {
+		return new FSA(this.a.intersection(other.a).minimize());
 	}
 
 	@Override
