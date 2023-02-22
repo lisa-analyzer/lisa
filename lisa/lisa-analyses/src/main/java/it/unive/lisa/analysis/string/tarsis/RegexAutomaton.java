@@ -55,6 +55,61 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 
+	@Override
+	public SortedSet<RegularExpression> commonAlphabet(RegexAutomaton other) {
+		SortedSet<RegularExpression> fa = getAlphabet();
+		SortedSet<RegularExpression> sa = other.getAlphabet();
+
+		if (fa.containsAll(sa))
+			return fa;
+
+		if (sa.containsAll(fa))
+			return sa;
+		
+		if (fa.contains(TopAtom.INSTANCE))
+			return fa;
+		
+		fa.addAll(sa);
+		return fa;
+	}
+	
+	@Override
+	public RegexAutomaton intersection(RegexAutomaton other) {
+		if (this == other)
+			return this;
+
+		RegexAutomaton thisCopy = copy();
+		RegexAutomaton otherCopy = other.copy();
+		
+		Set<Transition<RegularExpression>> toAdd = new HashSet<Transition<RegularExpression>>();
+		for (Transition<RegularExpression> t : thisCopy.getTransitions())
+			if (t.getSymbol() == TopAtom.INSTANCE)
+				toAdd.add(new Transition<RegularExpression>(t.getSource(), t.getDestination(), Atom.EPSILON));
+		
+		for (Transition<RegularExpression> t : toAdd)
+			thisCopy.addTransition(t);
+		toAdd.clear();
+		
+		for (Transition<RegularExpression> t : otherCopy.getTransitions())
+			if (t.getSymbol() == TopAtom.INSTANCE)
+				toAdd.add(new Transition<RegularExpression>(t.getSource(), t.getDestination(), Atom.EPSILON));
+		
+		for (Transition<RegularExpression> t : toAdd)
+			otherCopy.addTransition(t);
+		
+		// !(!(first) u !(second))
+		Set<RegularExpression> sigmaFirst = commonAlphabet(other);
+		Set<RegularExpression> sigmaSecond = other.commonAlphabet(this);
+		RegexAutomaton notFirst = thisCopy.complement(sigmaFirst);
+		RegexAutomaton notSecond = otherCopy.complement(sigmaSecond);
+		RegexAutomaton union = notFirst.union(notSecond);
+		RegexAutomaton result = union.complement(null);
+		// the last operation of the complement is minimization, and thus the
+		// result is already minimized
+		return result;
+	}
+	
+
 	/**
 	 * Builds a {@link RegexAutomaton} recognizing the empty language.
 	 * 
