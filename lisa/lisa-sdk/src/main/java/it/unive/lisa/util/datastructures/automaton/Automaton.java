@@ -464,6 +464,11 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		if (deterministic.isPresent())
 			return deterministic.get();
 
+		if (states.stream().filter(s -> s.isInitial()).collect(Collectors.toSet()).size() > 1) {
+			deterministic = Optional.of(false);
+			return false;
+		}
+
 		deterministic = Optional.of(false);
 		for (State s : states) {
 			Set<Transition<T>> outgoingTranisitions = getOutgoingTransitionsFrom(s);
@@ -606,7 +611,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return a boolean value that tells if {@code this} has any cycle.
 	 */
 	public boolean hasCycle() {
-		// BFS: move one step each time starting rom the initial states
+		// BFS: move one step each time starting from the initial states
 		Set<State> currentStates = getInitialStates();
 		Set<State> visited = new TreeSet<>();
 		while (!visited.containsAll(states)) {
@@ -655,6 +660,13 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		SortedSet<String> lang = new TreeSet<>();
 		if (hasCycle())
 			throw new CyclicAutomatonException();
+
+		// is the minimum automaton recognizing empty string
+		if (states.size() == 1 && states.iterator().next().isFinal() && states.iterator().next().isInitial()
+				&& transitions.isEmpty()) {
+			lang.add("");
+			return lang;
+		}
 
 		WorkingSet<Pair<String, Transition<T>>> ws = FIFOWorkingSet.mk();
 		for (State q : getInitialStates())
@@ -1714,9 +1726,13 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 			return 0;
 
 		int max = Integer.MIN_VALUE, tmp;
-		for (List<State> v : paths)
-			if ((tmp = maxStringLengthTraversing(v)) > max)
+		for (List<State> v : paths) {
+			tmp = maxStringLengthTraversing(v);
+			if (tmp == Integer.MAX_VALUE)
+				return tmp;
+			else if (tmp > max)
 				max = tmp;
+		}
 
 		return max;
 	}
@@ -1730,8 +1746,12 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 			return maxStringLength(path.get(0), path.get(0));
 
 		int len = 0;
-		for (int i = 0; i < path.size() - 1; i++)
-			len += maxStringLength(path.get(i), path.get(i + 1));
+		for (int i = 0; i < path.size() - 1; i++) {
+			int l = maxStringLength(path.get(i), path.get(i + 1));
+			if (l == Integer.MAX_VALUE)
+				return l;
+			len += l;
+		}
 
 		return len;
 	}
@@ -1788,7 +1808,7 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		for (State q : states) {
 			State mock = new State(q.getId(), q == s ? true : false, true);
 			newStates.add(mock);
-			nameToStates.put(s.getId(), mock);
+			nameToStates.put(q.getId(), mock);
 		}
 
 		for (Transition<T> t : transitions)
@@ -1796,7 +1816,6 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 					nameToStates.get(t.getSource().getId()),
 					nameToStates.get(t.getDestination().getId()),
 					t.getSymbol()));
-
 		return from(newStates, newDelta).minimize();
 	}
 

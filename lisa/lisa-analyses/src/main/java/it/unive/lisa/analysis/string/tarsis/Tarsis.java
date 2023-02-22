@@ -7,6 +7,7 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.analysis.string.fsa.FSA;
 import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
@@ -35,7 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
  *
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
+public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCharProvider {
 
 	/**
 	 * Top element of the domain
@@ -73,6 +74,15 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	 */
 	public Tarsis(RegexAutomaton a) {
 		this.a = a;
+	}
+
+	/**
+	 * Yields the {@link RegexAutomaton} backing this domain element.
+	 * 
+	 * @return the automaton
+	 */
+	public RegexAutomaton getAutomaton() {
+		return a;
 	}
 
 	@Override
@@ -307,7 +317,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 	}
 
 	/**
-	 * Yields the concatenation between two automata
+	 * Yields the concatenation between two automata.
 	 * 
 	 * @param other the other automaton
 	 * 
@@ -317,6 +327,16 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		return new Tarsis(this.a.concat(other.a));
 	}
 
+	/**
+	 * Yields the replacement of occurrences of {@code search} inside
+	 * {@code this} with {@code repl}.
+	 * 
+	 * @param search the domain instance containing the automaton to search
+	 * @param repl   the domain instance containing the automaton to use as
+	 *                   replacement
+	 * 
+	 * @return the domain instance containing the replaced automaton
+	 */
 	public Tarsis replace(Tarsis search, Tarsis repl) {
 		try {
 			return new Tarsis(this.a.replace(search.a, repl.a));
@@ -325,29 +345,49 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis> {
 		}
 	}
 
+	/**
+	 * Converts this domain instance to one of {@link FSA}, that uses single
+	 * characters as transition symbols.
+	 * 
+	 * @return the converted domain instance
+	 */
 	public FSA toFSA() {
-		RegexAutomaton exploded = this.a.explode();
-		SortedSet<State> fsaStates = new TreeSet<>();
+		RegexAutomaton exploded = this.a.minimize().explode();
 		SortedSet<Transition<StringSymbol>> fsaDelta = new TreeSet<>();
-		for (State s : exploded.getStates())
-			fsaStates.add(s);
+
+		if (!this.a.acceptsTopEventually()) {
+			for (Transition<RegularExpression> t : exploded.getTransitions())
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(),
+						new StringSymbol(t.getSymbol().toString())));
+
+			return new FSA(new SimpleAutomaton(exploded.getStates(), fsaDelta));
+		}
+
+		SortedSet<State> fsaStates = new TreeSet<>(exploded.getStates());
 
 		for (Transition<RegularExpression> t : exploded.getTransitions()) {
 			if (t.getSymbol() != TopAtom.INSTANCE)
-				fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getDestination(),
+				fsaDelta.add(new Transition<>(t.getSource(), t.getDestination(),
 						new StringSymbol(t.getSymbol().toString())));
 			else {
 				for (char c = 32; c <= 123; c++)
-					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), t.getSource(), new StringSymbol(c)));
-
-				for (Transition<RegularExpression> to : exploded.getOutgoingTransitionsFrom(t.getDestination()))
-					fsaDelta.add(new Transition<StringSymbol>(t.getSource(), to.getDestination(),
-							new StringSymbol(to.getSymbol().toString())));
+					fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), new StringSymbol(c)));
+				fsaDelta.add(new Transition<>(t.getSource(), t.getSource(), StringSymbol.EPSILON));
 			}
 		}
 
-		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta);
+		SimpleAutomaton fsa = new SimpleAutomaton(fsaStates, fsaDelta).minimize();
 		return new FSA(fsa);
+	}
 
+	@Override
+	public Satisfiability containsChar(char c) throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		return satisfiesBinaryExpression(StringContains.INSTANCE, this,
+				new Tarsis(RegexAutomaton.string(String.valueOf(c))), null);
 	}
 }

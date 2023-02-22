@@ -1,6 +1,7 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
@@ -31,7 +32,7 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
+public class Prefix implements BaseNonRelationalValueDomain<Prefix>, ContainsCharProvider {
 
 	private final static Prefix TOP = new Prefix();
 	private final static Prefix BOTTOM = new Prefix(null);
@@ -214,5 +215,14 @@ public class Prefix implements BaseNonRelationalValueDomain<Prefix> {
 	 */
 	public IntInterval indexOf(Prefix s) {
 		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
+	}
+
+	@Override
+	public Satisfiability containsChar(char c) {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		return this.prefix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 	}
 }

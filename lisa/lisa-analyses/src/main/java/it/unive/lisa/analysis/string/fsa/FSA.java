@@ -1,11 +1,18 @@
 package it.unive.lisa.analysis.string.fsa;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -13,15 +20,13 @@ import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
 import it.unive.lisa.symbolic.value.operator.binary.StringContains;
 import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
 import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.automaton.CyclicAutomatonException;
 import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * A class that represent the Finite State Automaton domain for strings,
@@ -30,7 +35,7 @@ import java.util.TreeSet;
  * @author <a href="mailto:simone.leoni2@studenti.unipr.it">Simone Leoni</a>
  * @author <a href="mailto:vincenzo.arceri@unipr.it">Vincenzo Arceri</a>
  */
-public class FSA implements BaseNonRelationalValueDomain<FSA> {
+public class FSA implements BaseNonRelationalValueDomain<FSA>, ContainsCharProvider {
 
 	/**
 	 * Top element of the domain
@@ -40,7 +45,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	/**
 	 * The parameter used for the widening operator.
 	 */
-	public static final int WIDENING_TH = 3;
+	public static final int WIDENING_TH = 5;
 
 	/**
 	 * Used to store the string representation
@@ -70,8 +75,28 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	}
 
 	@Override
+	public FSA glbAux(FSA other) throws SemanticException {
+		return new FSA(this.a.intersection(other.a).minimize());
+	}
+
+	@Override
 	public FSA wideningAux(FSA other) throws SemanticException {
-		return new FSA(this.a.union(other.a).widening(WIDENING_TH));
+		return new FSA(this.a.union(other.a).widening(getSizeDiffCapped(other)));
+	}
+
+	public int size() {
+		return a.getStates().size();
+	}
+	
+	private int getSizeDiffCapped(FSA other) {
+		int size = size();
+		int otherSize = other.size();
+		if (size > otherSize)
+			return Math.min(size - otherSize, WIDENING_TH);
+		else if (size < otherSize)
+			return Math.min(otherSize - size, WIDENING_TH);
+		else
+			return WIDENING_TH;
 	}
 
 	@Override
@@ -179,7 +204,10 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 		if (!a.hasCycle()) {
 			SimpleAutomaton result = this.a.emptyLanguage();
 			for (String s : a.getLanguage()) {
-				result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
+				if (begin < s.length() && end < s.length())
+					result = result.union(new SimpleAutomaton(s.substring((int) begin, (int) end)));
+				else
+					result = result.union(new SimpleAutomaton(""));
 
 				return new FSA(result);
 			}
@@ -261,7 +289,7 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	}
 
 	/**
-	 * Yields the concatenation between two automata
+	 * Yields the concatenation between two automata.
 	 * 
 	 * @param other the other automaton
 	 * 
@@ -291,37 +319,97 @@ public class FSA implements BaseNonRelationalValueDomain<FSA> {
 	 *             automaton
 	 */
 	public Satisfiability contains(FSA other) {
-		try {
-			Set<String> rightLang = a.getLanguage();
-			Set<String> leftLang = other.a.getLanguage();
-			// right accepts only the empty string
-			if (rightLang.size() == 1 && rightLang.contains(""))
-				return Satisfiability.SATISFIED;
 
-			// we can compare languages
-			boolean atLeastOne = false, all = true;
-			for (String a : leftLang)
-				for (String b : rightLang) {
-					boolean cont = a.contains(b);
-					atLeastOne = atLeastOne || cont;
-					all = all && cont;
-				}
-
-			if (all)
-				return Satisfiability.SATISFIED;
-			if (atLeastOne)
-				return Satisfiability.UNKNOWN;
+		if (other.a.isEqualTo(a.emptyString()))
+			return Satisfiability.SATISFIED;
+		else if (this.a.factors().intersection(other.a).acceptsEmptyLanguage())
 			return Satisfiability.NOT_SATISFIED;
-		} catch (CyclicAutomatonException e) {
-			return Satisfiability.UNKNOWN;
-		}
+		else
+			try {
+				Set<String> rightLang = other.a.getLanguage();
+				Set<String> leftLang = a.getLanguage();
+				// right accepts only the empty string
+				if (rightLang.size() == 1 && rightLang.contains(""))
+					return Satisfiability.SATISFIED;
+
+				// we can compare languages
+				boolean atLeastOne = false, all = true;
+				for (String a : leftLang)
+					for (String b : rightLang) {
+						boolean cont = a.contains(b);
+						atLeastOne = atLeastOne || cont;
+						all = all && cont;
+					}
+
+				if (all)
+					return Satisfiability.SATISFIED;
+				if (atLeastOne)
+					return Satisfiability.UNKNOWN;
+				return Satisfiability.NOT_SATISFIED;
+			} catch (CyclicAutomatonException e) {
+				return Satisfiability.UNKNOWN;
+			}
 	}
 
+	/**
+	 * Yields the replacement of occurrences of {@code search} inside
+	 * {@code this} with {@code repl}.
+	 * 
+	 * @param search the domain instance containing the automaton to search
+	 * @param repl   the domain instance containing the automaton to use as
+	 *                   replacement
+	 * 
+	 * @return the domain instance containing the replaced automaton
+	 */
 	public FSA replace(FSA search, FSA repl) {
 		try {
 			return new FSA(this.a.replace(search.a, repl.a));
 		} catch (CyclicAutomatonException e) {
 			return TOP;
 		}
+	}
+
+	@Override
+	public Satisfiability containsChar(char c) throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		if (!a.hasCycle()) {
+			Satisfiability sat = Satisfiability.BOTTOM;
+			try {
+				for (String s : a.getLanguage())
+					if (s.contains(String.valueOf(c)))
+						sat = sat.lub(Satisfiability.SATISFIED);
+					else
+						sat = sat.lub(Satisfiability.NOT_SATISFIED);
+			} catch (CyclicAutomatonException e) {
+				// can ignore thanks to the guard
+			}
+			return sat;
+		}
+
+		WorkingSet<State> ws = FIFOWorkingSet.mk();
+		Set<State> visited = new TreeSet<>();
+
+		for (State q : a.getInitialStates())
+			ws.push(q);
+
+		while (!ws.isEmpty()) {
+			State top = ws.pop();
+			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top)) {
+				if (tr.getSymbol().getSymbol().equals(String.valueOf(c)))
+					return Satisfiability.SATISFIED;
+			}
+			visited.add(top);
+
+			for (Transition<StringSymbol> tr : a.getOutgoingTransitionsFrom(top))
+				if (visited.contains(tr.getDestination()))
+					return Satisfiability.UNKNOWN;
+				else
+					ws.push(tr.getDestination());
+		}
+
+		return Satisfiability.NOT_SATISFIED;
 	}
 }

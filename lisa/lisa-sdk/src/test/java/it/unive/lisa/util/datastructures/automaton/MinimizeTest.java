@@ -147,19 +147,18 @@ public class MinimizeTest {
 
 		SortedSet<State> expStates = new TreeSet<>();
 		SortedSet<Transition<TestSymbol>> expDelta = new TreeSet<>();
-		State[] expSt = new State[5];
+		State[] expSt = new State[4];
 		expSt[0] = new State(0, true, true);
 		expSt[1] = new State(1, false, false);
 		expSt[2] = new State(2, false, false);
 		expSt[3] = new State(3, false, true);
-		expSt[4] = new State(4, false, true);
 		Collections.addAll(expStates, expSt);
 
 		expDelta.add(new Transition<>(expSt[0], expSt[0], new TestSymbol("c")));
 		expDelta.add(new Transition<>(expSt[0], expSt[1], new TestSymbol("a")));
 		expDelta.add(new Transition<>(expSt[0], expSt[2], new TestSymbol("b")));
 		expDelta.add(new Transition<>(expSt[1], expSt[3], new TestSymbol("a")));
-		expDelta.add(new Transition<>(expSt[2], expSt[4], new TestSymbol("b")));
+		expDelta.add(new Transition<>(expSt[2], expSt[3], new TestSymbol("b")));
 
 		TestAutomaton exp = new TestAutomaton(expStates, expDelta);
 

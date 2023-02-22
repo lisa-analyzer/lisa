@@ -58,6 +58,15 @@ public class ExecutionTrace {
 	}
 
 	/**
+	 * Yields the head of the execution trace.
+	 * 
+	 * @return the head
+	 */
+	public TraceToken getHead() {
+		return tokens[tokens.length - 1];
+	}
+
+	/**
 	 * Yields the number of {@link Branching} tokens in this trace.
 	 * 
 	 * @return the number of branches

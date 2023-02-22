@@ -85,7 +85,7 @@ public class Atom extends RegularExpression {
 	@Override
 	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
-		
+
 		int len = string.length();
 		if (charsToSkip > len)
 			// outside of the string

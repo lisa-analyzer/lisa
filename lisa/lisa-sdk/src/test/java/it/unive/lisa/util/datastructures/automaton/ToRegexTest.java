@@ -131,8 +131,8 @@ public class ToRegexTest {
 		delta.add(new Transition<>(st[3], st[3], new TestSymbol("c")));
 
 		TestAutomaton a = new TestAutomaton(states, delta);
-		// ac* + bc*
-		RegularExpression exp = new Atom("a").comp(new Atom("c").star()).or(new Atom("b").comp(new Atom("c").star()));
+		// (a + b)c*
+		RegularExpression exp = new Atom("a").or(new Atom("b")).comp(new Atom("c").star());
 		assertEquals(exp, a.toRegex().simplify());
 	}
 

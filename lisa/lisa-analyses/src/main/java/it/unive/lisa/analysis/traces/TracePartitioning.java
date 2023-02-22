@@ -150,86 +150,60 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 
 		ControlFlowStructure struct = src.getCFG().getControlFlowStructureOf(src);
 		Map<ExecutionTrace, A> result = mkNewFunction(null, false);
-		if (struct instanceof Loop) {
-			boolean isInBody = ((Loop) struct).getBody().contains(dest);
-			if (!isInBody) {
-				if (isTop() || function == null)
-					// no need to generate an empty trace here
-					return this;
-				else
-					for (Entry<ExecutionTrace, A> trace : this) {
-						Satisfiability sat = trace.getValue().satisfies(expression, src);
-						A assume = trace.getValue().assume(expression, src, dest);
-						if (sat.mightBeTrue() && !assume.isBottom())
-							// we only keep traces that can escape the loop
-							result.put(trace.getKey(), assume);
-					}
-			} else {
-				if (isTop() || function == null) {
-					TraceToken token;
-					if (MAX_LOOP_ITERATIONS > 0)
-						token = new LoopIteration(src, 0);
-					else
-						token = new LoopSummary(src);
-					result.put(new ExecutionTrace().push(token), lattice.top());
-				} else
-					for (Entry<ExecutionTrace, A> trace : this) {
-						Satisfiability sat = trace.getValue().satisfies(expression, src);
-						A assume = trace.getValue().assume(expression, src, dest);
-						if (!sat.mightBeTrue() || assume.isBottom())
-							// the trace will not appear
-							continue;
 
-						ExecutionTrace tokens = trace.getKey();
-						TraceToken prev = tokens.lastLoopTokenFor(src);
-						if (prev == null) {
-							if (MAX_LOOP_ITERATIONS > 0)
-								tokens = tokens.push(new LoopIteration(src, 0));
-							else
-								tokens = tokens.push(new LoopSummary(src));
-						} else if (prev instanceof LoopIteration) {
-							LoopIteration li = (LoopIteration) prev;
-							if (li.getIteration() < MAX_LOOP_ITERATIONS)
-								tokens = tokens.push(new LoopIteration(src, li.getIteration() + 1));
-							else
-								tokens = tokens.push(new LoopSummary(src));
-						}
-						// we do nothing on loop summaries as we already reached
-						// the maximum iterations for this loop
+		if (isTop() || function == null) {
+			ExecutionTrace trace = new ExecutionTrace();
+			ExecutionTrace nextTrace = generateTraceFor(trace, struct, src, dest);
+			result.put(nextTrace, lattice.top());
+		} else
+			for (Entry<ExecutionTrace, A> trace : this) {
+				A state = trace.getValue();
+				ExecutionTrace tokens = trace.getKey();
 
-						result.put(tokens, assume);
-					}
+				Satisfiability sat = state.satisfies(expression, src);
+				if (!sat.mightBeTrue())
+					// we only keep traces that can escape the loop
+					continue;
+
+				A assume = state.assume(expression, src, dest);
+				if (assume.isBottom())
+					// we only keep traces that can escape the loop
+					continue;
+
+				ExecutionTrace nextTrace = generateTraceFor(tokens, struct, src, dest);
+				// when we hit one of the limits, more traces can get smashed
+				// into one
+				A prev = result.get(nextTrace);
+				result.put(nextTrace, prev == null ? assume : assume.lub(prev));
 			}
-		} else if (struct instanceof IfThenElse) {
-			boolean isTrueBranch = ((IfThenElse) struct).getTrueBranch().contains(dest);
-			Branching token = new Branching(src, isTrueBranch);
 
-			if (isTop() || function == null) {
-				if (MAX_CONDITIONS < 1)
-					return this;
-				// we still generate the trace as the two branches might behave
-				// differently
-				result.put(new ExecutionTrace().push(token), lattice.top());
-			} else
-				for (Entry<ExecutionTrace, A> trace : this) {
-					Satisfiability sat = trace.getValue().satisfies(expression, src);
-					A assume = trace.getValue().assume(expression, src, dest);
-					if (sat.mightBeTrue() && !assume.isBottom())
-						result.put(trace.getKey().numberOfBranches() < MAX_CONDITIONS
-								? trace.getKey().push(token)
-								: trace.getKey(),
-								assume);
-				}
-		} else {
-			// no known conditional structure: we ignore it
-			if (isTop() || function == null)
-				return this;
+		return new TracePartitioning<>(lattice, result.isEmpty() ? null : result);
+	}
 
-			for (Entry<ExecutionTrace, A> trace : this)
-				result.put(trace.getKey(), trace.getValue().assume(expression, src, dest));
-		}
+	private static ExecutionTrace generateTraceFor(ExecutionTrace trace, ControlFlowStructure struct, ProgramPoint src,
+			ProgramPoint dest) {
+		if (struct instanceof Loop && ((Loop) struct).getBody().contains(dest)) {
+			// on loop exits we do not generate new traces
+			TraceToken prev = trace.lastLoopTokenFor(src);
+			if (prev == null)
+				if (MAX_LOOP_ITERATIONS > 0)
+					return trace.push(new LoopIteration(src, 0));
+				else
+					return trace.push(new LoopSummary(src));
+			else if (prev instanceof LoopIteration) {
+				LoopIteration li = (LoopIteration) prev;
+				if (li.getIteration() < MAX_LOOP_ITERATIONS)
+					return trace.push(new LoopIteration(src, li.getIteration() + 1));
+				else
+					return trace.push(new LoopSummary(src));
+			}
+			// we do nothing on loop summaries as we already reached
+			// the maximum iterations for this loop
+		} else if (struct instanceof IfThenElse && trace.numberOfBranches() < MAX_CONDITIONS)
+			return trace.push(new Branching(src, ((IfThenElse) struct).getTrueBranch().contains(dest)));
 
-		return new TracePartitioning<>(lattice, result);
+		// no known conditional structure, or no need to push new tokens
+		return trace;
 	}
 
 	@Override
@@ -421,5 +395,10 @@ public class TracePartitioning<A extends AbstractState<A, H, V, T>,
 			return result.bottom();
 		}
 		return result;
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 }
