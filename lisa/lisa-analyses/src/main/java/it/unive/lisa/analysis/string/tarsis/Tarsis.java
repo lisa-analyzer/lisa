@@ -60,7 +60,7 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 	private final RegexAutomaton a;
 
 	/**
-	 * Creates a new FSA object representing the TOP element.
+	 * Creates a new Tarsis object representing the TOP element.
 	 */
 	public Tarsis() {
 		// top
@@ -87,12 +87,12 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 
 	@Override
 	public Tarsis lubAux(Tarsis other) throws SemanticException {
-		return new Tarsis(this.a.union(other.a).minimize());
+		return new Tarsis(this.a.union(other.a));
 	}
 
 	@Override
 	public Tarsis glbAux(Tarsis other) throws SemanticException {
-		return new Tarsis(this.a.intersection(other.a).minimize());
+		return new Tarsis(this.a.intersection(other.a));
 	}
 
 	/**
