@@ -39,7 +39,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	 * @return the automaton
 	 */
 	public static RegexAutomaton topString() {
-		State q0 = new State(0, true, false);
+		State q0 = new State(0, true, true);
 		State q1 = new State(1, false, true);
 
 		SortedSet<State> states = new TreeSet<>();
@@ -78,30 +78,11 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		if (this == other)
 			return this;
 
-		RegexAutomaton thisCopy = copy();
-		RegexAutomaton otherCopy = other.copy();
-		
-		Set<Transition<RegularExpression>> toAdd = new HashSet<Transition<RegularExpression>>();
-		for (Transition<RegularExpression> t : thisCopy.getTransitions())
-			if (t.getSymbol() == TopAtom.INSTANCE)
-				toAdd.add(new Transition<RegularExpression>(t.getSource(), t.getDestination(), Atom.EPSILON));
-		
-		for (Transition<RegularExpression> t : toAdd)
-			thisCopy.addTransition(t);
-		toAdd.clear();
-		
-		for (Transition<RegularExpression> t : otherCopy.getTransitions())
-			if (t.getSymbol() == TopAtom.INSTANCE)
-				toAdd.add(new Transition<RegularExpression>(t.getSource(), t.getDestination(), Atom.EPSILON));
-		
-		for (Transition<RegularExpression> t : toAdd)
-			otherCopy.addTransition(t);
-		
 		// !(!(first) u !(second))
 		Set<RegularExpression> sigmaFirst = commonAlphabet(other);
 		Set<RegularExpression> sigmaSecond = other.commonAlphabet(this);
-		RegexAutomaton notFirst = thisCopy.complement(sigmaFirst);
-		RegexAutomaton notSecond = otherCopy.complement(sigmaSecond);
+		RegexAutomaton notFirst = complement(sigmaFirst);
+		RegexAutomaton notSecond = other.complement(sigmaSecond);
 		RegexAutomaton union = notFirst.union(notSecond);
 		RegexAutomaton result = union.complement(null);
 		// the last operation of the complement is minimization, and thus the
@@ -109,6 +90,14 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return result;
 	}
 	
+	@Override
+	public boolean isContained(RegexAutomaton other) {
+		SortedSet<RegularExpression> commonAlphabet = other.commonAlphabet(this);
+		RegexAutomaton complement = other.complement(commonAlphabet);
+		RegexAutomaton intersection = intersection(complement);
+		RegexAutomaton minimal = intersection.minimize();
+		return minimal.acceptsEmptyLanguage();
+	}
 
 	/**
 	 * Builds a {@link RegexAutomaton} recognizing the empty language.
