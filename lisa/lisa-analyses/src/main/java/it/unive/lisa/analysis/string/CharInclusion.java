@@ -76,11 +76,11 @@ public class CharInclusion implements BaseNonRelationalValueDomain<CharInclusion
 
 	@Override
 	public boolean lessOrEqualAux(CharInclusion other) throws SemanticException {
-		if (this.certainlyContained.size() > other.certainlyContained.size() ||
+		if (other.certainlyContained.size() > this.certainlyContained.size() ||
 				this.maybeContained.size() > other.maybeContained.size())
 			return false;
 
-		if (!other.certainlyContained.containsAll(this.certainlyContained))
+		if (!this.certainlyContained.containsAll(other.certainlyContained))
 			return false;
 
 		return other.maybeContained.containsAll(this.maybeContained);

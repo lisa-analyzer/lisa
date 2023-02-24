@@ -74,17 +74,17 @@ public class CharInclusionTest {
 
 		certainlyContained.add('a');
 		certainlyContained.add('b');
+		certainlyContained.add('c');
+		certainlyContained.add('d');
 
 		otherCertainlyContained.add('a');
 		otherCertainlyContained.add('b');
-		otherCertainlyContained.add('c');
-		otherCertainlyContained.add('d');
+
+		maybeContained.add('h');
 
 		otherMaybeContained.add('f');
 		otherMaybeContained.add('g');
 		otherMaybeContained.add('h');
-
-		maybeContained.add('h');
 
 		assertTrue(new CharInclusion(certainlyContained, maybeContained)
 				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
