@@ -1659,7 +1659,23 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 	 * @return the factors automaton
 	 */
 	public A factors() {
-		return prefix().suffix();
+		SortedSet<State> newStates = new TreeSet<>();
+		Map<Integer, State> nameToStates = new HashMap<Integer, State>();
+		SortedSet<Transition<T>> newDelta = new TreeSet<>();
+
+		for (State s : states) {
+			State mock = new State(s.getId(), true, true);
+			newStates.add(mock);
+			nameToStates.put(s.getId(), mock);
+		}
+
+		for (Transition<T> t : transitions)
+			newDelta.add(new Transition<>(
+					nameToStates.get(t.getSource().getId()),
+					nameToStates.get(t.getDestination().getId()),
+					t.getSymbol()));
+
+		return from(newStates, newDelta).minimize();
 	}
 
 	/**

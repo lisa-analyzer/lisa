@@ -65,14 +65,14 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 
 		if (sa.containsAll(fa))
 			return sa;
-		
+
 		if (fa.contains(TopAtom.INSTANCE))
 			return fa;
-		
+
 		fa.addAll(sa);
 		return fa;
 	}
-	
+
 	@Override
 	public RegexAutomaton intersection(RegexAutomaton other) {
 		if (this == other)
@@ -89,7 +89,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		// result is already minimized
 		return result;
 	}
-	
+
 	@Override
 	public boolean isContained(RegexAutomaton other) {
 		SortedSet<RegularExpression> commonAlphabet = other.commonAlphabet(this);
