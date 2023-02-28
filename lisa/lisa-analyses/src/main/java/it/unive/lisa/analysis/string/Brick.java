@@ -183,15 +183,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		Set<String> reps = new TreeSet<>();
 
 		try {
-			if (this.getMin().toInt() == 0)
+			if (this.getMin().toInt() == 0 && this.getMax().toInt() == 0)
 				return reps;
-
-			if (this.strings.size() == 1) {
-				String element = this.strings.iterator().next();
-				reps.add(element.repeat(this.getMin().toInt()));
-				reps.add(element.repeat(this.getMax().toInt()));
-				return reps;
-			}
 
 			this.recGetReps(reps, 0, "");
 		} catch (MathNumberConversionException e) {
@@ -204,13 +197,16 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Set<String> reps, int currentRep, String currentStr)
+	private void recGetReps(Set<String> reps, int concatCount, String currentStr)
 			throws MathNumberConversionException {
-		if (currentRep <= this.getMax().toInt() && currentRep >= this.getMin().toInt())
+		if (concatCount >= this.getMin().toInt() && concatCount <= this.getMax().toInt()) {
 			reps.add(currentStr);
-		else {
-			for (String string : this.strings)
-				recGetReps(reps, currentRep + 1, currentStr + string);
+		}
+
+		if (concatCount < this.getMax().toInt()) {
+			for (String string : this.strings) {
+				recGetReps(reps, concatCount + 1, currentStr + string);
+			}
 		}
 	}
 

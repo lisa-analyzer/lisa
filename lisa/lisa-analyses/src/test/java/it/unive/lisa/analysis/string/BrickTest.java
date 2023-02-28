@@ -115,6 +115,25 @@ public class BrickTest {
 	}
 
 	@Test
+	public void testGetReps6() {
+		Set<String> set = new HashSet<>();
+
+		set.add("a");
+
+		Brick brick = new Brick(0, 4, set);
+
+		Set<String> result = new HashSet<>();
+
+		result.add("");
+		result.add("a");
+		result.add("aa");
+		result.add("aaa");
+		result.add("aaaa");
+
+		assertEquals(brick.getReps(), result);
+	}
+
+	@Test
 	public void testRepresentation() {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
