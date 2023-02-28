@@ -186,8 +186,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		Set<String> concats = new TreeSet<>();
 
 		try {
-			if (this.getMin().toInt() == 0 &&
-					this.getMax().toInt() == 0) {
+			if (this.getMin().equals(MathNumber.ZERO) &&
+					this.getMax().equals(MathNumber.ZERO)) {
 				concats.add("");
 				return concats;
 			}
