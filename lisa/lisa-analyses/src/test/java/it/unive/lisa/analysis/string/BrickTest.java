@@ -134,6 +134,21 @@ public class BrickTest {
 	}
 
 	@Test
+	public void testGetReps7() {
+		Set<String> set = new HashSet<>();
+
+		set.add("a");
+
+		Brick brick = new Brick(0, 0, set);
+
+		Set<String> result = new HashSet<>();
+
+		result.add("");
+
+		assertEquals(brick.getConcats(), result);
+	}
+
+	@Test
 	public void testRepresentation() {
 		Set<String> hashSet = new HashSet<>();
 		hashSet.add("mo");
