@@ -209,13 +209,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		if (currentRep <= this.getMax().toInt() && currentRep >= this.getMin().toInt())
 			reps.add(currentStr);
 		else {
-			for (String string : this.strings) {
-				if (!currentStr.isEmpty() && currentRep >= this.getMin().toInt() &&
-						currentRep <= this.getMax().toInt())
-					reps.add(currentStr);
-
+			for (String string : this.strings)
 				recGetReps(reps, currentRep + 1, currentStr + string);
-			}
 		}
 	}
 
