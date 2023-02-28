@@ -177,8 +177,11 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @throws IllegalStateException if the brick is not finite.
 	 */
 	public Set<String> getConcats() {
+		if (isTop() || isBottom())
+			throw new IllegalStateException("Brick must not be TOP or BOT.");
+
 		if (!isFinite())
-			throw new IllegalStateException("Brick must be finite.");
+			throw new IllegalStateException("Brick must finite.");
 
 		Set<String> concats = new TreeSet<>();
 
