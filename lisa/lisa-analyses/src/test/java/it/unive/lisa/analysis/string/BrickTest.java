@@ -24,7 +24,7 @@ public class BrickTest {
 		result.add("mode");
 		result.add("demo");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class BrickTest {
 		Set<String> result = new HashSet<>();
 		result.add("abc");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class BrickTest {
 		result.add("mode");
 		result.add("demo");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test
@@ -76,7 +76,7 @@ public class BrickTest {
 
 		Brick brick = new Brick(1, 4, hashSet);
 
-		assertTrue(brick.getReps().contains("derevemo"));
+		assertTrue(brick.getConcats().contains("derevemo"));
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class BrickTest {
 		result.add("");
 		result.add("straw");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class BrickTest {
 		result.add("ab");
 		result.add("ba");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test
@@ -130,7 +130,7 @@ public class BrickTest {
 		result.add("aaa");
 		result.add("aaaa");
 
-		assertEquals(brick.getReps(), result);
+		assertEquals(brick.getConcats(), result);
 	}
 
 	@Test

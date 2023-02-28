@@ -176,7 +176,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * 
 	 * @throws IllegalStateException if the brick is not finite.
 	 */
-	public Set<String> getReps() {
+	public Set<String> getConcats() {
 		if (!isFinite())
 			throw new IllegalStateException("Brick must be finite.");
 
@@ -186,7 +186,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 			if (this.getMin().toInt() == 0 && this.getMax().toInt() == 0)
 				return reps;
 
-			this.recGetReps(reps, 0, "");
+			this.recGetConcats(reps, 0, "");
 		} catch (MathNumberConversionException e) {
 			// TODO: what to do in this case;
 			return this.getStrings();
@@ -197,7 +197,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	// Recursive function that gets all the possible combinations of the set
 	// between min and max
-	private void recGetReps(Set<String> reps, int concatCount, String currentStr)
+	private void recGetConcats(Set<String> reps, int concatCount, String currentStr)
 			throws MathNumberConversionException {
 		if (concatCount >= this.getMin().toInt() && concatCount <= this.getMax().toInt()) {
 			reps.add(currentStr);
@@ -205,7 +205,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 		if (concatCount < this.getMax().toInt()) {
 			for (String string : this.strings) {
-				recGetReps(reps, concatCount + 1, currentStr + string);
+				recGetConcats(reps, concatCount + 1, currentStr + string);
 			}
 		}
 	}

@@ -217,7 +217,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return Satisfiability.UNKNOWN;
 	}
 
-	@java.lang.Override
+	@Override
 	public boolean equals(Object object) {
 		if (this == object)
 			return true;
@@ -273,7 +273,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	private void rule3(int index) {
 		Brick brick = this.bricks.get(index);
 
-		this.bricks.set(index, new Brick(1, 1, brick.getReps()));
+		this.bricks.set(index, new Brick(1, 1, brick.getConcats()));
 	}
 
 	private void rule4(int first, int second) {
@@ -292,7 +292,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		Brick br = new Brick(brick.getMin(), brick.getMin(), brick.getStrings());
 
-		this.bricks.set(index, new Brick(1, 1, br.getReps()));
+		this.bricks.set(index, new Brick(1, 1, br.getConcats()));
 		this.bricks.add(index + 1,
 				new Brick(MathNumber.ZERO, brick.getMax().subtract(brick.getMin()), brick.getStrings()));
 	}
