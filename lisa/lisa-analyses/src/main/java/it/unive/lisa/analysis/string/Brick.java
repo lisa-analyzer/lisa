@@ -181,7 +181,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 			throw new IllegalStateException("Brick must not be TOP or BOT.");
 
 		if (!isFinite())
-			throw new IllegalStateException("Brick must finite.");
+			throw new IllegalStateException("Brick must be finite.");
 
 		Set<String> concats = new TreeSet<>();
 
@@ -205,9 +205,8 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	// between min and max
 	private void recGetConcats(Set<String> concats, int concatCount, String currentStr)
 			throws MathNumberConversionException {
-		if (concatCount >= this.getMin().toInt() && concatCount <= this.getMax().toInt()) {
+		if (concatCount >= this.getMin().toInt() && concatCount <= this.getMax().toInt())
 			concats.add(currentStr);
-		}
 
 		if (concatCount < this.getMax().toInt()) {
 			for (String string : this.strings) {
