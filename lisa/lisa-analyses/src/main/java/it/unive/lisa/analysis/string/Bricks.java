@@ -338,7 +338,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
 					rule4(i, i + 1);
 
-			if (MathNumber.ONE.le(currentBrick.getMin()) &&
+			if ((currentBrick.getMin().ge(MathNumber.ONE)) &&
 					!currentBrick.getMin().equals(currentBrick.getMax()))
 				rule5(i);
 		}
@@ -367,9 +367,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 				first.getMax().equals(MathNumber.ONE) &&
 				!first.getStrings().isEmpty()) {
 			first.getStrings().forEach(s -> {
-				boolean allGreater = s.length() >= e;
-
-				if (allGreater)
+				if (s.length() >= e)
 					result.add(s.substring(e, b));
 			});
 		}
@@ -399,7 +397,8 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 */
 	public List<Brick> padList(final Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
-			throw new IllegalArgumentException("Other bricks’ list is longer or equal");
+			throw new IllegalArgumentException("This bricks' list is longer or equal");
+
 		List<Brick> thisList = new ArrayList<>(this.bricks);
 		List<Brick> otherList = new ArrayList<>(other.bricks);
 
