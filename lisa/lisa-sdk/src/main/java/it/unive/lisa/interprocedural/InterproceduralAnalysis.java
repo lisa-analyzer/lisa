@@ -6,7 +6,6 @@ import java.util.Set;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
-import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -14,7 +13,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.Application;
@@ -65,34 +64,23 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	 * Computes a fixpoint over the whole control flow graph, producing a
 	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
 	 * analysis. Each result is computed with
-	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, int)}
+	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, FixpointConfiguration)}
 	 * or one of its overloads. Results of individual cfgs are then available
 	 * through {@link #getAnalysisResultsOf(CFG)}.
 	 * 
-	 * @param entryState             the entry state for the {@link CFG}s that
-	 *                                   are the entrypoints of the computation
-	 * @param fixpointWorkingSet     the concrete class of {@link WorkingSet} to
-	 *                                   be used in fixpoints.
-	 * @param wideningThreshold      the number of fixpoint iteration on a given
-	 *                                   node after which calls to
-	 *                                   {@link Lattice#lub(Lattice)} gets
-	 *                                   replaced with
-	 *                                   {@link Lattice#widening(Lattice)}.
-	 * @param descendingPhase        the type of descending phase algorithm that
-	 *                                   will be used during fixpoint
-	 *                                   calculation
-	 * @param descendingGlbThreshold the number of fixpoint iteration on a given
-	 *                                   node during descending phase after
-	 *                                   which calls to
-	 *                                   {@link Lattice#glb(Lattice)} does not
-	 *                                   do anything
+	 * @param entryState         the entry state for the {@link CFG}s that are
+	 *                               the entrypoints of the computation
+	 * @param fixpointWorkingSet the concrete class of {@link WorkingSet} to be
+	 *                               used in fixpoints.
+	 * @param conf               the {@link FixpointConfiguration} containing
+	 *                               the parameters tuning fixpoint behavior
 	 * 
 	 * @throws FixpointException if something goes wrong while evaluating the
 	 *                               fixpoint
 	 */
 	void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold, DescendingPhaseType descendingPhase, int descendingGlbThreshold)
+			FixpointConfiguration conf)
 			throws FixpointException;
 
 	/**

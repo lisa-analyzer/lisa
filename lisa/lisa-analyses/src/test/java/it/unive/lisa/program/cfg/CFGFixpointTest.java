@@ -13,6 +13,8 @@ import it.unive.lisa.analysis.nonrelational.value.ValueEnvironment;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
+import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
 import it.unive.lisa.imp.ParsingException;
@@ -32,6 +34,8 @@ import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import org.junit.Test;
 
 public class CFGFixpointTest {
+	
+	private final FixpointConfiguration conf = new FixpointConfiguration(5, 5, DescendingPhaseType.NONE, false);
 
 	private ModularWorstCaseAnalysis<
 			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
@@ -70,7 +74,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
 		} catch (FixpointException e) {
 			System.err.println(e);
 			fail("The fixpoint computation has thrown an exception");
@@ -83,7 +87,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -96,7 +100,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), 5);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -121,7 +125,7 @@ public class CFGFixpointTest {
 				MonolithicHeap,
 				ValueEnvironment<Sign>,
 				TypeEnvironment<InferredTypes>> result = cfg.fixpoint(domain,
-						mkAnalysis(program), FIFOWorkingSet.mk(), 5);
+						mkAnalysis(program), FIFOWorkingSet.mk(), conf);
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
 	}

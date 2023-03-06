@@ -6,7 +6,6 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
@@ -36,7 +35,7 @@ import it.unive.lisa.util.file.FileManager;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class LiSAConfiguration {
+public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The type of graphs that can be dumped by LiSA.
@@ -234,7 +233,7 @@ public class LiSAConfiguration {
 	 * {@link Lattice#widening(Lattice)}. Defaults to
 	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
 	 */
-	public int descendingGlbThreshold = DEFAULT_WIDENING_THRESHOLD;
+	public int glbThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
 	 * the type of descending phase that will be applied by the fixpoint
@@ -253,43 +252,6 @@ public class LiSAConfiguration {
 	 * {@link OpenCall}s. Defaults to {@link WorstCasePolicy}.
 	 */
 	public OpenCallPolicy openCallPolicy = WorstCasePolicy.INSTANCE;
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		try {
-			for (Field field : LiSAConfiguration.class.getFields())
-				if (!Modifier.isStatic(field.getModifiers()))
-					result = prime * result + Objects.hashCode(field.get(this));
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new IllegalStateException("Cannot access one of this class' public fields", e);
-		}
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		LiSAConfiguration other = (LiSAConfiguration) obj;
-		try {
-			for (Field field : LiSAConfiguration.class.getFields())
-				if (!Modifier.isStatic(field.getModifiers())) {
-					Object value = field.get(this);
-					Object ovalue = field.get(other);
-					if (!Objects.equals(value, ovalue))
-						return false;
-				}
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			throw new IllegalStateException("Cannot access one of this class' public fields", e);
-		}
-		return true;
-	}
 
 	@Override
 	public String toString() {

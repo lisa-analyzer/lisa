@@ -33,7 +33,7 @@ public class DescendingTest extends AnalysisTestExecutor {
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.descendingPhaseType = DescendingPhaseType.GLB;
-		conf.descendingGlbThreshold = 5;
+		conf.glbThreshold = 5;
 		perform("descending-maxglb", "program.imp", conf);
 	}
 }

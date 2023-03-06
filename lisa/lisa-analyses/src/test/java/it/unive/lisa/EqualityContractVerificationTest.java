@@ -45,6 +45,7 @@ import it.unive.lisa.analysis.string.fsa.regex.RegularExpression;
 import it.unive.lisa.analysis.string.fsa.regex.Star;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.types.IMPTypeSystem;
@@ -248,6 +249,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testConfiguration() {
 		verify(LiSAConfiguration.class, Warning.NONFINAL_FIELDS);
+		verify(FixpointConfiguration.class);
 		verify(ConfigurableComponent.class);
 	}
 

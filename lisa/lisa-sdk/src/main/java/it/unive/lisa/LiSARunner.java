@@ -21,6 +21,7 @@ import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.GraphType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
@@ -174,7 +175,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 						interproc.fixpoint(
 								new AnalysisState<>(state, new Skip(SyntheticLocation.INSTANCE), new SymbolAliasing()),
 								(Class<? extends WorkingSet<Statement>>) conf.fixpointWorkingSet,
-								conf.wideningThreshold, conf.descendingPhaseType, conf.descendingGlbThreshold);
+								new FixpointConfiguration(conf));
 					} catch (FixpointException e) {
 						LOG.fatal(FIXPOINT_EXCEPTION_MESSAGE, e);
 						throw new AnalysisExecutionException(FIXPOINT_EXCEPTION_MESSAGE, e);

@@ -22,7 +22,7 @@ import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.logging.IterationLogger;
@@ -85,9 +85,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	@Override
 	public void fixpoint(AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold,
-			DescendingPhaseType descendingPhase,
-			int descendingGlbThreshold)
+			FixpointConfiguration conf)
 			throws FixpointException {
 		for (CFG cfg : IterationLogger.iterate(LOG, app.getAllCFGs(), "Computing fixpoint over the whole program",
 				"cfgs"))
@@ -101,9 +99,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 							cfg.getGenericProgramPoint());
 				}
 
-				results.put(cfg, Optional
-						.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet),
-								wideningThreshold, descendingPhase, descendingGlbThreshold)));
+				results.put(cfg, Optional.of(cfg.fixpoint(prepared, this, WorkingSet.of(fixpointWorkingSet), conf)));
 			} catch (SemanticException | AnalysisSetupException e) {
 				throw new FixpointException("Error while creating the entrystate for " + cfg, e);
 			}

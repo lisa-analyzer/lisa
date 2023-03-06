@@ -23,7 +23,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
-import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.logging.IterationLogger;
 import it.unive.lisa.logging.TimerLogger;
 import it.unive.lisa.program.cfg.CFG;
@@ -69,11 +69,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private Class<? extends WorkingSet<Statement>> fixpointWorkingSet;
 
-	private int wideningThreshold;
-
-	private DescendingPhaseType descendingPhase;
-
-	private int descendingGlbThreshold;
+	private FixpointConfiguration conf;
 
 	/**
 	 * Builds the analysis, using {@link SingleScopeToken}s.
@@ -97,22 +93,16 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 	public void fixpoint(
 			AnalysisState<A, H, V, T> entryState,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold,
-			DescendingPhaseType descendingPhase,
-			int descendingGlbThreshold)
+			FixpointConfiguration conf)
 			throws FixpointException {
 		this.results = null;
 		this.fixpointWorkingSet = fixpointWorkingSet;
-		this.wideningThreshold = wideningThreshold;
-		this.descendingPhase = descendingPhase;
-		this.descendingGlbThreshold = descendingGlbThreshold;
+		this.conf = conf;
 
 		if (app.getEntryPoints().isEmpty())
 			throw new NoEntryPointException();
 
-		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program",
-				() -> this.fixpointAux(entryState, fixpointWorkingSet, wideningThreshold,
-						descendingPhase, descendingGlbThreshold));
+		TimerLogger.execAction(LOG, "Computing fixpoint over the whole program", () -> this.fixpointAux(entryState));
 	}
 
 	private static String ordinal(int i) {
@@ -129,12 +119,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 		return i + "rd";
 	}
 
-	private void fixpointAux(AnalysisState<A, H, V, T> entryState,
-			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
-			int wideningThreshold,
-			DescendingPhaseType descendingPhase,
-			int descendingGlbThreshold)
-			throws AnalysisExecutionException {
+	private void fixpointAux(AnalysisState<A, H, V, T> entryState) throws AnalysisExecutionException {
 		int iter = 0;
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
@@ -146,8 +131,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 					if (results == null)
 						this.results = new FixpointResults<>(value.top());
 					results.putResult(cfg, token.empty(),
-							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), wideningThreshold,
-									descendingPhase, descendingGlbThreshold));
+							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), conf));
 				} catch (SemanticException | AnalysisSetupException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 				} catch (FixpointException e) {
@@ -256,7 +240,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			AnalysisState<A, H, V, T> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
 		CFGWithAnalysisResults<A, H, V, T> fixpointResult = cfg.fixpoint(computedEntryState, this,
-				WorkingSet.of(fixpointWorkingSet), wideningThreshold, descendingPhase, descendingGlbThreshold);
+				WorkingSet.of(fixpointWorkingSet), conf);
 		fixpointResult.setId(localToken.toString());
 		Pair<Boolean, CFGWithAnalysisResults<A, H, V, T>> res = results.putResult(cfg, localToken, fixpointResult);
 		if (Boolean.TRUE.equals(res.getLeft()))

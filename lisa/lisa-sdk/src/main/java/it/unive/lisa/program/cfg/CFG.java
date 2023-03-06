@@ -22,6 +22,7 @@ import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
@@ -227,76 +228,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * invoked cfgs, while {@code ws} is used as working set for the statements
 	 * to process.
 	 * 
-	 * @param <A>                    the type of {@link AbstractState} contained
-	 *                                   into the analysis state
-	 * @param <H>                    the type of {@link HeapDomain} contained
-	 *                                   into the computed abstract state
-	 * @param <V>                    the type of {@link ValueDomain} contained
-	 *                                   into the computed abstract state
-	 * @param <T>                    the type of {@link TypeDomain} contained
-	 *                                   into the computed abstract state
-	 * @param entryState             the entry states to apply to each
-	 *                                   {@link Statement} returned by
-	 *                                   {@link #getEntrypoints()}
-	 * @param interprocedural        the interprocedural analysis that can be
-	 *                                   queried when a call towards an other
-	 *                                   cfg is encountered
-	 * @param ws                     the {@link WorkingSet} instance to use for
-	 *                                   this computation
-	 * @param widenAfter             the number of times after which the
-	 *                                   {@link Lattice#lub(Lattice)} invocation
-	 *                                   gets replaced by the
-	 *                                   {@link Lattice#widening(Lattice)} call.
-	 *                                   Use {@code 0} to <b>always</b> use
-	 *                                   {@link Lattice#lub(Lattice)}
-	 * @param descendingPhase        the type of descending phase algorithm that
-	 *                                   will be used during fixpoint
-	 *                                   calculation
-	 * @param descendingGlbThreshold the number of fixpoint iteration on a given
-	 *                                   node during descending phase after
-	 *                                   which calls to
-	 *                                   {@link Lattice#glb(Lattice)} does not
-	 *                                   do anything
-	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
-	 *             this control flow graph, and that stores for each
-	 *             {@link Statement} the result of the fixpoint computation
-	 * 
-	 * @throws FixpointException if an error occurs during the semantic
-	 *                               computation of a statement, or if some
-	 *                               unknown/invalid statement ends up in the
-	 *                               working set
-	 */
-	public <A extends AbstractState<A, H, V, T>,
-			H extends HeapDomain<H>,
-			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
-					AnalysisState<A, H, V, T> entryState,
-					InterproceduralAnalysis<A, H, V, T> interprocedural,
-					WorkingSet<Statement> ws,
-					int widenAfter,
-					DescendingPhaseType descendingPhase,
-					int descendingGlbThreshold) throws FixpointException {
-		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
-		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, widenAfter, descendingPhase, descendingGlbThreshold);
-	}
-
-	/**
-	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to
-	 * the {@link AnalysisState} computed by this method. The computation uses
-	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
-	 * iterations, up to {@code widenAfter * predecessors_number} times, where
-	 * {@code predecessors_number} is the number of expressions that are
-	 * predecessors of the one being processed. After overcoming that threshold,
-	 * {@link Lattice#widening(Lattice)} is used. The computation starts at the
-	 * statements returned by {@link #getEntrypoints()}, using
-	 * {@code entryState} as entry state for all of them.
-	 * {@code interprocedural} will be invoked to get the approximation of all
-	 * invoked cfgs, while {@code ws} is used as working set for the statements
-	 * to process.
-	 * 
 	 * @param <A>             the type of {@link AbstractState} contained into
 	 *                            the analysis state
 	 * @param <H>             the type of {@link HeapDomain} contained into the
@@ -313,12 +244,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            encountered
 	 * @param ws              the {@link WorkingSet} instance to use for this
 	 *                            computation
-	 * @param widenAfter      the number of times after which the
-	 *                            {@link Lattice#lub(Lattice)} invocation gets
-	 *                            replaced by the
-	 *                            {@link Lattice#widening(Lattice)} call. Use
-	 *                            {@code 0} to <b>always</b> use
-	 *                            {@link Lattice#lub(Lattice)}
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -329,7 +256,6 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                               unknown/invalid statement ends up in the
 	 *                               working set
 	 */
-
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -337,10 +263,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					int widenAfter)
-					throws FixpointException {
-
-		return fixpoint(entryState, interprocedural, ws, widenAfter, DescendingPhaseType.NONE, 5);
+					FixpointConfiguration conf) throws FixpointException {
+		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
+		entrypoints.forEach(e -> start.put(e, entryState));
+		return fixpoint(entryState, start, interprocedural, ws, conf);
 	}
 
 	/**
@@ -357,40 +283,25 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * approximation of all invoked cfgs, while {@code ws} is used as working
 	 * set for the statements to process.
 	 * 
-	 * @param <A>                    the type of {@link AbstractState} contained
-	 *                                   into the analysis state
-	 * @param <H>                    the type of {@link HeapDomain} contained
-	 *                                   into the computed abstract state
-	 * @param <V>                    the type of {@link ValueDomain} contained
-	 *                                   into the computed abstract state
-	 * @param <T>                    the type of {@link TypeDomain} contained
-	 *                                   into the computed abstract state
-	 * @param entrypoints            the collection of {@link Statement}s that
-	 *                                   to use as a starting point of the
-	 *                                   computation (that must be nodes of this
-	 *                                   cfg)
-	 * @param entryState             the entry states to apply to each
-	 *                                   {@link Statement} in
-	 *                                   {@code entrypoints}
-	 * @param interprocedural        the callgraph that can be queried when a
-	 *                                   call towards an other cfg is
-	 *                                   encountered
-	 * @param ws                     the {@link WorkingSet} instance to use for
-	 *                                   this computation
-	 * @param widenAfter             the number of times after which the
-	 *                                   {@link Lattice#lub(Lattice)} invocation
-	 *                                   gets replaced by the
-	 *                                   {@link Lattice#widening(Lattice)} call.
-	 *                                   Use {@code 0} to <b>always</b> use
-	 *                                   {@link Lattice#lub(Lattice)}
-	 * @param descendingPhase        the type of descending phase algorithm that
-	 *                                   will be used during fixpoint
-	 *                                   calculation
-	 * @param descendingGlbThreshold the number of fixpoint iteration on a given
-	 *                                   node during descending phase after
-	 *                                   which calls to
-	 *                                   {@link Lattice#glb(Lattice)} does not
-	 *                                   do anything
+	 * @param <A>             the type of {@link AbstractState} contained into
+	 *                            the analysis state
+	 * @param <H>             the type of {@link HeapDomain} contained into the
+	 *                            computed abstract state
+	 * @param <V>             the type of {@link ValueDomain} contained into the
+	 *                            computed abstract state
+	 * @param <T>             the type of {@link TypeDomain} contained into the
+	 *                            computed abstract state
+	 * @param entrypoints     the collection of {@link Statement}s that to use
+	 *                            as a starting point of the computation (that
+	 *                            must be nodes of this cfg)
+	 * @param entryState      the entry states to apply to each
+	 *                            {@link Statement} in {@code entrypoints}
+	 * @param interprocedural the callgraph that can be queried when a call
+	 *                            towards an other cfg is encountered
+	 * @param ws              the {@link WorkingSet} instance to use for this
+	 *                            computation
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -409,12 +320,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					int widenAfter,
-					DescendingPhaseType descendingPhase,
-					int descendingGlbThreshold) throws FixpointException {
+					FixpointConfiguration conf) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, widenAfter, descendingPhase, descendingGlbThreshold);
+		return fixpoint(entryState, start, interprocedural, ws, conf);
 	}
 
 	/**
@@ -450,18 +359,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            towards an other cfg is encountered
 	 * @param ws              the {@link WorkingSet} instance to use for this
 	 *                            computation
-	 * @param widenAfter      the number of times after which the
-	 *                            {@link Lattice#lub(Lattice)} invocation gets
-	 *                            replaced by the
-	 *                            {@link Lattice#widening(Lattice)} call. Use
-	 *                            {@code 0} to <b>always</b> use
-	 *                            {@link Lattice#lub(Lattice)}
-	 * @param descendingPhase the type of descending phase algorithm that will
-	 *                            be used during fixpoint calculation
-	 * @param glbThreshold    the number of fixpoint iteration on a given node
-	 *                            during descending phase after which calls to
-	 *                            {@link Lattice#glb(Lattice)} does not do
-	 *                            anything
+	 * @param conf            the {@link FixpointConfiguration} containing the
+	 *                            parameters tuning fixpoint behavior
 	 * 
 	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
@@ -480,11 +379,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					int widenAfter,
-					DescendingPhaseType descendingPhase,
-					int glbThreshold) throws FixpointException {
+					FixpointConfiguration conf) throws FixpointException {
 		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = new Fixpoint<>(this, false);
-		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, widenAfter, interprocedural);
+		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		startingPoints.forEach(
 				(st, state) -> starting.put(st, CompoundState.of(state, new StatementStore<>(state.bottom()))));
@@ -492,15 +389,16 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 		Map<Statement, CompoundState<A, H, V, T>> fixpoint;
 
-		if (descendingPhase != DescendingPhaseType.NONE) {
+		if (conf.descendingPhaseType != DescendingPhaseType.NONE) {
 			fix = new Fixpoint<>(this, true);
 			starting.clear();
 			startingPoints.forEach((st, state) -> starting.put(st, ascendingResult.get(st)));
 		}
 
-		switch (descendingPhase) {
+		switch (conf.descendingPhaseType) {
 		case GLB:
-			DescendingGLBFixpoint<A, H, V, T> desc = new DescendingGLBFixpoint<>(this, glbThreshold, interprocedural);
+			DescendingGLBFixpoint<A, H, V,
+					T> desc = new DescendingGLBFixpoint<>(this, conf.glbThreshold, interprocedural);
 			fixpoint = fix.fixpoint(starting, ws, desc, ascendingResult);
 			break;
 		case NARROWING:
