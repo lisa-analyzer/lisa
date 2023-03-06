@@ -22,7 +22,7 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import java.util.Map;
 import org.junit.Test;
 
-public class CFGWithAnalysisResultsTest {
+public class AnalyzedCFGTest {
 
 	private static final ClassUnit unit = new ClassUnit(new SourceCodeLocation("unknown", 0, 0),
 			new Program(new TestLanguageFeatures(), new TestTypeSystem()), "Testing", false);
@@ -46,8 +46,8 @@ public class CFGWithAnalysisResultsTest {
 		Map<Statement, AnalysisState<TestAbstractState,
 				TestHeapDomain, TestValueDomain, TestTypeDomain>> results = Map.of(y, state, x, state);
 
-		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res = new CFGWithAnalysisResults<>(cfg, state, entries, results);
+		AnalyzedCFG<TestAbstractState, TestHeapDomain,
+				TestValueDomain, TestTypeDomain> res = new AnalyzedCFG<>(cfg, state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));

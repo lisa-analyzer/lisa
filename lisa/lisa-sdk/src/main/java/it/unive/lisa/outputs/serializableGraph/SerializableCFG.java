@@ -1,6 +1,6 @@
 package it.unive.lisa.outputs.serializableGraph;
 
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
@@ -54,8 +54,8 @@ public class SerializableCFG {
 	public static SerializableGraph fromCFG(CFG source, Function<Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
-		if (source instanceof CFGWithAnalysisResults<?, ?, ?, ?>)
-			desc = ((CFGWithAnalysisResults<?, ?, ?, ?>) source).getId();
+		if (source instanceof AnalyzedCFG<?, ?, ?, ?>)
+			desc = ((AnalyzedCFG<?, ?, ?, ?>) source).getId();
 		else
 			desc = null;
 

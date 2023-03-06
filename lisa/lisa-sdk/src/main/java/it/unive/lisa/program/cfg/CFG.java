@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -215,7 +215,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
 	 * the {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
@@ -247,7 +247,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -259,7 +259,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
@@ -271,7 +271,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
 	 * the {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
@@ -303,7 +303,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -315,7 +315,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
 					Collection<Statement> entrypoints,
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
@@ -328,7 +328,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link CFGWithAnalysisResults} instance mapping each {@link Statement} to
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
 	 * the {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
@@ -362,7 +362,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link CFGWithAnalysisResults} instance that is equivalent to
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to
 	 *             this control flow graph, and that stores for each
 	 *             {@link Statement} the result of the fixpoint computation
 	 * 
@@ -374,7 +374,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
-			T extends TypeDomain<T>> CFGWithAnalysisResults<A, H, V, T> fixpoint(
+			T extends TypeDomain<T>> AnalyzedCFG<A, H, V, T> fixpoint(
 					AnalysisState<A, H, V, T> singleton,
 					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
@@ -418,7 +418,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
-		return new CFGWithAnalysisResults<>(this, singleton, startingPoints, finalResults);
+		return new AnalyzedCFG<>(this, singleton, startingPoints, finalResults);
 	}
 
 	@Override

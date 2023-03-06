@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -144,7 +144,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		if (state != null) {
 			analyze(allCFGs, fileManager, htmlViewer, subnodes);
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
+			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results = new IdentityHashMap<>(allCFGs.size());
 			for (CFG cfg : allCFGs)
 				results.put(cfg, interproc.getAnalysisResultsOf(cfg));
 
@@ -187,7 +187,7 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 			int nfiles = fileManager.createdFiles().size();
 
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping analysis results", "cfgs"))
-				for (CFGWithAnalysisResults<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
+				for (AnalyzedCFG<A, H, V, T> result : interproc.getAnalysisResultsOf(cfg)) {
 					SerializableGraph graph = result.toSerializableGraph(
 							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();

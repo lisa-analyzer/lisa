@@ -19,7 +19,7 @@ import it.unive.lisa.TestTypeDomain;
 import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.checks.syntactic.CheckTool;
@@ -218,13 +218,13 @@ public class CheckToolWithAnalysisResultsTest {
 						new TestAbstractState(),
 						new ExpressionSet<>(), new SymbolAliasing());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
-		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res1 = new CFGWithAnalysisResults<>(cfg, singleton,
+		AnalyzedCFG<TestAbstractState, TestHeapDomain,
+				TestValueDomain, TestTypeDomain> res1 = new AnalyzedCFG<>(cfg, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
-		CFGWithAnalysisResults<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res2 = new CFGWithAnalysisResults<>(cfg2, singleton,
+		AnalyzedCFG<TestAbstractState, TestHeapDomain,
+				TestValueDomain, TestTypeDomain> res2 = new AnalyzedCFG<>(cfg2, singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		CheckToolWithAnalysisResults<TestAbstractState,

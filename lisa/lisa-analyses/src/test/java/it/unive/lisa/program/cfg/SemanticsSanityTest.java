@@ -4,7 +4,7 @@ import static org.junit.Assert.fail;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -365,10 +365,10 @@ public class SemanticsSanityTest {
 			return cfg;
 		if (param == AnalysisState.class)
 			return as;
-		if (param == CFGWithAnalysisResults.class)
-			return new CFGWithAnalysisResults<>(cfg, as);
+		if (param == AnalyzedCFG.class)
+			return new AnalyzedCFG<>(cfg, as);
 		if (param == CFGResults.class)
-			return new CFGResults<>(new CFGWithAnalysisResults<>(cfg, as));
+			return new CFGResults<>(new AnalyzedCFG<>(cfg, as));
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

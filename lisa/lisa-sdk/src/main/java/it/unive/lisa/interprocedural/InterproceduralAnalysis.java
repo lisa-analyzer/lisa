@@ -5,7 +5,7 @@ import java.util.Set;
 
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -62,7 +62,7 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Computes a fixpoint over the whole control flow graph, producing a
-	 * {@link CFGWithAnalysisResults} for each {@link CFG} contained in this
+	 * {@link AnalyzedCFG} for each {@link CFG} contained in this
 	 * analysis. Each result is computed with
 	 * {@link CFG#fixpoint(AnalysisState, InterproceduralAnalysis, WorkingSet, FixpointConfiguration)}
 	 * or one of its overloads. Results of individual cfgs are then available
@@ -86,14 +86,14 @@ public interface InterproceduralAnalysis<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields the results of the given analysis, identified by its class, on the
 	 * given {@link CFG}. Results are provided as
-	 * {@link CFGWithAnalysisResults}.
+	 * {@link AnalyzedCFG}.
 	 * 
 	 * @param cfg the cfg whose fixpoint results needs to be retrieved
 	 *
 	 * @return the result of the fixpoint computation of {@code valueDomain}
 	 *             over {@code cfg}
 	 */
-	Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
+	Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg);
 
 	/**
 	 * Computes an analysis state that abstracts the execution of the possible

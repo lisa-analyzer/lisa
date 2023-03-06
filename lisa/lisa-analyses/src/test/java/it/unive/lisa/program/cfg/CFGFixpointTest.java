@@ -4,7 +4,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
@@ -120,7 +120,7 @@ public class CFGFixpointTest {
 				MonolithicHeap,
 				ValueEnvironment<Sign>,
 				TypeEnvironment<InferredTypes>> domain = mkState();
-		CFGWithAnalysisResults<
+		AnalyzedCFG<
 				SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,
 				MonolithicHeap,
 				ValueEnvironment<Sign>,

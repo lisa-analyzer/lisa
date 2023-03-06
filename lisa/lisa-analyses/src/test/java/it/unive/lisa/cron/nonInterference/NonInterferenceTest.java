@@ -6,7 +6,7 @@ import org.junit.Test;
 
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SimpleAbstractState;
 import it.unive.lisa.analysis.heap.MonolithicHeap;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
@@ -134,7 +134,7 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			Collection<?> results = tool.getResultOf(graph);
 
 			for (Object res : results) {
-				CFGWithAnalysisResults<?, ?, ?, ?> result = (CFGWithAnalysisResults<?, ?, ?, ?>) res;
+				AnalyzedCFG<?, ?, ?, ?> result = (AnalyzedCFG<?, ?, ?, ?>) res;
 				InferenceSystem<NonInterference> state = result
 						.getAnalysisStateAfter(assign).getDomainInstance(InferenceSystem.class);
 				InferenceSystem<NonInterference> left = result

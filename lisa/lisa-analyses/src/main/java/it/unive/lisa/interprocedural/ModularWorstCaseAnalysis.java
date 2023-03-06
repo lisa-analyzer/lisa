@@ -14,7 +14,7 @@ import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.FallbackImplementation;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
@@ -73,7 +73,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	 * {@link Optional#isEmpty()} yields true, then the fixpoint for that key
 	 * has not be computed yet.
 	 */
-	private final Map<CFG, Optional<CFGWithAnalysisResults<A, H, V, T>>> results;
+	private final Map<CFG, Optional<AnalyzedCFG<A, H, V, T>>> results;
 
 	/**
 	 * Builds the interprocedural analysis.
@@ -106,7 +106,7 @@ public class ModularWorstCaseAnalysis<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A, H, V, T>> getAnalysisResultsOf(CFG cfg) {
 		return Collections.singleton(results.get(cfg).orElse(null));
 	}
 

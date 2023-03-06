@@ -21,7 +21,7 @@ import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -404,7 +404,7 @@ public class EqualityContractVerificationTest {
 				verify(subject, Warning.NONFINAL_FIELDS);
 			else if (subject == StaticTypes.class)
 				verify(subject, verifier -> verifier.withIgnoredFields("types"));
-			else if (subject != CFGWithAnalysisResults.class)
+			else if (subject != AnalyzedCFG.class)
 				// we test the cfg separately
 				verify(subject);
 	}
@@ -416,7 +416,7 @@ public class EqualityContractVerificationTest {
 		verify(CompoundState.class);
 		// we consider only fields that compose the results
 		// id is mutable
-		verify(CFGWithAnalysisResults.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
+		verify(AnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
 	}
 
@@ -467,7 +467,7 @@ public class EqualityContractVerificationTest {
 		for (Class<? extends Unit> unit : scanner.getSubTypesOf(Unit.class))
 			verify(unit, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 		for (Class<? extends CodeMember> cm : scanner.getSubTypesOf(CodeMember.class))
-			if (!CFGWithAnalysisResults.class.isAssignableFrom(cm))
+			if (!AnalyzedCFG.class.isAssignableFrom(cm))
 				verify(cm, Warning.INHERITED_DIRECTLY_FROM_OBJECT, Warning.ALL_FIELDS_SHOULD_BE_USED);
 	}
 

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import it.unive.lisa.analysis.AbstractState;
-import it.unive.lisa.analysis.CFGWithAnalysisResults;
+import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
@@ -34,7 +34,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>> extends CheckTool {
 
-	private final Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results;
+	private final Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results;
 
 	private final CallGraph callgraph;
 
@@ -48,7 +48,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 *                          analysis
 	 */
 	public CheckToolWithAnalysisResults(LiSAConfiguration configuration, FileManager fileManager,
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results,
+			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results,
 			CallGraph callgraph) {
 		super(configuration, fileManager);
 		this.results = results;
@@ -63,7 +63,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * @param callgraph the callgraph that has been built during the analysis
 	 */
 	public CheckToolWithAnalysisResults(CheckTool other,
-			Map<CFG, Collection<CFGWithAnalysisResults<A, H, V, T>>> results,
+			Map<CFG, Collection<AnalyzedCFG<A, H, V, T>>> results,
 			CallGraph callgraph) {
 		super(other);
 		this.results = results;
@@ -78,7 +78,7 @@ public class CheckToolWithAnalysisResults<A extends AbstractState<A, H, V, T>,
 	 * 
 	 * @return the results on the given cfg
 	 */
-	public Collection<CFGWithAnalysisResults<A, H, V, T>> getResultOf(CFG cfg) {
+	public Collection<AnalyzedCFG<A, H, V, T>> getResultOf(CFG cfg) {
 		return results.get(cfg);
 	}
 
