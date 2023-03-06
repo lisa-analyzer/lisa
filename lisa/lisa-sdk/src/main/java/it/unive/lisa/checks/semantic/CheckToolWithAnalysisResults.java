@@ -1,12 +1,15 @@
 package it.unive.lisa.checks.semantic;
 
-import it.unive.lisa.LiSAConfiguration;
+import java.util.Collection;
+import java.util.Map;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.CFGWithAnalysisResults;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.checks.syntactic.CheckTool;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
 import it.unive.lisa.program.cfg.CFG;
@@ -14,8 +17,6 @@ import it.unive.lisa.program.cfg.CodeMember;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.util.file.FileManager;
-import java.util.Collection;
-import java.util.Map;
 
 /**
  * An extension of {@link CheckTool} that also contains the results of the
