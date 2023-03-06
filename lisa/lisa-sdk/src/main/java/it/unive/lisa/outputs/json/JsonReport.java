@@ -1,5 +1,11 @@
 package it.unive.lisa.outputs.json;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import it.unive.lisa.LiSAReport;
+import it.unive.lisa.LiSARunInfo;
+import it.unive.lisa.checks.warnings.Warning;
+import it.unive.lisa.conf.LiSAConfiguration;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -8,14 +14,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import it.unive.lisa.LiSAReport;
-import it.unive.lisa.LiSARunInfo;
-import it.unive.lisa.checks.warnings.Warning;
-import it.unive.lisa.conf.LiSAConfiguration;
 
 /**
  * A report of an executed analysis that can be dumped in json format, and that

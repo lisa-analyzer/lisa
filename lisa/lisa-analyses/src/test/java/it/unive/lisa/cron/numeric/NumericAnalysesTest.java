@@ -2,8 +2,6 @@ package it.unive.lisa.cron.numeric;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.analysis.AbstractState;
@@ -15,6 +13,7 @@ import it.unive.lisa.analysis.numeric.Parity;
 import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration;
+import org.junit.Test;
 
 public class NumericAnalysesTest extends AnalysisTestExecutor {
 
@@ -38,7 +37,7 @@ public class NumericAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testInterval() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration(); 
+		LiSAConfiguration conf = new LiSAConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = getDefaultFor(AbstractState.class, getDefaultFor(HeapDomain.class), new Interval(),
 				new TypeEnvironment<>(new InferredTypes()));

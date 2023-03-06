@@ -14,6 +14,7 @@ import it.unive.lisa.analysis.numeric.Sign;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
+import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.imp.IMPFeatures;
 import it.unive.lisa.imp.IMPFrontend;
@@ -31,11 +32,21 @@ import it.unive.lisa.program.cfg.statement.call.Call.CallType;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class CFGFixpointTest {
-	
-	private final FixpointConfiguration conf = new FixpointConfiguration(5, 5, DescendingPhaseType.NONE, false);
+
+	private static FixpointConfiguration conf;
+
+	@BeforeClass
+	public static void init() {
+		LiSAConfiguration base = new LiSAConfiguration();
+		base.descendingPhaseType = DescendingPhaseType.NONE;
+		base.glbThreshold = 5;
+		base.wideningThreshold = 5;
+		conf = new FixpointConfiguration(base);
+	}
 
 	private ModularWorstCaseAnalysis<
 			SimpleAbstractState<MonolithicHeap, ValueEnvironment<Sign>, TypeEnvironment<InferredTypes>>,

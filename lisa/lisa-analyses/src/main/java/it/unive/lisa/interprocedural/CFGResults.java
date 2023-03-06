@@ -14,8 +14,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
- * {@link AnalyzedCFG}s. This class is meant to store fixpoint
- * results on each token generated during the interprocedural analysis.
+ * {@link AnalyzedCFG}s. This class is meant to store fixpoint results on each
+ * token generated during the interprocedural analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -51,9 +51,9 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 
 	/**
 	 * Stores the result of a fixpoint computation on a cfg, if needed. This
-	 * method returns a pair of a boolean and a {@link AnalyzedCFG},
-	 * where ({@code prev} is the {@link AnalyzedCFG} already present
-	 * for the given {@code token}):
+	 * method returns a pair of a boolean and a {@link AnalyzedCFG}, where
+	 * ({@code prev} is the {@link AnalyzedCFG} already present for the given
+	 * {@code token}):
 	 * <ul>
 	 * <li>if no {@code prev} was stored for {@code token}, than that token is
 	 * mapped to {@code result} and this method returns

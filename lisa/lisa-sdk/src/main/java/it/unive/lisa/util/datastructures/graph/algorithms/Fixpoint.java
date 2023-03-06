@@ -34,7 +34,10 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
 	 * 
-	 * @param graph the source graph
+	 * @param graph               the source graph
+	 * @param forceFullEvaluation whether or not the fixpoint should evaluate
+	 *                                all nodes independently of the fixpoint
+	 *                                implementation
 	 */
 	public Fixpoint(G graph, boolean forceFullEvaluation) {
 		this.graph = graph;

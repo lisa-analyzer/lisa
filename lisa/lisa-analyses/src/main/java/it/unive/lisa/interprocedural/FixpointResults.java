@@ -50,8 +50,8 @@ public class FixpointResults<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Stores the result of a fixpoint computation on a cfg. This method returns
 	 * the result of calling
-	 * {@link CFGResults#putResult(ContextSensitivityToken, AnalyzedCFG)}
-	 * with the given {@code token} and {@code result} on the {@link CFGResults}
+	 * {@link CFGResults#putResult(ContextSensitivityToken, AnalyzedCFG)} with
+	 * the given {@code token} and {@code result} on the {@link CFGResults}
 	 * instance corresponding to {@code cfg}.
 	 * 
 	 * @param cfg    the {@link CFG} on which the result has been computed

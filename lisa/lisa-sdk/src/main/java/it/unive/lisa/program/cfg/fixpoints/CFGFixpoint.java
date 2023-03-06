@@ -1,11 +1,5 @@
 package it.unive.lisa.program.cfg.fixpoints;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.Lattice;
@@ -23,18 +17,48 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import org.apache.commons.lang3.StringUtils;
 
+/**
+ * A {@link FixpointImplementation} for {@link CFG}s.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state computed by the fixpoint
+ * @param <H> the type of {@link HeapDomain} contained into the computed
+ *                abstract state
+ * @param <V> the type of {@link ValueDomain} contained into the computed
+ *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
+ */
 public abstract class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		implements
-		FixpointImplementation<Statement, Edge,
-				it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState<A, H, V, T>> {
+		implements FixpointImplementation<Statement, Edge, CFGFixpoint.CompoundState<A, H, V, T>> {
 
+	/**
+	 * The graph targeted by this implementation.
+	 */
 	protected final CFG graph;
+
+	/**
+	 * The {@link InterproceduralAnalysis} to use for semantics invocations.
+	 */
 	protected final InterproceduralAnalysis<A, H, V, T> interprocedural;
 
+	/**
+	 * Builds the fixpoint implementation.
+	 * 
+	 * @param graph           the graph targeted by this implementation
+	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
+	 *                            semantics invocation
+	 */
 	public CFGFixpoint(CFG graph, InterproceduralAnalysis<A, H, V, T> interprocedural) {
 		this.graph = graph;
 		this.interprocedural = interprocedural;
@@ -81,20 +105,59 @@ public abstract class CFGFixpoint<A extends AbstractState<A, H, V, T>,
 		return left.lub(right);
 	}
 
+	/**
+	 * A compound state for a {@link Statement}, holding the post-state of the
+	 * whole statement as well as the ones of the inner expressions.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 * 
+	 * @param <A> the type of {@link AbstractState} contained into the analysis
+	 *                state
+	 * @param <H> the type of {@link HeapDomain} contained into the computed
+	 *                abstract state
+	 * @param <V> the type of {@link ValueDomain} contained into the computed
+	 *                abstract state
+	 * @param <T> the type of {@link TypeDomain} contained into the computed
+	 *                abstract state
+	 */
 	public static final class CompoundState<A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
 			T extends TypeDomain<T>> implements Lattice<CompoundState<A, H, V, T>> {
 
+		/**
+		 * Builds a compound state from the given post-states.
+		 * 
+		 * @param <A>                the type of {@link AbstractState} contained
+		 *                               into the analysis state
+		 * @param <H>                the type of {@link HeapDomain} contained
+		 *                               into the computed abstract state
+		 * @param <V>                the type of {@link ValueDomain} contained
+		 *                               into the computed abstract state
+		 * @param <T>                the type of {@link TypeDomain} contained
+		 *                               into the computed abstract state
+		 * @param postState          the overall post-state of a statement
+		 * @param intermediateStates the post-state of intermediate expressions
+		 * 
+		 * @return the generated compound state
+		 */
 		public static <A extends AbstractState<A, H, V, T>,
 				H extends HeapDomain<H>,
 				V extends ValueDomain<V>,
-				T extends TypeDomain<T>> CompoundState<A, H, V, T> of(AnalysisState<A, H, V, T> postState,
+				T extends TypeDomain<T>> CompoundState<A, H, V, T> of(
+						AnalysisState<A, H, V, T> postState,
 						StatementStore<A, H, V, T> intermediateStates) {
 			return new CompoundState<>(postState, intermediateStates);
 		}
 
+		/**
+		 * The overall post-state of a statement.
+		 */
 		public final AnalysisState<A, H, V, T> postState;
+
+		/**
+		 * The post-state of intermediate expressions.
+		 */
 		public final StatementStore<A, H, V, T> intermediateStates;
 
 		private CompoundState(AnalysisState<A, H, V, T> postState, StatementStore<A, H, V, T> intermediateStates) {

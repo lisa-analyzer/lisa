@@ -1,7 +1,5 @@
 package it.unive.lisa.cron.taint;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.LiSAFactory;
@@ -30,6 +28,7 @@ import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
+import org.junit.Test;
 
 public class TaintAnalysesTest extends AnalysisTestExecutor {
 

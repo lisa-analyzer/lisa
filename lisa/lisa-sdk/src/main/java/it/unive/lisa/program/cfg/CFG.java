@@ -1,19 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -49,6 +35,18 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -215,8 +213,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
-	 * the {@link AnalysisState} computed by this method. The computation uses
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
 	 * {@code predecessors_number} is the number of expressions that are
@@ -247,9 +245,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link AnalyzedCFG} instance that is equivalent to
-	 *             this control flow graph, and that stores for each
-	 *             {@link Statement} the result of the fixpoint computation
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
+	 *             flow graph, and that stores for each {@link Statement} the
+	 *             result of the fixpoint computation
 	 * 
 	 * @throws FixpointException if an error occurs during the semantic
 	 *                               computation of a statement, or if some
@@ -271,8 +269,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
-	 * the {@link AnalysisState} computed by this method. The computation uses
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
 	 * {@code predecessors_number} is the number of expressions that are
@@ -303,9 +301,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link AnalyzedCFG} instance that is equivalent to
-	 *             this control flow graph, and that stores for each
-	 *             {@link Statement} the result of the fixpoint computation
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
+	 *             flow graph, and that stores for each {@link Statement} the
+	 *             result of the fixpoint computation
 	 * 
 	 * @throws FixpointException if an error occurs during the semantic
 	 *                               computation of a statement, or if some
@@ -328,8 +326,8 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 
 	/**
 	 * Computes a fixpoint over this control flow graph. This method returns a
-	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to
-	 * the {@link AnalysisState} computed by this method. The computation uses
+	 * {@link AnalyzedCFG} instance mapping each {@link Statement} to the
+	 * {@link AnalysisState} computed by this method. The computation uses
 	 * {@link Lattice#lub(Lattice)} to compose results obtained at different
 	 * iterations, up to {@code widenAfter * predecessors_number} times, where
 	 * {@code predecessors_number} is the number of expressions that are
@@ -362,9 +360,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
 	 * 
-	 * @return a {@link AnalyzedCFG} instance that is equivalent to
-	 *             this control flow graph, and that stores for each
-	 *             {@link Statement} the result of the fixpoint computation
+	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
+	 *             flow graph, and that stores for each {@link Statement} the
+	 *             result of the fixpoint computation
 	 * 
 	 * @throws FixpointException if an error occurs during the semantic
 	 *                               computation of a statement, or if some
@@ -816,6 +814,12 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		return getRecent(pp, IfThenElse.class::isInstance);
 	}
 
+	/**
+	 * {@inheritDoc} <br>
+	 * <br>
+	 * In a CFG, the normal reasoning is replaced by taking all the {@link Loop}
+	 * conditions appearing in the cfg's control flow structures.
+	 */
 	@Override
 	public Collection<Statement> getCycleEntries() {
 		Collection<Statement> result = new HashSet<>();

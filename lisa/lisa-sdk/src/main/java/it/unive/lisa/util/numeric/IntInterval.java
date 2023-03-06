@@ -7,7 +7,7 @@ import java.util.Iterator;
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
-public class IntInterval implements Iterable<Long> {
+public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 
 	/**
 	 * The interval {@code [-Inf, +Inf]}.
@@ -367,5 +367,13 @@ public class IntInterval implements Iterable<Long> {
 		} catch (MathNumberConversionException e) {
 			throw new InfiniteIterationException(this);
 		}
+	}
+
+	@Override
+	public int compareTo(IntInterval o) {
+		int cmp;
+		if ((cmp = low.compareTo(o.low)) != 0)
+			return cmp;
+		return high.compareTo(o.high);
 	}
 }

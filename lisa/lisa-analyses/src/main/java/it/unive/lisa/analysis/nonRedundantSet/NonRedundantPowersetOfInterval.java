@@ -13,8 +13,8 @@ import it.unive.lisa.symbolic.value.operator.binary.ComparisonGt;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLe;
 import it.unive.lisa.symbolic.value.operator.binary.ComparisonLt;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * The finite non redundant powerset of {@link Interval} abstract domain
@@ -33,7 +33,7 @@ public class NonRedundantPowersetOfInterval
 	 * Constructs an empty non redundant set of intervals.
 	 */
 	public NonRedundantPowersetOfInterval() {
-		super(new HashSet<Interval>(), new Interval());
+		super(new TreeSet<>(), new Interval());
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @param elements the set of intervals
 	 */
-	public NonRedundantPowersetOfInterval(Set<Interval> elements) {
+	public NonRedundantPowersetOfInterval(SortedSet<Interval> elements) {
 		super(elements, new Interval());
 	}
 
@@ -64,8 +64,8 @@ public class NonRedundantPowersetOfInterval
 	@Override
 	protected NonRedundantPowersetOfInterval EgliMilnerConnector(NonRedundantPowersetOfInterval other)
 			throws SemanticException {
-		Set<Interval> newElementsSet = new HashSet<Interval>();
-		Set<Interval> notCoverSet = new HashSet<Interval>();
+		SortedSet<Interval> newElementsSet = new TreeSet<>();
+		SortedSet<Interval> notCoverSet = new TreeSet<>();
 		for (Interval s2 : other.elementsSet) {
 			boolean existsLower = false;
 			for (Interval s1 : elementsSet) {
@@ -121,7 +121,7 @@ public class NonRedundantPowersetOfInterval
 
 	@Override
 	public NonRedundantPowersetOfInterval top() {
-		Set<Interval> topSet = new HashSet<Interval>();
+		SortedSet<Interval> topSet = new TreeSet<>();
 		topSet.add(Interval.TOP);
 		return new NonRedundantPowersetOfInterval(topSet);
 	}
@@ -236,7 +236,7 @@ public class NonRedundantPowersetOfInterval
 	}
 
 	@Override
-	protected NonRedundantPowersetOfInterval mk(Set<Interval> elements) {
+	protected NonRedundantPowersetOfInterval mk(SortedSet<Interval> elements) {
 		return new NonRedundantPowersetOfInterval(elements);
 	}
 

@@ -2,8 +2,6 @@ package it.unive.lisa.cron.string;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.analysis.AbstractState;
@@ -12,6 +10,7 @@ import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.string.Prefix;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.conf.LiSAConfiguration;
+import org.junit.Test;
 
 public class PrefixAnalysisTest extends AnalysisTestExecutor {
 

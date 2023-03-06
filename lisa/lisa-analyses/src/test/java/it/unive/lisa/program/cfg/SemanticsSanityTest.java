@@ -51,6 +51,7 @@ import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.edge.Edge;
+import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
@@ -85,6 +86,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.reflections.Reflections;
@@ -359,8 +362,8 @@ public class SemanticsSanityTest {
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == ValueNonRedundantSet.class)
-			if (param == Set.class)
-				return new HashSet<ValueEnvironment<Sign>>();
+			if (param == SortedSet.class)
+				return new TreeSet<ValueEnvironment<Sign>>();
 			else if (param == boolean.class)
 				return true;
 			else if (param == ValueDomain.class)
@@ -391,6 +394,7 @@ public class SemanticsSanityTest {
 		for (Class<? extends T> clazz : classes)
 			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
 					&& !Satisfiability.class.isAssignableFrom(clazz)
+					&& !CompoundState.class.isAssignableFrom(clazz)
 					// some testing domain that we do not care about end up here
 					&& !clazz.getName().contains("Test")) {
 				total++;

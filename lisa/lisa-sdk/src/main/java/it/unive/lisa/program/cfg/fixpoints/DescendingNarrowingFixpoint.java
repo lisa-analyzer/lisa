@@ -9,12 +9,33 @@ import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 
+/**
+ * A {@link CFGFixpoint} that traverses descending chains using narrowings.
+ * 
+ * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+ * 
+ * @param <A> the type of {@link AbstractState} contained into the analysis
+ *                state
+ * @param <H> the type of {@link HeapDomain} contained into the computed
+ *                abstract state
+ * @param <V> the type of {@link ValueDomain} contained into the computed
+ *                abstract state
+ * @param <T> the type of {@link TypeDomain} contained into the computed
+ *                abstract state
+ */
 public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
 		extends CFGFixpoint<A, H, V, T> {
 
+	/**
+	 * Builds the fixpoint implementation.
+	 * 
+	 * @param target          the target of the implementation
+	 * @param interprocedural the {@link InterproceduralAnalysis} to use for
+	 *                            semantics computations
+	 */
 	public DescendingNarrowingFixpoint(CFG target,
 			InterproceduralAnalysis<A, H, V, T> interprocedural) {
 		super(target, interprocedural);

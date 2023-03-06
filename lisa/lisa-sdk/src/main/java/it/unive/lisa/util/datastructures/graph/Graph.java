@@ -4,7 +4,6 @@ import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -240,6 +239,13 @@ public interface Graph<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exte
 				return;
 	}
 
+	/**
+	 * Yields all the nodes that are part of cycles in the graph that are also
+	 * reachable from outside the cycle itself (that is, if they are also
+	 * entrypoints or if they have an incoming back-edge).
+	 * 
+	 * @return the nodes that are cycle entries
+	 */
 	public default Collection<N> getCycleEntries() {
 		Collection<N> result = new HashSet<>();
 

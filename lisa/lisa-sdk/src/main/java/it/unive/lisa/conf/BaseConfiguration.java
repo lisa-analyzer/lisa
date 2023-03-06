@@ -1,10 +1,9 @@
 package it.unive.lisa.conf;
 
+import it.unive.lisa.LiSA;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
-
-import it.unive.lisa.LiSA;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.

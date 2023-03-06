@@ -45,7 +45,7 @@ import it.unive.lisa.util.numeric.MathNumber;
  * @author <a href="mailto:vincenzo.arceri@unive.it">Vincenzo Arceri</a>
  */
 @FallbackImplementation
-public class Interval implements BaseNonRelationalValueDomain<Interval> {
+public class Interval implements BaseNonRelationalValueDomain<Interval>, Comparable<Interval> {
 
 	/**
 	 * The abstract zero ({@code [0, 0]}) element.
@@ -435,5 +435,18 @@ public class Interval implements BaseNonRelationalValueDomain<Interval> {
 				return lowIsMinusInfinity ? environment : environment.putState(id, starting.glb(lowp1_inf));
 		else
 			return environment;
+	}
+
+	@Override
+	public int compareTo(Interval o) {
+		if (isBottom())
+			return o.isBottom() ? 0 : -1;
+		if (isTop())
+			return o.isTop() ? 0 : 1;
+		if (o.isBottom())
+			return 1;
+		if (o.isTop())
+			return -1;
+		return interval.compareTo(o.interval);
 	}
 }

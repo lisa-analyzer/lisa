@@ -187,9 +187,9 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	}
 
 	/**
-	 * Joins two {@link AnalyzedCFG} together. The difference between
-	 * this method and {@link #lub(AnalyzedCFG)} is that this method
-	 * does not set the ID of the resulting cfg.
+	 * Joins two {@link AnalyzedCFG} together. The difference between this
+	 * method and {@link #lub(AnalyzedCFG)} is that this method does not set the
+	 * ID of the resulting cfg.
 	 * 
 	 * @param other the other cfg
 	 * 
