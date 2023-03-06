@@ -32,17 +32,13 @@ import it.unive.lisa.analysis.lattices.InverseSetLattice;
 import it.unive.lisa.analysis.lattices.SetLattice;
 import it.unive.lisa.analysis.nonInterference.NonInterference;
 import it.unive.lisa.analysis.nonrelational.NonRelationalElement;
+import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.numeric.Interval;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
-import it.unive.lisa.analysis.string.fsa.Automaton;
-import it.unive.lisa.analysis.string.fsa.State;
-import it.unive.lisa.analysis.string.fsa.Transition;
-import it.unive.lisa.analysis.string.fsa.regex.Atom;
-import it.unive.lisa.analysis.string.fsa.regex.Comp;
-import it.unive.lisa.analysis.string.fsa.regex.EmptySet;
-import it.unive.lisa.analysis.string.fsa.regex.Or;
-import it.unive.lisa.analysis.string.fsa.regex.RegularExpression;
-import it.unive.lisa.analysis.string.fsa.regex.Star;
+import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
+import it.unive.lisa.analysis.string.fsa.StringSymbol;
+import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
 import it.unive.lisa.analysis.symbols.Symbol;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
@@ -63,6 +59,7 @@ import it.unive.lisa.outputs.serializableGraph.SerializableNode;
 import it.unive.lisa.outputs.serializableGraph.SerializableNodeDescription;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.program.ClassUnit;
+import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
@@ -87,6 +84,7 @@ import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NaryExpression;
+import it.unive.lisa.program.cfg.statement.NaryStatement;
 import it.unive.lisa.program.cfg.statement.PluggableStatement;
 import it.unive.lisa.program.cfg.statement.Ret;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -109,9 +107,23 @@ import it.unive.lisa.util.collections.workset.ConcurrentLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.datastructures.automaton.Automaton;
+import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix.NodeEdges;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import it.unive.lisa.util.datastructures.regex.Atom;
+import it.unive.lisa.util.datastructures.regex.Comp;
+import it.unive.lisa.util.datastructures.regex.EmptySet;
+import it.unive.lisa.util.datastructures.regex.Or;
+import it.unive.lisa.util.datastructures.regex.RegularExpression;
+import it.unive.lisa.util.datastructures.regex.RegularExpression.PartialSubstring;
+import it.unive.lisa.util.datastructures.regex.Star;
+import it.unive.lisa.util.datastructures.regex.TopAtom;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicChar;
+import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
+import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -143,6 +155,9 @@ public class EqualityContractVerificationTest {
 
 	private static final RegularExpression re1 = new Atom("a");
 	private static final RegularExpression re2 = new Atom("b");
+
+	private static final Interval int1 = Interval.TOP;
+	private static final Interval int2 = Interval.BOTTOM;
 
 	private static final DomainRepresentation dr1 = new StringRepresentation("foo");
 	private static final DomainRepresentation dr2 = new StringRepresentation("bar");
@@ -234,7 +249,8 @@ public class EqualityContractVerificationTest {
 				.withPrefabValues(NonInterference.class, new NonInterference().top(), new NonInterference().bottom())
 				.withPrefabValues(UnresolvedCall.class, uc1, uc2)
 				.withPrefabValues(Set.class, s1, s2)
-				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2);
+				.withPrefabValues(org.graphstream.graph.Graph.class, g1, g2)
+				.withPrefabValues(BaseNonRelationalValueDomain.class, int1, int2);
 
 		if (getClass)
 			verifier = verifier.usingGetClass();
@@ -282,18 +298,25 @@ public class EqualityContractVerificationTest {
 
 	@Test
 	public void testAutomatonClasses() {
-		verify(State.class, Warning.IDENTICAL_COPY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
-		verify(Transition.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
-		verify(Automaton.class, Warning.REFERENCE_EQUALITY, Warning.INHERITED_DIRECTLY_FROM_OBJECT,
-				Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(State.class);
+		verify(Transition.class);
+		verify(Automaton.class);
 
-		verify(EmptySet.class);
+		verify(EmptySet.class, false);
 		verify(Atom.class);
+		verify(TopAtom.class);
 		verify(Comp.class);
 		verify(Or.class);
 		verify(Star.class);
+		verify(PartialSubstring.class);
+
+		verify(SymbolicString.class);
+		verify(SymbolicChar.class);
+		verify(UnknownSymbolicChar.class);
+
+		verify(RegexAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(SimpleAutomaton.class, Warning.ALL_FIELDS_SHOULD_BE_USED);
+		verify(StringSymbol.class);
 	}
 
 	@Test
@@ -352,9 +375,15 @@ public class EqualityContractVerificationTest {
 						verifier -> verifier
 								.withIgnoredFields(ListUtils.union(expressionFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
-			} else
-				verify(st, verifier -> verifier.withIgnoredFields(statementFields.toArray(String[]::new)),
+			} else {
+				List<String> extra = new LinkedList<>();
+				if (NaryStatement.class.isAssignableFrom(st))
+					extra.add("order");
+				verify(st,
+						verifier -> verifier
+								.withIgnoredFields(ListUtils.union(statementFields, extra).toArray(String[]::new)),
 						Warning.NULL_FIELDS);
+			}
 	}
 
 	@Test
@@ -448,6 +477,7 @@ public class EqualityContractVerificationTest {
 	@Test
 	public void testProgramStructure() {
 		verify(Global.class);
+		verify(ConstantGlobal.class);
 		// the default value does not impact the definition of the formal
 		verify(Parameter.class, verifier -> verifier.withIgnoredFields("defaultValue"));
 		// 'overridable' is mutable

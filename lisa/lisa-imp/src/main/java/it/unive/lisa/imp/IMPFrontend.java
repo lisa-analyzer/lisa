@@ -6,12 +6,14 @@ import static it.unive.lisa.imp.Antlr4Util.getLine;
 import it.unive.lisa.imp.antlr.IMPLexer;
 import it.unive.lisa.imp.antlr.IMPParser;
 import it.unive.lisa.imp.antlr.IMPParser.ClassUnitContext;
+import it.unive.lisa.imp.antlr.IMPParser.ConstantDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.ConstructorDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.FieldDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.FileContext;
 import it.unive.lisa.imp.antlr.IMPParser.FormalContext;
 import it.unive.lisa.imp.antlr.IMPParser.FormalsContext;
 import it.unive.lisa.imp.antlr.IMPParser.InterfaceUnitContext;
+import it.unive.lisa.imp.antlr.IMPParser.LiteralContext;
 import it.unive.lisa.imp.antlr.IMPParser.MethodDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.SignatureDeclarationContext;
 import it.unive.lisa.imp.antlr.IMPParser.UnitContext;
@@ -32,11 +34,13 @@ import it.unive.lisa.imp.types.InterfaceType;
 import it.unive.lisa.program.AbstractClassUnit;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.CompilationUnit;
+import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.InterfaceUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
 import it.unive.lisa.program.Unit;
+import it.unive.lisa.program.annotations.Annotations;
 import it.unive.lisa.program.cfg.AbstractCodeMember;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeMember;
@@ -47,6 +51,7 @@ import it.unive.lisa.program.type.BoolType;
 import it.unive.lisa.program.type.Float32Type;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.program.type.StringType;
+import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Untyped;
 import java.io.ByteArrayInputStream;
@@ -325,10 +330,8 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 		for (FieldDeclarationContext decl : ctx.interfaceMemberDeclarations().fieldDeclaration())
 			unit.addGlobal(visitFieldDeclaration(decl));
 
-		for (Global global : unit.getInstanceGlobals(false))
-			if (unit.getInstanceGlobals(false).stream()
-					.anyMatch(g -> g != global && g.getName().equals(global.getName())))
-				throw new IMPSyntaxException("Duplicate global: " + global);
+		for (ConstantDeclarationContext decl : ctx.interfaceMemberDeclarations().constantDeclaration())
+			unit.addGlobal(visitConstantDeclaration(decl));
 
 		return unit;
 	}
@@ -367,6 +370,9 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 				program.addEntryPoint((CFG) cm);
 		}
 
+		for (ConstantDeclarationContext decl : ctx.classMemberDeclarations().constantDeclaration())
+			unit.addGlobal(visitConstantDeclaration(decl));
+
 		for (FieldDeclarationContext decl : ctx.classMemberDeclarations().fieldDeclaration())
 			unit.addInstanceGlobal(visitFieldDeclaration(decl));
 
@@ -388,9 +394,20 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	}
 
 	@Override
+	public ConstantGlobal visitConstantDeclaration(ConstantDeclarationContext ctx) {
+		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
+		String name = ctx.name.getText();
+		Annotations annotations = new IMPAnnotationVisitor().visitAnnotations(ctx.annotations());
+		Constant value = visitLiteral(ctx.value);
+		return new ConstantGlobal(location, currentUnit, name, value, annotations);
+	}
+
+	@Override
 	public Global visitFieldDeclaration(FieldDeclarationContext ctx) {
-		return new Global(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), currentUnit, ctx.name.getText(),
-				true, Untyped.INSTANCE, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+		SourceCodeLocation location = new SourceCodeLocation(file, getLine(ctx), getCol(ctx));
+		String name = ctx.name.getText();
+		Annotations annotations = new IMPAnnotationVisitor().visitAnnotations(ctx.annotations());
+		return new Global(location, currentUnit, name, true, Untyped.INSTANCE, annotations);
 	}
 
 	@Override
@@ -466,5 +483,33 @@ public class IMPFrontend extends IMPParserBaseVisitor<Object> {
 	public Parameter visitFormal(FormalContext ctx) {
 		return new Parameter(new SourceCodeLocation(file, getLine(ctx), getCol(ctx)), ctx.name.getText(),
 				Untyped.INSTANCE, null, new IMPAnnotationVisitor().visitAnnotations(ctx.annotations()));
+	}
+
+	@Override
+	public Constant visitLiteral(LiteralContext ctx) {
+		int line = getLine(ctx);
+		int col = getCol(ctx);
+		SourceCodeLocation location = new SourceCodeLocation(file, line, col);
+		if (ctx.LITERAL_NULL() != null)
+			throw new UnsupportedOperationException("Constant fields cannot be null");
+		else if (ctx.LITERAL_BOOL() != null)
+			if (ctx.LITERAL_BOOL().getText().equals("true"))
+				return new Constant(BoolType.INSTANCE, true, location);
+			else
+				return new Constant(BoolType.INSTANCE, false, location);
+		else if (ctx.LITERAL_STRING() != null)
+			return new Constant(StringType.INSTANCE, IMPCodeMemberVisitor.clean(ctx), location);
+		else if (ctx.LITERAL_FLOAT() != null)
+			if (ctx.SUB() != null)
+				return new Constant(Float32Type.INSTANCE, -Float.parseFloat(ctx.LITERAL_FLOAT().getText()), location);
+			else
+				return new Constant(Float32Type.INSTANCE, Float.parseFloat(ctx.LITERAL_FLOAT().getText()), location);
+		else if (ctx.LITERAL_DECIMAL() != null)
+			if (ctx.SUB() != null)
+				return new Constant(Int32Type.INSTANCE, -Integer.parseInt(ctx.LITERAL_DECIMAL().getText()), location);
+			else
+				return new Constant(Int32Type.INSTANCE, Integer.parseInt(ctx.LITERAL_DECIMAL().getText()), location);
+
+		throw new UnsupportedOperationException("Type of literal not supported: " + ctx);
 	}
 }

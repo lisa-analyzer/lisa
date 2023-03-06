@@ -11,10 +11,10 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.HeapLocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.MemoryPointer;
@@ -25,7 +25,9 @@ import it.unive.lisa.type.ReferenceType;
 import it.unive.lisa.type.Type;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -50,6 +52,8 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 */
 	public final HeapEnvironment<AllocationSites> heapEnv;
 
+	private final List<HeapReplacement> replacements;
+
 	/**
 	 * Builds a new instance of field-insensitive point-based heap.
 	 */
@@ -64,7 +68,19 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	 * @param heapEnv the heap environment that this instance tracks
 	 */
 	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv) {
+		this(heapEnv, Collections.emptyList());
+	}
+
+	/**
+	 * Builds a new instance of field-insensitive point-based heap from its heap
+	 * environment.
+	 * 
+	 * @param heapEnv      the heap environment that this instance tracks
+	 * @param replacements the heap replacements of this instance
+	 */
+	public PointBasedHeap(HeapEnvironment<AllocationSites> heapEnv, List<HeapReplacement> replacements) {
 		this.heapEnv = heapEnv;
+		this.replacements = replacements.isEmpty() ? Collections.emptyList() : replacements;
 	}
 
 	/**
@@ -86,6 +102,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		ExpressionSet<ValueExpression> rewrittenExp = sss.rewrite(expression, pp);
 
 		PointBasedHeap result = bottom();
+		List<HeapReplacement> replacements = new LinkedList<>();
 		for (ValueExpression exp : rewrittenExp)
 			if (exp instanceof MemoryPointer) {
 				MemoryPointer pid = (MemoryPointer) exp;
@@ -98,13 +115,98 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(star_x, star_y, pp);
 					result = result.lub(from(new PointBasedHeap(heap)));
 				} else {
-					HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
-					result = result.lub(from(new PointBasedHeap(heap)));
+					if (star_y instanceof StackAllocationSite
+							&& alreadyAllocated(((StackAllocationSite) star_y).getLocationName()) != null)
+						result = result
+								.lub(nonAliasedAssignment(id, (StackAllocationSite) star_y, sss, pp, replacements));
+					else {
+						// aliasing: id and star_y points to the same object
+						HeapEnvironment<AllocationSites> heap = sss.heapEnv.assign(id, star_y, pp);
+						result = result.lub(from(new PointBasedHeap(heap)));
+					}
 				}
 			} else
 				result = result.lub(sss);
 
-		return result;
+		return buildHeapAfterAssignment(result.heapEnv, sss, replacements);
+	}
+
+	/**
+	 * Yields an allocation site name {@code id} if it is tracked by this
+	 * domain, {@code null} otherwise.
+	 * 
+	 * @param id allocation site's name to be searched
+	 * 
+	 * @return an allocation site name {@code id} if it is tracked by this
+	 *             domain, {@code null} otherwise
+	 */
+	protected AllocationSite alreadyAllocated(String id) {
+		for (AllocationSites set : heapEnv.getValues())
+			for (AllocationSite site : set)
+				if (site.getLocationName().equals(id))
+					return site;
+
+		return null;
+	}
+
+	/**
+	 * Builds an instance of the heap domain after an assignment, from the
+	 * resulting heap environment, the heap instance obtained from the small
+	 * step semantics of the right-hand side of the assignment, and the
+	 * replacements.
+	 * 
+	 * @param heap         the resulting heap environment
+	 * @param sss          the heap instance obtained from the small step
+	 *                         semantics of the right-hand side of the
+	 *                         assignment
+	 * @param replacements the list of replacements to be updated
+	 * 
+	 * @return an instance of the heap domain after an assignment, from the
+	 *             resulting heap domain, the heap instance obtained from the
+	 *             small step semantics of the right-hand side of the
+	 *             assignment, and the replacements
+	 */
+	protected PointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap, PointBasedHeap sss,
+			List<HeapReplacement> replacements) {
+		return from(new PointBasedHeap(heap, replacements));
+	}
+
+	/**
+	 * Given the point-based heap instance {@code pb}, perform the assignment of
+	 * {@code site} to the identifier {@code id} when {@code site} is a static
+	 * allocation site, thus handling the heap replacements.
+	 * 
+	 * @param id           the identifier to be updated
+	 * @param site         the allocation site to be assigned
+	 * @param pb           the starting point-based heap instance
+	 * @param pp           the program point where this operation occurs
+	 * @param replacements the list of replacements to be updated
+	 * 
+	 * @return the point-based heap instance where {@code id} is updated with
+	 *             {@code star_y} and the needed heap replacements
+	 * 
+	 * @throws SemanticException if something goes wrong during the analysis
+	 */
+	public PointBasedHeap nonAliasedAssignment(Identifier id, StackAllocationSite site, PointBasedHeap pb,
+			ProgramPoint pp, List<HeapReplacement> replacements)
+			throws SemanticException {
+		// no aliasing: star_y must be cloned and the clone must
+		// be assigned to id
+		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
+				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
+		// also runtime types are inherited, if already inferred
+		if (site.hasRuntimeTypes())
+			clone.setRuntimeTypes(site.getRuntimeTypes(null));
+
+		HeapEnvironment<AllocationSites> tmp = pb.heapEnv.assign(id, clone, pp);
+
+		HeapReplacement replacement = new HeapReplacement();
+		replacement.addSource(site);
+		replacement.addTarget(clone);
+		replacement.addTarget(site);
+		replacements.add(replacement);
+
+		return from(new PointBasedHeap(tmp));
 	}
 
 	@Override
@@ -162,7 +264,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public List<HeapReplacement> getSubstitution() {
-		return Collections.emptyList();
+		return replacements;
 	}
 
 	@Override
@@ -187,10 +289,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((heapEnv == null) ? 0 : heapEnv.hashCode());
-		return result;
+		return Objects.hash(heapEnv, replacements);
 	}
 
 	@Override
@@ -202,12 +301,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		if (getClass() != obj.getClass())
 			return false;
 		PointBasedHeap other = (PointBasedHeap) obj;
-		if (heapEnv == null) {
-			if (other.heapEnv != null)
-				return false;
-		} else if (!heapEnv.equals(other.heapEnv))
-			return false;
-		return true;
+		return Objects.equals(heapEnv, other.heapEnv) && Objects.equals(replacements, other.replacements);
 	}
 
 	@Override
@@ -254,13 +348,30 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;
 					AllocationSite site = (AllocationSite) pid.getReferencedLocation();
-					AllocationSite e = new AllocationSite(
-							expression.getStaticType(),
-							site.getLocationName(),
-							true,
-							expression.getCodeLocation());
+					AllocationSite e;
+					if (site instanceof StackAllocationSite)
+						e = new StackAllocationSite(
+								expression.getStaticType(),
+								site.getLocationName(),
+								true,
+								expression.getCodeLocation());
+					else
+						e = new HeapAllocationSite(
+								expression.getStaticType(),
+								site.getLocationName(),
+								true,
+								expression.getCodeLocation());
+
+					Set<Type> types = new HashSet<>();
 					if (expression.hasRuntimeTypes())
-						e.setRuntimeTypes(expression.getRuntimeTypes(null));
+						types.addAll(expression.getRuntimeTypes(null));
+
+					if (rec.hasRuntimeTypes())
+						types.addAll(rec.getRuntimeTypes(null));
+
+					if (!types.isEmpty())
+						e.setRuntimeTypes(types);
+
 					result.add(e);
 				} else if (rec instanceof AllocationSite)
 					result.add(rec);
@@ -269,13 +380,22 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		}
 
 		@Override
-		public ExpressionSet<ValueExpression> visit(HeapAllocation expression, Object... params)
+		public ExpressionSet<ValueExpression> visit(MemoryAllocation expression, Object... params)
 				throws SemanticException {
-			AllocationSite id = new AllocationSite(
-					expression.getStaticType(),
-					expression.getCodeLocation().getCodeLocation(),
-					true,
-					expression.getCodeLocation());
+			AllocationSite id;
+			if (expression.isStackAllocation())
+				id = new StackAllocationSite(
+						expression.getStaticType(),
+						expression.getCodeLocation().getCodeLocation(),
+						true,
+						expression.getCodeLocation());
+			else
+				id = new HeapAllocationSite(
+						expression.getStaticType(),
+						expression.getCodeLocation().getCodeLocation(),
+						true,
+						expression.getCodeLocation());
+
 			if (expression.hasRuntimeTypes())
 				id.setRuntimeTypes(expression.getRuntimeTypes(null));
 			return new ExpressionSet<>(id);
@@ -319,7 +439,14 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 						// this is a variable from the program that we know
 						// nothing about
 						CodeLocation loc = expression.getCodeLocation();
-						AllocationSite site = new AllocationSite(id.getStaticType(), "unknown@" + id.getName(), loc);
+						AllocationSite site;
+						if (id.getStaticType().isPointerType())
+							site = new HeapAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+						else if (id.getStaticType().isInMemoryType() || id.getStaticType().isUntyped())
+							site = new StackAllocationSite(id.getStaticType(), "unknown@" + id.getName(), true, loc);
+						else
+							throw new SemanticException("The type " + id.getStaticType()
+									+ " cannot be allocated by point-based heap domains");
 						result.add(site);
 					}
 				} else
@@ -358,7 +485,13 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			if (expression.getStaticType().isPointerType()) {
 				Type inner = expression.getStaticType().asPointerType().getInnerType();
 				CodeLocation loc = expression.getCodeLocation();
-				AllocationSite site = new AllocationSite(inner, "unknown@" + loc.getCodeLocation(), loc);
+				HeapAllocationSite site = new HeapAllocationSite(inner, "unknown@" + loc.getCodeLocation(), false, loc);
+				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
+			} else if (expression.getStaticType().isInMemoryType()) {
+				Type type = expression.getStaticType();
+				CodeLocation loc = expression.getCodeLocation();
+				StackAllocationSite site = new StackAllocationSite(type, "unknown@" + loc.getCodeLocation(), false,
+						loc);
 				return new ExpressionSet<>(new MemoryPointer(expression.getStaticType(), site, loc));
 			}
 			return new ExpressionSet<>(expression);

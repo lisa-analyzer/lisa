@@ -15,10 +15,10 @@ import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.program.type.Int32Type;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapExpression;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -40,8 +40,8 @@ public class PointBasedHeapTest {
 	private final CodeLocation loc1 = new SourceCodeLocation("fake", 1, 1);
 	private final CodeLocation loc2 = new SourceCodeLocation("fake", 2, 2);
 
-	private final AllocationSite alloc1 = new AllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
-	private final AllocationSite alloc2 = new AllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
+	private final AllocationSite alloc1 = new HeapAllocationSite(untyped, loc1.getCodeLocation(), true, loc1);
+	private final AllocationSite alloc2 = new HeapAllocationSite(untyped, loc2.getCodeLocation(), true, loc2);
 
 	private final ProgramPoint pp1 = new ProgramPoint() {
 
@@ -115,7 +115,7 @@ public class PointBasedHeapTest {
 		// expected: x -> pp1
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		AllocationSites xSites = new AllocationSites(Collections.singleton(alloc1), false);
@@ -126,7 +126,7 @@ public class PointBasedHeapTest {
 		// expected: x -> pp2
 		PointBasedHeap actual = xAssign.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		xSites = new AllocationSites(Collections.singleton(alloc2), false);
@@ -143,7 +143,7 @@ public class PointBasedHeapTest {
 		// result.
 
 		// 1. Heap allocation
-		HeapExpression heapExpression = new HeapAllocation(untyped, loc1);
+		HeapExpression heapExpression = new MemoryAllocation(untyped, loc1);
 
 		// from topState
 		PointBasedHeap sss = topHeap.semanticsOf(heapExpression, pp1);
@@ -156,14 +156,14 @@ public class PointBasedHeapTest {
 		// from x -> pp1
 		PointBasedHeap xToLoc1 = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 		sss = xToLoc1.semanticsOf(heapExpression, pp1);
 		assertEquals(sss.rewrite(heapExpression, pp1), xToLoc1.rewrite(heapExpression, pp1));
 
 		// 2. Heap reference
 		heapExpression = new HeapReference(untyped,
-				new HeapAllocation(untyped, loc1), loc1);
+				new MemoryAllocation(untyped, loc1), loc1);
 
 		// from topState
 		sss = topHeap.semanticsOf(heapExpression, pp1);
@@ -194,7 +194,7 @@ public class PointBasedHeapTest {
 
 		// 4. Heap dereference
 		heapExpression = new HeapDereference(untyped, new HeapReference(untyped,
-				new HeapAllocation(untyped, loc1), loc1), loc1);
+				new MemoryAllocation(untyped, loc1), loc1), loc1);
 
 		// from topState
 		sss = topHeap.semanticsOf(heapExpression, pp1);
@@ -213,17 +213,17 @@ public class PointBasedHeapTest {
 	public void testLub() throws SemanticException {
 		PointBasedHeap xToLoc1 = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		PointBasedHeap xToLoc2 = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		PointBasedHeap yToLoc2 = topHeap.assign(y,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		// top lub <any heap> or <any heap> lub top = top
@@ -262,17 +262,17 @@ public class PointBasedHeapTest {
 	public void testWidening() throws SemanticException {
 		PointBasedHeap xToLoc1 = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		PointBasedHeap xToLoc2 = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		PointBasedHeap yToLoc2 = topHeap.assign(y,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		// top lub <any heap> or <any heap> lub top = top
@@ -312,12 +312,12 @@ public class PointBasedHeapTest {
 
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		PointBasedHeap yAssign = topHeap.assign(y,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc2), loc2),
+						new MemoryAllocation(untyped, loc2), loc2),
 				pp2);
 
 		// <any heap> <= top
@@ -350,7 +350,7 @@ public class PointBasedHeapTest {
 	public void testForgetIdentifier() throws SemanticException {
 		PointBasedHeap result = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		assertEquals(result.forgetIdentifier(x), emptyHeap);
@@ -375,12 +375,12 @@ public class PointBasedHeapTest {
 
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 		PointBasedHeap xPushedScopeAssign = topHeap.assign(
 				new OutOfScopeIdentifier(x, token, loc1),
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		// x -> pp1 pushScope = [out-of-scope-id]x -> pp1
@@ -402,12 +402,12 @@ public class PointBasedHeapTest {
 
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		PointBasedHeap xScopedAssign = topHeap.assign((Identifier) x.pushScope(token),
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 
 		// [scoped]x -> pp1 popScope = x -> pp1
@@ -421,7 +421,7 @@ public class PointBasedHeapTest {
 	public void testAccessChildRewrite() throws SemanticException {
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), loc1),
+						new MemoryAllocation(untyped, loc1), loc1),
 				pp1);
 		// x.y rewritten in x -> pp1 = pp1
 		AccessChild accessChild = new AccessChild(untyped, x, y, loc1);
@@ -438,7 +438,7 @@ public class PointBasedHeapTest {
 	public void testIdentifierRewrite() throws SemanticException {
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), fakeLocation),
+						new MemoryAllocation(untyped, loc1), fakeLocation),
 				pp1);
 		// x rewritten in x -> pp1 = pp1
 		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<>(
@@ -454,7 +454,7 @@ public class PointBasedHeapTest {
 	public void testHeapDereferenceRewrite() throws SemanticException {
 		// *(&(new loc(pp1)) rewritten in top -> pp1
 		HeapDereference deref = new HeapDereference(untyped, new HeapReference(untyped,
-				new HeapAllocation(untyped, loc1), loc1), loc1);
+				new MemoryAllocation(untyped, loc1), loc1), loc1);
 
 		ExpressionSet<ValueExpression> expectedRewritten = new ExpressionSet<>(alloc1);
 		assertEquals(expectedRewritten, topHeap.rewrite(deref, fakeProgramPoint));
@@ -462,15 +462,16 @@ public class PointBasedHeapTest {
 		// *(x) rewritten in x -> pp1 -> pp1
 		PointBasedHeap xAssign = topHeap.assign(x,
 				new HeapReference(untyped,
-						new HeapAllocation(untyped, loc1), fakeLocation),
+						new MemoryAllocation(untyped, loc1), fakeLocation),
 				pp1);
 		deref = new HeapDereference(untyped, x, loc1);
 		expectedRewritten = new ExpressionSet<>(alloc1);
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 
 		// *(y) rewritten in x -> pp1 -> empty set
+		AllocationSite expectedUnknownAlloc = new StackAllocationSite(untyped, "unknown@y", true, fakeLocation);
 		deref = new HeapDereference(untyped, y, loc1);
-		expectedRewritten = new ExpressionSet<>(new AllocationSite(untyped, "unknown@y", fakeLocation));
+		expectedRewritten = new ExpressionSet<>(expectedUnknownAlloc);
 		assertEquals(expectedRewritten, xAssign.rewrite(deref, fakeProgramPoint));
 	}
 }

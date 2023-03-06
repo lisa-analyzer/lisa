@@ -70,7 +70,7 @@ public abstract class NaryExpression extends Expression {
 	 * @param constructName  the name of the construct represented by this
 	 *                           expression
 	 * @param order          the evaluation order of the sub-expressions
-	 * @param subExpressions the sub-expressions to be evaluated left-to-right
+	 * @param subExpressions the sub-expressions
 	 */
 	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Expression... subExpressions) {
@@ -104,7 +104,7 @@ public abstract class NaryExpression extends Expression {
 	 *                           expression
 	 * @param order          the evaluation order of the sub-expressions
 	 * @param staticType     the static type of this expression
-	 * @param subExpressions the sub-expressions to be evaluated left-to-right
+	 * @param subExpressions the sub-expressions
 	 */
 	protected NaryExpression(CFG cfg, CodeLocation location, String constructName, EvaluationOrder order,
 			Type staticType, Expression... subExpressions) {
@@ -132,8 +132,7 @@ public abstract class NaryExpression extends Expression {
 	}
 
 	/**
-	 * Yields the sub-expressions of this expression, to be evaluated
-	 * left-to-right.
+	 * Yields the sub-expressions of this expression.
 	 * 
 	 * @return the sub-expressions
 	 */
@@ -217,9 +216,9 @@ public abstract class NaryExpression extends Expression {
 
 	/**
 	 * Semantics of an n-ary expression is evaluated by computing the semantics
-	 * of its sub-expressions, from left to right, using the analysis state from
-	 * each sub-expression's computation as entry state for the next one. Then,
-	 * the semantics of the expression itself is evaluated.<br>
+	 * of its sub-expressions, in the specified order, using the analysis state
+	 * from each sub-expression's computation as entry state for the next one.
+	 * Then, the semantics of the expression itself is evaluated.<br>
 	 * <br>
 	 * {@inheritDoc}
 	 */

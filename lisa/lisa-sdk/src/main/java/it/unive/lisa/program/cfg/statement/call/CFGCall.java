@@ -170,7 +170,7 @@ public class CFGCall extends CallWithResult implements MetaVariableCreator, CanR
 	@Override
 	public final Identifier getMetaVariable() {
 		Variable meta = new Variable(getStaticType(), "call_ret_value@" + getLocation(), getLocation());
-		// propagates the annotations of the targets
+		// propagate the annotations of the targets
 		// to the metavariable of this cfg call
 		for (CFG target : targets)
 			for (Annotation ann : target.getDescriptor().getAnnotations())

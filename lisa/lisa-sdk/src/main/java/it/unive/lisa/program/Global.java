@@ -36,9 +36,8 @@ public class Global implements CodeElement {
 	private final Unit container;
 
 	/**
-	 * Builds an untyped global variable, identified by its name. The location
-	 * where this global happens is unknown (e.g. no source file/line/column is
-	 * available) as well as its type (i.e. it is {#link Untyped#INSTANCE}).
+	 * Builds an untyped global variable, identified by its name. The type of
+	 * this global is unknown (i.e. it is {#link Untyped#INSTANCE}).
 	 * 
 	 * @param location   the location of this global variable
 	 * @param container  the {@link Unit} containing this global
@@ -50,8 +49,8 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Builds the global reference, identified by its name and its type,
-	 * happening at the given location in the program.
+	 * Builds the global, identified by its name and its type, happening at the
+	 * given location in the program.
 	 * 
 	 * @param location   the location where this global is defined within the
 	 *                       program
@@ -66,8 +65,8 @@ public class Global implements CodeElement {
 	}
 
 	/**
-	 * Builds the global reference, identified by its name and its type,
-	 * happening at the given location in the program.
+	 * Builds the global, identified by its name and its type, happening at the
+	 * given location in the program.
 	 * 
 	 * @param location    the location where this global is defined within the
 	 *                        program

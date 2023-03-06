@@ -3,6 +3,8 @@ package it.unive.lisa.analysis.string.fsa;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import it.unive.lisa.util.datastructures.automaton.State;
+import it.unive.lisa.util.datastructures.automaton.Transition;
 import java.util.Collections;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -15,24 +17,24 @@ public class ValidateStringTest {
 	public void testDfa() {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[5];
-		st[0] = new State(true, false);
-		st[1] = new State(false, false);
-		st[2] = new State(false, false);
-		st[3] = new State(false, false);
-		st[4] = new State(false, true);
+		st[0] = new State(0, true, false);
+		st[1] = new State(1, false, false);
+		st[2] = new State(2, false, false);
+		st[3] = new State(3, false, false);
+		st[4] = new State(4, false, true);
 		Collections.addAll(states, st);
 
-		SortedSet<Transition> transitions = new TreeSet<>();
-		transitions.add(new Transition(st[0], st[0], "a"));
-		transitions.add(new Transition(st[0], st[1], "b"));
-		transitions.add(new Transition(st[1], st[0], "a"));
-		transitions.add(new Transition(st[1], st[1], "b"));
-		transitions.add(new Transition(st[1], st[2], "c"));
-		transitions.add(new Transition(st[2], st[3], "b"));
-		transitions.add(new Transition(st[3], st[4], "a"));
+		SortedSet<Transition<StringSymbol>> transitions = new TreeSet<>();
+		transitions.add(new Transition<>(st[0], st[0], new StringSymbol("a")));
+		transitions.add(new Transition<>(st[0], st[1], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[1], st[0], new StringSymbol("a")));
+		transitions.add(new Transition<>(st[1], st[1], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[1], st[2], new StringSymbol("c")));
+		transitions.add(new Transition<>(st[2], st[3], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[3], st[4], new StringSymbol("a")));
 
 		// accepts language {a^nb^m}^pcba
-		Automaton dfa = new Automaton(states, transitions);
+		SimpleAutomaton dfa = new SimpleAutomaton(states, transitions);
 
 		assertTrue(dfa.validateString("aabbababcba"));
 		assertTrue(dfa.validateString("abababbbbaabcba"));
@@ -47,17 +49,17 @@ public class ValidateStringTest {
 	public void testNfa() {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[2];
-		st[0] = new State(true, false);
-		st[1] = new State(false, true);
+		st[0] = new State(0, true, false);
+		st[1] = new State(1, false, true);
 		Collections.addAll(states, st);
 
-		SortedSet<Transition> transitions = new TreeSet<>();
-		transitions.add(new Transition(st[0], st[0], "a"));
-		transitions.add(new Transition(st[0], st[0], "b"));
-		transitions.add(new Transition(st[0], st[1], "b"));
+		SortedSet<Transition<StringSymbol>> transitions = new TreeSet<>();
+		transitions.add(new Transition<>(st[0], st[0], new StringSymbol("a")));
+		transitions.add(new Transition<>(st[0], st[0], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[0], st[1], new StringSymbol("b")));
 
 		// accepts language {a^nb^m}^p
-		Automaton nfa = new Automaton(states, transitions);
+		SimpleAutomaton nfa = new SimpleAutomaton(states, transitions);
 
 		assertTrue(nfa.validateString("ababababababb"));
 		assertTrue(nfa.validateString("babababababab"));
@@ -71,36 +73,36 @@ public class ValidateStringTest {
 	public void testEpsNfa() {
 		SortedSet<State> states = new TreeSet<>();
 		State[] st = new State[11];
-		st[0] = new State(true, false);
-		st[1] = new State(false, false);
-		st[2] = new State(false, false);
-		st[3] = new State(false, false);
-		st[4] = new State(false, false);
-		st[5] = new State(false, false);
-		st[6] = new State(false, false);
-		st[7] = new State(false, false);
-		st[8] = new State(false, false);
-		st[9] = new State(false, false);
-		st[10] = new State(false, true);
+		st[0] = new State(0, true, false);
+		st[1] = new State(1, false, false);
+		st[2] = new State(2, false, false);
+		st[3] = new State(3, false, false);
+		st[4] = new State(4, false, false);
+		st[5] = new State(5, false, false);
+		st[6] = new State(6, false, false);
+		st[7] = new State(7, false, false);
+		st[8] = new State(8, false, false);
+		st[9] = new State(9, false, false);
+		st[10] = new State(10, false, true);
 		Collections.addAll(states, st);
 
-		SortedSet<Transition> transitions = new TreeSet<>();
-		transitions.add(new Transition(st[0], st[1], ""));
-		transitions.add(new Transition(st[0], st[7], ""));
-		transitions.add(new Transition(st[1], st[2], ""));
-		transitions.add(new Transition(st[1], st[4], ""));
-		transitions.add(new Transition(st[2], st[3], "a"));
-		transitions.add(new Transition(st[3], st[6], ""));
-		transitions.add(new Transition(st[4], st[5], "b"));
-		transitions.add(new Transition(st[5], st[6], ""));
-		transitions.add(new Transition(st[6], st[1], ""));
-		transitions.add(new Transition(st[6], st[7], ""));
-		transitions.add(new Transition(st[7], st[8], "a"));
-		transitions.add(new Transition(st[8], st[9], "b"));
-		transitions.add(new Transition(st[9], st[10], "b"));
+		SortedSet<Transition<StringSymbol>> transitions = new TreeSet<>();
+		transitions.add(new Transition<>(st[0], st[1], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[0], st[7], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[1], st[2], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[1], st[4], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[2], st[3], new StringSymbol("a")));
+		transitions.add(new Transition<>(st[3], st[6], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[4], st[5], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[5], st[6], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[6], st[1], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[6], st[7], StringSymbol.EPSILON));
+		transitions.add(new Transition<>(st[7], st[8], new StringSymbol("a")));
+		transitions.add(new Transition<>(st[8], st[9], new StringSymbol("b")));
+		transitions.add(new Transition<>(st[9], st[10], new StringSymbol("b")));
 
 		// accepts {a^nb^m}^pabb
-		Automaton enfa = new Automaton(states, transitions);
+		SimpleAutomaton enfa = new SimpleAutomaton(states, transitions);
 
 		assertTrue(enfa.validateString("abababb"));
 		assertTrue(enfa.validateString("abbbaabb"));

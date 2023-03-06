@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.program.ConstantGlobal;
 import it.unive.lisa.program.Global;
 import it.unive.lisa.program.Unit;
 import it.unive.lisa.program.cfg.CFG;
@@ -123,6 +124,9 @@ public class AccessGlobal extends Expression {
 			T extends TypeDomain<T>> AnalysisState<A, H, V, T> semantics(AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural, StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
+		if (target instanceof ConstantGlobal)
+			return entryState.smallStepSemantics(((ConstantGlobal) target).getConstant(), this);
+
 		// unit globals are unique, we can directly access those
 		return entryState.smallStepSemantics(
 				new Variable(target.getStaticType(), toString(), target.getAnnotations(), getLocation()),

@@ -7,9 +7,9 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.ExpressionVisitor;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.heap.AccessChild;
-import it.unive.lisa.symbolic.heap.HeapAllocation;
 import it.unive.lisa.symbolic.heap.HeapDereference;
 import it.unive.lisa.symbolic.heap.HeapReference;
+import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.BinaryExpression;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.Identifier;
@@ -71,7 +71,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 		}
 
 		@Override
-		public T visit(HeapAllocation expression, Object... params) throws SemanticException {
+		public T visit(MemoryAllocation expression, Object... params) throws SemanticException {
 			throw new SemanticException(CANNOT_PROCESS_ERROR);
 		}
 

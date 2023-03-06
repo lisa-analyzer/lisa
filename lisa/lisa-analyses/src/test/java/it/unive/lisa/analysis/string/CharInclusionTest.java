@@ -80,11 +80,11 @@ public class CharInclusionTest {
 		otherCertainlyContained.add('c');
 		otherCertainlyContained.add('d');
 
-		maybeContained.add('f');
-		maybeContained.add('g');
-		maybeContained.add('h');
-
+		otherMaybeContained.add('f');
+		otherMaybeContained.add('g');
 		otherMaybeContained.add('h');
+
+		maybeContained.add('h');
 
 		assertTrue(new CharInclusion(certainlyContained, maybeContained)
 				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
@@ -163,14 +163,14 @@ public class CharInclusionTest {
 		otherCertainlyContained.add('c');
 		otherCertainlyContained.add('d');
 
-		maybeContained.add('d');
-		maybeContained.add('e');
-		maybeContained.add('f');
-
 		otherMaybeContained.add('d');
 		otherMaybeContained.add('e');
 		otherMaybeContained.add('f');
-		otherMaybeContained.add('g');
+
+		maybeContained.add('d');
+		maybeContained.add('e');
+		maybeContained.add('f');
+		maybeContained.add('g');
 
 		assertFalse(new CharInclusion(certainlyContained, maybeContained)
 				.lessOrEqualAux(new CharInclusion(otherCertainlyContained, otherMaybeContained)));
