@@ -1,5 +1,6 @@
 package it.unive.lisa.symbolic.heap;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.symbolic.ExpressionVisitor;
@@ -74,5 +75,25 @@ public class HeapReference extends HeapExpression {
 	public <T> T accept(ExpressionVisitor<T> visitor, Object... params) throws SemanticException {
 		T l = expression.accept(visitor, params);
 		return visitor.visit(this, l, params);
+	}
+	
+	@Override
+	public SymbolicExpression pushScope(ScopeToken token) {
+		try {
+			return new HeapReference(getStaticType(), expression.pushScope(token), getCodeLocation());
+		} catch (SemanticException e) {
+			// TODO: this is here to make the code compile, change this ASAP
+			throw new IllegalStateException();
+		}
+	}
+	
+	@Override
+	public SymbolicExpression popScope(ScopeToken token) throws SemanticException {
+		try {
+			return new HeapReference(getStaticType(), expression.popScope(token), getCodeLocation());
+		} catch (SemanticException e) {
+			// TODO: this is here to make the code compile, change this ASAP
+			throw new IllegalStateException();
+		} 
 	}
 }
