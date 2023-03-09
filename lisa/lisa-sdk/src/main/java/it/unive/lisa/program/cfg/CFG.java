@@ -1,25 +1,10 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.OptimizedAnalyzedCFG;
 import it.unive.lisa.analysis.StatementStore;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
@@ -41,6 +26,7 @@ import it.unive.lisa.program.cfg.fixpoints.AscendingFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.CFGFixpoint.CompoundState;
 import it.unive.lisa.program.cfg.fixpoints.DescendingGLBFixpoint;
 import it.unive.lisa.program.cfg.fixpoints.DescendingNarrowingFixpoint;
+import it.unive.lisa.program.cfg.fixpoints.OptimizedFixpoint;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
@@ -53,6 +39,20 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -391,7 +391,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
 					FixpointConfiguration conf) throws FixpointException {
-		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = new Fixpoint<>(this, false);
+		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = conf.optimize
+				? new OptimizedFixpoint<>(this, false, conf.hotspots)
+				: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		startingPoints.forEach(
@@ -401,7 +403,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		Map<Statement, CompoundState<A, H, V, T>> fixpoint;
 
 		if (conf.descendingPhaseType != DescendingPhaseType.NONE) {
-			fix = new Fixpoint<>(this, true);
+			fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
 			starting.clear();
 			startingPoints.forEach((st, state) -> starting.put(st, ascendingResult.get(st)));
 		}
@@ -429,7 +431,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				finalResults.put(ee.getKey(), ee.getValue());
 		}
 
-		return new AnalyzedCFG<>(this, singleton, startingPoints, finalResults);
+		return conf.optimize
+				? new OptimizedAnalyzedCFG<A, H, V, T>(this, singleton, startingPoints, finalResults, interprocedural)
+				: new AnalyzedCFG<>(this, singleton, startingPoints, finalResults);
 	}
 
 	@Override
@@ -893,6 +897,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * 
 	 * @return the basic blocks, returned as pairs in the form of &lt;leader,
 	 *             block&gt;
+	 * 
+	 * @throws IllegalStateException if {@link #computeBasicBlocks()} has not
+	 *                                   been invoked first
 	 */
 	public Map<Statement, Statement[]> getBasicBlocks() {
 		if (basicBlocks == null)

@@ -41,14 +41,14 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	private static final String CANNOT_GLB_ERROR = "Cannot perform the greatest lower bound of two graphs with different descriptor";
 
 	/**
-	 * The map storing the analysis results
+	 * The map storing the analysis results.
 	 */
-	private final StatementStore<A, H, V, T> results;
+	protected final StatementStore<A, H, V, T> results;
 
 	/**
-	 * The map storing the entry state of each entry point
+	 * The map storing the entry state of each entry point.
 	 */
-	private final StatementStore<A, H, V, T> entryStates;
+	protected final StatementStore<A, H, V, T> entryStates;
 
 	/**
 	 * An optional string meant to identify this specific result, based on how
@@ -80,7 +80,8 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(CFG cfg, AnalysisState<A, H, V, T> singleton,
+	public AnalyzedCFG(CFG cfg,
+			AnalysisState<A, H, V, T> singleton,
 			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
 			Map<Statement, AnalysisState<A, H, V, T>> results) {
 		super(cfg);
@@ -98,7 +99,8 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
-	public AnalyzedCFG(CFG cfg, StatementStore<A, H, V, T> entryStates,
+	public AnalyzedCFG(CFG cfg,
+			StatementStore<A, H, V, T> entryStates,
 			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;

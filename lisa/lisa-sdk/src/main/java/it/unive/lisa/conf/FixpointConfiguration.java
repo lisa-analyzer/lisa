@@ -1,9 +1,8 @@
 package it.unive.lisa.conf;
 
-import java.util.function.Predicate;
-
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.function.Predicate;
 
 /**
  * An immutable configuration holding fixpoint-specific parameters.
@@ -27,8 +26,14 @@ public class FixpointConfiguration extends BaseConfiguration {
 	 */
 	public final DescendingPhaseType descendingPhaseType;
 
+	/**
+	 * Holder of {@link LiSAConfiguration#optimize}.
+	 */
 	public final boolean optimize;
 
+	/**
+	 * Holder of {@link LiSAConfiguration#hotspots}.
+	 */
 	public final Predicate<Statement> hotspots;
 
 	/**

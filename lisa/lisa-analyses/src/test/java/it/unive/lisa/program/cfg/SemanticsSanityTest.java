@@ -380,6 +380,8 @@ public class SemanticsSanityTest {
 			return new AnalyzedCFG<>(cfg, as);
 		if (param == CFGResults.class)
 			return new CFGResults<>(new AnalyzedCFG<>(cfg, as));
+		if (param == InterproceduralAnalysis.class)
+			return interprocedural;
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);

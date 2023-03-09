@@ -45,6 +45,7 @@ public class CFGFixpointTest {
 		base.descendingPhaseType = DescendingPhaseType.NONE;
 		base.glbThreshold = 5;
 		base.wideningThreshold = 5;
+		base.optimize = false;
 		conf = new FixpointConfiguration(base);
 	}
 

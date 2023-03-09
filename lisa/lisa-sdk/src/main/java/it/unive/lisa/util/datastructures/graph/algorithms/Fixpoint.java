@@ -25,11 +25,20 @@ import java.util.Map;
  */
 public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E extends Edge<G, N, E>, T> {
 
-	private static final String ERROR = "Exception while %s of '%s' in '%s'";
+	/**
+	 * Common format for error messages.
+	 */
+	protected static final String ERROR = "Exception while %s of '%s' in '%s'";
 
-	private final G graph;
+	/**
+	 * The graph to target.
+	 */
+	protected final G graph;
 
-	private final boolean forceFullEvaluation;
+	/**
+	 * Whether or not all nodes should be processed at least once.
+	 */
+	protected final boolean forceFullEvaluation;
 
 	/**
 	 * Builds a fixpoint for the given {@link Graph}.
@@ -244,15 +253,29 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 		return result;
 	}
 
-	private T getEntryState(N current, T startstate, FixpointImplementation<N, E, T> implementation, Map<N, T> result)
+	/**
+	 * Yields the entry state for the given node.
+	 * 
+	 * @param node           the node under evaluation
+	 * @param startstate     a predefined starting state that must be taken into
+	 *                           account for the computation
+	 * @param implementation the fixpoint implementation that knows how to
+	 *                           combine different states
+	 * @param result         the current approximations for each node
+	 * 
+	 * @return the computed state
+	 * 
+	 * @throws FixpointException if something goes wrong during the computation
+	 */
+	protected T getEntryState(N node, T startstate, FixpointImplementation<N, E, T> implementation, Map<N, T> result)
 			throws FixpointException {
-		Collection<N> preds = graph.predecessorsOf(current);
+		Collection<N> preds = graph.predecessorsOf(node);
 		List<T> states = new ArrayList<>(preds.size());
 
 		for (N pred : preds)
 			if (result.containsKey(pred)) {
 				// this might not have been computed yet
-				E edge = graph.getEdgeConnecting(pred, current);
+				E edge = graph.getEdgeConnecting(pred, node);
 				try {
 					states.add(implementation.traverse(edge, result.get(pred)));
 				} catch (Exception e) {
@@ -266,9 +289,9 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 				if (entrystate == null)
 					entrystate = s;
 				else
-					entrystate = implementation.union(current, entrystate, s);
+					entrystate = implementation.union(node, entrystate, s);
 		} catch (Exception e) {
-			throw new FixpointException(format(ERROR, "creating entry state", current, graph), e);
+			throw new FixpointException(format(ERROR, "creating entry state", node, graph), e);
 		}
 
 		return entrystate;

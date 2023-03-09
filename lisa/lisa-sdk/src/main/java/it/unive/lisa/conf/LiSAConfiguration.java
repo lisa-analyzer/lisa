@@ -1,18 +1,5 @@
 package it.unive.lisa.conf;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
-
 import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
@@ -30,6 +17,17 @@ import it.unive.lisa.program.cfg.statement.call.OpenCall;
 import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -265,7 +263,8 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * will be stored, discarding everything else. When the pre- or post-state
 	 * of a non-widening point is queried, a fast fixpoint iteration will be ran
 	 * to unwind (that is, re-propagate) the results and compute the missing
-	 * states. Defaults to {@code true}.
+	 * states. Note that results are <b>not</b> unwinded for dumping results.
+	 * Defaults to {@code true}.
 	 */
 	public boolean optimize = true;
 
