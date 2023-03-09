@@ -362,6 +362,11 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public DomainRepresentation representation() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+
 		DomainRepresentation stateRepr = state.representation();
 		DomainRepresentation exprRepr = computedExpressions.representation();
 		return new ObjectRepresentation(Map.of("state", stateRepr, "expressions", exprRepr));

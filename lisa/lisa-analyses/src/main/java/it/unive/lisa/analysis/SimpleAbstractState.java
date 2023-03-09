@@ -353,6 +353,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public DomainRepresentation representation() {
+		if (isBottom())
+			return Lattice.bottomRepresentation();
+		if (isTop())
+			return Lattice.topRepresentation();
+
 		DomainRepresentation h = heapState.representation();
 		DomainRepresentation t = typeState.representation();
 		DomainRepresentation v = valueState.representation();
