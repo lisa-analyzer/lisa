@@ -576,9 +576,6 @@ public class JsonReportComparer {
 				String> diff = new CollectionsDiffBuilder<>(String.class, felements.keySet(), selements.keySet());
 		diff.compute(String::compareTo);
 
-		int fsize = felements.size();
-		int ssize = selements.size();
-		int min = Math.min(fsize, ssize);
 		boolean atLeastOne = false;
 		StringBuilder inner;
 		for (Pair<String, String> field : diff.getCommons())
@@ -593,10 +590,10 @@ public class JsonReportComparer {
 				atLeastOne = true;
 			}
 
-		if (fsize > min) {
+		if (!diff.getOnlyFirst().isEmpty()) {
 			builder.append("\t".repeat(depth))
 					.append(">EXPECTED HAS ")
-					.append(fsize - min)
+					.append(diff.getOnlyFirst().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlyFirst()) {
 				builder.append("\t".repeat(depth + 1))
@@ -610,10 +607,10 @@ public class JsonReportComparer {
 			atLeastOne = true;
 		}
 
-		if (ssize > min) {
+		if (!diff.getOnlySecond().isEmpty()) {
 			builder.append("\t".repeat(depth))
 					.append(">ACTUAL HAS ")
-					.append(ssize - min)
+					.append(diff.getOnlySecond().size())
 					.append(" MORE FIELD(S):\n");
 			for (String field : diff.getOnlySecond()) {
 				builder.append("\t".repeat(depth + 1))

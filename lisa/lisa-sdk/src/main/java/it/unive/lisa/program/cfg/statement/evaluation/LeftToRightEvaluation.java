@@ -11,6 +11,10 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
+import it.unive.lisa.type.Type;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A left-to-right {@link EvaluationOrder}, evaluating expressions in the given
@@ -48,8 +52,11 @@ public class LeftToRightEvaluation implements EvaluationOrder {
 			AnalysisState<A, H, V, T> tmp = subExpressions[i].semantics(postState, interprocedural, expressions);
 			expressions.put(subExpressions[i], tmp);
 			computed[i] = tmp.getComputedExpressions();
-			computed[i].forEach(
-					e -> e.setRuntimeTypes(tmp.getDomainInstance(TypeDomain.class).getInferredRuntimeTypes()));
+			T typedom = (T) tmp.getDomainInstance(TypeDomain.class);
+			Set<Type> types = new HashSet<>();
+			for (SymbolicExpression e : tmp.rewrite(computed[i], subExpressions[i]))
+				types.addAll(typedom.getRuntimeTypesOf((ValueExpression) e, subExpressions[i]));
+			computed[i].forEach(e -> e.setRuntimeTypes(types));
 			postState = tmp;
 		}
 

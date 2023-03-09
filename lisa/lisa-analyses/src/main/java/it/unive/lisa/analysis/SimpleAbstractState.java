@@ -105,7 +105,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		for (ValueExpression expr : exprs) {
 			T tmp = type.assign(id, expr, pp);
 
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			id.setRuntimeTypes(rt);
 			expr.setRuntimeTypes(rt);
 
@@ -131,7 +131,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		for (ValueExpression expr : exprs) {
 			T tmp = type.smallStepSemantics(expr, pp);
 
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			expr.setRuntimeTypes(rt);
 
 			// if the expression is a memory allocation, its type is registered
@@ -153,7 +153,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 				Set<Type> runtimeTypes;
 				Set<Type> allTypes = new HashSet<Type>();
 				for (Identifier source : repl.getSources()) {
-					runtimeTypes = type.smallStepSemantics(source, pp).getInferredRuntimeTypes();
+					runtimeTypes = type.smallStepSemantics(source, pp).getRuntimeTypesOf(source, pp);
 					source.setRuntimeTypes(runtimeTypes);
 					allTypes.addAll(runtimeTypes);
 				}
@@ -192,7 +192,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
 			T tmp = type.smallStepSemantics(expr, pp);
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			expr.setRuntimeTypes(rt);
 
 			typeRes = typeRes.lub(type.assume(expr, pp));
@@ -209,7 +209,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		Satisfiability valueResult = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten) {
 			T tmp = typeState.smallStepSemantics(expr, pp);
-			Set<Type> rt = tmp.getInferredRuntimeTypes();
+			Set<Type> rt = tmp.getRuntimeTypesOf(expr, pp);
 			expr.setRuntimeTypes(rt);
 
 			typeResult = typeResult.lub(typeState.satisfies(expr, pp));

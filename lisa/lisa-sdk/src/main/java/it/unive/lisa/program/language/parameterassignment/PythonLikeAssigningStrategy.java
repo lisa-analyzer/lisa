@@ -15,7 +15,9 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.NamedParameterExpression;
 import it.unive.lisa.program.language.resolution.PythonLikeMatchingStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
+import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.HashSet;
 import java.util.Set;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -87,7 +89,10 @@ public class PythonLikeAssigningStrategy implements ParameterAssigningStrategy {
 				callState = def.semantics(callState, interprocedural, expressions);
 				expressions.put(def, callState);
 				defaults[pos] = callState.getComputedExpressions();
-				defaultTypes[pos] = callState.getDomainInstance(TypeDomain.class).getInferredRuntimeTypes();
+				T typedom = (T) callState.getDomainInstance(TypeDomain.class);
+				defaultTypes[pos] = new HashSet<>();
+				for (SymbolicExpression e : callState.rewrite(defaults[pos], call))
+					defaultTypes[pos].addAll(typedom.getRuntimeTypesOf((ValueExpression) e, call));
 			}
 		}
 
