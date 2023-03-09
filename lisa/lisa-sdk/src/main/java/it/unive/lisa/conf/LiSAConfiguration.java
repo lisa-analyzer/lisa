@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
@@ -255,6 +256,30 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 */
 	public OpenCallPolicy openCallPolicy = WorstCasePolicy.INSTANCE;
 
+	/**
+	 * If {@code true}, will cause the analysis to optimize fixpoint executions.
+	 * This means that (i) basic blocks will be computed for each cfg, (ii)
+	 * fixpoint computations will discard post-states of statements that are not
+	 * ending a basic block, (iii) after the fixpoint terminates, only the
+	 * pre-state of the cfg entrypoints and the post-states of widening points
+	 * will be stored, discarding everything else. When the pre- or post-state
+	 * of a non-widening point is queried, a fast fixpoint iteration will be ran
+	 * to unwind (that is, re-propagate) the results and compute the missing
+	 * states. Defaults to {@code true}.
+	 */
+	public boolean optimize = true;
+
+	/**
+	 * When {@link #optimize} is {@code true}, this predicate will be used to
+	 * determine additional statements (also considering intermediate ones) for
+	 * which the fixpoint results must be kept. This is useful for avoiding
+	 * result unwinding due to {@link SemanticCheck}s querying for the
+	 * post-state of statements. Note that statements for which
+	 * {@link Statement#stopsExecution()} is {@code true} are always considered
+	 * hotspots.
+	 */
+	public Predicate<Statement> hotspots = null;
+
 	@Override
 	public String toString() {
 		StringBuilder res = new StringBuilder();
@@ -279,6 +304,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 						res.append(": ").append(((Class<?>) value).getSimpleName());
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
 						res.append(": ").append(((OpenCallPolicy) value).getClass().getSimpleName());
+					else if (Predicate.class.isAssignableFrom(field.getType()))
+						// not sure how we can get more details reliably
+						res.append(": ").append(value == null ? "unset" : "set");
 					else
 						res.append(": ").append(String.valueOf(value));
 				}
@@ -316,6 +344,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 						val = ((Class<?>) value).getSimpleName();
 					else if (OpenCallPolicy.class.isAssignableFrom(field.getType()))
 						val = ((OpenCallPolicy) value).getClass().getSimpleName();
+					else if (Predicate.class.isAssignableFrom(field.getType()))
+						// not sure how we can get more details reliably
+						val = value == null ? "unset" : "set";
 					else
 						val = String.valueOf(value);
 					bag.put(key, val);
