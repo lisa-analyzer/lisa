@@ -19,7 +19,7 @@
   "configuration" : {
     "analysisGraphs" : "HTML",
     "descendingPhaseType" : "NONE",
-    "fixpointWorkingSet" : "FIFOWorkingSet",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
     "glbThreshold" : "5",
     "jsonOutput" : "true",
     "openCallPolicy" : "WorstCasePolicy",

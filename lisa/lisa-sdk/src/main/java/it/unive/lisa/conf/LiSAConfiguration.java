@@ -1,5 +1,17 @@
 package it.unive.lisa.conf;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.StringUtils;
+
 import it.unive.lisa.LiSA;
 import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
@@ -14,19 +26,9 @@ import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.OpenCall;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.file.FileManager;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Collectors;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * A holder for the configuration of a {@link LiSA} analysis.
@@ -243,9 +245,9 @@ public class LiSAConfiguration extends BaseConfiguration {
 
 	/**
 	 * The concrete class of {@link WorkingSet} to be used in fixpoints.
-	 * Defaults to {@link FIFOWorkingSet}.
+	 * Defaults to {@link DuplicateFreeFIFOWorkingSet}.
 	 */
-	public Class<?> fixpointWorkingSet = FIFOWorkingSet.class;
+	public Class<?> fixpointWorkingSet = DuplicateFreeFIFOWorkingSet.class;
 
 	/**
 	 * The {@link OpenCallPolicy} to be used for computing the result of
