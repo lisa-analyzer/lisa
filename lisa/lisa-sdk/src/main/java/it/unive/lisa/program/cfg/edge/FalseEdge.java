@@ -46,14 +46,14 @@ public class FalseEdge extends Edge {
 					throws SemanticException {
 		ExpressionSet<SymbolicExpression> exprs = sourceState.getComputedExpressions();
 		AnalysisState<A, H, V, T> result = sourceState.bottom();
-		for (SymbolicExpression expr : exprs)
-			if (sourceState.satisfies(expr, getSource()).mightBeFalse()) {
-				AnalysisState<A, H, V, T> tmp = sourceState
-						.assume(new UnaryExpression(expr.getStaticType(), expr, LogicalNegation.INSTANCE,
-								expr.getCodeLocation()),
-								getSource());
-				result = result.lub(tmp);
-			}
+		for (SymbolicExpression expr : exprs) {
+			UnaryExpression negated = new UnaryExpression(
+					expr.getStaticType(),
+					expr,
+					LogicalNegation.INSTANCE,
+					expr.getCodeLocation());
+			result = result.lub(sourceState.assume(negated, getSource()));
+		}
 		return result;
 	}
 

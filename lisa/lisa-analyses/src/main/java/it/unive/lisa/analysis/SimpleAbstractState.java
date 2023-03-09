@@ -96,7 +96,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.assign(id, expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -122,7 +122,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		H heap = heapState.smallStepSemantics(expression, pp);
 		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -146,7 +146,7 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}
 
-	private SimpleAbstractState<H, V, T> applySubstitiontion(H heap, V value, T type, ProgramPoint pp)
+	private SimpleAbstractState<H, V, T> applySubstitution(H heap, V value, T type, ProgramPoint pp)
 			throws SemanticException {
 		if (heap.getSubstitution() != null && !heap.getSubstitution().isEmpty()) {
 			for (HeapReplacement repl : heap.getSubstitution()) {
@@ -182,9 +182,11 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
 			throws SemanticException {
 		H heap = heapState.assume(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
+		if (heap.isBottom())
+			return bottom();
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitution(heap, valueState, typeState, pp);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
@@ -198,6 +200,9 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 			typeRes = typeRes.lub(type.assume(expr, pp));
 			valueRes = valueRes.lub(value.assume(expr, pp));
 		}
+
+		if (typeRes.isBottom() || valueRes.isBottom())
+			return bottom();
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
 	}

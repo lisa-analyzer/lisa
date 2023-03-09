@@ -557,6 +557,12 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	@Override
 	default ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
 			ProgramPoint pp) throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, pp);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 

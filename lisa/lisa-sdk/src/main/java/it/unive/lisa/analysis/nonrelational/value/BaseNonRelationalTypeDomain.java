@@ -556,6 +556,12 @@ public interface BaseNonRelationalTypeDomain<T extends BaseNonRelationalTypeDoma
 	@Override
 	default TypeEnvironment<T> assume(TypeEnvironment<T> environment, ValueExpression expression,
 			ProgramPoint pp) throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, pp);
+		if (sat == Satisfiability.NOT_SATISFIED)
+			return environment.bottom();
+		if (sat == Satisfiability.SATISFIED)
+			return environment;
+
 		if (expression instanceof UnaryExpression) {
 			UnaryExpression unary = (UnaryExpression) expression;
 

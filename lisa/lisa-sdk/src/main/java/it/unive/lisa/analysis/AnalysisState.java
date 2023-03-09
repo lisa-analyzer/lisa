@@ -218,7 +218,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		return new AnalysisState<>(state.assume(expression, pp), computedExpressions, aliasing);
+		A assume = state.assume(expression, pp);
+		if (assume.isBottom())
+			return bottom();
+		return new AnalysisState<>(assume, computedExpressions, aliasing);
 	}
 
 	@Override

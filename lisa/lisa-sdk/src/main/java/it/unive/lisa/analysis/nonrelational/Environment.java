@@ -105,14 +105,6 @@ public abstract class Environment<M extends Environment<M, E, T>,
 	public M assume(E expression, ProgramPoint pp) throws SemanticException {
 		if (isBottom())
 			return (M) this;
-
-		Satisfiability sat = lattice.satisfies(expression, (M) this, pp);
-		if (sat == Satisfiability.NOT_SATISFIED)
-			return bottom();
-
-		if (sat == Satisfiability.SATISFIED)
-			return (M) this;
-
 		return lattice.assume((M) this, expression, pp);
 	}
 }
