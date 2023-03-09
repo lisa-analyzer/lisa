@@ -119,7 +119,7 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The default number of maximum time glb can be called on a node during the
 	 * descending phase of fixpoint algorithm.
 	 */
-	public static final int DEFAULT_DESCENDING_GLB_THRESHOLD = 5;
+	public static final int DEFAULT_GLB_THRESHOLD = 5;
 
 	/**
 	 * The collection of {@link SyntacticCheck}s to execute. These checks will
@@ -221,17 +221,19 @@ public class LiSAConfiguration extends BaseConfiguration {
 	 * The number of fixpoint iteration on a given node after which calls to
 	 * {@link Lattice#lub(Lattice)} gets replaced with
 	 * {@link Lattice#widening(Lattice)}. Defaults to
-	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 * {@link #DEFAULT_WIDENING_THRESHOLD}. Note that widening is only invoked
+	 * on widening points (that is, on loop guards) to reduce cost and increase
+	 * precision. Use to always apply lubs.
 	 */
 	public int wideningThreshold = DEFAULT_WIDENING_THRESHOLD;
 
 	/**
-	 * The number of fixpoint iteration on a given node after which calls to
-	 * {@link Lattice#lub(Lattice)} gets replaced with
-	 * {@link Lattice#widening(Lattice)}. Defaults to
-	 * {@link #DEFAULT_WIDENING_THRESHOLD}.
+	 * The number of descending fixpoint iteration on a given node where
+	 * {@link Lattice#glb(Lattice)} can be applied. After the threshold is
+	 * reached, no more glbs will be applied on that node and the descending
+	 * chain will stop. Defaults to {@link #DEFAULT_GLB_THRESHOLD}.
 	 */
-	public int glbThreshold = DEFAULT_WIDENING_THRESHOLD;
+	public int glbThreshold = DEFAULT_GLB_THRESHOLD;
 
 	/**
 	 * the type of descending phase that will be applied by the fixpoint

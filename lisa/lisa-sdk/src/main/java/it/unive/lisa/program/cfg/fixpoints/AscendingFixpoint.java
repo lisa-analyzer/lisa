@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 
 	private final int widenAfter;
 	private final Map<Statement, Integer> lubs;
+	private final Collection<Statement> wideningPoints;
 
 	/**
 	 * Builds the fixpoint implementation.
@@ -48,6 +50,7 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 		super(target, interprocedural);
 		this.widenAfter = widenAfter;
 		this.lubs = new HashMap<>(target.getNodesCount());
+		this.wideningPoints = target.getCycleEntries();
 	}
 
 	@Override
@@ -56,16 +59,21 @@ public class AscendingFixpoint<A extends AbstractState<A, H, V, T>,
 			CompoundState<A, H, V, T> old) throws SemanticException {
 		CompoundState<A, H, V, T> result;
 
-		if (widenAfter == 0)
-			result = approx.lub(old);
+		// optimization: never apply widening on normal instructions,
+		// save time and precision and only apply to widening points
+		if (widenAfter == 0 || !wideningPoints.contains(node))
+			result = old.lub(approx);
 		else {
-			// we multiply by the number of predecessors since
-			// if we have more than one the threshold will be reached faster
-			int lub = lubs.computeIfAbsent(node, st -> widenAfter * graph.predecessorsOf(st).size());
+			int lub = lubs.computeIfAbsent(node, st -> widenAfter);
 			if (lub > 0)
 				result = old.lub(approx);
 			else
-				result = old.widening(approx);
+				result = CompoundState.of(
+						old.postState.widening(approx.postState),
+						// no need to widen the intermediate expressions as
+						// well: we force convergence on the final post state
+						// only, to recover as much precision as possible
+						old.intermediateStates.lub(approx.intermediateStates));
 			lubs.put(node, --lub);
 		}
 
