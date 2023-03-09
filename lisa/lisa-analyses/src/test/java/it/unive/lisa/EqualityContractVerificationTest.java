@@ -2,6 +2,24 @@ package it.unive.lisa;
 
 import static org.junit.Assert.assertTrue;
 
+import java.lang.reflect.Modifier;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.lang3.tuple.Pair;
+import org.graphstream.graph.implementations.SingleGraph;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+
 import it.unive.lisa.LiSAFactory.ConfigurableComponent;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.Lattice;
@@ -86,9 +104,12 @@ import it.unive.lisa.util.collections.externalSet.ExternalSetCache;
 import it.unive.lisa.util.collections.externalSet.UniversalExternalSet;
 import it.unive.lisa.util.collections.workset.ConcurrentFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.ConcurrentLIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.DuplicateFreeLIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.LIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceLIFOWorkingSet;
 import it.unive.lisa.util.datastructures.automaton.Automaton;
 import it.unive.lisa.util.datastructures.automaton.State;
 import it.unive.lisa.util.datastructures.automaton.Transition;
@@ -108,25 +129,9 @@ import it.unive.lisa.util.datastructures.regex.symbolic.SymbolicString;
 import it.unive.lisa.util.datastructures.regex.symbolic.UnknownSymbolicChar;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.lang.reflect.Modifier;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import nl.jqno.equalsverifier.api.SingleTypeEqualsVerifierApi;
-import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.graphstream.graph.implementations.SingleGraph;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
 
 //This test must live here since this project has all the others in its classpath, and reflections can detect all classes
 public class EqualityContractVerificationTest {
@@ -291,7 +296,10 @@ public class EqualityContractVerificationTest {
 		verify(ConcurrentLIFOWorkingSet.class);
 		verify(FIFOWorkingSet.class);
 		verify(LIFOWorkingSet.class);
-		verify(VisitOnceWorkingSet.class);
+		verify(VisitOnceFIFOWorkingSet.class);
+		verify(VisitOnceLIFOWorkingSet.class);
+		verify(DuplicateFreeFIFOWorkingSet.class);
+		verify(DuplicateFreeLIFOWorkingSet.class);
 	}
 
 	@Test

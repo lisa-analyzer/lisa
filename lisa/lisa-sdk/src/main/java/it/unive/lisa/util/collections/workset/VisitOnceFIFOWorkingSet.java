@@ -2,23 +2,24 @@ package it.unive.lisa.util.collections.workset;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.HashSet;
 import java.util.LinkedList;
 
 /**
- * A last-in, first-out working set. This implementation is <b>not</b>
- * thread-safe.
+ * A FIFO working set that guarantees that each element will be added to this
+ * working set no more than once. It works by pushing elements <i>only</i> if
+ * they were not already added before (even if they have already been popped
+ * out). This implementation is <b>not</b> thread-safe.
  * 
  * @author Luca Negrini
  * 
  * @param <E> the type of the elements that this working set contains
  */
-public final class LIFOWorkingSet<E> implements WorkingSet<E> {
+public class VisitOnceFIFOWorkingSet<E> implements VisitOnceWorkingSet<E> {
 
 	private final Deque<E> ws;
 
-	private LIFOWorkingSet() {
-		ws = new LinkedList<>();
-	}
+	private final Collection<E> seen;
 
 	/**
 	 * Yields a new, empty working set.
@@ -28,23 +29,32 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	 * 
 	 * @return the new working set
 	 */
-	public static <E> LIFOWorkingSet<E> mk() {
-		return new LIFOWorkingSet<>();
+	public static <E> VisitOnceFIFOWorkingSet<E> mk() {
+		return new VisitOnceFIFOWorkingSet<>();
+	}
+
+	private VisitOnceFIFOWorkingSet() {
+		ws = new LinkedList<>();
+		seen = new HashSet<>();
 	}
 
 	@Override
 	public void push(E e) {
-		ws.push(e);
+		if (seen.contains(e))
+			return;
+
+		seen.add(e);
+		ws.addLast(e);
 	}
 
 	@Override
 	public E pop() {
-		return ws.pop();
+		return ws.removeFirst();
 	}
 
 	@Override
 	public E peek() {
-		return ws.peek();
+		return ws.peekFirst();
 	}
 
 	@Override
@@ -68,9 +78,15 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 	}
 
 	@Override
+	public Collection<E> getSeen() {
+		return seen;
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((seen == null) ? 0 : seen.hashCode());
 		result = prime * result + ((ws == null) ? 0 : ws.hashCode());
 		return result;
 	}
@@ -83,7 +99,12 @@ public final class LIFOWorkingSet<E> implements WorkingSet<E> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		LIFOWorkingSet<?> other = (LIFOWorkingSet<?>) obj;
+		VisitOnceFIFOWorkingSet<?> other = (VisitOnceFIFOWorkingSet<?>) obj;
+		if (seen == null) {
+			if (other.seen != null)
+				return false;
+		} else if (!seen.equals(other.seen))
+			return false;
 		if (ws == null) {
 			if (other.ws != null)
 				return false;

@@ -7,8 +7,7 @@ import it.unive.lisa.program.cfg.edge.SequentialEdge;
 import it.unive.lisa.program.cfg.edge.TrueEdge;
 import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.Statement;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.GraphVisitor;
 import it.unive.lisa.util.datastructures.graph.algorithms.Dominators;
@@ -86,7 +85,7 @@ public class ControlFlowExtractor {
 
 			// with empty loops, we can skip the whole reasoning
 			if (tail != conditional) {
-				WorkingSet<Edge> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
+				WorkingSet<Edge> ws = VisitOnceFIFOWorkingSet.mk();
 				target.getIngoingEdges(tail).forEach(ws::push);
 				body.addNode(tail);
 				while (!ws.isEmpty()) {

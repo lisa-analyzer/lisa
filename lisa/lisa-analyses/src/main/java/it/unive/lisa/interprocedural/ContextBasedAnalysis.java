@@ -23,8 +23,7 @@ import it.unive.lisa.program.cfg.statement.call.CFGCall;
 import it.unive.lisa.program.language.parameterassignment.ParameterAssigningStrategy;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
-import it.unive.lisa.util.collections.workset.FIFOWorkingSet;
-import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
@@ -139,7 +138,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			// starting from the callers of the cfgs that needed a lub,
 			// find out the complete set of cfgs that might need to be
 			// processed again
-			VisitOnceWorkingSet<CFG> ws = VisitOnceWorkingSet.mk(FIFOWorkingSet.mk());
+			VisitOnceFIFOWorkingSet<CFG> ws = VisitOnceFIFOWorkingSet.mk();
 			fixpointTriggers.forEach(cfg -> callgraph.getCallers(cfg).stream().filter(CFG.class::isInstance)
 					.map(CFG.class::cast).forEach(ws::push));
 			while (!ws.isEmpty())
