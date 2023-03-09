@@ -1,5 +1,21 @@
 package it.unive.lisa.program.cfg;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -29,24 +45,14 @@ import it.unive.lisa.program.cfg.statement.Expression;
 import it.unive.lisa.program.cfg.statement.NoOp;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.call.Call;
+import it.unive.lisa.util.collections.workset.VisitOnceFIFOWorkingSet;
+import it.unive.lisa.util.collections.workset.VisitOnceWorkingSet;
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.AdjacencyMatrix;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -70,6 +76,12 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * The control flow structures of this cfg
 	 */
 	private final Collection<ControlFlowStructure> cfStructs;
+
+	/**
+	 * The lazily computed basic blocks of this cfg, available only after
+	 * {@link #computeBasicBlocks()} has been invoked.
+	 */
+	private Map<Statement, Statement[]> basicBlocks;
 
 	/**
 	 * Builds the control flow graph.
@@ -107,6 +119,7 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		super(other.entrypoints, other.list);
 		this.descriptor = other.descriptor;
 		this.cfStructs = other.cfStructs;
+		this.basicBlocks = other.basicBlocks;
 	}
 
 	/**
@@ -829,5 +842,61 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 				result.add(cfs.getCondition());
 
 		return result;
+	}
+
+	/**
+	 * Computes the basic blocks of this cfg, that is, the sequences of
+	 * statements with no incoming branches (except to the first statement) and
+	 * no outgoing branches (except from the last statement). The result of the
+	 * computation can be retrieved through {@link #getBasicBlocks()}. <br>
+	 * <br>
+	 * Note that control flow structures must be available for this task: if
+	 * those have not been provided at construction, ensure that
+	 * {@link #extractControlFlowStructures(ControlFlowExtractor)} has been
+	 * invoked after constructing the cfg.
+	 */
+	public void computeBasicBlocks() {
+		Collection<Statement> leaders = new HashSet<>();
+		leaders.addAll(entrypoints);
+		for (ControlFlowStructure struct : cfStructs)
+			leaders.addAll(struct.getTargetedStatements());
+
+		basicBlocks = new IdentityHashMap<>(leaders.size());
+		for (Statement leader : leaders) {
+			VisitOnceWorkingSet<Statement> ws = VisitOnceFIFOWorkingSet.mk();
+			ws.push(leader);
+			List<Statement> bb = new LinkedList<>();
+			while (!ws.isEmpty()) {
+				Statement current = ws.pop();
+				bb.add(current);
+				Collection<Statement> followers = list.followersOf(current);
+				boolean pushed = false;
+				for (Statement follower : followers)
+					if (leaders.contains(follower))
+						continue;
+					else if (pushed)
+						throw new IllegalStateException(
+								"Cannot have statements with more than one follower inside a basic block");
+					else {
+						ws.push(follower);
+						pushed = true;
+					}
+			}
+
+			basicBlocks.put(leader, bb.toArray(Statement[]::new));
+		}
+	}
+
+	/**
+	 * Yields the basic blocks of this cfg, available only after
+	 * {@link #computeBasicBlocks()} has been invoked.
+	 * 
+	 * @return the basic blocks, returned as pairs in the form of &lt;leader,
+	 *             block&gt;
+	 */
+	public Map<Statement, Statement[]> getBasicBlocks() {
+		if (basicBlocks == null)
+			throw new IllegalStateException("Cannot retrieve basic blocks before computing them");
+		return basicBlocks;
 	}
 }

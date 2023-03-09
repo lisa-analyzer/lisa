@@ -102,6 +102,9 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 
 		Collection<CFG> allCFGs = app.getAllCFGs();
 
+		if (conf.optimize)
+			allCFGs.forEach(CFG::computeBasicBlocks);
+
 		AtomicBoolean htmlViewer = new AtomicBoolean(false), subnodes = new AtomicBoolean(false);
 		if (conf.serializeInputs)
 			for (CFG cfg : IterationLogger.iterate(LOG, allCFGs, "Dumping input cfgs", "cfgs")) {
