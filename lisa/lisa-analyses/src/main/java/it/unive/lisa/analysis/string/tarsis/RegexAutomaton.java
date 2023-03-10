@@ -56,47 +56,36 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 	}
 
 	@Override
-	public SortedSet<RegularExpression> commonAlphabet(RegexAutomaton other) {
-		SortedSet<RegularExpression> fa = getAlphabet();
-		SortedSet<RegularExpression> sa = other.getAlphabet();
+	public RegexAutomaton totalize(Set<RegularExpression> sigma) {
+		SortedSet<State> newStates = new TreeSet<>(states);
+		SortedSet<Transition<RegularExpression>> newTransitions = new TreeSet<>(transitions);
 
-		if (fa.containsAll(sa))
-			return fa;
+		int code = 1 + states.stream().map(State::getId).max(Integer::compare).orElseGet(() -> -1);
 
-		if (sa.containsAll(fa))
-			return sa;
+		// add a new "garbage" state
+		State garbage = new State(code, false, false);
+		newStates.add(garbage);
 
-		if (fa.contains(TopAtom.INSTANCE))
-			return fa;
+		// add additional transitions towards the garbage state
+		if (sigma.contains(TopAtom.INSTANCE)) {
+			for (State s : states)
+				if (!getReadableSymbolsFromStates(Collections.singleton(s)).contains(TopAtom.INSTANCE))
+					newTransitions.add(new Transition<>(s, garbage, TopAtom.INSTANCE));
+		} else 
+			for (State s : states)
+				for (RegularExpression c : sigma)
+					if (!getReadableSymbolsFromStates(Collections.singleton(s)).contains(c))
+						newTransitions.add(new Transition<>(s, garbage, c));
 
-		fa.addAll(sa);
-		return fa;
-	}
+		// self loops over garbage state
+		if (!sigma.contains(TopAtom.INSTANCE)) 
+			for (RegularExpression c : sigma) 
+				newTransitions.add(new Transition<>(garbage, garbage, c));
+		else
+			newTransitions.add(new Transition<>(garbage, garbage, TopAtom.INSTANCE));
 
-	@Override
-	public RegexAutomaton intersection(RegexAutomaton other) {
-		if (this == other)
-			return this;
 
-		// !(!(first) u !(second))
-		Set<RegularExpression> sigmaFirst = commonAlphabet(other);
-		Set<RegularExpression> sigmaSecond = other.commonAlphabet(this);
-		RegexAutomaton notFirst = complement(sigmaFirst);
-		RegexAutomaton notSecond = other.complement(sigmaSecond);
-		RegexAutomaton union = notFirst.union(notSecond);
-		RegexAutomaton result = union.complement(null);
-		// the last operation of the complement is minimization, and thus the
-		// result is already minimized
-		return result;
-	}
-
-	@Override
-	public boolean isContained(RegexAutomaton other) {
-		SortedSet<RegularExpression> commonAlphabet = other.commonAlphabet(this);
-		RegexAutomaton complement = other.complement(commonAlphabet);
-		RegexAutomaton intersection = intersection(complement);
-		RegexAutomaton minimal = intersection.minimize();
-		return minimal.acceptsEmptyLanguage();
+		return from(newStates, newTransitions);
 	}
 
 	/**
