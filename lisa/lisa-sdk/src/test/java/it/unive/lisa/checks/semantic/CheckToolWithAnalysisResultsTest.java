@@ -22,6 +22,7 @@ import it.unive.lisa.checks.warnings.StatementWarning;
 import it.unive.lisa.checks.warnings.UnitWarning;
 import it.unive.lisa.checks.warnings.Warning;
 import it.unive.lisa.conf.LiSAConfiguration;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.CallResolutionException;
@@ -217,12 +218,12 @@ public class CheckToolWithAnalysisResultsTest {
 						new ExpressionSet<>(), new SymbolAliasing());
 		NoOp noop = new NoOp(cfg, new SourceCodeLocation("fake", 3, 0));
 		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res1 = new AnalyzedCFG<>(cfg, singleton,
+				TestValueDomain, TestTypeDomain> res1 = new AnalyzedCFG<>(cfg, new UniqueScope(), singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		noop = new NoOp(cfg2, new SourceCodeLocation("fake", 30, 0));
 		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res2 = new AnalyzedCFG<>(cfg2, singleton,
+				TestValueDomain, TestTypeDomain> res2 = new AnalyzedCFG<>(cfg2, new UniqueScope(), singleton,
 						Map.of(noop, singleton.bottom()), Map.of(noop, singleton.bottom()));
 
 		CheckToolWithAnalysisResults<TestAbstractState,

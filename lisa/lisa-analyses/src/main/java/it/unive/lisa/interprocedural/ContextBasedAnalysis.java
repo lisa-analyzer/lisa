@@ -92,7 +92,6 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			Class<? extends WorkingSet<Statement>> fixpointWorkingSet,
 			FixpointConfiguration conf)
 			throws FixpointException {
-		this.results = null;
 		this.fixpointWorkingSet = fixpointWorkingSet;
 		this.conf = conf;
 
@@ -118,17 +117,20 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 
 	private void fixpointAux(AnalysisState<A, H, V, T> entryState) throws AnalysisExecutionException {
 		int iter = 0;
+		ContextSensitivityToken empty = token.empty();
 		do {
 			LOG.info("Performing {} fixpoint iteration", ordinal(iter + 1));
 			fixpointTriggers.clear();
 			for (CFG cfg : IterationLogger.iterate(LOG, app.getEntryPoints(), "Processing entrypoints", "entries"))
 				try {
-					CFGResults<A, H, V, T> value = new CFGResults<>(new AnalyzedCFG<>(cfg, entryState));
-					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
-					if (results == null)
+					if (results == null) {
+						CFGResults<A, H, V,
+								T> value = new CFGResults<>(new AnalyzedCFG<>(cfg, token.empty(), entryState));
 						this.results = new FixpointResults<>(value.top());
-					results.putResult(cfg, token.empty(),
-							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), conf));
+					}
+					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
+					results.putResult(cfg, empty,
+							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), conf, empty));
 				} catch (SemanticException | AnalysisSetupException e) {
 					throw new AnalysisExecutionException("Error while creating the entrystate for " + cfg, e);
 				} catch (FixpointException e) {
@@ -237,11 +239,15 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 			AnalysisState<A, H, V, T> computedEntryState)
 			throws FixpointException, SemanticException, AnalysisSetupException {
 		AnalyzedCFG<A, H, V, T> fixpointResult = cfg.fixpoint(computedEntryState, this,
-				WorkingSet.of(fixpointWorkingSet), conf);
-		fixpointResult.setId(localToken.toString());
+				WorkingSet.of(fixpointWorkingSet), conf, localToken);
 		Pair<Boolean, AnalyzedCFG<A, H, V, T>> res = results.putResult(cfg, localToken, fixpointResult);
 		if (Boolean.TRUE.equals(res.getLeft()))
 			fixpointTriggers.add(cfg);
 		return res.getRight();
+	}
+
+	@Override
+	public FixpointResults<A, H, V, T> getFixpointResults() {
+		return results;
 	}
 }

@@ -54,8 +54,8 @@ public class SerializableCFG {
 	public static SerializableGraph fromCFG(CFG source, Function<Statement, SerializableValue> descriptionGenerator) {
 		String name = source.getDescriptor().getFullSignatureWithParNames();
 		String desc;
-		if (source instanceof AnalyzedCFG<?, ?, ?, ?>)
-			desc = ((AnalyzedCFG<?, ?, ?, ?>) source).getId();
+		if (source instanceof AnalyzedCFG<?, ?, ?, ?> && !((AnalyzedCFG<?, ?, ?, ?>) source).getId().isStartingId())
+			desc = ((AnalyzedCFG<?, ?, ?, ?>) source).getId().toString();
 		else
 			desc = null;
 

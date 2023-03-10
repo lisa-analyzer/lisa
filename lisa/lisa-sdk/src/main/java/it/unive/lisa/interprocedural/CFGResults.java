@@ -13,9 +13,9 @@ import java.util.Map;
 import org.apache.commons.lang3.tuple.Pair;
 
 /**
- * A {@link FunctionalLattice} from {@link ContextSensitivityToken}s to
- * {@link AnalyzedCFG}s. This class is meant to store fixpoint results on each
- * token generated during the interprocedural analysis.
+ * A {@link FunctionalLattice} from {@link ScopeId}s to {@link AnalyzedCFG}s.
+ * This class is meant to store fixpoint results on each token generated during
+ * the interprocedural analysis.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -32,7 +32,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends FunctionalLattice<CFGResults<A, H, V, T>, ContextSensitivityToken, AnalyzedCFG<A, H, V, T>> {
+		extends FunctionalLattice<CFGResults<A, H, V, T>, ScopeId, AnalyzedCFG<A, H, V, T>> {
 
 	/**
 	 * Builds a new result.
@@ -45,7 +45,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	}
 
 	private CFGResults(AnalyzedCFG<A, H, V, T> lattice,
-			Map<ContextSensitivityToken, AnalyzedCFG<A, H, V, T>> function) {
+			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
 		super(lattice, function);
 	}
 
@@ -68,15 +68,14 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	 * The value returned by this method is intended to be a hint that a new
 	 * fixpoint computation is needed to ensure that the results are stable.
 	 * 
-	 * @param token  the {@link ContextSensitivityToken} that identifying the
-	 *                   result
+	 * @param token  the {@link ScopeId} that identifying the result
 	 * @param result the {@link AnalyzedCFG} to store
 	 * 
 	 * @return {@code true} if the previous result has been updated, if any
 	 * 
 	 * @throws SemanticException if something goes wrong during the update
 	 */
-	public Pair<Boolean, AnalyzedCFG<A, H, V, T>> putResult(ContextSensitivityToken token,
+	public Pair<Boolean, AnalyzedCFG<A, H, V, T>> putResult(ScopeId token,
 			AnalyzedCFG<A, H, V, T> result)
 			throws SemanticException {
 		if (function == null) {
@@ -115,18 +114,17 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 	/**
 	 * Yields {@code true} if a result exists for the given {@code token}.
 	 * 
-	 * @param token the {@link ContextSensitivityToken} that identifying the
-	 *                  result
+	 * @param token the {@link ScopeId} that identifying the result
 	 * 
 	 * @return {@code true} if that condition holds
 	 */
-	public boolean contains(ContextSensitivityToken token) {
+	public boolean contains(ScopeId token) {
 		return function != null && function.containsKey(token);
 	}
 
 	/**
 	 * Yields all the results stored in this object, for any possible
-	 * {@link ContextSensitivityToken} used.
+	 * {@link ScopeId} used.
 	 * 
 	 * @return the results
 	 */
@@ -146,7 +144,7 @@ public class CFGResults<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public CFGResults<A, H, V, T> mk(AnalyzedCFG<A, H, V, T> lattice,
-			Map<ContextSensitivityToken, AnalyzedCFG<A, H, V, T>> function) {
+			Map<ScopeId, AnalyzedCFG<A, H, V, T>> function) {
 		return new CFGResults<>(lattice, function);
 	}
 }

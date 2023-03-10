@@ -192,8 +192,10 @@ public class LiSARunner<A extends AbstractState<A, H, V, T>,
 					SerializableGraph graph = result.toSerializableGraph(
 							st -> result.getAnalysisStateAfter(st).representation().toSerializableValue());
 					String filename = cfg.getDescriptor().getFullSignatureWithParNames();
-					if (result.getId() != null)
-						filename += "_" + result.getId().hashCode();
+					if (!result.getId().isStartingId())
+						// we use the string for compatibility with older file
+						// names
+						filename += "_" + result.getId().toString().hashCode();
 
 					try {
 						if (conf.serializeResults)

@@ -1,5 +1,8 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -11,10 +14,6 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * This abstract class generalize the concept of an abstract domain whose domain
@@ -87,16 +86,17 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	protected C removeRedundancy() throws SemanticException {
 		SortedSet<E> newElementsSet = new TreeSet<>();
-		for (E element : elementsSet) {
+		for (E element : elementsSet)
 			if (!element.isBottom()) {
 				boolean toRemove = false;
 				for (E otherElement : elementsSet)
-					if (element.lessOrEqual(otherElement) && !otherElement.lessOrEqual(element))
+					if (element.lessOrEqual(otherElement) && !otherElement.lessOrEqual(element)) {
 						toRemove = true;
+						break;
+					}
 				if (!toRemove)
 					newElementsSet.add(element);
 			}
-		}
 		return mk(newElementsSet);
 	}
 
@@ -120,18 +120,18 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 			tmpSet = new TreeSet<>();
 			for (E e1 : newSet) {
 				boolean intersectionFound = false;
-				for (E e2 : newSet) {
+				for (E e2 : newSet)
 					if (!e1.glb(e2).isBottom()) {
 						E notOverlappingElement = removeOverlappingBetweenElements(e1, e2);
 						if (!tmpSet.contains(notOverlappingElement))
 							tmpSet.add(notOverlappingElement);
 						intersectionFound = true;
 					}
-				}
 				if (!intersectionFound)
 					tmpSet.add(e1);
 			}
 		} while (tmpSet.size() != newSet.size());
+
 		return mk(tmpSet).removeRedundancy();
 	}
 
@@ -170,17 +170,15 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	protected C EgliMilnerConnector(C other) throws SemanticException {
-		SortedSet<E> unionSet = new TreeSet<>(elementsSet);
-		unionSet.addAll(other.elementsSet);
-		E completeLub = valueDomain.bottom();
-		if (!unionSet.isEmpty()) {
-			for (E element : unionSet) {
-				completeLub = completeLub.lub(element);
-			}
-		}
 		SortedSet<E> newSet = new TreeSet<>();
-		if (completeLub != null)
-			newSet.add(completeLub);
+		if (elementsSet.isEmpty() && other.elementsSet.isEmpty())
+			return mk(newSet);
+		E completeLub = valueDomain.bottom();
+		for (E element : elementsSet)
+			completeLub = completeLub.lub(element);
+		for (E element : other.elementsSet)
+			completeLub = completeLub.lub(element);
+		newSet.add(completeLub);
 		return mk(newSet);
 	}
 
@@ -213,7 +211,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	protected void add(E element) {
 		elementsSet.add(element);
-	};
+	}
 
 	/**
 	 * Performs the least upper bound between this non redundant set and the
@@ -221,16 +219,14 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * removed of redundancy.
 	 */
 	@Override
-	public C lubAux(C other)
-			throws SemanticException {
+	public C lubAux(C other) throws SemanticException {
 		SortedSet<E> lubSet = new TreeSet<>(elementsSet);
 		lubSet.addAll(other.elementsSet);
 		return mk(lubSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
-	public C glbAux(C other)
-			throws SemanticException {
+	public C glbAux(C other) throws SemanticException {
 		SortedSet<E> glbSet = new TreeSet<>();
 		for (E s1 : elementsSet)
 			for (E s2 : other.elementsSet)
@@ -271,12 +267,10 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	protected C extrapolationHeuristic(C other) throws SemanticException {
 		SortedSet<E> extrapolatedSet = new TreeSet<>();
-		for (E s1 : elementsSet) {
-			for (E s2 : other.elementsSet) {
+		for (E s1 : elementsSet)
+			for (E s2 : other.elementsSet)
 				if (s1.lessOrEqual(s2) && !s2.lessOrEqual(s1))
 					extrapolatedSet.add(s1.widening(s2));
-			}
-		}
 		return mk(extrapolatedSet).removeRedundancy().lub(other);
 	}
 
@@ -305,11 +299,10 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {
-		if (lessOrEqualEgliMilner(other)) {
+		if (lessOrEqualEgliMilner(other))
 			return extrapolationHeuristic(other).removeRedundancy().removeOverlapping();
-		} else {
+		else
 			return extrapolationHeuristic(EgliMilnerConnector(other)).removeRedundancy().removeOverlapping();
-		}
 	}
 
 	/**
@@ -331,22 +324,20 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 * @throws SemanticException if an error occurs during the computation
 	 */
 	public boolean lessOrEqualEgliMilner(C other) throws SemanticException {
-		if (lessOrEqual(other)) {
-			if (!isBottom()) {
-				for (E s2 : other.elementsSet) {
-					boolean existsLowerElement = false;
-					for (E s1 : elementsSet) {
-						if (s1.lessOrEqual(s2)) {
-							existsLowerElement = true;
-							break;
-						}
-					}
-					if (!existsLowerElement)
-						return false;
-				}
-			}
-		} else
+		if (!lessOrEqual(other))
 			return false;
+		if (isBottom())
+			return true;
+		for (E s2 : other.elementsSet) {
+			boolean existsLowerElement = false;
+			for (E s1 : elementsSet)
+				if (s1.lessOrEqual(s2)) {
+					existsLowerElement = true;
+					break;
+				}
+			if (!existsLowerElement)
+				return false;
+		}
 		return true;
 	}
 
@@ -360,12 +351,11 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	public boolean lessOrEqualAux(C other) throws SemanticException {
 		for (E s1 : elementsSet) {
 			boolean existsGreaterElement = false;
-			for (E s2 : other.elementsSet) {
+			for (E s2 : other.elementsSet)
 				if (s1.lessOrEqual(s2)) {
 					existsGreaterElement = true;
 					break;
 				}
-			}
 			if (!existsGreaterElement)
 				return false;
 		}
@@ -382,9 +372,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	@Override
 	public C evalUnaryExpression(UnaryOperator operator, C arg, ProgramPoint pp) throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
-		for (E s : arg.elementsSet) {
+		for (E s : arg.elementsSet)
 			newSet.add(valueDomain.evalUnaryExpression(operator, s, pp));
-		}
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
@@ -394,11 +383,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 			C right,
 			ProgramPoint pp) throws SemanticException {
 		SortedSet<E> newSet = new TreeSet<>();
-		for (E sLeft : left.elementsSet) {
-			for (E sRight : right.elementsSet) {
+		for (E sLeft : left.elementsSet)
+			for (E sRight : right.elementsSet)
 				newSet.add(valueDomain.evalBinaryExpression(operator, sLeft, sRight, pp));
-			}
-		}
 		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
@@ -411,21 +398,11 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		if (left.isTop() || right.isTop())
 			return Satisfiability.UNKNOWN;
 
-		Set<Satisfiability> setSatisf = new HashSet<Satisfiability>();
-		for (E sLeft : left.elementsSet) {
-			for (E sRight : right.elementsSet) {
-				setSatisf.add(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp));
-			}
-		}
-		if ((setSatisf.contains(Satisfiability.SATISFIED) && setSatisf.contains(Satisfiability.NOT_SATISFIED)) ||
-				setSatisf.contains(Satisfiability.UNKNOWN))
-			return Satisfiability.UNKNOWN;
-		else if (setSatisf.contains(Satisfiability.SATISFIED))
-			return Satisfiability.SATISFIED;
-		else if (setSatisf.contains(Satisfiability.NOT_SATISFIED))
-			return Satisfiability.NOT_SATISFIED;
-
-		return Satisfiability.UNKNOWN;
+		Satisfiability sat = Satisfiability.BOTTOM;
+		for (E sLeft : left.elementsSet)
+			for (E sRight : right.elementsSet)
+				sat = sat.lub(valueDomain.satisfiesBinaryExpression(operator, sLeft, sRight, pp));
+		return sat;
 	}
 
 	@Override

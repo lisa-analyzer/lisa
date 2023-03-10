@@ -31,6 +31,11 @@ public class SingleScopeToken implements ContextSensitivityToken {
 		return empty();
 	}
 
+	@Override
+	public boolean isStartingId() {
+		return token == null;
+	}
+
 	/**
 	 * Return an empty token.
 	 * 

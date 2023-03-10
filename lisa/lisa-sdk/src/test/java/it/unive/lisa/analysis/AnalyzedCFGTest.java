@@ -10,6 +10,7 @@ import it.unive.lisa.TestTypeSystem;
 import it.unive.lisa.TestValueDomain;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.symbols.SymbolAliasing;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.program.ClassUnit;
 import it.unive.lisa.program.Program;
 import it.unive.lisa.program.SourceCodeLocation;
@@ -47,7 +48,8 @@ public class AnalyzedCFGTest {
 				TestHeapDomain, TestValueDomain, TestTypeDomain>> results = Map.of(y, state, x, state);
 
 		AnalyzedCFG<TestAbstractState, TestHeapDomain,
-				TestValueDomain, TestTypeDomain> res = new AnalyzedCFG<>(cfg, state, entries, results);
+				TestValueDomain,
+				TestTypeDomain> res = new AnalyzedCFG<>(cfg, new UniqueScope(), state, entries, results);
 
 		assertEquals(state, res.getAnalysisStateAfter(y));
 		assertEquals(state, res.getAnalysisStateBefore(y));

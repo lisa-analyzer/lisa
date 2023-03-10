@@ -40,6 +40,8 @@ import it.unive.lisa.interprocedural.CFGResults;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraph;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
@@ -377,11 +379,13 @@ public class SemanticsSanityTest {
 		if (param == AnalysisState.class)
 			return as;
 		if (param == AnalyzedCFG.class)
-			return new AnalyzedCFG<>(cfg, as);
+			return new AnalyzedCFG<>(cfg, new UniqueScope(), as);
 		if (param == CFGResults.class)
-			return new CFGResults<>(new AnalyzedCFG<>(cfg, as));
+			return new CFGResults<>(new AnalyzedCFG<>(cfg, new UniqueScope(), as));
 		if (param == InterproceduralAnalysis.class)
 			return interprocedural;
+		if (param == ScopeId.class)
+			return new UniqueScope();
 
 		throw new UnsupportedOperationException(
 				"No default domain for domain " + root + " and parameter of type " + param);
@@ -390,8 +394,8 @@ public class SemanticsSanityTest {
 	@SuppressWarnings("unchecked")
 	private <T> int buildDomainsInstances(Set<Class<? extends T>> classes, Set<T> instances, List<String> failures) {
 		int total = 0;
-		Constructor<?> nullary, unary, binary, ternary;
-		nullary = unary = binary = ternary = null;
+		Constructor<?> nullary, unary, binary, ternary, quaternary;
+		nullary = unary = binary = ternary = quaternary = null;
 		T instance;
 		for (Class<? extends T> clazz : classes)
 			if (!Modifier.isAbstract(clazz.getModifiers()) && !Modifier.isInterface(clazz.getModifiers())
@@ -409,6 +413,8 @@ public class SemanticsSanityTest {
 						binary = c;
 					else if (c.getParameterCount() == 3)
 						ternary = c;
+					else if (c.getParameterCount() == 4)
+						quaternary = c;
 				}
 
 				try {
@@ -429,6 +435,13 @@ public class SemanticsSanityTest {
 						Object param2 = domainFor(clazz, types[1]);
 						Object param3 = domainFor(clazz, types[2]);
 						instance = (T) ternary.newInstance(param1, param2, param3);
+					} else if (quaternary != null) {
+						Class<?>[] types = quaternary.getParameterTypes();
+						Object param1 = domainFor(clazz, types[0]);
+						Object param2 = domainFor(clazz, types[1]);
+						Object param3 = domainFor(clazz, types[2]);
+						Object param4 = domainFor(clazz, types[3]);
+						instance = (T) quaternary.newInstance(param1, param2, param3, param4);
 					} else {
 						failures.add(clazz.getName());
 						System.err.println("No suitable consturctor found for " + clazz.getName());

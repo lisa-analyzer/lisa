@@ -12,6 +12,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration.DescendingPhaseType;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.outputs.serializableGraph.SerializableCFG;
 import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
@@ -257,6 +258,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            computation
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
 	 * 
 	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
 	 *             flow graph, and that stores for each {@link Statement} the
@@ -274,10 +278,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					FixpointConfiguration conf) throws FixpointException {
+					FixpointConfiguration conf,
+					ScopeId id) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, conf);
+		return fixpoint(entryState, start, interprocedural, ws, conf, id);
 	}
 
 	/**
@@ -313,6 +318,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            computation
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
 	 * 
 	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
 	 *             flow graph, and that stores for each {@link Statement} the
@@ -331,10 +339,11 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					AnalysisState<A, H, V, T> entryState,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					FixpointConfiguration conf) throws FixpointException {
+					FixpointConfiguration conf,
+					ScopeId id) throws FixpointException {
 		Map<Statement, AnalysisState<A, H, V, T>> start = new HashMap<>();
 		entrypoints.forEach(e -> start.put(e, entryState));
-		return fixpoint(entryState, start, interprocedural, ws, conf);
+		return fixpoint(entryState, start, interprocedural, ws, conf, id);
 	}
 
 	/**
@@ -372,6 +381,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 *                            computation
 	 * @param conf            the {@link FixpointConfiguration} containing the
 	 *                            parameters tuning fixpoint behavior
+	 * @param id              a {@link ScopeId} meant to identify this specific
+	 *                            result based on how it has been produced, that
+	 *                            will be embedded in the returned cfg
 	 * 
 	 * @return a {@link AnalyzedCFG} instance that is equivalent to this control
 	 *             flow graph, and that stores for each {@link Statement} the
@@ -390,10 +402,12 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					Map<Statement, AnalysisState<A, H, V, T>> startingPoints,
 					InterproceduralAnalysis<A, H, V, T> interprocedural,
 					WorkingSet<Statement> ws,
-					FixpointConfiguration conf) throws FixpointException {
+					FixpointConfiguration conf,
+					ScopeId id) throws FixpointException {
 		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = conf.optimize
-				? new OptimizedFixpoint<>(this, false, conf.hotspots)
-				: new Fixpoint<>(this, false);
+				&& conf.descendingPhaseType == DescendingPhaseType.NONE
+						? new OptimizedFixpoint<>(this, false, conf.hotspots)
+						: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		startingPoints.forEach(
@@ -432,8 +446,9 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 		}
 
 		return conf.optimize
-				? new OptimizedAnalyzedCFG<A, H, V, T>(this, singleton, startingPoints, finalResults, interprocedural)
-				: new AnalyzedCFG<>(this, singleton, startingPoints, finalResults);
+				? new OptimizedAnalyzedCFG<A, H, V, T>(this, id, singleton, startingPoints, finalResults,
+						interprocedural)
+				: new AnalyzedCFG<>(this, id, singleton, startingPoints, finalResults);
 	}
 
 	@Override

@@ -22,6 +22,7 @@ import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.imp.types.IMPTypeSystem;
 import it.unive.lisa.interprocedural.InterproceduralAnalysisException;
 import it.unive.lisa.interprocedural.ModularWorstCaseAnalysis;
+import it.unive.lisa.interprocedural.UniqueScope;
 import it.unive.lisa.interprocedural.WorstCasePolicy;
 import it.unive.lisa.interprocedural.callgraph.CallGraphConstructionException;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -86,7 +87,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
 		} catch (FixpointException e) {
 			System.err.println(e);
 			fail("The fixpoint computation has thrown an exception");
@@ -99,7 +100,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -112,7 +113,7 @@ public class CFGFixpointTest {
 		Program p = IMPFrontend.processText("class empty { foo() { if (true) { this.foo(); } else {} } }");
 		CFG cfg = p.getAllCFGs().iterator().next();
 		try {
-			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf);
+			cfg.fixpoint(mkState(), mkAnalysis(p), FIFOWorkingSet.mk(), conf, new UniqueScope());
 		} catch (FixpointException e) {
 			e.printStackTrace(System.err);
 			fail("The fixpoint computation has thrown an exception");
@@ -137,7 +138,7 @@ public class CFGFixpointTest {
 				MonolithicHeap,
 				ValueEnvironment<Sign>,
 				TypeEnvironment<InferredTypes>> result = cfg.fixpoint(domain,
-						mkAnalysis(program), FIFOWorkingSet.mk(), conf);
+						mkAnalysis(program), FIFOWorkingSet.mk(), conf, new UniqueScope());
 
 		assertTrue(result.getAnalysisStateAfter(call).getState().getValueState().getKeys().isEmpty());
 	}

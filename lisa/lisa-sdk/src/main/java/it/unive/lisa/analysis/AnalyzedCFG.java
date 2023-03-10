@@ -3,6 +3,7 @@ package it.unive.lisa.analysis;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.analysis.value.ValueDomain;
+import it.unive.lisa.interprocedural.ScopeId;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.edge.Edge;
 import it.unive.lisa.program.cfg.statement.Expression;
@@ -32,13 +33,33 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 		H extends HeapDomain<H>,
 		V extends ValueDomain<V>,
 		T extends TypeDomain<T>>
-		extends CFG implements Lattice<AnalyzedCFG<A, H, V, T>> {
+		extends CFG
+		implements BaseLattice<AnalyzedCFG<A, H, V, T>> {
 
-	private static final String CANNOT_JOIN_ERROR = "Cannot join graphs with different IDs: '%s' and '%s'";
+	/**
+	 * Error message for the inability to lub two graphs.
+	 */
+	protected static final String CANNOT_LUB_ERROR = "Cannot lub two graphs with different descriptor or different IDs";
 
-	private static final String CANNOT_LUB_ERROR = "Cannot perform the least upper bound of two graphs with different descriptor";
+	/**
+	 * Error message for the inability to glb two graphs.
+	 */
+	protected static final String CANNOT_GLB_ERROR = "Cannot glb two graphs with different descriptor or different IDs";
 
-	private static final String CANNOT_GLB_ERROR = "Cannot perform the greatest lower bound of two graphs with different descriptor";
+	/**
+	 * Error message for the inability to widen two graphs.
+	 */
+	protected static final String CANNOT_WIDEN_ERROR = "Cannot widen two graphs with different descriptor or different IDs";
+
+	/**
+	 * Error message for the inability to narrow two graphs.
+	 */
+	protected static final String CANNOT_NARROW_ERROR = "Cannot perform narrow two graphs with different descriptor or different IDs";
+
+	/**
+	 * Error message for the inability to compare two graphs.
+	 */
+	protected static final String CANNOT_COMPARE_ERROR = "Cannot compare two graphs with different descriptor or different IDs";
 
 	/**
 	 * The map storing the analysis results.
@@ -51,22 +72,24 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	protected final StatementStore<A, H, V, T> entryStates;
 
 	/**
-	 * An optional string meant to identify this specific result, based on how
-	 * it has been produced
+	 * An id meant to identify this specific result, based on how it has been
+	 * produced.
 	 */
-	private String id;
+	protected final ScopeId id;
 
 	/**
 	 * Builds the control flow graph, storing the given mapping between nodes
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg       the original control flow graph
+	 * @param id        a {@link ScopeId} meant to identify this specific result
+	 *                      based on how it has been produced
 	 * @param singleton an instance of the {@link AnalysisState} containing the
 	 *                      abstract state of the analysis that was executed,
 	 *                      used to retrieve top and bottom values
 	 */
-	public AnalyzedCFG(CFG cfg, AnalysisState<A, H, V, T> singleton) {
-		this(cfg, singleton, Collections.emptyMap(), Collections.emptyMap());
+	public AnalyzedCFG(CFG cfg, ScopeId id, AnalysisState<A, H, V, T> singleton) {
+		this(cfg, id, singleton, Collections.emptyMap(), Collections.emptyMap());
 	}
 
 	/**
@@ -74,6 +97,8 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg         the original control flow graph
+	 * @param id          a {@link ScopeId} meant to identify this specific
+	 *                        result based on how it has been produced
 	 * @param singleton   an instance of the {@link AnalysisState} containing
 	 *                        the abstract state of the analysis that was
 	 *                        executed, used to retrieve top and bottom values
@@ -81,6 +106,7 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	 * @param results     the results of the fixpoint computation
 	 */
 	public AnalyzedCFG(CFG cfg,
+			ScopeId id,
 			AnalysisState<A, H, V, T> singleton,
 			Map<Statement, AnalysisState<A, H, V, T>> entryStates,
 			Map<Statement, AnalysisState<A, H, V, T>> results) {
@@ -89,6 +115,7 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 		results.forEach(this.results::put);
 		this.entryStates = new StatementStore<>(singleton);
 		entryStates.forEach(this.entryStates::put);
+		this.id = id;
 	}
 
 	/**
@@ -96,35 +123,29 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 	 * and fixpoint computation results.
 	 * 
 	 * @param cfg         the original control flow graph
+	 * @param id          a {@link ScopeId} meant to identify this specific
+	 *                        result based on how it has been produced
 	 * @param entryStates the entry state for each entry point of the cfg
 	 * @param results     the results of the fixpoint computation
 	 */
 	public AnalyzedCFG(CFG cfg,
+			ScopeId id,
 			StatementStore<A, H, V, T> entryStates,
 			StatementStore<A, H, V, T> results) {
 		super(cfg);
 		this.results = results;
 		this.entryStates = entryStates;
+		this.id = id;
 	}
 
 	/**
-	 * Yields a string meant to identify this specific result, based on how it
-	 * has been produced. This method might return {@code null}.
+	 * Yields an id meant to identify this specific result, based on how it has
+	 * been produced. This method might return {@code null}.
 	 * 
 	 * @return the identifier of this result
 	 */
-	public String getId() {
+	public ScopeId getId() {
 		return id;
-	}
-
-	/**
-	 * Sets the string meant to identify this specific result, based on how it
-	 * has been produced.
-	 * 
-	 * @param id the identifier of this result (might be {@code null})
-	 */
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	/**
@@ -188,90 +209,84 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 		return result;
 	}
 
-	/**
-	 * Joins two {@link AnalyzedCFG} together. The difference between this
-	 * method and {@link #lub(AnalyzedCFG)} is that this method does not set the
-	 * ID of the resulting cfg.
-	 * 
-	 * @param other the other cfg
-	 * 
-	 * @return the least upper bound of the two cfgs without its id set
-	 * 
-	 * @throws SemanticException if something goes wrong during the join
-	 */
-	public AnalyzedCFG<A, H, V, T> join(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
+	@Override
+	public AnalyzedCFG<A, H, V, T> lubAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_LUB_ERROR);
 
-		return new AnalyzedCFG<>(this, entryStates.lub(other.entryStates),
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.lub(other.entryStates),
 				results.lub(other.results));
 	}
 
 	@Override
-	public AnalyzedCFG<A, H, V, T> lub(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
-
-		AnalyzedCFG<A, H, V, T> lub = new AnalyzedCFG<>(this, entryStates.lub(other.entryStates),
-				results.lub(other.results));
-		lub.setId(joinIDs(other));
-		return lub;
-	}
-
-	@Override
-	public AnalyzedCFG<A, H, V, T> glb(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
+	public AnalyzedCFG<A, H, V, T> glbAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
 			throw new SemanticException(CANNOT_GLB_ERROR);
 
-		AnalyzedCFG<A, H, V, T> glb = new AnalyzedCFG<>(this, entryStates.glb(other.entryStates),
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.glb(other.entryStates),
 				results.glb(other.results));
-		glb.setId(joinIDs(other));
-		return glb;
 	}
 
 	@Override
-	public AnalyzedCFG<A, H, V, T> widening(AnalyzedCFG<A, H, V, T> other)
-			throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
+	public AnalyzedCFG<A, H, V, T> wideningAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_WIDEN_ERROR);
 
-		AnalyzedCFG<A, H, V, T> widen = new AnalyzedCFG<>(
+		return new AnalyzedCFG<>(
 				this,
+				id,
 				entryStates.widening(other.entryStates),
 				results.widening(other.results));
-		widen.setId(joinIDs(other));
-		return widen;
-	}
-
-	private String joinIDs(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
-		// we accept merging only if the ids are the same
-		if (id == null) {
-			if (other.id == null)
-				return null;
-
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-		}
-
-		if (other.id == null)
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-
-		if (!id.equals(other.id))
-			throw new SemanticException(String.format(CANNOT_JOIN_ERROR, String.valueOf(id), String.valueOf(other.id)));
-
-		return id;
 	}
 
 	@Override
-	public boolean lessOrEqual(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
-		if (!getDescriptor().equals(other.getDescriptor()))
-			throw new SemanticException(CANNOT_LUB_ERROR);
+	public AnalyzedCFG<A, H, V, T> narrowingAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_NARROW_ERROR);
+
+		return new AnalyzedCFG<>(
+				this,
+				id,
+				entryStates.narrowing(other.entryStates),
+				results.narrowing(other.results));
+	}
+
+	@Override
+	public boolean lessOrEqualAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
+		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other))
+			throw new SemanticException(CANNOT_COMPARE_ERROR);
 
 		return entryStates.lessOrEqual(other.entryStates) && results.lessOrEqual(other.results);
 	}
 
+	/**
+	 * Yields whether or not the {@link #id} of this graph and the given one are
+	 * the same.
+	 * 
+	 * @param other the other graph
+	 * 
+	 * @return {@code true} if that condition holds
+	 */
+	protected boolean sameIDs(AnalyzedCFG<A, H, V, T> other) {
+		if (id == null) {
+			if (other.id == null)
+				return true;
+			return false;
+		} else if (other.id == null)
+			return false;
+		else
+			return id.equals(other.id);
+	}
+
 	@Override
 	public AnalyzedCFG<A, H, V, T> top() {
-		return new AnalyzedCFG<>(this, entryStates.top(), results.top());
+		return new AnalyzedCFG<>(this, id.startingId(), entryStates.top(), results.top());
 	}
 
 	@Override
@@ -281,7 +296,7 @@ public class AnalyzedCFG<A extends AbstractState<A, H, V, T>,
 
 	@Override
 	public AnalyzedCFG<A, H, V, T> bottom() {
-		return new AnalyzedCFG<>(this, entryStates.bottom(), results.bottom());
+		return new AnalyzedCFG<>(this, id.startingId(), entryStates.bottom(), results.bottom());
 	}
 
 	@Override
