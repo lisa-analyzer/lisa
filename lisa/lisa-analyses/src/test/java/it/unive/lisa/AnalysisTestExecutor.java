@@ -184,6 +184,7 @@ public abstract class AnalysisTestExecutor {
 		setupWorkdir(configuration, actualPath);
 
 		configuration.jsonOutput = true;
+		configuration.optimize = false;
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");

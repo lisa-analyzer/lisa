@@ -42,7 +42,7 @@
     "hotspots" : "unset",
     "jsonOutput" : "true",
     "openCallPolicy" : "WorstCasePolicy",
-    "optimize" : "true",
+    "optimize" : "false",
     "semanticChecks" : "",
     "serializeInputs" : "false",
     "serializeResults" : "false",

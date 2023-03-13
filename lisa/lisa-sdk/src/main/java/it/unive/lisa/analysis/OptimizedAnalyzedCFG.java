@@ -288,15 +288,6 @@ public class OptimizedAnalyzedCFG<
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> getAnalysisStateAfter(Statement st) {
-		// FIXME only temporary
-		// ideally, cron tests still run without optimization,
-		// and we design some tests that ensure optimized tests
-		// share the same results
-		return getUnwindedAnalysisStateAfter(st);
-	}
-
-	@Override
 	public OptimizedAnalyzedCFG<A, H, V, T> lubAux(AnalyzedCFG<A, H, V, T> other) throws SemanticException {
 		if (!getDescriptor().equals(other.getDescriptor()) || !sameIDs(other)
 				|| !(other instanceof OptimizedAnalyzedCFG<?, ?, ?, ?>))
