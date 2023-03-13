@@ -132,6 +132,11 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	}
 
 	@Override
+	public String toString() {
+		return representation().toString();
+	}
+
+	@Override
 	public Interval evalNonNullConstant(Constant constant, ProgramPoint pp) {
 		if (constant.getValue() instanceof Integer) {
 			Integer i = (Integer) constant.getValue();

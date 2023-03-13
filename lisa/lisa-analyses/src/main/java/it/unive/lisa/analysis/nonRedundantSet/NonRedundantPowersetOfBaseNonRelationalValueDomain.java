@@ -8,8 +8,9 @@ import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
+import it.unive.lisa.analysis.nonrelational.value.NonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
-import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.representation.SetRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
@@ -33,7 +34,8 @@ import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
  */
 public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		C extends NonRedundantPowersetOfBaseNonRelationalValueDomain<C, E>,
-		E extends BaseNonRelationalValueDomain<E>> implements BaseNonRelationalValueDomain<C> {
+		E extends BaseNonRelationalValueDomain<E>>
+		implements BaseNonRelationalValueDomain<C> {
 
 	/**
 	 * The set that containing the elements.
@@ -114,9 +116,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	protected C removeOverlapping() throws SemanticException {
 		SortedSet<E> newSet;
-		SortedSet<E> tmpSet = new TreeSet<>(this.elementsSet);
+		SortedSet<E> tmpSet = this.elementsSet;
 		do {
-			newSet = new TreeSet<>(tmpSet);
+			newSet = tmpSet;
 			tmpSet = new TreeSet<>();
 			for (E e1 : newSet) {
 				boolean intersectionFound = false;
@@ -187,30 +189,12 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 		if (isBottom())
 			return Lattice.bottomRepresentation();
 
-		String representation = "[";
-		boolean first = true;
-
-		for (E element : this.elementsSet) {
-			if (!first)
-				representation += ", ";
-			else
-				first = false;
-
-			representation += element.representation();
-		}
-
-		representation += "]";
-
-		return new StringRepresentation(representation);
+		return new SetRepresentation(elementsSet, NonRelationalValueDomain::representation);
 	}
 
-	/**
-	 * Add an element to the set.
-	 * 
-	 * @param element the element that is added to the set
-	 */
-	protected void add(E element) {
-		elementsSet.add(element);
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 
 	/**
@@ -235,7 +219,7 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	}
 
 	/**
-	 * This method implements the widening-connected hextrapolation heuristic
+	 * This method implements the widening-connected extrapolation heuristic
 	 * proposed in the
 	 * <a href="https://www.cs.unipr.it/Publications/PDF/Q349.pdf">paper</a>
 	 * (represented as h<sup>&nabla;</sup>). Given two subsets S<sub>1</sub> and
@@ -299,10 +283,8 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 	 */
 	@Override
 	public C wideningAux(C other) throws SemanticException {
-		if (lessOrEqualEgliMilner(other))
-			return extrapolationHeuristic(other).removeRedundancy().removeOverlapping();
-		else
-			return extrapolationHeuristic(EgliMilnerConnector(other)).removeRedundancy().removeOverlapping();
+		C arg = lessOrEqualEgliMilner(other) ? other : EgliMilnerConnector(other);
+		return extrapolationHeuristic(arg).removeRedundancy().removeOverlapping();
 	}
 
 	/**
@@ -364,9 +346,9 @@ public abstract class NonRedundantPowersetOfBaseNonRelationalValueDomain<
 
 	@Override
 	public C evalNonNullConstant(Constant constant, ProgramPoint pp) throws SemanticException {
-		C newSet = bottom();
+		SortedSet<E> newSet = new TreeSet<>();
 		newSet.add(valueDomain.evalNonNullConstant(constant, pp));
-		return newSet.removeRedundancy().removeOverlapping();
+		return mk(newSet).removeRedundancy().removeOverlapping();
 	}
 
 	@Override
