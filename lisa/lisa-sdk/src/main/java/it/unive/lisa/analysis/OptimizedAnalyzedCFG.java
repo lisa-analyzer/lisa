@@ -49,6 +49,9 @@ import org.apache.logging.log4j.Logger;
  * {@link #getCycleEntries()}), exit statements (that is, {@link Statement}s
  * such that {@link Statement#stopsExecution()} holds), and hotspots (that is,
  * {@link Statement}s such that {@link LiSAConfiguration#hotspots} holds).
+ * Approximations for other statements can be retrieved through
+ * {@link #getUnwindedAnalysisStateAfter(Statement)}, that will first expand the
+ * results using {@link #unwind()}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  * 
@@ -161,7 +164,7 @@ public class OptimizedAnalyzedCFG<
 	 * Yields the computed result at a given statement (exit state). If such a
 	 * state is not available as it was discarded due to optimization, and
 	 * fixpoint's results have not been unwinded yet, a fixpoint iteration is
-	 * executed in-place.
+	 * executed in-place through {@link #unwind()}.
 	 *
 	 * @param st the statement
 	 *
@@ -174,6 +177,17 @@ public class OptimizedAnalyzedCFG<
 		if (expanded != null)
 			return expanded.getState(st);
 
+		unwind();
+
+		return expanded.getState(st);
+	}
+
+	/**
+	 * Runs an ascending fixpoint computation starting with the results
+	 * available in this graph, with the purpose of propagating the
+	 * approximations held in this result to all the missing nodes.
+	 */
+	public void unwind() {
 		AnalysisState<A, H, V, T> bottom = results.lattice.bottom();
 		StatementStore<A, H, V, T> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
@@ -216,8 +230,6 @@ public class OptimizedAnalyzedCFG<
 				LOG.error("Unable to unwind optimized results of " + this, e);
 			}
 		});
-
-		return expanded.getState(st);
 	}
 
 	private class PrecomputedAnalysis implements InterproceduralAnalysis<A, H, V, T> {
