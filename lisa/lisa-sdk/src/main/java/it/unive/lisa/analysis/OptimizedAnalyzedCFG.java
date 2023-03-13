@@ -175,12 +175,12 @@ public class OptimizedAnalyzedCFG<
 			return expanded.getState(st);
 
 		AnalysisState<A, H, V, T> bottom = results.lattice.bottom();
+		StatementStore<A, H, V, T> bot = new StatementStore<>(bottom);
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
 		for (Entry<Statement, AnalysisState<A, H, V, T>> entry : entryStates)
-			starting.put(entry.getKey(), CompoundState.of(entry.getValue(), new StatementStore<>(bottom)));
+			starting.put(entry.getKey(), CompoundState.of(entry.getValue(), bot));
 
 		Map<Statement, CompoundState<A, H, V, T>> existing = new HashMap<>();
-		StatementStore<A, H, V, T> bot = new StatementStore<>(bottom);
 		CompoundState<A, H, V, T> fallback = CompoundState.of(bottom, bot);
 		for (Entry<Statement, AnalysisState<A, H, V, T>> entry : results) {
 			Statement stmt = entry.getKey();
@@ -201,8 +201,11 @@ public class OptimizedAnalyzedCFG<
 		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = new Fixpoint<>(this, true);
 		TimerLogger.execAction(LOG, "Unwinding optimizied results of " + this, () -> {
 			try {
-				Map<Statement,
-						CompoundState<A, H, V, T>> res = fix.fixpoint(starting, FIFOWorkingSet.mk(), asc, existing);
+				Map<Statement, CompoundState<A, H, V, T>> res = fix.fixpoint(
+						starting,
+						FIFOWorkingSet.mk(),
+						asc,
+						existing);
 				expanded = new StatementStore<>(bottom);
 				for (Entry<Statement, CompoundState<A, H, V, T>> e : res.entrySet()) {
 					expanded.put(e.getKey(), e.getValue().postState);

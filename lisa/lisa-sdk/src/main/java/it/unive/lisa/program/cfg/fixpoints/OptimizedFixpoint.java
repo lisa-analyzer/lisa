@@ -18,8 +18,10 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint.FixpointImplementation;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 import java.util.function.Predicate;
 
@@ -66,17 +68,22 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public Map<Statement, CompoundState<A, H, V, T>> fixpoint(Map<Statement, CompoundState<A, H, V, T>> startingPoints,
-			WorkingSet<Statement> ws, FixpointImplementation<Statement, Edge, CompoundState<A, H, V, T>> implementation,
-			Map<Statement, CompoundState<A, H, V, T>> initialResult) throws FixpointException {
-		Map<Statement, CompoundState<A, H, V, T>> result = initialResult;
+	public Map<Statement, CompoundState<A, H, V, T>> fixpoint(
+			Map<Statement, CompoundState<A, H, V, T>> startingPoints,
+			WorkingSet<Statement> ws,
+			FixpointImplementation<Statement, Edge, CompoundState<A, H, V, T>> implementation,
+			Map<Statement, CompoundState<A, H, V, T>> initialResult)
+			throws FixpointException {
+		Map<Statement, CompoundState<A, H, V, T>> result = initialResult == null
+				? new HashMap<>(graph.getNodesCount())
+				: new HashMap<>(initialResult);
 
 		Map<Statement, Statement[]> bbs = graph.getBasicBlocks();
+		startingPoints.keySet().forEach(ws::push);
 
+		Set<Statement> toProcess = null;
 		if (forceFullEvaluation)
-			bbs.keySet().forEach(ws::push);
-		else
-			startingPoints.keySet().forEach(ws::push);
+			toProcess = new HashSet<>(bbs.keySet());
 
 		CompoundState<A, H, V, T> newApprox;
 		while (!ws.isEmpty()) {
@@ -111,7 +118,13 @@ public class OptimizedFixpoint<A extends AbstractState<A, H, V, T>,
 				}
 
 			try {
-				if (oldApprox == null || !implementation.equality(closing, newApprox, oldApprox)) {
+				// we go on if we were asked to analyze all nodes at least once
+				if ((forceFullEvaluation && toProcess.remove(current))
+						// or if this is the first time we analyze this node
+						|| oldApprox == null
+						// or if we got a result that should not be considered
+						// equal
+						|| !implementation.equality(closing, newApprox, oldApprox)) {
 					result.put(closing, newApprox);
 					for (Statement instr : graph.followersOf(closing))
 						ws.push(instr);

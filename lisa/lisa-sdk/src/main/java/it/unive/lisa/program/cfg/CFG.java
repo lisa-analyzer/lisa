@@ -371,10 +371,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 * @param singleton       an instance of the {@link AnalysisState}
 	 *                            containing the abstract state of the analysis
 	 *                            to run, used to retrieve top and bottom values
-	 * @param startingPoints  a map between {@link Statement}s that to use as a
+	 * @param startingPoints  a map between {@link Statement}s to use as a
 	 *                            starting point of the computation (that must
 	 *                            be nodes of this cfg) and the entry states to
-	 *                            apply on it
+	 *                            apply on them
 	 * @param interprocedural the callgraph that can be queried when a call
 	 *                            towards an other cfg is encountered
 	 * @param ws              the {@link WorkingSet} instance to use for this
@@ -404,23 +404,20 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					WorkingSet<Statement> ws,
 					FixpointConfiguration conf,
 					ScopeId id) throws FixpointException {
-		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = conf.optimize
-				&& conf.descendingPhaseType == DescendingPhaseType.NONE
-						? new OptimizedFixpoint<>(this, false, conf.hotspots)
-						: new Fixpoint<>(this, false);
+		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE
+				? new OptimizedFixpoint<>(this, false, conf.hotspots)
+				: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
+
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
-		startingPoints.forEach(
-				(st, state) -> starting.put(st, CompoundState.of(state, new StatementStore<>(state.bottom()))));
+		StatementStore<A, H, V, T> bot = new StatementStore<>(singleton.bottom());
+		startingPoints.forEach((st, state) -> starting.put(st, CompoundState.of(state, bot)));
 		Map<Statement, CompoundState<A, H, V, T>> ascendingResult = fix.fixpoint(starting, ws, asc);
 
 		Map<Statement, CompoundState<A, H, V, T>> fixpoint;
 
-		if (conf.descendingPhaseType != DescendingPhaseType.NONE) {
+		if (conf.descendingPhaseType != DescendingPhaseType.NONE)
 			fix = conf.optimize ? new OptimizedFixpoint<>(this, true, conf.hotspots) : new Fixpoint<>(this, true);
-			starting.clear();
-			startingPoints.forEach((st, state) -> starting.put(st, ascendingResult.get(st)));
-		}
 
 		switch (conf.descendingPhaseType) {
 		case GLB:

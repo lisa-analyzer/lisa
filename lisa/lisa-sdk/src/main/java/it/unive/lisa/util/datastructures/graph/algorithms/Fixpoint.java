@@ -2,15 +2,18 @@ package it.unive.lisa.util.datastructures.graph.algorithms;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import it.unive.lisa.util.collections.workset.WorkingSet;
 import it.unive.lisa.util.datastructures.graph.Edge;
 import it.unive.lisa.util.datastructures.graph.Graph;
 import it.unive.lisa.util.datastructures.graph.Node;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * A fixpoint algorithm for a {@link Graph}, parametric to the
@@ -181,7 +184,7 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
 			FixpointImplementation<N, E, T> implementation)
 			throws FixpointException {
-		return fixpoint(startingPoints, ws, implementation, new HashMap<>(graph.getNodesCount()));
+		return fixpoint(startingPoints, ws, implementation, null);
 	}
 
 	/**
@@ -203,15 +206,17 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 	 * @throws FixpointException if something goes wrong during the fixpoint
 	 *                               execution
 	 */
-	public Map<N, T> fixpoint(Map<N, T> startingPoints, WorkingSet<N> ws,
-			FixpointImplementation<N, E, T> implementation, Map<N, T> initialResult)
+	public Map<N, T> fixpoint(Map<N, T> startingPoints,
+			WorkingSet<N> ws,
+			FixpointImplementation<N, E, T> implementation,
+			Map<N, T> initialResult)
 			throws FixpointException {
-		Map<N, T> result = initialResult;
+		Map<N, T> result = initialResult == null ? new HashMap<>(graph.getNodesCount()) : new HashMap<>(initialResult);
+		startingPoints.keySet().forEach(ws::push);
 
+		Set<N> toProcess = null;
 		if (forceFullEvaluation)
-			graph.getNodes().forEach(ws::push);
-		else
-			startingPoints.keySet().forEach(ws::push);
+			toProcess = new HashSet<>(graph.getNodes());
 
 		T newApprox;
 		while (!ws.isEmpty()) {
@@ -240,7 +245,13 @@ public class Fixpoint<G extends Graph<G, N, E>, N extends Node<G, N, E>, E exten
 					throw new FixpointException(format(ERROR, "joining states", current, graph), e);
 				}
 			try {
-				if (oldApprox == null || !implementation.equality(current, newApprox, oldApprox)) {
+				// we go on if we were asked to analyze all nodes at least once
+				if ((forceFullEvaluation && toProcess.remove(current))
+						// or if this is the first time we analyze this node
+						|| oldApprox == null
+						// or if we got a result that should not be considered
+						// equal
+						|| !implementation.equality(current, newApprox, oldApprox)) {
 					result.put(current, newApprox);
 					for (N instr : graph.followersOf(current))
 						ws.push(instr);
