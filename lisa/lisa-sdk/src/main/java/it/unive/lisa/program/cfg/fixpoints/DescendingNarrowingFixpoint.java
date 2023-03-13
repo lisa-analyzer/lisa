@@ -8,6 +8,7 @@ import it.unive.lisa.analysis.value.ValueDomain;
 import it.unive.lisa.interprocedural.InterproceduralAnalysis;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
+import java.util.Collection;
 
 /**
  * A {@link CFGFixpoint} that traverses descending chains using narrowings.
@@ -29,6 +30,8 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 		T extends TypeDomain<T>>
 		extends CFGFixpoint<A, H, V, T> {
 
+	private final Collection<Statement> wideningPoints;
+
 	/**
 	 * Builds the fixpoint implementation.
 	 * 
@@ -39,13 +42,24 @@ public class DescendingNarrowingFixpoint<A extends AbstractState<A, H, V, T>,
 	public DescendingNarrowingFixpoint(CFG target,
 			InterproceduralAnalysis<A, H, V, T> interprocedural) {
 		super(target, interprocedural);
+		this.wideningPoints = target.getCycleEntries();
 	}
 
 	@Override
 	public CompoundState<A, H, V, T> operation(Statement node,
 			CompoundState<A, H, V, T> approx,
 			CompoundState<A, H, V, T> old) throws SemanticException {
-		return old.narrowing(approx);
+		// optimization: never apply narrowing on normal instructions,
+		// save time and precision and only apply to widening points
+		if (!wideningPoints.contains(node))
+			return old.glb(approx);
+		else
+			return CompoundState.of(
+					old.postState.narrowing(approx.postState),
+					// no need to narrow the intermediate expressions as
+					// well: we force convergence on the final post state
+					// only, to recover as much precision as possible
+					old.intermediateStates.glb(approx.intermediateStates));
 	}
 
 	@Override

@@ -1,8 +1,5 @@
 package it.unive.lisa.analysis.nonRedundantSet;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
 import it.unive.lisa.analysis.BaseLattice;
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
@@ -15,6 +12,8 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
 import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
 import it.unive.lisa.symbolic.value.operator.unary.UnaryOperator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * This abstract class generalize the concept of an abstract domain whose domain

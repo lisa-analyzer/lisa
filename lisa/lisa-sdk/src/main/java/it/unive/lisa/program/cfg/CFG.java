@@ -404,9 +404,10 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 					WorkingSet<Statement> ws,
 					FixpointConfiguration conf,
 					ScopeId id) throws FixpointException {
-		Fixpoint<CFG, Statement, Edge, CompoundState<A, H, V, T>> fix = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE
-				? new OptimizedFixpoint<>(this, false, conf.hotspots)
-				: new Fixpoint<>(this, false);
+		Fixpoint<CFG, Statement, Edge,
+				CompoundState<A, H, V, T>> fix = conf.optimize && conf.descendingPhaseType == DescendingPhaseType.NONE
+						? new OptimizedFixpoint<>(this, false, conf.hotspots)
+						: new Fixpoint<>(this, false);
 		AscendingFixpoint<A, H, V, T> asc = new AscendingFixpoint<>(this, conf.wideningThreshold, interprocedural);
 
 		Map<Statement, CompoundState<A, H, V, T>> starting = new HashMap<>();
