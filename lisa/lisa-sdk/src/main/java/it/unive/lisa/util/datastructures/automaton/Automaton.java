@@ -786,8 +786,17 @@ public abstract class Automaton<A extends Automaton<A, T>, T extends TransitionS
 		return from(newStates, newDelta).minimize();
 	}
 
-	protected State getStateFromPair(Map<State, Pair<State, State>> stateMapping, Pair<State, State> pair) {
-		for (Entry<State, Pair<State, State>> entry : stateMapping.entrySet())
+	/**
+	 * Given a pair of states, yields the state associated to the pair in the
+	 * given state mapping.
+	 * 
+	 * @param mapping the mapping
+	 * @param pair    the pair of states
+	 * 
+	 * @return the state associated to the pair in the given state mapping
+	 */
+	protected State getStateFromPair(Map<State, Pair<State, State>> mapping, Pair<State, State> pair) {
+		for (Entry<State, Pair<State, State>> entry : mapping.entrySet())
 			if (entry.getValue().getLeft().equals(pair.getLeft())
 					&& entry.getValue().getRight().equals(pair.getRight()))
 				return entry.getKey();
