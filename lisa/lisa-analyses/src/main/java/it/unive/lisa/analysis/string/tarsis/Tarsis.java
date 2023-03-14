@@ -233,17 +233,17 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 				// the empty string is always contained
 				return Satisfiability.SATISFIED;
 
-			if (other.a.hasOnlyOnePath()) {
+			if (other.a.hasOnlyOnePath() && !other.a.acceptsTopEventually()) {
+				Satisfiability allSat = Satisfiability.UNKNOWN;
 				RegexAutomaton C = other.a.extractLongestString();
 				String longest = C.getLanguage().iterator().next();
 				RegexAutomaton withNoScc = a.minimize().makeAcyclic();
-				boolean all = true;
 				SortedSet<String> lang = withNoScc.getLanguage();
 				for (String a : lang)
-					all = all && a.contains(longest);
+					allSat = allSat.glb(contains(a, longest));
 
-				if (!lang.isEmpty() && all)
-					return Satisfiability.SATISFIED;
+				if (!lang.isEmpty() && allSat == Satisfiability.SATISFIED)
+					return allSat;
 			}
 
 			RegexAutomaton transformed = a.explode().factors();
@@ -257,6 +257,20 @@ public class Tarsis implements BaseNonRelationalValueDomain<Tarsis>, ContainsCha
 			// can safely ignore
 		}
 		return Satisfiability.UNKNOWN;
+	}
+
+	private Satisfiability contains(String other, String that) {
+		if (!other.contains("Ͳ")) {
+			if (other.contains(that))
+				return Satisfiability.SATISFIED;
+			return Satisfiability.NOT_SATISFIED;
+		} else {
+			String otherWithoutTops = other.replaceAll("Ͳ", "");
+			if (otherWithoutTops.contains(that))
+				return Satisfiability.SATISFIED;
+			else
+				return Satisfiability.UNKNOWN;
+		}
 	}
 
 	/**

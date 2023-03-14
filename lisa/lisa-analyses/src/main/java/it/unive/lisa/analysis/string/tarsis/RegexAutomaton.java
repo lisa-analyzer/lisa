@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * A class that describes an generic automaton(dfa, nfa, epsilon nfa) using an
@@ -53,39 +54,6 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		result.deterministic = Optional.of(true);
 		result.minimized = Optional.of(true);
 		return result;
-	}
-
-	@Override
-	public RegexAutomaton totalize(Set<RegularExpression> sigma) {
-		SortedSet<State> newStates = new TreeSet<>(states);
-		SortedSet<Transition<RegularExpression>> newTransitions = new TreeSet<>(transitions);
-
-		int code = 1 + states.stream().map(State::getId).max(Integer::compare).orElseGet(() -> -1);
-
-		// add a new "garbage" state
-		State garbage = new State(code, false, false);
-		newStates.add(garbage);
-
-		// add additional transitions towards the garbage state
-		if (sigma.contains(TopAtom.INSTANCE)) {
-			for (State s : states)
-				if (!getReadableSymbolsFromStates(Collections.singleton(s)).contains(TopAtom.INSTANCE))
-					newTransitions.add(new Transition<>(s, garbage, TopAtom.INSTANCE));
-		} else 
-			for (State s : states)
-				for (RegularExpression c : sigma)
-					if (!getReadableSymbolsFromStates(Collections.singleton(s)).contains(c))
-						newTransitions.add(new Transition<>(s, garbage, c));
-
-		// self loops over garbage state
-		if (!sigma.contains(TopAtom.INSTANCE)) 
-			for (RegularExpression c : sigma) 
-				newTransitions.add(new Transition<>(garbage, garbage, c));
-		else
-			newTransitions.add(new Transition<>(garbage, garbage, TopAtom.INSTANCE));
-
-
-		return from(newStates, newTransitions);
 	}
 
 	/**
@@ -311,6 +279,40 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		}
 
 		return new RegexAutomaton(exStates, exTransitions).minimize();
+	}
+
+	public RegexAutomaton intersection(RegexAutomaton other) {
+		if (this == other)
+			return this;
+
+		int code = 0;
+		Map<State, Pair<State, State>> stateMapping = new HashMap<>();
+		SortedSet<State> newStates = new TreeSet<>();
+		SortedSet<Transition<RegularExpression>> newDelta = new TreeSet<Transition<RegularExpression>>();
+
+		for (State s1 : states)
+			for (State s2 : other.states) {
+				State s = new State(code++, s1.isInitial() && s2.isInitial(), s1.isFinal() && s2.isFinal());
+				stateMapping.put(s, Pair.of(s1, s2));
+				newStates.add(s);
+			}
+
+		for (Transition<RegularExpression> t1 : getTransitions()) {
+			for (Transition<RegularExpression> t2 : other.getTransitions()) {
+				State from = getStateFromPair(stateMapping, Pair.of(t1.getSource(), t2.getSource()));
+				State to = getStateFromPair(stateMapping, Pair.of(t1.getDestination(), t2.getDestination()));
+
+				if (t1.getSymbol().equals(t2.getSymbol()))
+					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
+				else if (t1.getSymbol() == TopAtom.INSTANCE && t2.getSymbol() != TopAtom.INSTANCE)
+					newDelta.add(new Transition<RegularExpression>(from, to, t2.getSymbol()));
+				else if (t1.getSymbol() != TopAtom.INSTANCE && t2.getSymbol() == TopAtom.INSTANCE)
+					newDelta.add(new Transition<RegularExpression>(from, to, t1.getSymbol()));
+			}
+		}
+
+		RegexAutomaton result = from(newStates, newDelta).minimize();
+		return result;
 	}
 
 	/**
