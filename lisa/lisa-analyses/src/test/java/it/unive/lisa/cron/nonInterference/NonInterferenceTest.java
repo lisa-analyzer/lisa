@@ -1,7 +1,12 @@
 package it.unive.lisa.cron.nonInterference;
 
+import java.util.Collection;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
 import it.unive.lisa.analysis.SemanticException;
@@ -13,7 +18,6 @@ import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.RecursionFreeToken;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -22,8 +26,6 @@ import it.unive.lisa.program.cfg.statement.Assignment;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import java.util.Collection;
-import org.junit.Test;
 
 public class NonInterferenceTest extends AnalysisTestExecutor {
 
@@ -34,28 +36,32 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 						new MonolithicHeap(),
 						new InferenceSystem<>(new NonInterference()),
 						new TypeEnvironment<>(new InferredTypes()));
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = s;
 		conf.semanticChecks.add(new NICheck());
-		perform("non-interference/confidentiality", "program.imp", conf);
+		conf.testDir = "non-interference/confidentiality";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testIntegrityNI() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
 				new InferenceSystem<>(new NonInterference()),
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.semanticChecks.add(new NICheck());
-		perform("non-interference/integrity", "program.imp", conf);
+		conf.testDir = "non-interference/integrity";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testDeclassification() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.serializeResults = true;
 		conf.abstractState = new SimpleAbstractState<>(
 				new MonolithicHeap(),
@@ -64,7 +70,9 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>(RecursionFreeToken.getSingleton());
 		conf.semanticChecks.add(new NICheck());
-		perform("non-interference/interproc", "program.imp", conf);
+		conf.testDir = "non-interference/interproc";
+		conf.programFile = "program.imp";
+		perform(conf);
 	}
 
 	private static class NICheck

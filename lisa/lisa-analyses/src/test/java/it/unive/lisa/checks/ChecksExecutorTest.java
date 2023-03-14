@@ -1,15 +1,17 @@
 package it.unive.lisa.checks;
 
+import java.io.IOException;
+
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisTestExecutor;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.checks.syntactic.CheckTool;
 import it.unive.lisa.checks.syntactic.SyntacticCheck;
-import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.imp.ParsingException;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.statement.Statement;
 import it.unive.lisa.program.cfg.statement.VariableRef;
-import java.io.IOException;
-import org.junit.Test;
 
 public class ChecksExecutorTest extends AnalysisTestExecutor {
 
@@ -25,8 +27,10 @@ public class ChecksExecutorTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testSyntacticChecks() throws IOException, ParsingException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.syntacticChecks.add(new VariableI());
-		perform("syntactic", "expressions.imp", conf);
+		conf.testDir = "syntactic";
+		conf.programFile = "expressions.imp";
+		perform(conf);
 	}
 }

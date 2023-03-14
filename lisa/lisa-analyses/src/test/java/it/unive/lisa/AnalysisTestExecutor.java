@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Objects;
 
 public abstract class AnalysisTestExecutor {
 
@@ -44,152 +45,35 @@ public abstract class AnalysisTestExecutor {
 	 * <li>The external files mentioned in the reports are different</li>
 	 * </ul>
 	 * 
-	 * @param folder        the name of the sub-folder; this is used for
-	 *                          searching expected results and as a working
-	 *                          directory for executing tests in the test
-	 *                          execution folder
-	 * @param source        the name of the imp source file to be searched in
-	 *                          the given folder
-	 * @param configuration the configuration of the analysis to run (note that
-	 *                          the workdir present into the configuration will
-	 *                          be ignored, as it will be overwritten by the
-	 *                          computed workdir)
+	 * @param conf the configuration of the test to run (note that the workdir
+	 *                 present into the configuration will be ignored, as it
+	 *                 will be overwritten by the computed workdir)
 	 */
-	protected void perform(String folder, String source, LiSAConfiguration configuration) {
+	public void perform(CronConfiguration conf) {
 		System.out.println("Testing " + getCaller());
-		performAux(folder, null, source, configuration, false);
-	}
+		Objects.requireNonNull(conf);
+		Objects.requireNonNull(conf.testDir);
+		Objects.requireNonNull(conf.programFile);
 
-	/**
-	 * Performs a test, running an analysis. The test will fail if:
-	 * <ul>
-	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
-	 * thrown)</li>
-	 * <li>The previous working directory using for the test execution cannot be
-	 * deleted</li>
-	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
-	 * <li>One of the json reports (either the one generated during the test
-	 * execution or the one used as baseline) cannot be found or cannot be
-	 * opened</li>
-	 * <li>The two json reports are different</li>
-	 * <li>The external files mentioned in the reports are different</li>
-	 * </ul>
-	 * 
-	 * @param folder        the name of the sub-folder; this is used for
-	 *                          searching expected results and as a working
-	 *                          directory for executing tests in the test
-	 *                          execution folder
-	 * @param source        the name of the imp source file to be searched in
-	 *                          {@code folder}
-	 * @param configuration the configuration of the analysis to run (note that
-	 *                          the workdir present into the configuration will
-	 *                          be ignored, as it will be overwritten by the
-	 *                          computed workdir)
-	 * @param forceUpdate   if {@code true}, baselines will be updated if the
-	 *                          test fails
-	 */
-	protected void perform(String folder, String source, LiSAConfiguration configuration, boolean forceUpdate) {
-		System.out.println("Testing " + getCaller());
-		performAux(folder, null, source, configuration, forceUpdate);
-
-	}
-
-	/**
-	 * Performs a test, running an analysis. The test will fail if:
-	 * <ul>
-	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
-	 * thrown)</li>
-	 * <li>The previous working directory using for the test execution cannot be
-	 * deleted</li>
-	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
-	 * <li>One of the json reports (either the one generated during the test
-	 * execution or the one used as baseline) cannot be found or cannot be
-	 * opened</li>
-	 * <li>The two json reports are different</li>
-	 * <li>The external files mentioned in the reports are different</li>
-	 * </ul>
-	 * 
-	 * @param folder        the name of the sub-folder; this is used for
-	 *                          searching expected results and as a working
-	 *                          directory for executing tests in the test
-	 *                          execution folder
-	 * @param source        the name of the imp source file to be searched in
-	 *                          {@code folder}
-	 * @param subfolder     an additional folder that is appended to
-	 *                          {@code folder} both when computing the working
-	 *                          directory and when searching for the expected
-	 *                          results, but <b>not</b> for searching the source
-	 *                          IMP program
-	 * @param configuration the configuration of the analysis to run (note that
-	 *                          the workdir present into the configuration will
-	 *                          be ignored, as it will be overwritten by the
-	 *                          computed workdir)
-	 */
-	protected void perform(String folder, String subfolder, String source, LiSAConfiguration configuration) {
-		System.out.println("Testing " + getCaller());
-		performAux(folder, subfolder, source, configuration, false);
-	}
-
-	/**
-	 * Performs a test, running an analysis. The test will fail if:
-	 * <ul>
-	 * <li>The imp file cannot be parsed (i.e. a {@link ParsingException} is
-	 * thrown)</li>
-	 * <li>The previous working directory using for the test execution cannot be
-	 * deleted</li>
-	 * <li>The analysis run terminates with an {@link AnalysisException}</li>
-	 * <li>One of the json reports (either the one generated during the test
-	 * execution or the one used as baseline) cannot be found or cannot be
-	 * opened</li>
-	 * <li>The two json reports are different</li>
-	 * <li>The external files mentioned in the reports are different</li>
-	 * </ul>
-	 * 
-	 * @param folder        the name of the sub-folder; this is used for
-	 *                          searching expected results and as a working
-	 *                          directory for executing tests in the test
-	 *                          execution folder
-	 * @param source        the name of the imp source file to be searched in
-	 *                          {@code folder}
-	 * @param subfolder     an additional folder that is appended to
-	 *                          {@code folder} both when computing the working
-	 *                          directory and when searching for the expected
-	 *                          results, but <b>not</b> for searching the source
-	 *                          IMP program
-	 * @param configuration the configuration of the analysis to run (note that
-	 *                          the workdir present into the configuration will
-	 *                          be ignored, as it will be overwritten by the
-	 *                          computed workdir)
-	 * @param forceUpdate   if {@code true}, baselines will be updated if the
-	 *                          test fails
-	 */
-	protected void perform(String folder, String subfolder, String source, LiSAConfiguration configuration,
-			boolean forceUpdate) {
-		System.out.println("Testing " + getCaller());
-		performAux(folder, subfolder, source, configuration, forceUpdate);
-	}
-
-	private void performAux(String folder, String subfolder, String source, LiSAConfiguration configuration,
-			boolean forceUpdate) {
-		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, folder);
-		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, folder);
-		Path target = Paths.get(expectedPath.toString(), source);
-		if (subfolder != null) {
-			expectedPath = Paths.get(expectedPath.toString(), subfolder);
-			actualPath = Paths.get(actualPath.toString(), subfolder);
+		Path expectedPath = Paths.get(EXPECTED_RESULTS_DIR, conf.testDir);
+		Path actualPath = Paths.get(ACTUAL_RESULTS_DIR, conf.testDir);
+		Path target = Paths.get(expectedPath.toString(), conf.programFile);
+		if (conf.testSubDir != null) {
+			expectedPath = Paths.get(expectedPath.toString(), conf.testSubDir);
+			actualPath = Paths.get(actualPath.toString(), conf.testSubDir);
 		}
 
 		Program program = readProgram(target);
 
-		setupWorkdir(configuration, actualPath);
+		setupWorkdir(conf, actualPath);
 
-		configuration.jsonOutput = true;
-		configuration.optimize = false;
+		conf.jsonOutput = true;
+		conf.optimize = false;
 
 		// save disk space!
 		System.clearProperty("lisa.json.indent");
 
-		run(configuration, program);
+		run(conf, program);
 
 		File expFile = Paths.get(expectedPath.toString(), "report.json").toFile();
 		File actFile = Paths.get(actualPath.toString(), "report.json").toFile();
@@ -200,7 +84,7 @@ public abstract class AnalysisTestExecutor {
 			return;
 		}
 
-		boolean update = "true".equals(System.getProperty("lisa.cron.update")) || forceUpdate;
+		boolean update = "true".equals(System.getProperty("lisa.cron.update")) || conf.forceUpdate;
 		try (FileReader l = new FileReader(expFile); FileReader r = new FileReader(actFile)) {
 			JsonReport expected = JsonReport.read(l);
 			JsonReport actual = JsonReport.read(r);

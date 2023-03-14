@@ -1,7 +1,10 @@
 package it.unive.lisa.cron.taint;
 
+import org.junit.Test;
+
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
+import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.LiSAFactory;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
@@ -19,7 +22,6 @@ import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.TypeDomain;
 import it.unive.lisa.checks.semantic.CheckToolWithAnalysisResults;
 import it.unive.lisa.checks.semantic.SemanticCheck;
-import it.unive.lisa.conf.LiSAConfiguration;
 import it.unive.lisa.interprocedural.ContextBasedAnalysis;
 import it.unive.lisa.interprocedural.ReturnTopPolicy;
 import it.unive.lisa.interprocedural.callgraph.RTACallGraph;
@@ -32,13 +34,12 @@ import it.unive.lisa.program.cfg.statement.call.Call;
 import it.unive.lisa.program.cfg.statement.call.UnresolvedCall;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.ValueExpression;
-import org.junit.Test;
 
 public class TaintAnalysesTest extends AnalysisTestExecutor {
 
 	@Test
 	public void testTaint() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = LiSAFactory.getDefaultFor(AbstractState.class,
 				LiSAFactory.getDefaultFor(HeapDomain.class),
 				new ValueEnvironment<>(new Taint()),
@@ -48,12 +49,15 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.semanticChecks.add(new TaintCheck<>());
-		perform("taint", "2val", "taint.imp", conf);
+		conf.testDir = "taint";
+		conf.testSubDir = "2val";
+		conf.programFile = "taint.imp";
+		perform(conf);
 	}
 
 	@Test
 	public void testThreeLevelsTaint() throws AnalysisSetupException {
-		LiSAConfiguration conf = new LiSAConfiguration();
+		CronConfiguration conf = new CronConfiguration();
 		conf.abstractState = LiSAFactory.getDefaultFor(AbstractState.class,
 				LiSAFactory.getDefaultFor(HeapDomain.class),
 				new ValueEnvironment<>(new ThreeLevelsTaint()),
@@ -63,7 +67,10 @@ public class TaintAnalysesTest extends AnalysisTestExecutor {
 		conf.callGraph = new RTACallGraph();
 		conf.interproceduralAnalysis = new ContextBasedAnalysis<>();
 		conf.semanticChecks.add(new TaintCheck<>());
-		perform("taint", "3val", "taint.imp", conf);
+		conf.testDir = "taint";
+		conf.testSubDir = "3val";
+		conf.programFile = "taint.imp";
+		perform(conf);
 	}
 
 	private static class TaintCheck<T extends BaseTaint<T>> implements
