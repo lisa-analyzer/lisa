@@ -281,6 +281,7 @@ public class RegexAutomaton extends Automaton<RegexAutomaton, RegularExpression>
 		return new RegexAutomaton(exStates, exTransitions).minimize();
 	}
 
+	@Override
 	public RegexAutomaton intersection(RegexAutomaton other) {
 		if (this == other)
 			return this;
