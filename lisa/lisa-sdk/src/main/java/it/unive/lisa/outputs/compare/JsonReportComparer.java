@@ -1,5 +1,6 @@
 package it.unive.lisa.outputs.compare;
 
+import it.unive.lisa.LiSA;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
 import it.unive.lisa.outputs.serializableGraph.SerializableArray;
@@ -9,6 +10,9 @@ import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
+
+import static java.lang.String.format;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,13 +37,45 @@ import org.apache.logging.log4j.util.TriConsumer;
 
 /**
  * A class providing capabilities for finding differences between two
- * {@link JsonReport}s.
+ * {@link JsonReport}s. Reports are compared by:
+ * <ol>
+ * <li>configurations ({@link JsonReport#getConfiguration()}) are compared fist,
+ * treating each field as a string</li>
+ * <li>run information ({@link JsonReport#getInfo()}) are then compared,
+ * treating each field as a string but ignoring timestamps (duration, start,
+ * end) and LiSA's version</li>
+ * <li>warnings ({@link JsonReport#getWarnings()}) are then compared, using
+ * {@link JsonWarning#compareTo(JsonWarning)} method</li>
+ * <li>the set of files produced during the analysis
+ * ({@link JsonReport#getFiles()}) is then compared, matching their paths</li>
+ * <li>finally, the contents of every file produced by both analyses are
+ * compared, excluding the report itself ({@link LiSA#REPORT_NAME}) and
+ * visualization-only files</li>
+ * </ol>
+ * Comparison can be customized providing an implementation of
+ * {@link DiffAlgorithm}.
  * 
  * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
  */
 public class JsonReportComparer {
 
 	private static final Logger LOG = LogManager.getLogger(JsonReportComparer.class);
+
+	private static final String MISSING_FILE = "'%s' declared as output in the %s report does not exist";
+
+	private static final String VIS_ONLY = "Skipping comparison of visualization-only files: '{}' and '{}'";
+
+	private static final String CANNOT_COMPARE = "Cannot compare files '%s' and '%s'";
+
+	private static final String MALFORMED_GRAPH = "Graphs are different but have same structure and descriptions";
+
+	private static final String GRAPH_DIFF = "Graphs have different structure";
+
+	private static final String NO_DESC = "%s graph does not have a desciption for node %d: %s";
+
+	private static final String DESC_DIFF = "Different desciption for node %d (%s):\n%s";
+
+	private static final String DESC_DIFF_VERBOSE = "Different desciption for node %d (%s)";
 
 	/**
 	 * An enumeration defining the different type of reports that can be issued.
@@ -105,7 +141,7 @@ public class JsonReportComparer {
 	 * 
 	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
 	 */
-	public interface DiffReporter {
+	public interface DiffAlgorithm {
 		/**
 		 * Reports a difference in one of the components of the reports.
 		 * 
@@ -149,11 +185,123 @@ public class JsonReportComparer {
 		 * @param second the value in the second report
 		 */
 		void configurationDiff(String key, String first, String second);
+
+		/**
+		 * If {@code true}, analysis configurations
+		 * ({@link JsonReport#getConfiguration()}) will be compared.
+		 * 
+		 * @return whether or not configurations should be compared
+		 */
+		default boolean shouldCompareConfigurations() {
+			return true;
+		}
+
+		/**
+		 * If {@code true}, run information ({@link JsonReport#getInfo()}) will
+		 * be compared.
+		 * 
+		 * @return whether or not run informations should be compared
+		 */
+		default boolean shouldCompareRunInfos() {
+			return true;
+		}
+
+		/**
+		 * If {@code true}, warnings ({@link JsonReport#getWarnings()}) will be
+		 * compared.
+		 * 
+		 * @return whether or not warnings should be compared
+		 */
+		default boolean shouldCompareWarnings() {
+			return true;
+		}
+
+		/**
+		 * If {@code true}, files ({@link JsonReport#getFiles()}) will be
+		 * compared.
+		 * 
+		 * @return whether or not files should be compared
+		 */
+		default boolean shouldCompareFiles() {
+			return true;
+		}
+
+		/**
+		 * If {@code true}, content of files produced by both analyses will be
+		 * compared.
+		 * 
+		 * @return whether or not file contents should be compared
+		 */
+		default boolean shouldCompareFileContents() {
+			return true;
+		}
+
+		/**
+		 * If {@code true}, comparison will halt after the first failed category
+		 * (warnings, files, ...) without reporting the full diff.
+		 * 
+		 * @return whether or not comparison should fail fast
+		 */
+		default boolean shouldFailFast() {
+			return false;
+		}
+
+		/**
+		 * Yields whether or not the file pointed by the given path should be
+		 * considered a json graph.
+		 * 
+		 * @param path the path pointing to the file
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		default boolean isJsonGraph(String path) {
+			return FilenameUtils.getExtension(path).equals("json");
+		}
+
+		/**
+		 * Yields whether or not the file pointed by the given path is for
+		 * visualizing results and can thus be skipped as its content depends
+		 * solely on other files.
+		 * 
+		 * @param path the path pointing to the file
+		 * 
+		 * @return {@code true} if that condition holds
+		 */
+		default boolean isVisualizationFile(String path) {
+			String ext = FilenameUtils.getExtension(path);
+			return ext.equals("dot")
+					|| ext.equals("graphml")
+					|| ext.equals("html")
+					|| ext.equals("js");
+		}
+
+		/**
+		 * Custom comparison method for files that are neither json graphs nor
+		 * visualization-only files.
+		 * 
+		 * @param expected the file from the expected report
+		 * @param actual   the file from the actual report
+		 * 
+		 * @return whether or not a difference was found in the files
+		 */
+		default boolean customFileCompare(File expected, File actual) {
+			throw new UnsupportedOperationException(format(CANNOT_COMPARE, expected.toString(), actual.toString()));
+		}
+
+		/**
+		 * If {@code true}, the full diff between two labels will be reported
+		 * when a difference is found. Otherwise, a simple message is reported.
+		 * 
+		 * @return whether or not label diff reporting should be verbose
+		 */
+		default boolean verboseLabelDiff() {
+			return true;
+		}
 	}
 
 	/**
-	 * Compares the two reports. The {@link DiffReporter} used during the
-	 * comparison will dump the differences to {@link System#err}.
+	 * Compares the two reports using {@link BaseDiffAlgorithm}. See this class'
+	 * documentation for information about how reports are compared.
 	 * 
 	 * @param first          the first report
 	 * @param second         the second report
@@ -171,13 +319,18 @@ public class JsonReportComparer {
 	 * @throws IOException if errors happen while opening or reading the files
 	 *                         contained in the reports
 	 */
-	public static boolean compare(JsonReport first, JsonReport second, File firstFileRoot, File secondFileRoot)
+	public static boolean compare(
+			JsonReport first,
+			JsonReport second,
+			File firstFileRoot,
+			File secondFileRoot)
 			throws IOException {
-		return compare(first, second, firstFileRoot, secondFileRoot, new BaseDiffReporter());
+		return compare(first, second, firstFileRoot, secondFileRoot, new BaseDiffAlgorithm());
 	}
 
 	/**
-	 * Compares the two reports.
+	 * Compares the two reports according to the given algorithm. See this
+	 * class' documentation for information about how reports are compared.
 	 * 
 	 * @param first          the first report
 	 * @param second         the second report
@@ -189,110 +342,160 @@ public class JsonReportComparer {
 	 *                           names in the second report (this should be
 	 *                           either the workdir of that analysis or the
 	 *                           folder where {@code second} lies)
-	 * @param reporter       the {@link DiffReporter} that will be used for
+	 * @param diff           the {@link DiffAlgorithm} that will be used for
 	 *                           dumping the differences found in the two
-	 *                           reports
+	 *                           reports and for customizing the reporting
+	 *                           process
 	 * 
 	 * @return {@code true} if and only the two reports are equal
 	 * 
 	 * @throws IOException if errors happen while opening or reading the files
 	 *                         contained in the reports
 	 */
-	public static boolean compare(JsonReport first, JsonReport second, File firstFileRoot, File secondFileRoot,
-			DiffReporter reporter) throws IOException {
-
-		boolean sameConfs = compareConfs(first, second, reporter);
-		boolean sameInfos = compareInfos(first, second, reporter);
-		boolean sameWarnings = compareWarnings(first, second, reporter);
-		CollectionsDiffBuilder<String> files = compareFiles(first, second, reporter);
-
-		if (!sameConfs || !sameInfos || !sameWarnings || !files.sameContent())
+	public static boolean compare(
+			JsonReport first,
+			JsonReport second,
+			File firstFileRoot,
+			File secondFileRoot,
+			DiffAlgorithm diff)
+			throws IOException {
+		boolean sameConfs = !diff.shouldCompareConfigurations() || compareConfs(first, second, diff);
+		if (diff.shouldFailFast() && !sameConfs)
 			return false;
 
-		boolean diffFound = compareFileContents(firstFileRoot, secondFileRoot, reporter, files);
-		return !diffFound;
+		boolean sameInfos = !diff.shouldCompareRunInfos() || compareInfos(first, second, diff);
+		if (diff.shouldFailFast() && !sameInfos)
+			return false;
+
+		boolean sameWarnings = !diff.shouldCompareWarnings() || compareWarnings(first, second, diff);
+		if (diff.shouldFailFast() && !sameWarnings)
+			return false;
+
+		boolean sameFiles = !diff.shouldCompareFiles();
+		CollectionsDiffBuilder<String> files = null;
+		if (!sameFiles) {
+			files = compareFiles(first, second, diff);
+			sameFiles = files.sameContent();
+			if (diff.shouldFailFast() && !sameFiles)
+				return false;
+		}
+
+		boolean sameFileContents = !diff.shouldCompareFileContents();
+		if (!sameFileContents) {
+			if (files == null) {
+				files = compareFiles(first, second, diff);
+				sameFiles = files.sameContent();
+			}
+
+			sameFileContents = compareFileContents(firstFileRoot, secondFileRoot, diff, files);
+			if (diff.shouldFailFast() && !(sameFileContents && sameFiles))
+				return false;
+		}
+
+		return sameConfs && sameInfos && sameWarnings && sameFiles && sameFileContents;
 	}
 
-	private static boolean compareFileContents(File firstFileRoot, File secondFileRoot, DiffReporter reporter,
-			CollectionsDiffBuilder<String> files) throws FileNotFoundException, IOException {
+	private static boolean compareFileContents(
+			File firstFileRoot,
+			File secondFileRoot,
+			DiffAlgorithm diff,
+			CollectionsDiffBuilder<String> files)
+			throws FileNotFoundException, IOException {
 		boolean diffFound = false;
 		for (Pair<String, String> pair : files.getCommons()) {
 			File left = new File(firstFileRoot, pair.getLeft());
 			if (!left.exists())
-				throw new FileNotFoundException(
-						pair.getLeft() + " declared as output in the first report does not exist");
+				throw new FileNotFoundException(format(MISSING_FILE, pair.getLeft(), "first"));
 
 			File right = new File(secondFileRoot, pair.getRight());
 			if (!right.exists())
-				throw new FileNotFoundException(
-						pair.getRight() + " declared as output in the second report does not exist");
+				throw new FileNotFoundException(format(MISSING_FILE, pair.getRight(), "second"));
 
-			if (FilenameUtils.getName(left.getName()).equals("report.json"))
+			String path = left.getName();
+			if (FilenameUtils.getName(path).equals(LiSA.REPORT_NAME))
 				continue;
 
-			String ext = FilenameUtils.getExtension(left.getName());
-			if (ext.endsWith("json"))
-				diffFound |= matchJsonGraphs(reporter, left, right);
-			else if (ext.equals("dot")
-					|| ext.equals("graphml")
-					|| ext.equals("html")
-					|| ext.equals("js"))
-				LOG.info("Skipping comparison of visualization-only files: " + left.toString() + " and "
-						+ right.toString());
+			if (diff.isJsonGraph(path))
+				diffFound |= matchJsonGraphs(diff, left, right);
+			else if (diff.isVisualizationFile(path))
+				LOG.info(VIS_ONLY, left.toString(), right.toString());
 			else
-				throw new UnsupportedOperationException("Cannot compare files with extension " + ext);
+				diffFound |= diff.customFileCompare(left, right);
 		}
-		return diffFound;
+		return !diffFound;
 	}
 
-	private static CollectionsDiffBuilder<String> compareFiles(JsonReport first, JsonReport second,
-			DiffReporter reporter) {
-		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(String.class, first.getFiles(),
+	private static CollectionsDiffBuilder<String> compareFiles(
+			JsonReport first,
+			JsonReport second,
+			DiffAlgorithm diff) {
+		CollectionsDiffBuilder<String> files = new CollectionsDiffBuilder<>(
+				String.class,
+				first.getFiles(),
 				second.getFiles());
 		files.compute(String::compareTo);
 
 		if (!files.getCommons().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.COMMON, files.getCommons());
+			diff.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.COMMON, files.getCommons());
 		if (!files.getOnlyFirst().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_FIRST, files.getOnlyFirst());
+			diff.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_FIRST, files.getOnlyFirst());
 		if (!files.getOnlySecond().isEmpty())
-			reporter.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_SECOND, files.getOnlySecond());
+			diff.report(REPORTED_COMPONENT.FILES, REPORT_TYPE.ONLY_SECOND, files.getOnlySecond());
 		return files;
 	}
 
-	private static boolean compareConfs(JsonReport first, JsonReport second,
-			DiffReporter reporter) {
-		return compareBags(REPORTED_COMPONENT.CONFIGURATION, first.getConfiguration(), second.getConfiguration(),
-				reporter, (key, fvalue, svalue) -> reporter.configurationDiff(key, fvalue, svalue), key -> false);
+	private static boolean compareConfs(
+			JsonReport first,
+			JsonReport second,
+			DiffAlgorithm diff) {
+		return compareBags(
+				REPORTED_COMPONENT.CONFIGURATION,
+				first.getConfiguration(),
+				second.getConfiguration(),
+				diff,
+				(key, fvalue, svalue) -> diff.configurationDiff(key, fvalue, svalue),
+				key -> false);
 	}
 
 	private static final Set<String> INFO_BLACKLIST = Set.of("duration", "start", "end", "version");
 
-	private static boolean compareInfos(JsonReport first, JsonReport second,
-			DiffReporter reporter) {
-		return compareBags(REPORTED_COMPONENT.INFO, first.getInfo(), second.getInfo(), reporter,
-				(key, fvalue, svalue) -> reporter.infoDiff(key, fvalue, svalue),
+	private static boolean compareInfos(
+			JsonReport first,
+			JsonReport second,
+			DiffAlgorithm diff) {
+		return compareBags(
+				REPORTED_COMPONENT.INFO,
+				first.getInfo(),
+				second.getInfo(),
+				diff,
+				(key, fvalue, svalue) -> diff.infoDiff(key, fvalue, svalue),
 				// we are really only interested in code metrics here,
-				// information like timestamps and version are not useful for
-				// the test system - we still use a blacklist approach to ensure
-				// that new fields are tested by default
+				// information like timestamps and version are not useful - we
+				// still use a blacklist approach to ensure that new fields are
+				// tested by default
 				key -> INFO_BLACKLIST.contains(key));
 	}
 
-	private static boolean compareBags(REPORTED_COMPONENT component, Map<String, String> first,
-			Map<String, String> second, DiffReporter reporter, TriConsumer<String, String, String> diffReporter,
+	private static boolean compareBags(
+			REPORTED_COMPONENT component,
+			Map<String, String> first,
+			Map<String, String> second,
+			DiffAlgorithm diff,
+			TriConsumer<String, String, String> reporter,
 			Predicate<String> ignore) {
-		CollectionsDiffBuilder<
-				String> builder = new CollectionsDiffBuilder<>(String.class, first.keySet(), second.keySet());
+		CollectionsDiffBuilder<String> builder = new CollectionsDiffBuilder<>(
+				String.class,
+				first.keySet(),
+				second.keySet());
 		builder.compute(String::compareTo);
 
 		if (!builder.getOnlyFirst().isEmpty())
-			reporter.report(component, REPORT_TYPE.ONLY_FIRST, builder.getOnlyFirst());
+			diff.report(component, REPORT_TYPE.ONLY_FIRST, builder.getOnlyFirst());
 		if (!builder.getOnlySecond().isEmpty())
-			reporter.report(component, REPORT_TYPE.ONLY_SECOND, builder.getOnlySecond());
+			diff.report(component, REPORT_TYPE.ONLY_SECOND, builder.getOnlySecond());
 
 		Collection<Pair<String, String>> same = new HashSet<>();
-		if (!builder.getCommons().isEmpty()) {
+		if (!builder.getCommons().isEmpty())
 			for (Pair<String, String> entry : builder.getCommons()) {
 				String key = entry.getKey();
 				String fvalue = first.get(key);
@@ -300,32 +503,38 @@ public class JsonReportComparer {
 				if (fvalue.equals(svalue) || ignore.test(key))
 					same.add(Pair.of(key, fvalue));
 				else
-					diffReporter.accept(key, fvalue, svalue);
+					reporter.accept(key, fvalue, svalue);
 			}
-		}
 
 		if (!same.isEmpty())
-			reporter.report(component, REPORT_TYPE.COMMON, same);
+			diff.report(component, REPORT_TYPE.COMMON, same);
 
 		return builder.sameContent() && same.size() == builder.getCommons().size();
 	}
 
-	private static boolean compareWarnings(JsonReport first, JsonReport second,
-			DiffReporter reporter) {
-		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(JsonWarning.class,
-				first.getWarnings(), second.getWarnings());
+	private static boolean compareWarnings(
+			JsonReport first,
+			JsonReport second,
+			DiffAlgorithm diff) {
+		CollectionsDiffBuilder<JsonWarning> warnings = new CollectionsDiffBuilder<>(
+				JsonWarning.class,
+				first.getWarnings(),
+				second.getWarnings());
 		warnings.compute(JsonWarning::compareTo);
 
 		if (!warnings.getCommons().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
+			diff.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.COMMON, warnings.getCommons());
 		if (!warnings.getOnlyFirst().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_FIRST, warnings.getOnlyFirst());
+			diff.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_FIRST, warnings.getOnlyFirst());
 		if (!warnings.getOnlySecond().isEmpty())
-			reporter.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
+			diff.report(REPORTED_COMPONENT.WARNINGS, REPORT_TYPE.ONLY_SECOND, warnings.getOnlySecond());
 		return warnings.sameContent();
 	}
 
-	private static boolean matchJsonGraphs(DiffReporter reporter, File left, File right)
+	private static boolean matchJsonGraphs(
+			DiffAlgorithm diff,
+			File left,
+			File right)
 			throws IOException, FileNotFoundException {
 		boolean diffFound = false;
 
@@ -339,81 +548,18 @@ public class JsonReportComparer {
 				String rightpath = right.toString();
 
 				if (!leftGraph.sameStructure(rightGraph))
-					reporter.fileDiff(leftpath, rightpath, "Graphs have different structure");
+					diff.fileDiff(leftpath, rightpath, GRAPH_DIFF);
 				else {
 					CollectionsDiffBuilder<SerializableNodeDescription> builder = new CollectionsDiffBuilder<>(
-							SerializableNodeDescription.class, leftGraph.getDescriptions(),
+							SerializableNodeDescription.class,
+							leftGraph.getDescriptions(),
 							rightGraph.getDescriptions());
 					builder.compute(SerializableNodeDescription::compareTo);
 
 					if (builder.sameContent())
-						reporter.fileDiff(leftpath, rightpath,
-								"Graphs are different but have same structure and descriptions");
-					else {
-						Map<Integer, String> llabels = new HashMap<>();
-						Map<Integer, String> rlabels = new HashMap<>();
-						leftGraph.getNodes().forEach(d -> llabels.put(d.getId(), d.getText()));
-						rightGraph.getNodes().forEach(d -> rlabels.put(d.getId(), d.getText()));
-
-						Iterator<SerializableNodeDescription> ol = builder.getOnlyFirst().iterator();
-						Iterator<SerializableNodeDescription> or = builder.getOnlySecond().iterator();
-
-						SerializableNodeDescription currentF = null;
-						SerializableNodeDescription currentS = null;
-
-						while (ol.hasNext() && or.hasNext()) {
-							if (ol.hasNext() && currentF == null)
-								currentF = ol.next();
-							if (or.hasNext() && currentS == null)
-								currentS = or.next();
-
-							if (currentF == null) {
-								if (currentS == null)
-									break;
-								else {
-									reporter.fileDiff(leftpath, rightpath,
-											"First graph does not have a desciption for node "
-													+ currentS.getNodeId() + ": "
-													+ rlabels.get(currentS.getNodeId()));
-									currentS = null;
-									continue;
-								}
-							} else {
-								if (currentS == null) {
-									reporter.fileDiff(leftpath, rightpath,
-											"Second graph does not have a desciption for node "
-													+ currentF.getNodeId() + ": "
-													+ llabels.get(currentF.getNodeId()));
-									currentF = null;
-									continue;
-								}
-							}
-
-							int fid = currentF.getNodeId();
-							int sid = currentS.getNodeId();
-							if (fid == sid) {
-								reporter.fileDiff(leftpath, rightpath,
-										"Different desciption for node "
-												+ currentF.getNodeId() + " ("
-												+ llabels.get(currentF.getNodeId()) + "):\n"
-												+ diff(currentF.getDescription(), currentS.getDescription()));
-								currentF = null;
-								currentS = null;
-							} else if (fid < sid) {
-								reporter.fileDiff(leftpath, rightpath,
-										"Second graph does not have a desciption for node "
-												+ currentF.getNodeId() + ": "
-												+ llabels.get(currentF.getNodeId()));
-								currentF = null;
-							} else {
-								reporter.fileDiff(leftpath, rightpath,
-										"First graph does not have a desciption for node "
-												+ currentS.getNodeId() + ": "
-												+ rlabels.get(currentS.getNodeId()));
-								currentS = null;
-							}
-						}
-					}
+						diff.fileDiff(leftpath, rightpath, MALFORMED_GRAPH);
+					else
+						compareLabels(diff, leftGraph, rightGraph, leftpath, rightpath, builder);
 				}
 			}
 		}
@@ -421,7 +567,104 @@ public class JsonReportComparer {
 		return diffFound;
 	}
 
-	private static class BaseDiffReporter implements DiffReporter {
+	private static void compareLabels(
+			DiffAlgorithm diff,
+			SerializableGraph leftGraph,
+			SerializableGraph rightGraph,
+			String leftpath,
+			String rightpath,
+			CollectionsDiffBuilder<SerializableNodeDescription> builder) {
+		Map<Integer, String> llabels = new HashMap<>();
+		Map<Integer, String> rlabels = new HashMap<>();
+		leftGraph.getNodes().forEach(d -> llabels.put(d.getId(), d.getText()));
+		rightGraph.getNodes().forEach(d -> rlabels.put(d.getId(), d.getText()));
+
+		Iterator<SerializableNodeDescription> ol = builder.getOnlyFirst().iterator();
+		Iterator<SerializableNodeDescription> or = builder.getOnlySecond().iterator();
+
+		SerializableNodeDescription currentF = null;
+		SerializableNodeDescription currentS = null;
+
+		while (ol.hasNext() && or.hasNext()) {
+			if (ol.hasNext() && currentF == null)
+				currentF = ol.next();
+			if (or.hasNext() && currentS == null)
+				currentS = or.next();
+
+			if (currentF == null)
+				if (currentS == null)
+					break;
+				else {
+					diff.fileDiff(leftpath, rightpath, format(
+							NO_DESC,
+							"First",
+							currentS.getNodeId(),
+							rlabels.get(currentS.getNodeId())));
+					currentS = null;
+					continue;
+				}
+			else if (currentS == null) {
+				diff.fileDiff(leftpath, rightpath, format(
+						NO_DESC,
+						"Second",
+						currentF.getNodeId(),
+						llabels.get(currentF.getNodeId())));
+				currentF = null;
+				continue;
+			}
+
+			int fid = currentF.getNodeId();
+			int sid = currentS.getNodeId();
+			if (fid == sid) {
+				if (diff.verboseLabelDiff())
+					diff.fileDiff(leftpath, rightpath, format(
+							DESC_DIFF_VERBOSE,
+							currentF.getNodeId(),
+							llabels.get(currentF.getNodeId()),
+							diff(currentF.getDescription(), currentS.getDescription())));
+				else
+					diff.fileDiff(leftpath, rightpath, format(
+							DESC_DIFF,
+							currentF.getNodeId(),
+							llabels.get(currentF.getNodeId())));
+				currentF = null;
+				currentS = null;
+			} else if (fid < sid) {
+				diff.fileDiff(leftpath, rightpath, format(
+						NO_DESC,
+						"Second",
+						currentF.getNodeId(),
+						llabels.get(currentF.getNodeId())));
+				currentF = null;
+			} else {
+				diff.fileDiff(leftpath, rightpath, format(
+						NO_DESC,
+						"First",
+						currentS.getNodeId(),
+						rlabels.get(currentS.getNodeId())));
+				currentS = null;
+			}
+		}
+	}
+
+	/**
+	 * A {@link DiffAlgorithm} that dumps the differences using this class'
+	 * logger, will compare all fields of the report, and will not fail fast.
+	 * This class provides an implementation only of non-default method from
+	 * {@link DiffAlgorithm}.
+	 * 
+	 * @author <a href="mailto:luca.negrini@unive.it">Luca Negrini</a>
+	 */
+	public static class BaseDiffAlgorithm implements DiffAlgorithm {
+
+		private static final Logger LOG = LogManager.getLogger(BaseDiffAlgorithm.class);
+
+		private static final String FILES_ONLY = "Files only in the {} report:";
+		private static final String WARNINGS_ONLY = "Warnings only in the {} report:";
+		private static final String INFOS_ONLY = "Run info keys only in the {} report:";
+		private static final String CONFS_ONLY = "Configuration keys only in the {} report:";
+		private static final String FILE_DIFF = "['{}', '{}'] {}";
+		private static final String VALUE_DIFF = "Different values for {} key '{}': '{}' and '{}'";
 
 		@Override
 		public void report(REPORTED_COMPONENT component, REPORT_TYPE type, Collection<?> reported) {
@@ -433,27 +676,27 @@ public class JsonReportComparer {
 			switch (component) {
 			case FILES:
 				if (isFirst)
-					LOG.warn("Files only in the first report:");
+					LOG.warn(FILES_ONLY, "first");
 				else
-					LOG.warn("Files only in the second report:");
+					LOG.warn(FILES_ONLY, "second");
 				break;
 			case WARNINGS:
 				if (isFirst)
-					LOG.warn("Warnings only in the first report:");
+					LOG.warn(WARNINGS_ONLY, "first");
 				else
-					LOG.warn("Warnings only in the second report:");
+					LOG.warn(WARNINGS_ONLY, "second");
 				break;
 			case INFO:
 				if (isFirst)
-					LOG.warn("Run info keys only in the first report:");
+					LOG.warn(INFOS_ONLY, "first");
 				else
-					LOG.warn("Run info keys only in the second report:");
+					LOG.warn(INFOS_ONLY, "second");
 				break;
 			case CONFIGURATION:
 				if (isFirst)
-					LOG.warn("Configuration keys only in the first report:");
+					LOG.warn(CONFS_ONLY, "first");
 				else
-					LOG.warn("Configuration keys only in the second report:");
+					LOG.warn(CONFS_ONLY, "second");
 				break;
 			default:
 				break;
@@ -465,17 +708,17 @@ public class JsonReportComparer {
 
 		@Override
 		public void fileDiff(String first, String second, String message) {
-			LOG.warn("['" + first + "', '" + second + "'] " + message);
+			LOG.warn(FILE_DIFF, first, second, message);
 		}
 
 		@Override
 		public void infoDiff(String key, String first, String second) {
-			LOG.warn("Different values for run info key '" + key + "': '" + first + "' and '" + second + "'");
+			LOG.warn(VALUE_DIFF, "run info", key, first, second);
 		}
 
 		@Override
 		public void configurationDiff(String key, String first, String second) {
-			LOG.warn("Different values for configuration key '" + key + "': '" + first + "' and '" + second + "'");
+			LOG.warn(VALUE_DIFF, "configuration", key, first, second);
 		}
 	}
 
