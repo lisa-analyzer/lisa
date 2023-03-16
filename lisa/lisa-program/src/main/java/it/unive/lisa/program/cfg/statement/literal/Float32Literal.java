@@ -3,7 +3,6 @@ package it.unive.lisa.program.cfg.statement.literal;
 import it.unive.lisa.program.cfg.CFG;
 import it.unive.lisa.program.cfg.CodeLocation;
 import it.unive.lisa.program.type.Float32Type;
-import it.unive.lisa.program.type.Int32Type;
 
 /**
  * A 32-bit signed {@link Literal} representing a constant non-integral value.
@@ -22,6 +21,6 @@ public class Float32Literal extends Literal<Float> {
 	 * @param value    the constant value represented by this literal
 	 */
 	public Float32Literal(CFG cfg, CodeLocation location, float value) {
-		super(cfg, location, value, Int32Type.INSTANCE);
+		super(cfg, location, value, Float32Type.INSTANCE);
 	}
 }
