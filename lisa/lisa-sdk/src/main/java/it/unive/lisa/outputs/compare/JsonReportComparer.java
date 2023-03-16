@@ -1,5 +1,7 @@
 package it.unive.lisa.outputs.compare;
 
+import static java.lang.String.format;
+
 import it.unive.lisa.LiSA;
 import it.unive.lisa.outputs.json.JsonReport;
 import it.unive.lisa.outputs.json.JsonReport.JsonWarning;
@@ -10,9 +12,6 @@ import it.unive.lisa.outputs.serializableGraph.SerializableObject;
 import it.unive.lisa.outputs.serializableGraph.SerializableString;
 import it.unive.lisa.outputs.serializableGraph.SerializableValue;
 import it.unive.lisa.util.collections.CollectionsDiffBuilder;
-
-import static java.lang.String.format;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

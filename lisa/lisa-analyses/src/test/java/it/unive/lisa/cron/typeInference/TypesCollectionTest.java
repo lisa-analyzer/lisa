@@ -2,8 +2,6 @@ package it.unive.lisa.cron.typeInference;
 
 import static it.unive.lisa.LiSAFactory.getDefaultFor;
 
-import org.junit.Test;
-
 import it.unive.lisa.AnalysisSetupException;
 import it.unive.lisa.AnalysisTestExecutor;
 import it.unive.lisa.CronConfiguration;
@@ -12,6 +10,7 @@ import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
 import it.unive.lisa.analysis.types.InferredTypes;
 import it.unive.lisa.analysis.value.ValueDomain;
+import org.junit.Test;
 
 public class TypesCollectionTest extends AnalysisTestExecutor {
 	@Test
