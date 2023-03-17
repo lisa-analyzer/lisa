@@ -256,10 +256,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		return BOTTOM;
 	}
 
-	// @Override
-	// public String toString() {
-	// return representation().toString();
-	// }
+	@Override
+	public String toString() {
+		return representation().toString();
+	}
 
 	@Override
 	public DomainRepresentation representation() {
@@ -268,7 +268,7 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation("{" + StringUtils.join(this.bricks, ",\n") + "}");
+		return new StringRepresentation(StringUtils.join(this.bricks, " "));
 	}
 
 	private void rule2(int first, int second) {
@@ -324,7 +324,6 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 			return;
 
 		List<Brick> thisBricks = this.bricks;
-
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
 		thisBricks.removeIf(brick -> brick.getMin().equals(MathNumber.ZERO)
@@ -503,10 +502,5 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCha
 		}
 
 		return sat;
-	}
-
-	@Override
-	public String toString() {
-		return representation().toString();
 	}
 }

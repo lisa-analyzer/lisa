@@ -27,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 public class Brick implements BaseNonRelationalValueDomain<Brick> {
 
 	private final Set<String> strings;
-	private final IntInterval brickInterval;
+	private final IntInterval interval;
 
 	private final static Brick TOP = new Brick();
 
@@ -54,7 +54,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	public Brick(int min, int max, Set<String> strings) {
 		if (min < 0 || max < 0)
 			throw new IllegalArgumentException();
-		this.brickInterval = new IntInterval(min, max);
+		this.interval = new IntInterval(min, max);
 		this.strings = strings;
 	}
 
@@ -68,7 +68,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @param strings the set of strings
 	 */
 	public Brick(MathNumber min, MathNumber max, Set<String> strings) {
-		this.brickInterval = new IntInterval(min, max);
+		this.interval = new IntInterval(min, max);
 		this.strings = strings;
 	}
 
@@ -80,7 +80,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @param strings  the set of strings
 	 */
 	public Brick(IntInterval interval, Set<String> strings) {
-		this.brickInterval = interval;
+		this.interval = interval;
 		this.strings = strings;
 	}
 
@@ -140,12 +140,12 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		Brick brick = (Brick) o;
-		return Objects.equals(strings, brick.strings) && Objects.equals(brickInterval, brick.brickInterval);
+		return Objects.equals(strings, brick.strings) && Objects.equals(interval, brick.interval);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(strings, brickInterval);
+		return Objects.hash(strings, interval);
 	}
 
 	/**
@@ -154,7 +154,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @return the min of this abstract value
 	 */
 	public MathNumber getMin() {
-		return this.brickInterval.getLow();
+		return this.interval.getLow();
 	}
 
 	/**
@@ -163,7 +163,7 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 	 * @return the max of this abstract value
 	 */
 	public MathNumber getMax() {
-		return this.brickInterval.getHigh();
+		return this.interval.getHigh();
 	}
 
 	/**
@@ -254,16 +254,6 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		return representation().toString();
 	}
 
-	private String formatRepresentation() {
-		return "[ (min: " +
-				this.brickInterval.getLow().toString() +
-				", max: " +
-				this.brickInterval.getHigh().toString() +
-				"), strings: (" +
-				(strings == null ? Lattice.TOP_STRING : StringUtils.join(this.strings, ", ")) +
-				") ]";
-	}
-
 	@Override
 	public DomainRepresentation representation() {
 		if (isBottom())
@@ -271,6 +261,12 @@ public class Brick implements BaseNonRelationalValueDomain<Brick> {
 		if (isTop())
 			return Lattice.topRepresentation();
 
-		return new StringRepresentation(formatRepresentation());
+		return new StringRepresentation("[{"
+				+ (strings == null ? Lattice.TOP_STRING : StringUtils.join(this.strings, ", "))
+				+ "}]("
+				+ interval.getLow()
+				+ ","
+				+ interval.getHigh()
+				+ ")");
 	}
 }

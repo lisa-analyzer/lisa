@@ -22,6 +22,15 @@ public class BricksAnalysisTest extends AnalysisTestExecutor {
 				new TypeEnvironment<>(new InferredTypes()));
 		conf.testDir = "bricks";
 		conf.programFile = "program.imp";
+		// we disable optimized test because of bricks normalization: without
+		// optimization, loops that get iterated more than once will have
+		// poststates of instructions within them built with at least one lub
+		// invocation between the different iterations, and that will invoke the
+		// normalization algorithm. Optimized run instead will not iterate
+		// multiple times, and poststates will be the plain ones returned by
+		// abstract transformers. Even if they are semantically equivalent,
+		// comparisons will fail nonetheless
+		conf.compareWithOptimization = false;
 		perform(conf);
 	}
 }
