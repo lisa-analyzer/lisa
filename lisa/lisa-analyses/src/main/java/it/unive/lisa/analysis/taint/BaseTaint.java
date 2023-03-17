@@ -213,8 +213,8 @@ public abstract class BaseTaint<T extends BaseTaint<T>> implements BaseNonRelati
 	}
 
 	@Override
-	public ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression, ProgramPoint pp)
-			throws SemanticException {
+	public ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression, ProgramPoint src,
+			ProgramPoint dest) throws SemanticException {
 		// quick answer: we cannot do anything
 		return environment;
 	}

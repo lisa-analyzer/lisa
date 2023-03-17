@@ -269,7 +269,7 @@ public class SemanticsSanityTest {
 
 		@Override
 		public HeapEnvironment<NRHeap> assume(HeapEnvironment<NRHeap> environment, SymbolicExpression expression,
-				ProgramPoint pp) throws SemanticException {
+				ProgramPoint src, ProgramPoint dest) throws SemanticException {
 			return environment;
 		}
 
@@ -339,23 +339,21 @@ public class SemanticsSanityTest {
 			return new ReachingDefinitions();
 		if (root == DefiniteForwardDataflowDomain.class)
 			return new AvailableExpressions();
-		if (root == AnalysisState.class)
-			if (param == AbstractState.class)
-				return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
-						new TypeEnvironment<>(new InferredTypes()));
-			else if (param == SymbolicExpression.class)
-				return new Skip(new SourceCodeLocation("unknown", 0, 0));
-			else if (param == ExpressionSet.class)
-				return new ExpressionSet<>();
-			else if (param == SymbolAliasing.class)
-				return new SymbolAliasing();
-		if (root == SimpleAbstractState.class)
-			if (param == HeapDomain.class)
-				return new MonolithicHeap();
-			else if (param == ValueDomain.class)
-				return new ValueEnvironment<>(new Sign());
-			else if (param == TypeDomain.class)
-				return new TypeEnvironment<>(new InferredTypes());
+		if (param == AbstractState.class)
+			return new SimpleAbstractState<>(new MonolithicHeap(), new ValueEnvironment<>(new Sign()),
+					new TypeEnvironment<>(new InferredTypes()));
+		if (param == SymbolicExpression.class)
+			return new Skip(new SourceCodeLocation("unknown", 0, 0));
+		if (param == ExpressionSet.class)
+			return new ExpressionSet<>();
+		if (param == SymbolAliasing.class)
+			return new SymbolAliasing();
+		if (param == HeapDomain.class)
+			return new MonolithicHeap();
+		if (param == ValueDomain.class)
+			return new ValueEnvironment<>(new Sign());
+		if (param == TypeDomain.class)
+			return new TypeEnvironment<>(new InferredTypes());
 		if (root == ValueCartesianProduct.class)
 			return new ValueEnvironment<>(new Sign());
 		if (root == ValueNonRedundantSet.class)

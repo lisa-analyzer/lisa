@@ -126,8 +126,7 @@ public class AllocationSites extends SetLattice<AllocationSites, AllocationSite>
 
 	@Override
 	public HeapEnvironment<AllocationSites> assume(HeapEnvironment<AllocationSites> environment,
-			SymbolicExpression expression,
-			ProgramPoint pp) throws SemanticException {
+			SymbolicExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		return environment;
 	}
 

@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.bricks;
 
 import static org.junit.Assert.*;
 
@@ -444,7 +444,7 @@ public class BricksTest {
 		Set<String> treeSet1 = new TreeSet<>();
 		treeSet1.add("a");
 
-		bricksList.add(new Brick(1, 13, treeSet));
+		bricksList.add(new Brick(1, 23, treeSet));
 
 		bricksList1.add(new Brick(1, 12, treeSet1));
 

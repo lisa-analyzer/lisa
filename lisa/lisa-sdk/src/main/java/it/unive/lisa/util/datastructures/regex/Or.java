@@ -136,15 +136,21 @@ public final class Or extends RegularExpression {
 		else if (second.isEpsilon() && first.isStar())
 			result = first;
 
-		// "" + ee* = e*
+		// epsilon + ee* = e*
 		else if (first.isEpsilon() && second.isComp() && second.asComp().getSecond().isStar()
 				&& second.asComp().getFirst().equals(second.asComp().getSecond().asStar().getOperand()))
 			result = second.asComp().getFirst().star();
+		else if (second.isEpsilon() && first.isComp() && first.asComp().getSecond().isStar()
+				&& first.asComp().getFirst().equals(first.asComp().getSecond().asStar().getOperand()))
+			result = first.asComp().getFirst().star();
 
-		// "" + e*e = e*
+		// epsilon + e*e = e*
 		else if (first.isEpsilon() && second.isComp() && second.asComp().getFirst().isStar()
 				&& second.asComp().getSecond().equals(second.asComp().getFirst().asStar().getOperand()))
 			result = second.asComp().getFirst().star();
+		else if (second.isEpsilon() && first.isComp() && first.asComp().getFirst().isStar()
+				&& first.asComp().getSecond().equals(first.asComp().getFirst().asStar().getOperand()))
+			result = first.asComp().getFirst().star();
 
 		// this is a common situation
 		// that yields to an ugly representation of the string
@@ -182,7 +188,7 @@ public final class Or extends RegularExpression {
 	}
 
 	@Override
-	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 		result.addAll(first.substringAux(charsToSkip, missingChars));
 		result.addAll(second.substringAux(charsToSkip, missingChars));

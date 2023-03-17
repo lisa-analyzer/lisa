@@ -34,7 +34,7 @@ public abstract class TestDomain<T extends TestDomain<T, E>, E extends SymbolicE
 	}
 
 	@Override
-	public T assume(E expression, ProgramPoint pp) throws SemanticException {
+	public T assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		return (T) this;
 	}
 

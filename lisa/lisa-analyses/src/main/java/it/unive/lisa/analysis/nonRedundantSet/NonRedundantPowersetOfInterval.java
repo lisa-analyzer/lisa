@@ -109,7 +109,7 @@ public class NonRedundantPowersetOfInterval
 	 * 
 	 * @return the middle point of the interval
 	 */
-	private MathNumber middlePoint(Interval interval) {
+	public MathNumber middlePoint(Interval interval) {
 		if (interval.interval.isFinite())
 			return interval.interval.getLow().add(interval.interval.getHigh()).divide(new MathNumber(2));
 		else if (interval.interval.getHigh().isFinite() && !interval.interval.getLow().isFinite())
@@ -134,17 +134,17 @@ public class NonRedundantPowersetOfInterval
 	@Override
 	public ValueEnvironment<NonRedundantPowersetOfInterval> assumeBinaryExpression(
 			ValueEnvironment<NonRedundantPowersetOfInterval> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint pp) throws SemanticException {
+			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 
 		Identifier id;
 		NonRedundantPowersetOfInterval eval;
 		boolean rightIsExpr;
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, pp);
+			eval = eval(right, environment, src);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, pp);
+			eval = eval(left, environment, src);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else

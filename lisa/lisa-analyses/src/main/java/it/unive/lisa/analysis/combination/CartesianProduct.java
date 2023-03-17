@@ -10,6 +10,7 @@ import it.unive.lisa.analysis.representation.ListRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collection;
 import java.util.function.Predicate;
 
 /**
@@ -149,9 +150,9 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	public C assume(E expression, ProgramPoint pp) throws SemanticException {
-		T1 newLeft = left.assume(expression, pp);
-		T2 newRight = right.assume(expression, pp);
+	public C assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		T1 newLeft = left.assume(expression, src, dest);
+		T2 newRight = right.assume(expression, src, dest);
 		return mk(newLeft, newRight);
 	}
 
@@ -225,15 +226,10 @@ public abstract class CartesianProduct<C extends CartesianProduct<C, T1, T2, E, 
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T getDomainInstance(Class<T> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (T) this;
-
-		T di = left.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		return right.getDomainInstance(domain);
+	public <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(Class<T> domain) {
+		Collection<T> result = SemanticDomain.super.getAllDomainInstances(domain);
+		result.addAll(left.getAllDomainInstances(domain));
+		result.addAll(right.getAllDomainInstances(domain));
+		return result;
 	}
 }

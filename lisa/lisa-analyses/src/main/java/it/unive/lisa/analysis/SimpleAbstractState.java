@@ -18,6 +18,7 @@ import it.unive.lisa.symbolic.heap.MemoryAllocation;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
 import it.unive.lisa.type.Type;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -179,24 +180,24 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint pp)
+	public SimpleAbstractState<H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
 			throws SemanticException {
-		H heap = heapState.assume(expression, pp);
-		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, pp);
+		H heap = heapState.assume(expression, src, dest);
+		ExpressionSet<ValueExpression> exprs = heap.rewrite(expression, src);
 
-		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, pp);
+		SimpleAbstractState<H, V, T> as = applySubstitiontion(heap, valueState, typeState, src);
 		T type = as.getTypeState();
 		V value = as.getValueState();
 
 		T typeRes = type.bottom();
 		V valueRes = value.bottom();
 		for (ValueExpression expr : exprs) {
-			T tmp = type.smallStepSemantics(expr, pp);
+			T tmp = type.smallStepSemantics(expr, src);
 			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			typeRes = typeRes.lub(type.assume(expr, pp));
-			valueRes = valueRes.lub(value.assume(expr, pp));
+			typeRes = typeRes.lub(type.assume(expr, src, dest));
+			valueRes = valueRes.lub(value.assume(expr, src, dest));
 		}
 
 		return new SimpleAbstractState<>(heap, valueRes, typeRes);
@@ -204,18 +205,29 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 
 	@Override
 	public Satisfiability satisfies(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+		Satisfiability heapsat = heapState.satisfies(expression, pp);
+		if (heapsat == Satisfiability.BOTTOM)
+			return Satisfiability.BOTTOM;
+
 		ExpressionSet<ValueExpression> rewritten = heapState.rewrite(expression, pp);
-		Satisfiability typeResult = Satisfiability.BOTTOM;
-		Satisfiability valueResult = Satisfiability.BOTTOM;
+		Satisfiability typesat = Satisfiability.BOTTOM;
+		Satisfiability valuesat = Satisfiability.BOTTOM;
 		for (ValueExpression expr : rewritten) {
 			T tmp = typeState.smallStepSemantics(expr, pp);
 			Set<Type> rt = tmp.getInferredRuntimeTypes();
 			expr.setRuntimeTypes(rt);
 
-			typeResult = typeResult.lub(typeState.satisfies(expr, pp));
-			valueResult = valueResult.lub(valueState.satisfies(expr, pp));
+			Satisfiability sat = typeState.satisfies(expr, pp);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			typesat = typesat.lub(sat);
+
+			sat = valueState.satisfies(expr, pp);
+			if (sat == Satisfiability.BOTTOM)
+				return sat;
+			valuesat = valuesat.lub(sat);
 		}
-		return heapState.satisfies(expression, pp).glb(typeResult).glb(valueResult);
+		return heapsat.glb(typesat).glb(valuesat);
 	}
 
 	@Override
@@ -363,20 +375,12 @@ public class SimpleAbstractState<H extends HeapDomain<H>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <D> D getDomainInstance(Class<D> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (D) this;
-
-		D di = heapState.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		di = typeState.getDomainInstance(domain);
-		if (di != null)
-			return di;
-
-		return valueState.getDomainInstance(domain);
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+		Collection<D> result = AbstractState.super.getAllDomainInstances(domain);
+		result.addAll(heapState.getAllDomainInstances(domain));
+		result.addAll(typeState.getAllDomainInstances(domain));
+		result.addAll(valueState.getAllDomainInstances(domain));
+		return result;
 	}
 
 	@Override

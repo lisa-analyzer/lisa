@@ -4,6 +4,8 @@ import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.function.Predicate;
 
 /**
@@ -57,14 +59,17 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	 * always return {@code this}.
 	 * 
 	 * @param expression the expression to assume to hold.
-	 * @param pp         the program point that where this operation is being
-	 *                       evaluated
+	 * @param src        the program point that where this operation is being
+	 *                       evaluated, corresponding to the one that generated
+	 *                       the given expression
+	 * @param dest       the program point where the execution will move after
+	 *                       the expression has been assumed
 	 * 
 	 * @return the (optionally) modified copy of this domain
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	D assume(E expression, ProgramPoint pp) throws SemanticException;
+	D assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
 
 	/**
 	 * Forgets an {@link Identifier}. This means that all information regarding
@@ -410,27 +415,58 @@ public interface SemanticDomain<D extends SemanticDomain<D, E, I>, E extends Sym
 	DomainRepresentation representation();
 
 	/**
-	 * Yields the instance of a specific domain, of class {@code domain},
-	 * contained inside the domain. If this domain is an instance of the
-	 * specified class, then {@code this} is returned. Otherwise, inner domains
-	 * are recursively checked (enabling retrieval of semantic domains through
-	 * Cartesian products or other types of combinations), returning the first
-	 * that is instance of {@code domain}.<br>
+	 * Yields a unique instance of the specific domain, of class {@code domain},
+	 * contained inside the domain, also recursively querying inner domains
+	 * (enabling retrieval of semantic domains through Cartesian products or
+	 * other types of combinations).<br>
 	 * <br>
-	 * The default implementation of this method returns {@code this} if
-	 * {@code domain.isAssignableFrom(getClass()) == true}, otherwise it returns
-	 * {@code null}.
+	 * The default implementation of this method lubs together (using
+	 * {@link Lattice#lub(Lattice)}) all instances returned by
+	 * {@link #getAllDomainInstances(Class)}, defaulting to {@code null} if no
+	 * instance is returned.
 	 * 
 	 * @param <T>    the type of domain to retrieve
 	 * @param domain the class of the domain instance to retrieve
 	 * 
 	 * @return the instance of that domain, or {@code null}
+	 * 
+	 * @throws SemanticException if an exception happens while lubbing the
+	 *                               results
+	 */
+	default <T extends SemanticDomain<T, ?, ?> & Lattice<T>> T getDomainInstance(Class<T> domain)
+			throws SemanticException {
+		Collection<T> all = getAllDomainInstances(domain);
+		T result = null;
+		for (T instance : all)
+			if (result == null)
+				result = instance;
+			else
+				result = result.lub(instance);
+
+		return result;
+	}
+
+	/**
+	 * Yields all of the instances of a specific domain, of class
+	 * {@code domain}, contained inside this domain, also recursively querying
+	 * inner domains (enabling retrieval of semantic domains through Cartesian
+	 * products or other types of combinations).<br>
+	 * <br>
+	 * The default implementation of this method returns a singleton collection
+	 * containing {@code this} if {@code domain.isAssignableFrom(getClass())}
+	 * holds, otherwise it returns an empty collection.
+	 * 
+	 * @param <T>    the type of domain to retrieve
+	 * @param domain the class of the domain instance to retrieve
+	 * 
+	 * @return the instances of that domain
 	 */
 	@SuppressWarnings("unchecked")
-	default <T> T getDomainInstance(Class<T> domain) {
+	default <T extends SemanticDomain<?, ?, ?>> Collection<T> getAllDomainInstances(Class<T> domain) {
+		Collection<T> result = new HashSet<>();
 		if (domain.isAssignableFrom(getClass()))
-			return (T) this;
+			result.add((T) this);
 
-		return null;
+		return result;
 	}
 }

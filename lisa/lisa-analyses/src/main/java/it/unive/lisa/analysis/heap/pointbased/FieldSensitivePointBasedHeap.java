@@ -1,5 +1,6 @@
 package it.unive.lisa.analysis.heap.pointbased;
 
+import it.unive.lisa.analysis.ScopeToken;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.lattices.ExpressionSet;
 import it.unive.lisa.analysis.nonrelational.heap.HeapEnvironment;
@@ -89,10 +90,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 	}
 
 	@Override
-	protected FieldSensitivePointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap,
-			PointBasedHeap sss,
+	protected FieldSensitivePointBasedHeap buildHeapAfterAssignment(PointBasedHeap sss,
 			List<HeapReplacement> replacements) {
-		return new FieldSensitivePointBasedHeap(heap, replacements,
+		return new FieldSensitivePointBasedHeap(sss.heapEnv, replacements,
 				((FieldSensitivePointBasedHeap) sss).fields);
 	}
 
@@ -106,6 +106,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		StackAllocationSite clone = new StackAllocationSite(site.getStaticType(),
 				id.getCodeLocation().toString(), site.isWeak(), id.getCodeLocation());
 		HeapEnvironment<AllocationSites> heap = pb.heapEnv.assign(id, clone, pp);
+
+		Map<AllocationSite,
+				Set<SymbolicExpression>> newFields = new HashMap<>(((FieldSensitivePointBasedHeap) pb).fields);
 
 		// all the allocation sites fields of star_y
 		if (((FieldSensitivePointBasedHeap) pb).fields.containsKey(site)) {
@@ -121,6 +124,9 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 				replacement.addTarget(cloneWithField);
 				replacement.addTarget(star_yWithField);
 
+				// need to update also the fields of the clone
+				addField(clone, field, newFields);
+
 				replacements.add(replacement);
 			}
 		}
@@ -133,12 +139,12 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		replacement.addTarget(site);
 		replacements.add(replacement);
 
-		return new FieldSensitivePointBasedHeap(heap, ((FieldSensitivePointBasedHeap) pb).fields);
+		return new FieldSensitivePointBasedHeap(heap, newFields);
 	}
 
 	@Override
 	public FieldSensitivePointBasedHeap from(PointBasedHeap original) {
-		return new FieldSensitivePointBasedHeap(original.heapEnv);
+		return new FieldSensitivePointBasedHeap(original.heapEnv, fields);
 	}
 
 	@Override
@@ -290,5 +296,15 @@ public class FieldSensitivePointBasedHeap extends PointBasedHeap {
 		if (!mapping.containsKey(site))
 			mapping.put(site, new HashSet<>());
 		mapping.get(site).add(field);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap popScope(ScopeToken scope) throws SemanticException {
+		return new FieldSensitivePointBasedHeap(heapEnv.popScope(scope), fields);
+	}
+
+	@Override
+	public FieldSensitivePointBasedHeap pushScope(ScopeToken scope) throws SemanticException {
+		return new FieldSensitivePointBasedHeap(heapEnv.pushScope(scope), fields);
 	}
 }

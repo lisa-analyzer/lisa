@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.bricks;
 
 import static org.junit.Assert.*;
 

@@ -128,7 +128,7 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 			} else
 				result = result.lub(sss);
 
-		return buildHeapAfterAssignment(result.heapEnv, sss, replacements);
+		return buildHeapAfterAssignment(result, replacements);
 	}
 
 	/**
@@ -150,25 +150,23 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	}
 
 	/**
-	 * Builds an instance of the heap domain after an assignment, from the
-	 * resulting heap environment, the heap instance obtained from the small
-	 * step semantics of the right-hand side of the assignment, and the
-	 * replacements.
+	 * Builds an instance of the heap domain after an assignment, from the heap
+	 * instance obtained from the small step semantics of the right-hand side of
+	 * the assignment and the replacements.
 	 * 
-	 * @param heap         the resulting heap environment
-	 * @param sss          the heap instance obtained from the small step
-	 *                         semantics of the right-hand side of the
+	 * @param sss          the point-based heap instance obtained from the small
+	 *                         step semantics of the right-hand side of the
 	 *                         assignment
 	 * @param replacements the list of replacements to be updated
 	 * 
-	 * @return an instance of the heap domain after an assignment, from the
-	 *             resulting heap domain, the heap instance obtained from the
-	 *             small step semantics of the right-hand side of the
+	 * @return an instance of the point-based heap domain after an assignment,
+	 *             from the resulting heap domain, the heap instance obtained
+	 *             from the small step semantics of the right-hand side of the
 	 *             assignment, and the replacements
 	 */
-	protected PointBasedHeap buildHeapAfterAssignment(HeapEnvironment<AllocationSites> heap, PointBasedHeap sss,
+	protected PointBasedHeap buildHeapAfterAssignment(PointBasedHeap sss,
 			List<HeapReplacement> replacements) {
-		return from(new PointBasedHeap(heap, replacements));
+		return from(new PointBasedHeap(sss.heapEnv, replacements));
 	}
 
 	/**
@@ -210,9 +208,10 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 	}
 
 	@Override
-	public PointBasedHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public PointBasedHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		// we just rewrite the expression if needed
-		return smallStepSemantics(expression, pp);
+		return smallStepSemantics(expression, src);
 	}
 
 	@Override
@@ -343,7 +342,6 @@ public class PointBasedHeap implements BaseHeapDomain<PointBasedHeap> {
 		public ExpressionSet<ValueExpression> visit(AccessChild expression, ExpressionSet<ValueExpression> receiver,
 				ExpressionSet<ValueExpression> child, Object... params) throws SemanticException {
 			Set<ValueExpression> result = new HashSet<>();
-
 			for (ValueExpression rec : receiver)
 				if (rec instanceof MemoryPointer) {
 					MemoryPointer pid = (MemoryPointer) rec;

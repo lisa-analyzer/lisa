@@ -1,13 +1,24 @@
 package it.unive.lisa.analysis.string;
 
 import it.unive.lisa.analysis.Lattice;
+import it.unive.lisa.analysis.SemanticDomain.Satisfiability;
 import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.*;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
+import it.unive.lisa.symbolic.value.operator.ternary.StringReplace;
+import it.unive.lisa.symbolic.value.operator.ternary.TernaryOperator;
+import it.unive.lisa.util.numeric.IntInterval;
+import it.unive.lisa.util.numeric.MathNumber;
 import java.util.Objects;
 
 /**
@@ -21,7 +32,7 @@ import java.util.Objects;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
+public class Suffix implements BaseNonRelationalValueDomain<Suffix>, ContainsCharProvider {
 
 	private final static Suffix TOP = new Suffix();
 	private final static Suffix BOTTOM = new Suffix(null);
@@ -136,6 +147,24 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 		return TOP;
 	}
 
+	@Override
+	public Suffix evalTernaryExpression(TernaryOperator operator, Suffix left, Suffix middle, Suffix right,
+			ProgramPoint pp) throws SemanticException {
+
+		if (operator == StringReplace.INSTANCE) {
+			String replace = right.getSuffix();
+			String string = middle.getSuffix();
+			String target = left.getSuffix();
+
+			if (!target.contains(replace))
+				return this;
+
+			return new Suffix(target.replace(replace, string));
+		}
+
+		return TOP;
+	}
+
 	/**
 	 * Yields the suffix of this abstract value.
 	 *
@@ -143,5 +172,50 @@ public class Suffix implements BaseNonRelationalValueDomain<Suffix> {
 	 */
 	public String getSuffix() {
 		return this.suffix;
+	}
+
+	/**
+	 * Yields the suffix corresponding to the substring of this suffix between
+	 * two indexes.
+	 * 
+	 * @param begin where the substring starts
+	 * @param end   where the substring ends
+	 * 
+	 * @return the suffix corresponding to the substring of this suffix between
+	 *             two indexes
+	 */
+	public Suffix substring(long begin, long end) {
+		return new Suffix("");
+	}
+
+	/**
+	 * Yields the {@link IntInterval} containing the minimum and maximum length
+	 * of this abstract value.
+	 * 
+	 * @return the minimum and maximum length of this abstract value
+	 */
+	public IntInterval length() {
+		return new IntInterval(new MathNumber(suffix.length()), MathNumber.PLUS_INFINITY);
+	}
+
+	/**
+	 * Yields the {@link IntInterval} containing the minimum and maximum index
+	 * of {@code s} in {@code this}.
+	 *
+	 * @param s the string to be searched
+	 * 
+	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 */
+	public IntInterval indexOf(Suffix s) {
+		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
+	}
+
+	@Override
+	public Satisfiability containsChar(char c) {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+		return this.suffix.contains(String.valueOf(c)) ? Satisfiability.SATISFIED : Satisfiability.UNKNOWN;
 	}
 }

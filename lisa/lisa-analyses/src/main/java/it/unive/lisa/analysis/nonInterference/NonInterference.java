@@ -312,11 +312,11 @@ public class NonInterference implements BaseInferredValue<NonInterference> {
 
 	@Override
 	public InferenceSystem<NonInterference> assume(InferenceSystem<NonInterference> environment,
-			ValueExpression expression, ProgramPoint pp) throws SemanticException {
-		InferredPair<NonInterference> eval = eval(expression, environment, pp);
+			ValueExpression expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		InferredPair<NonInterference> eval = eval(expression, environment, src);
 		NonInterference inf = eval.getInferred();
 		eval.getState().guards.forEach(inf.guards::put);
-		inf.guards.put(pp, inf);
+		inf.guards.put(src, inf);
 		return new InferenceSystem<>(environment, inf);
 	}
 }

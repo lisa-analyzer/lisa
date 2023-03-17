@@ -142,18 +142,18 @@ public abstract class Environment<M extends Environment<M, E, T, V>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+	public M assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		if (isBottom())
 			return (M) this;
 
-		Satisfiability sat = lattice.satisfies(expression, (M) this, pp);
+		Satisfiability sat = lattice.satisfies(expression, (M) this, src);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
 		if (sat == Satisfiability.SATISFIED)
-			return assumeSatisfied(eval(expression, pp).getRight());
+			return assumeSatisfied(eval(expression, src).getRight());
 
-		return lattice.assume((M) this, expression, pp);
+		return lattice.assume((M) this, expression, src, dest);
 	}
 
 	/**
