@@ -71,7 +71,8 @@ public class MonolithicHeap implements BaseHeapDomain<MonolithicHeap> {
 	}
 
 	@Override
-	public MonolithicHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public MonolithicHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		return this;
 	}
 

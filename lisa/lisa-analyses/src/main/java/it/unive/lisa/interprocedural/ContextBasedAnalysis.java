@@ -133,7 +133,7 @@ public class ContextBasedAnalysis<A extends AbstractState<A, H, V, T>,
 						CFGResults<A, H, V, T> value = new CFGResults<>(graph);
 						this.results = new FixpointResults<>(value.top());
 					}
-					
+
 					AnalysisState<A, H, V, T> entryStateCFG = prepareEntryStateOfEntryPoint(entryState, cfg);
 					results.putResult(cfg, empty,
 							cfg.fixpoint(entryStateCFG, this, WorkingSet.of(fixpointWorkingSet), conf, empty));

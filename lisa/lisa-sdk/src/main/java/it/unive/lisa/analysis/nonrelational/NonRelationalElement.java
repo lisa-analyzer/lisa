@@ -60,14 +60,18 @@ public interface NonRelationalElement<T extends NonRelationalElement<T, E, F>,
 	 * 
 	 * @param environment the environment
 	 * @param expression  the expression to be assumed
-	 * @param pp          the program point where {@code expression} occurs.
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
 	 * 
 	 * @return the environment {@code environment} where {@code expression} is
 	 *             assumed to hold
 	 * 
 	 * @throws SemanticException if an error occurs during the computation
 	 */
-	F assume(F environment, E expression, ProgramPoint pp) throws SemanticException;
+	F assume(F environment, E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException;
 
 	/**
 	 * Yields a fixed abstraction of the given variable. The abstraction does

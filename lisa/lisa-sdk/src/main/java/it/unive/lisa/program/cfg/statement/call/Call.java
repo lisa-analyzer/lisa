@@ -248,7 +248,7 @@ public abstract class Call extends NaryExpression {
 	 * 
 	 * @return the array of parameter types
 	 * 
-	 * @throws SemanticException if something goes wrong while computing the
+	 * @throws SemanticException if an exception happens while retrieving the
 	 *                               types
 	 */
 	@SuppressWarnings("unchecked")

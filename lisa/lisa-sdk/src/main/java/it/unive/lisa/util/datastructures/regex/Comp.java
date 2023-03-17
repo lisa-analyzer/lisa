@@ -102,14 +102,9 @@ public final class Comp extends RegularExpression {
 		if (first.isEmptySet() || second.isEmptySet())
 			result = EmptySet.INSTANCE;
 
-		// x.(a + b) = x.a + x.b
-		else if (second.isOr())
-			result = first.comp(second.asOr().getFirst()).or(first.comp(second.asOr().getSecond()));
-
 		// a.(b + c) = a.b + a.c
 		else if (first.isAtom() && second.isOr() && second.asOr().isAtomic())
-			result = new Atom(first.asAtom().getString() + second.asOr().getFirst().asAtom().getString())
-					.or(new Atom(first.asAtom().getString() + second.asOr().getSecond().asAtom().getString()));
+			result = first.comp(second.asOr().getFirst()).or(first.comp(second.asOr().getSecond()));
 
 		// a.epsilon = a
 		else if (second.isEpsilon())
@@ -127,9 +122,9 @@ public final class Comp extends RegularExpression {
 		// a.((b.a)*.b) = (a.b)*
 		else if (first.isAtom() && second.isComp() && second.asComp().first.isStar()
 				&& second.asComp().second.isAtom()
-				&& new Atom(second.asComp().second.asAtom().getString() + first.asAtom().getString())
+				&& second.asComp().second.asAtom().comp(first.asAtom())
 						.equals(second.asComp().first.asStar().getOperand()))
-			result = new Atom(first.asAtom().getString() + second.asComp().second.asAtom().getString()).star();
+			result = first.asAtom().comp(second.asComp().second.asAtom()).star();
 
 		// a*.(a*.b) = a*b
 		else if (first.isStar() && second.isComp() && second.asComp().first.isStar()
@@ -151,7 +146,7 @@ public final class Comp extends RegularExpression {
 	}
 
 	@Override
-	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
 		Set<PartialSubstring> firstSS = first.substringAux(charsToSkip, missingChars);
@@ -159,8 +154,7 @@ public final class Comp extends RegularExpression {
 			if (s.getMissingChars() == 0)
 				result.add(s);
 			else {
-				Set<PartialSubstring> secondSS = second.substringAux(s.getCharsToStart(),
-						s.getCharsToStart() + s.getMissingChars());
+				Set<PartialSubstring> secondSS = second.substringAux(s.getCharsToStart(), s.getMissingChars());
 				for (PartialSubstring ss : secondSS)
 					result.add(s.concat(ss));
 			}

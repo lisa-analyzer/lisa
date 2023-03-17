@@ -102,9 +102,9 @@ public abstract class Environment<M extends Environment<M, E, T>,
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public M assume(E expression, ProgramPoint pp) throws SemanticException {
+	public M assume(E expression, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		if (isBottom())
 			return (M) this;
-		return lattice.assume((M) this, expression, pp);
+		return lattice.assume((M) this, expression, src, dest);
 	}
 }

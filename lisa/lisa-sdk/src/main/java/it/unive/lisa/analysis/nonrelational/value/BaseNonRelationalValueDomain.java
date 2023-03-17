@@ -556,8 +556,8 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 
 	@Override
 	default ValueEnvironment<T> assume(ValueEnvironment<T> environment, ValueExpression expression,
-			ProgramPoint pp) throws SemanticException {
-		Satisfiability sat = satisfies(expression, environment, pp);
+			ProgramPoint src, ProgramPoint dest) throws SemanticException {
+		Satisfiability sat = satisfies(expression, environment, src);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return environment.bottom();
 		if (sat == Satisfiability.SATISFIED)
@@ -571,31 +571,32 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 				// It is possible that the expression cannot be rewritten (e.g.,
 				// !true) hence we recursively call assume iff something changed
 				if (rewritten != unary)
-					return assume(environment, rewritten, pp);
+					return assume(environment, rewritten, src, dest);
 			}
 
-			return assumeUnaryExpression(environment, unary.getOperator(), (ValueExpression) unary.getExpression(), pp);
+			return assumeUnaryExpression(environment, unary.getOperator(), (ValueExpression) unary.getExpression(), src,
+					dest);
 		}
 
 		if (expression instanceof BinaryExpression) {
 			BinaryExpression binary = (BinaryExpression) expression;
 
 			if (binary.getOperator() == LogicalAnd.INSTANCE)
-				return assume(environment, (ValueExpression) binary.getLeft(), pp)
-						.glb(assume(environment, (ValueExpression) binary.getRight(), pp));
+				return assume(environment, (ValueExpression) binary.getLeft(), src, dest)
+						.glb(assume(environment, (ValueExpression) binary.getRight(), src, dest));
 			else if (binary.getOperator() == LogicalOr.INSTANCE)
-				return assume(environment, (ValueExpression) binary.getLeft(), pp)
-						.lub(assume(environment, (ValueExpression) binary.getRight(), pp));
+				return assume(environment, (ValueExpression) binary.getLeft(), src, dest)
+						.lub(assume(environment, (ValueExpression) binary.getRight(), src, dest));
 			else
 				return assumeBinaryExpression(environment, binary.getOperator(), (ValueExpression) binary.getLeft(),
-						(ValueExpression) binary.getRight(), pp);
+						(ValueExpression) binary.getRight(), src, dest);
 		}
 
 		if (expression instanceof TernaryExpression) {
 			TernaryExpression ternary = (TernaryExpression) expression;
 
 			return assumeTernaryExpression(environment, ternary.getOperator(), (ValueExpression) ternary.getLeft(),
-					(ValueExpression) ternary.getMiddle(), (ValueExpression) ternary.getRight(), pp);
+					(ValueExpression) ternary.getMiddle(), (ValueExpression) ternary.getRight(), src, dest);
 		}
 
 		return environment;
@@ -613,7 +614,11 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param middle      the middle-hand side argument of the ternary
 	 *                        expression
 	 * @param right       the right-hand side argument of the ternary expression
-	 * @param pp          the program point where the ternary expression occurs
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
 	 * 
 	 * @return the environment {@code environment} assuming that a ternary
 	 *             expression with operator {@code operator}, left argument
@@ -624,7 +629,7 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 */
 	default ValueEnvironment<T> assumeTernaryExpression(ValueEnvironment<T> environment,
 			TernaryOperator operator, ValueExpression left, ValueExpression middle, ValueExpression right,
-			ProgramPoint pp) throws SemanticException {
+			ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		return environment;
 	}
 
@@ -640,7 +645,11 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @param operator    the operator of the binary expression
 	 * @param left        the left-hand side argument of the binary expression
 	 * @param right       the right-hand side argument of the binary expression
-	 * @param pp          the program point where the binary expression occurs
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
 	 * 
 	 * @return the environment {@code environment} assuming that a binary
 	 *             expression with operator {@code operator}, left argument
@@ -649,8 +658,8 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
 	default ValueEnvironment<T> assumeBinaryExpression(ValueEnvironment<T> environment,
-			BinaryOperator operator, ValueExpression left, ValueExpression right, ProgramPoint pp)
-			throws SemanticException {
+			BinaryOperator operator, ValueExpression left, ValueExpression right, ProgramPoint src,
+			ProgramPoint dest) throws SemanticException {
 		return environment;
 	}
 
@@ -663,7 +672,11 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 *                        assumed
 	 * @param operator    the operator of the unary expression
 	 * @param expression  the argument of the unary expression
-	 * @param pp          the program point where the unary expression occurs
+	 * @param src         the program point that where this operation is being
+	 *                        evaluated, corresponding to the one that generated
+	 *                        the given expression
+	 * @param dest        the program point where the execution will move after
+	 *                        the expression has been assumed
 	 * 
 	 * @return the environment {@code environment} assuming that an unary
 	 *             expression with operator {@code operator} and argument
@@ -672,7 +685,8 @@ public interface BaseNonRelationalValueDomain<T extends BaseNonRelationalValueDo
 	 * @throws SemanticException if something goes wrong during the assumption
 	 */
 	default ValueEnvironment<T> assumeUnaryExpression(ValueEnvironment<T> environment,
-			UnaryOperator operator, ValueExpression expression, ProgramPoint pp) throws SemanticException {
+			UnaryOperator operator, ValueExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		return environment;
 	}
 }

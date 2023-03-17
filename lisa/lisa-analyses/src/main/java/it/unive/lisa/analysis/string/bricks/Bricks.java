@@ -1,4 +1,4 @@
-package it.unive.lisa.analysis.string;
+package it.unive.lisa.analysis.string.bricks;
 
 import it.unive.lisa.analysis.Lattice;
 import it.unive.lisa.analysis.SemanticDomain;
@@ -7,12 +7,23 @@ import it.unive.lisa.analysis.SemanticException;
 import it.unive.lisa.analysis.nonrelational.value.BaseNonRelationalValueDomain;
 import it.unive.lisa.analysis.representation.DomainRepresentation;
 import it.unive.lisa.analysis.representation.StringRepresentation;
+import it.unive.lisa.analysis.string.ContainsCharProvider;
 import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.value.Constant;
-import it.unive.lisa.symbolic.value.operator.binary.*;
+import it.unive.lisa.symbolic.value.operator.binary.BinaryOperator;
+import it.unive.lisa.symbolic.value.operator.binary.StringConcat;
+import it.unive.lisa.symbolic.value.operator.binary.StringContains;
+import it.unive.lisa.symbolic.value.operator.binary.StringEndsWith;
+import it.unive.lisa.symbolic.value.operator.binary.StringEquals;
+import it.unive.lisa.symbolic.value.operator.binary.StringIndexOf;
+import it.unive.lisa.symbolic.value.operator.binary.StringStartsWith;
 import it.unive.lisa.util.numeric.IntInterval;
 import it.unive.lisa.util.numeric.MathNumber;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -26,7 +37,7 @@ import org.apache.commons.lang3.StringUtils;
  *          "https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34">
  *          https://link.springer.com/chapter/10.1007/978-3-642-24559-6_34</a>
  */
-public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
+public class Bricks implements BaseNonRelationalValueDomain<Bricks>, ContainsCharProvider {
 
 	private final List<Brick> bricks;
 
@@ -36,21 +47,21 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	/**
 	 * The length of the bricks list used in the widening.
 	 */
-	public static int kL = 10;
+	public static int kL = 20;
 	/**
 	 * The indices range of a brick used in the widening.
 	 */
-	public static int kI = 10;
+	public static int kI = 20;
 	/**
 	 * The number of strings in the set of a brick used in the widening.
 	 */
-	public static int kS = 20;
+	public static int kS = 50;
 
 	/**
 	 * Builds the top brick abstract element.
 	 */
 	public Bricks() {
-		this.bricks = new ArrayList<>();
+		this.bricks = new ArrayList<>(1);
 		bricks.add(new Brick());
 	}
 
@@ -70,19 +81,16 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		if (this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
-
 		else if (other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
 
-		List<Brick> resultBricks = new ArrayList<>();
+		List<Brick> resultBricks = new ArrayList<>(thisPaddedList.size());
 
 		for (int i = 0; i < thisPaddedList.size(); ++i)
-			resultBricks.add(thisPaddedList.get(i).lubAux(otherPaddedList.get(i)));
+			resultBricks.add(thisPaddedList.get(i).lub(otherPaddedList.get(i)));
 
 		Bricks result = new Bricks(resultBricks);
-
 		result.normBricks();
-
 		return result;
 	}
 
@@ -93,37 +101,35 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		if (this.bricks.size() < other.bricks.size())
 			thisPaddedList = this.padList(other);
-
 		else if (other.bricks.size() < this.bricks.size())
 			otherPaddedList = other.padList(this);
 
-		for (int i = 0; i < thisPaddedList.size(); ++i)
-			if (!thisPaddedList.get(i).lessOrEqualAux(otherPaddedList.get(i)))
+		for (int i = 0; i < thisPaddedList.size(); ++i) {
+			Brick first = thisPaddedList.get(i);
+			Brick second = otherPaddedList.get(i);
+			if (!first.lessOrEqual(second))
 				return false;
+		}
 
 		return true;
 	}
 
 	@Override
 	public Bricks wideningAux(Bricks other) throws SemanticException {
-		this.normBricks();
-		other.normBricks();
-
-		if (!this.lessOrEqualAux(other) &&
-				!other.lessOrEqualAux(this))
+		boolean rel = this.lessOrEqual(other);
+		if (!rel && !other.lessOrEqual(this))
 			return TOP;
 
-		if (this.bricks.size() > kL ||
-				other.bricks.size() > kL)
+		if (this.bricks.size() > kL || other.bricks.size() > kL)
 			return TOP;
 
-		if (this.lessOrEqualAux(other))
+		if (rel)
 			return w(other);
 		else
 			return other.w(this);
 	}
 
-	private Bricks w(Bricks other) {
+	private Bricks w(Bricks other) throws SemanticException {
 		List<Brick> thisPaddedList = this.bricks;
 		List<Brick> otherPaddedList = other.bricks;
 
@@ -138,34 +144,11 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		for (int i = 0; i < thisPaddedList.size(); ++i) {
 			Brick thisCurrent = thisPaddedList.get(i);
 			Brick otherCurrent = otherPaddedList.get(i);
-
-			if (thisCurrent.isTop() || otherCurrent.isTop()) {
-				resultList.add(new Brick());
-				break;
-			}
-
-			Set<String> resultSet = new TreeSet<>(thisCurrent.getStrings());
-
-			resultSet.addAll(otherCurrent.getStrings());
-
-			MathNumber minOfMins = thisCurrent.getMin().min(otherCurrent.getMin());
-			MathNumber maxOfMaxs = thisCurrent.getMax().max(otherCurrent.getMax());
-
-			if (resultSet.size() > kS)
-				resultList.add(new Brick());
-
-			else if (new MathNumber(kI).leq(maxOfMaxs.subtract(minOfMins))) {
-				IntInterval interval = new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
-				Brick resultBrick = new Brick(interval, resultSet);
-				resultList.add(resultBrick);
-			} else
-				resultList.add(new Brick(minOfMins, maxOfMaxs, resultSet));
+			resultList.add(thisCurrent.widening(otherCurrent));
 		}
 
 		Bricks result = new Bricks(resultList);
-
 		result.normBricks();
-
 		return result;
 	}
 
@@ -211,13 +194,44 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 			return SemanticDomain.Satisfiability.UNKNOWN;
 
 		if (operator == StringContains.INSTANCE)
-			if (left.bricks.stream().anyMatch(right.bricks::contains))
-				return Satisfiability.SATISFIED;
+			return left.contains(right);
 
 		return Satisfiability.UNKNOWN;
 	}
 
-	@java.lang.Override
+	private Satisfiability contains(Bricks right) {
+		if (right.bricks.size() != 1)
+			return Satisfiability.UNKNOWN;
+
+		if (!right.bricks.get(0).isFinite())
+			return Satisfiability.UNKNOWN;
+
+		Set<String> strings = right.bricks.get(0).getStrings();
+		if (strings.size() != 1)
+			return Satisfiability.UNKNOWN;
+
+		if (strings.iterator().next().length() != 1)
+			return Satisfiability.UNKNOWN;
+
+		String c = strings.iterator().next();
+
+		boolean res = bricks.stream()
+				.filter(b -> b.getMin().gt(MathNumber.ZERO))
+				.map(b -> b.getStrings())
+				.anyMatch(set -> set == null || set.stream().allMatch(s -> s.contains(c)));
+		if (res)
+			return Satisfiability.SATISFIED;
+
+		res = bricks.stream()
+				.map(b -> b.getStrings())
+				.allMatch(set -> set != null && set.stream().allMatch(s -> !s.contains(c)));
+		if (res)
+			return Satisfiability.NOT_SATISFIED;
+
+		return Satisfiability.UNKNOWN;
+	}
+
+	@Override
 	public boolean equals(Object object) {
 		if (this == object)
 			return true;
@@ -242,10 +256,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		return BOTTOM;
 	}
 
-	@Override
-	public String toString() {
-		return representation().toString();
-	}
+	// @Override
+	// public String toString() {
+	// return representation().toString();
+	// }
 
 	@Override
 	public DomainRepresentation representation() {
@@ -261,10 +275,14 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 		Brick firstBrick = this.bricks.get(first);
 		Brick secondBrick = this.bricks.get(second);
 
-		Set<String> resultSet = new TreeSet<>();
-
-		firstBrick.getStrings()
-				.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
+		Set<String> resultSet;
+		if (firstBrick.getStrings() == null || secondBrick.getStrings() == null)
+			resultSet = null;
+		else {
+			resultSet = new TreeSet<>();
+			firstBrick.getStrings()
+					.forEach(string -> secondBrick.getStrings().forEach(otherStr -> resultSet.add(string + otherStr)));
+		}
 
 		this.bricks.set(first, new Brick(1, 1, resultSet));
 		this.bricks.remove(second);
@@ -309,9 +327,10 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 
 		List<Brick> tempList = new ArrayList<>(thisBricks);
 
-		thisBricks.removeIf(brick -> brick.getMin().equals(MathNumber.ZERO) &&
-				brick.getMax().equals(MathNumber.ZERO) &&
-				brick.getStrings().isEmpty());
+		thisBricks.removeIf(brick -> brick.getMin().equals(MathNumber.ZERO)
+				&& brick.getMax().equals(MathNumber.ZERO)
+				&& brick.getStrings() != null
+				&& brick.getStrings().isEmpty());
 
 		for (int i = 0; i < thisBricks.size(); ++i) {
 			Brick currentBrick = thisBricks.get(i);
@@ -330,16 +349,19 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 					lastBrick = i == thisBricks.size() - 1;
 				}
 
-			if (currentBrick.getMin().equals(currentBrick.getMax()) &&
-					!currentBrick.getMin().equals(MathNumber.ONE) && !currentBrick.getMax().equals(MathNumber.ONE))
+			if (currentBrick.getMin().equals(currentBrick.getMax())
+					&& !currentBrick.getMin().equals(MathNumber.ONE)
+					&& !currentBrick.getMax().equals(MathNumber.ONE)
+					&& currentBrick.getStrings() != null)
 				rule3(i);
 
 			if (!lastBrick)
-				if (currentBrick.getStrings().equals(nextBrick.getStrings()))
+				if (currentBrick.getStrings() != null && currentBrick.getStrings().equals(nextBrick.getStrings()))
 					rule4(i, i + 1);
 
-			if (MathNumber.ONE.le(currentBrick.getMin()) &&
-					!currentBrick.getMin().equals(currentBrick.getMax()))
+			if (MathNumber.ONE.lt(currentBrick.getMin())
+					&& !currentBrick.getMin().equals(currentBrick.getMax())
+					&& currentBrick.getStrings() != null)
 				rule5(i);
 		}
 
@@ -356,21 +378,22 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 * @return A new Bricks with all possible substrings if the conditions are
 	 *             met or TOP.
 	 */
-	public Bricks substring(int e, int b) {
+	public Bricks substring(long e, long b) {
 		this.normBricks();
 
 		Brick first = this.bricks.get(0);
 
 		TreeSet<String> result = new TreeSet<>();
 
-		if (first.getMin().equals(MathNumber.ONE) &&
-				first.getMax().equals(MathNumber.ONE) &&
-				!first.getStrings().isEmpty()) {
+		if (first.getMin().equals(MathNumber.ONE)
+				&& first.getMax().equals(MathNumber.ONE)
+				&& first.getStrings() != null
+				&& !first.getStrings().isEmpty()) {
 			first.getStrings().forEach(s -> {
 				boolean allGreater = s.length() >= e;
 
 				if (allGreater)
-					result.add(s.substring(e, b));
+					result.add(s.substring((int) e, (int) b));
 			});
 		}
 
@@ -399,25 +422,91 @@ public class Bricks implements BaseNonRelationalValueDomain<Bricks> {
 	 */
 	public List<Brick> padList(final Bricks other) {
 		if (this.bricks.size() >= other.bricks.size())
-			throw new IllegalArgumentException("Other bricks’ list is longer or equal");
-		List<Brick> thisList = new ArrayList<>(this.bricks);
-		List<Brick> otherList = new ArrayList<>(other.bricks);
+			throw new IllegalArgumentException("Other bricks list is longer or equal");
 
-		int diff = otherList.size() - thisList.size();
-		int emptyAdded = 0;
-		List<Brick> newList = new ArrayList<>();
-		for (Brick brick : otherList) {
-			if (emptyAdded >= diff) {
-				newList.addAll(thisList);
-				break;
-			} else if (thisList.isEmpty() || !thisList.get(0).equals(brick)) {
-				newList.add(new Brick(0, 0, new TreeSet<>()));
-				emptyAdded++;
+		List<Brick> l1 = new ArrayList<>(this.bricks), l2 = new ArrayList<>(other.bricks);
+		Brick e = new Brick(0, 0, new TreeSet<>());
+		int n1 = l1.size();
+		int n2 = l2.size();
+		int n = n2 - n1;
+		List<Brick> lnew = new ArrayList<>();
+		int emptyBricksAdded = 0;
+
+		for (int i = 0; i < n2; i++)
+			if (emptyBricksAdded >= n) {
+				lnew.add(l1.get(0));
+				l1.remove(0);
+			} else if (l1.isEmpty() || !l1.get(0).equals(l2.get(i))) {
+				lnew.add(e);
+				emptyBricksAdded++;
 			} else {
-				newList.add(thisList.get(0));
-				thisList.remove(0);
+				lnew.add(l1.get(0));
+				l1.remove(0);
+			}
+
+		return lnew;
+	}
+
+	/**
+	 * Yields the {@link IntInterval} containing the minimum and maximum length
+	 * of this abstract value.
+	 * 
+	 * @return the minimum and maximum length of this abstract value
+	 */
+	public IntInterval length() {
+		return new IntInterval(MathNumber.ZERO, MathNumber.PLUS_INFINITY);
+	}
+
+	/**
+	 * Yields the {@link IntInterval} containing the minimum and maximum index
+	 * of {@code s} in {@code this}.
+	 *
+	 * @param s the string to be searched
+	 * 
+	 * @return the minimum and maximum index of {@code s} in {@code this}
+	 */
+	public IntInterval indexOf(Bricks s) {
+		return new IntInterval(MathNumber.MINUS_ONE, MathNumber.PLUS_INFINITY);
+	}
+
+	@Override
+	public Satisfiability containsChar(char c) throws SemanticException {
+		if (isTop())
+			return Satisfiability.UNKNOWN;
+		if (isBottom())
+			return Satisfiability.BOTTOM;
+
+		Satisfiability sat = Satisfiability.BOTTOM;
+
+		for (Brick b : this.bricks) {
+			// surely a string of the brick is contained
+			if (b.getMin().geq(MathNumber.ONE)) {
+				Satisfiability bricksat = Satisfiability.BOTTOM;
+				for (String s : b.getStrings())
+					if (!s.contains(String.valueOf(c)))
+						bricksat = bricksat.lub(Satisfiability.NOT_SATISFIED);
+					else
+						bricksat = bricksat.lub(Satisfiability.SATISFIED);
+
+				if (bricksat == Satisfiability.SATISFIED)
+					return bricksat;
+				else
+					sat = sat.lub(bricksat);
+			} else {
+				// the brick can be missing
+				for (String s : b.getStrings())
+					if (s.contains(String.valueOf(c)))
+						sat = sat.lub(Satisfiability.UNKNOWN);
+					else
+						sat = sat.lub(Satisfiability.NOT_SATISFIED);
 			}
 		}
-		return newList;
+
+		return sat;
+	}
+
+	@Override
+	public String toString() {
+		return representation().toString();
 	}
 }

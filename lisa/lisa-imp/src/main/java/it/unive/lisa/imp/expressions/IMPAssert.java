@@ -38,6 +38,7 @@ public class IMPAssert extends UnaryStatement {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <A extends AbstractState<A, H, V, T>,
 			H extends HeapDomain<H>,
 			V extends ValueDomain<V>,
@@ -48,7 +49,6 @@ public class IMPAssert extends UnaryStatement {
 					StatementStore<A, H, V, T> expressions)
 					throws SemanticException {
 		Type type = null;
-		@SuppressWarnings("unchecked")
 		T typedom = (T) state.getDomainInstance(TypeDomain.class);
 		for (SymbolicExpression e : state.rewrite(expr, this)) {
 			Type inferred = typedom.getDynamicTypeOf((ValueExpression) e, this);

@@ -390,17 +390,17 @@ public class Interval implements BaseNonRelationalValueDomain<Interval>, Compara
 	@Override
 	public ValueEnvironment<Interval> assumeBinaryExpression(
 			ValueEnvironment<Interval> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint pp) throws SemanticException {
+			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 
 		Identifier id;
 		Interval eval;
 		boolean rightIsExpr;
 		if (left instanceof Identifier) {
-			eval = eval(right, environment, pp);
+			eval = eval(right, environment, src);
 			id = (Identifier) left;
 			rightIsExpr = true;
 		} else if (right instanceof Identifier) {
-			eval = eval(left, environment, pp);
+			eval = eval(left, environment, src);
 			id = (Identifier) right;
 			rightIsExpr = false;
 		} else

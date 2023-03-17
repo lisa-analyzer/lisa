@@ -52,8 +52,8 @@ public class IntInterval implements Iterable<Long>, Comparable<IntInterval> {
 	/**
 	 * Builds a new interval.
 	 * 
-	 * @param low  the lower bound
-	 * @param high the upper bound
+	 * @param low  the lower bound (if {@code null}, -inf will be used)
+	 * @param high the upper bound (if {@code null}, +inf will be used)
 	 * 
 	 * @throws IllegalArgumentException if {@code low > high}
 	 */

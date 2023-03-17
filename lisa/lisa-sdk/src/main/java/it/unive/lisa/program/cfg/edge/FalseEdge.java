@@ -52,7 +52,7 @@ public class FalseEdge extends Edge {
 					expr,
 					LogicalNegation.INSTANCE,
 					expr.getCodeLocation());
-			result = result.lub(sourceState.assume(negated, getSource()));
+			result = result.lub(sourceState.assume(negated, getSource(), getDestination()));
 		}
 		return result;
 	}

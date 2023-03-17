@@ -1,0 +1,36 @@
+{
+  "warnings" : [ ],
+  "files" : [ "report.json", "untyped_tutorial.branching1(tutorial__this,_untyped_b).json", "untyped_tutorial.branching2(tutorial__this,_untyped_b).json", "untyped_tutorial.loop0(tutorial__this).json", "untyped_tutorial.loop2(tutorial__this).json", "untyped_tutorial.loopN(tutorial__this,_untyped_b).json", "untyped_tutorial.nesting(tutorial__this,_untyped_b).json", "untyped_tutorial.sequential(tutorial__this).json" ],
+  "info" : {
+    "cfgs" : "7",
+    "duration" : "1s 389ms",
+    "end" : "2023-03-17T11:42:05.885+01:00",
+    "expressions" : "69",
+    "files" : "7",
+    "globals" : "0",
+    "members" : "7",
+    "programs" : "1",
+    "start" : "2023-03-17T11:42:04.496+01:00",
+    "statements" : "32",
+    "units" : "1",
+    "version" : "0.1b7",
+    "warnings" : "0"
+  },
+  "configuration" : {
+    "analysisGraphs" : "NONE",
+    "descendingPhaseType" : "NONE",
+    "dumpForcesUnwinding" : "false",
+    "fixpointWorkingSet" : "DuplicateFreeFIFOWorkingSet",
+    "glbThreshold" : "5",
+    "hotspots" : "unset",
+    "jsonOutput" : "true",
+    "openCallPolicy" : "WorstCasePolicy",
+    "optimize" : "false",
+    "semanticChecks" : "",
+    "serializeInputs" : "false",
+    "serializeResults" : "true",
+    "syntacticChecks" : "",
+    "wideningThreshold" : "5",
+    "workdir" : "test-outputs/traces"
+  }
+}

@@ -1,21 +1,5 @@
 package it.unive.lisa.program.cfg;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.AnalysisState;
 import it.unive.lisa.analysis.AnalyzedCFG;
@@ -56,6 +40,20 @@ import it.unive.lisa.util.datastructures.graph.algorithms.Fixpoint;
 import it.unive.lisa.util.datastructures.graph.algorithms.FixpointException;
 import it.unive.lisa.util.datastructures.graph.code.CodeGraph;
 import it.unive.lisa.util.datastructures.graph.code.NodeList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * A control flow graph with an implementation, that has {@link Statement}s as
@@ -844,6 +842,21 @@ public class CFG extends CodeGraph<CFG, Statement, Edge> implements CodeMember {
 	 */
 	public Statement getMostRecentIfThenElseGuard(ProgramPoint pp) {
 		return getRecent(pp, IfThenElse.class::isInstance);
+	}
+
+	/**
+	 * Yields the {@link ControlFlowStructure} that uses {@code guard} as
+	 * condition, if any.
+	 * 
+	 * @param guard the condition
+	 * 
+	 * @return the control flow structure, or {@code null}
+	 */
+	public ControlFlowStructure getControlFlowStructureOf(ProgramPoint guard) {
+		for (ControlFlowStructure struct : getControlFlowStructures())
+			if (struct.getCondition().equals(guard))
+				return struct;
+		return null;
 	}
 
 	/**

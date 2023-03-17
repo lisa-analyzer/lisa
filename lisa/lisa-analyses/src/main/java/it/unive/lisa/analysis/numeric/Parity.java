@@ -201,12 +201,12 @@ public class Parity implements BaseNonRelationalValueDomain<Parity> {
 	@Override
 	public ValueEnvironment<Parity> assumeBinaryExpression(
 			ValueEnvironment<Parity> environment, BinaryOperator operator, ValueExpression left,
-			ValueExpression right, ProgramPoint pp) throws SemanticException {
+			ValueExpression right, ProgramPoint src, ProgramPoint dest) throws SemanticException {
 		if (operator == ComparisonEq.INSTANCE) {
 			if (left instanceof Identifier)
-				environment = environment.assign((Identifier) left, right, pp);
+				environment = environment.assign((Identifier) left, right, src);
 			else if (right instanceof Identifier)
-				environment = environment.assign((Identifier) right, left, pp);
+				environment = environment.assign((Identifier) right, left, src);
 			return environment;
 		}
 		return environment;

@@ -83,20 +83,20 @@ public class Atom extends RegularExpression {
 	}
 
 	@Override
-	public Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
+	protected Set<PartialSubstring> substringAux(int charsToSkip, int missingChars) {
 		Set<PartialSubstring> result = new HashSet<>();
 
-		if (charsToSkip > string.length())
+		int len = string.length();
+		if (charsToSkip > len)
 			// outside of the string
-			result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip - string.length(),
-					missingChars - charsToSkip));
-		else if (missingChars > string.length())
+			result.add(new PartialSubstring(SymbolicString.mkEmptyString(), charsToSkip - len, missingChars));
+		else if (charsToSkip + missingChars > len)
 			// partially inside the string
 			result.add(new PartialSubstring(SymbolicString.mkString(string.substring(charsToSkip)), 0,
-					missingChars - string.length()));
+					missingChars - len + charsToSkip));
 		else
-			result.add(
-					new PartialSubstring(SymbolicString.mkString(string.substring(charsToSkip, missingChars)), 0, 0));
+			result.add(new PartialSubstring(
+					SymbolicString.mkString(string.substring(charsToSkip, charsToSkip + missingChars)), 0, 0));
 
 		return result;
 	}

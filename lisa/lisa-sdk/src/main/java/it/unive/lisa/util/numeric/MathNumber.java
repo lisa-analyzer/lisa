@@ -367,7 +367,7 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if
 	 */
-	public boolean ge(MathNumber other) {
+	public boolean gt(MathNumber other) {
 		return geq(other) && !equals(other);
 	}
 
@@ -378,7 +378,7 @@ public class MathNumber implements Comparable<MathNumber> {
 	 * 
 	 * @return true if
 	 */
-	public boolean le(MathNumber other) {
+	public boolean lt(MathNumber other) {
 		return leq(other) && !equals(other);
 	}
 

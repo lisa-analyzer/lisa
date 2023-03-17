@@ -1,5 +1,8 @@
 package it.unive.lisa.util.datastructures.graph.code;
 
+import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
+import it.unive.lisa.outputs.serializableGraph.SerializableValue;
+import it.unive.lisa.util.datastructures.graph.Graph;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -7,12 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.tuple.Pair;
-
-import it.unive.lisa.outputs.serializableGraph.SerializableGraph;
-import it.unive.lisa.outputs.serializableGraph.SerializableValue;
-import it.unive.lisa.util.datastructures.graph.Graph;
 
 /**
  * A {@link Graph} that contains a list of nodes, backed by a {@link NodeList}.

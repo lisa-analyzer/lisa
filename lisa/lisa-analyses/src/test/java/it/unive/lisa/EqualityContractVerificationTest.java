@@ -23,6 +23,8 @@ import it.unive.lisa.analysis.string.fsa.SimpleAutomaton;
 import it.unive.lisa.analysis.string.fsa.StringSymbol;
 import it.unive.lisa.analysis.string.tarsis.RegexAutomaton;
 import it.unive.lisa.analysis.symbols.Symbol;
+import it.unive.lisa.analysis.traces.ExecutionTrace;
+import it.unive.lisa.analysis.traces.TraceToken;
 import it.unive.lisa.analysis.types.StaticTypes;
 import it.unive.lisa.conf.FixpointConfiguration;
 import it.unive.lisa.conf.LiSAConfiguration;
@@ -457,6 +459,11 @@ public class EqualityContractVerificationTest {
 		// as they do not identify the results
 		verify(OptimizedAnalyzedCFG.class, verifier -> verifier.withOnlyTheseFields("id", "results", "entryStates"),
 				Warning.NONFINAL_FIELDS);
+
+		verify(ExecutionTrace.class);
+		Reflections scanner = mkReflections();
+		for (Class<? extends TraceToken> warning : scanner.getSubTypesOf(TraceToken.class))
+			verify(warning);
 	}
 
 	@Test

@@ -8,7 +8,7 @@ import it.unive.lisa.CronConfiguration;
 import it.unive.lisa.analysis.AbstractState;
 import it.unive.lisa.analysis.heap.HeapDomain;
 import it.unive.lisa.analysis.nonrelational.value.TypeEnvironment;
-import it.unive.lisa.analysis.string.Bricks;
+import it.unive.lisa.analysis.string.bricks.Bricks;
 import it.unive.lisa.analysis.types.InferredTypes;
 import org.junit.Test;
 

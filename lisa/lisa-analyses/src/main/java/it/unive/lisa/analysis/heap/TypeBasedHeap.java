@@ -81,7 +81,8 @@ public class TypeBasedHeap implements BaseHeapDomain<TypeBasedHeap> {
 	}
 
 	@Override
-	public TypeBasedHeap assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
+	public TypeBasedHeap assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		return this;
 	}
 

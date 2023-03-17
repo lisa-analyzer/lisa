@@ -97,16 +97,16 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 			Assignment assign = (Assignment) node;
 			Collection<?> results = tool.getResultOf(graph);
 
-			for (Object res : results) {
-				AnalyzedCFG<?, ?, ?, ?> result = (AnalyzedCFG<?, ?, ?, ?>) res;
-				AnalysisState<?, ?, ?, ?> post = result.getAnalysisStateAfter(assign);
-				InferenceSystem<NonInterference> state = post.getDomainInstance(InferenceSystem.class);
-				AnalysisState<?, ?, ?, ?> postL = result.getAnalysisStateAfter(assign.getLeft());
-				InferenceSystem<NonInterference> left = postL.getDomainInstance(InferenceSystem.class);
-				AnalysisState<?, ?, ?, ?> postR = result.getAnalysisStateAfter(assign.getRight());
-				InferenceSystem<NonInterference> right = postR.getDomainInstance(InferenceSystem.class);
-
+			for (Object res : results)
 				try {
+					AnalyzedCFG<?, ?, ?, ?> result = (AnalyzedCFG<?, ?, ?, ?>) res;
+					AnalysisState<?, ?, ?, ?> post = result.getAnalysisStateAfter(assign);
+					InferenceSystem<NonInterference> state = post.getDomainInstance(InferenceSystem.class);
+					AnalysisState<?, ?, ?, ?> postL = result.getAnalysisStateAfter(assign.getLeft());
+					InferenceSystem<NonInterference> left = postL.getDomainInstance(InferenceSystem.class);
+					AnalysisState<?, ?, ?, ?> postR = result.getAnalysisStateAfter(assign.getRight());
+					InferenceSystem<NonInterference> right = postR.getDomainInstance(InferenceSystem.class);
+
 					for (SymbolicExpression l : postL.rewrite(postL.getComputedExpressions(), assign))
 						for (SymbolicExpression r : postR.rewrite(postR.getComputedExpressions(), assign)) {
 							NonInterference ll = left.eval((ValueExpression) l, assign.getLeft());
@@ -129,10 +129,9 @@ public class NonInterferenceTest extends AnalysisTestExecutor {
 										"This assignment, located in a LOW integrity block, assigns a HIGH integrity variable, thus violating non-interference");
 						}
 				} catch (SemanticException e) {
-					e.printStackTrace();
+					throw new RuntimeException(e);
 				}
 
-			}
 			return true;
 		}
 	}

@@ -111,12 +111,8 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 	 */
 	public F putState(K key, V state) {
 		// we are only adding elements here, so it is fine to not preserve null
-		Map<K, V> result = mkNewFunction(null, false);
-
+		Map<K, V> result = mkNewFunction(function, false);
 		result.put(key, state);
-		for (K k : getKeys())
-			if (!k.equals(key))
-				result.put(k, getState(k));
 		return mk(lattice, result);
 	}
 
@@ -261,9 +257,10 @@ public abstract class FunctionalLattice<F extends FunctionalLattice<F, K, V>, K,
 
 	@Override
 	public boolean lessOrEqualAux(F other) throws SemanticException {
-		for (K key : function.keySet())
-			if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
-				return false;
+		if (function != null)
+			for (K key : function.keySet())
+				if (getState(key) != null && (!getState(key).lessOrEqual(other.getState(key))))
+					return false;
 
 		return true;
 	}

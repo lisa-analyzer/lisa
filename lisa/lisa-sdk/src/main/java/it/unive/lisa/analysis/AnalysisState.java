@@ -12,6 +12,7 @@ import it.unive.lisa.program.cfg.ProgramPoint;
 import it.unive.lisa.symbolic.SymbolicExpression;
 import it.unive.lisa.symbolic.value.Identifier;
 import it.unive.lisa.symbolic.value.ValueExpression;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -217,8 +218,9 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint pp) throws SemanticException {
-		A assume = state.assume(expression, pp);
+	public AnalysisState<A, H, V, T> assume(SymbolicExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
+		A assume = state.assume(expression, src, dest);
 		if (assume.isBottom())
 			return bottom();
 		return new AnalysisState<>(assume, computedExpressions, aliasing);
@@ -378,12 +380,10 @@ public class AnalysisState<A extends AbstractState<A, H, V, T>,
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public <D> D getDomainInstance(Class<D> domain) {
-		if (domain.isAssignableFrom(getClass()))
-			return (D) this;
-
-		return state.getDomainInstance(domain);
+	public <D extends SemanticDomain<?, ?, ?>> Collection<D> getAllDomainInstances(Class<D> domain) {
+		Collection<D> result = SemanticDomain.super.getAllDomainInstances(domain);
+		result.addAll(state.getAllDomainInstances(domain));
+		return result;
 	}
 
 	/**

@@ -115,18 +115,19 @@ public class InferenceSystem<T extends InferredValue<T>>
 	}
 
 	@Override
-	public InferenceSystem<T> assume(ValueExpression expression, ProgramPoint pp) throws SemanticException {
+	public InferenceSystem<T> assume(ValueExpression expression, ProgramPoint src, ProgramPoint dest)
+			throws SemanticException {
 		if (isBottom())
 			return this;
 
-		Satisfiability sat = lattice.satisfies(expression, this, pp);
+		Satisfiability sat = lattice.satisfies(expression, this, src);
 		if (sat == Satisfiability.NOT_SATISFIED)
 			return bottom();
 
 		if (sat == Satisfiability.SATISFIED)
-			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, pp).getState());
+			return new InferenceSystem<>(lattice, function, lattice.eval(expression, this, src).getState());
 
-		return lattice.assume(this, expression, pp);
+		return lattice.assume(this, expression, src, dest);
 	}
 
 	/**

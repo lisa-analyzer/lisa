@@ -161,8 +161,8 @@ public abstract class NonRelationalValueCartesianProduct<C extends NonRelational
 	}
 
 	@Override
-	public ValueEnvironment<C> assume(ValueEnvironment<C> environment, ValueExpression expression, ProgramPoint pp)
-			throws SemanticException {
+	public ValueEnvironment<C> assume(ValueEnvironment<C> environment, ValueExpression expression, ProgramPoint src,
+			ProgramPoint dest) throws SemanticException {
 		ValueEnvironment<T1> lenv = new ValueEnvironment<>(left);
 		ValueEnvironment<T2> renv = new ValueEnvironment<>(right);
 		for (Entry<Identifier, C> entry : environment) {
@@ -170,8 +170,8 @@ public abstract class NonRelationalValueCartesianProduct<C extends NonRelational
 			renv = renv.putState(entry.getKey(), entry.getValue().right);
 		}
 
-		ValueEnvironment<T1> lassume = left.assume(lenv, expression, pp);
-		ValueEnvironment<T2> rassume = right.assume(renv, expression, pp);
+		ValueEnvironment<T1> lassume = left.assume(lenv, expression, src, dest);
+		ValueEnvironment<T2> rassume = right.assume(renv, expression, src, dest);
 
 		@SuppressWarnings("unchecked")
 		ValueEnvironment<C> res = new ValueEnvironment<>((C) this);
